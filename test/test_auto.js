@@ -2149,7 +2149,7 @@ it('test_capture_selection_cdata', async function () {
  *
  * capturer.captureDocument
  */
-itSkipIfNoMultipleSelection()('test_capture_selection_multiple', async function () {
+$it.skipIf($.noMultipleSelection)('test_capture_selection_multiple', async function () {
   var blob = await capture({
     url: `${localhost}/capture_selection/selection_multiple.html`,
     options: baseOptions,
@@ -2189,7 +2189,7 @@ itSkipIfNoMultipleSelection()('test_capture_selection_multiple', async function 
  *
  * capturer.captureDocument
  */
-itSkipIfNoMultipleSelection()('test_capture_selection_multiple_text', async function () {
+$it.skipIf($.noMultipleSelection)('test_capture_selection_multiple_text', async function () {
   var blob = await capture({
     url: `${localhost}/capture_selection/selection_multiple_text.xhtml`,
     options: baseOptions,
@@ -3280,7 +3280,7 @@ it('test_capture_base_dynamic_bad', async function () {
 /**
  * Check if CSS-related URLs after base[href] are handled correctly.
  */
-itXfailIf(
+$it.xfailIf(
   userAgent.is('chromium') && userAgent.major < 96,
   'referrer for an imported CSS is erroneously set to document base in Chromium < 96',
 )('test_capture_base_dynamic_css', async function () {
@@ -3351,7 +3351,7 @@ itXfailIf(
 /**
  * Check if CSS-related URLs before base[href] are handled correctly.
  */
-itXfailIf(
+$it.xfailIf(
   userAgent.is('chromium') && userAgent.major < 96,
   'referrer for an imported CSS is erroneously set to document base in Chromium < 96',
 )('test_capture_base_dynamic_css_bad', async function () {
@@ -3591,7 +3591,7 @@ it('test_capture_base_dynamic_frame_bad', async function () {
  *
  * capture.base
  */
-itXfail()('test_capture_base_dynamic_scripted', async function () {
+$it.xfail()('test_capture_base_dynamic_scripted', async function () {
   var options = {
     "capture.base": "blank",
   };
@@ -4495,7 +4495,7 @@ it('test_capture_css_rewriteCss_at_supports', async function () {
  * capture.rewriteCss
  * capturer.DocumentCssHandler
  */
-itSkipIfNoAtCounterStyle()('test_capture_css_rewriteCss_at_counter_style', async function () {
+$it.skipIf($.noAtCounterStyle)('test_capture_css_rewriteCss_at_counter_style', async function () {
   /* capture.rewriteCss = url */
   var options = {
     "capture.rewriteCss": "url",
@@ -4597,7 +4597,7 @@ itSkipIfNoAtCounterStyle()('test_capture_css_rewriteCss_at_counter_style', async
  * capture.rewriteCss
  * capturer.DocumentCssHandler
  */
-itSkipIfNoAtLayer()('test_capture_css_rewriteCss_at_layer', async function () {
+$it.skipIf($.noAtLayer)('test_capture_css_rewriteCss_at_layer', async function () {
   /* capture.rewriteCss = match */
   var options = {
     "capture.rewriteCss": "match",
@@ -4729,7 +4729,7 @@ it('test_capture_css_rewriteCss_match_pseudo', async function () {
   assert(styleElems[11].textContent.trim() === ``);
 });
 
-itSkipIfNoIsPseudo()('test_capture_css_rewriteCss_match_pseudo_is', async function () {
+$it.skipIf($.noIsPseudo)('test_capture_css_rewriteCss_match_pseudo_is', async function () {
   /* capture.rewriteCss = match */
   var options = {
     "capture.rewriteCss": "match",
@@ -4806,7 +4806,7 @@ it('test_capture_css_rewriteCss_match_shadow', async function () {
   assert(shadow.querySelector('style').textContent.trim() === `:host(#nonexist) { background-color: lime; }`);
 });
 
-itSkipIfNoHostContextPseudo()('test_capture_css_rewriteCss_match_shadow_host_context', async function () {
+$it.skipIf($.noHostContextPseudo)('test_capture_css_rewriteCss_match_shadow_host_context', async function () {
   /* capture.rewriteCss = match */
   var options = {
     "capture.rewriteCss": "match",
@@ -4958,7 +4958,7 @@ it('test_capture_css_rewriteCss_cross_origin', async function () {
  * capture.rewriteCss
  * capturer.DocumentCssHandler
  */
-itSkipIfNoNestingCss()('test_capture_css_rewriteCss_nesting', async function () {
+$it.skipIf($.noNestingCss)('test_capture_css_rewriteCss_nesting', async function () {
   /* capture.rewriteCss = url */
   var options = {
     "capture.rewriteCss": "url",
@@ -5727,7 +5727,7 @@ it('test_capture_css_dynamic_rename', async function () {
  *
  * capturer.DocumentCssHandler
  */
-itSkipIfNoAdoptedStylesheet()('test_capture_css_adopted', async function () {
+$it.skipIf($.noAdoptedStylesheet)('test_capture_css_adopted', async function () {
   var blob = await capture({
     url: `${localhost}/capture_css_adopted/index.html`,
     options: baseOptions,
@@ -6196,7 +6196,7 @@ it('test_capture_imageBackground_used_syntax', async function () {
  *
  * capture.imageBackground
  */
-itSkipIfNoAtLayer()('test_capture_imageBackground_used_syntax_at', async function () {
+$it.skipIf($.noAtLayer)('test_capture_imageBackground_used_syntax_at', async function () {
   /* capture.imageBackground = save-used */
   var options = {
     "capture.imageBackground": "save-used",
@@ -6369,7 +6369,7 @@ it('test_capture_imageBackground_used_scope', async function () {
  *
  * capture.imageBackground
  */
-itSkipIfNoAdoptedStylesheet()('test_capture_imageBackground_used_adopted', async function () {
+$it.skipIf($.noAdoptedStylesheet)('test_capture_imageBackground_used_adopted', async function () {
   /* capture.imageBackground = save-used */
   var options = {
     "capture.imageBackground": "save-used",
@@ -6403,7 +6403,7 @@ itSkipIfNoAdoptedStylesheet()('test_capture_imageBackground_used_adopted', async
  *
  * capture.imageBackground
  */
-itXfail()('test_capture_imageBackground_used_var', async function () {
+$it.xfail()('test_capture_imageBackground_used_var', async function () {
   /* capture.imageBackground = save-used */
   var options = {
     "capture.imageBackground": "save-used",
@@ -6484,7 +6484,7 @@ itXfail()('test_capture_imageBackground_used_var', async function () {
  *
  * capture.imageBackground
  */
-itSkipIfNoNestingCss()('test_capture_imageBackground_used_nesting', async function () {
+$it.skipIf($.noNestingCss)('test_capture_imageBackground_used_nesting', async function () {
   /* capture.imageBackground = save-used */
   var options = {
     "capture.imageBackground": "save-used",
@@ -6827,7 +6827,7 @@ it('test_capture_font_used_scope', async function () {
  *
  * capture.font = "save-used"
  */
-itXfail()('test_capture_font_used_var', async function () {
+$it.xfail()('test_capture_font_used_var', async function () {
   /* capture.font = save-used */
   var options = {
     "capture.rewriteCss": "url",
@@ -6894,7 +6894,7 @@ itXfail()('test_capture_font_used_var', async function () {
  *
  * capture.font = "save-used"
  */
-itSkipIfNoNestingCss()('test_capture_font_used_nesting', async function () {
+$it.skipIf($.noNestingCss)('test_capture_font_used_nesting', async function () {
   /* capture.font = save-used */
   var options = {
     "capture.font": "save-used",
@@ -13915,7 +13915,7 @@ it('test_capture_downLink_blob', async function () {
  * capture.downLink.file.mode
  * capture.downLink.file.extFilter
  */
-itXfailIf(
+$it.xfailIf(
   userAgent.is('firefox'),
   'Fetching a blob URL generated in a page from an extension page is not allowed in Firefox',
 )('test_capture_downLink_blob_deep', async function () {

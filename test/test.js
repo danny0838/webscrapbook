@@ -77,144 +77,255 @@ function assert(condition, message) {
   throw err;
 }
 
-function itSkip(reason) {
-  return (title, callback) => {
-    const t = `${title} - skipped${reason ? ' (' + reason + ')' : ''}`;
-    xit(t, callback);
-  };
+/**
+ * A jQuery-style extension of describe or it for chainable and conditional
+ * skip or xfail.
+ *
+ * Also globally exposed as:
+ *   - $it = $(it) = MochaQuery(it)
+ *   - $describe = $(describe) = MochaQuery(describe)
+ *
+ * Usage:
+ *   .skip([reason])           // skip (if not yet skipped)
+ *   .skipIf(cond [, reason])  // skip if cond (and not yet skipped)
+ *   .xfail([reason])          // expect fail (if not yet skipped/xfailed)
+ *   .xfailIf(cond, [reason])  // expect fail if cond (and not yet skipped/xfailed)
+ *
+ *   $it
+ *     .skipIf(cond1, skipReason1)
+ *     .skipIf(cond2, skipReason2)
+ *     .xfail(xfailReason)
+ *     (title, callback)
+ *
+ *   $describe
+ *     .skipIf(cond1, skipReason1)
+ *     .skipIf(cond2, skipReason2)
+ *     (title, callback)
+ */
+function MochaQuery(func, data = {}) {
+  return data.proxy = new Proxy(func, Object.entries(MochaQuery.handler).reduce((obj, [key, value]) => {
+    obj[key] = value.bind(this, data);
+    return obj;
+  }, {}));
 }
 
-function itSkipIf(cond, reason) {
-  if (!cond) {
-    return it;
-  }
-  return itSkip(reason);
-}
-
-function itSkipIfNoMultipleSelection(reason = 'multiple selection not supported') {
-  const sel = document.getSelection();
-
-  const origCount = sel.rangeCount;
-  if (origCount > 1) {
-    return it;
-  }
-
-  const origRanges = [];
-  for (let i = 0; i < origCount; i++) {
-    origRanges.push(sel.getRangeAt(i));
-  }
-
-  const dummyTextNode = document.createTextNode('dummy');
-  try {
-    document.body.appendChild(dummyTextNode);
-
-    let range = document.createRange();
-    range.setStart(dummyTextNode, 0);
-    range.setEnd(dummyTextNode, 1);
-    sel.addRange(range);
-
-    range = document.createRange();
-    range.setStart(dummyTextNode, 2);
-    range.setEnd(dummyTextNode, 3);
-    sel.addRange(range);
-
-    if (sel.rangeCount <= 1) {
-      return itSkip(reason);
+MochaQuery.handler = {
+  get(data, func, prop) {
+    if (prop in MochaQuery.methods) {
+      return MochaQuery(func, Object.assign({}, data, {method: prop}));
     }
-  } finally {
-    sel.removeAllRanges();
-    for (let i = 0; i < origCount; i++) {
-      sel.addRange(origRanges[i]);
+    return Reflect.get(func, prop);
+  },
+  apply(data, func, thisArg, args) {
+    const methods = MochaQuery.methods, method = methods[data.method];
+    if (method) {
+      const d = Object.assign({}, data, {method: null});
+      method.call(methods, d, ...args);
+      return MochaQuery(func, d);
     }
-    dummyTextNode.remove();
-  }
 
-  return it;
-}
-
-function itSkipIfNoAdoptedStylesheet(reason = 'Document.adoptedStyleSheets not supported') {
-  // Document.adoptedStyleSheets is not supported by Firefox < 101.
-  if (!document.adoptedStyleSheets) {
-    return itSkip(reason);
-  }
-  return it;
-}
-
-function itSkipIfNoNestingCss(reason = 'CSS nesting not supported') {
-  // CSS nesting selector is supported in Firefox >= 117 and Chromium >= 120.
-  try {
-    // Chrome 109/110 gets null for the querySelector
-    if (!document.querySelector('&')) {
-      throw new Error('bad support');
-    }
-  } catch (ex) {
-    return itSkip(reason);
-  }
-  return it;
-}
-
-function itSkipIfNoIsPseudo(reason = ':is() CSS pseudo-class not supported') {
-  // :is() CSS pseudo-class is supported in Firefox >= 78 and Chromium >= 88.
-  try {
-    document.querySelector(':is()');
-  } catch (ex) {
-    return itSkip(reason);
-  }
-  return it;
-}
-
-function itSkipIfNoHostContextPseudo(reason = ':host-context() CSS pseudo-class not supported') {
-  // :host-context() not suported in some browsers (e.g. Firefox)
-  try {
-    document.querySelector(':host-context(*)');
-  } catch (ex) {
-    return itSkip(reason);
-  }
-  return it;
-}
-
-function itSkipIfNoAtCounterStyle(reason = '@counter-style CSS rule not supported') {
-  const d = document.implementation.createHTMLDocument();
-  const style = d.head.appendChild(d.createElement('style'));
-  style.textContent = '@counter-style my { symbols: "1"; }';
-  if (!style.sheet.cssRules.length) {
-    return itSkip(reason);
-  }
-  return it;
-}
-
-function itSkipIfNoAtLayer(reason = '@layer CSS rule not supported') {
-  const d = document.implementation.createHTMLDocument();
-  const style = d.head.appendChild(d.createElement('style'));
-  style.textContent = '@layer mylayer;';
-  if (!style.sheet.cssRules.length) {
-    return itSkip(reason);
-  }
-  return it;
-}
-
-function itXfail(reason) {
-  return (title, callback) => {
-    const titleRewritten = `${title} - expected failure${reason ? ' (' + reason + ')' : ''}`;
-    const callbackRewritten = async function (...args) {
-      try {
-        await callback.call(this, ...args);
-      } catch (ex) {
-        return;
+    const [title, callback] = args;
+    switch (data.mode) {
+      case 'skip': {
+        const reason = data.reason ? ` (${data.reason})` : '';
+        const titleNew = `${title} - skipped${reason}`;
+        return func.skip.call(thisArg, titleNew, callback);
       }
-      throw new Error('unexpected success');
-    };
-    callbackRewritten.toString = () => callback.toString();
-    it(titleRewritten, callbackRewritten);
-  };
-}
+      case 'xfail': {
+        const reason = data.reason ? ` (${data.reason})` : '';
+        const titleNew = `${title} - expected failure${reason}`;
+        const callbackNew = async function (...args) {
+          try {
+            await callback.apply(this, args);
+          } catch (ex) {
+            return;
+          }
+          throw new Error('unexpected success');
+        };
+        callbackNew.toString = () => callback.toString();
+        return func.call(thisArg, titleNew, callbackNew);
+      }
+    }
 
-function itXfailIf(cond, reason) {
-  if (!cond) {
-    return it;
+    return Reflect.apply(func, thisArg, args);
+  },
+};
+
+MochaQuery.methods = {
+  skip(data, reason) {
+    if (data.mode === 'skip') { return; }
+    data.mode = 'skip';
+    data.reason = reason;
+  },
+  skipIf(data, condition, reason) {
+    if (data.mode === 'skip') { return; }
+    if (condition instanceof MochaQuery.Query) {
+      [condition, reason] = [condition.condition, reason || condition.reason];
+    }
+    if (!condition) { return; }
+    data.mode = 'skip';
+    data.reason = reason;
+  },
+  xfail(data, reason) {
+    if (data.mode) { return; }
+    data.mode = 'xfail';
+    data.reason = reason;
+  },
+  xfailIf(data, condition, reason) {
+    if (data.mode) { return; }
+    if (condition instanceof MochaQuery.Query) {
+      [condition, reason] = [condition.condition, reason || condition.reason];
+    }
+    if (!condition) { return; }
+    data.mode = 'xfail';
+    data.reason = reason;
+  },
+};
+
+MochaQuery.Query = class Query {
+  constructor(condition, reason) {
+    this.condition = condition;
+    this.reason = reason;
   }
-  return itXfail(reason);
-}
+};
+
+Object.assign(MochaQuery, {
+  get noMultipleSelection() {
+    const value = new MochaQuery.Query(
+      (() => {
+        const sel = document.getSelection();
+        const origCount = sel.rangeCount;
+        if (origCount > 1) {
+          return false;
+        }
+        const origRanges = [];
+        for (let i = 0; i < origCount; i++) {
+          origRanges.push(sel.getRangeAt(i));
+        }
+        const dummyTextNode = document.createTextNode('dummy');
+        try {
+          document.body.appendChild(dummyTextNode);
+
+          let range = document.createRange();
+          range.setStart(dummyTextNode, 0);
+          range.setEnd(dummyTextNode, 1);
+          sel.addRange(range);
+
+          range = document.createRange();
+          range.setStart(dummyTextNode, 2);
+          range.setEnd(dummyTextNode, 3);
+          sel.addRange(range);
+
+          if (sel.rangeCount <= 1) {
+            return true;
+          }
+        } finally {
+          sel.removeAllRanges();
+          for (let i = 0; i < origCount; i++) {
+            sel.addRange(origRanges[i]);
+          }
+          dummyTextNode.remove();
+        }
+        return false;
+      })(),
+      'multiple selection not supported',
+    );
+    Object.defineProperty(this, 'noMultipleSelection', {value});
+    return value;
+  },
+  get noAdoptedStylesheet() {
+    // Document.adoptedStyleSheets is not supported by Firefox < 101.
+    const value = new MochaQuery.Query(
+      !document.adoptedStyleSheets,
+      'Document.adoptedStyleSheets not supported',
+    );
+    Object.defineProperty(this, 'noAdoptedStylesheet', {value});
+    return value;
+  },
+  get noNestingCss() {
+    // CSS nesting selector is supported in Firefox >= 117 and Chromium >= 120.
+    const value = new MochaQuery.Query(
+      (() => {
+        try {
+          // Chrome 109/110 gets null for the querySelector
+          if (!document.querySelector('&')) {
+            throw new Error('bad support');
+          }
+        } catch (ex) {
+          return true;
+        }
+        return false;
+      })(),
+      'CSS nesting not supported',
+    );
+    Object.defineProperty(this, 'noNestingCss', {value});
+    return value;
+  },
+  get noIsPseudo() {
+    // :is() CSS pseudo-class is supported in Firefox >= 78 and Chromium >= 88.
+    const value = new MochaQuery.Query(
+      (() => {
+        try {
+          document.querySelector(':is()');
+        } catch (ex) {
+          return true;
+        }
+        return false;
+      })(),
+      ':is() CSS pseudo-class not supported',
+    );
+    Object.defineProperty(this, 'noIsPseudo', {value});
+    return value;
+  },
+  get noHostContextPseudo() {
+    // :host-context() not suported in some browsers (e.g. Firefox)
+    const value = new MochaQuery.Query(
+      (() => {
+        try {
+          document.querySelector(':host-context(*)');
+        } catch (ex) {
+          return true;
+        }
+        return false;
+      })(),
+      ':host-context() CSS pseudo-class not supported',
+    );
+    Object.defineProperty(this, 'noHostContextPseudo', {value});
+    return value;
+  },
+  get noAtCounterStyle() {
+    const value = new MochaQuery.Query(
+      (() => {
+        const d = document.implementation.createHTMLDocument();
+        const style = d.head.appendChild(d.createElement('style'));
+        style.textContent = '@counter-style my { symbols: "1"; }';
+        if (!style.sheet.cssRules.length) {
+          return true;
+        }
+        return false;
+      })(),
+      '@counter-style CSS rule not supported',
+    );
+    Object.defineProperty(this, 'noAtCounterStyle', {value});
+    return value;
+  },
+  get noAtLayer() {
+    const value = new MochaQuery.Query(
+      (() => {
+        const d = document.implementation.createHTMLDocument();
+        const style = d.head.appendChild(d.createElement('style'));
+        style.textContent = '@layer mylayer;';
+        if (!style.sheet.cssRules.length) {
+          return true;
+        }
+        return false;
+      })(),
+      '@layer CSS rule not supported',
+    );
+    Object.defineProperty(this, 'noAtLayer', {value});
+    return value;
+  },
+});
 
 class TestSuite {
   async init() {
@@ -466,17 +577,9 @@ class TestSuite {
     MAF,
 
     assert,
-    itSkip,
-    itSkipIf,
-    itSkipIfNoMultipleSelection,
-    itSkipIfNoAdoptedStylesheet,
-    itSkipIfNoNestingCss,
-    itSkipIfNoIsPseudo,
-    itSkipIfNoHostContextPseudo,
-    itSkipIfNoAtCounterStyle,
-    itSkipIfNoAtLayer,
-    itXfail,
-    itXfailIf,
+    $: MochaQuery,
+    $describe: MochaQuery(describe),
+    $it: MochaQuery(it),
 
     localhost: suite.localhost,
     localhost2: suite.localhost2,
