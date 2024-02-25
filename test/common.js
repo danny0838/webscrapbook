@@ -2,18 +2,12 @@
 
 var userAgent = (() => {
     const ua = navigator.userAgent;
-    const manifest = browser.runtime.getManifest();
     const soup = new Set(['webext']);
     const flavor = {
       major: 0,
       soup: soup,
       is: (value) => soup.has(value),
     };
-
-    // Whether this is a dev build.
-    if (/^\d+\.\d+\.\d+\D/.test(browser.runtime.getManifest().version)) {
-      soup.add('devbuild');
-    }
 
     if (/\bMobile\b/.test(ua)) {
       soup.add('mobile');
