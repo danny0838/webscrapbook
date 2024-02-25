@@ -6699,37 +6699,65 @@ it('test_capture_imageBackground_used_keyframes_scope', async function () {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(!zip.file('internal-keyframes1.bmp'));
-  assert(!zip.file('internal-keyframes2.bmp'));
-  assert(zip.file('internal-keyframes3.bmp'));
-  assert(zip.file('internal-keyframes4.bmp'));
-  assert(zip.file('shadow-keyframes1.bmp'));
-  assert(zip.file('shadow-keyframes2.bmp'));
-  assert(zip.file('shadow-keyframes3.bmp'));
+  assert(zip.file('internal1.bmp'));
+  assert(!zip.file('internal2.bmp'));
+  assert(zip.file('internal3.bmp'));
+  assert(!zip.file('internal4.bmp'));
+  assert(zip.file('internal5.bmp'));
+  assert(zip.file('internal6.bmp'));
+  assert(zip.file('internal7.bmp'));
+  assert(!zip.file('internal8.bmp'));
+
+  assert(zip.file('shadow1.bmp'));
+  assert(zip.file('shadow2.bmp'));
+  assert(!zip.file('shadow3.bmp'));
+  assert(!zip.file('shadow4.bmp'));
+  assert(zip.file('shadow5.bmp'));
+  assert(zip.file('shadow6.bmp'));
+  assert(!zip.file('shadow7.bmp'));
+  assert(!zip.file('shadow8.bmp'));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
-  var styleElems = doc.querySelectorAll('style');
+  assert(doc.querySelectorAll('style')[1].textContent.trim() === `\
+@keyframes local-upper-by-local-upper {
+  from { background-image: url("internal1.bmp"); }
+  to { transform: translateX(40px); }
+}
 
-  assert(styleElems[0].textContent.trim() === `\
-@keyframes internal1 {
+@keyframes local-upper-by-local {
   from { background-image: url(""); }
   to { transform: translateX(40px); }
 }
 
-@keyframes internal2 {
+@keyframes local-upper-by-upper {
+  from { background-image: url("internal3.bmp"); }
+  to { transform: translateX(40px); }
+}
+
+@keyframes local-upper-by-none {
   from { background-image: url(""); }
   to { transform: translateX(40px); }
 }
 
-@keyframes internal3 {
-  from { background-image: url("internal-keyframes3.bmp"); }
+@keyframes upper-by-local-upper {
+  from { background-image: url("internal5.bmp"); }
   to { transform: translateX(40px); }
-}`);
-  assert(styleElems[1].textContent.trim() === `\
-@keyframes internal4 {
-  from { background-image: url("internal-keyframes4.bmp"); }
+}
+
+@keyframes upper-by-local {
+  from { background-image: url("internal6.bmp"); }
+  to { transform: translateX(40px); }
+}
+
+@keyframes upper-by-upper {
+  from { background-image: url("internal7.bmp"); }
+  to { transform: translateX(40px); }
+}
+
+@keyframes upper-by-none {
+  from { background-image: url(""); }
   to { transform: translateX(40px); }
 }`);
 
@@ -6737,37 +6765,45 @@ it('test_capture_imageBackground_used_keyframes_scope', async function () {
   var frag = doc.createElement("template");
   frag.innerHTML = host1.getAttribute("data-scrapbook-shadowdom");
   var shadow1 = frag.content;
-  assert(shadow1.querySelector('style').textContent.trim() === `\
-@keyframes shadow1 {
-  from { background-image: url("shadow-keyframes1.bmp"); }
-  to { transform: translateX(40px); }
-}
-#shadow-keyframes1 {
-  animation: shadow1 3s linear infinite;
-}
-
-@keyframes internal1 {
-  from { background-image: url("shadow-keyframes2.bmp"); }
-  to { transform: translateX(40px); }
-}
-#shadow-keyframes2 {
-  animation: internal1 3s linear infinite;
-}
-
-#shadow-keyframes3 {
-  animation: internal2 3s linear infinite;
-}
-@keyframes internal2 {
-  from { background-image: url("shadow-keyframes3.bmp"); }
+  assert(shadow1.querySelectorAll('style')[1].textContent.trim() === `\
+@keyframes local-upper-by-local-upper {
+  from { background-image: url("shadow1.bmp"); }
   to { transform: translateX(40px); }
 }
 
-#shadow-keyframes4 {
-  animation: internal3 3s linear infinite;
+@keyframes local-upper-by-local {
+  from { background-image: url("shadow2.bmp"); }
+  to { transform: translateX(40px); }
 }
 
-#shadow-keyframes5 {
-  animation: internal4 3s linear infinite;
+@keyframes local-upper-by-upper {
+  from { background-image: url(""); }
+  to { transform: translateX(40px); }
+}
+
+@keyframes local-upper-by-none {
+  from { background-image: url(""); }
+  to { transform: translateX(40px); }
+}
+
+@keyframes local-by-local-upper {
+  from { background-image: url("shadow5.bmp"); }
+  to { transform: translateX(40px); }
+}
+
+@keyframes local-by-local {
+  from { background-image: url("shadow6.bmp"); }
+  to { transform: translateX(40px); }
+}
+
+@keyframes local-by-upper {
+  from { background-image: url(""); }
+  to { transform: translateX(40px); }
+}
+
+@keyframes local-by-none {
+  from { background-image: url(""); }
+  to { transform: translateX(40px); }
 }`);
 });
 
@@ -7296,44 +7332,49 @@ it('test_capture_font_used_scope', async function () {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(!zip.file('internal1.woff'));
+  assert(zip.file('internal1.woff'));
   assert(!zip.file('internal2.woff'));
   assert(zip.file('internal3.woff'));
-  assert(zip.file('internal4.woff'));
+  assert(!zip.file('internal4.woff'));
+  assert(zip.file('internal5.woff'));
+  assert(zip.file('internal6.woff'));
+  assert(zip.file('internal7.woff'));
+  assert(!zip.file('internal8.woff'));
   assert(zip.file('shadow1.woff'));
   assert(zip.file('shadow2.woff'));
-  assert(zip.file('shadow3.woff'));
+  assert(!zip.file('shadow3.woff'));
+  assert(!zip.file('shadow4.woff'));
+  assert(zip.file('shadow5.woff'));
+  assert(zip.file('shadow6.woff'));
+  assert(!zip.file('shadow7.woff'));
+  assert(!zip.file('shadow8.woff'));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
-  var styleElems = doc.querySelectorAll('style');
-
-  assert(styleElems[0].textContent.trim() === `\
-@font-face { font-family: internal1; src: url(""); }
-@font-face { font-family: internal2; src: url(""); }
-@font-face { font-family: internal3; src: url("internal3.woff"); }`);
-
-  assert(styleElems[1].textContent.trim() === `\
-@font-face { font-family: internal4; src: url("internal4.woff"); }`);
+  assert(doc.querySelectorAll('style')[1].textContent.trim() === `\
+@font-face { font-family: local-upper-by-local-upper; src: url("internal1.woff"); }
+@font-face { font-family: local-upper-by-local; src: url(""); }
+@font-face { font-family: local-upper-by-upper; src: url("internal3.woff"); }
+@font-face { font-family: local-upper-by-none; src: url(""); }
+@font-face { font-family: upper-by-local-upper; src: url("internal5.woff"); }
+@font-face { font-family: upper-by-local; src: url("internal6.woff"); }
+@font-face { font-family: upper-by-upper; src: url("internal7.woff"); }
+@font-face { font-family: upper-by-none; src: url(""); }`);
 
   var host1 = doc.querySelector('#shadow1');
   var frag = doc.createElement("template");
   frag.innerHTML = host1.getAttribute("data-scrapbook-shadowdom");
   var shadow1 = frag.content;
-  assert(shadow1.querySelector('style').textContent.trim() === `\
-@font-face { font-family: shadow1; src: url("shadow1.woff"); }
-#shadow1 { font-family: shadow1; }
-
-@font-face { font-family: internal1; src: url("shadow2.woff"); }
-#shadow2 { font-family: internal1; }
-
-#shadow3 { font-family: internal2; }
-@font-face { font-family: internal2; src: url("shadow3.woff"); }
-
-#shadow4 { font-family: internal3; }
-
-#shadow5 { font-family: internal4; }`);
+  assert(shadow1.querySelectorAll('style')[1].textContent.trim() === `\
+@font-face { font-family: local-upper-by-local-upper; src: url("shadow1.woff"); }
+@font-face { font-family: local-upper-by-local; src: url("shadow2.woff"); }
+@font-face { font-family: local-upper-by-upper; src: url(""); }
+@font-face { font-family: local-upper-by-none; src: url(""); }
+@font-face { font-family: local-by-local-upper; src: url("shadow5.woff"); }
+@font-face { font-family: local-by-local; src: url("shadow6.woff"); }
+@font-face { font-family: local-by-upper; src: url(""); }
+@font-face { font-family: local-by-none; src: url(""); }`);
 });
 
 $it.skipIf($.noPartPseudo)('test_capture_font_used_scope_part', async function () {

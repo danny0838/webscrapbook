@@ -3,72 +3,110 @@
 <head>
 <meta charset="UTF-8">
 <title>Test used background images (scoped @keyframes)</title>
+<style>blockquote::after { content: attr(style); }</style>
 <style>
-@keyframes internal1 {
-  from { background-image: url("internal-keyframes1.bmp"); }
+@keyframes local-upper-by-local-upper {
+  from { background-image: url("internal1.bmp"); }
   to { transform: translateX(40px); }
 }
 
-@keyframes internal2 {
-  from { background-image: url("internal-keyframes2.bmp"); }
+@keyframes local-upper-by-local {
+  from { background-image: url("internal2.bmp"); }
   to { transform: translateX(40px); }
 }
 
-@keyframes internal3 {
-  from { background-image: url("internal-keyframes3.bmp"); }
+@keyframes local-upper-by-upper {
+  from { background-image: url("internal3.bmp"); }
+  to { transform: translateX(40px); }
+}
+
+@keyframes local-upper-by-none {
+  from { background-image: url("internal4.bmp"); }
+  to { transform: translateX(40px); }
+}
+
+@keyframes upper-by-local-upper {
+  from { background-image: url("internal5.bmp"); }
+  to { transform: translateX(40px); }
+}
+
+@keyframes upper-by-local {
+  from { background-image: url("internal6.bmp"); }
+  to { transform: translateX(40px); }
+}
+
+@keyframes upper-by-upper {
+  from { background-image: url("internal7.bmp"); }
+  to { transform: translateX(40px); }
+}
+
+@keyframes upper-by-none {
+  from { background-image: url("internal8.bmp"); }
   to { transform: translateX(40px); }
 }
 </style>
 </head>
 <body>
+<blockquote style="animation: local-upper-by-local-upper 3s linear infinite;"></blockquote>
+<blockquote style="animation: local-upper-by-upper 3s linear infinite;"></blockquote>
+<blockquote style="animation: local-by-local-upper 3s linear infinite;"></blockquote>
+<blockquote style="animation: local-by-upper 3s linear infinite;"></blockquote>
+<blockquote style="animation: upper-by-local-upper 3s linear infinite;"></blockquote>
+<blockquote style="animation: upper-by-upper 3s linear infinite;"></blockquote>
+<blockquote>
 <div id="shadow1">
 <template>
+  <style>blockquote::after { content: attr(style); }</style>
   <style>
-@keyframes shadow1 {
-  from { background-image: url("shadow-keyframes1.bmp"); }
-  to { transform: translateX(40px); }
-}
-#shadow-keyframes1 {
-  animation: shadow1 3s linear infinite;
-}
-
-@keyframes internal1 {
-  from { background-image: url("shadow-keyframes2.bmp"); }
-  to { transform: translateX(40px); }
-}
-#shadow-keyframes2 {
-  animation: internal1 3s linear infinite;
-}
-
-#shadow-keyframes3 {
-  animation: internal2 3s linear infinite;
-}
-@keyframes internal2 {
-  from { background-image: url("shadow-keyframes3.bmp"); }
+@keyframes local-upper-by-local-upper {
+  from { background-image: url("shadow1.bmp"); }
   to { transform: translateX(40px); }
 }
 
-#shadow-keyframes4 {
-  animation: internal3 3s linear infinite;
+@keyframes local-upper-by-local {
+  from { background-image: url("shadow2.bmp"); }
+  to { transform: translateX(40px); }
 }
 
-#shadow-keyframes5 {
-  animation: internal4 3s linear infinite;
+@keyframes local-upper-by-upper {
+  from { background-image: url("shadow3.bmp"); }
+  to { transform: translateX(40px); }
+}
+
+@keyframes local-upper-by-none {
+  from { background-image: url("shadow4.bmp"); }
+  to { transform: translateX(40px); }
+}
+
+@keyframes local-by-local-upper {
+  from { background-image: url("shadow5.bmp"); }
+  to { transform: translateX(40px); }
+}
+
+@keyframes local-by-local {
+  from { background-image: url("shadow6.bmp"); }
+  to { transform: translateX(40px); }
+}
+
+@keyframes local-by-upper {
+  from { background-image: url("shadow7.bmp"); }
+  to { transform: translateX(40px); }
+}
+
+@keyframes local-by-none {
+  from { background-image: url("shadow8.bmp"); }
+  to { transform: translateX(40px); }
 }
   </style>
-  <blockquote id="shadow-keyframes1">shadow1</blockquote>
-  <blockquote id="shadow-keyframes2">shadow2</blockquote>
-  <blockquote id="shadow-keyframes3">shadow3</blockquote>
-  <blockquote id="shadow-keyframes4">shadow4</blockquote>
-  <blockquote id="shadow-keyframes5">shadow5</blockquote>
+  <blockquote style="animation: local-upper-by-local-upper 3s linear infinite;"></blockquote>
+  <blockquote style="animation: local-upper-by-local 3s linear infinite;"></blockquote>
+  <blockquote style="animation: local-by-local-upper 3s linear infinite;"></blockquote>
+  <blockquote style="animation: local-by-local 3s linear infinite;"></blockquote>
+  <blockquote style="animation: upper-by-local-upper 3s linear infinite;"></blockquote>
+  <blockquote style="animation: upper-by-local 3s linear infinite;"></blockquote>
 </template>
 </div>
-<style>
-@keyframes internal4 {
-  from { background-image: url("internal-keyframes4.bmp"); }
-  to { transform: translateX(40px); }
-}
-</style>
+</blockquote>
 </body>
 <script src="../../common.js"></script>
 <script>loadShadowDoms();</script>

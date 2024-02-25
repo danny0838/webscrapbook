@@ -3,39 +3,48 @@
 <head>
 <meta charset="UTF-8">
 <title>Test used fonts (scoped @font-face)</title>
+<style>blockquote::after { content: attr(style); }</style>
 <style>
-@font-face { font-family: internal1; src: url("internal1.woff"); }
-@font-face { font-family: internal2; src: url("internal2.woff"); }
-@font-face { font-family: internal3; src: url("internal3.woff"); }
+@font-face { font-family: local-upper-by-local-upper; src: url("internal1.woff"); }
+@font-face { font-family: local-upper-by-local; src: url("internal2.woff"); }
+@font-face { font-family: local-upper-by-upper; src: url("internal3.woff"); }
+@font-face { font-family: local-upper-by-none; src: url("internal4.woff"); }
+@font-face { font-family: upper-by-local-upper; src: url("internal5.woff"); }
+@font-face { font-family: upper-by-local; src: url("internal6.woff"); }
+@font-face { font-family: upper-by-upper; src: url("internal7.woff"); }
+@font-face { font-family: upper-by-none; src: url("internal8.woff"); }
 </style>
 </head>
 <body>
+<blockquote style="font-family: local-upper-by-local-upper;"></blockquote>
+<blockquote style="font-family: local-upper-by-upper;"></blockquote>
+<blockquote style="font-family: local-by-local-upper;"></blockquote>
+<blockquote style="font-family: local-by-upper;"></blockquote>
+<blockquote style="font-family: upper-by-local-upper;"></blockquote>
+<blockquote style="font-family: upper-by-upper;"></blockquote>
+<blockquote>
 <div id="shadow1">
 <template>
+  <style>blockquote::after { content: attr(style); }</style>
   <style>
-@font-face { font-family: shadow1; src: url("shadow1.woff"); }
-#shadow1 { font-family: shadow1; }
-
-@font-face { font-family: internal1; src: url("shadow2.woff"); }
-#shadow2 { font-family: internal1; }
-
-#shadow3 { font-family: internal2; }
-@font-face { font-family: internal2; src: url("shadow3.woff"); }
-
-#shadow4 { font-family: internal3; }
-
-#shadow5 { font-family: internal4; }
+@font-face { font-family: local-upper-by-local-upper; src: url("shadow1.woff"); }
+@font-face { font-family: local-upper-by-local; src: url("shadow2.woff"); }
+@font-face { font-family: local-upper-by-upper; src: url("shadow3.woff"); }
+@font-face { font-family: local-upper-by-none; src: url("shadow4.woff"); }
+@font-face { font-family: local-by-local-upper; src: url("shadow5.woff"); }
+@font-face { font-family: local-by-local; src: url("shadow6.woff"); }
+@font-face { font-family: local-by-upper; src: url("shadow7.woff"); }
+@font-face { font-family: local-by-none; src: url("shadow8.woff"); }
   </style>
-  <blockquote id="shadow1">shadow1</blockquote>
-  <blockquote id="shadow2">shadow2</blockquote>
-  <blockquote id="shadow3">shadow3</blockquote>
-  <blockquote id="shadow4">shadow4</blockquote>
-  <blockquote id="shadow5">shadow5</blockquote>
+  <blockquote style="font-family: local-upper-by-local-upper;"></blockquote>
+  <blockquote style="font-family: local-upper-by-local;"></blockquote>
+  <blockquote style="font-family: local-by-local-upper;"></blockquote>
+  <blockquote style="font-family: local-by-local;"></blockquote>
+  <blockquote style="font-family: upper-by-local-upper;"></blockquote>
+  <blockquote style="font-family: upper-by-local;"></blockquote>
 </template>
 </div>
-<style>
-@font-face { font-family: internal4; src: url("internal4.woff"); }
-</style>
+</blockquote>
 </body>
 <script src="../../common.js"></script>
 <script>loadShadowDoms();</script>
