@@ -155,14 +155,11 @@ function byteStringToArrayBuffer(bstr) {
   return u8ar.buffer;
 }
 
-async function getRulesFromCssText(cssText) {
+function getRulesFromCssText(cssText) {
   const d = document.implementation.createHTMLDocument('');
   const styleElem = d.createElement('style');
   styleElem.textContent = cssText;
   d.head.appendChild(styleElem);
-
-  await delay(0);
-
   return styleElem.sheet.cssRules;
 }
 

@@ -1710,7 +1710,7 @@ it('test_capture_singleHtml_mergeCss', async function () {
   var doc = await readFileAsDocument(blob);
   var styles = doc.querySelectorAll('style');
 
-  var o = (await getRulesFromCssText(doc.querySelector('style[data-scrapbook-elem="css-resource-map"]').textContent))[0].style;
+  var o = getRulesFromCssText(doc.querySelector('style[data-scrapbook-elem="css-resource-map"]').textContent)[0].style;
   var map = Array.prototype.reduce.call(o, (a, c) => {
     a[`var(${c})`] = o.getPropertyValue(c);
     return a;
