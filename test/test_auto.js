@@ -4982,6 +4982,69 @@ $it.skipIf($.noHostContextPseudo).xfail()('test_capture_css_rewriteCss_match_sha
   assert(shadow.querySelector('style').textContent.trim() === ``);
 });
 
+it('test_capture_css_rewriteCss_match_shadow_slotted', async function () {
+  /* capture.rewriteCss = match */
+  var options = {
+    "capture.rewriteCss": "match",
+  };
+
+  var blob = await capture({
+    url: `${localhost}/capture_css_rewriteCss_match_shadow/rewrite_slotted.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+  var zip = await new JSZip().loadAsync(blob);
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+
+  var host = doc.querySelector('#person1');
+  var frag = doc.createElement("template");
+  frag.innerHTML = host.getAttribute("data-scrapbook-shadowdom");
+  var shadow = frag.content;
+  assert(shadow.querySelector('style').textContent.trim() === `\
+::slotted(*) { background-color: yellow; }
+::slotted(p) { text-decoration: underline; }
+div > ::slotted(*) { font-size: 1.2em; }`);
+
+  var host = doc.querySelector('#person2');
+  var frag = doc.createElement("template");
+  frag.innerHTML = host.getAttribute("data-scrapbook-shadowdom");
+  var shadow = frag.content;
+  assert(shadow.querySelector('style').textContent.trim() === `\
+::slotted(*) { background-color: yellow; }
+::slotted(p) { text-decoration: underline; }
+div > ::slotted(*) { font-size: 1.2em; }`);
+
+  var host = doc.querySelector('#person3');
+  var frag = doc.createElement("template");
+  frag.innerHTML = host.getAttribute("data-scrapbook-shadowdom");
+  var shadow = frag.content;
+  assert(shadow.querySelector('style').textContent.trim() === `\
+::slotted(*) { background-color: yellow; }
+::slotted(p) { text-decoration: underline; }
+div > ::slotted(*) { font-size: 1.2em; }`);
+});
+
+$it.skipIf($.noPartPseudo)('test_capture_css_rewriteCss_match_shadow_part', async function () {
+  /* capture.rewriteCss = match */
+  var options = {
+    "capture.rewriteCss": "match",
+  };
+
+  var blob = await capture({
+    url: `${localhost}/capture_css_rewriteCss_match_shadow/rewrite_part.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+  var zip = await new JSZip().loadAsync(blob);
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assert(doc.querySelector('style').textContent.trim() === `\
+::part(elem1) { background-color: lime; }
+#host1::part(elem2) { background-color: lime; }
+#host1::part(nonexist) { background-color: red; }`);
+});
+
 /**
  * Check cross-origin CSS for "tidy" and "match"
  *

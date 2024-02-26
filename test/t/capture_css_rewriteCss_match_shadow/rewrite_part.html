@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+::part(elem1) { background-color: lime; }
+#host1::part(elem2) { background-color: lime; }
+#host1::part(nonexist) { background-color: red; }
+#nonexist::part(elem3) { background-color: red; }
+</style>
+</head>
+<body>
+<div id="host1">
+<template>
+  <style>blockquote::after { content: attr(part); }</style>
+  <blockquote part="elem1"></blockquote>
+  <blockquote part="elem2"></blockquote>
+  <blockquote part="elem3"></blockquote>
+</template>
+</div>
+</body>
+<script src="../../common.js"></script>
+<script>loadShadowDoms();</script>
+</html>

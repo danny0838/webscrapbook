@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+</head>
+<body>
+<blockquote>
+<person-details id="person1">
+  <p slot="person-name">Dr. X</p>
+  <span slot="person-age">100</span>
+  <span slot="person-occupation">hero</span>
+</person-details>
+</blockquote>
+
+<blockquote>
+<person-details id="person2">
+  <span slot="person-name">Dr. Y</span>
+</person-details>
+</blockquote>
+
+<blockquote>
+<person-details id="person3">
+  <span slot="person-age">50</span>
+  <span slot="person-occupation">police</span>
+</person-details>
+</blockquote>
+
+<template id="person-template">
+  <style>
+::slotted(*) { background-color: yellow; }
+::slotted(p) { text-decoration: underline; }
+div > ::slotted(*) { font-size: 1.2em; }
+#nonexist > ::slotted(*) { text-decoration: line-through; }
+  </style>
+  <section>
+    <h3><slot name="person-name">NAME MISSING</slot></h3>
+    <div><slot name="person-age">AGE MISSING</slot></div>
+    <div><slot name="person-occupation">OCCUPATION MISSING</slot></div>
+  </section>
+  <style>section { background-color: lime; }</style>
+</template>
+</body>
+<script>
+customElements.define(
+  "person-details",
+  class extends HTMLElement {
+    constructor() {
+      super();
+      const template = document.getElementById("person-template");
+      const shadowRoot = this.attachShadow({ mode: "open" });
+      shadowRoot.appendChild(template.content.cloneNode(true));
+    }
+  },
+);
+</script>
+</html>
