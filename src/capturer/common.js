@@ -3023,7 +3023,7 @@
       })();
 
       if (helpers) {
-        const parser = new capturer.CaptureHelperHandler({
+        const parser = new CaptureHelperHandler({
           helpers,
           rootNode,
           docUrl,
@@ -3049,12 +3049,12 @@
     }
 
     // init cssHandler
-    const cssHandler = new capturer.DocumentCssHandler({
+    const cssHandler = new DocumentCssHandler({
       doc, rootNode: newDoc,
       origNodeMap, clonedNodeMap,
       settings, options,
     });
-    const cssResourcesHandler = new capturer.DocumentCssResourcesHandler(cssHandler);
+    const cssResourcesHandler = new DocumentCssResourcesHandler(cssHandler);
 
     // prepare favicon selector
     const favIconSelector = scrapbook.split(options["capture.faviconAttrs"])
@@ -3951,11 +3951,10 @@
   };
 
 
-  /****************************************************************************
+  /**
    * A class that handles document CSS analysis.
-   ***************************************************************************/
-
-  capturer.DocumentCssHandler = class DocumentCssHandler {
+   */
+  class DocumentCssHandler {
     constructor({doc, rootNode, origNodeMap, clonedNodeMap, settings, options}) {
       this.doc = doc;
       this.rootNode = rootNode;
@@ -4047,7 +4046,7 @@
      * @param {CSSStyleRule} rule
      * @return {string} The equivalent selector text.
      */
-    getSelectorText(...args) {
+    static getSelectorText(...args) {
       const regex = /(?:\\.|"[^\\"]*(?:\\.[^\\"]*)*")+|(&)|./gu;
       const getParentStyleRule = (rule) => {
         let ruleCurrent = rule;
@@ -4081,17 +4080,26 @@
       const fn = (rule) => {
         return rewriteRule(rule);
       };
-      Object.defineProperty(this, 'getSelectorText', {value: fn});
+      Object.defineProperty(DocumentCssHandler, 'getSelectorText', {value: fn});
       return fn(...args);
     }
 
+    getSelectorText(...args) {
+      return this.constructor.getSelectorText.apply(this, args);
+    }
+
     /**
-     * Verify whether rule matches something in root.
+     * Rewrite the given CSS selector to cover a reasonably broader cases and
+     * can be used in querySelector().
      *
-     * @param {Element|DocumentFragment} root
-     * @param {CSSStyleRule} rule
+     * 1. Remove namespace in the selector. (e.g. svg|a => a)
+     * 2. Recursively remove pseudoes (including pseudo-classes(:*) and
+     *    pseudo-elements(::*)) unless it's listed in ALLOWED_PSEUDO.
+     *    (e.g. div:hover => div).
+     * 3. Add * in place if the non-pseudo version becomes empty.
+     *    (e.g. :hover => *)
      */
-    verifySelector(...args) {
+    static getVerifyingSelector(...args) {
       // Do not include :not as the semantic is reversed and the rule could be
       // narrower after rewriting (e.g. :not(:hover) => :not(*)).
       //
@@ -4105,16 +4113,6 @@
         'only-child', 'only-of-type',
         ]);
 
-      /**
-       * A class that rewrites the given CSS selector to make the rule cover
-       * a reasonably broader range.
-       *
-       * 1. Remove namespace in selector (e.g. svg|a => a).
-       * 2. Recursively remove pseudoes (including pseudo-classes(:*) and
-       *    pseudo-elements(::*)) unless it's listed in ALLOWED_PSEUDO. (e.g.
-       *    div:hover => div).
-       * 3. Add * in place if it will be empty after removal (e.g. :hover => *).
-       */
       class Rewriter {
         constructor() {
           this.regexLiteral = /(?:[0-9A-Za-z_\-\u00A0-\uFFFF]|\\(?:[0-9A-Fa-f]{1,6} ?|.))+|(.)/g;
@@ -4304,46 +4302,56 @@
         }
       }
 
-      const verifySelector = (root, rule) => {
-        const selectorText = this.getSelectorText(rule);
-
-        let selectorTextInvalid = false;
-        try {
-          // querySelector of a pseudo selector like a:hover always return null
-          if (root.querySelector(selectorText)) { return true; }
-        } catch (ex) {
-          // As CSSStyleRule.selectorText is already a valid selector,
-          // an error means it's valid but not supported by querySelector.
-          // One example is a namespaced selector like: svg|a,
-          // as querySelector cannot consume a @namespace rule in prior.
-          // Mark selectorText as invalid and test the rewritten selector text
-          // instead.
-          selectorTextInvalid = true;
-        }
-
-        let selectorTextRewritten = new Rewriter().run(selectorText);
-        if (selectorTextInvalid || selectorTextRewritten !== selectorText) {
-          try {
-            if (root.querySelector(selectorTextRewritten)) {
-              return true;
-            }
-          } catch (ex) {
-            // Rewritten rule still not supported by querySelector due to an
-            // unexpected reason.
-            // Return true as false positive is safer than false negative.
-            return true;
-          }
-        }
-
-        return false;
+      const fn = (selectorText) => {
+        return new Rewriter().run(selectorText);
       };
 
-      Object.defineProperty(this, 'verifySelector', {
-        value: verifySelector,
-        writable: false,
-        configurable: true,
-      });
-      return verifySelector(...args);
+      Object.defineProperty(DocumentCssHandler, 'getVerifyingSelector', {value: fn});
+      return fn(...args);
+    }
+
+    getVerifyingSelector(...args) {
+      return this.constructor.getVerifyingSelector.apply(this, args);
+    }
+
+    /**
+     * Verify whether rule matches something in root.
+     *
+     * @param {Element|DocumentFragment} root
+     * @param {CSSStyleRule} rule
+     */
+    verifySelector(root, rule) {
+      const selectorText = this.getSelectorText(rule);
+
+      let selectorTextInvalid = false;
+      try {
+        // querySelector of a pseudo selector like a:hover always return null
+        if (root.querySelector(selectorText)) { return true; }
+      } catch (ex) {
+        // As CSSStyleRule.selectorText is already a valid selector,
+        // an error means it's valid but not supported by querySelector.
+        // One example is a namespaced selector like: svg|a,
+        // as querySelector cannot consume a @namespace rule in prior.
+        // Mark selectorText as invalid and test the rewritten selector text
+        // instead.
+        selectorTextInvalid = true;
+      }
+
+      let selectorTextRewritten = this.getVerifyingSelector(selectorText);
+      if (selectorTextInvalid || selectorTextRewritten !== selectorText) {
+        try {
+          if (root.querySelector(selectorTextRewritten)) {
+            return true;
+          }
+        } catch (ex) {
+          // Rewritten rule still not supported by querySelector due to an
+          // unexpected reason.
+          // Return true as false positive is safer than false negative.
+          return true;
+        }
+      }
+
+      return false;
     }
 
     getElemCss(elem) {
@@ -4354,7 +4362,7 @@
       return origElem && origElem.sheet;
     }
 
-    getRulesFromCssText(cssText) {
+    static getRulesFromCssText(cssText) {
       // In Chromium, BOM causes returned cssRules be empty.
       // Remove it to prevent the issue.
       if (cssText[0] === '\uFEFF') {
@@ -4366,6 +4374,10 @@
       styleElem.textContent = cssText;
       d.head.appendChild(styleElem);
       return styleElem.sheet.cssRules;
+    }
+
+    getRulesFromCssText(...args) {
+      return this.constructor.getRulesFromCssText.apply(this, args);
     }
 
     /**
@@ -5048,8 +5060,10 @@
     }
   };
 
+  capturer.DocumentCssHandler = DocumentCssHandler;
 
-  /****************************************************************************
+
+  /**
    * A class that calculates used CSS resources of a document.
    *
    * - Currently we only check whether a font is USED (font-family referred
@@ -5068,9 +5082,8 @@
    * - A font/keyframe name referenced in a shadow DOM is treated as referenced
    *   in local and all upper scopes, since the local @font-face/@keyframes rule
    *   may be inside a conditional rule and not really used.
-   ***************************************************************************/
-
-  capturer.DocumentCssResourcesHandler = class DocumentCssResourcesHandler {
+   */
+  class DocumentCssResourcesHandler {
     constructor(cssHandler) {
       this.cssHandler = cssHandler;
     }
@@ -5349,11 +5362,13 @@
     }
   }
 
-  /****************************************************************************
-   * A class that handles capture helpers.
-   ***************************************************************************/
+  capturer.DocumentCssResourcesHandler = DocumentCssResourcesHandler;
 
-  capturer.CaptureHelperHandler = class CaptureHelperHandler {
+
+  /**
+   * A class that handles capture helpers.
+   */
+  class CaptureHelperHandler {
     constructor({helpers, rootNode, docUrl, origNodeMap}) {
       this.helpers = helpers;
       this.rootNode = rootNode;
@@ -5942,6 +5957,8 @@
       }
     }
   };
+
+  capturer.CaptureHelperHandler = CaptureHelperHandler;
 
 
   return capturer;
