@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>div::before { content: attr(id); }</style>
+</head>
+<body>
+<div id="host1">
+<template>
+  <style>blockquote::after { content: attr(id); }</style>
+  <style>
+:host { background-color: lime; }
+:host #elem1 { background-color: yellow; }
+:host #elem2:hover { background-color: yellow; }
+:host > #elem3 { background-color: yellow; }
+:host > #elem4:hover { background-color: yellow; }
+  </style>
+  <blockquote id="elem1"></blockquote>
+  <blockquote id="elem2"></blockquote>
+  <blockquote id="elem3"></blockquote>
+  <blockquote id="elem4"></blockquote>
+</template>
+</div>
+<div id="host2">
+<template>
+  <style>blockquote::after { content: attr(id); }</style>
+  <style>
+:host(#host2) { background-color: lime; }
+:host(#host2) #elem1 { background-color: yellow; }
+:host(#host2) #elem2:hover { background-color: yellow; }
+:host(#host2) > #elem3 { background-color: yellow; }
+:host(#host2) > #elem4:hover { background-color: yellow; }
+  </style>
+  <blockquote id="elem1"></blockquote>
+  <blockquote id="elem2"></blockquote>
+  <blockquote id="elem3"></blockquote>
+  <blockquote id="elem4"></blockquote>
+</template>
+</div>
+<div id="host3">
+<template>
+  <style>blockquote::after { content: attr(id); }</style>
+  <style>
+:host(#nonexist) { background-color: lime; }
+:host(#nonexist) #elem1 { background-color: yellow; }
+:host(#nonexist) #elem2:hover { background-color: yellow; }
+:host(#nonexist) > #elem3 { background-color: yellow; }
+:host(#nonexist) > #elem4:hover { background-color: yellow; }
+  </style>
+  <blockquote id="elem1"></blockquote>
+  <blockquote id="elem2"></blockquote>
+  <blockquote id="elem3"></blockquote>
+  <blockquote id="elem4"></blockquote>
+</template>
+</div>
+</body>
+<script src="../../common.js"></script>
+<script>loadShadowDoms();</script>
+</html>

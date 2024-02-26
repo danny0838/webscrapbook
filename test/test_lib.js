@@ -2616,12 +2616,12 @@ div, span {
       testGetVerifyingSelector('a:hover::before', 'a');
 
       // pseudo-elements that are not guaranteed to work after rewritten
-      testGetVerifyingSelector(':host', '*');
-      testGetVerifyingSelector(':host > div', '* > div');
-      testGetVerifyingSelector(':host(.class)', '*');
-      testGetVerifyingSelector(':host(.class) > div', '* > div');
-      testGetVerifyingSelector(':host-context(.class)', '*', false);
-      testGetVerifyingSelector(':host-context(.class) > div', '* > div', false);
+      testGetVerifyingSelector(':host', '');
+      testGetVerifyingSelector(':host > div', '');
+      testGetVerifyingSelector(':host(.class)', '');
+      testGetVerifyingSelector(':host(.class) > div', '');
+      testGetVerifyingSelector(':host-context(.class)', '', false);
+      testGetVerifyingSelector(':host-context(.class) > div', '', false);
 
       // allowed pseudo-classes
       testGetVerifyingSelector(':root', ':root');

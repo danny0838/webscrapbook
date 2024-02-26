@@ -2,19 +2,39 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<style>
-div::before { content: attr(id); }
-</style>
+<style>div::before { content: attr(id); }</style>
 </head>
 <body>
 <div id="host1">
 <template>
-  <style>:host-context(body) { background-color: lime; }</style>
+  <style>blockquote::after { content: attr(id); }</style>
+  <style>
+:host-context(body) { background-color: lime; }
+:host-context(body) #elem1 { background-color: yellow; }
+:host-context(body) #elem2:hover { background-color: yellow; }
+:host-context(body) > #elem3 { background-color: yellow; }
+:host-context(body) > #elem4:hover { background-color: yellow; }
+  </style>
+  <blockquote id="elem1"></blockquote>
+  <blockquote id="elem2"></blockquote>
+  <blockquote id="elem3"></blockquote>
+  <blockquote id="elem4"></blockquote>
 </template>
 </div>
 <div id="host2">
 <template>
-  <style>:host-context(#nonexist) { background-color: lime; }</style>
+  <style>blockquote::after { content: attr(id); }</style>
+  <style>
+:host-context(#nonexist) { background-color: lime; }
+:host-context(#nonexist) #elem1 { background-color: yellow; }
+:host-context(#nonexist) #elem2:hover { background-color: yellow; }
+:host-context(#nonexist) > #elem3 { background-color: yellow; }
+:host-context(#nonexist) > #elem4:hover { background-color: yellow; }
+  </style>
+  <blockquote id="elem1"></blockquote>
+  <blockquote id="elem2"></blockquote>
+  <blockquote id="elem3"></blockquote>
+  <blockquote id="elem4"></blockquote>
 </template>
 </div>
 </body>

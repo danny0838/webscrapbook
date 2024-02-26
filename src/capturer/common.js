@@ -4098,13 +4098,14 @@
      *    (e.g. div:hover => div).
      * 3. Add * in place if the non-pseudo version becomes empty.
      *    (e.g. :hover => *)
+     * 4. Return "" if the selector contains a special pseudo that cannot be
+     *    reliably rewritten.
+     *    (e.g. :host and :host-context represent the shadow host, which can
+     *    not be matched by ShadowRoot.querySelector() using any selector.
      */
     static getVerifyingSelector(...args) {
       // Do not include :not as the semantic is reversed and the rule could be
       // narrower after rewriting (e.g. :not(:hover) => :not(*)).
-      //
-      // @FIXME: ':host', ':host(...)', ':host-context(...)' not handled correctly,
-      // as ShadowRoot.querySelector() doesn't work for them.
       const ALLOWED_PSEUDO = new Set([
         'root', 'scope',
         'is', 'matches', 'any', 'where', 'has',
@@ -4112,6 +4113,10 @@
         'nth-child', 'nth-of-type', 'nth-last-child', 'nth-last-of-type',
         'only-child', 'only-of-type',
         ]);
+
+      // @TODO: rewrite only standalone ':host', as ':host > div' etc. can
+      //        still match using ShadowRoot.querySelector().
+      const SPECIAL_PSEUDO = new Set(['host', 'host-context']);
 
       class Rewriter {
         constructor() {
@@ -4121,7 +4126,14 @@
 
         run(selectorText) {
           this.tokens = [];
+          this.hasSpecialPseudo = false;
+
           this.parse(selectorText, 0);
+
+          if (this.hasSpecialPseudo) {
+            return '';
+          }
+
           return this.tokens.reduce((result, current) => {
             return result + current.value;
           }, '');
@@ -4247,6 +4259,10 @@
             }
           }
 
+          if (this.tokens[0] && this.tokens[0].type === 'name' && SPECIAL_PSEUDO.has(this.tokens[0].value)) {
+            this.hasSpecialPseudo = true;
+          }
+
           if (this.tokens[0] && this.tokens[0].type === 'name' && ALLOWED_PSEUDO.has(this.tokens[0].value)) {
             _tokens.push({
               type: 'operator',
@@ -4338,13 +4354,17 @@
       }
 
       let selectorTextRewritten = this.getVerifyingSelector(selectorText);
+      if (!selectorTextRewritten) {
+        // The selector cannot be reliably rewritten.
+        return true;
+      }
       if (selectorTextInvalid || selectorTextRewritten !== selectorText) {
         try {
           if (root.querySelector(selectorTextRewritten)) {
             return true;
           }
         } catch (ex) {
-          // Rewritten rule still not supported by querySelector due to an
+          // Rewritten selector still not supported by querySelector due to an
           // unexpected reason.
           // Return true as false positive is safer than false negative.
           return true;

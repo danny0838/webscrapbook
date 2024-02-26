@@ -4375,19 +4375,17 @@ $it.skipIf($.noIsPseudo)('test_capture_css_rewriteCss_match_pseudo_is', async fu
   assert(styleElems[5].textContent.trim() === `:where(nonexist, #pseudo5) { }`);
 });
 
-it('test_capture_css_rewriteCss_match_shadow', async function () {
+it('test_capture_css_rewriteCss_match_shadow_host', async function () {
   /* capture.rewriteCss = match */
   var options = {
     "capture.rewriteCss": "match",
   };
 
   var blob = await capture({
-    url: `${localhost}/capture_css_rewriteCss_match_shadow/rewrite.html`,
+    url: `${localhost}/capture_css_rewriteCss_match_shadow/rewrite_host.html`,
     options: Object.assign({}, baseOptions, options),
   });
-
   var zip = await new JSZip().loadAsync(blob);
-
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
@@ -4396,74 +4394,34 @@ it('test_capture_css_rewriteCss_match_shadow', async function () {
   var frag = doc.createElement("template");
   frag.innerHTML = host.getAttribute("data-scrapbook-shadowdom");
   var shadow = frag.content;
-  assert(shadow.querySelectorAll('style')[1].textContent.trim() === ``);
-  if (shadow.querySelector(':scope blockquote')) {
-    assert(shadow.querySelectorAll('style')[2].textContent.trim() === `:scope #elem2 { background-color: green; }`);
-  } else {
-    // ShadowRoot.querySelector(':scope ...') doesn't work in many browsers (e.g. Firefox 124)
-    assert(shadow.querySelectorAll('style')[2].textContent.trim() === ``);
-  }
+  assert(shadow.querySelector('style:nth-of-type(2)').textContent.trim() === `\
+:host { background-color: lime; }
+:host #elem1 { background-color: yellow; }
+:host #elem2:hover { background-color: yellow; }
+:host > #elem3 { background-color: yellow; }
+:host > #elem4:hover { background-color: yellow; }`);
 
   var host = doc.querySelector('#host2');
   var frag = doc.createElement("template");
   frag.innerHTML = host.getAttribute("data-scrapbook-shadowdom");
   var shadow = frag.content;
-  assert(shadow.querySelector('style').textContent.trim() === `:host { background-color: lime; }`);
+  assert(shadow.querySelector('style:nth-of-type(2)').textContent.trim() === `\
+:host(#host2) { background-color: lime; }
+:host(#host2) #elem1 { background-color: yellow; }
+:host(#host2) #elem2:hover { background-color: yellow; }
+:host(#host2) > #elem3 { background-color: yellow; }
+:host(#host2) > #elem4:hover { background-color: yellow; }`);
 
   var host = doc.querySelector('#host3');
   var frag = doc.createElement("template");
   frag.innerHTML = host.getAttribute("data-scrapbook-shadowdom");
   var shadow = frag.content;
-  assert(shadow.querySelector('style').textContent.trim() === `:host(#host3) { background-color: lime; }`);
-
-  var host = doc.querySelector('#host4');
-  var frag = doc.createElement("template");
-  frag.innerHTML = host.getAttribute("data-scrapbook-shadowdom");
-  var shadow = frag.content;
-  assert(shadow.querySelector('style').textContent.trim() === `:host(#nonexist) { background-color: lime; }`);
-});
-
-$it.xfail()('test_capture_css_rewriteCss_match_shadow_todo', async function () {
-  /* capture.rewriteCss = match */
-  var options = {
-    "capture.rewriteCss": "match",
-  };
-
-  var blob = await capture({
-    url: `${localhost}/capture_css_rewriteCss_match_shadow/rewrite.html`,
-    options: Object.assign({}, baseOptions, options),
-  });
-
-  var zip = await new JSZip().loadAsync(blob);
-
-  var indexFile = zip.file('index.html');
-  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
-  var doc = await readFileAsDocument(indexBlob);
-
-  var host = doc.querySelector('#host1');
-  var frag = doc.createElement("template");
-  frag.innerHTML = host.getAttribute("data-scrapbook-shadowdom");
-  var shadow = frag.content;
-  assert(shadow.querySelectorAll('style')[1].textContent.trim() === ``);
-  assert(shadow.querySelectorAll('style')[2].textContent.trim() === `:scope #elem2 { background-color: green; }`);
-
-  var host = doc.querySelector('#host2');
-  var frag = doc.createElement("template");
-  frag.innerHTML = host.getAttribute("data-scrapbook-shadowdom");
-  var shadow = frag.content;
-  assert(shadow.querySelector('style').textContent.trim() === `:host { background-color: lime; }`);
-
-  var host = doc.querySelector('#host3');
-  var frag = doc.createElement("template");
-  frag.innerHTML = host.getAttribute("data-scrapbook-shadowdom");
-  var shadow = frag.content;
-  assert(shadow.querySelector('style').textContent.trim() === `:host(#host3) { background-color: lime; }`);
-
-  var host = doc.querySelector('#host4');
-  var frag = doc.createElement("template");
-  frag.innerHTML = host.getAttribute("data-scrapbook-shadowdom");
-  var shadow = frag.content;
-  assert(shadow.querySelector('style').textContent.trim() === ``);
+  assert(shadow.querySelector('style:nth-of-type(2)').textContent.trim() === `\
+:host(#nonexist) { background-color: lime; }
+:host(#nonexist) #elem1 { background-color: yellow; }
+:host(#nonexist) #elem2:hover { background-color: yellow; }
+:host(#nonexist) > #elem3 { background-color: yellow; }
+:host(#nonexist) > #elem4:hover { background-color: yellow; }`);
 });
 
 $it.skipIf($.noHostContextPseudo)('test_capture_css_rewriteCss_match_shadow_host_context', async function () {
@@ -4476,9 +4434,7 @@ $it.skipIf($.noHostContextPseudo)('test_capture_css_rewriteCss_match_shadow_host
     url: `${localhost}/capture_css_rewriteCss_match_shadow/rewrite_host_context.html`,
     options: Object.assign({}, baseOptions, options),
   });
-
   var zip = await new JSZip().loadAsync(blob);
-
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
@@ -4487,43 +4443,23 @@ $it.skipIf($.noHostContextPseudo)('test_capture_css_rewriteCss_match_shadow_host
   var frag = doc.createElement("template");
   frag.innerHTML = host.getAttribute("data-scrapbook-shadowdom");
   var shadow = frag.content;
-  assert(shadow.querySelector('style').textContent.trim() === `:host-context(body) { background-color: lime; }`);
+  assert(shadow.querySelector('style:nth-of-type(2)').textContent.trim() === `\
+:host-context(body) { background-color: lime; }
+:host-context(body) #elem1 { background-color: yellow; }
+:host-context(body) #elem2:hover { background-color: yellow; }
+:host-context(body) > #elem3 { background-color: yellow; }
+:host-context(body) > #elem4:hover { background-color: yellow; }`);
 
   var host = doc.querySelector('#host2');
   var frag = doc.createElement("template");
   frag.innerHTML = host.getAttribute("data-scrapbook-shadowdom");
   var shadow = frag.content;
-  assert(shadow.querySelector('style').textContent.trim() === `:host-context(#nonexist) { background-color: lime; }`);
-});
-
-$it.skipIf($.noHostContextPseudo).xfail()('test_capture_css_rewriteCss_match_shadow_host_context_todo', async function () {
-  /* capture.rewriteCss = match */
-  var options = {
-    "capture.rewriteCss": "match",
-  };
-
-  var blob = await capture({
-    url: `${localhost}/capture_css_rewriteCss_match_shadow/rewrite_host_context.html`,
-    options: Object.assign({}, baseOptions, options),
-  });
-
-  var zip = await new JSZip().loadAsync(blob);
-
-  var indexFile = zip.file('index.html');
-  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
-  var doc = await readFileAsDocument(indexBlob);
-
-  var host = doc.querySelector('#host1');
-  var frag = doc.createElement("template");
-  frag.innerHTML = host.getAttribute("data-scrapbook-shadowdom");
-  var shadow = frag.content;
-  assert(shadow.querySelector('style').textContent.trim() === `:host-context(body) { background-color: lime; }`);
-
-  var host = doc.querySelector('#host2');
-  var frag = doc.createElement("template");
-  frag.innerHTML = host.getAttribute("data-scrapbook-shadowdom");
-  var shadow = frag.content;
-  assert(shadow.querySelector('style').textContent.trim() === ``);
+  assert(shadow.querySelector('style:nth-of-type(2)').textContent.trim() === `\
+:host-context(#nonexist) { background-color: lime; }
+:host-context(#nonexist) #elem1 { background-color: yellow; }
+:host-context(#nonexist) #elem2:hover { background-color: yellow; }
+:host-context(#nonexist) > #elem3 { background-color: yellow; }
+:host-context(#nonexist) > #elem4:hover { background-color: yellow; }`);
 });
 
 it('test_capture_css_rewriteCss_match_shadow_slotted', async function () {
