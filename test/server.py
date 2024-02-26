@@ -96,6 +96,14 @@ def main():
             os.path.join(root, '..', 'src', 'lib', 'referrer.js'),
             os.path.join(root, 'shared', 'lib', 'referrer.js'),
         ),
+        (
+            os.path.join(root, '..', 'src', 'core', 'common.js'),
+            os.path.join(root, 'shared', 'core', 'common.js'),
+        ),
+        (
+            os.path.join(root, '..', 'src', 'capturer', 'common.js'),
+            os.path.join(root, 'shared', 'capturer', 'common.js'),
+        ),
     )
 
     try:

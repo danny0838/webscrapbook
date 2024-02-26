@@ -78,6 +78,50 @@ function assert(condition, message) {
 }
 
 /**
+ * Check two objects (JSONifiable) are deeply identical.
+ */
+function assertEqual(obj1, obj2, message) {
+  const s1 = JSON.stringify(obj1);
+  const s2 = JSON.stringify(obj2);
+  if (s1 === s2) { return; }
+  const err = new Error(`${s1} not equal to ${s2}${message ? ': ' + message : ''}`);
+  console.error(err);
+  throw err;
+}
+
+/**
+ * @typedef {Object} assertThrowsSpec
+ * @property {string} [name] - The expected error name.
+ * @property {string} [message] - The expected error message.
+ */
+
+/**
+ * Check if the function throws with the exception
+ *
+ * @param {Function} func - the function to test
+ * @param {assertThrowsSpec|Error} [expectedEx] - the expected error
+ */
+function assertThrows(func, expectedEx, message) {
+  let error;
+  try {
+    func();
+  } catch (ex) {
+    error = ex;
+  }
+  if (!error) {
+    throw new Error(`Expected error not thrown${message ? ': ' + message : ''}`);
+  }
+  if (expectedEx) {
+    if (expectedEx.name && error.name !== expectedEx.name) {
+      throw new Error(`Expected ${expectedEx.name} not thrown${message ? ': ' + message : ''}`);
+    }
+    if (expectedEx.message && error.message !== expectedEx.message) {
+      throw new Error(`Expected error with message "${expectedEx.message}" not thrown${message ? ': ' + message : ''}`);
+    }
+  }
+}
+
+/**
  * A jQuery-style extension of describe or it for chainable and conditional
  * skip or xfail.
  *
@@ -593,6 +637,8 @@ class TestSuite {
     MAF,
 
     assert,
+    assertEqual,
+    assertThrows,
     $: MochaQuery,
     $describe: MochaQuery(describe),
     $it: MochaQuery(it),
