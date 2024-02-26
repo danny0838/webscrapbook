@@ -605,7 +605,8 @@ class TestSuite {
   });
 
   // import all tests
-  await import('./test_auto.js');
+  await import('./test_lib.js');
+  await import('./test_capture.js');
   await import('./test_manual.js');
 
   mocha.run();

@@ -9,7 +9,7 @@ chrome.contextMenus.create({
   title: 'Run automated tests',
   contexts: ["browser_action"],
   onclick: (info, tab) => {
-    const url = chrome.runtime.getURL("test.html?grep=Automated tests");
+    const url = chrome.runtime.getURL("test.html?grep=Test libraries|Test capture");
     chrome.tabs.create({url});
   }
 });
