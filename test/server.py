@@ -79,13 +79,33 @@ def main():
             config.update(json.load(fh))
 
     # build hardlinks for shared libraries
-    fsrc = os.path.join(os.path.dirname(root), 'src', 'lib')
-    fdst = os.path.join(root, 'shared')
+    link_files = (
+        (
+            os.path.join(root, '..', 'src', 'lib', 'browser-polyfill.js'),
+            os.path.join(root, 'shared', 'lib', 'browser-polyfill.js'),
+        ),
+        (
+            os.path.join(root, '..', 'src', 'lib', 'jszip.js'),
+            os.path.join(root, 'shared', 'lib', 'jszip.js'),
+        ),
+        (
+            os.path.join(root, '..', 'src', 'lib', 'sha.js'),
+            os.path.join(root, 'shared', 'lib', 'sha.js'),
+        ),
+        (
+            os.path.join(root, '..', 'src', 'lib', 'referrer.js'),
+            os.path.join(root, 'shared', 'lib', 'referrer.js'),
+        ),
+    )
+
     try:
-        shutil.rmtree(fdst)
+        shutil.rmtree(os.path.join(root, 'shared'))
     except FileNotFoundError:
         pass
-    shutil.copytree(fsrc, fdst, copy_function=os.link)
+
+    for fsrc, fdst in link_files:
+        os.makedirs(os.path.dirname(fdst), exist_ok=True)
+        os.link(fsrc, fdst)
 
     # start server
     os.chdir(os.path.join(root, 't'))

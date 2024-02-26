@@ -16,7 +16,7 @@
 
   "background": {
     "scripts": [
-      "shared/browser-polyfill.js",
+      "shared/lib/browser-polyfill.js",
       "background.js"
     ]
   },
