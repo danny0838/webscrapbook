@@ -4354,7 +4354,7 @@
       return origElem && origElem.sheet;
     }
 
-    async getRulesFromCssText(cssText) {
+    getRulesFromCssText(cssText) {
       // In Chromium, BOM causes returned cssRules be empty.
       // Remove it to prevent the issue.
       if (cssText[0] === '\uFEFF') {
@@ -4406,7 +4406,7 @@
         // cssRules not accessible, probably a cross-domain CSS.
         if (crossOrigin) {
           if (css && css.ownerNode && css.ownerNode.nodeName.toLowerCase() === 'style') {
-            rules = await this.getRulesFromCssText(css.ownerNode.textContent);
+            rules = this.getRulesFromCssText(css.ownerNode.textContent);
           } else {
             const {settings, options} = this;
 
@@ -4418,7 +4418,7 @@
                 settings,
                 options,
               });
-              rules = await this.getRulesFromCssText(response.text);
+              rules = this.getRulesFromCssText(response.text);
             } catch (ex) {
               console.error(ex);
             }
@@ -4879,7 +4879,7 @@
         const cssTextUnicode = charset ? cssText : await scrapbook.readFileAsText(new Blob([scrapbook.byteStringToArrayBuffer(cssText)]));
 
         // rules from source CSS text
-        const cssRulesSource = await this.getRulesFromCssText(cssTextUnicode);
+        const cssRulesSource = this.getRulesFromCssText(cssTextUnicode);
 
         // difference between cssRulesSource and cssRules is considered dynamic
         // use CSSOM rules instead
@@ -4967,7 +4967,7 @@
           if (!isDynamic) {
             charset = "UTF-8";
             if (!isCircular) {
-              cssRules = cssRules || await this.getRulesFromCssText(cssText);
+              cssRules = cssRules || this.getRulesFromCssText(cssText);
               cssText = Array.prototype.map.call(
                 cssRules,
                 cssRule => cssRule.cssText,
@@ -4991,7 +4991,7 @@
           if (!cssRules) {
             charset = "UTF-8";
             if (!isCircular) {
-              cssRules = await this.getRulesFromCssText(cssText);
+              cssRules = this.getRulesFromCssText(cssText);
             }
           }
           if (cssRules) {
