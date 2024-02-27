@@ -1309,10 +1309,14 @@ describe('core/common.js', function () {
       );
     });
 
-    it('duplicated parameters', function () {
+    it('duplicated parameters are invalid (ignored)', function () {
       assertEqual(
         scrapbook.parseHeaderContentType(`text/html; charset=utf-8; charset=big5`),
-        {type: "text/html", parameters: {charset: "big5"}},
+        {type: "text/html", parameters: {charset: "utf-8"}},
+      );
+      assertEqual(
+        scrapbook.parseHeaderContentType(`text/html; charset=utf-8; CHARSET=big5`),
+        {type: "text/html", parameters: {charset: "utf-8"}},
       );
     });
   });

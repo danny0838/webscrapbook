@@ -2855,6 +2855,11 @@
           let field = match[1].toLowerCase();
           let value = match[2];
 
+          // duplicated parameter is invalid, ignore it
+          if (field in result.parameters) {
+            continue;
+          }
+
           if (value.startsWith('"')) {
             // any valid value with leading '"' must be ".*"
             value = scrapbook.unescapeQuotes(value.slice(1, -1));

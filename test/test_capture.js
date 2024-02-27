@@ -2285,7 +2285,7 @@ it('test_capture_meta_charset', async function () {
 
   var metaElems = doc.querySelectorAll('meta');
   assert(metaElems[0].getAttribute('content') === String.raw`text/javascript; KEY=VALUE`);
-  assert(metaElems[1].getAttribute('content') === String.raw`text/plain; charset=UTF-8; data=bar456; data2="中文\"789\""`);
+  assert(metaElems[1].getAttribute('content') === String.raw`text/plain; charset=UTF-8; data=foo123; data2="中文\"789\""`);
   assert(metaElems[2].getAttribute('content') === String.raw`text/css; CHARSET="GBK"; data=中文123`);
 
   /* no meta charset; HTTP header Big5 */
