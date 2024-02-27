@@ -2909,6 +2909,11 @@
           let field = match[1].toLowerCase();
           let value = match[2];
 
+          // duplicated parameter is invalid, ignore it
+          if (field in result.parameters) {
+            continue;
+          }
+
           try {
             if (field.endsWith('*')) {
               // ext-value

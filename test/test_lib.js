@@ -1427,6 +1427,17 @@ describe('core/common.js', function () {
       );
     });
 
+    it('duplicated parameters are invalid (ignored)', function () {
+      assertEqual(
+        scrapbook.parseHeaderContentDisposition(`attachment; filename=file.html; filename=file2.html; size=3; size=5`),
+        {type: "attachment", parameters: {filename: "file.html", size: "3"}},
+      );
+      assertEqual(
+        scrapbook.parseHeaderContentDisposition(`attachment; filename=file.html; FILENAME=file2.html; size=3; Size=5`),
+        {type: "attachment", parameters: {filename: "file.html", size: "3"}},
+      );
+    });
+
   });
 
   describe('scrapbook.parseHeaderRefresh', function () {
