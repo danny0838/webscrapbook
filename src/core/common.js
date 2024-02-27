@@ -2906,14 +2906,8 @@
 
         while (match = regexDispExtParam.exec(string)) {
           string = string.slice(match.index + match[0].length);
-          let field = match[1];
+          let field = match[1].toLowerCase();
           let value = match[2];
-
-          // RFC 6266 does not mention that parameters other than "filename"
-          // and "filename*" should be matched case-insensitively.
-          if (/^filename$/i.test(field)) {
-            field = field.toLowerCase();
-          }
 
           try {
             if (field.endsWith('*')) {

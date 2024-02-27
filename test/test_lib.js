@@ -1410,7 +1410,7 @@ describe('core/common.js', function () {
       );
     });
 
-    it('parameter filename should be case-insensitive (lower case)', function () {
+    it('parameter name should be case-insensitive (lower case)', function () {
       assertEqual(
         scrapbook.parseHeaderContentDisposition(`attachment; FILENAME=file.html`),
         {type: "attachment", parameters: {filename: "file.html"}},
@@ -1420,12 +1420,10 @@ describe('core/common.js', function () {
         scrapbook.parseHeaderContentDisposition(`attachment; FileName=file.html`),
         {type: "attachment", parameters: {filename: "file.html"}},
       );
-    });
 
-    it('other parameters are case-sensitive (undefined by RFC 6266)', function () {
       assertEqual(
-        scrapbook.parseHeaderContentDisposition(`inline; filename=file.bmp; param=value; PARAM=VALUE`),
-        {type: "inline", parameters: {filename: "file.bmp", param: "value", PARAM: "VALUE"}},
+        scrapbook.parseHeaderContentDisposition(`inline; filename=file.bmp; Size=84`),
+        {type: "inline", parameters: {filename: "file.bmp", size: "84"}},
       );
     });
 
