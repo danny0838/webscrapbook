@@ -3952,6 +3952,195 @@
 
 
   /**
+   * A class that tokenizes a CSS selector.
+   *
+   * Expect a selector text which is validated and tidied by the browser.
+   */
+  class CssSelectorTokenizer {
+    constructor() {
+      this.regexLiteral = /(?:[0-9A-Za-z_\-\u00A0-\uFFFF]|\\(?:[0-9A-Fa-f]{1,6} ?|.))+|(.)/g;
+      this.regexQuote = /[^"]*(?:\\.[^"]*)*"/g;
+    }
+
+    static tokensToString(tokens) {
+      return tokens.reduce((result, current) => {
+        return result + current.value;
+      }, '');
+    }
+
+    tokensToString(...args) {
+      return this.constructor.tokensToString.apply(this, args);
+    }
+
+    run(selectorText) {
+      this.tokens = [];
+      this.depth = -1;
+      this.parse(selectorText, 0);
+      return this.tokens;
+    }
+
+    parse(selectorText, start, endSymbol = null) {
+      this.depth++;
+      this.regexLiteral.lastIndex = start;
+      let match;
+      while (match = this.regexLiteral.exec(selectorText)) {
+        switch (match[1]) {
+          case endSymbol: {
+            this.depth--;
+            this.tokens.push({
+              type: 'operator',
+              value: match[0],
+              depth: this.depth,
+            });
+            return this.regexLiteral.lastIndex;
+            break;
+          }
+          case '(': {
+            this.tokens.push({
+              type: 'operator',
+              value: match[0],
+              depth: this.depth,
+            });
+            this.regexLiteral.lastIndex = this.parse(
+              selectorText,
+              this.regexLiteral.lastIndex,
+              ')',
+            );
+            break;
+          }
+          case '[': {
+            const start = this.regexLiteral.lastIndex;
+            const end = this.regexLiteral.lastIndex = this.matchBracket(selectorText, start);
+            this.tokens.push({
+              type: 'selector',
+              value: selectorText.slice(start - 1, end),
+              depth: this.depth,
+            });
+            break;
+          }
+          case ':': {
+            const isPseudoElement = selectorText[this.regexLiteral.lastIndex] === ':';
+            if (isPseudoElement) {
+              this.regexLiteral.lastIndex++;
+            }
+            this.tokens.push({
+              type: 'operator',
+              value: isPseudoElement ? '::' : ':',
+              depth: this.depth,
+            });
+            this.regexLiteral.lastIndex = this.parsePseudo(
+              selectorText,
+              this.regexLiteral.lastIndex,
+            );
+            break;
+          }
+          case '|': {
+            // Special handling for || (column combinator in CSS4 draft)
+            // to prevent misinterpreted as double | operator.
+            const isColumnCombinator = selectorText[this.regexLiteral.lastIndex] === '|';
+            if (isColumnCombinator) {
+              this.regexLiteral.lastIndex++;
+            }
+            this.tokens.push({
+              type: 'operator',
+              value: isColumnCombinator ? '||' : '|',
+              depth: this.depth,
+            });
+            break;
+          }
+          default: {
+            if (match[1]) {
+              this.tokens.push({
+                type: 'operator',
+                value: match[0],
+                depth: this.depth,
+              });
+            } else {
+              this.tokens.push({
+                type: 'name',
+                value: match[0],
+                depth: this.depth,
+              });
+            }
+            break;
+          }
+        }
+      }
+      this.depth--;
+      return selectorText.length;
+    }
+
+    parsePseudo(selectorText, start) {
+      let _tokens = this.tokens;
+      this.tokens = [];
+      let lastIndex = selectorText.length;
+      this.regexLiteral.lastIndex = start;
+      let match;
+      while (match = this.regexLiteral.exec(selectorText)) {
+        switch (match[1]) {
+          case '(': {
+            this.tokens.push({
+              type: 'operator',
+              value: match[0],
+              depth: this.depth,
+            });
+            this.regexLiteral.lastIndex = this.parse(
+              selectorText,
+              this.regexLiteral.lastIndex,
+              ')',
+            );
+            break;
+          }
+          default: {
+            if (match[1]) {
+              lastIndex = this.regexLiteral.lastIndex - 1;
+              this.regexLiteral.lastIndex = selectorText.length;
+            } else {
+              this.tokens.push({
+                type: 'name',
+                value: match[0],
+                depth: this.depth,
+              });
+            }
+            break;
+          }
+        }
+      }
+
+      this.tokens = _tokens.concat(this.tokens);
+      return lastIndex;
+    }
+
+    matchBracket(selectorText, start) {
+      this.regexLiteral.lastIndex = start;
+      let match;
+      while (match = this.regexLiteral.exec(selectorText)) {
+        switch (match[1]) {
+          case ']': {
+            return this.regexLiteral.lastIndex;
+            break;
+          }
+          case '"': {
+            this.regexLiteral.lastIndex = this.matchQuote(selectorText, this.regexLiteral.lastIndex);
+            break;
+          }
+        }
+      }
+      return selectorText.length;
+    }
+
+    matchQuote(selectorText, start) {
+      this.regexQuote.lastIndex = start;
+      const m = this.regexQuote.exec(selectorText);
+      if (m) { return this.regexQuote.lastIndex; }
+      return selectorText.length;
+    }
+  }
+
+  capturer.CssSelectorTokenizer = CssSelectorTokenizer;
+
+
+  /**
    * A class that handles document CSS analysis.
    */
   class DocumentCssHandler {
@@ -4115,208 +4304,69 @@
       //        still match using ShadowRoot.querySelector().
       const SPECIAL_PSEUDO = new Set(['host', 'host-context']);
 
-      class Rewriter {
-        constructor() {
-          this.regexLiteral = /(?:[0-9A-Za-z_\-\u00A0-\uFFFF]|\\(?:[0-9A-Fa-f]{1,6} ?|.))+|(.)/g;
-          this.regexQuote = /[^"]*(?:\\.[^"]*)*"/g;
-        }
-
-        run(selectorText) {
-          this.tokens = [];
-          this.hasSpecialPseudo = false;
-
-          this.parse(selectorText, 0);
-
-          if (this.hasSpecialPseudo) {
-            return '';
-          }
-
-          return this.tokens.reduce((result, current) => {
-            return result + current.value;
-          }, '');
-        }
-
-        parse(selectorText, start, endSymbol = null) {
-          this.regexLiteral.lastIndex = start;
-          let match;
-          while (match = this.regexLiteral.exec(selectorText)) {
-            switch (match[1]) {
-              case endSymbol: {
-                this.tokens.push({
-                  type: 'operator',
-                  value: match[0],
-                });
-                return this.regexLiteral.lastIndex;
-                break;
-              }
-              case '(': {
-                this.tokens.push({
-                  type: 'operator',
-                  value: match[0],
-                });
-                this.regexLiteral.lastIndex = this.parse(
-                  selectorText,
-                  this.regexLiteral.lastIndex,
-                  ')',
-                );
-                break;
-              }
-              case '[': {
-                const start = this.regexLiteral.lastIndex;
-                const end = this.regexLiteral.lastIndex = this.matchBracket(selectorText, start);
-                this.tokens.push({
-                  type: 'selector',
-                  value: selectorText.slice(start - 1, end),
-                });
-                break;
-              }
-              case ':': {
-                this.regexLiteral.lastIndex = this.parsePseudo(
-                  selectorText,
-                  this.regexLiteral.lastIndex,
-                  selectorText[this.regexLiteral.lastIndex] === ':',
-                );
-                break;
-              }
-              case '|': {
-                // Special handling for || (column combinator in CSS4 draft)
-                // to prevent misinterpreted as double | operator.
-                {
-                  const pos = this.regexLiteral.lastIndex;
-                  const next = selectorText.slice(pos, pos + 1);
-                  if (next === '|') {
-                    this.regexLiteral.lastIndex++;
-                    this.tokens.push({
-                      type: 'operator',
-                      value: match[0] + next,
-                    });
-                    break;
-                  }
-                }
-
-                const prevToken = this.tokens[this.tokens.length - 1];
-                if (prevToken) {
-                  if (prevToken.type === 'name' || (prevToken.type === 'operator' && prevToken.value === '*')) {
-                    this.tokens.pop();
-                  }
-                }
-                break;
-              }
-              default: {
-                if (match[1]) {
-                  this.tokens.push({
-                    type: 'operator',
-                    value: match[0],
-                  });
-                } else {
-                  this.tokens.push({
-                    type: 'name',
-                    value: match[0],
-                  });
-                }
-                break;
-              }
-            }
-          }
-          return selectorText.length;
-        }
-
-        parsePseudo(selectorText, start, isPseudoElement) {
-          let _tokens = this.tokens;
-          this.tokens = [];
-          let lastIndex = selectorText.length;
-          this.regexLiteral.lastIndex = start + (isPseudoElement ? 1 : 0);
-          let match;
-          while (match = this.regexLiteral.exec(selectorText)) {
-            switch (match[1]) {
-              case '(': {
-                this.tokens.push({
-                  type: 'operator',
-                  value: match[0],
-                });
-                this.regexLiteral.lastIndex = this.parse(
-                  selectorText,
-                  this.regexLiteral.lastIndex,
-                  ')',
-                );
-                break;
-              }
-              default: {
-                if (match[1]) {
-                  lastIndex = this.regexLiteral.lastIndex - 1;
-                  this.regexLiteral.lastIndex = selectorText.length;
-                } else {
-                  this.tokens.push({
-                    type: 'name',
-                    value: match[0],
-                  });
-                }
-                break;
-              }
-            }
-          }
-
-          if (this.tokens[0] && this.tokens[0].type === 'name' && SPECIAL_PSEUDO.has(this.tokens[0].value)) {
-            this.hasSpecialPseudo = true;
-          }
-
-          if (this.tokens[0] && this.tokens[0].type === 'name' && ALLOWED_PSEUDO.has(this.tokens[0].value)) {
-            _tokens.push({
-              type: 'operator',
-              value: isPseudoElement ? '::' : ':',
-            });
-            _tokens = _tokens.concat(this.tokens);
-          } else {
-            addUniversalSelector: {
-              const prevToken = _tokens[_tokens.length - 1];
-              if (prevToken) {
-                if (prevToken.type === 'name' || prevToken.type === 'selector') {
-                  break addUniversalSelector;
-                }
-                if (prevToken.type === 'operator' && prevToken.value === ')') {
-                  break addUniversalSelector;
-                }
-              }
-
-              _tokens.push({
-                type: 'name',
-                value: '*',
-              });
-            }
-          }
-
-          this.tokens = _tokens;
-          return lastIndex;
-        }
-
-        matchBracket(selectorText, start) {
-          this.regexLiteral.lastIndex = start;
-          let match;
-          while (match = this.regexLiteral.exec(selectorText)) {
-            switch (match[1]) {
-              case ']': {
-                return this.regexLiteral.lastIndex;
-                break;
-              }
-              case '"': {
-                this.regexLiteral.lastIndex = this.matchQuote(selectorText, this.regexLiteral.lastIndex);
-                break;
-              }
-            }
-          }
-          return selectorText.length;
-        }
-
-        matchQuote(selectorText, start) {
-          this.regexQuote.lastIndex = start;
-          const m = this.regexQuote.exec(selectorText);
-          if (m) { return this.regexQuote.lastIndex; }
-          return selectorText.length;
-        }
-      }
+      const tokenizer = new CssSelectorTokenizer();
 
       const fn = (selectorText) => {
-        return new Rewriter().run(selectorText);
+        const tokens = tokenizer.run(selectorText);
+        const result = [];
+        for (let i = 0, I = tokens.length; i < I; i++) {
+          const token = tokens[i];
+
+          // remove namespace
+          if (token.value === '|' && token.type === 'operator') {
+            const prevToken = result[result.length - 1];
+            if (prevToken && (prevToken.type === 'name' || (prevToken.value === '*' && prevToken.type === 'operator'))) {
+              result.pop();
+            }
+            continue;
+          }
+
+          // handle pseudo-classes/elements
+          if ((token.value === ':' || token.value === '::') && token.type === 'operator') {
+            const name = tokens[i + 1].value;
+
+            if (SPECIAL_PSEUDO.has(name)) {
+              return "";
+            }
+
+            if (!ALLOWED_PSEUDO.has(name)) {
+              skipPseudoAndGetNextPos: {
+                let j = i = i + 2;
+                const parenToken = tokens[j];
+                if (parenToken && parenToken.value === '(' && parenToken.type === 'operator') {
+                  const depth = parenToken.depth;
+                  for (j += 1; j < I; j++) {
+                    const token = tokens[j];
+                    if (token && token.depth === depth) {
+                      i = j + 1;
+                      break skipPseudoAndGetNextPos;
+                    }
+                  }
+                  i = j;
+                  break skipPseudoAndGetNextPos;
+                }
+              }
+              i -= 1;
+
+              addUniversalSelector: {
+                const prevToken = result[result.length - 1];
+                if (!prevToken || (prevToken.type === 'operator' && prevToken.value !== ')')) {
+                  result.push({
+                    type: 'name',
+                    value: '*',
+                    depth: token.depth,
+                  });
+                }
+              }
+
+              continue;
+            }
+          }
+
+          result.push(token);
+        }
+
+        return tokenizer.tokensToString(result);
       };
 
       Object.defineProperty(DocumentCssHandler, 'getVerifyingSelector', {value: fn});

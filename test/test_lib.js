@@ -2511,6 +2511,311 @@ describe('capturer/common.js', function () {
 
   });
 
+  describe('capturer.CssSelectorTokenizer.run', function () {
+    const tokenizer = new capturer.CssSelectorTokenizer();
+
+    it('basic selectors', function () {
+      assertEqual(tokenizer.run(''), []);
+      assertEqual(tokenizer.run('body'), [
+        {type: 'name', value: 'body', depth: 0},
+      ]);
+      assertEqual(tokenizer.run('*'), [
+        {type: 'operator', value: '*', depth: 0},
+      ]);
+      assertEqual(tokenizer.run('#my-id'), [
+        {type: 'operator', value: '#', depth: 0},
+        {type: 'name', value: 'my-id', depth: 0},
+      ]);
+      assertEqual(tokenizer.run('.my-class'), [
+        {type: 'operator', value: '.', depth: 0},
+        {type: 'name', value: 'my-class', depth: 0},
+      ]);
+
+      // escaped string
+      assertEqual(tokenizer.run(String.raw`#\*`), [
+        {type: 'operator', value: '#', depth: 0},
+        {type: 'name', value: String.raw`\*`, depth: 0},
+      ]);
+
+      assertEqual(tokenizer.run(String.raw`.my\.class\4E00 \20000 \10FFFF x`), [
+        {type: 'operator', value: '.', depth: 0},
+        {type: 'name', value: String.raw`my\.class\4E00 \20000 \10FFFF x`, depth: 0},
+      ]);
+    });
+
+    it('attribute selector ([attr="..."])', function () {
+      // attr only
+      assertEqual(tokenizer.run('[myattr]'), [
+        {type: 'selector', value: '[myattr]', depth: 0},
+      ]);
+
+      // attr and value
+      assertEqual(tokenizer.run('[myattr=myvalue]'), [
+        {type: 'selector', value: '[myattr=myvalue]', depth: 0},
+      ]);
+      assertEqual(tokenizer.run('[myattr~=myvalue]'), [
+        {type: 'selector', value: '[myattr~=myvalue]', depth: 0},
+      ]);
+      assertEqual(tokenizer.run('[myattr|=myvalue]'), [
+        {type: 'selector', value: '[myattr|=myvalue]', depth: 0},
+      ]);
+      assertEqual(tokenizer.run('[myattr^=myvalue]'), [
+        {type: 'selector', value: '[myattr^=myvalue]', depth: 0},
+      ]);
+      assertEqual(tokenizer.run('[myattr$=myvalue]'), [
+        {type: 'selector', value: '[myattr$=myvalue]', depth: 0},
+      ]);
+      assertEqual(tokenizer.run('[myattr*=myvalue]'), [
+        {type: 'selector', value: '[myattr*=myvalue]', depth: 0},
+      ]);
+
+      // attr and value with modifier
+      assertEqual(tokenizer.run('[myattr=myvalue i]'), [
+        {type: 'selector', value: '[myattr=myvalue i]', depth: 0},
+      ]);
+      assertEqual(tokenizer.run('[myattr=myvalue s]'), [
+        {type: 'selector', value: '[myattr=myvalue s]', depth: 0},
+      ]);
+
+      // quoted value
+      assertEqual(tokenizer.run('[myattr="my complex value"]'), [
+        {type: 'selector', value: '[myattr="my complex value"]', depth: 0},
+      ]);
+
+      // quoted value with escaping
+      assertEqual(tokenizer.run(String.raw`[myattr=" my escaped\value and \"quoted\" ones "]`), [
+        {type: 'selector', value: String.raw`[myattr=" my escaped\value and \"quoted\" ones "]`, depth: 0},
+      ]);
+
+      // quoted value with modifier
+      assertEqual(tokenizer.run('[myattr="my complex value" i]'), [
+        {type: 'selector', value: '[myattr="my complex value" i]', depth: 0},
+      ]);
+
+      // combine with other selectors
+      assertEqual(tokenizer.run('div [myattr]'), [
+        {type: 'name', value: 'div', depth: 0},
+        {type: 'operator', value: ' ', depth: 0},
+        {type: 'selector', value: '[myattr]', depth: 0},
+      ]);
+    });
+
+    it('descendant combinator (" ")', function () {
+      assertEqual(tokenizer.run('div span'), [
+        {type: 'name', value: 'div', depth: 0},
+        {type: 'operator', value: ' ', depth: 0},
+        {type: 'name', value: 'span', depth: 0},
+      ]);
+      assertEqual(tokenizer.run('div    span'), [
+        {type: 'name', value: 'div', depth: 0},
+        {type: 'operator', value: ' ', depth: 0},
+        {type: 'operator', value: ' ', depth: 0},
+        {type: 'operator', value: ' ', depth: 0},
+        {type: 'operator', value: ' ', depth: 0},
+        {type: 'name', value: 'span', depth: 0},
+      ]);
+
+      assertEqual(tokenizer.run('div\tspan'), [
+        {type: 'name', value: 'div', depth: 0},
+        {type: 'operator', value: '\t', depth: 0},
+        {type: 'name', value: 'span', depth: 0},
+      ]);
+
+      assertEqual(tokenizer.run('div \t span'), [
+        {type: 'name', value: 'div', depth: 0},
+        {type: 'operator', value: ' ', depth: 0},
+        {type: 'operator', value: '\t', depth: 0},
+        {type: 'operator', value: ' ', depth: 0},
+        {type: 'name', value: 'span', depth: 0},
+      ]);
+
+      // non-ascii white space is a name rather than a combinator
+      assertEqual(tokenizer.run('div　span'), [
+        {type: 'name', value: 'div　span', depth: 0},
+      ]);
+      assertEqual(tokenizer.run('.my-class　span'), [
+        {type: 'operator', value: '.', depth: 0},
+        {type: 'name', value: 'my-class　span', depth: 0},
+      ]);
+      assertEqual(tokenizer.run('div 　 span'), [
+        {type: 'name', value: 'div', depth: 0},
+        {type: 'operator', value: ' ', depth: 0},
+        {type: 'name', value: '　', depth: 0},
+        {type: 'operator', value: ' ', depth: 0},
+        {type: 'name', value: 'span', depth: 0},
+      ]);
+    });
+
+    it('other combinators', function () {
+      assertEqual(tokenizer.run('div > span'), [
+        {type: 'name', value: 'div', depth: 0},
+        {type: 'operator', value: ' ', depth: 0},
+        {type: 'operator', value: '>', depth: 0},
+        {type: 'operator', value: ' ', depth: 0},
+        {type: 'name', value: 'span', depth: 0},
+      ]);
+      assertEqual(tokenizer.run('div + span'), [
+        {type: 'name', value: 'div', depth: 0},
+        {type: 'operator', value: ' ', depth: 0},
+        {type: 'operator', value: '+', depth: 0},
+        {type: 'operator', value: ' ', depth: 0},
+        {type: 'name', value: 'span', depth: 0},
+      ]);
+      assertEqual(tokenizer.run('div ~ span'), [
+        {type: 'name', value: 'div', depth: 0},
+        {type: 'operator', value: ' ', depth: 0},
+        {type: 'operator', value: '~', depth: 0},
+        {type: 'operator', value: ' ', depth: 0},
+        {type: 'name', value: 'span', depth: 0},
+      ]);
+      assertEqual(tokenizer.run('div || span'), [
+        {type: 'name', value: 'div', depth: 0},
+        {type: 'operator', value: ' ', depth: 0},
+        {type: 'operator', value: '||', depth: 0},
+        {type: 'operator', value: ' ', depth: 0},
+        {type: 'name', value: 'span', depth: 0},
+      ]);
+    });
+
+    it('pseudo-class', function () {
+      // simple
+      assertEqual(tokenizer.run(':root'), [
+        {type: 'operator', value: ':', depth: 0},
+        {type: 'name', value: 'root', depth: 0},
+      ]);
+
+      // vander prefix
+      assertEqual(tokenizer.run(':-webkit-autofill'), [
+        {type: 'operator', value: ':', depth: 0},
+        {type: 'name', value: '-webkit-autofill', depth: 0},
+      ]);
+
+      // chained
+      assertEqual(tokenizer.run('a:hover:visited'), [
+        {type: 'name', value: 'a', depth: 0},
+        {type: 'operator', value: ':', depth: 0},
+        {type: 'name', value: 'hover', depth: 0},
+        {type: 'operator', value: ':', depth: 0},
+        {type: 'name', value: 'visited', depth: 0},
+      ]);
+
+      // parenthesized
+      assertEqual(tokenizer.run('td:nth-child(-n + 3)'), [
+        {type: 'name', value: 'td', depth: 0},
+        {type: 'operator', value: ':', depth: 0},
+        {type: 'name', value: 'nth-child', depth: 0},
+        {type: 'operator', value: '(', depth: 0},
+        {type: 'name', value: '-n', depth: 1},
+        {type: 'operator', value: ' ', depth: 1},
+        {type: 'operator', value: '+', depth: 1},
+        {type: 'operator', value: ' ', depth: 1},
+        {type: 'name', value: '3', depth: 1},
+        {type: 'operator', value: ')', depth: 0},
+      ]);
+
+      // recursive
+      assertEqual(tokenizer.run('a:not([href])'), [
+        {type: 'name', value: 'a', depth: 0},
+        {type: 'operator', value: ':', depth: 0},
+        {type: 'name', value: 'not', depth: 0},
+        {type: 'operator', value: '(', depth: 0},
+        {type: 'selector', value: '[href]', depth: 1},
+        {type: 'operator', value: ')', depth: 0},
+      ]);
+      assertEqual(tokenizer.run('p:is(#id1, :is(#id2))'), [
+        {type: 'name', value: 'p', depth: 0},
+        {type: 'operator', value: ':', depth: 0},
+        {type: 'name', value: 'is', depth: 0},
+        {type: 'operator', value: '(', depth: 0},
+        {type: 'operator', value: '#', depth: 1},
+        {type: 'name', value: 'id1', depth: 1},
+        {type: 'operator', value: ',', depth: 1},
+        {type: 'operator', value: ' ', depth: 1},
+        {type: 'operator', value: ':', depth: 1},
+        {type: 'name', value: 'is', depth: 1},
+        {type: 'operator', value: '(', depth: 1},
+        {type: 'operator', value: '#', depth: 2},
+        {type: 'name', value: 'id2', depth: 2},
+        {type: 'operator', value: ')', depth: 1},
+        {type: 'operator', value: ')', depth: 0},
+      ]);
+    });
+
+    it('pseudo-element', function () {
+      // simple
+      assertEqual(tokenizer.run('p::before'), [
+        {type: 'name', value: 'p', depth: 0},
+        {type: 'operator', value: '::', depth: 0},
+        {type: 'name', value: 'before', depth: 0},
+      ]);
+
+      // recursive
+      assertEqual(tokenizer.run('p::slotted(*)'), [
+        {type: 'name', value: 'p', depth: 0},
+        {type: 'operator', value: '::', depth: 0},
+        {type: 'name', value: 'slotted', depth: 0},
+        {type: 'operator', value: '(', depth: 0},
+        {type: 'operator', value: '*', depth: 1},
+        {type: 'operator', value: ')', depth: 0},
+      ]);
+    });
+
+    it('namespaced type selector', function () {
+      assertEqual(tokenizer.run('|a'), [
+        {type: 'operator', value: '|', depth: 0},
+        {type: 'name', value: 'a', depth: 0},
+      ]);
+      assertEqual(tokenizer.run('svg|a'), [
+        {type: 'name', value: 'svg', depth: 0},
+        {type: 'operator', value: '|', depth: 0},
+        {type: 'name', value: 'a', depth: 0},
+      ]);
+      assertEqual(tokenizer.run('*|a'), [
+        {type: 'operator', value: '*', depth: 0},
+        {type: 'operator', value: '|', depth: 0},
+        {type: 'name', value: 'a', depth: 0},
+      ]);
+      assertEqual(tokenizer.run('svg|*'), [
+        {type: 'name', value: 'svg', depth: 0},
+        {type: 'operator', value: '|', depth: 0},
+        {type: 'operator', value: '*', depth: 0},
+      ]);
+    });
+
+    it('namespaced attribute selector', function () {
+      assertEqual(tokenizer.run('[|attr]'), [
+        {type: 'selector', value: '[|attr]', depth: 0},
+      ]);
+      assertEqual(tokenizer.run('[svg|attr]'), [
+        {type: 'selector', value: '[svg|attr]', depth: 0},
+      ]);
+      assertEqual(tokenizer.run('[*|attr]'), [
+        {type: 'selector', value: '[*|attr]', depth: 0},
+      ]);
+
+      assertEqual(tokenizer.run('[*|attr=value]'), [
+        {type: 'selector', value: '[*|attr=value]', depth: 0},
+      ]);
+      assertEqual(tokenizer.run('[*|attr="value"]'), [
+        {type: 'selector', value: '[*|attr="value"]', depth: 0},
+      ]);
+    });
+
+  });
+
+  describe('capturer.CssSelectorTokenizer.tokensToString', function () {
+    const tokenizer = new capturer.CssSelectorTokenizer();
+
+    it('basic', function () {
+      assertEqual(tokenizer.tokensToString([
+        {type: 'name', value: 'div', depth: 0},
+        {type: 'operator', value: ' ', depth: 0},
+        {type: 'name', value: 'span', depth: 0},
+      ]), 'div span');
+    });
+
+  });
+
   describe('capturer.DocumentCssHandler.getSelectorText', function () {
     const getSelectorText = capturer.DocumentCssHandler.getSelectorText;
 
