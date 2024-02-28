@@ -4232,11 +4232,13 @@
     /**
      * Return the equivalent selector text for a possibly nested CSSStyleRule.
      *
+     * ref: https://drafts.csswg.org/css-nesting-1/
+     *
      * @param {CSSStyleRule} rule
      * @return {string} The equivalent selector text.
      */
     static getSelectorText(...args) {
-      const regex = /(?:\\.|"[^\\"]*(?:\\.[^\\"]*)*")+|(&)|./gu;
+      const tokenizer = new CssSelectorTokenizer();
       const getParentStyleRule = (rule) => {
         let ruleCurrent = rule;
         while (ruleCurrent = ruleCurrent.parentRule) {
@@ -4251,15 +4253,53 @@
         const parent = getParentStyleRule(rule);
         if (parent) {
           const parentSelectorText = `:is(${rewriteRule(parent)})`;
-          let hasAmp = false;
-          selectorText = selectorText.replace(regex, (m, amp) => {
-            if (!amp) { return m; }
-            hasAmp = true;
-            return parentSelectorText;
-          });
-          if (!hasAmp) {
-            selectorText = parentSelectorText + ' ' + selectorText;
+
+          // get the top-level selectors separated by ","
+          const tokens = tokenizer.run(selectorText);
+          let selectors = [], lastSplitIndex = 0;
+          for (let i = 0, I = tokens.length; i < I; i++) {
+            const token = tokens[i];
+            if (token.value === ',' && token.type === 'operator' && token.depth === 0) {
+              selectors.push(tokens.slice(lastSplitIndex, i));
+              lastSplitIndex = i + 1;
+            }
           }
+          selectors.push(tokens.slice(lastSplitIndex));
+
+          // combine with parentSelectorText
+          selectorText = selectors.map(tokens => {
+            let firstToken = null;
+            let hasAmp = false;
+            for (let i = 0, I = tokens.length; i < I; i++) {
+              const token = tokens[i];
+              if (!firstToken && !(!scrapbook.trim(token.value) && token.type === 'operator')) {
+                firstToken = token;
+              }
+              if (token.value === '&' && token.type === 'operator') {
+                hasAmp = true;
+                tokens[i] = {
+                  type: 'selector',
+                  value: parentSelectorText,
+                  depth: token.depth,
+                };
+              }
+            }
+            if (!hasAmp || (['>', '+', '~', '||'].includes(firstToken.value) && firstToken.type === 'operator')) {
+              tokens.splice(0, 0,
+                {
+                  type: 'selector',
+                  value: parentSelectorText,
+                  depth: 0,
+                },
+                {
+                  type: 'operator',
+                  value: ' ',
+                  depth: 0,
+                },
+              );
+            }
+            return tokenizer.tokensToString(tokens);
+          }).join(', ');
         }
         return selectorText;
       };

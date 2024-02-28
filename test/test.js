@@ -304,6 +304,21 @@ Object.assign(MochaQuery, {
     Object.defineProperty(this, 'noNestingCss', {value});
     return value;
   },
+  get noColumnCombinator() {
+    const value = new MochaQuery.Query(
+      (() => {
+        try {
+          document.querySelector('col || td');
+        } catch (ex) {
+          return true;
+        }
+        return false;
+      })(),
+      'CSS column combinator ("||") not supported',
+    );
+    Object.defineProperty(this, 'noNestingCss', {value});
+    return value;
+  },
   get noPartPseudo() {
     // :part() CSS pseudo-element is supported in Firefox >= 72 and Chromium >= 73.
     const value = new MochaQuery.Query(

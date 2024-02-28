@@ -2836,6 +2836,20 @@ div, span {
       assertEqual(getSelectorText(rules[0].cssRules[0].cssRules[0]), ':is(:is(div, span) a) b');
     });
 
+    $it.skipIf($.noNestingCss)('prepend parent selector for all top-level selector list items', function () {
+      var rules = getRulesFromCssText(`\
+div {
+  a, area {
+    b, strong {}
+  }
+}`);
+      // extra spaces may be inserted, but the semantic should not change
+      var regex = cssRegex`:is(div) a, :is(div) area`;
+      assert(getSelectorText(rules[0].cssRules[0]).match(regex));
+      var regex = cssRegex`:is(:is(div) a, :is(div) area) b, :is(:is(div) a, :is(div) area) strong`;
+      assert(getSelectorText(rules[0].cssRules[0].cssRules[0]).match(regex));
+    });
+
     $it.skipIf($.noNestingCss)('replace "&" with :is() wrapped parent selector text for a nested rule', function () {
       var rules = getRulesFromCssText(`\
 div, span {
@@ -2851,6 +2865,65 @@ div, span {
       assertEqual(getSelectorText(rules[0].cssRules[2]), '.case3 :is(div, span)');
       assertEqual(getSelectorText(rules[0].cssRules[3]), '.case4:is(div, span)');
       assertEqual(getSelectorText(rules[0].cssRules[4]), ':is(div, span) .case5 :is(div, span) :is(div, span)');
+    });
+
+    $it.skipIf($.noNestingCss)('prepend parent selector for top-level selector list items without "&"', function () {
+      var rules = getRulesFromCssText(`\
+div {
+  & .case1, .case2 {}
+  & .case1, & .case2 {}
+  .case1, .case2 & {}
+}`);
+      // extra spaces may be inserted, but the semantic should not change
+      var regex = cssRegex`:is(div) .case1, :is(div) .case2`;
+      assert(getSelectorText(rules[0].cssRules[0]).match(regex));
+      var regex = cssRegex`:is(div) .case1, :is(div) .case2`;
+      assert(getSelectorText(rules[0].cssRules[1]).match(regex));
+      var regex = cssRegex`:is(div) .case1, .case2 :is(div)`;
+      assert(getSelectorText(rules[0].cssRules[2]).match(regex));
+
+      // don't recurse into a non-top-level select list
+      var rules = getRulesFromCssText(`\
+div {
+  & :is(.case1, .case2) {}
+  :is(& .case1, .case2) {}
+  :is(.case1 &, .case2) {}
+  :is(.case1, & .case2) {}
+  :is(.case1, .case2 &) {}
+}`);
+      assertEqual(getSelectorText(rules[0].cssRules[0]), ':is(div) :is(.case1, .case2)');
+      assertEqual(getSelectorText(rules[0].cssRules[1]), ':is(:is(div) .case1, .case2)');
+      assertEqual(getSelectorText(rules[0].cssRules[2]), ':is(.case1 :is(div), .case2)');
+      assertEqual(getSelectorText(rules[0].cssRules[3]), ':is(.case1, :is(div) .case2)');
+      assertEqual(getSelectorText(rules[0].cssRules[4]), ':is(.case1, .case2 :is(div))');
+    });
+
+    $it.skipIf($.noNestingCss)('imply parent selector for a relative selector even if "&" exists', function () {
+      var rules = getRulesFromCssText(`\
+ul {
+  > li &, + li &, ~ li & {}
+}`);
+      // Some browsers (e.g. Firefox 124) auto-prepend the implied "&" and parse the sub-rule as: "& > li &, & + li &, & ~ li &"
+      // while some browsers (e.g. Chromium 122) don't and parse as original "> li &, + li &, ~ li &".
+      var regex = cssRegex`:is(ul) > li :is(ul), :is(ul) + li :is(ul), :is(ul) ~ li :is(ul)`;
+      assert(getSelectorText(rules[0].cssRules[0]).match(regex));
+
+      // should work for other ASCII white spaces
+      var rules = getRulesFromCssText(`\
+ul {
+  >\tli\t&,\t+\tli\t&,\t~\tli\t&\t{}
+}`);
+      var regex = cssRegex`:is(ul) > li :is(ul), :is(ul) + li :is(ul), :is(ul) ~ li :is(ul)`;
+      assert(getSelectorText(rules[0].cssRules[0]).match(regex));
+    });
+
+    $it.skipIf($.noNestingCss).skipIf($.noColumnCombinator)('imply parent selector for a starting column combinator even if "&" exists', function () {
+      var rules = getRulesFromCssText(`\
+.colcls {
+  || td & {}
+}`);
+      var regex = cssRegex`:is(.colcls) || td :is(.colcls)`;
+      assert(getSelectorText(rules[0].cssRules[0]).match(regex));
     });
 
     $it.skipIf($.noNestingCss)('escaped "&" should not be rewritten', function () {
