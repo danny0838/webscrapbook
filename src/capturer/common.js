@@ -4057,11 +4057,11 @@
         }
         return null;
       };
-      const rewriteRule = (rule, wrap = false) => {
+      const rewriteRule = (rule) => {
         let selectorText = rule.selectorText;
         const parent = getParentStyleRule(rule);
         if (parent) {
-          const parentSelectorText = rewriteRule(parent, true);
+          const parentSelectorText = `:is(${rewriteRule(parent)})`;
           let hasAmp = false;
           selectorText = selectorText.replace(regex, (m, amp) => {
             if (!amp) { return m; }
@@ -4071,9 +4071,6 @@
           if (!hasAmp) {
             selectorText = parentSelectorText + ' ' + selectorText;
           }
-        }
-        if (wrap) {
-          selectorText = `:is(${selectorText})`;
         }
         return selectorText;
       };
