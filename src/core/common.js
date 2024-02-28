@@ -2725,6 +2725,26 @@
     } else if (scrapbook.isUrlAbsolute(baseUrl)) {
       // this should not happen
       throw new Error("Unable to get a relative URL from an absolute URL to a non-absolute URL");
+    } else if (targetUrl.startsWith('//') && baseUrl.startsWith('//')) {
+      // assume that both URLs are relative to the same protocol
+      targetUrlObj = new URL('http:' + targetUrl);
+      baseUrlObj = new URL('http:' + baseUrl);
+    } else if (targetUrl.startsWith('//')) {
+      targetUrlObj = new URL('http:' + targetUrl);
+      return '//' + targetUrlObj.host + targetUrlObj.pathname + targetUrlObj.search + targetUrlObj.hash;
+    } else if (baseUrl.startsWith('//')) {
+      // this should not happen
+      throw new Error("Unable to get a relative URL from a protocol-relative URL to a non-protocol-relative URL");
+    } else if (targetUrl.startsWith('/') && baseUrl.startsWith('/')) {
+      // assume that both URLs are relative to the same host
+      targetUrlObj = new URL('file://' + targetUrl);
+      baseUrlObj = new URL('file://' + baseUrl);
+    } else if (targetUrl.startsWith('/')) {
+      targetUrlObj = new URL('file://' + targetUrl);
+      return targetUrlObj.pathname + targetUrlObj.search + targetUrlObj.hash;
+    } else if (baseUrl.startsWith('/')) {
+      // this should not happen
+      throw new Error("Unable to get a relative URL from a root-relative URL to a non-root-relative URL");
     } else {
       // assume that both URLs are realative to the same root
       targetUrlObj = new URL('file:///' + targetUrl);

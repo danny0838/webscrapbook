@@ -1028,15 +1028,89 @@ describe('core/common.js', function () {
       });
     });
 
-    it('relative URLs (since path)', function () {
+    it('protocol-relative URLs', function () {
+      // different since host
+      assertEqual(
+        scrapbook.getRelativeUrl(
+          `//sub.example.com/page`,
+          `//example.com/ref`,
+        ),
+        `//sub.example.com/page`,
+      );
+
       // different since path
       assertEqual(
         scrapbook.getRelativeUrl(
-          `myroot/page`,
-          `myroot/ref`,
+          `//example.com/page`,
+          `//example.com/ref`,
         ),
         `page`,
       );
+    });
+
+    it('return original URL if input is protocol-relative and base is not', function () {
+      assertEqual(
+        scrapbook.getRelativeUrl(
+          `//sub.example.com/page`,
+          `/ref`,
+        ),
+        `//sub.example.com/page`,
+      );
+    });
+
+    it('throw if base is protocol-relative and input is not', function () {
+      assertThrows(() => {
+        scrapbook.getRelativeUrl(
+          `/page`,
+          `//example.com/ref`,
+        );
+      });
+
+      assertThrows(() => {
+        scrapbook.getRelativeUrl(
+          `page`,
+          `//example.com/ref`,
+        );
+      });
+    });
+
+    it('root-relative URLs', function () {
+      // different since path
+      assertEqual(
+        scrapbook.getRelativeUrl(
+          `/page`,
+          `/ref`,
+        ),
+        `page`,
+      );
+    });
+
+    it('return original URL if input is root-relative and base is not', function () {
+      assertEqual(
+        scrapbook.getRelativeUrl(
+          `/page`,
+          `ref`,
+        ),
+        `/page`,
+      );
+    });
+
+    it('throw if base is root-relative and input is not', function () {
+      var error = (() => {
+        try {
+          scrapbook.getRelativeUrl(
+            `page`,
+            `/ref`,
+          );
+        } catch (ex) {
+          return ex;
+        }
+      })();
+      assert(error);
+    });
+
+    it('relative URLs (since path)', function () {
+      // different since path
       assertEqual(
         scrapbook.getRelativeUrl(
           `myroot/page/`,
