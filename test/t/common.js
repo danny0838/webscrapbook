@@ -218,7 +218,8 @@ function rawRegex(strings, ...args) {
  *     cssRegex`body { background: ${/\w+/} }` === /body\s*\{\s*background:\s*\w+\s*\}/
  */
 function cssRegex(strings, ...args) {
-  const permissiveSpacing = (s) => s.split(/\s+/).map(s => escapeRegExp(s)).join('\\s*');
+  const ASCII_WHITESPACE = String.raw`\t\n\f\r `;
+  const permissiveSpacing = (s) => s.split(regex`[${ASCII_WHITESPACE}]+`).map(s => escapeRegExp(s)).join(`[${ASCII_WHITESPACE}]*`);
   const results = [permissiveSpacing(strings.raw[0])];
   args.forEach((arg, i) => {
     if (arg instanceof RegExp) {
