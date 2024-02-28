@@ -3449,7 +3449,14 @@
    */
   scrapbook.rewriteSrcset = function (srcset, rewriter) {
     const KEY_PREFIX = "urn:scrapbook:str:";
-    const REGEX_SRCSET = /(\s*)([^ ,][^ ]*[^ ,])(\s*(?: [^ ,]+)?\s*(?:,|$))/g;
+    const REGEX_SRCSET = new RegExp(
+      [
+        String.raw`([${ASCII_WHITESPACE}]*)`,
+        String.raw`([^${ASCII_WHITESPACE},][^${ASCII_WHITESPACE}]*[^${ASCII_WHITESPACE},])`,
+        String.raw`([${ASCII_WHITESPACE}]*(?:[^${ASCII_WHITESPACE},]+[${ASCII_WHITESPACE}]*)?(?:,|$))`,
+      ].join(''),
+      'g',
+    );
     const REGEX_UUID = new RegExp(KEY_PREFIX + "([0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12})", 'g');
 
     const fn = scrapbook.rewriteSrcset = function (srcset, rewriter) {

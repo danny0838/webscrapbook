@@ -2042,7 +2042,7 @@ div { image-background: var(${/(--sb(\d+)-2)/}); }`;
 
       for (const testCase of testCases) {
         // individual ASCII white space
-        for (const space of [' ', '   ']) {
+        for (const space of [' ', '\t', '\n', '\r', '\f', ' \t ']) {
           // space required for a URL without descriptor to prevent ambiguity
           if (testCase === testCases[2]) {
             var input = testCase.map(p => p.join(space)).join(',' + space);
@@ -2064,7 +2064,13 @@ div { image-background: var(${/(--sb(\d+)-2)/}); }`;
 
         // non-ASCII-whitespaces should be ignored (treated as part of the URL)
         for (const space of ['\u00A0', '\u2009', '\u200A', '\u200B', '\u3000', '\uFEFF']) {
+          // least spaces
           var input = testCase.map(p => p.join(space)).join(',');
+          var expected = `<${input}>`;
+          assertEqual(scrapbook.rewriteSrcset(input, rewriter), expected);
+
+          // more spaces
+          var input = testCase.map(p => space + p.join(space) + space).join(',');
           var expected = `<${input}>`;
           assertEqual(scrapbook.rewriteSrcset(input, rewriter), expected);
         }
@@ -2102,7 +2108,7 @@ div { image-background: var(${/(--sb(\d+)-2)/}); }`;
 
       for (const testCase of testCases) {
         // individual ASCII white space
-        for (const space of [' ', '   ']) {
+        for (const space of [' ', '\t', '\n', '\r', '\f', ' \t ']) {
           // space required for a URL without descriptor to prevent ambiguity
           if (testCase === testCases[2]) {
             var input = testCase.map(p => p.join(space)).join(',' + space);
@@ -2124,7 +2130,13 @@ div { image-background: var(${/(--sb(\d+)-2)/}); }`;
 
         // non-ASCII-whitespaces should be ignored (treated as part of the URL)
         for (const space of ['\u00A0', '\u2009', '\u200A', '\u200B', '\u3000', '\uFEFF']) {
+          // least spaces
           var input = testCase.map(p => p.join(space)).join(',');
+          var expected = `<${input}>`;
+          assertEqual(await scrapbook.rewriteSrcset(input, rewriter), expected);
+
+          // more spaces
+          var input = testCase.map(p => space + p.join(space) + space).join(',');
           var expected = `<${input}>`;
           assertEqual(await scrapbook.rewriteSrcset(input, rewriter), expected);
         }
