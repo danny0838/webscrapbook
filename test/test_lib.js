@@ -1743,7 +1743,7 @@ describe('core/common.js', function () {
       assertEqual(scrapbook.rewriteCssText(input, options), input);
     });
 
-    $it.xfail()('image ignore unrelated pattern', function () {
+    it('image ignore unrelated pattern', function () {
       const options = {
         rewriteImportUrl: url => ({url}),
         rewriteFontFaceUrl: url => ({url}),
@@ -1870,7 +1870,7 @@ describe('core/common.js', function () {
       assertEqual(scrapbook.rewriteCssText(input, options), input);
     });
 
-    $it.xfail()('@font-face ignore unrelated pattern', function () {
+    it('@font-face ignore unrelated pattern', function () {
       const options = {
         rewriteImportUrl: url => ({url}),
         rewriteFontFaceUrl: url => ({url: `http://example.com/${url}`}),
@@ -1998,7 +1998,7 @@ describe('core/common.js', function () {
       assertEqual(scrapbook.rewriteCssText(input, options), input);
     });
 
-    $it.xfail()('@import ignore unrelated pattern', function () {
+    it('@import ignore unrelated pattern', function () {
       const options = {
         rewriteImportUrl: url => ({url: `http://example.com/${url}`}),
         rewriteFontFaceUrl: url => ({url}),

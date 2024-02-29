@@ -3334,7 +3334,8 @@
     const pSp = r`(?:[${ASCII_WHITESPACE}]*)`; // ASCII whitespaces
     const pCmSp = r`(?:(?:${pCm}|${pSp})*)`; // comment or space
     const pCmSp2 = r`(?:(?:${pCm}|${pSp})+)`; // comment or space, at least one
-    const pChar = r`(?:\\.|[^\\"'])`; // a non-quote char or an escaped char sequence
+    const pEscaped = r`\\(?:[0-9A-Fa-f]{1,6} ?|.)`; // an escaped char sequence
+    const pChar = r`(?:${pEscaped}|[^\\"'])`; // a non-quote char or an escaped char sequence
     const pStr = r`(?:${pChar}*?)`; // string
     const pSStr = r`(?:${pCmSp}${pStr}${pCmSp})`; // comment-or-space enclosed string
     const pDQStr = r`(?:"[^\\"]*(?:\\.[^\\"]*)*")`; // double quoted string
@@ -3349,7 +3350,7 @@
     const KEY_PREFIX = "urn:scrapbook:str:";
     const REGEX_UUID = new RegExp(r`${KEY_PREFIX}([0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12})`, 'g');
     const REGEX_RESOURCE_MAP = /^(.+?-)\d+$/;
-    const REGEX_REWRITE_CSS = new RegExp(r`${pCm}|${pRImport}|${pRFontFace}|${pRNamespace}|(${pUrl})`, "gi");
+    const REGEX_REWRITE_CSS = new RegExp(r`${pEscaped}|${pDQStr}|${pSQStr}|${pCm}|${pRImport}|${pRFontFace}|${pRNamespace}|(${pUrl})`, "gi");
     const REGEX_PARSE_URL = new RegExp(pUrl2, "gi");
 
     const fn = scrapbook.rewriteCssText = function (cssText, options = {}) {
