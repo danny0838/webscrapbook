@@ -3047,7 +3047,6 @@ ul {
       // general selectors
       testGetVerifyingSelector('*', '*');
       testGetVerifyingSelector('div#id, span.class', 'div#id, span.class');
-      testGetVerifyingSelector('[attr], [attr=value], [attr="value"]', '[attr], [attr=value], [attr="value"]');
       testGetVerifyingSelector('& body', '& body', false);
 
       // common pseudo-classes
@@ -3131,10 +3130,24 @@ ul {
       testGetVerifyingSelector('*|* span', '* span');
       testGetVerifyingSelector('|* span', '* span');
 
-      // namespace for attribute selector
-      testGetVerifyingSelector('[|attr]', '[|attr]');
-      testGetVerifyingSelector('[svg|attr]', '[svg|attr]', false);
+      // namespace for attribute selector should be *
+      testGetVerifyingSelector('[attr]', '[*|attr]');
+      testGetVerifyingSelector('[attr=value]', '[*|attr=value]');
+      testGetVerifyingSelector('[attr="value"]', '[*|attr="value"]');
+
+      testGetVerifyingSelector('[|attr]', '[*|attr]');
+      testGetVerifyingSelector('[|attr=value]', '[*|attr=value]');
+      testGetVerifyingSelector('[|attr="value"]', '[*|attr="value"]');
+
+      testGetVerifyingSelector('[svg|attr]', '[*|attr]', false);
+      testGetVerifyingSelector('[svg|attr=value]', '[*|attr=value]', false);
+      testGetVerifyingSelector('[svg|attr="value"]', '[*|attr="value"]', false);
+
       testGetVerifyingSelector('[*|attr]', '[*|attr]');
+      testGetVerifyingSelector('[*|attr=value]', '[*|attr=value]');
+      testGetVerifyingSelector('[*|attr="value"]', '[*|attr="value"]');
+
+      testGetVerifyingSelector('[svg|attr="value" i]', '[*|attr="value" i]', false);
 
       // column combinator should not be treated as namespace
       testGetVerifyingSelector('col||td', 'col||td', false);

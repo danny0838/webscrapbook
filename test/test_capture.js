@@ -3974,6 +3974,90 @@ background: blue; background: url(rewrite/green.bmp);`);
 });
 
 /**
+ * Check if namsepaced element selector is reasonably handled.
+ */
+it('test_capture_css_rewriteCss_namespace_element', async function () {
+  /* capture.rewriteCss = match */
+  var options = {
+    "capture.rewriteCss": "match",
+  };
+
+  var blob = await capture({
+    url: `${localhost}/capture_css_rewriteCss_namespace/element.xhtml`,
+    options: Object.assign({}, baseOptions, options),
+  });
+  var zip = await new JSZip().loadAsync(blob);
+  var indexFile = zip.file('index.xhtml');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  var styleElems = doc.querySelectorAll('style');
+
+  assertEqual(styleElems[0].textContent.trim(), `\
+@namespace myns url("http://example.com/myns");
+myns|elem-1 { background-color: lime; }`);
+
+  assertEqual(styleElems[1].textContent.trim(), `\
+@namespace url("http://example.com/myns");
+elem-2 { background-color: lime; }`);
+
+  assertEqual(styleElems[2].textContent.trim(), `\
+@namespace myns url("http://example.com/myns");
+myns|elem-3 { background-color: lime; }`);
+
+  assertEqual(styleElems[3].textContent.trim(), `\
+@namespace url("http://example.com/myns");
+elem-4 { background-color: lime; }`);
+
+  assertEqual(styleElems[4].textContent.trim(), `\
+@namespace myns url("http://example.com/myns");`);
+
+  assertEqual(styleElems[5].textContent.trim(), `\
+@namespace url("http://example.com/myns");`);
+});
+
+/**
+ * Check if namsepaced attribute selector is reasonably handled.
+ */
+it('test_capture_css_rewriteCss_namespace_attribute', async function () {
+  /* capture.rewriteCss = match */
+  var options = {
+    "capture.rewriteCss": "match",
+  };
+
+  var blob = await capture({
+    url: `${localhost}/capture_css_rewriteCss_namespace/attribute.xhtml`,
+    options: Object.assign({}, baseOptions, options),
+  });
+  var zip = await new JSZip().loadAsync(blob);
+  var indexFile = zip.file('index.xhtml');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  var styleElems = doc.querySelectorAll('style');
+
+  assertEqual(styleElems[0].textContent.trim(), `\
+@namespace myns url("http://example.com/myns");
+[myns|attr1] { background-color: lime; }`);
+
+  assertEqual(styleElems[1].textContent.trim(), `\
+@namespace url("http://example.com/myns");
+[attr2] { background-color: lime; }`);
+
+  assertEqual(styleElems[2].textContent.trim(), `\
+@namespace myns url("http://example.com/myns");
+[myns|attr3] { background-color: lime; }`);
+
+  assertEqual(styleElems[3].textContent.trim(), `\
+@namespace url("http://example.com/myns");
+[attr4] { background-color: lime; }`);
+
+  assertEqual(styleElems[4].textContent.trim(), `\
+@namespace myns url("http://example.com/myns");`);
+
+  assertEqual(styleElems[5].textContent.trim(), `\
+@namespace url("http://example.com/myns");`);
+});
+
+/**
  * Check if option works for @supports.
  *
  * capture.rewriteCss

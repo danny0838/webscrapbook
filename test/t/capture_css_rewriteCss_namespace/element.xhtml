@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:myns="http://example.com/myns">
+<head>
+<meta charset="UTF-8" />
+<style>
+@namespace myns url("http://example.com/myns");
+myns|elem-1 { background-color: lime; }
+</style>
+<style>
+@namespace url("http://example.com/myns");
+elem-2 { background-color: lime; }
+</style>
+<style>
+@namespace myns url("http://example.com/myns");
+myns|elem-3 { background-color: lime; }
+</style>
+<style>
+@namespace url("http://example.com/myns");
+elem-4 { background-color: lime; }
+</style>
+<style>
+@namespace myns url("http://example.com/myns");
+myns|elem-5 { background-color: lime; }
+</style>
+<style>
+@namespace url("http://example.com/myns");
+elem-6 { background-color: lime; }
+</style>
+</head>
+<body>
+<blockquote>
+<myns:elem-1>myns:elem-1</myns:elem-1>
+</blockquote>
+<blockquote>
+<myns:elem-2>myns:elem-2</myns:elem-2>
+</blockquote>
+<blockquote>
+<elem-3 xmlns="http://example.com/myns">elem-3</elem-3>
+</blockquote>
+<blockquote>
+<elem-4 xmlns="http://example.com/myns">elem-4</elem-4>
+</blockquote>
+</body>
+</html>

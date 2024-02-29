@@ -4344,6 +4344,8 @@
       //        still match using ShadowRoot.querySelector().
       const SPECIAL_PSEUDO = new Set(['host', 'host-context']);
 
+      const regexAttrNs = /^\[[^\\|=\]]*(?:\\.[^\\|=\]]*)*\|/g;
+
       const tokenizer = new CssSelectorTokenizer();
 
       const fn = (selectorText) => {
@@ -4352,13 +4354,32 @@
         for (let i = 0, I = tokens.length; i < I; i++) {
           const token = tokens[i];
 
-          // remove namespace
+          // Remove namespaced type selector to match any namespace.
+          // - document.querySelector('elem') matches elem or ns:elem in any namespace
+          // - document.querySelector('*|elem') matches elem or ns:elem in any namespace
+          //   (seems no difference to the previous one)
+          // - document.querySelector('ns|elem') throws an error
           if (token.value === '|' && token.type === 'operator') {
             const prevToken = result[result.length - 1];
             if (prevToken && (prevToken.type === 'name' || (prevToken.value === '*' && prevToken.type === 'operator'))) {
               result.pop();
             }
             continue;
+          }
+
+          // Force attribute selector namespace to be *. Do this for any namespace since
+          // the namespace and prefix can be defined by a @namespace rule and different
+          // from the docuemnt, which is difficult to trace reliably.
+          // - document.querySelector('[*|attr]') matches attr or ns:attr in any namespace
+          // - document.querySelector('[attr]') matches attr in any namespace
+          // - document.querySelector('[ns|attr]') throws an error
+          if (token.type === 'selector' && token.value.startsWith('[')) {
+            regexAttrNs.lastIndex = 0;
+            if (regexAttrNs.test(token.value)) {
+              token.value = '[*|' + token.value.slice(regexAttrNs.lastIndex);
+            } else {
+              token.value = '[*|' + token.value.slice(1);
+            }
           }
 
           // handle pseudo-classes/elements
