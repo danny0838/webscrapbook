@@ -3329,26 +3329,27 @@
    * @param {Object} [options.resourceMap] - A Map to group same resources.
    */
   scrapbook.rewriteCssText = function (cssText, options) {
-    const pCm = `(?:/\\*[\\s\\S]*?(?:\\*/|$))`; // comment
-    const pSp = `(?:[\\t\\n\\f\\r ]*)`; // ASCII whitespaces
-    const pCmSp = `(?:(?:${pCm}|${pSp})*)`; // comment or space
-    const pCmSp2 = `(?:(?:${pCm}|${pSp})+)`; // comment or space, at least one
-    const pChar = `(?:\\\\.|[^\\\\"'])`; // a non-quote char or an escaped char sequence
-    const pStr = `(?:${pChar}*?)`; // string
-    const pSStr = `(?:${pCmSp}${pStr}${pCmSp})`; // comment-or-space enclosed string
-    const pDQStr = `(?:"[^\\\\"]*(?:\\\\.[^\\\\"]*)*")`; // double quoted string
-    const pSQStr = `(?:'[^\\\\']*(?:\\\\.[^\\\\']*)*')`; // single quoted string
-    const pES = `(?:(?:${pCm}|${pDQStr}|${pSQStr}|${pChar})*?)`; // embeded string
-    const pUrl = `(?:\\burl\\(${pSp}(?:${pDQStr}|${pSQStr}|${pStr})${pSp}\\))`; // URL
-    const pUrl2 = `(\\burl\\(${pSp})(${pDQStr}|${pSQStr}|${pStr})(${pSp}\\))`; // URL; catch 3
-    const pRImport = `(@import${pCmSp})(${pUrl}|${pDQStr}|${pSQStr})`; // @import; catch 2
-    const pRFontFace = `(@font-face${pCmSp}{${pES}})`; // @font-face; catch 1
-    const pRNamespace = `(@namespace${pCmSp}(?:${pStr}${pCmSp2})?${pUrl})`; // @namespace; catch 1
+    const r = String.raw;
+    const pCm = r`(?:/\*[\s\S]*?(?:\*/|$))`; // comment
+    const pSp = r`(?:[${ASCII_WHITESPACE}]*)`; // ASCII whitespaces
+    const pCmSp = r`(?:(?:${pCm}|${pSp})*)`; // comment or space
+    const pCmSp2 = r`(?:(?:${pCm}|${pSp})+)`; // comment or space, at least one
+    const pChar = r`(?:\\.|[^\\"'])`; // a non-quote char or an escaped char sequence
+    const pStr = r`(?:${pChar}*?)`; // string
+    const pSStr = r`(?:${pCmSp}${pStr}${pCmSp})`; // comment-or-space enclosed string
+    const pDQStr = r`(?:"[^\\"]*(?:\\.[^\\"]*)*")`; // double quoted string
+    const pSQStr = r`(?:'[^\\']*(?:\\.[^\\']*)*')`; // single quoted string
+    const pES = r`(?:(?:${pCm}|${pDQStr}|${pSQStr}|${pChar})*?)`; // embeded string
+    const pUrl = r`(?:\burl\(${pSp}(?:${pDQStr}|${pSQStr}|${pStr})${pSp}\))`; // URL
+    const pUrl2 = r`(\burl\(${pSp})(${pDQStr}|${pSQStr}|${pStr})(${pSp}\))`; // URL; catch 3
+    const pRImport = r`(@import${pCmSp})(${pUrl}|${pDQStr}|${pSQStr})`; // @import; catch 2
+    const pRFontFace = r`(@font-face${pCmSp}{${pES}})`; // @font-face; catch 1
+    const pRNamespace = r`(@namespace${pCmSp}(?:${pStr}${pCmSp2})?${pUrl})`; // @namespace; catch 1
 
     const KEY_PREFIX = "urn:scrapbook:str:";
-    const REGEX_UUID = new RegExp(KEY_PREFIX + "([0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12})", 'g');
+    const REGEX_UUID = new RegExp(r`${KEY_PREFIX}([0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12})`, 'g');
     const REGEX_RESOURCE_MAP = /^(.+?-)\d+$/;
-    const REGEX_REWRITE_CSS = new RegExp(`${pCm}|${pRImport}|${pRFontFace}|${pRNamespace}|(${pUrl})`, "gi");
+    const REGEX_REWRITE_CSS = new RegExp(r`${pCm}|${pRImport}|${pRFontFace}|${pRNamespace}|(${pUrl})`, "gi");
     const REGEX_PARSE_URL = new RegExp(pUrl2, "gi");
 
     const fn = scrapbook.rewriteCssText = function (cssText, options = {}) {
