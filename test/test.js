@@ -246,12 +246,11 @@ Object.assign(MochaQuery, {
     // CSS nesting selector is supported in Firefox >= 117 and Chromium >= 120.
     const value = new MochaQuery.Query(
       (() => {
-        try {
-          // Chrome 109/110 gets null for the querySelector
-          if (!document.querySelector('&')) {
-            throw new Error('bad support');
-          }
-        } catch (ex) {
+        const d = document.implementation.createHTMLDocument();
+        const style = d.head.appendChild(d.createElement('style'));
+        style.textContent = 'a{b{}}';
+        const rule = style.sheet.cssRules[0];
+        if (!(rule.cssRules && rule.cssRules[0])) {
           return true;
         }
         return false;
