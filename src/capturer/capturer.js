@@ -1999,9 +1999,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
             }
 
             let {blob} = data;
-            if (!(blob instanceof Blob)) {
-              blob = await capturer.loadBlobCache(blob);
-            }
+            blob = await capturer.loadBlobCache(blob);
             const {parameters: {charset}} = scrapbook.parseHeaderContentType(blob.type);
 
             // forbid non-UTF-8 for data safety
@@ -3232,9 +3230,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
     }
 
     let {blob} = data;
-    if (!(blob instanceof Blob)) {
-      blob = await capturer.loadBlobCache(blob);
-    }
+    blob = await capturer.loadBlobCache(blob);
     const response = await capturer.downloadBlob({
       blob,
       filename: documentFileName,
@@ -3473,9 +3469,7 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
     switch (options["capture.saveAs"]) {
       case "singleHtml": {
         let {blob} = data;
-        if (!(blob instanceof Blob)) {
-          blob = await capturer.loadBlobCache(blob);
-        }
+        blob = await capturer.loadBlobCache(blob);
         filename = settings.indexFilename + "." + ext;
 
         // special handling: single HTML cannot use "index.html"
@@ -3746,9 +3740,7 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
       const [sourceUrlMain, sourceUrlHash] = scrapbook.splitUrlByAnchor(sourceUrl);
       const {timeId} = settings;
 
-      if (!(blob instanceof Blob)) {
-        blob = await capturer.loadBlobCache(blob);
-      }
+      blob = await capturer.loadBlobCache(blob);
 
       // special handling for data URI
       // if not to save as file, convert the blob to a data URL

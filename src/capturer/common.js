@@ -3960,17 +3960,13 @@
   };
 
   /**
-   * @typedef {Object} blobCacheObjectEntity
+   * @typedef {Object} blobCacheObject
    * @property {string} __key__ - UUID to retrieve the Blob data
    */
 
   /**
-   * @typedef {blobCacheObjectEntity|serializedBlob} blobCacheObject
-   */
-
-  /**
    * An object that can be transmitted through messaging.
-   * @typedef {Blob|blobCacheObject} transferableBlob
+   * @typedef {Blob|serializedBlob|blobCacheObject} transferableBlob
    */
 
   /**
@@ -3998,12 +3994,16 @@
   };
 
   /**
-   * Load a Blob from a blobCacheObject.
+   * Load a Blob from a transferableBlob.
    *
-   * @param {blobCacheObject} blob
+   * @param {transferableBlob} blob
    * @return {Promise<Blob>}
    */
   capturer.loadBlobCache = async function (blob) {
+    if (blob instanceof Blob) {
+      return blob;
+    }
+
     if (blob.__type__) {
       return await scrapbook.deserializeObject(blob);
     }
