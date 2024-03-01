@@ -181,7 +181,7 @@
    * @memberof capturer
    * @variation 2
    * @param {Object} params
-   * @return {Promise<captureDocumentResponse|serializedBlob|null>}
+   * @return {Promise<captureDocumentResponse|transferableBlob|null>}
    */
   capturer.captureUrl = async function (params) {
     isDebug && console.debug("call: captureUrl", params);
@@ -220,7 +220,7 @@
    * @param {captureSettings} params.settings
    * @param {string} [params.settings.title] - item title
    * @param {captureOptions} params.options
-   * @return {Promise<captureDocumentResponse|downloadBlobResponse|serializedBlob>}
+   * @return {Promise<captureDocumentResponse|downloadBlobResponse|transferableBlob>}
    */
   capturer.captureDocumentOrFile = async function (params) {
     isDebug && console.debug("call: captureDocumentOrFile", params);
@@ -290,7 +290,7 @@
    * @param {string} [params.settings.title] - item title
    * @param {string} [params.settings.favIconUrl] - item favicon
    * @param {captureOptions} params.options
-   * @return {Promise<captureDocumentResponse|serializedBlob>}
+   * @return {Promise<captureDocumentResponse|transferableBlob>}
    */
   capturer.captureDocument = async function (params) {
     isDebug && console.debug("call: captureDocument", params);
@@ -3274,7 +3274,7 @@
     });
 
     // special handling for blob response
-    if (response.__type__ === 'Blob') {
+    if (!('url' in response)) {
       return response;
     }
 
@@ -3973,9 +3973,10 @@
    * Save a Blob in the cache and return a transferableBlob.
    *
    * @param {Blob} blob
+   * @param {number} threshold - cache only when size greater than this
    * @return {Promise<transferableBlob>}
    */
-  capturer.saveBlobCache = async function (blob) {
+  capturer.saveBlobCache = async function (blob, threshold = 32 * 1024 * 1024) {
     // Return the original Blob if the browser supports tramsmitting Blob
     // through message natively.
     if (scrapbook.userAgent.is('gecko')) {
@@ -3983,7 +3984,7 @@
     }
 
     // for a small Blob, simply serialize to an object
-    if (blob.size < 32 * 1024 * 1024) {
+    if (blob.size < threshold) {
       return await scrapbook.serializeObject(blob);
     }
 

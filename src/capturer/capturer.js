@@ -979,7 +979,7 @@
    * @param {?string} [params.bookId] - bookId ID for the captured items
    * @param {string} [params.parentId] - parent item ID for the captured items
    * @param {integer} [params.index] - position index for the captured items
-   * @return {Promise<captureDocumentResponse|serializedBlob>}
+   * @return {Promise<captureDocumentResponse|transferableBlob>}
    */
   capturer.captureGeneral = async function ({
     timeId = scrapbook.dateToId(),
@@ -1070,7 +1070,7 @@
    * @param {string} [params.favIconUrl] - item favicon
    * @param {string} [params.mode] - "tab", "source", "bookmark"
    * @param {captureOptions} params.options
-   * @return {Promise<captureDocumentResponse|serializedBlob>}
+   * @return {Promise<captureDocumentResponse|transferableBlob>}
    */
   capturer.captureTab = async function ({
     timeId,
@@ -1153,7 +1153,7 @@
    * @param {string} [params.favIconUrl] - item favicon
    * @param {string} [params.mode] - "tab", "source", "bookmark"
    * @param {captureOptions} params.options
-   * @return {Promise<captureDocumentResponse|serializedBlob>}
+   * @return {Promise<captureDocumentResponse|transferableBlob>}
    */
   capturer.captureRemote = async function ({
     timeId,
@@ -1221,7 +1221,7 @@
    * @param {string} [params.refPolicy] - the referrer policy
    * @param {captureSettings} params.settings
    * @param {captureOptions} params.options
-   * @return {Promise<captureDocumentResponse|serializedBlob>}
+   * @return {Promise<captureDocumentResponse|transferableBlob>}
    */
   capturer.captureRemoteTab = async function ({
     url, refUrl, refPolicy,
@@ -1305,7 +1305,7 @@
    * @param {boolean} [params.downLinkPage] - is a page previously registered in linkedPages
    * @param {captureSettings} params.settings
    * @param {captureOptions} params.options
-   * @return {Promise<captureDocumentResponse|serializedBlob|null>} The capture
+   * @return {Promise<captureDocumentResponse|transferableBlob|null>} The capture
    *     result, or null if not to be captured.
    */
   capturer.captureUrl = async function (params) {
@@ -1539,7 +1539,7 @@
    * @param {string} [params.settings.title] - item title (also used as index page title)
    * @param {string} [params.settings.favIconUrl] - item favicon (also used as index page favicon)
    * @param {captureOptions} params.options
-   * @return {Promise<captureDocumentResponse|serializedBlob>}
+   * @return {Promise<captureDocumentResponse|transferableBlob>}
    */
   capturer.captureBookmark = async function (params) {
     isDebug && console.debug("call: captureBookmark", params);
@@ -1693,7 +1693,7 @@ Bookmark for <a href="${scrapbook.escapeHtml(sourceUrl)}">${scrapbook.escapeHtml
     switch (options["capture.saveTo"]) {
       case 'memory': {
         // special handling (for unit test)
-        return await capturer.saveBlobInMemory({blob});
+        return await capturer.saveBlobCache(blob, Infinity);
       }
       case 'file': {
         const downloadItem = await capturer.saveBlobNaturally({
@@ -1836,7 +1836,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
         });
 
         // special handling for blob response
-        if (response.__type__ === 'Blob') {
+        if (!('url' in response)) {
           return response;
         }
 
@@ -3215,7 +3215,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
    * @param {string} params.sourceUrl - may include hash
    * @param {captureSettings} params.settings
    * @param {captureOptions} params.options
-   * @return {Promise<saveMainDocumentResponse|downloadBlobResponse|serializedBlob>}
+   * @return {Promise<saveMainDocumentResponse|downloadBlobResponse|transferableBlob>}
    */
   capturer.saveDocument = async function (params) {
     isDebug && console.debug("call: saveDocument", params);
@@ -3269,7 +3269,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
    * @param {string} params.documentFileName
    * @param {captureSettings} params.settings
    * @param {captureOptions} params.options
-   * @return {Promise<saveMainDocumentResponse|serializedBlob>}
+   * @return {Promise<saveMainDocumentResponse|transferableBlob>}
    */
   capturer.saveMainDocument = async function (params) {
     isDebug && console.debug("call: saveMainDocument", params);
@@ -3309,7 +3309,7 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
       switch (options["capture.saveTo"]) {
         case 'memory': {
           // special handling (for unit test)
-          return await capturer.saveBlobInMemory({blob});
+          return await capturer.saveBlobCache(blob, Infinity);
         }
         case 'file': {
           const downloadItem = await capturer.saveBlobNaturally({
@@ -3822,19 +3822,6 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
       capturer.log(elem);
       elem.click();
     });
-  };
-
-  /**
-   * @param {Object} params
-   * @param {Blob} params.blob
-   * @return {Promise<serializedBlob>}
-   */
-  capturer.saveBlobInMemory = async function (params) {
-    isDebug && console.debug("call: saveBlobInMemory", params);
-
-    const {blob} = params;
-
-    return await scrapbook.serializeObject(blob);
   };
 
   /**

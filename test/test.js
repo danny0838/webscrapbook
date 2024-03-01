@@ -585,8 +585,11 @@ class TestSuite {
       return result;
     }
 
-    const blob = new Blob(result.data.map(x => byteStringToArrayBuffer(x)), {type: result.type});
-    return blob;
+    if (result instanceof Blob) {
+      return result;
+    }
+
+    return new Blob(result.data.map(x => byteStringToArrayBuffer(x)), {type: result.type});
   }
 
   /**
