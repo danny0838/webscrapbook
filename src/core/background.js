@@ -140,7 +140,7 @@
    * (the window "on top"), rather than the window the user last activates a
    * tab within.
    *
-   * @kind invokable
+   * @type invokable
    * @param {Object} params
    * @param {boolean} [params.populate]
    * @param {WindowType[]} [params.windowTypes]
@@ -164,7 +164,7 @@
   };
 
   /**
-   * @kind invokable
+   * @type invokable
    */
   background.invokeFrameScript = async function ({frameId, cmd, args}, sender) {
     const tabId = sender.tab.id;
@@ -174,7 +174,7 @@
   };
 
   /**
-   * @kind invokable
+   * @type invokable
    */
   background.findBookIdFromUrl = async function ({url}, sender) {
     await server.init(true);
@@ -184,8 +184,8 @@
   /**
    * Attempt to locate an item in the sidebar.
    *
-   * @kind invokable
-   * @return {Object|null|false} - The located item.
+   * @type invokable
+   * @return {Object|null|false} The located item.
    *     - Object: the located item
    *     - null: no item located
    *     - false: no sidebar opened
@@ -232,7 +232,7 @@
   };
 
   /**
-   * @kind invokable
+   * @type invokable
    */
   background.captureCurrentTab = async function (params = {}, sender) {
     const task = Object.assign({tabId: sender.tab.id}, params);
@@ -240,7 +240,7 @@
   };
 
   /**
-   * @kind invokable
+   * @type invokable
    * @param {Object} [params]
    * @param {string[]} [params.urls]
    * @return {Object<string~url, integer~count>}
@@ -254,7 +254,7 @@
   };
 
   /**
-   * @kind invokable
+   * @type invokable
    * @param {Object} [params]
    * @param {string[]} [params.urls]
    */
@@ -265,7 +265,7 @@
   };
 
   /**
-   * @kind invokable
+   * @type invokable
    */
   background.createSubPage = async function ({url, title}, sender) {
     await server.init(true);
@@ -312,14 +312,14 @@
   };
 
   /**
-   * @kind invokable
+   * @type invokable
    */
   background.registerActiveEditorTab = async function ({willEnable = true} = {}, sender) {
     return editor.registerActiveEditorTab(sender.tab.id, willEnable);
   };
 
   /**
-   * @kind invokable
+   * @type invokable
    */
   background.invokeEditorCommand = async function ({code, cmd, args, frameId = -1, frameIdExcept = -1}, sender) {
     const tabId = sender.tab.id;
@@ -376,7 +376,7 @@
   };
 
   /**
-   * @kind invokable
+   * @type invokable
    */
   background.onServerTreeChange = async function (params = {}, sender) {
     const tasks = [];
@@ -411,7 +411,7 @@
   };
 
   /**
-   * @kind invokable
+   * @type invokable
    * @param {Object} [params]
    */
   background.onCaptureEnd = async function (params, sender) {
@@ -420,7 +420,7 @@
   };
 
   /**
-   * @kind invokable
+   * @type invokable
    * @param {Object} [options]
    */
   background.getGeoLocation = async function (options) {

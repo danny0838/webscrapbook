@@ -63,7 +63,7 @@
    * @property {boolean} useDiskCache
    * @property {Set<string~filename>} indexPages
    * @property {Map<string~filename, missionCaptureInfoFilesEntry>} files
-   * @property {Map<string~token, Promise<fetchResult>>} fetchMap
+   * @property {Map<string~token, Promise<fetchResponse>>} fetchMap
    * @property {Map<string~token, missionCaptureInfoFilenameMapEntry>} filenameMap
    * @property {Map<string~url, missionCaptureInfoLinkedPagesEntry>} linkedPages
    */
@@ -174,7 +174,7 @@
    *
    * @param {string} timeId
    * @param {string} filename - A validated filename (via scrapbook.validateFilename).
-   * @param {Object} params.options
+   * @param {captureOptions} params.options
    * @return {string} The uniquified filename.
    */
   capturer.getUniqueFilename = function (timeId, filename, options) {
@@ -201,7 +201,7 @@
    * @param {Object} params
    * @param {string} params.filename - may contain directory
    * @param {boolean} params.isFile
-   * @param {Object} params.options
+   * @param {captureOptions} params.options
    * @return {string} The deduplicated filename.
    */
   capturer.getAvailableSaveFilename = async function (params) {
@@ -417,12 +417,18 @@
   };
 
   /**
-   * @typedef {Object} fetchResult
+   * @typedef {Object} fetchError
+   * @property {string} name
+   * @property {string} message
+   */
+
+  /**
+   * @typedef {Object} fetchResponse
    * @property {string} url - The response URL (without hash).
    * @property {integer} status
    * @property {Object} headers
-   * @property {Blob} blob
-   * @property {string} error - The error message for the request.
+   * @property {?Blob} blob
+   * @property {fetchError} [error] - Error of the fetch request.
    */
 
   /**
@@ -435,9 +441,9 @@
    * @param {Blob} [params.overrideBlob]
    * @param {boolean} [params.headerOnly] - fetch HTTP header only
    * @param {boolean} [params.ignoreSizeLimit]
-   * @param {Objet} params.settings
-   * @param {Objet} params.options
-   * @return {Promise<fetchResult>}
+   * @param {captureSettings} params.settings
+   * @param {captureOptions} params.options
+   * @return {Promise<fetchResponse>}
    */
   capturer.fetch = async function (params) {
     const REGEX_SCHEMES = /^([^:]+):/;
@@ -772,7 +778,7 @@
   };
 
   /**
-   * @kind invokable
+   * @type invokable
    * @param {Object} params
    * @param {Object} params.item
    * @param {string} params.parentId
@@ -839,7 +845,7 @@
   };
 
   /**
-   * @kind invokable
+   * @type invokable
    * @return {Promise<Object>}
    */
   capturer.getMissionResult = async function () {
@@ -847,7 +853,7 @@
   };
 
   /**
-   * @kind invokable
+   * @type invokable
    */
   capturer.remoteMsg = async function ({msg, type}) {
     if (['log', 'warn', 'error'].includes(type)) {
@@ -865,9 +871,9 @@
    * @param {integer} [params.index] - position index for the captured items
    * @param {float} [params.delay] - delay between tasks (ms)
    * @param {string} [params.mode] - base capture mode
-   * @param {Object} [params.options] - base capture options, overwriting default
+   * @param {captureOptions} [params.options] - base capture options, overwriting default
    * @param {string} [params.comment] - comment for the captured item
-   * @return {Promise<Array|Object>} - list of task results (or error), or an object of error
+   * @return {Promise<Array|Object>} A list of task results (or error), or an object of error.
    */
   capturer.runTasks = async function ({
     tasks,
@@ -968,12 +974,12 @@
    * @param {string} [params.title] - item title
    * @param {string} [params.favIconUrl] - item favicon
    * @param {string} [params.mode] - "tab", "source", "bookmark"
-   * @param {Object} params.options
+   * @param {captureOptions} params.options
    * @param {string} [params.comment] - comment for the captured item
    * @param {?string} [params.bookId] - bookId ID for the captured items
    * @param {string} [params.parentId] - parent item ID for the captured items
    * @param {integer} [params.index] - position index for the captured items
-   * @return {Promise<Object>}
+   * @return {Promise<captureDocumentResponse|serializedBlob>}
    */
   capturer.captureGeneral = async function ({
     timeId = scrapbook.dateToId(),
@@ -1063,8 +1069,8 @@
    * @param {string} [params.title] - item title
    * @param {string} [params.favIconUrl] - item favicon
    * @param {string} [params.mode] - "tab", "source", "bookmark"
-   * @param {Object} params.options
-   * @return {Promise<Object>}
+   * @param {captureOptions} params.options
+   * @return {Promise<captureDocumentResponse|serializedBlob>}
    */
   capturer.captureTab = async function ({
     timeId,
@@ -1146,8 +1152,8 @@
    * @param {string} [params.title] - item title
    * @param {string} [params.favIconUrl] - item favicon
    * @param {string} [params.mode] - "tab", "source", "bookmark"
-   * @param {Object} params.options
-   * @return {Promise<Object>}
+   * @param {captureOptions} params.options
+   * @return {Promise<captureDocumentResponse|serializedBlob>}
    */
   capturer.captureRemote = async function ({
     timeId,
@@ -1213,9 +1219,9 @@
    * @param {string} params.url
    * @param {string} [params.refUrl]
    * @param {string} [params.refPolicy] - the referrer policy
-   * @param {Object} params.settings
-   * @param {Object} params.options
-   * @return {Promise<Object>}
+   * @param {captureSettings} params.settings
+   * @param {captureOptions} params.options
+   * @return {Promise<captureDocumentResponse|serializedBlob>}
    */
   capturer.captureRemoteTab = async function ({
     url, refUrl, refPolicy,
@@ -1297,9 +1303,10 @@
    *     and capture as file or register in linkedPages)
    * @param {boolean} [params.downLinkExtra] - is an extra downLink resource (don't check filter)
    * @param {boolean} [params.downLinkPage] - is a page previously registered in linkedPages
-   * @param {Object} params.settings
-   * @param {Object} params.options
-   * @return {Promise<Object|null>} - The capture result, or null if not to be captured.
+   * @param {captureSettings} params.settings
+   * @param {captureOptions} params.options
+   * @return {Promise<captureDocumentResponse|serializedBlob|null>} The capture
+   *     result, or null if not to be captured.
    */
   capturer.captureUrl = async function (params) {
     isDebug && console.debug("call: captureUrl", params);
@@ -1527,12 +1534,12 @@
    * @param {string} params.url - may include hash
    * @param {string} [params.refUrl]
    * @param {string} [params.refPolicy] - the referrer policy
-   * @param {Object} params.settings
+   * @param {captureSettings} params.settings
    * @param {string} params.settings.timeId
    * @param {string} [params.settings.title] - item title (also used as index page title)
    * @param {string} [params.settings.favIconUrl] - item favicon (also used as index page favicon)
-   * @param {Object} params.options
-   * @return {Promise<Object>}
+   * @param {captureOptions} params.options
+   * @return {Promise<captureDocumentResponse|serializedBlob>}
    */
   capturer.captureBookmark = async function (params) {
     isDebug && console.debug("call: captureBookmark", params);
@@ -1747,16 +1754,16 @@ Bookmark for <a href="${scrapbook.escapeHtml(sourceUrl)}">${scrapbook.escapeHtml
   };
 
   /**
-   * @kind invokable
+   * @type invokable
    * @param {Object} params
    * @param {string} params.url - may include hash
    * @param {string} [params.refUrl] - the referrer URL
    * @param {string} [params.refPolicy] - the referrer policy
    * @param {string} [params.charset] - charset for the text file
-   * @param {Object} params.settings
+   * @param {captureSettings} params.settings
    * @param {string} [params.settings.title] - item title (also used as index page title)
-   * @param {Object} params.options
-   * @return {Promise<Object>}
+   * @param {captureOptions} params.options
+   * @return {Promise<captureDocumentResponse|downloadBlobResponse>}
    */
   capturer.captureFile = async function (params) {
     isDebug && console.debug("call: captureFile", params);
@@ -1850,9 +1857,9 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
    * @param {Object} params
    * @param {integer} params.tabId
    * @param {integer} [params.frameId]
-   * @param {string} [params.options] - preset options that overwrites default
+   * @param {captureOptions} [params.options] - preset options that overwrites default
    * @param {boolean} [params.internalize]
-   * @return {Promise<Object>}
+   * @return {Promise<{title: string, sourceUrl: string, favIconUrl: string}>}
    */
   capturer.resaveTab = async function ({
     tabId, frameId, options,
@@ -2121,7 +2128,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
 
   /**
    * @param {Object} params
-   * @return {Promise<Object>}
+   * @return {Promise<captureDocumentResponse>}
    */
   capturer.recapture = async function ({
     tabId, frameId, fullPage,
@@ -2485,7 +2492,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
 
   /**
    * @param {Object} params
-   * @return {Promise<Object>}
+   * @return {Promise<captureDocumentResponse>}
    */
   capturer.mergeCapture = async function ({
     tabId, frameId, fullPage,
@@ -2800,16 +2807,16 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
    * - If role is not provided, return a non-uniquified document filename
    *   without registration.
    *
-   * @kind invokable
+   * @type invokable
    * @param {Object} params
    * @param {string} params.docUrl
    * @param {string} params.mime
    * @param {string} [params.role] - "document-*", "document" (headless)
-   * @param {Object} params.settings
+   * @param {captureSettings} params.settings
    * @param {boolean} params.settings.isMainPage
    * @param {boolean} params.settings.isMainFrame
    * @param {string} params.settings.documentName
-   * @param {Object} params.options
+   * @param {captureOptions} params.options
    * @return {Promise<registerDocumentResponse>}
    */
   capturer.registerDocument = async function (params) {
@@ -2943,11 +2950,11 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
    * - If role is not provided, return a non-uniquified filename without
    *   registration.
    *
-   * @kind invokable
+   * @type invokable
    * @param {string} params.url
    * @param {string} [params.role] - "resource", "css", "css-*" (dynamic)
-   * @param {Object} params.settings
-   * @param {Object} params.options
+   * @param {captureSettings} params.settings
+   * @param {captureOptions} params.options
    * @return {Promise<registerFileResponse>}
    */
   capturer.registerFile = async function (params) {
@@ -3200,23 +3207,17 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
   };
 
   /**
-   * @typedef {Object} saveDocumentResponse
-   * @property {string} filename - The saved filename.
-   * @property {string} url - URL of the saved filename (without hash).
-   */
-
-  /**
-   * @kind invokable
+   * @type invokable
    * @param {Object} params
    * @param {Object} params.data
-   * @param {Blob|blobCacheObject} params.data.blob
+   * @param {transferableBlob} params.data.blob
    * @param {string} [params.data.title]
    * @param {string} [params.data.favIconUrl]
    * @param {string} params.documentFileName
    * @param {string} params.sourceUrl - may include hash
-   * @param {Object} params.settings
-   * @param {Object} params.options
-   * @return {Promise<saveDocumentResponse>}
+   * @param {captureSettings} params.settings
+   * @param {captureOptions} params.options
+   * @return {Promise<saveMainDocumentResponse|downloadBlobResponse|serializedBlob>}
    */
   capturer.saveDocument = async function (params) {
     isDebug && console.debug("call: saveDocument", params);
@@ -3262,17 +3263,17 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
    */
 
   /**
-   * @kind invokable
+   * @type invokable
    * @param {Object} params
    * @param {Object} params.data
-   * @param {Blob|blobCacheObject} [params.data.blob]
+   * @param {transferableBlob} [params.data.blob]
    * @param {string} [params.data.title]
    * @param {string} [params.data.favIconUrl]
    * @param {string} params.sourceUrl - may include hash
    * @param {string} params.documentFileName
-   * @param {Object} params.settings
-   * @param {Object} params.options
-   * @return {Promise<saveMainDocumentResponse>}
+   * @param {captureSettings} params.settings
+   * @param {captureOptions} params.options
+   * @return {Promise<saveMainDocumentResponse|serializedBlob>}
    */
   capturer.saveMainDocument = async function (params) {
     isDebug && console.debug("call: saveMainDocument", params);
@@ -3583,22 +3584,16 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
   };
 
   /**
-   * @typedef {Object} downloadFileResponse
-   * @property {string} filename - The downloaded filename.
-   * @property {string} url - URL of the downloaded filename (without hash).
-   */
-
-  /**
    * @override
-   * @kind invokable
+   * @type invokable
    * @param {Object} params
    * @param {string} params.url - may include hash
    * @param {string} [params.refUrl] - the referrer URL
    * @param {string} [params.refPolicy] - the referrer policy
    * @param {Blob} [params.overrideBlob]
-   * @param {Object} params.settings
-   * @param {Object} params.options
-   * @return {Promise<downloadFileResponse>}
+   * @param {captureSettings} params.settings
+   * @param {captureOptions} params.options
+   * @return {Promise<downloadBlobResponse>}
    */
   capturer.downloadFile = async function (params) {
     isDebug && console.debug("call: downloadFile", params);
@@ -3665,14 +3660,14 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
    * Fetch a remote CSS and resolve its charset and text.
    *
    * @override
-   * @kind invokable
+   * @type invokable
    * @param {Object} params
    * @param {string} params.url
    * @param {string} [params.refUrl]
    * @param {string} [params.refPolicy] - the referrer policy
    * @param {Blob} [params.overrideBlob]
-   * @param {string} params.settings
-   * @param {Object} params.options
+   * @param {captureSettings} params.settings
+   * @param {captureOptions} params.options
    * @return {Promise<fetchCssResponse>}
    */
   capturer.fetchCss = async function (params) {
@@ -3700,20 +3695,20 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
 
   /**
    * @typedef {Object} downloadBlobResponse
-   * @property {string} filename - The downloaded filename.
+   * @property {string} [filename] - The downloaded filename.
    * @property {string} url - URL of the downloaded filename (without hash).
    */
 
   /**
-   * @kind invokable
+   * @type invokable
    * @param {Object} params
-   * @param {Blob|blobCacheObject} params.blob - may include charset
+   * @param {transferableBlob} params.blob - may include charset
    * @param {string} [params.filename] - validated and unique;
    *     may be absent when saveAs = singleHtml
    * @param {string} params.sourceUrl
-   * @param {Object} params.settings
-   * @param {Object} params.options
-   * @return {Promise<downloadBlobResponse>}
+   * @param {captureSettings} params.settings
+   * @param {captureOptions} params.options
+   * @return {Promise<downloadBlobResponse|string>}
    */
   capturer.downloadBlob = async function (params) {
     const makeDataUri = async (blob, filename) => {
@@ -3840,7 +3835,7 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
   /**
    * @param {Object} params
    * @param {Blob} params.blob
-   * @return {Promise<serializedObject>}
+   * @return {Promise<serializedBlob>}
    */
   capturer.saveBlobInMemory = async function (params) {
     isDebug && console.debug("call: saveBlobInMemory", params);
@@ -3934,7 +3929,7 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
    * @param {string} params.blob
    * @param {string} params.directory - URL of the server
    * @param {string} params.filename
-   * @param {Object} params.options
+   * @param {captureOptions} params.options
    * @return {Promise<string>} Filename of the saved blob.
    */
   capturer.saveBlobToServer = async function (params) {
@@ -3985,8 +3980,8 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
 
   /**
    * @param {Object} params
-   * @param {string} params.settings
-   * @param {Object} params.options
+   * @param {captureSettings} params.settings
+   * @param {captureOptions} params.options
    * @return {Promise<string>} 
    */
   capturer.captureLinkedPages = async function (params) {
@@ -4044,7 +4039,7 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
   /**
    * @param {Object} params
    * @param {string} params.timeId
-   * @param {Object} params.options
+   * @param {captureOptions} params.options
    */
   capturer.rebuildLinks = async function (params) {
     const rewriteUrl = (url, filenameMap, linkedPages) => {

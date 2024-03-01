@@ -49,7 +49,34 @@
   const REMOVE_HIDDEN_EXCLUDE_SVG = new Set(["svg"]);
   const REMOVE_HIDDEN_EXCLUDE_MATH = new Set(["math"]);
 
+  /**
+   * @global
+   * @namespace
+   */
   const capturer = {};
+
+  /**
+   * Settings of the current capture.
+   * @typedef {Object} captureSettings
+   * @property {string} missionId - missionId ID for the current capture tasks
+   * @property {string} timeId - scrapbook ID for the current capture task
+   * @property {string} documentName
+   * @property {string[]} recurseChain
+   * @property {number} depth
+   * @property {boolean} isHeadless
+   * @property {?string} indexFilename
+   * @property {boolean} isMainPage
+   * @property {boolean} isMainFrame
+   * @property {boolean} fullPage
+   * @property {string} title - item title (also used as index page title)
+   * @property {string} favIconUrl - item favicon (also used as index page favicon)
+   */
+
+  /**
+   * Options of the current capture which is the "capture.*" subgroup of
+   * scrapbookOptions.
+   * @typedef {scrapbookOptions} captureOptions
+   */
 
   /**
    * Invoke an invokable capturer method from another script.
@@ -59,6 +86,7 @@
    * - To invoke a content script method in a frame, provide
    *   details.frameWindow.
    *
+   * @memberof capturer
    * @param {string} method - The capturer method to invoke.
    * @param {Object} [args] - The arguments to pass to the capturer method.
    * @param {Object} [details] - Data to determine invocation behavior.
@@ -87,9 +115,11 @@
   };
 
   /**
-   * @kind invokable
+   * @type invokable
+   * @memberof capturer
+   * @variation 2
    * @param {Object} params
-   * @return {Promise<downloadFileResponse>}
+   * @return {Promise<downloadBlobResponse>}
    */
   capturer.downloadFile = async function (params) {
     isDebug && console.debug("call: downloadFile", params);
@@ -116,7 +146,9 @@
   };
 
   /**
-   * @kind invokable
+   * @type invokable
+   * @memberof capturer
+   * @variation 2
    * @param {Object} params
    * @return {Promise<fetchCssResponse>}
    */
@@ -145,9 +177,11 @@
   };
 
   /**
-   * @kind invokable
+   * @type invokable
+   * @memberof capturer
+   * @variation 2
    * @param {Object} params
-   * @return {Promise<Object|null>} - The capture result, or null if not to be captured.
+   * @return {Promise<captureDocumentResponse|serializedBlob|null>}
    */
   capturer.captureUrl = async function (params) {
     isDebug && console.debug("call: captureUrl", params);
@@ -174,18 +208,19 @@
   };
 
   /**
-   * @kind invokable
+   * @type invokable
+   * @memberof capturer
    * @param {Object} params
-   * @param {Document} params.doc
+   * @param {Document} [params.doc]
    * @param {string} [params.metaDocUrl] - an overriding meta document URL
    * @param {string} [params.docUrl] - an overriding document URL
    * @param {string} [params.baseUrl] - an overriding document base URL
    * @param {string} [params.refUrl] - the referrer URL
    * @param {string} [params.refPolicy] - the referrer policy
-   * @param {Object} params.settings
+   * @param {captureSettings} params.settings
    * @param {string} [params.settings.title] - item title
-   * @param {Object} params.options
-   * @return {Promise<Object>}
+   * @param {captureOptions} params.options
+   * @return {Promise<captureDocumentResponse|downloadBlobResponse|serializedBlob>}
    */
   capturer.captureDocumentOrFile = async function (params) {
     isDebug && console.debug("call: captureDocumentOrFile", params);
@@ -234,9 +269,15 @@
   };
 
   /**
-   * @kind invokable
+   * @typedef {saveMainDocumentResponse} captureDocumentResponse
+   * @property {string} url - URL of the saved filename (with hash).
+   */
+
+  /**
+   * @type invokable
+   * @memberof capturer
    * @param {Object} params
-   * @param {Document} params.doc
+   * @param {Document} [params.doc]
    * @param {string} [params.metaDocUrl] - an overriding meta document URL
    *     (real doc URL like about:srcdoc, for handling document metadata)
    * @param {string} [params.docUrl] - an overriding document URL (for request
@@ -245,11 +286,11 @@
    *     resolving relative URLs)
    * @param {string} [params.refPolicy] - the default document referrer policy
    * @param {string} [params.mime] - an overriding document contentType
-   * @param {Object} params.settings
+   * @param {captureSettings} params.settings
    * @param {string} [params.settings.title] - item title
    * @param {string} [params.settings.favIconUrl] - item favicon
-   * @param {Object} params.options
-   * @return {Promise<Object>}
+   * @param {captureOptions} params.options
+   * @return {Promise<captureDocumentResponse|serializedBlob>}
    */
   capturer.captureDocument = async function (params) {
     isDebug && console.debug("call: captureDocument", params);
@@ -3244,14 +3285,30 @@
   };
 
   /**
-   * @kind invokable
+   * @typedef {Object} retrieveDocumentContentResponseItem
+   * @property {Blob} blob
+   * @property {Object} info
+   * @property {string} info.isMainFrame
+   * @property {string} info.title
+   * @property {Object} resources
+   * @property {string} resources.uuid
+   * @property {string} resources.url
+   */
+
+  /**
+   * @typedef {Object<string~docUrl, retrieveDocumentContentResponseItem>} retrieveDocumentContentResponse
+   */
+
+  /**
+   * @type invokable
+   * @memberof capturer
    * @param {Object} params
    * @param {Document} [params.doc]
    * @param {boolean} [params.internalize]
    * @param {boolean} params.isMainPage
    * @param {Object} params.item
-   * @param {Object} params.options
-   * @return {Promise<Object>}
+   * @param {captureOptions} params.options
+   * @return {Promise<retrieveDocumentContentResponse>}
    */
   capturer.retrieveDocumentContent = async function (params) {
     isDebug && console.debug("call: retrieveDocumentContent", params);
@@ -3705,9 +3762,9 @@
   };
 
   /**
-   * @kind invokable
+   * @type invokable
    * @param {Object} params
-   * @param {Object} params.doc
+   * @param {Document} [params.doc]
    * @param {string} [params.select]
    * @param {string[]} [params.filter]
    * @return {Promise<Array>}
@@ -3769,8 +3826,8 @@
    * @param {string} params.title
    * @param {string} params.sourceUrl
    * @param {boolean} params.isFolder
-   * @param {Object} params.settings
-   * @param {Object} params.options
+   * @param {captureSettings} [params.settings]
+   * @param {captureOptions} [params.options]
    * @return {string} The formatted filename.
    */
   capturer.formatIndexFilename = async function ({
@@ -3903,17 +3960,24 @@
   };
 
   /**
-   * @typedef {Object} blobCacheObject
-   * @property {string} [__key__]
-   * @property {string} [__type__]
+   * @typedef {Object} blobCacheObjectEntity
+   * @property {string} __key__ - UUID to retrieve the Blob data
    */
 
   /**
-   * Save a Blob in the cache and return a blobCacheObject that can be
-   * transmitted through messaging.
+   * @typedef {blobCacheObjectEntity|serializedBlob} blobCacheObject
+   */
+
+  /**
+   * An object that can be transmitted through messaging.
+   * @typedef {Blob|blobCacheObject} transferableBlob
+   */
+
+  /**
+   * Save a Blob in the cache and return a transferableBlob.
    *
    * @param {Blob} blob
-   * @return {Promise<blobCacheObject>}
+   * @return {Promise<transferableBlob>}
    */
   capturer.saveBlobCache = async function (blob) {
     // Return the original Blob if the browser supports tramsmitting Blob
@@ -4511,7 +4575,7 @@
     /**
      * @param {Object} params
      * @param {?CSSStyleSheet} params.css - The CSS to get rules from.
-     * @param {string} params.url - The overriding source URL for retrieving a
+     * @param {string} [params.url] - The overriding source URL for retrieving a
      *     cross-orign CSS.
      * @param {string} [params.refUrl] - The referrer URL for retrieving a
      *     cross-orign CSS.
@@ -4587,8 +4651,8 @@
      * @param {Node} [params.rootNode] - the reference root node for an
      *     imported CSS.
      * @param {boolean} [params.isInline] - whether cssText is inline.
-     * @param {Object} [params.settings]
-     * @param {Object} [params.options]
+     * @param {captureSettings} [params.settings]
+     * @param {captureOptions} [params.options]
      */
     async rewriteCssText({cssText, baseUrl, refUrl, refPolicy, refCss = null, rootNode, isInline = false, settings, options}) {
       settings = Object.assign({}, this.settings, settings);
@@ -4906,6 +4970,12 @@
     }
 
     /**
+     * @callback rewriteCssRewriter
+     * @param {Element} elem
+     * @param {fetchCssResponse} response
+     */
+
+    /**
      * Rewrite an internal, external, or imported CSS.
      *
      * - Pass {elem, callback} for internal or external CSS.
@@ -4923,9 +4993,9 @@
      *     resources.
      * @param {Node} [params.rootNode] - the reference root node for an
      *     imported CSS.
-     * @param {Function} params.callback
-     * @param {Object} [params.settings]
-     * @param {Object} [params.options]
+     * @param {rewriteCssRewriter} params.callback
+     * @param {captureSettings} [params.settings]
+     * @param {captureOptions} [params.options]
      */
     async rewriteCss({elem, url, refCss, baseUrl, refUrl, refPolicy, rootNode, callback, settings, options}) {
       settings = settings ? Object.assign({}, this.settings, settings) : this.settings;

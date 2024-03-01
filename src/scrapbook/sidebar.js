@@ -1007,7 +1007,7 @@
      *
      * Provide {bookId, id}, {url}, or {bookId, url}.
      *
-     * @kind invokable
+     * @type invokable
      */
     async locate({bookId, id, url}) {
       if (this.mode !== 'normal') { return null; }

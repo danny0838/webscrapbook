@@ -26,7 +26,7 @@
   /**
    * Return true to confirm that content script is loaded.
    *
-   * @kind invokable
+   * @type invokable
    */
   core.isScriptLoaded = async function (params) {
     return true;

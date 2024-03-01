@@ -109,7 +109,7 @@ height: 100vh;`;
    ***************************************************************************/
 
   /**
-   * @kind invokable
+   * @type invokable
    */
   editor.init = async function ({willActive = !editor.active, force = false} = {}) {
     if (!willActive) {
@@ -914,7 +914,7 @@ height: 100vh;`;
   };
 
   /**
-   * @kind invokable
+   * @type invokable
    */
   editor.initFrame = async function ({
     active = true,
@@ -935,7 +935,7 @@ height: 100vh;`;
   };
 
   /**
-   * @kind invokable
+   * @type invokable
    */
   editor.getStatus = function () {
     return {
@@ -948,7 +948,7 @@ height: 100vh;`;
   };
 
   /**
-   * @kind invokable
+   * @type invokable
    */
   editor.lineMarkerInternal = function ({tagName = 'span', attrs = {}} = {}) {
     editor.addHistory();
@@ -1013,7 +1013,7 @@ height: 100vh;`;
   };
 
   /**
-   * @kind invokable
+   * @type invokable
    */
   editor.locateAnnotationInternal = function (...args) {
     const getAnnotationElems = () => {
@@ -1137,7 +1137,7 @@ height: 100vh;`;
   };
 
   /**
-   * @kind invokable
+   * @type invokable
    */
   editor.eraseNodesInternal = function () {
     editor.addHistory();
@@ -1152,7 +1152,7 @@ height: 100vh;`;
   };
 
   /**
-   * @kind invokable
+   * @type invokable
    */
   editor.eraseSelectorInternal = function ({selector}) {
     editor.addHistory();
@@ -1169,7 +1169,7 @@ height: 100vh;`;
   };
 
   /**
-   * @kind invokable
+   * @type invokable
    */
   editor.eraseXpathInternal = function ({selector}) {
     editor.addHistory();
@@ -1191,7 +1191,7 @@ height: 100vh;`;
   };
 
   /**
-   * @kind invokable
+   * @type invokable
    */
   editor.uneraseNodesInternal = function () {
     editor.addHistory();
@@ -1208,7 +1208,7 @@ height: 100vh;`;
   };
 
   /**
-   * @kind invokable
+   * @type invokable
    */
   editor.uneraseAllNodesInternal = function () {
     editor.addHistory();
@@ -1239,7 +1239,7 @@ height: 100vh;`;
   };
 
   /**
-   * @kind invokable
+   * @type invokable
    */
   editor.removeEditsInternal = function () {
     editor.addHistory();
@@ -1257,7 +1257,7 @@ height: 100vh;`;
   };
 
   /**
-   * @kind invokable
+   * @type invokable
    */
   editor.removeAllEditsInternal = function () {
     editor.addHistory();
@@ -1279,7 +1279,7 @@ height: 100vh;`;
   };
 
   /**
-   * @kind invokable
+   * @type invokable
    */
   editor.undoInternal = function () {
     if (!document.body) { return; }
@@ -1288,7 +1288,7 @@ height: 100vh;`;
   };
 
   /**
-   * @kind invokable
+   * @type invokable
    */
   editor.deleteErasedInternal = function () {
     editor.addHistory();
@@ -1311,7 +1311,7 @@ height: 100vh;`;
   };
 
   /**
-   * @kind invokable
+   * @type invokable
    */
   editor.editTitleInternal = function () {
     let title = prompt(scrapbook.lang('EditorButtonSaveEditTitlePrompt'), document.title);
@@ -1320,7 +1320,7 @@ height: 100vh;`;
   };
 
   /**
-   * @kind invokable
+   * @type invokable
    */
   editor.setViewportInternal = function () {
     let viewportElem = document.querySelector('meta[name="viewport"i]');
@@ -2264,7 +2264,7 @@ height: 100vh;`;
       active: false,
 
       /**
-       * @kind invokable
+       * @type invokable
        */
       toggle({willActive = !this.active} = {}) {
         if (willActive) {
@@ -2310,7 +2310,7 @@ height: 100vh;`;
       },
 
       /**
-       * @kind invokable
+       * @type invokable
        */
       editLineMarker(elem, pos, skipHistory = false) {
         if (elem.shadowRoot) { return; }
@@ -2462,7 +2462,7 @@ height: 100vh;`;
       },
 
       /**
-       * @kind invokable
+       * @type invokable
        * @param {boolean} [richText] - Whether content is rich text.
        * @param {Node|false} [refNode] - The ref node to create a sticky note around.
        *     Auto-detected by selection when unspecified. False to not create a relative note.
@@ -2828,7 +2828,7 @@ height: 100vh;`;
       active: false,
 
       /**
-       * @kind invokable
+       * @type invokable
        */
       toggle({willActive = !this.active} = {}) {
         if (willActive) {
@@ -3060,7 +3060,7 @@ height: 100vh;`;
     active: false,
 
     /**
-     * @kind invokable
+     * @type invokable
      */
     async toggle({willActive = !this.active} = {}) {
       if (willActive) {
@@ -3437,7 +3437,7 @@ height: 100vh;`;
       history: [],
 
       /**
-       * @kind invokable
+       * @type invokable
        */
       toggle({willActive = !this.active} = {}) {
         if (willActive) {

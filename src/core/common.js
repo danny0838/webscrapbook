@@ -29,6 +29,9 @@
 
   const BACKEND_MIN_VERSION = '2.0.1';
 
+  /**
+   * @typedef {Object} scrapbookOptions
+   */
   const DEFAULT_OPTIONS = {
     "ui.toolbar.showCaptureTab": true,
     "ui.toolbar.showCaptureTabSource": true,
@@ -554,6 +557,10 @@
 
   const ASCII_WHITESPACE = String.raw`\t\n\f\r `;
 
+  /**
+   * @global
+   * @namespace
+   */
   const scrapbook = {
     BACKEND_MIN_VERSION,
     DEFAULT_OPTIONS,
@@ -773,8 +780,19 @@
    ***************************************************************************/
 
   /**
-   * @typedef {Object} serializedObject
+   * @typedef {Object} serializedBlob
    * @property {string} __type__
+   * @property {string} type
+   * @property {string} data
+   */
+
+  /**
+   * @typedef {serializedBlob} serializedFile
+   * @property {string} __type__
+   * @property {string} name
+   * @property {string} type
+   * @property {number} lastModified
+   * @property {string} data
    */
 
   /**
@@ -783,7 +801,7 @@
    * If the serialization cannot be done synchronously, a Promise is returned.
    *
    * @param {*} obj
-   * @return {*|serializedObject|Promise<serializedObject>}
+   * @return {*|serializedBlob|Promise<serializedBlob>}
    */
   scrapbook.serializeObject = function (...args) {
     // Max JavaScript string is 256MiB UTF-16 chars in an older Browser.
@@ -821,11 +839,11 @@
   };
 
   /**
-   * Deerialize a serializedObject.
+   * Deserialize a serializedBlob.
    *
    * If the deserialization cannot be done synchronously, a Promise is returned.
    *
-   * @param {serializedObject|*} obj
+   * @param {serializedBlob|*} obj
    * @return {*|Promise<*>}
    */
   scrapbook.deserializeObject = function (obj) {
@@ -1361,6 +1379,12 @@
     }
     return await Promise.all(tasks);
   };
+
+  /**
+   * A function that can be invoked through messaging.
+   * @typedef {Function} invokable
+   * @param {Object} params
+   */
 
   /**
    * Invoke an invokable command in the extension script.
@@ -2848,7 +2872,8 @@
    *
    * ref: https://tools.ietf.org/html/rfc7231#section-3.1.1.1
    *
-   * @return {{type: string, parameters: {[charset: string]}}}
+   * @memberof scrapbook
+   * @return {{type: string, parameters: {}}}
    */
   scrapbook.parseHeaderContentType = function (string) {
     const pOWS = "[\\t ]*";
@@ -2900,8 +2925,9 @@
    * ref: https://github.com/jshttp/content-disposition/blob/master/index.js
    *      https://tools.ietf.org/html/rfc5987#section-3.2
    *
+   * @memberof scrapbook
    * @param {string} string - The string to parse, not including "Content-Disposition: "
-   * @return {{type: ('inline'|'attachment'), parameters: {[filename: string]}}}
+   * @return {{type: string, parameters: {}}}
    */
   scrapbook.parseHeaderContentDisposition = function (string) {
     const pOWS = "[\\t ]*";
@@ -2985,7 +3011,8 @@
    *
    * ref: https://html.spec.whatwg.org/multipage/semantics.html#attr-meta-http-equiv-refresh
    *
-   * @return {{time: integer, url: string}}
+   * @memberof scrapbook
+   * @return {{time: (integer|undefined), url: (string|undefined)}}
    */
   scrapbook.parseHeaderRefresh = function (string) {
     const regex = new RegExp([
