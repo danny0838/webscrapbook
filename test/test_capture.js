@@ -1306,6 +1306,27 @@ it('test_capture_dataUri_frame', async function () {
 });
 
 /**
+ * Capture current page content for a frame with data URL.
+ *
+ * capturer.captureDocument
+ */
+$it.xfail()('test_capture_dataUri_frame_dynamic', async function () {
+  var options = {
+    "capture.frame": "save",
+    "capture.saveDataUriAsFile": true,
+  };
+  var blob = await capture({
+    url: `${localhost}/capture_dataUri_frame_dynamic/index.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+  var zip = await new JSZip().loadAsync(blob);
+  var indexFile = zip.file('index_1.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assertEqual(doc.querySelector('p').textContent, 'page content modified');
+});
+
+/**
  * Check support of parameters in a data URL
  *
  * capture.saveDataUriAsFile

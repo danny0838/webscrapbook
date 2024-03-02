@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+</head>
+<body>
+<script>
+var html = `\
+<!DOCTYPE html>
+<meta charset="UTF-8">
+<body>
+<p>page content</p>
+</body>
+<script>
+document.querySelector('p').textContent = 'page content modified';
+<\/script>`;
+
+var elem = document.createElement("iframe");
+elem.src = `data:text/html,${encodeURIComponent(html)}`;
+document.body.appendChild(elem);
+</script>
+</body>
+</html>
