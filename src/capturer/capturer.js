@@ -4022,17 +4022,12 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
    */
   capturer.rebuildLinks = async function (params) {
     const rewriteUrl = (url, filenameMap, linkedPages) => {
-      let u;
-      try {
-        u = new URL(url);
-      } catch (ex) {
-        // not absolute URL, probably already mapped
+      // assume a non-absolute URL to be already mapped
+      if (!scrapbook.isUrlAbsolute(url)) {
         return null;
       }
 
-      let urlHash = u.hash;
-      u.hash = '';
-      let urlMain = u.href;
+      let [urlMain, urlHash] = scrapbook.splitUrlByAnchor(url);
 
       // handle possible redirect
       const linkedPageItem = linkedPages.get(urlMain);

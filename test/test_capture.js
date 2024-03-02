@@ -12611,6 +12611,7 @@ it('test_capture_downLink_indepth', async function () {
   assert(doc.querySelectorAll('a')[2].getAttribute('href') === `${localhost}/capture_downLink_indepth/linked1-2.html#222`);
   assert(doc.querySelectorAll('a')[3].getAttribute('href') === `${localhost}/capture_downLink_indepth/linked1-3.html#333`);
   assert(doc.querySelectorAll('a')[4].getAttribute('href') === `${localhost}/capture_downLink_indepth/linked1-4.html#444`);
+  assert(doc.querySelectorAll('a')[5].getAttribute('href') === `${localhost}/capture_downLink_indepth/linked1-5.html#`);
 
   assert(!zip.file('index.json'));
 
@@ -12636,6 +12637,7 @@ it('test_capture_downLink_indepth', async function () {
   assert(doc.querySelectorAll('a')[2].getAttribute('href') === `${localhost}/capture_downLink_indepth/linked1-2.html#222`);
   assert(doc.querySelectorAll('a')[3].getAttribute('href') === `${localhost}/capture_downLink_indepth/linked1-3.html#333`);
   assert(doc.querySelectorAll('a')[4].getAttribute('href') === `${localhost}/capture_downLink_indepth/linked1-4.html#444`);
+  assert(doc.querySelectorAll('a')[5].getAttribute('href') === `${localhost}/capture_downLink_indepth/linked1-5.html#`);
 
   var sitemapBlob = await zip.file('index.json').async('blob');
   var expectedData = {
@@ -12698,7 +12700,7 @@ it('test_capture_downLink_indepth', async function () {
   assert(doc.querySelectorAll('a')[2].getAttribute('href') === `linked1-2.html#222`);
   assert(doc.querySelectorAll('a')[3].getAttribute('href') === `linked1-3.html#333`);
   assert(doc.querySelectorAll('a')[4].getAttribute('href') === `linked1-4.html#444`);
-  assert(doc.querySelectorAll('a')[5].getAttribute('href') === `linked1-5.html#555`);
+  assert(doc.querySelectorAll('a')[5].getAttribute('href') === `linked1-5.html#`);
 
   var indexFile = zip.file('linked1-1.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -12822,7 +12824,7 @@ it('test_capture_downLink_indepth', async function () {
   assert(doc.querySelectorAll('a')[2].getAttribute('href') === `linked1-2.html#222`);
   assert(doc.querySelectorAll('a')[3].getAttribute('href') === `linked1-3.html#333`);
   assert(doc.querySelectorAll('a')[4].getAttribute('href') === `linked1-4.html#444`);
-  assert(doc.querySelectorAll('a')[5].getAttribute('href') === `linked1-5.html#555`);
+  assert(doc.querySelectorAll('a')[5].getAttribute('href') === `linked1-5.html#`);
 
   var indexFile = zip.file('linked1-1.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -13021,7 +13023,7 @@ it('test_capture_downLink_indepth_skip_file', async function () {
   assert(doc.querySelectorAll('a')[2].getAttribute('href') === `linked1-2.html#222`);
   assert(doc.querySelectorAll('a')[3].getAttribute('href') === `linked1-3.html#333`);
   assert(doc.querySelectorAll('a')[4].getAttribute('href') === `linked1-4.html#444`);
-  assert(doc.querySelectorAll('a')[5].getAttribute('href') === `linked1-5.html#555`);
+  assert(doc.querySelectorAll('a')[5].getAttribute('href') === `linked1-5.html#`);
 
   // downloaded as file (not rewritten)
   var indexFile = zip.file('linked1-1.html');
@@ -13077,7 +13079,7 @@ it('test_capture_downLink_indepth_skip_file', async function () {
   assert(doc.querySelectorAll('a')[2].getAttribute('href') === `${localhost}/capture_downLink_indepth/linked1-2.html#222`);
   assert(doc.querySelectorAll('a')[3].getAttribute('href') === `${localhost}/capture_downLink_indepth/linked1-3.html#333`);
   assert(doc.querySelectorAll('a')[4].getAttribute('href') === `${localhost}/capture_downLink_indepth/linked1-4.html#444`);
-  assert(doc.querySelectorAll('a')[5].getAttribute('href') === `${localhost}/capture_downLink_indepth/linked1-5.html#555`);
+  assert(doc.querySelectorAll('a')[5].getAttribute('href') === `${localhost}/capture_downLink_indepth/linked1-5.html#`);
 
   // skip downLinkFile even if depth exceeds
   assert(!zip.file('linked1-1.html'));
@@ -13106,7 +13108,7 @@ it('test_capture_downLink_indepth_skip_file', async function () {
   assert(doc.querySelectorAll('a')[2].getAttribute('href') === `linked1-2.html#222`);
   assert(doc.querySelectorAll('a')[3].getAttribute('href') === `linked1-3.html#333`);
   assert(doc.querySelectorAll('a')[4].getAttribute('href') === `linked1-4.html#444`);
-  assert(doc.querySelectorAll('a')[5].getAttribute('href') === `linked1-5.html#555`);
+  assert(doc.querySelectorAll('a')[5].getAttribute('href') === `linked1-5.html#`);
 
   // captured as page (rewritten)
   var indexFile = zip.file('linked1-1.html');
@@ -13175,7 +13177,7 @@ ${localhost}/capture_downLink_indepth/linked2-1.html`,
   assert(doc.querySelectorAll('a')[2].getAttribute('href') === `linked1-2.html#222`);
   assert(doc.querySelectorAll('a')[3].getAttribute('href') === `${localhost}/capture_downLink_indepth/linked1-3.html#333`);
   assert(doc.querySelectorAll('a')[4].getAttribute('href') === `${localhost}/capture_downLink_indepth/linked1-4.html#444`);
-  assert(doc.querySelectorAll('a')[5].getAttribute('href') === `${localhost}/capture_downLink_indepth/linked1-5.html#555`);
+  assert(doc.querySelectorAll('a')[5].getAttribute('href') === `${localhost}/capture_downLink_indepth/linked1-5.html#`);
 
   assert(!zip.file('linked1-1.html'));
 
@@ -13219,7 +13221,7 @@ ${localhost}/capture_downLink_indepth/linked2-1.html`,
   assert(doc.querySelectorAll('a')[2].getAttribute('href') === `linked1-2.html#222`);
   assert(doc.querySelectorAll('a')[3].getAttribute('href') === `${localhost}/capture_downLink_indepth/linked1-3.html#333`);
   assert(doc.querySelectorAll('a')[4].getAttribute('href') === `${localhost}/capture_downLink_indepth/linked1-4.html#444`);
-  assert(doc.querySelectorAll('a')[5].getAttribute('href') === `${localhost}/capture_downLink_indepth/linked1-5.html#555`);
+  assert(doc.querySelectorAll('a')[5].getAttribute('href') === `${localhost}/capture_downLink_indepth/linked1-5.html#`);
 
   var indexFile = zip.file('linked1-1.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
