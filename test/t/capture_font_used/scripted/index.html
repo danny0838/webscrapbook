@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>blockquote::before { content: attr(style); }</style>
+</head>
+<body>
+<blockquote class="scripted" style="font-family: scripted;"></blockquote>
+<blockquote class="removed" style="font-family: removed;"></blockquote>
+</body>
+<script>
+var font = new FontFace("scripted", "url(scripted.woff)");
+document.fonts.add(font);
+font.load();
+
+var font = new FontFace("removed", "url(removed.woff)");
+document.fonts.add(font);
+font.loaded.then((font) => {
+  document.fonts.delete(font);
+});
+</script>
+</html>

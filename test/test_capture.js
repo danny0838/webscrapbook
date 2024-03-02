@@ -6840,8 +6840,6 @@ it('test_capture_font_used', async function () {
   assert(zip.file('link.woff'));
   assert(zip.file('import.woff'));
   assert(zip.file('pseudo1.woff'));
-  assert(zip.file('internal-ranged1.woff'));
-  assert(zip.file('internal-ranged2.woff'));
   assert(zip.file('internal-keyframes.woff'));
   assert(!zip.file('neverused.woff'));
   assert(!zip.file('removed.woff'));
@@ -6856,13 +6854,10 @@ it('test_capture_font_used', async function () {
 @font-face { font-family: pseudo1; src: url("pseudo1.woff"); }
 #pseudo1::before { font-family: pseudo1; content: "X"; }`);
   assert(styleElems[3].textContent.trim() === `\
-@font-face { font-family: internal-ranged; unicode-range: U+0-7F; src: url("internal-ranged1.woff"); }
-@font-face { font-family: internal-ranged; unicode-range: U+8?, U+9?, U+1??; src: url("internal-ranged2.woff"); }`);
-  assert(styleElems[4].textContent.trim() === `\
 @font-face { font-family: internal-keyframes; src: url("internal-keyframes.woff"); }`);
-  assert(styleElems[6].textContent.trim() === `@font-face { font-family: neverused; src: url(""); }`);
-  assert(styleElems[9].textContent.trim() === `@font-face { font-family: removed-internal; src: url(""); }`);
-  assert(styleElems[10].textContent.trim() === `@font-face { font-family: removed-keyframes; src: url(""); }`);
+  assert(styleElems[5].textContent.trim() === `@font-face { font-family: neverused; src: url(""); }`);
+  assert(styleElems[8].textContent.trim() === `@font-face { font-family: removed-internal; src: url(""); }`);
+  assert(styleElems[9].textContent.trim() === `@font-face { font-family: removed-keyframes; src: url(""); }`);
 
   var cssFile = zip.file('link.css');
   var text = await readFileAsText(await cssFile.async('blob'));
@@ -6889,8 +6884,6 @@ it('test_capture_font_used', async function () {
   assert(zip.file('link.woff'));
   assert(zip.file('import.woff'));
   assert(zip.file('pseudo1.woff'));
-  assert(zip.file('internal-ranged1.woff'));
-  assert(zip.file('internal-ranged2.woff'));
   assert(zip.file('internal-keyframes.woff'));
   assert(zip.file('neverused.woff'));
   assert(zip.file('removed.woff'));
@@ -6905,13 +6898,10 @@ it('test_capture_font_used', async function () {
 @font-face { font-family: pseudo1; src: url("pseudo1.woff"); }
 #pseudo1::before { font-family: pseudo1; content: "X"; }`);
   assert(styleElems[3].textContent.trim() === `\
-@font-face { font-family: internal-ranged; unicode-range: U+0-7F; src: url("internal-ranged1.woff"); }
-@font-face { font-family: internal-ranged; unicode-range: U+8?, U+9?, U+1??; src: url("internal-ranged2.woff"); }`);
-  assert(styleElems[4].textContent.trim() === `\
 @font-face { font-family: internal-keyframes; src: url("internal-keyframes.woff"); }`);
-  assert(styleElems[6].textContent.trim() === `@font-face { font-family: neverused; src: url("neverused.woff"); }`);
-  assert(styleElems[9].textContent.trim() === `@font-face { font-family: removed-internal; src: url("removed.woff"); }`);
-  assert(styleElems[10].textContent.trim() === `@font-face { font-family: removed-keyframes; src: url("removed.woff"); }`);
+  assert(styleElems[5].textContent.trim() === `@font-face { font-family: neverused; src: url("neverused.woff"); }`);
+  assert(styleElems[8].textContent.trim() === `@font-face { font-family: removed-internal; src: url("removed.woff"); }`);
+  assert(styleElems[9].textContent.trim() === `@font-face { font-family: removed-keyframes; src: url("removed.woff"); }`);
 
   var cssFile = zip.file('link.css');
   var text = await readFileAsText(await cssFile.async('blob'));
@@ -6978,6 +6968,55 @@ it('test_capture_font_used_syntax', async function () {
   from { font-family: keyframes1, "keyframes 2"; }
   to { transform: translateX(40px); font-family: "keyframes\\A 3"; }
 }`);
+});
+
+/**
+ * Check handling of unloaded font files.
+ *
+ * capture.font = "save-used"
+ */
+it('test_capture_font_used_unloaded', async function () {
+  /* capture.font = save-used */
+  var options = {
+    "capture.rewriteCss": "url",
+    "capture.font": "save-used",
+  };
+  var blob = await capture({
+    url: `${localhost}/capture_font_used/unloaded/index.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+  var zip = await new JSZip().loadAsync(blob);
+  assert(zip.file('alternative-1.woff'));
+  assert(zip.file('alternative-2.woff'));
+  assert(zip.file('alternative-3.woff'));
+  assert(zip.file('unicode-range-1.woff'));
+  assert(zip.file('unicode-range-2.woff'));
+  assert(zip.file('unicode-range-3.woff'));
+  assert(zip.file('unicode-range-4.woff'));
+  assert(zip.file('unicode-range-5.woff'));
+  assert(zip.file('unicode-range-6.woff'));
+  assert(zip.file('unicode-range-7.woff'));
+  assert(zip.file('unicode-range-8.woff'));
+
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assertEqual(
+    doc.querySelector('style.alternative').textContent.trim(),
+    `@font-face { font-family: alternative; src: url("alternative-1.woff"), url("alternative-2.woff"), url("alternative-3.woff"); }`,
+  );
+  assertEqual(
+    doc.querySelector('style.unicode-range').textContent.trim(),
+    `\
+@font-face { font-family: unicode-range; src: url("unicode-range-1.woff"); unicode-range: U+30; }
+@font-face { font-family: unicode-range; src: url("unicode-range-2.woff"); unicode-range: U+34-35; }
+@font-face { font-family: unicode-range; src: url("unicode-range-3.woff"); unicode-range: U+4?; }
+@font-face { font-family: unicode-range; src: url("unicode-range-4.woff"); unicode-range: U+61-65, U+68; }
+@font-face { font-family: unicode-range; src: url("unicode-range-5.woff"); unicode-range: U+10; }
+@font-face { font-family: unicode-range; src: url("unicode-range-6.woff"); unicode-range: U+200-300; }
+@font-face { font-family: unicode-range; src: url("unicode-range-7.woff"); unicode-range: U+5??; }
+@font-face { font-family: unicode-range; src: url("unicode-range-8.woff"); unicode-range: U+700-800, U+1000; }`,
+  );
 });
 
 /**
@@ -7218,6 +7257,26 @@ $it.skipIf($.noNestingCss)('test_capture_font_used_nesting', async function () {
     }
   }
 }`);
+});
+
+/**
+ * Check handling of fonts loaded by scripts.
+ *
+ * capture.font = "save-used"
+ */
+$it.xfail()('test_capture_font_used_scripted', async function () {
+  /* capture.font = save-used */
+  var options = {
+    "capture.rewriteCss": "url",
+    "capture.font": "save-used",
+  };
+  var blob = await capture({
+    url: `${localhost}/capture_font_used/scripted/index.html`,
+    options: Object.assign({}, baseOptions, options),
+  }, {delay: 300});
+  var zip = await new JSZip().loadAsync(blob);
+  assert(zip.file('scripted.woff'));
+  assert(!zip.file('removed.woff'));
 });
 
 /**

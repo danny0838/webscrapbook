@@ -19,12 +19,6 @@
 #pseudo1::before { font-family: pseudo1; content: "X"; }
 </style>
 
-<!-- Unicode-range -->
-<style>
-@font-face { font-family: internal-ranged; unicode-range: U+0-7F; src: url("internal-ranged1.woff"); }
-@font-face { font-family: internal-ranged; unicode-range: U+8?, U+9?, U+1??; src: url("internal-ranged2.woff"); }
-</style>
-
 <!-- @keyframes -->
 <style>
 @font-face { font-family: internal-keyframes; src: url("internal-keyframes.woff"); }
@@ -73,9 +67,6 @@
 
 <h2>Pseudo-elements</h2>
 <blockquote id="pseudo1">before</blockquote>
-
-<h2>Unicode range</h2>
-<blockquote style="font-family: internal-ranged;">internal-ranged</blockquote>
 
 <h2>@keyframes</h2>
 <blockquote style="animation: internal 3s linear infinite;">internal-keyframes</blockquote>

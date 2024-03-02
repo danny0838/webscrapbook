@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>blockquote::before { content: attr(style); }</style>
+<style class="alternative">
+@font-face { font-family: alternative; src: url(./alternative-1.woff), url(./alternative-2.woff), url(./alternative-3.woff); }
+</style>
+<style class="unicode-range">
+@font-face { font-family: unicode-range; src: url(./unicode-range-1.woff); unicode-range: U+30; }
+@font-face { font-family: unicode-range; src: url(./unicode-range-2.woff); unicode-range: U+34-35; }
+@font-face { font-family: unicode-range; src: url(./unicode-range-3.woff); unicode-range: U+4?; }
+@font-face { font-family: unicode-range; src: url(./unicode-range-4.woff); unicode-range: U+61-65, U+68; }
+@font-face { font-family: unicode-range; src: url(./unicode-range-5.woff); unicode-range: U+10; }
+@font-face { font-family: unicode-range; src: url(./unicode-range-6.woff); unicode-range: U+200-300; }
+@font-face { font-family: unicode-range; src: url(./unicode-range-7.woff); unicode-range: U+5??; }
+@font-face { font-family: unicode-range; src: url(./unicode-range-8.woff); unicode-range: U+700-800, U+1000; }
+</style>
+</head>
+<body>
+<blockquote style="font-family: alternative;"></blockquote>
+<blockquote style="font-family: unicode-range;">0123456789 ABCDEFG abcdefg</blockquote>
+</body>
+</html>
