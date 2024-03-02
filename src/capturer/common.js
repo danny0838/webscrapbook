@@ -419,9 +419,9 @@
       const [urlMain, urlHash] = scrapbook.splitUrlByAnchor(url);
 
       // This link targets the current page
-      if (urlMain === docUrl) {
+      if (urlMain === metaDocUrl && !capturer.isAboutUrl(metaDocUrl)) {
         // @TODO: for iframe whose URL is about:blank or about:srcdoc,
-        // this link should point to the main frame page rather than self
+        // this link should point to the captured page
         if (urlHash === "" || urlHash === "#") {
           return urlHash;
         }

@@ -8876,6 +8876,85 @@ it('test_capture_anchor_partial', async function () {
 });
 
 /**
+ * Check anchors handling in iframe[srcdoc].
+ *
+ * capturer.captureDocument
+ */
+it('test_capture_anchor_srcdoc', async function () {
+  /* depth = null */
+  // Links to the original page should be rewritten to the captured one,
+  // but it's over-complicated to do so for a non-indepth capture.
+  // Link to the original URL instead.
+  var options = {
+    "capture.downLink.doc.depth": null,
+  };
+  var blob = await capture({
+    url: `${localhost}/capture_anchor/srcdoc/srcdoc.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+  var zip = await new JSZip().loadAsync(blob);
+
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+
+  var frameSrc = doc.querySelector('iframe').getAttribute('src');
+  var frameFile = zip.file(frameSrc);
+  var frameBlob = new Blob([await frameFile.async('blob')], {type: "text/html"});
+  var frameDoc = await readFileAsDocument(frameBlob);
+  var anchors = frameDoc.querySelectorAll('a');
+
+  assertEqual(anchors[0].getAttribute('href'), `${localhost}/capture_anchor/srcdoc/srcdoc.html`);
+  assertEqual(anchors[1].getAttribute('href'), `${localhost}/capture_anchor/srcdoc/srcdoc.html#`);
+  assertEqual(anchors[2].getAttribute('href'), `${localhost}/capture_anchor/srcdoc/srcdoc.html#123`);
+  assertEqual(anchors[3].getAttribute('href'), `${localhost}/capture_anchor/srcdoc/srcdoc.html?`);
+  assertEqual(anchors[4].getAttribute('href'), `${localhost}/capture_anchor/srcdoc/srcdoc.html?id=123`);
+
+  assertEqual(anchors[5].getAttribute('href'), `${localhost}/capture_anchor/srcdoc/srcdoc.html`);
+  assertEqual(anchors[6].getAttribute('href'), `${localhost}/capture_anchor/srcdoc/srcdoc.html#`);
+  assertEqual(anchors[7].getAttribute('href'), `${localhost}/capture_anchor/srcdoc/srcdoc.html#123`);
+  assertEqual(anchors[8].getAttribute('href'), `${localhost}/capture_anchor/srcdoc/srcdoc.html?`);
+  assertEqual(anchors[9].getAttribute('href'), `${localhost}/capture_anchor/srcdoc/srcdoc.html?id=123`);
+
+  assertEqual(anchors[10].getAttribute('href'), `about:srcdoc`);
+
+  /* depth = 0 */
+  // links to the original page should be rewritten to be the captured one
+  var options = {
+    "capture.downLink.doc.depth": 0,
+  };
+  var blob = await capture({
+    url: `${localhost}/capture_anchor/srcdoc/srcdoc.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+  var zip = await new JSZip().loadAsync(blob);
+
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+
+  var frameSrc = doc.querySelector('iframe').getAttribute('src');
+  var frameFile = zip.file(frameSrc);
+  var frameBlob = new Blob([await frameFile.async('blob')], {type: "text/html"});
+  var frameDoc = await readFileAsDocument(frameBlob);
+  var anchors = frameDoc.querySelectorAll('a');
+
+  assertEqual(anchors[0].getAttribute('href'), `index.html`);
+  assertEqual(anchors[1].getAttribute('href'), `index.html#`);
+  assertEqual(anchors[2].getAttribute('href'), `index.html#123`);
+  assertEqual(anchors[3].getAttribute('href'), `index.html`);  // "srcdoc.html?" is normalized to "srcdoc.html"
+  assertEqual(anchors[4].getAttribute('href'), `${localhost}/capture_anchor/srcdoc/srcdoc.html?id=123`);
+
+  assertEqual(anchors[5].getAttribute('href'), `index.html`);
+  assertEqual(anchors[6].getAttribute('href'), `index.html#`);
+  assertEqual(anchors[7].getAttribute('href'), `index.html#123`);
+  assertEqual(anchors[8].getAttribute('href'), `index.html`);  // "srcdoc.html?" is normalized to "srcdoc.html"
+  assertEqual(anchors[9].getAttribute('href'), `${localhost}/capture_anchor/srcdoc/srcdoc.html?id=123`);
+
+  assertEqual(anchors[10].getAttribute('href'), `about:srcdoc`);
+});
+
+/**
  * Check when base is set to another page
  *
  * capturer.captureDocument
