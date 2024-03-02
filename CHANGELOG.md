@@ -3,6 +3,19 @@
 * Versions before 1.0 are in initial development. APIs are not stable for these versions, even a `y` version can involve a breaking change, and only partial notable changes are summarized in this document. See full commit history in the source repository for details.
 * Backend server requirement in this document refers to the version of [`webscrapbook` Python package](https://github.com/danny0838/pywebscrapbook) (or PyWebScrapBook).
 
+## [2.8.0] - 2024-03-02
+* Fixed rewriting of srcset attribute that are separated by alternative spaces.
+* Fixed bad URL rewriting in some complicated CSS.
+* Fixed bad tidying of a CSS rule containing `:host` or `:host-context`.
+* Fixed bad tidying of a CSS rule with a namespaced attribute selector.
+* Fixed bad tidying of a nested CSS rule with a selector list.
+* Fixed bad tidying of a resource of a font or keyframe referenced by a rule inside a shadow DOM.
+* Fixed bad URL rewriting for links in an srcdoc iframe to the main page.
+* Fixed bad URL hash rewriting when rebuilding links for an in-depth capture.
+* Adjusted parameters handling of a content-type and content-disposition header in some rare cases.
+* Miscellaneous improvements of the internal code and unit test suite.
+* Added many tests for the internal API and falure tests for known issues..
+
 ## [2.7.0] - 2024-02-24
 * Fixed bad referrer when capturing `iframe[srcdoc]` headlessly.
 * Fixed possible random errors when capturing an inaccessible `iframe[srcdoc]`.
