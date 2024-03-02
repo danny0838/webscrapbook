@@ -7734,6 +7734,66 @@ it('test_capture_frame_cross_origin', async function () {
 });
 
 /**
+ * Check frame capture if sandboxed
+ *
+ * capture.frame
+ */
+$it.xfailIf(
+  userAgent.is('firefox'),
+  'content script cannot be injected into a sandboxed iframe in Firefox',
+)('test_capture_frame_sandboxed', async function () {
+  /* capture.frame = save */
+  var options = {
+    "capture.frame": "save",
+    "capture.saveResourcesSequentially": true,
+  };
+  var blob = await capture({
+    url: `${localhost}/capture_frame/sandboxed.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+  var zip = await new JSZip().loadAsync(blob);
+
+  // frame1.html
+  var indexFile = zip.file('index_1.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assertEqual(doc.querySelector('p').textContent.trim(), `frame1 content modified`);
+  assertEqual(doc.querySelector('img').getAttribute('src'), 'red.bmp');
+
+  var imgFile = zip.file('red.bmp');
+  assert(imgFile);
+  var imgData = await imgFile.async('base64');
+  assertEqual(imgData, 'Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAAD/AAAA');
+});
+
+$it.skipIf(
+  !userAgent.is('firefox'),
+)('test_capture_frame_sandboxed_firefox', async function () {
+  /* capture.frame = save */
+  var options = {
+    "capture.frame": "save",
+    "capture.saveResourcesSequentially": true,
+  };
+  var blob = await capture({
+    url: `${localhost}/capture_frame/sandboxed.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+  var zip = await new JSZip().loadAsync(blob);
+
+  // frame1.html
+  var indexFile = zip.file('index_1.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assertEqual(doc.querySelector('p').textContent.trim(), `frame1 content`);
+  assertEqual(doc.querySelector('img').getAttribute('src'), 'red.bmp');
+
+  var imgFile = zip.file('red.bmp');
+  assert(imgFile);
+  var imgData = await imgFile.async('base64');
+  assertEqual(imgData, 'Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAAD/AAAA');
+});
+
+/**
  * Check frame capture for srcdoc
  *
  * capture.frame
