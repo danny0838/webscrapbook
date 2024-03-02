@@ -8762,99 +8762,117 @@ it('test_capture_frameRename_header', async function () {
  *
  * capturer.captureDocument
  */
-it('test_capture_anchor', async function () {
+it('test_capture_anchor_basic', async function () {
   var blob = await capture({
-    url: `${localhost}/capture_anchor/index.html`,
+    url: `${localhost}/capture_anchor/basic/basic.html`,
     options: baseOptions,
   });
-
   var zip = await new JSZip().loadAsync(blob);
-
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
   var anchors = doc.querySelectorAll('a');
 
-  assert(anchors[0].getAttribute('href') === ``);
-  assert(anchors[1].getAttribute('href') === `#`);
-  assert(anchors[2].getAttribute('href') === `#123`);
-  assert(anchors[3].getAttribute('href') === `${localhost}/capture_anchor/index.html?id=123`);
+  assertEqual(anchors[0].getAttribute('href'), ``);
+  assertEqual(anchors[1].getAttribute('href'), `#`);
+  assertEqual(anchors[2].getAttribute('href'), `#123`);
+  assertEqual(anchors[3].getAttribute('href'), `${localhost}/capture_anchor/basic/basic.html?`);
+  assertEqual(anchors[4].getAttribute('href'), `${localhost}/capture_anchor/basic/basic.html?id=123`);
+  assertEqual(anchors[5].getAttribute('href'), `${localhost}/capture_anchor/basic/basic.html?id=123#456`);
 
-  assert(anchors[4].getAttribute('href') === ``);
-  assert(anchors[5].getAttribute('href') === `#`);
-  assert(anchors[6].getAttribute('href') === `#123`);
-  assert(anchors[7].getAttribute('href') === `${localhost}/capture_anchor/index.html?id=123`);
+  assertEqual(anchors[6].getAttribute('href'), ``);
+  assertEqual(anchors[7].getAttribute('href'), `#`);
+  assertEqual(anchors[8].getAttribute('href'), `#123`);
+  assertEqual(anchors[9].getAttribute('href'), `${localhost}/capture_anchor/basic/basic.html?`);
+  assertEqual(anchors[10].getAttribute('href'), `${localhost}/capture_anchor/basic/basic.html?id=123`);
+  assertEqual(anchors[11].getAttribute('href'), `${localhost}/capture_anchor/basic/basic.html?id=123#456`);
 
-  assert(anchors[8].getAttribute('href') === `${localhost}/capture_anchor/linked.html`);
-  assert(anchors[9].getAttribute('href') === `${localhost}/capture_anchor/linked.html#`);
-  assert(anchors[10].getAttribute('href') === `${localhost}/capture_anchor/linked.html#123`);
-  assert(anchors[11].getAttribute('href') === `${localhost}/capture_anchor/linked.html?id=123`);
+  assertEqual(anchors[12].getAttribute('href'), `${localhost}/capture_anchor/basic/linked.html`);
+  assertEqual(anchors[13].getAttribute('href'), `${localhost}/capture_anchor/basic/linked.html#`);
+  assertEqual(anchors[14].getAttribute('href'), `${localhost}/capture_anchor/basic/linked.html#123`);
+  assertEqual(anchors[15].getAttribute('href'), `${localhost}/capture_anchor/basic/linked.html?`);
+  assertEqual(anchors[16].getAttribute('href'), `${localhost}/capture_anchor/basic/linked.html?id=123`);
+  assertEqual(anchors[17].getAttribute('href'), `${localhost}/capture_anchor/basic/linked.html?id=123#456`);
 
-  assert(anchors[12].getAttribute('href') === `${localhost}/capture_anchor/subdir/linked.html`);
-  assert(anchors[13].getAttribute('href') === `${localhost}/capture_anchor/subdir/linked.html#`);
-  assert(anchors[14].getAttribute('href') === `${localhost}/capture_anchor/subdir/linked.html#123`);
-  assert(anchors[15].getAttribute('href') === `${localhost}/capture_anchor/subdir/linked.html?id=123`);
+  assertEqual(anchors[18].getAttribute('href'), `${localhost}/capture_anchor/basic/subdir/linked.html`);
+  assertEqual(anchors[19].getAttribute('href'), `${localhost}/capture_anchor/basic/subdir/linked.html#`);
+  assertEqual(anchors[20].getAttribute('href'), `${localhost}/capture_anchor/basic/subdir/linked.html#123`);
+  assertEqual(anchors[21].getAttribute('href'), `${localhost}/capture_anchor/basic/subdir/linked.html?`);
+  assertEqual(anchors[22].getAttribute('href'), `${localhost}/capture_anchor/basic/subdir/linked.html?id=123`);
+  assertEqual(anchors[23].getAttribute('href'), `${localhost}/capture_anchor/basic/subdir/linked.html?id=123#456`);
 
-  assert(anchors[16].getAttribute('href') === `http://example.com/`); // slightly changed from http://example.com
-  assert(anchors[17].getAttribute('href') === `http://example.com/#`);
-  assert(anchors[18].getAttribute('href') === `http://example.com/#123`);
-  assert(anchors[19].getAttribute('href') === `http://example.com/?id=123`);
+  assertEqual(anchors[24].getAttribute('href'), `http://example.com/`); // fixed from http://example.com
+  assertEqual(anchors[25].getAttribute('href'), `http://example.com/#`);
+  assertEqual(anchors[26].getAttribute('href'), `http://example.com/#123`);
+  assertEqual(anchors[27].getAttribute('href'), `http://example.com/?`);
+  assertEqual(anchors[28].getAttribute('href'), `http://example.com/?id=123`);
+  assertEqual(anchors[29].getAttribute('href'), `http://example.com/?id=123#456`);
 
-  assert(anchors[20].getAttribute('href') === `about:blank`);
-  assert(anchors[21].getAttribute('href') === `urn:scrapbook:download:error:http://example.com`);
-  assert(anchors[22].getAttribute('href') === `mailto:noresponse@example.com`);
+  assertEqual(anchors[30].getAttribute('href'), `about:blank`);
+  assertEqual(anchors[31].getAttribute('href'), `about:blank#`);
+  assertEqual(anchors[32].getAttribute('href'), `about:blank#123`);
+  assertEqual(anchors[33].getAttribute('href'), `about:blank?`);
+  assertEqual(anchors[34].getAttribute('href'), `about:blank?id=123`);
+  assertEqual(anchors[35].getAttribute('href'), `about:blank?id=123#456`);
+
+  assertEqual(anchors[36].getAttribute('href'), `urn:scrapbook:download:error:http://example.com`);
+  assertEqual(anchors[37].getAttribute('href'), `urn:scrapbook:download:error:http://example.com#`);
+  assertEqual(anchors[38].getAttribute('href'), `urn:scrapbook:download:error:http://example.com#123`);
+  assertEqual(anchors[39].getAttribute('href'), `urn:scrapbook:download:error:http://example.com?`);
+  assertEqual(anchors[40].getAttribute('href'), `urn:scrapbook:download:error:http://example.com?id=123`);
+  assertEqual(anchors[41].getAttribute('href'), `urn:scrapbook:download:error:http://example.com?id=123#456`);
+
+  assertEqual(anchors[42].getAttribute('href'), `mailto:noresponse@example.com`);
 });
 
 /**
  * Check local selection
- * a hash URL pointing to a not captured part of self page should be resolved to original page
+ * a hash URL pointing to a non-captured part of self page should be resolved to original page
  *
  * capturer.captureDocument
  */
-it('test_capture_anchor_self', async function () {
+it('test_capture_anchor_partial', async function () {
   /* hash link target not captured */
   var blob = await capture({
-    url: `${localhost}/capture_anchor/index21.html`,
+    url: `${localhost}/capture_anchor/partial_noncaptured/partial.html`,
     options: baseOptions,
   });
-
   var zip = await new JSZip().loadAsync(blob);
-
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
-
   var anchors = doc.querySelectorAll('a');
-  assert(anchors[0].getAttribute('href') === ``);
-  assert(anchors[1].getAttribute('href') === `#`);
-  assert(anchors[2].getAttribute('href') === `${localhost}/capture_anchor/index21.html#target_id`);
-  assert(anchors[3].getAttribute('href') === `${localhost}/capture_anchor/index21.html#target_name`);
-  assert(anchors[4].getAttribute('href') === ``);
-  assert(anchors[5].getAttribute('href') === `#`);
-  assert(anchors[6].getAttribute('href') === `${localhost}/capture_anchor/index21.html#target_id`);
-  assert(anchors[7].getAttribute('href') === `${localhost}/capture_anchor/index21.html#target_name`);
+
+  assertEqual(anchors[0].getAttribute('href'), ``);
+  assertEqual(anchors[1].getAttribute('href'), `#`);
+  assertEqual(anchors[2].getAttribute('href'), `${localhost}/capture_anchor/partial_noncaptured/partial.html#target_id`);
+  assertEqual(anchors[3].getAttribute('href'), `${localhost}/capture_anchor/partial_noncaptured/partial.html#target_name`);
+
+  assertEqual(anchors[4].getAttribute('href'), ``);
+  assertEqual(anchors[5].getAttribute('href'), `#`);
+  assertEqual(anchors[6].getAttribute('href'), `${localhost}/capture_anchor/partial_noncaptured/partial.html#target_id`);
+  assertEqual(anchors[7].getAttribute('href'), `${localhost}/capture_anchor/partial_noncaptured/partial.html#target_name`);
 
   /* hash link target captured */
   var blob = await capture({
-    url: `${localhost}/capture_anchor/index22.html`,
+    url: `${localhost}/capture_anchor/partial/partial.html`,
     options: baseOptions,
   });
-
   var zip = await new JSZip().loadAsync(blob);
-
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
-
   var anchors = doc.querySelectorAll('a');
-  assert(anchors[0].getAttribute('href') === ``);
-  assert(anchors[1].getAttribute('href') === `#`);
-  assert(anchors[2].getAttribute('href') === `#target_id`);
-  assert(anchors[3].getAttribute('href') === `#target_name`);
-  assert(anchors[4].getAttribute('href') === ``);
-  assert(anchors[5].getAttribute('href') === `#`);
-  assert(anchors[6].getAttribute('href') === `#target_id`);
-  assert(anchors[7].getAttribute('href') === `#target_name`);
+
+  assertEqual(anchors[0].getAttribute('href'), ``);
+  assertEqual(anchors[1].getAttribute('href'), `#`);
+  assertEqual(anchors[2].getAttribute('href'), `#target_id`);
+  assertEqual(anchors[3].getAttribute('href'), `#target_name`);
+
+  assertEqual(anchors[4].getAttribute('href'), ``);
+  assertEqual(anchors[5].getAttribute('href'), `#`);
+  assertEqual(anchors[6].getAttribute('href'), `#target_id`);
+  assertEqual(anchors[7].getAttribute('href'), `#target_name`);
 });
 
 /**
@@ -8864,26 +8882,26 @@ it('test_capture_anchor_self', async function () {
  */
 it('test_capture_anchor_base', async function () {
   var blob = await capture({
-    url: `${localhost}/capture_anchor/index3.html`,
+    url: `${localhost}/capture_anchor/base/base.html`,
     options: baseOptions,
   });
-
   var zip = await new JSZip().loadAsync(blob);
-
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
-
   var anchors = doc.querySelectorAll('a');
-  assert(anchors[0].getAttribute('href') === `${localhost}/capture_anchor/subdir/linked.html`);
-  assert(anchors[1].getAttribute('href') === `${localhost}/capture_anchor/subdir/linked.html#`);
-  assert(anchors[2].getAttribute('href') === `${localhost}/capture_anchor/subdir/linked.html#123`);
-  assert(anchors[3].getAttribute('href') === `${localhost}/capture_anchor/subdir/linked.html?id=123`);
-  assert(anchors[4].getAttribute('href') === ``);
-  assert(anchors[5].getAttribute('href') === `#`);
-  assert(anchors[6].getAttribute('href') === `#123`);
-  assert(anchors[7].getAttribute('href') === `${localhost}/capture_anchor/index3.html?id=123`);
-  assert(anchors[8].getAttribute('href') === `http://example.com/`); // slight changed from http://example.com
+
+  assertEqual(anchors[0].getAttribute('href'), `${localhost}/capture_anchor/base/subdir/linked.html`);
+  assertEqual(anchors[1].getAttribute('href'), `${localhost}/capture_anchor/base/subdir/linked.html#`);
+  assertEqual(anchors[2].getAttribute('href'), `${localhost}/capture_anchor/base/subdir/linked.html#123`);
+  assertEqual(anchors[3].getAttribute('href'), `${localhost}/capture_anchor/base/subdir/linked.html?id=123`);
+
+  assertEqual(anchors[4].getAttribute('href'), ``);
+  assertEqual(anchors[5].getAttribute('href'), `#`);
+  assertEqual(anchors[6].getAttribute('href'), `#123`);
+  assertEqual(anchors[7].getAttribute('href'), `${localhost}/capture_anchor/base/base.html?id=123`);
+
+  assertEqual(anchors[8].getAttribute('href'), `http://example.com/`); // slight changed from http://example.com
 });
 
 /**
@@ -8897,32 +8915,32 @@ it('test_capture_anchor_ping', async function () {
     "capture.ping": "link",
   };
   var blob = await capture({
-    url: `${localhost}/capture_anchor_ping/ping.html`,
+    url: `${localhost}/capture_anchor/ping/ping.html`,
     options: Object.assign({}, baseOptions, options),
   });
-
   var zip = await new JSZip().loadAsync(blob);
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
   var a = doc.querySelector('a');
-  assert(a.getAttribute('ping') === `${localhost}/capture_anchor_ping/ping.py ${localhost}/capture_anchor_ping/ping2.py`);
+
+  assertEqual(a.getAttribute('ping'), `${localhost}/capture_anchor/ping/ping.py ${localhost}/capture_anchor/ping/ping2.py`);
 
   /* capture.ping = blank */
   var options = {
     "capture.ping": "blank",
   };
   var blob = await capture({
-    url: `${localhost}/capture_anchor_ping/ping.html`,
+    url: `${localhost}/capture_anchor/ping/ping.html`,
     options: Object.assign({}, baseOptions, options),
   });
-
   var zip = await new JSZip().loadAsync(blob);
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
   var a = doc.querySelector('a');
-  assert(!a.hasAttribute('ping'));
+
+  assertEqual(a.hasAttribute('ping'), false);
 });
 
 /**
