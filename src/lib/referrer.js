@@ -2,6 +2,7 @@
  * A JavaScript implementation for referrer handling
  *
  * ref: https://www.w3.org/TR/referrer-policy/#referrer-policies
+ * ref: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Referrer-Policy
  *
  * Copyright Danny Lin 2021-2024
  * Distributed under the MIT License

@@ -1,6 +1,5 @@
 describe('Test libraries', function () {
 
-// ref: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Referrer-Policy
 describe('lib/referrer.js', function () {
 
   describe('Referrer.toString', function () {
