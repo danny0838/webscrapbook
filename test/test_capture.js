@@ -1,4 +1,4 @@
-describe('Test capture', function () {
+describe('Capture tests', function () {
 
 /**
  * Check html saving structure in various formats
@@ -16569,4 +16569,4 @@ it('test_capture_helpers_nesting', async function () {
   assert(doc.querySelector('img[src="green.bmp"]'));
 });
 
-});  // Test capture
+});  // Capture tests

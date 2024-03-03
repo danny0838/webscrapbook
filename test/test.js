@@ -669,7 +669,9 @@ class TestSuite {
   });
 
   // import all tests
-  await import('./test_lib.js');
+  await import('./test_lib_referrer.js');
+  await import('./test_src_core_common.js');
+  await import('./test_src_capturer_common.js');
   await import('./test_capture.js');
   await import('./test_manual.js');
 
