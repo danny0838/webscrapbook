@@ -1769,6 +1769,9 @@ describe('core/common.js', function () {
       var input = `@import url("file.css");`;
       assertEqual(scrapbook.rewriteCssText(input, options), input);
 
+      var input = `@namespace url("file.css");`;
+      assertEqual(scrapbook.rewriteCssText(input, options), input);
+
       var input = `@font-face { font-family: myfont; src: url("file.woff"); }`;
       assertEqual(scrapbook.rewriteCssText(input, options), input);
     });
