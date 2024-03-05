@@ -305,10 +305,33 @@ describe('lib/referrer.js', function () {
         "https://example.com/page",
         "about:srcdoc",
       ).isDownGrade === false);
-      assert(new Referrer(
-        "https://example.com/page",
-        new URL(browser.runtime.getURL('')).href,
-      ).isDownGrade === false);
+    });
+
+  });
+
+  describe('Referrer.trustworthyProtocols', function () {
+
+    it('basic', function () {
+      assert(Referrer.trustworthyProtocols.includes('https:'));
+      assert(Referrer.trustworthyProtocols.includes('wss:'));
+      assert(Referrer.trustworthyProtocols.includes('data:'));
+      assert(Referrer.trustworthyProtocols.includes('file:'));
+    });
+
+    $it.skipIf(
+      typeof browser === 'undefined',
+      'globalThis.browser does not exist',
+    )('browser extension protocol (globalThis.browser)', function () {
+      const protocol = new URL(chrome.runtime.getURL('')).protocol;
+      assert(Referrer.trustworthyProtocols.includes(protocol));
+    });
+
+    $it.skipIf(
+      typeof chrome === 'undefined',
+      'globalThis.chrome does not exist',
+    )('browser extension protocol (globalThis.chrome)', function () {
+      const protocol = new URL(chrome.runtime.getURL('')).protocol;
+      assert(Referrer.trustworthyProtocols.includes(protocol));
     });
 
   });

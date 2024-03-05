@@ -77,7 +77,7 @@
       // ref: https://www.w3.org/TR/secure-contexts/#is-url-trustworthy
       const sourceIsTls = ['https:', 'wss:'].includes(this.source.protocol);
       const targetIsPotentiallyTrustworthy = ['about:blank', 'about:srcdoc'].includes(this.target.protocol + this.target.pathname)
-        || ['data:', 'https:', 'wss:', 'file:', ...this.appProtocols].includes(this.target.protocol)
+        || this.trustworthyProtocols.includes(this.target.protocol)
         || this.target.hostname.match(/^127(?:\.\d{0,3}){3}$/)
         || ['[::1]', 'localhost', 'localhost.'].includes(this.target.hostname)
         || this.target.hostname.endsWith('.localhost') || this.target.hostname.endsWith('.localhost.');
@@ -87,13 +87,24 @@
       return value;
     }
 
-    get appProtocols() {
-      const value = [];
+    static get trustworthyProtocols() {
+      let value = ['data:', 'https:', 'wss:', 'file:'];
+
+      // browser extensions
+      try {
+        value.push(new URL(chrome.runtime.getURL('')).protocol);
+      } catch (ex) {}
       try {
         value.push(new URL(browser.runtime.getURL('')).protocol);
       } catch (ex) {}
-      Object.defineProperty(this, 'appProtocols', {value});
+
+      value = [...new Set(value)];
+      Object.defineProperty(Referrer, 'trustworthyProtocols', {value});
       return value;
+    }
+
+    get trustworthyProtocols() {
+      return this.constructor.trustworthyProtocols;
     }
 
     toString() {
