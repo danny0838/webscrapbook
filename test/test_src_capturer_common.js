@@ -1,3 +1,34 @@
+(function (global, factory) {
+  if (typeof exports === "object" && typeof module === "object") {
+    // CommonJS
+    module.exports = factory(
+      require('./lib/unittest'),
+      require('./t/common'),
+      require('./shared/capturer/common'),
+    );
+  } else if (typeof define === "function" && define.amd) {
+    // AMD
+    define(
+      ['./lib/unittest', './t/common', './shared/capturer/common'],
+      factory,
+    );
+  } else {
+    // Browser globals
+    global = typeof globalThis !== "undefined" ? globalThis : global || self;
+    factory(
+      global.unittest,
+      global.utils,
+      global.capturer,
+    );
+  }
+}(this, function (unittest, utils, capturer) {
+
+'use strict';
+
+const {MochaQuery: $, assert, assertEqual, assertThrows} = unittest;
+const $it = $(it);
+const {userAgent, getRulesFromCssText, cssRegex} = utils;
+
 describe('capturer/common.js', function () {
 
   describe('capturer.getRedirectedUrl', function () {
@@ -1100,3 +1131,5 @@ ul {
   });
 
 });
+
+}));

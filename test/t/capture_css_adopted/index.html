@@ -27,7 +27,7 @@ document.adoptedStyleSheets = [...document.adoptedStyleSheets, css, css2];
 
 var css = new CSSStyleSheet();
 css.insertRule('#adopted { background-color: #0F0; }');
-loadShadowDoms();
+utils.loadShadowDoms();
 var s = document.querySelector('#shadow1').shadowRoot;
 s.adoptedStyleSheets = [...s.adoptedStyleSheets, css];
 </script>

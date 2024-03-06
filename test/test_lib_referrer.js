@@ -1,3 +1,31 @@
+(function (global, factory) {
+  if (typeof exports === "object" && typeof module === "object") {
+    // CommonJS
+    module.exports = factory(
+      require('./lib/unittest'),
+      require('./shared/lib/referrer'),
+    );
+  } else if (typeof define === "function" && define.amd) {
+    // AMD
+    define(
+      ['./lib/unittest', './shared/lib/referrer'],
+      factory,
+    );
+  } else {
+    // Browser globals
+    global = typeof globalThis !== "undefined" ? globalThis : global || self;
+    factory(
+      global.unittest,
+      global.Referrer,
+    );
+  }
+}(this, function (unittest, Referrer) {
+
+'use strict';
+
+const {MochaQuery: $, assert} = unittest;
+const $it = $(it);
+
 describe('lib/referrer.js', function () {
 
   describe('Referrer.toString', function () {
@@ -286,3 +314,5 @@ describe('lib/referrer.js', function () {
   });
 
 });
+
+}));

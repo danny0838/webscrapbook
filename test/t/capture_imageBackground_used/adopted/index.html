@@ -19,7 +19,7 @@ var css = new CSSStyleSheet();
 css.insertRule('#adopted { background-image: url(./doc.bmp); }');
 document.adoptedStyleSheets = [...document.adoptedStyleSheets, css];
 
-loadShadowDoms();
+utils.loadShadowDoms();
 var css = new CSSStyleSheet();
 css.insertRule('#adopted { background-image: url(./shadow.bmp); }');
 var s = document.querySelector('#shadow1').shadowRoot;

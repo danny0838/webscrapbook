@@ -1,3 +1,42 @@
+(function (global, factory) {
+  global = typeof globalThis !== "undefined" ? globalThis : global || self;
+  if (typeof exports === "object" && typeof module === "object") {
+    // CommonJS
+    module.exports = factory(
+      global,
+      require('./lib/unittest'),
+      require('./t/common'),
+      require('./shared/lib/jszip'),
+    );
+  } else if (typeof define === "function" && define.amd) {
+    // AMD
+    define(
+      ['./lib/unittest', './t/common', './shared/lib/jszip'],
+      (...args) => {
+        return factory(global, ...args);
+      },
+    );
+  } else {
+    // Browser globals
+    factory(
+      global,
+      global.unittest,
+      global.utils,
+      global.JSZip,
+    );
+  }
+}(this, function (global, unittest, utils, JSZip) {
+
+'use strict';
+
+const {MochaQuery: $, assert, assertEqual, assertThrows} = unittest;
+const $it = $(it);
+const {
+  userAgent, delay, xhr,
+  readFileAsText, readFileAsArrayBuffer, readFileAsDataURL, readFileAsDocument,
+  getRulesFromCssText, getToken, escapeRegExp, regex, rawRegex, cssRegex,
+} = utils;
+
 describe('Capture tests', function () {
 
 /**
@@ -2996,7 +3035,7 @@ it('test_capture_base_dynamic_frame', async function () {
       "capture.base": "blank",
       "capture.frame": "save",
     };
-    var blob = await globalThis[func]({
+    var blob = await global[func]({
       url: `${localhost}/capture_base_dynamic_frame/srcdoc_basic.html`,
       options: Object.assign({}, baseOptions, options),
     });
@@ -3040,7 +3079,7 @@ it('test_capture_base_dynamic_frame', async function () {
       "capture.base": "blank",
       "capture.frame": "link",
     };
-    var blob = await globalThis[func]({
+    var blob = await global[func]({
       url: `${localhost}/capture_base_dynamic_frame/srcdoc_basic.html`,
       options: Object.assign({}, baseOptions, options),
     });
@@ -3084,7 +3123,7 @@ it('test_capture_base_dynamic_frame_bad', async function () {
       "capture.base": "blank",
       "capture.frame": "save",
     };
-    var blob = await globalThis[func]({
+    var blob = await global[func]({
       url: `${localhost}/capture_base_dynamic_frame/srcdoc_bad.html`,
       options: Object.assign({}, baseOptions, options),
     });
@@ -3116,7 +3155,7 @@ it('test_capture_base_dynamic_frame_bad', async function () {
       "capture.base": "blank",
       "capture.frame": "link",
     };
-    var blob = await globalThis[func]({
+    var blob = await global[func]({
       url: `${localhost}/capture_base_dynamic_frame/srcdoc_bad.html`,
       options: Object.assign({}, baseOptions, options),
     });
@@ -16570,3 +16609,5 @@ it('test_capture_helpers_nesting', async function () {
 });
 
 });  // Capture tests
+
+}));

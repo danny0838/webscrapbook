@@ -1,3 +1,20 @@
+/**
+ * Utilities for unit testing in server or browser extension.
+ */
+(function (global, factory) {
+  if (typeof exports === "object" && typeof module === "object") {
+    // CommonJS
+    module.exports = factory(require('../shared/lib/sha'));
+  } else if (typeof define === "function" && define.amd) {
+    // AMD
+    define(['../shared/lib/sha'], factory);
+  } else {
+    // Browser globals
+    global = typeof globalThis !== "undefined" ? globalThis : global || self;
+    global.utils = factory(global.jsSHA);
+  }
+}(this, function (jsSHA) {
+
 'use strict';
 
 var userAgent = (() => {
@@ -168,7 +185,7 @@ function escapeRegExp(str) {
   // Escaping "-" allows the result be embedded in a character class.
   // Escaping "/" allows the result be embedded in a JS regex literal.
   const regex = /[/\\^$*+?.|()[\]{}]/g;
-  const fn = window.escapeRegExp = (str) => {
+  const fn = escapeRegExp = (str) => {
     return str.replace(regex, "\\$&");
   };
   return fn(str);
@@ -252,3 +269,25 @@ function loadShadowDoms(root = document, {
     }
   }
 }
+
+return {
+  userAgent,
+  delay,
+  readFileAsArrayBuffer,
+  readFileAsText,
+  readFileAsDataURL,
+  readFileAsDocument,
+  xhr,
+  sha1,
+  getToken,
+  getUuid,
+  byteStringToArrayBuffer,
+  getRulesFromCssText,
+  escapeRegExp,
+  regex,
+  rawRegex,
+  cssRegex,
+  loadShadowDoms,
+};
+
+}));

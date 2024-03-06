@@ -1,3 +1,34 @@
+(function (global, factory) {
+  if (typeof exports === "object" && typeof module === "object") {
+    // CommonJS
+    module.exports = factory(
+      require('./lib/unittest'),
+      require('./t/common'),
+      require('./shared/core/common'),
+    );
+  } else if (typeof define === "function" && define.amd) {
+    // AMD
+    define(
+      ['./lib/unittest', './t/common', './shared/core/common'],
+      factory,
+    );
+  } else {
+    // Browser globals
+    global = typeof globalThis !== "undefined" ? globalThis : global || self;
+    factory(
+      global.unittest,
+      global.utils,
+      global.scrapbook,
+    );
+  }
+}(this, function (unittest, utils, scrapbook) {
+
+'use strict';
+
+const {MochaQuery: $, assert, assertEqual, assertThrows} = unittest;
+const $it = $(it);
+const {userAgent, cssRegex} = utils;
+
 describe('core/common.js', function () {
 
   describe('scrapbook.escapeFilename', function () {
@@ -1991,3 +2022,5 @@ div { image-background: var(${/(--sb(\d+)-2)/}); }`;
   });
 
 });
+
+}));

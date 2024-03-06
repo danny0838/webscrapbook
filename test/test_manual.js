@@ -1,3 +1,21 @@
+(function (global, factory) {
+  global = typeof globalThis !== "undefined" ? globalThis : global || self;
+  if (typeof exports === "object" && typeof module === "object") {
+    // CommonJS
+    module.exports = factory(global);
+  } else if (typeof define === "function" && define.amd) {
+    // AMD
+    define(() => {
+      return factory(global);
+    });
+  } else {
+    // Browser globals
+    factory(global);
+  }
+}(this, function (global) {
+
+'use strict';
+
 describe('Manual tests', function () {
 
 describe('Test viewer', function () {
@@ -115,3 +133,5 @@ it('test_viewer_csp', async function () {
 });  // Test viewer
 
 });  // Manual tests
+
+}));

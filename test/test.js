@@ -1,3 +1,35 @@
+(function (global, factory) {
+  global = typeof globalThis !== "undefined" ? globalThis : global || self;
+  if (typeof exports === "object" && typeof module === "object") {
+    // CommonJS
+    module.exports = factory(
+      global,
+      require('./lib/mocha'),
+      require('./t/common'),
+    );
+  } else if (typeof define === "function" && define.amd) {
+    // AMD
+    require(
+      ['./lib/mocha', './t/common'],
+      (...args) => {
+        return factory(global, ...args);
+      },
+    );
+  } else {
+    // Browser globals
+    factory(
+      global,
+      global.mocha,
+      global.utils,
+    );
+  }
+}(this, function (global, mocha, utils) {
+
+'use strict';
+
+const {userAgent, delay, xhr, readFileAsDocument, byteStringToArrayBuffer} = utils;
+
+
 /******************************************************************************
  * Configs
  *****************************************************************************/
@@ -66,340 +98,6 @@ const MAF = "http://maf.mozdev.org/metadata/rdf#";
 /******************************************************************************
  * Helpers
  *****************************************************************************/
-
-/**
- * Simple assertion that outputs the error to the console for later tracing.
- */
-function assert(condition, message) {
-  if (condition) { return; }
-  const err = new Error(message || "Assertion failed");
-  console.error(err);
-  throw err;
-}
-
-/**
- * Check two objects (JSONifiable) are deeply identical.
- */
-function assertEqual(obj1, obj2, message) {
-  const s1 = JSON.stringify(obj1);
-  const s2 = JSON.stringify(obj2);
-  if (s1 === s2) { return; }
-  const err = new Error(`${s1} not equal to ${s2}${message ? ': ' + message : ''}`);
-  console.error(err);
-  throw err;
-}
-
-/**
- * @typedef {Object} assertThrowsSpec
- * @property {string} [name] - The expected error name.
- * @property {string} [message] - The expected error message.
- */
-
-/**
- * Check if the function throws with the exception
- *
- * @param {Function} func - the function to test
- * @param {assertThrowsSpec|Error} [expectedEx] - the expected error
- */
-function assertThrows(func, expectedEx, message) {
-  let error;
-  try {
-    func();
-  } catch (ex) {
-    error = ex;
-  }
-  if (!error) {
-    throw new Error(`Expected error not thrown${message ? ': ' + message : ''}`);
-  }
-  if (expectedEx) {
-    if (expectedEx.name && error.name !== expectedEx.name) {
-      throw new Error(`Expected ${expectedEx.name} not thrown${message ? ': ' + message : ''}`);
-    }
-    if (expectedEx.message && error.message !== expectedEx.message) {
-      throw new Error(`Expected error with message "${expectedEx.message}" not thrown${message ? ': ' + message : ''}`);
-    }
-  }
-}
-
-/**
- * A jQuery-style extension of describe or it for chainable and conditional
- * skip or xfail.
- *
- * Also globally exposed as:
- *   - $it = $(it) = MochaQuery(it)
- *   - $describe = $(describe) = MochaQuery(describe)
- *
- * Usage:
- *   .skip([reason])           // skip (if not yet skipped)
- *   .skipIf(cond [, reason])  // skip if cond (and not yet skipped)
- *   .xfail([reason])          // expect fail (if not yet skipped/xfailed)
- *   .xfailIf(cond, [reason])  // expect fail if cond (and not yet skipped/xfailed)
- *
- *   $it
- *     .skipIf(cond1, skipReason1)
- *     .skipIf(cond2, skipReason2)
- *     .xfail(xfailReason)
- *     (title, callback)
- *
- *   $describe
- *     .skipIf(cond1, skipReason1)
- *     .skipIf(cond2, skipReason2)
- *     (title, callback)
- */
-function MochaQuery(func, data = {}) {
-  return data.proxy = new Proxy(func, Object.entries(MochaQuery.handler).reduce((obj, [key, value]) => {
-    obj[key] = value.bind(this, data);
-    return obj;
-  }, {}));
-}
-
-MochaQuery.handler = {
-  get(data, func, prop) {
-    if (prop in MochaQuery.methods) {
-      return MochaQuery(func, Object.assign({}, data, {method: prop}));
-    }
-    return Reflect.get(func, prop);
-  },
-  apply(data, func, thisArg, args) {
-    const methods = MochaQuery.methods, method = methods[data.method];
-    if (method) {
-      const d = Object.assign({}, data, {method: null});
-      method.call(methods, d, ...args);
-      return MochaQuery(func, d);
-    }
-
-    const [title, callback] = args;
-    switch (data.mode) {
-      case 'skip': {
-        const reason = data.reason ? ` (${data.reason})` : '';
-        const titleNew = `${title} - skipped${reason}`;
-        return func.skip.call(thisArg, titleNew, callback);
-      }
-      case 'xfail': {
-        const reason = data.reason ? ` (${data.reason})` : '';
-        const titleNew = `${title} - expected failure${reason}`;
-        const callbackNew = async function (...args) {
-          try {
-            await callback.apply(this, args);
-          } catch (ex) {
-            return;
-          }
-          throw new Error('unexpected success');
-        };
-        callbackNew.toString = () => callback.toString();
-        return func.call(thisArg, titleNew, callbackNew);
-      }
-    }
-
-    return Reflect.apply(func, thisArg, args);
-  },
-};
-
-MochaQuery.methods = {
-  skip(data, reason) {
-    if (data.mode === 'skip') { return; }
-    data.mode = 'skip';
-    data.reason = reason;
-  },
-  skipIf(data, condition, reason) {
-    if (data.mode === 'skip') { return; }
-    if (condition instanceof MochaQuery.Query) {
-      [condition, reason] = [condition.condition, reason || condition.reason];
-    }
-    if (!condition) { return; }
-    data.mode = 'skip';
-    data.reason = reason;
-  },
-  xfail(data, reason) {
-    if (data.mode) { return; }
-    data.mode = 'xfail';
-    data.reason = reason;
-  },
-  xfailIf(data, condition, reason) {
-    if (data.mode) { return; }
-    if (condition instanceof MochaQuery.Query) {
-      [condition, reason] = [condition.condition, reason || condition.reason];
-    }
-    if (!condition) { return; }
-    data.mode = 'xfail';
-    data.reason = reason;
-  },
-};
-
-MochaQuery.Query = class Query {
-  constructor(condition, reason) {
-    this.condition = condition;
-    this.reason = reason;
-  }
-};
-
-Object.defineProperties(MochaQuery, Object.getOwnPropertyDescriptors({
-  get noMultipleSelection() {
-    const value = new MochaQuery.Query(
-      (() => {
-        const sel = document.getSelection();
-        const origCount = sel.rangeCount;
-        if (origCount > 1) {
-          return false;
-        }
-        const origRanges = [];
-        for (let i = 0; i < origCount; i++) {
-          origRanges.push(sel.getRangeAt(i));
-        }
-        const dummyTextNode = document.createTextNode('dummy');
-        try {
-          document.body.appendChild(dummyTextNode);
-
-          let range = document.createRange();
-          range.setStart(dummyTextNode, 0);
-          range.setEnd(dummyTextNode, 1);
-          sel.addRange(range);
-
-          range = document.createRange();
-          range.setStart(dummyTextNode, 2);
-          range.setEnd(dummyTextNode, 3);
-          sel.addRange(range);
-
-          if (sel.rangeCount <= 1) {
-            return true;
-          }
-        } finally {
-          sel.removeAllRanges();
-          for (let i = 0; i < origCount; i++) {
-            sel.addRange(origRanges[i]);
-          }
-          dummyTextNode.remove();
-        }
-        return false;
-      })(),
-      'multiple selection not supported',
-    );
-    Object.defineProperty(this, 'noMultipleSelection', {value});
-    return value;
-  },
-  get noAdoptedStylesheet() {
-    // Document.adoptedStyleSheets is not supported by Firefox < 101.
-    const value = new MochaQuery.Query(
-      !document.adoptedStyleSheets,
-      'Document.adoptedStyleSheets not supported',
-    );
-    Object.defineProperty(this, 'noAdoptedStylesheet', {value});
-    return value;
-  },
-  get noNestingCss() {
-    // CSS nesting selector is supported in Firefox >= 117 and Chromium >= 120.
-    const value = new MochaQuery.Query(
-      (() => {
-        const d = document.implementation.createHTMLDocument();
-        const style = d.head.appendChild(d.createElement('style'));
-        style.textContent = 'a{b{}}';
-        const rule = style.sheet.cssRules[0];
-        if (!(rule.cssRules && rule.cssRules[0])) {
-          return true;
-        }
-        return false;
-      })(),
-      'CSS nesting not supported',
-    );
-    Object.defineProperty(this, 'noNestingCss', {value});
-    return value;
-  },
-  get noColumnCombinator() {
-    const value = new MochaQuery.Query(
-      (() => {
-        try {
-          document.querySelector('col || td');
-        } catch (ex) {
-          return true;
-        }
-        return false;
-      })(),
-      'CSS column combinator ("||") not supported',
-    );
-    Object.defineProperty(this, 'noColumnCombinator', {value});
-    return value;
-  },
-  get noPartPseudo() {
-    // :part() CSS pseudo-element is supported in Firefox >= 72 and Chromium >= 73.
-    const value = new MochaQuery.Query(
-      (() => {
-        try {
-          document.querySelector('::part(dummy)');
-        } catch (ex) {
-          return true;
-        }
-        return false;
-      })(),
-      '::part() CSS pseudo-element not supported',
-    );
-    Object.defineProperty(this, 'noPartPseudo', {value});
-    return value;
-  },
-  get noIsPseudo() {
-    // :is() CSS pseudo-class is supported in Firefox >= 78 and Chromium >= 88.
-    const value = new MochaQuery.Query(
-      (() => {
-        try {
-          document.querySelector(':is()');
-        } catch (ex) {
-          return true;
-        }
-        return false;
-      })(),
-      ':is() CSS pseudo-class not supported',
-    );
-    Object.defineProperty(this, 'noIsPseudo', {value});
-    return value;
-  },
-  get noHostContextPseudo() {
-    // :host-context() not suported in some browsers (e.g. Firefox)
-    const value = new MochaQuery.Query(
-      (() => {
-        try {
-          document.querySelector(':host-context(*)');
-        } catch (ex) {
-          return true;
-        }
-        return false;
-      })(),
-      ':host-context() CSS pseudo-class not supported',
-    );
-    Object.defineProperty(this, 'noHostContextPseudo', {value});
-    return value;
-  },
-  get noAtCounterStyle() {
-    const value = new MochaQuery.Query(
-      (() => {
-        const d = document.implementation.createHTMLDocument();
-        const style = d.head.appendChild(d.createElement('style'));
-        style.textContent = '@counter-style my { symbols: "1"; }';
-        if (!style.sheet.cssRules.length) {
-          return true;
-        }
-        return false;
-      })(),
-      '@counter-style CSS rule not supported',
-    );
-    Object.defineProperty(this, 'noAtCounterStyle', {value});
-    return value;
-  },
-  get noAtLayer() {
-    const value = new MochaQuery.Query(
-      (() => {
-        const d = document.implementation.createHTMLDocument();
-        const style = d.head.appendChild(d.createElement('style'));
-        style.textContent = '@layer mylayer;';
-        if (!style.sheet.cssRules.length) {
-          return true;
-        }
-        return false;
-      })(),
-      '@layer CSS rule not supported',
-    );
-    Object.defineProperty(this, 'noAtLayer', {value});
-    return value;
-  },
-}));
 
 class TestSuite {
   async init() {
@@ -649,17 +347,10 @@ class TestSuite {
   });
 
   // expose to global scope
-  Object.assign(globalThis, {
+  Object.assign(global, {
     baseOptions,
     RDF,
     MAF,
-
-    assert,
-    assertEqual,
-    assertThrows,
-    $: MochaQuery,
-    $describe: MochaQuery(describe),
-    $it: MochaQuery(it),
 
     localhost: suite.localhost,
     localhost2: suite.localhost2,
@@ -677,3 +368,5 @@ class TestSuite {
 
   mocha.run();
 })();
+
+}));
