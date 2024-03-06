@@ -25,9 +25,9 @@
 
 'use strict';
 
-const {MochaQuery: $, assert, assertEqual, assertThrows} = unittest;
+const {MochaQuery: $, assert, assertEqual, assertThrows, cssRegex} = unittest;
 const $it = $(it);
-const {userAgent, cssRegex} = utils;
+const {userAgent} = utils;
 
 describe('core/common.js', function () {
 

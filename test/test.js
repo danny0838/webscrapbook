@@ -5,12 +5,13 @@
     module.exports = factory(
       global,
       require('./lib/mocha'),
+      require('./lib/unittest'),
       require('./t/common'),
     );
   } else if (typeof define === "function" && define.amd) {
     // AMD
     require(
-      ['./lib/mocha', './t/common'],
+      ['./lib/mocha', './lib/unittest', './t/common'],
       (...args) => {
         return factory(global, ...args);
       },
@@ -20,14 +21,16 @@
     factory(
       global,
       global.mocha,
+      global.unittest,
       global.utils,
     );
   }
-}(this, function (global, mocha, utils) {
+}(this, function (global, mocha, unittest, utils) {
 
 'use strict';
 
-const {userAgent, delay, xhr, readFileAsDocument, byteStringToArrayBuffer} = utils;
+const {byteStringToArrayBuffer} = unittest;
+const {userAgent, delay, xhr, readFileAsDocument} = utils;
 
 
 /******************************************************************************

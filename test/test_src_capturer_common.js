@@ -25,9 +25,9 @@
 
 'use strict';
 
-const {MochaQuery: $, assert, assertEqual, assertThrows} = unittest;
+const {MochaQuery: $, assert, assertEqual, assertThrows, getRulesFromCssText, cssRegex} = unittest;
 const $it = $(it);
-const {userAgent, getRulesFromCssText, cssRegex} = utils;
+const {userAgent} = utils;
 
 describe('capturer/common.js', function () {
 

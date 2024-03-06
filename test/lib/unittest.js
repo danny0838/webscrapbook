@@ -8,16 +8,20 @@
 (function (global, factory) {
   if (typeof exports === "object" && typeof module === "object") {
     // CommonJS
-    module.exports = factory();
+    module.exports = factory(
+      require('../shared/lib/sha'),
+    );
   } else if (typeof define === "function" && define.amd) {
     // AMD
-    define(factory);
+    define(['../shared/lib/sha'], factory);
   } else {
     // Browser globals
     global = typeof globalThis !== "undefined" ? globalThis : global || self;
-    global.unittest = factory();
+    global.unittest = factory(
+      global.jsSHA,
+    );
   }
-}(this, function () {
+}(this, function (jsSHA) {
 
   'use strict';
 
@@ -355,11 +359,122 @@
     },
   }));
 
+  function sha1(data, type) {
+    let shaObj = new jsSHA("SHA-1", type);
+    shaObj.update(data);
+    return shaObj.getHash("HEX");
+  }
+
+  function getToken(url, role) {
+    let token = `${url}\t${role}`;
+    token = sha1(token, "TEXT");
+    return token;
+  }
+
+  function getUuid() {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+      let r = Math.random()*16|0, v = (c == 'x') ? r : (r&0x3|0x8);
+      return v.toString(16);
+    });
+  }
+
+  function byteStringToArrayBuffer(bstr) {
+    let n = bstr.length, u8ar = new Uint8Array(n);
+    while (n--) { u8ar[n] = bstr.charCodeAt(n); }
+    return u8ar.buffer;
+  }
+
+  function getRulesFromCssText(cssText) {
+    const d = document.implementation.createHTMLDocument('');
+    const styleElem = d.createElement('style');
+    styleElem.textContent = cssText;
+    d.head.appendChild(styleElem);
+    return styleElem.sheet.cssRules;
+  }
+
+  function escapeRegExp(str) {
+    // Don't escape "-" as it causes an error for a RegExp with unicode flag.
+    // Escaping "-" allows the result be embedded in a character class.
+    // Escaping "/" allows the result be embedded in a JS regex literal.
+    const regex = /[/\\^$*+?.|()[\]{}]/g;
+    const fn = escapeRegExp = (str) => {
+      return str.replace(regex, "\\$&");
+    };
+    return fn(str);
+  }
+
+  /**
+   * A RegExp with raw string.
+   *
+   * This is similar to /.../ but allows "/".
+   *
+   * Usage:
+   *     regex`^text/html$` === /^text\/html$/
+   */
+  function regex(strings, ...args) {
+    const results = [strings.raw[0]];
+    args.forEach((arg, i) => {
+      results.push(String(arg));
+      results.push(strings.raw[i + 1]);
+    });
+    return new RegExp(results.join(''));
+  }
+
+  /**
+   * A RegExp with literal string and optional interpolated RegExp source fragments.
+   *
+   * Usage:
+   *     rawRegex`${'^'}(function () {${'.+'}})()${'$'}` === /^\(function \(\) \{.+\}\)\(\)$/
+   */
+  function rawRegex(strings, ...args) {
+    const results = [escapeRegExp(strings.raw[0])];
+    args.forEach((arg, i) => {
+      if (arg instanceof RegExp) {
+        results.push(arg.source);
+      } else {
+        results.push(String(arg));
+      }
+      results.push(escapeRegExp(strings.raw[i + 1]));
+    });
+    return new RegExp(results.join(''));
+  }
+
+  /**
+   * A RegExp with raw CSS string with permissive spacing and optional
+   * interpolated RegExp source fragments.
+   *
+   * Usage:
+   *     cssRegex`body { background: ${/\w+/} }` === /body\s*\{\s*background:\s*\w+\s*\}/
+   */
+  function cssRegex(strings, ...args) {
+    const ASCII_WHITESPACE = String.raw`\t\n\f\r `;
+    const permissiveSpacing = (s) => s.split(regex`[${ASCII_WHITESPACE}]+`).map(s => escapeRegExp(s)).join(`[${ASCII_WHITESPACE}]*`);
+    const results = [permissiveSpacing(strings.raw[0])];
+    args.forEach((arg, i) => {
+      if (arg instanceof RegExp) {
+        results.push(arg.source);
+      } else {
+        results.push(String(arg));
+      }
+      results.push(permissiveSpacing(strings.raw[i + 1]));
+    });
+    return new RegExp(results.join(''));
+  }
+
   return {
     assert,
     assertEqual,
     assertThrows,
     MochaQuery,
+    sha1,
+    getToken,
+    getUuid,
+    byteStringToArrayBuffer,
+    getRulesFromCssText,
+    escapeRegExp,
+    regex,
+    rawRegex,
+    cssRegex,
   };
 
 }));

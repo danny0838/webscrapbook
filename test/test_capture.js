@@ -29,12 +29,14 @@
 
 'use strict';
 
-const {MochaQuery: $, assert, assertEqual, assertThrows} = unittest;
+const {
+  MochaQuery: $, assert, assertEqual, assertThrows,
+  getRulesFromCssText, getToken, escapeRegExp, regex, rawRegex, cssRegex,
+} = unittest;
 const $it = $(it);
 const {
   userAgent, delay, xhr,
   readFileAsText, readFileAsArrayBuffer, readFileAsDataURL, readFileAsDocument,
-  getRulesFromCssText, getToken, escapeRegExp, regex, rawRegex, cssRegex,
 } = utils;
 
 describe('Capture tests', function () {
