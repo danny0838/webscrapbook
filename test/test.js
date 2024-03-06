@@ -233,7 +233,7 @@ MochaQuery.Query = class Query {
   }
 };
 
-Object.assign(MochaQuery, {
+Object.defineProperties(MochaQuery, Object.getOwnPropertyDescriptors({
   get noMultipleSelection() {
     const value = new MochaQuery.Query(
       (() => {
@@ -399,7 +399,7 @@ Object.assign(MochaQuery, {
     Object.defineProperty(this, 'noAtLayer', {value});
     return value;
   },
-});
+}));
 
 class TestSuite {
   async init() {
