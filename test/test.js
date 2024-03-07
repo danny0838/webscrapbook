@@ -316,7 +316,7 @@ Object.defineProperties(MochaQuery, Object.getOwnPropertyDescriptors({
       })(),
       'CSS column combinator ("||") not supported',
     );
-    Object.defineProperty(this, 'noNestingCss', {value});
+    Object.defineProperty(this, 'noColumnCombinator', {value});
     return value;
   },
   get noPartPseudo() {
