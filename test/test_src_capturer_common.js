@@ -791,13 +791,13 @@ ul {
       assertEqual(getSelectorVerifier(selector1), selector2);
     };
 
-    it('basic', function () {
-      // general selectors
+    it('general selectors', function () {
       testGetSelectorVerifier('*', '*');
       testGetSelectorVerifier('div#id, span.class', 'div#id, span.class');
       testGetSelectorVerifier('& body', '& body', false);
+    });
 
-      // common pseudo-classes
+    it('common pseudo-classes', function () {
       testGetSelectorVerifier('a:hover', 'a');
       testGetSelectorVerifier('a:active', 'a');
       testGetSelectorVerifier('a:link', 'a');
@@ -827,27 +827,32 @@ ul {
       testGetSelectorVerifier(':dir(ltr)', '*', false);
 
       testGetSelectorVerifier('a:not([href]):not([target])', 'a');
+    });
 
-      // common pseudo-elements
+    it('common pseudo-elements', function () {
       testGetSelectorVerifier('a::before', 'a');
       testGetSelectorVerifier('a::after', 'a');
       testGetSelectorVerifier('p::first-line', 'p');
       testGetSelectorVerifier('input::placeholder', 'input');
       testGetSelectorVerifier('::slotted(span)', '*');
-      testGetSelectorVerifier('tabbed-custom-element::part(tab)', 'tabbed-custom-element', false);
+      testGetSelectorVerifier('custom-element::part(tab)', 'custom-element', false);
+      testGetSelectorVerifier('#nonexist::part(elem)', '#nonexist', false);
+    });
 
-      // combined pseudo-classes/elements
+    it('combined pseudo-classes/elements', function () {
       testGetSelectorVerifier('a:hover::before', 'a');
+    });
 
-      // pseudo-elements that are not guaranteed to work after rewritten
+    it('pseudo-classes that are not guaranteed to work after rewritten', function () {
       testGetSelectorVerifier(':host', '');
       testGetSelectorVerifier(':host > div', '');
       testGetSelectorVerifier(':host(.class)', '');
       testGetSelectorVerifier(':host(.class) > div', '');
       testGetSelectorVerifier(':host-context(.class)', '', false);
       testGetSelectorVerifier(':host-context(.class) > div', '', false);
+    });
 
-      // allowed pseudo-classes
+    it('allowed pseudo-classes', function () {
       testGetSelectorVerifier(':root', ':root');
       testGetSelectorVerifier(':scope', ':scope');
       testGetSelectorVerifier(':scope > body > div', ':scope > body > div');
@@ -865,12 +870,14 @@ ul {
       testGetSelectorVerifier('li:nth-last-child(2)', 'li:nth-last-child(2)');
       testGetSelectorVerifier('li:nth-of-type(3n + 1)', 'li:nth-of-type(3n + 1)');
       testGetSelectorVerifier('li:nth-last-of-type(3)', 'li:nth-last-of-type(3)');
+    });
 
-      // (...) inside an allowed pseudo-class should be recursively rewritten
+    it('(...) inside an allowed pseudo should be recursively rewritten', function () {
       testGetSelectorVerifier(':is(:hover, a:active)', ':is(*, a)', false);
       testGetSelectorVerifier(':is(:is(:link, :visited), button:active)', ':is(:is(*, *), button)', false);
+    });
 
-      // namespace for type selector should be removed
+    it('namespace for type selector should be removed', function () {
       testGetSelectorVerifier('svg|a span', 'a span', false);
       testGetSelectorVerifier('*|a span', 'a span');
       testGetSelectorVerifier('|a span', 'a span');
@@ -878,7 +885,15 @@ ul {
       testGetSelectorVerifier('*|* span', '* span');
       testGetSelectorVerifier('|* span', '* span');
 
-      // namespace for attribute selector should be *
+      testGetSelectorVerifier('p svg|a', 'p a', false);
+      testGetSelectorVerifier('p *|a', 'p a');
+      testGetSelectorVerifier('p |a', 'p a');
+      testGetSelectorVerifier('p svg|*', 'p *', false);
+      testGetSelectorVerifier('p *|*', 'p *');
+      testGetSelectorVerifier('p |*', 'p *');
+    });
+
+    it('namespace for attribute selector should be *', function () {
       testGetSelectorVerifier('[attr]', '[*|attr]');
       testGetSelectorVerifier('[attr=value]', '[*|attr=value]');
       testGetSelectorVerifier('[attr="value"]', '[*|attr="value"]');
@@ -897,7 +912,12 @@ ul {
 
       testGetSelectorVerifier('[svg|attr="value" i]', '[*|attr="value" i]', false);
 
-      // column combinator should not be treated as namespace
+      // be ware of the |= operator
+      testGetSelectorVerifier('[attr|="value"]', '[*|attr|="value"]');
+      testGetSelectorVerifier('[svg|attr|="value"]', '[*|attr|="value"]', false);
+    });
+
+    it('column combinator should not be treated as namespace', function () {
       testGetSelectorVerifier('col||td', 'col||td', false);
       testGetSelectorVerifier('col || td', 'col || td', false);
     });
