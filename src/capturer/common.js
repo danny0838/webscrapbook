@@ -4400,7 +4400,8 @@
      * Rewrite the given CSS selector to cover a reasonably broader cases and
      * can be used in querySelector().
      *
-     * 1. Remove namespace in the selector. (e.g. svg|a => a)
+     * 1. Rewrite namespace in the selector. (e.g. svg|a => a,
+     *    [attr=value] => [*|attr=value])
      * 2. Recursively remove pseudoes (including pseudo-classes(:*) and
      *    pseudo-elements(::*)) unless it's listed in ALLOWED_PSEUDO.
      *    (e.g. div:hover => div).
