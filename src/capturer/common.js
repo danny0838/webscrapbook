@@ -4427,7 +4427,7 @@
       //        still match using ShadowRoot.querySelector().
       const SPECIAL_PSEUDO = new Set(['host', 'host-context']);
 
-      const regexAttrNs = /^\[[^\\|=\]]*(?:\\.[^\\|=\]]*)*\|/g;
+      const regexAttrNs = /^\[[^\\|=\]]*(?:\\.[^\\|=\]]*)*\|(?!=)/g;
 
       const tokenizer = new CssSelectorTokenizer();
 
