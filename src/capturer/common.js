@@ -4412,7 +4412,7 @@
      *    (e.g. :host and :host-context represent the shadow host, which can
      *    not be matched by ShadowRoot.querySelector() using any selector.
      */
-    static getVerifyingSelector(...args) {
+    static getSelectorVerifier(...args) {
       // Do not include :not as the semantic is reversed and the rule could be
       // narrower after rewriting (e.g. :not(:hover) => :not(*)).
       const ALLOWED_PSEUDO = new Set([
@@ -4513,12 +4513,12 @@
         return tokenizer.tokensToString(result);
       };
 
-      Object.defineProperty(DocumentCssHandler, 'getVerifyingSelector', {value: fn});
+      Object.defineProperty(DocumentCssHandler, 'getSelectorVerifier', {value: fn});
       return fn(...args);
     }
 
-    getVerifyingSelector(...args) {
-      return this.constructor.getVerifyingSelector.apply(this, args);
+    getSelectorVerifier(...args) {
+      return this.constructor.getSelectorVerifier.apply(this, args);
     }
 
     /**
@@ -4544,7 +4544,7 @@
         selectorTextInvalid = true;
       }
 
-      let selectorTextRewritten = this.getVerifyingSelector(selectorText);
+      let selectorTextRewritten = this.getSelectorVerifier(selectorText);
       if (!selectorTextRewritten) {
         // The selector cannot be reliably rewritten.
         return true;

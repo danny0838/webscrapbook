@@ -772,10 +772,10 @@ ul {
 
   });
 
-  describe('capturer.DocumentCssHandler.getVerifyingSelector', function () {
-    const getVerifyingSelector = capturer.DocumentCssHandler.getVerifyingSelector;
+  describe('capturer.DocumentCssHandler.getSelectorVerifier', function () {
+    const getSelectorVerifier = capturer.DocumentCssHandler.getSelectorVerifier;
 
-    const testGetVerifyingSelector = (selector1, selector2, validate = true) => {
+    const testGetSelectorVerifier = (selector1, selector2, validate = true) => {
       if (validate) {
         try {
           selector1 && document.querySelector(selector1);
@@ -788,118 +788,118 @@ ul {
           throw new Error(`Invalid control CSS selector: ${selector2}`);
         }
       }
-      assertEqual(getVerifyingSelector(selector1), selector2);
+      assertEqual(getSelectorVerifier(selector1), selector2);
     };
 
     it('basic', function () {
       // general selectors
-      testGetVerifyingSelector('*', '*');
-      testGetVerifyingSelector('div#id, span.class', 'div#id, span.class');
-      testGetVerifyingSelector('& body', '& body', false);
+      testGetSelectorVerifier('*', '*');
+      testGetSelectorVerifier('div#id, span.class', 'div#id, span.class');
+      testGetSelectorVerifier('& body', '& body', false);
 
       // common pseudo-classes
-      testGetVerifyingSelector('a:hover', 'a');
-      testGetVerifyingSelector('a:active', 'a');
-      testGetVerifyingSelector('a:link', 'a');
-      testGetVerifyingSelector('a:visited', 'a');
+      testGetSelectorVerifier('a:hover', 'a');
+      testGetSelectorVerifier('a:active', 'a');
+      testGetSelectorVerifier('a:link', 'a');
+      testGetSelectorVerifier('a:visited', 'a');
 
-      testGetVerifyingSelector('div:empty', 'div');
+      testGetSelectorVerifier('div:empty', 'div');
 
-      testGetVerifyingSelector('form :enabled', 'form *');
-      testGetVerifyingSelector('form :disabled', 'form *');
+      testGetSelectorVerifier('form :enabled', 'form *');
+      testGetSelectorVerifier('form :disabled', 'form *');
 
-      testGetVerifyingSelector('form:focus', 'form');
-      testGetVerifyingSelector('form:focus-within', 'form');
+      testGetSelectorVerifier('form:focus', 'form');
+      testGetSelectorVerifier('form:focus-within', 'form');
 
-      testGetVerifyingSelector('input:checked', 'input');
-      testGetVerifyingSelector('input:indeterminate', 'input');
+      testGetSelectorVerifier('input:checked', 'input');
+      testGetSelectorVerifier('input:indeterminate', 'input');
 
-      testGetVerifyingSelector('input:required', 'input');
-      testGetVerifyingSelector('input:optional', 'input');
+      testGetSelectorVerifier('input:required', 'input');
+      testGetSelectorVerifier('input:optional', 'input');
 
-      testGetVerifyingSelector('input:valid', 'input');
-      testGetVerifyingSelector('input:invalid', 'input');
+      testGetSelectorVerifier('input:valid', 'input');
+      testGetSelectorVerifier('input:invalid', 'input');
 
-      testGetVerifyingSelector('input:in-range', 'input');
-      testGetVerifyingSelector('input:out-of-range', 'input');
+      testGetSelectorVerifier('input:in-range', 'input');
+      testGetSelectorVerifier('input:out-of-range', 'input');
 
-      testGetVerifyingSelector(':lang(en) > q', '* > q');
-      testGetVerifyingSelector(':dir(ltr)', '*', false);
+      testGetSelectorVerifier(':lang(en) > q', '* > q');
+      testGetSelectorVerifier(':dir(ltr)', '*', false);
 
-      testGetVerifyingSelector('a:not([href]):not([target])', 'a');
+      testGetSelectorVerifier('a:not([href]):not([target])', 'a');
 
       // common pseudo-elements
-      testGetVerifyingSelector('a::before', 'a');
-      testGetVerifyingSelector('a::after', 'a');
-      testGetVerifyingSelector('p::first-line', 'p');
-      testGetVerifyingSelector('input::placeholder', 'input');
-      testGetVerifyingSelector('::slotted(span)', '*');
-      testGetVerifyingSelector('tabbed-custom-element::part(tab)', 'tabbed-custom-element', false);
+      testGetSelectorVerifier('a::before', 'a');
+      testGetSelectorVerifier('a::after', 'a');
+      testGetSelectorVerifier('p::first-line', 'p');
+      testGetSelectorVerifier('input::placeholder', 'input');
+      testGetSelectorVerifier('::slotted(span)', '*');
+      testGetSelectorVerifier('tabbed-custom-element::part(tab)', 'tabbed-custom-element', false);
 
       // combined pseudo-classes/elements
-      testGetVerifyingSelector('a:hover::before', 'a');
+      testGetSelectorVerifier('a:hover::before', 'a');
 
       // pseudo-elements that are not guaranteed to work after rewritten
-      testGetVerifyingSelector(':host', '');
-      testGetVerifyingSelector(':host > div', '');
-      testGetVerifyingSelector(':host(.class)', '');
-      testGetVerifyingSelector(':host(.class) > div', '');
-      testGetVerifyingSelector(':host-context(.class)', '', false);
-      testGetVerifyingSelector(':host-context(.class) > div', '', false);
+      testGetSelectorVerifier(':host', '');
+      testGetSelectorVerifier(':host > div', '');
+      testGetSelectorVerifier(':host(.class)', '');
+      testGetSelectorVerifier(':host(.class) > div', '');
+      testGetSelectorVerifier(':host-context(.class)', '', false);
+      testGetSelectorVerifier(':host-context(.class) > div', '', false);
 
       // allowed pseudo-classes
-      testGetVerifyingSelector(':root', ':root');
-      testGetVerifyingSelector(':scope', ':scope');
-      testGetVerifyingSelector(':scope > body > div', ':scope > body > div');
-      testGetVerifyingSelector(':is(div, span)', ':is(div, span)', false);
-      testGetVerifyingSelector(':where(div, span)', ':where(div, span)', false);
-      testGetVerifyingSelector('h1:has(+ h2, + h3, + h4)', 'h1:has(+ h2, + h3, + h4)', false);
+      testGetSelectorVerifier(':root', ':root');
+      testGetSelectorVerifier(':scope', ':scope');
+      testGetSelectorVerifier(':scope > body > div', ':scope > body > div');
+      testGetSelectorVerifier(':is(div, span)', ':is(div, span)', false);
+      testGetSelectorVerifier(':where(div, span)', ':where(div, span)', false);
+      testGetSelectorVerifier('h1:has(+ h2, + h3, + h4)', 'h1:has(+ h2, + h3, + h4)', false);
 
-      testGetVerifyingSelector('p:first-child', 'p:first-child');
-      testGetVerifyingSelector('p:last-child', 'p:last-child');
-      testGetVerifyingSelector('div:first-of-type', 'div:first-of-type');
-      testGetVerifyingSelector('div:last-of-type', 'div:last-of-type');
-      testGetVerifyingSelector('li:only-child', 'li:only-child');
-      testGetVerifyingSelector('li:only-of-type', 'li:only-of-type');
-      testGetVerifyingSelector('li:nth-child(even)', 'li:nth-child(even)');
-      testGetVerifyingSelector('li:nth-last-child(2)', 'li:nth-last-child(2)');
-      testGetVerifyingSelector('li:nth-of-type(3n + 1)', 'li:nth-of-type(3n + 1)');
-      testGetVerifyingSelector('li:nth-last-of-type(3)', 'li:nth-last-of-type(3)');
+      testGetSelectorVerifier('p:first-child', 'p:first-child');
+      testGetSelectorVerifier('p:last-child', 'p:last-child');
+      testGetSelectorVerifier('div:first-of-type', 'div:first-of-type');
+      testGetSelectorVerifier('div:last-of-type', 'div:last-of-type');
+      testGetSelectorVerifier('li:only-child', 'li:only-child');
+      testGetSelectorVerifier('li:only-of-type', 'li:only-of-type');
+      testGetSelectorVerifier('li:nth-child(even)', 'li:nth-child(even)');
+      testGetSelectorVerifier('li:nth-last-child(2)', 'li:nth-last-child(2)');
+      testGetSelectorVerifier('li:nth-of-type(3n + 1)', 'li:nth-of-type(3n + 1)');
+      testGetSelectorVerifier('li:nth-last-of-type(3)', 'li:nth-last-of-type(3)');
 
       // (...) inside an allowed pseudo-class should be recursively rewritten
-      testGetVerifyingSelector(':is(:hover, a:active)', ':is(*, a)', false);
-      testGetVerifyingSelector(':is(:is(:link, :visited), button:active)', ':is(:is(*, *), button)', false);
+      testGetSelectorVerifier(':is(:hover, a:active)', ':is(*, a)', false);
+      testGetSelectorVerifier(':is(:is(:link, :visited), button:active)', ':is(:is(*, *), button)', false);
 
       // namespace for type selector should be removed
-      testGetVerifyingSelector('svg|a span', 'a span', false);
-      testGetVerifyingSelector('*|a span', 'a span');
-      testGetVerifyingSelector('|a span', 'a span');
-      testGetVerifyingSelector('svg|* span', '* span', false);
-      testGetVerifyingSelector('*|* span', '* span');
-      testGetVerifyingSelector('|* span', '* span');
+      testGetSelectorVerifier('svg|a span', 'a span', false);
+      testGetSelectorVerifier('*|a span', 'a span');
+      testGetSelectorVerifier('|a span', 'a span');
+      testGetSelectorVerifier('svg|* span', '* span', false);
+      testGetSelectorVerifier('*|* span', '* span');
+      testGetSelectorVerifier('|* span', '* span');
 
       // namespace for attribute selector should be *
-      testGetVerifyingSelector('[attr]', '[*|attr]');
-      testGetVerifyingSelector('[attr=value]', '[*|attr=value]');
-      testGetVerifyingSelector('[attr="value"]', '[*|attr="value"]');
+      testGetSelectorVerifier('[attr]', '[*|attr]');
+      testGetSelectorVerifier('[attr=value]', '[*|attr=value]');
+      testGetSelectorVerifier('[attr="value"]', '[*|attr="value"]');
 
-      testGetVerifyingSelector('[|attr]', '[*|attr]');
-      testGetVerifyingSelector('[|attr=value]', '[*|attr=value]');
-      testGetVerifyingSelector('[|attr="value"]', '[*|attr="value"]');
+      testGetSelectorVerifier('[|attr]', '[*|attr]');
+      testGetSelectorVerifier('[|attr=value]', '[*|attr=value]');
+      testGetSelectorVerifier('[|attr="value"]', '[*|attr="value"]');
 
-      testGetVerifyingSelector('[svg|attr]', '[*|attr]', false);
-      testGetVerifyingSelector('[svg|attr=value]', '[*|attr=value]', false);
-      testGetVerifyingSelector('[svg|attr="value"]', '[*|attr="value"]', false);
+      testGetSelectorVerifier('[svg|attr]', '[*|attr]', false);
+      testGetSelectorVerifier('[svg|attr=value]', '[*|attr=value]', false);
+      testGetSelectorVerifier('[svg|attr="value"]', '[*|attr="value"]', false);
 
-      testGetVerifyingSelector('[*|attr]', '[*|attr]');
-      testGetVerifyingSelector('[*|attr=value]', '[*|attr=value]');
-      testGetVerifyingSelector('[*|attr="value"]', '[*|attr="value"]');
+      testGetSelectorVerifier('[*|attr]', '[*|attr]');
+      testGetSelectorVerifier('[*|attr=value]', '[*|attr=value]');
+      testGetSelectorVerifier('[*|attr="value"]', '[*|attr="value"]');
 
-      testGetVerifyingSelector('[svg|attr="value" i]', '[*|attr="value" i]', false);
+      testGetSelectorVerifier('[svg|attr="value" i]', '[*|attr="value" i]', false);
 
       // column combinator should not be treated as namespace
-      testGetVerifyingSelector('col||td', 'col||td', false);
-      testGetVerifyingSelector('col || td', 'col || td', false);
+      testGetSelectorVerifier('col||td', 'col||td', false);
+      testGetSelectorVerifier('col || td', 'col || td', false);
     });
 
   });
