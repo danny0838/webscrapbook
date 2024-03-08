@@ -8,16 +8,17 @@
  * Distributed under the MIT License
  * https://opensource.org/licenses/MIT
  */
-(function (root, factory) {
-  if (typeof define === 'function' && define.amd) {
-    // AMD
-    define([], factory);
-  } else if (typeof module === 'object' && module.exports) {
+(function (global, factory) {
+  if (typeof exports === "object" && typeof module === "object") {
     // CommonJS
     module.exports = factory();
+  } else if (typeof define === "function" && define.amd) {
+    // AMD
+    define(factory);
   } else {
     // Browser globals
-    root.Referrer = factory();
+    global = typeof globalThis !== "undefined" ? globalThis : global || self;
+    global.Referrer = factory();
   }
 }(this, function () {
 

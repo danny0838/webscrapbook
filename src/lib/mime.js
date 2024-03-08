@@ -1,20 +1,21 @@
 /**
  * A JavaScript implementation for mimetype and file extension conversion
  *
- * Copyright Danny Lin 2017-2020
+ * Copyright Danny Lin 2017-2024
  * Distributed under the MIT License
  * https://opensource.org/licenses/MIT
  */
-(function (root, factory) {
-  if (typeof define === 'function' && define.amd) {
-    // AMD
-    define([], factory);
-  } else if (typeof module === 'object' && module.exports) {
+(function (global, factory) {
+  if (typeof exports === "object" && typeof module === "object") {
     // CommonJS
     module.exports = factory();
+  } else if (typeof define === "function" && define.amd) {
+    // AMD
+    define(factory);
   } else {
     // Browser globals
-    root.Mime = factory();
+    global = typeof globalThis !== "undefined" ? globalThis : global || self;
+    global.Mime = factory();
   }
 }(this, function () {
 

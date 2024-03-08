@@ -3,20 +3,21 @@
  *
  * ref: https://stackoverflow.com/questions/51319147/map-default-value
  *
- * Copyright Danny Lin 2017-2020
+ * Copyright Danny Lin 2017-2024
  * Distributed under the MIT License
  * https://opensource.org/licenses/MIT
  */
-(function (root, factory) {
-  if (typeof define === 'function' && define.amd) {
-    // AMD
-    define([], factory);
-  } else if (typeof module === 'object' && module.exports) {
+(function (global, factory) {
+  if (typeof exports === "object" && typeof module === "object") {
     // CommonJS
     module.exports = factory();
+  } else if (typeof define === "function" && define.amd) {
+    // AMD
+    define(factory);
   } else {
     // Browser globals
-    root.MapWithDefault = factory();
+    global = typeof globalThis !== "undefined" ? globalThis : global || self;
+    global.MapWithDefault = factory();
   }
 }(this, function () {
 
