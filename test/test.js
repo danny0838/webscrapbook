@@ -294,7 +294,10 @@ class TestSuite {
   });
 
   // import all tests
+  await import('./test_lib_mime.js');
   await import('./test_lib_referrer.js');
+  await import('./test_lib_map-with-default.js');
+  await import('./test_lib_strftime.js');
   await import('./test_src_core_common.js');
   await import('./test_src_capturer_common.js');
   await import('./test_capture.js');

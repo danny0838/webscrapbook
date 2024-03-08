@@ -93,8 +93,20 @@ def main():
             os.path.join(root, 'shared', 'lib', 'sha.js'),
         ),
         (
+            os.path.join(root, '..', 'src', 'lib', 'mime.js'),
+            os.path.join(root, 'shared', 'lib', 'mime.js'),
+        ),
+        (
             os.path.join(root, '..', 'src', 'lib', 'referrer.js'),
             os.path.join(root, 'shared', 'lib', 'referrer.js'),
+        ),
+        (
+            os.path.join(root, '..', 'src', 'lib', 'map-with-default.js'),
+            os.path.join(root, 'shared', 'lib', 'map-with-default.js'),
+        ),
+        (
+            os.path.join(root, '..', 'src', 'lib', 'strftime.js'),
+            os.path.join(root, 'shared', 'lib', 'strftime.js'),
         ),
         (
             os.path.join(root, '..', 'src', 'core', 'common.js'),
