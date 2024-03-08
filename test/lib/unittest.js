@@ -25,12 +25,20 @@
 
   'use strict';
 
+  class AssertionError extends Error {
+    constructor(...args) {
+      super(...args);
+      this.name = 'AssertionError';
+      this.message = this.message || "Assertion failed";
+    }
+  }
+
   /**
    * Simple assertion that outputs the error to the console for later tracing.
    */
   function assert(condition, message) {
     if (condition) { return; }
-    const err = new Error(message || "Assertion failed");
+    const err = new AssertionError(message);
     console.error(err);
     throw err;
   }
@@ -42,7 +50,7 @@
     const s1 = JSON.stringify(obj1);
     const s2 = JSON.stringify(obj2);
     if (s1 === s2) { return; }
-    const err = new Error(`${s1} not equal to ${s2}${message ? ': ' + message : ''}`);
+    const err = new AssertionError(`${s1} not equal to ${s2}${message ? ': ' + message : ''}`);
     console.error(err);
     throw err;
   }
@@ -67,14 +75,14 @@
       error = ex;
     }
     if (!error) {
-      throw new Error(`Expected error not thrown${message ? ': ' + message : ''}`);
+      throw new AssertionError(`Expected error not thrown${message ? ': ' + message : ''}`);
     }
     if (expectedEx) {
       if (expectedEx.name && error.name !== expectedEx.name) {
-        throw new Error(`Expected ${expectedEx.name} not thrown${message ? ': ' + message : ''}`);
+        throw new AssertionError(`Expected ${expectedEx.name} not thrown${message ? ': ' + message : ''}`);
       }
       if (expectedEx.message && error.message !== expectedEx.message) {
-        throw new Error(`Expected error with message "${expectedEx.message}" not thrown${message ? ': ' + message : ''}`);
+        throw new AssertionError(`Expected error with message "${expectedEx.message}" not thrown${message ? ': ' + message : ''}`);
       }
     }
   }
