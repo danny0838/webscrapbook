@@ -8,19 +8,15 @@
  * @public {Class} CustomTree
  *****************************************************************************/
 
-(function (root, factory) {
+(function (global, factory) {
   // Browser globals
-  root.CustomTree = factory(
-    root.isDebug,
-    root.browser,
-    root.scrapbook,
-    root.server,
-    root.Tree,
-    window,
-    document,
-    console,
+  global.CustomTree = factory(
+    global.isDebug,
+    global.scrapbook,
+    global.server,
+    global.Tree,
   );
-}(this, function (isDebug, browser, scrapbook, server, Tree, window, document, console) {
+}(this, function (isDebug, scrapbook, server, Tree) {
 
   'use strict';
 

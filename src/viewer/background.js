@@ -6,16 +6,14 @@
  * @public {Object} viewer
  *****************************************************************************/
 
-(function (root, factory) {
+(function (global, factory) {
   // Browser globals
-  if (root.hasOwnProperty('viewer')) { return; }
-  root.viewer = factory(
-    root.isDebug,
-    root.browser,
-    root.scrapbook,
-    console,
+  if (global.hasOwnProperty('viewer')) { return; }
+  global.viewer = factory(
+    global.isDebug,
+    global.scrapbook,
   );
-}(this, function (isDebug, browser, scrapbook, console) {
+}(this, function (isDebug, scrapbook) {
 
   'use strict';
 

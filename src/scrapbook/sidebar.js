@@ -8,19 +8,15 @@
  * @public {Object} sidebar
  *****************************************************************************/
 
-(function (root, factory) {
+(function (global, factory) {
   // Browser globals
-  root.sidebar = factory(
-    root.isDebug,
-    root.browser,
-    root.scrapbook,
-    root.server,
-    root.BookTree,
-    window,
-    document,
-    console,
+  global.sidebar = factory(
+    global.isDebug,
+    global.scrapbook,
+    global.server,
+    global.BookTree,
   );
-}(this, function (isDebug, browser, scrapbook, server, BookTree, window, document, console) {
+}(this, function (isDebug, scrapbook, server, BookTree) {
 
   'use strict';
 

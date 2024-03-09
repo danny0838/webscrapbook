@@ -7,18 +7,14 @@
  * @public {Object} editor
  *****************************************************************************/
 
-(function (root, factory) {
+(function (global, factory) {
   // Browser globals
-  root.editor = factory(
-    root.isDebug,
-    root.browser,
-    root.scrapbook,
-    root.server,
-    window,
-    document,
-    console,
+  global.editor = factory(
+    global.isDebug,
+    global.scrapbook,
+    global.server,
   );
-}(this, function (isDebug, browser, scrapbook, server, window, document, console) {
+}(this, function (isDebug, scrapbook, server) {
 
   'use strict';
 

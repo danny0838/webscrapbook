@@ -11,19 +11,15 @@
  * @public {Class} BookTree
  *****************************************************************************/
 
-(function (root, factory) {
+(function (global, factory) {
   // Browser globals
-  root.BookTree = factory(
-    root.isDebug,
-    root.browser,
-    root.scrapbook,
-    root.server,
-    root.Tree,
-    window,
-    document,
-    console,
+  global.BookTree = factory(
+    global.isDebug,
+    global.scrapbook,
+    global.server,
+    global.Tree,
   );
-}(this, function (isDebug, browser, scrapbook, server, Tree, window, document, console) {
+}(this, function (isDebug, scrapbook, server, Tree) {
 
   'use strict';
 

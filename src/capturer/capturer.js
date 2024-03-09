@@ -10,22 +10,17 @@
  * @override {Function} capturer.invoke
  *****************************************************************************/
 
-(function (root, factory) {
+(function (global, factory) {
   // Browser globals
   factory(
-    root.isDebug,
-    root.browser,
-    root.scrapbook,
-    root.server,
-    root.capturer,
-    root.JSZip,
-    root.MapWithDefault,
-    root,
-    window,
-    document,
-    console,
+    global.isDebug,
+    global.scrapbook,
+    global.server,
+    global.capturer,
+    global.JSZip,
+    global.MapWithDefault,
   );
-}(this, function (isDebug, browser, scrapbook, server, capturer, JSZip, MapWithDefault, root, window, document, console) {
+}(this, function (isDebug, scrapbook, server, capturer, JSZip, MapWithDefault) {
 
   'use strict';
 

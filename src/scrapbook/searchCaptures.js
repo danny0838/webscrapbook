@@ -9,20 +9,16 @@
  * @public {Object} searchCaptures
  *****************************************************************************/
 
-(function (root, factory) {
+(function (global, factory) {
   // Browser globals
-  root.searchCaptures = factory(
-    root.isDebug,
-    root.browser,
-    root.scrapbook,
-    root.server,
-    root.CustomTree,
-    root.MapWithDefault,
-    window,
-    document,
-    console,
+  global.searchCaptures = factory(
+    global.isDebug,
+    global.scrapbook,
+    global.server,
+    global.CustomTree,
+    global.MapWithDefault,
   );
-}(this, function (isDebug, browser, scrapbook, server, CustomTree, MapWithDefault, window, document, console) {
+}(this, function (isDebug, scrapbook, server, CustomTree, MapWithDefault) {
 
   'use strict';
 

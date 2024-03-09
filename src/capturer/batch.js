@@ -6,16 +6,13 @@
  * @public {Object} batch
  *****************************************************************************/
 
-(function (root, factory) {
+(function (global, factory) {
   // Browser globals
-  root.batch = factory(
-    root.isDebug,
-    root.browser,
-    root.scrapbook,
-    window,
-    console,
+  global.batch = factory(
+    global.isDebug,
+    global.scrapbook,
   );
-}(this, function (isDebug, browser, scrapbook, window, console) {
+}(this, function (isDebug, scrapbook) {
 
   'use strict';
 

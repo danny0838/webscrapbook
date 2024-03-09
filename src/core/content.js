@@ -6,18 +6,14 @@
  * @public {Object} core
  *****************************************************************************/
 
-(function (root, factory) {
+(function (global, factory) {
   // Browser globals
-  if (root.hasOwnProperty('core')) { return; }
-  root.core = factory(
-    root.isDebug,
-    root.browser,
-    root.scrapbook,
-    root, // root and window are different in Firefox
-    window,
-    console,
+  if (global.hasOwnProperty('core')) { return; }
+  global.core = factory(
+    global.isDebug,
+    global.scrapbook,
   );
-}(this, function (isDebug, browser, scrapbook, global, window, console) {
+}(this, function (isDebug, scrapbook) {
 
   'use strict';
 

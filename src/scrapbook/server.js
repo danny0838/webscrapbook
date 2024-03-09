@@ -6,17 +6,14 @@
  * @public {Object} server
  *****************************************************************************/
 
-(function (root, factory) {
+(function (global, factory) {
   // Browser globals
-  if (root.hasOwnProperty('server')) { return; }
-  root.server = factory(
-    root.isDebug,
-    root.browser,
-    root.scrapbook,
-    window,
-    console,
+  if (global.hasOwnProperty('server')) { return; }
+  global.server = factory(
+    global.isDebug,
+    global.scrapbook,
   );
-}(this, function (isDebug, browser, scrapbook, window, console) {
+}(this, function (isDebug, scrapbook) {
 
   'use strict';
 

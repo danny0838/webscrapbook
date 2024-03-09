@@ -6,16 +6,13 @@
  * @public {Object} advanced
  *****************************************************************************/
 
-(function (root, factory) {
+(function (global, factory) {
   // Browser globals
-  root.advanced = factory(
-    root.isDebug,
-    root.browser,
-    root.scrapbook,
-    window,
-    console,
+  global.advanced = factory(
+    global.isDebug,
+    global.scrapbook,
   );
-}(this, function (isDebug, browser, scrapbook, window, console) {
+}(this, function (isDebug, scrapbook) {
 
   'use strict';
 

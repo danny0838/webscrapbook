@@ -5,17 +5,13 @@
  * @require {Object} scrapbook
  *****************************************************************************/
 
-(function (root, factory) {
+(function (global, factory) {
   // Browser globals
   factory(
-    root.isDebug,
-    root.browser,
-    root.scrapbook,
-    window,
-    document,
-    console,
+    global.isDebug,
+    global.scrapbook,
   );
-}(this, function (isDebug, browser, scrapbook, window, document, console) {
+}(this, function (isDebug, scrapbook) {
 
   'use strict';
 

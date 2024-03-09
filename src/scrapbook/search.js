@@ -8,19 +8,15 @@
  * @public {Object} search
  *****************************************************************************/
 
-(function (root, factory) {
+(function (global, factory) {
   // Browser globals
-  root.search = factory(
-    root.isDebug,
-    root.browser,
-    root.scrapbook,
-    root.server,
-    root.CustomTree,
-    window,
-    document,
-    console,
+  global.search = factory(
+    global.isDebug,
+    global.scrapbook,
+    global.server,
+    global.CustomTree,
   );
-}(this, function (isDebug, browser, scrapbook, server, CustomTree, window, document, console) {
+}(this, function (isDebug, scrapbook, server, CustomTree) {
 
   'use strict';
 

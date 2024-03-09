@@ -7,17 +7,14 @@
  * @public {Promise} scrapbook.loadOptionsAuto
  *****************************************************************************/
 
-(function (root, factory) {
+(function (global, factory) {
   // Browser globals
-  if (root.hasOwnProperty('loadOptionsAuto')) { return; }
-  root.loadOptionsAuto = factory(
-    root.isDebug,
-    root.browser,
-    root.scrapbook,
-    window,
-    console,
+  if (global.hasOwnProperty('loadOptionsAuto')) { return; }
+  global.loadOptionsAuto = factory(
+    global.isDebug,
+    global.scrapbook,
   );
-}(this, function (isDebug, browser, scrapbook, window, console) {
+}(this, function (isDebug, scrapbook) {
 
   'use strict';
 

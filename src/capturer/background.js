@@ -6,16 +6,14 @@
  * @public {Object} capturer
  *****************************************************************************/
 
-(function (root, factory) {
+(function (global, factory) {
   // Browser globals
-  if (root.hasOwnProperty('capturer')) { return; }
-  root.capturer = factory(
-    root.isDebug,
-    root.browser,
-    root.scrapbook,
-    console,
+  if (global.hasOwnProperty('capturer')) { return; }
+  global.capturer = factory(
+    global.isDebug,
+    global.scrapbook,
   );
-}(this, function (isDebug, browser, scrapbook, console) {
+}(this, function (isDebug, scrapbook) {
 
   'use strict';
 

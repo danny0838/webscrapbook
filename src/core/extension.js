@@ -6,17 +6,13 @@
  * @extends scrapbook
  *****************************************************************************/
 
-(function (root, factory) {
+(function (global, factory) {
   // Browser globals
   factory(
-    root.isDebug,
-    root.browser,
-    root.scrapbook,
-    root,
-    window,
-    console,
+    global.isDebug,
+    global.scrapbook,
   );
-}(this, function (isDebug, browser, scrapbook, root, window, console) {
+}(this, function (isDebug, scrapbook) {
 
   'use strict';
 
