@@ -8548,18 +8548,6 @@
   };
 
   /**
-   * Extended MIME types
-   */
-  Object.assign(db, {
-    "application/html+zip": {
-      "extensions": ["htz"]
-    },
-    "application/x-maff": {
-      "extensions": ["maff"]
-    }
-  });
-
-  /**
    * Reverse map from extension to mimetype
    */
   const types = (() => {
@@ -8574,6 +8562,45 @@
     }
     return table;
   })();
+
+  /**
+   * Extended MIME types
+   */
+  extend("application/html+zip", {extensions: ["htz"]}, {important: true});
+  extend("application/x-maff", {extensions: ["maff"]}, {important: true});
+
+  // As latest HTML spec and RFC 9239:
+  // https://html.spec.whatwg.org/multipage/scripting.html#scriptingLanguages
+  // https://www.rfc-editor.org/rfc/rfc9239.html
+  extend("text/javascript", {extensions: ["js", "mjs"]}, {important: true});
+
+  /**
+   * Extend the database.
+   * @param {string} mime - the MIME type to extend
+   * @param {Object} [data] - the data for the MIME type
+   * @param {string[]} [data.extensions] - extensions to add
+   * @param {Object} [options]
+   * @param {boolean} [options.important] - insert the extensions at first
+   */
+  function extend(mime, {extensions = [], ...kwargs} = {}, {important} = {}) {
+    let target = db[mime];
+    if (!target) {
+      target = db[mime] = {};
+    }
+    if (!target.extensions) {
+      target.extensions = [];
+    }
+
+    // handle extensions
+    const method = important ? Array.prototype.unshift : Array.prototype.push;
+    method.apply(target.extensions, extensions);
+
+    for (const ext of extensions) {
+      types[ext] = mime;
+    }
+
+    Object.assign(target, {...kwargs});
+  }
 
   /**
    * Lookup a mime type based on extension
@@ -8608,6 +8635,7 @@
   return {
     db,
     types,
+    extend,
     lookup,
     extension,
     allExtensions,
