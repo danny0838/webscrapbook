@@ -34,71 +34,6 @@ const {userAgent, delay, xhr, readFileAsDocument} = utils;
 
 
 /******************************************************************************
- * Configs
- *****************************************************************************/
-
-const baseOptions = {
-  "capture.saveTo": "memory",
-  "capture.saveAs": "zip",
-  "capture.saveAsciiFilename": false,
-  "capture.saveOverwrite": false,
-  "capture.saveFileAsHtml": false,
-  "capture.saveDataUriAsFile": true,
-  "capture.saveDataUriAsSrcdoc": true,
-  "capture.saveResourcesSequentially": false,
-  "capture.resourceSizeLimit": null,
-  "capture.image": "save",
-  "capture.imageBackground": "save",
-  "capture.favicon": "save",
-  "capture.faviconAttrs": "",
-  "capture.canvas": "save",
-  "capture.audio": "save",
-  "capture.video": "save",
-  "capture.embed": "save",
-  "capture.object": "save",
-  "capture.applet": "save",
-  "capture.frame": "save",
-  "capture.frameRename": true,
-  "capture.font": "save",
-  "capture.style": "save",
-  "capture.styleInline": "save",
-  "capture.rewriteCss": "url",
-  "capture.mergeCssResources": false,
-  "capture.script": "save",
-  "capture.noscript": "save",
-  "capture.contentSecurityPolicy": "remove",
-  "capture.preload": "remove",
-  "capture.prefetch": "remove",
-  "capture.base": "blank",
-  "capture.formStatus": "keep",
-  "capture.shadowDom": "save",
-  "capture.removeHidden": "none",
-  "capture.linkUnsavedUri": false,
-  "capture.downLink.file.mode": "none",
-  "capture.downLink.file.extFilter": "",
-  "capture.downLink.doc.depth": null,
-  "capture.downLink.doc.delay": null,
-  "capture.downLink.doc.mode": "source",
-  "capture.downLink.doc.urlFilter": "",
-  "capture.downLink.urlFilter": "",
-  "capture.downLink.urlExtra": "",
-  "capture.referrerPolicy": "",
-  "capture.referrerSpoofSource": false,
-  "capture.recordDocumentMeta": true,
-  "capture.recordRewrites": false,
-  "capture.insertInfoBar": false,
-  "capture.helpersEnabled": false,
-  "capture.helpers": "",
-  "capture.remoteTabDelay": null,
-  "capture.deleteErasedOnCapture": false,
-  "capture.deleteErasedOnSave": false,
-};
-
-const RDF = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
-const MAF = "http://maf.mozdev.org/metadata/rdf#";
-
-
-/******************************************************************************
  * Helpers
  *****************************************************************************/
 
@@ -351,10 +286,6 @@ class TestSuite {
 
   // expose to global scope
   Object.assign(global, {
-    baseOptions,
-    RDF,
-    MAF,
-
     localhost: suite.localhost,
     localhost2: suite.localhost2,
     capture: suite.capture.bind(suite),
