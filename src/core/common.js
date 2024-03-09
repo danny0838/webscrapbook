@@ -7,23 +7,43 @@
  * @public {Object} scrapbook
  *****************************************************************************/
 
-(function (root, factory) {
-  // Browser globals
-  if (root.hasOwnProperty('scrapbook')) { return; }
-  root.scrapbook = factory(
-    root.isDebug,
-    root.browser,
-    root.JSZip,
-    root.jsSHA,
-    root.Mime,
-    root.Strftime,
-    root, // root and window are different in Firefox
-    window,
-    console,
-    crypto,
-    navigator,
-  );
-}(this, function (isDebug, browser, JSZip, jsSHA, Mime, Strftime, global, window, console, crypto, navigator) {
+(function (global, factory) {
+  global = typeof globalThis !== "undefined" ? globalThis : global || self;
+  if (typeof exports === "object" && typeof module === "object") {
+    // CommonJS
+    module.exports = factory(
+      global,
+      global.isDebug,
+      require('../lib/jszip'),
+      require('../lib/sha'),
+      require('../lib/mime'),
+      require('../lib/strftime'),
+    );
+  } else if (typeof define === "function" && define.amd) {
+    // AMD
+    define(
+      ['../lib/jszip', '../lib/sha', '../lib/mime', '../lib/strftime'],
+      (...args) => {
+        return factory(
+          global,
+          global.isDebug,
+          ...args,
+        );
+      },
+    );
+  } else {
+    // Browser globals
+    if (global.hasOwnProperty('scrapbook')) { return; }
+    global.scrapbook = factory(
+      global,
+      global.isDebug,
+      global.JSZip,
+      global.jsSHA,
+      global.Mime,
+      global.Strftime,
+    );
+  }
+}(this, function (global, isDebug, JSZip, jsSHA, Mime, Strftime) {
 
   'use strict';
 

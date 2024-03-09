@@ -7,19 +7,36 @@
  * @public {Object} capturer
  *****************************************************************************/
 
-(function (root, factory) {
-  // Browser globals
-  if (root.hasOwnProperty('capturer')) { return; }
-  root.capturer = factory(
-    root.isDebug,
-    root.browser,
-    root.scrapbook,
-    root.MapWithDefault,
-    window,
-    document,
-    console,
-  );
-}(this, function (isDebug, browser, scrapbook, MapWithDefault, window, document, console) {
+(function (global, factory) {
+  global = typeof globalThis !== "undefined" ? globalThis : global || self;
+  if (typeof exports === "object" && typeof module === "object") {
+    // CommonJS
+    module.exports = factory(
+      global.isDebug,
+      require('../core/common'),
+      require('../lib/map-with-default'),
+    );
+  } else if (typeof define === "function" && define.amd) {
+    // AMD
+    define(
+      ['../core/common', '../lib/map-with-default'],
+      (...args) => {
+        return factory(
+          global.isDebug,
+          ...args,
+        );
+      },
+    );
+  } else {
+    // Browser globals
+    if (global.hasOwnProperty('capturer')) { return; }
+    global.capturer = factory(
+      global.isDebug,
+      global.scrapbook,
+      global.MapWithDefault,
+    );
+  }
+}(this, function (isDebug, scrapbook, MapWithDefault) {
 
   'use strict';
 
