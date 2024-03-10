@@ -622,10 +622,10 @@
           flavor.major = parseInt(info.version, 10) || 0;
           soup.add(info.vendor.toLowerCase());
           soup.add(info.name.toLowerCase());
-        } catch (ex) {
+
           // dummy event for potential listeners
           dispatch();
-        }
+        } catch (ex) {}
       })();
 
       // Synchronous -- order of tests is important
