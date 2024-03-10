@@ -3,6 +3,11 @@
 * Versions before 1.0 are in initial development. APIs are not stable for these versions, even a `y` version can involve a breaking change, and only partial notable changes are summarized in this document. See full commit history in the source repository for details.
 * Backend server requirement in this document refers to the version of [`webscrapbook` Python package](https://github.com/danny0838/pywebscrapbook) (or PyWebScrapBook).
 
+## [2.8.1] - 2024-03-10
+* Fixed bad tidying of a CSS rule having an attribute selector with a `|=` operator.
+* Use `text/javascript` as the default MIME type of `js` files.
+* Miscellaneous improvements of the internal code and unit test suite.
+
 ## [2.8.0] - 2024-03-02
 * Fixed rewriting of srcset attribute that are separated by alternative spaces.
 * Fixed bad URL rewriting in some complicated CSS.
