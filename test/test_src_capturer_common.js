@@ -776,7 +776,7 @@ ul {
     const getSelectorVerifier = capturer.DocumentCssHandler.getSelectorVerifier;
 
     const testGetSelectorVerifier = (selector1, selector2, validate = true) => {
-      if (validate) {
+      if (validate && typeof document !== 'undefined' && document.querySelector) {
         try {
           selector1 && document.querySelector(selector1);
         } catch (ex) {
