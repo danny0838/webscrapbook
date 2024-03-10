@@ -26,6 +26,7 @@
 'use strict';
 
 const {MochaQuery: $, assert, assertEqual, assertThrows, getRulesFromCssText, cssRegex} = unittest;
+const $describe = $(describe);
 const $it = $(it);
 const {userAgent} = utils;
 
@@ -650,7 +651,7 @@ describe('capturer/common.js', function () {
 
   });
 
-  describe('capturer.DocumentCssHandler.getSelectorText', function () {
+  $describe.skipIf($.noBrowser)('capturer.DocumentCssHandler.getSelectorText', function () {
     const getSelectorText = capturer.DocumentCssHandler.getSelectorText;
 
     it('basic', function () {
@@ -924,7 +925,7 @@ ul {
 
   });
 
-  describe('capturer.DocumentCssHandler.getRulesFromCssText', function () {
+  $describe.skipIf($.noBrowser)('capturer.DocumentCssHandler.getRulesFromCssText', function () {
     const getRulesFromCssText = capturer.DocumentCssHandler.getRulesFromCssText;
 
     it('basic', function () {

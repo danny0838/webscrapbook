@@ -26,6 +26,7 @@
 'use strict';
 
 const {MochaQuery: $, assert, assertEqual, assertThrows, cssRegex} = unittest;
+const $describe = $(describe);
 const $it = $(it);
 const {userAgent} = utils;
 
@@ -1370,7 +1371,7 @@ describe('core/common.js', function () {
 
   });
 
-  describe('scrapbook.rewriteCssFile', function () {
+  $describe.skipIf($.noBrowser)('scrapbook.rewriteCssFile', function () {
 
     it('force UTF-8 if charset is known', async function () {
       const rewriter = async css => `${css} /* rewritten */`;

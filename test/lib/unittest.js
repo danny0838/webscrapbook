@@ -232,8 +232,16 @@
   };
 
   Object.defineProperties(MochaQuery, Object.getOwnPropertyDescriptors({
-    get noMultipleSelection() {
+    get noBrowser() {
       const value = new MochaQuery.Query(
+        !(typeof window !== 'undefined' && typeof navigator !== 'undefined' && window.document),
+        'no browser environment',
+      );
+      Object.defineProperty(this, 'noBrowser', {value});
+      return value;
+    },
+    get noMultipleSelection() {
+      const value = this.noBrowser.condition ? this.noBrowser : new MochaQuery.Query(
         (() => {
           const sel = document.getSelection();
           const origCount = sel.rangeCount;
@@ -277,7 +285,7 @@
     },
     get noAdoptedStylesheet() {
       // Document.adoptedStyleSheets is not supported by Firefox < 101.
-      const value = new MochaQuery.Query(
+      const value = this.noBrowser.condition ? this.noBrowser : new MochaQuery.Query(
         !document.adoptedStyleSheets,
         'Document.adoptedStyleSheets not supported',
       );
@@ -286,7 +294,7 @@
     },
     get noNestingCss() {
       // CSS nesting selector is supported in Firefox >= 117 and Chromium >= 120.
-      const value = new MochaQuery.Query(
+      const value = this.noBrowser.condition ? this.noBrowser : new MochaQuery.Query(
         (() => {
           const d = document.implementation.createHTMLDocument();
           const style = d.head.appendChild(d.createElement('style'));
@@ -303,7 +311,7 @@
       return value;
     },
     get noColumnCombinator() {
-      const value = new MochaQuery.Query(
+      const value = this.noBrowser.condition ? this.noBrowser : new MochaQuery.Query(
         (() => {
           try {
             document.querySelector('col || td');
@@ -319,7 +327,7 @@
     },
     get noPartPseudo() {
       // :part() CSS pseudo-element is supported in Firefox >= 72 and Chromium >= 73.
-      const value = new MochaQuery.Query(
+      const value = this.noBrowser.condition ? this.noBrowser : new MochaQuery.Query(
         (() => {
           try {
             document.querySelector('::part(dummy)');
@@ -335,7 +343,7 @@
     },
     get noIsPseudo() {
       // :is() CSS pseudo-class is supported in Firefox >= 78 and Chromium >= 88.
-      const value = new MochaQuery.Query(
+      const value = this.noBrowser.condition ? this.noBrowser : new MochaQuery.Query(
         (() => {
           try {
             document.querySelector(':is()');
@@ -351,7 +359,7 @@
     },
     get noHostContextPseudo() {
       // :host-context() not suported in some browsers (e.g. Firefox)
-      const value = new MochaQuery.Query(
+      const value = this.noBrowser.condition ? this.noBrowser : new MochaQuery.Query(
         (() => {
           try {
             document.querySelector(':host-context(*)');
@@ -366,7 +374,7 @@
       return value;
     },
     get noAtCounterStyle() {
-      const value = new MochaQuery.Query(
+      const value = this.noBrowser.condition ? this.noBrowser : new MochaQuery.Query(
         (() => {
           const d = document.implementation.createHTMLDocument();
           const style = d.head.appendChild(d.createElement('style'));
@@ -382,7 +390,7 @@
       return value;
     },
     get noAtLayer() {
-      const value = new MochaQuery.Query(
+      const value = this.noBrowser.condition ? this.noBrowser : new MochaQuery.Query(
         (() => {
           const d = document.implementation.createHTMLDocument();
           const style = d.head.appendChild(d.createElement('style'));
