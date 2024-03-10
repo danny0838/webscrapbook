@@ -19,7 +19,7 @@
 
 var userAgent = (() => {
     const ua = navigator.userAgent;
-    const soup = new Set(['webext']);
+    const soup = new Set();
     const flavor = {
       major: 0,
       soup: soup,
@@ -34,7 +34,7 @@ var userAgent = (() => {
     let match;
     if ((match = /\bFirefox\/(\d+)/.exec(ua)) !== null) {
       flavor.major = parseInt(match[1], 10) || 0;
-      soup.add('mozilla').add('firefox');
+      soup.add('mozilla').add('firefox').add('gecko');
     } else if ((match = /\bEdge\/(\d+)/.exec(ua)) !== null) {
       flavor.major = parseInt(match[1], 10) || 0;
       soup.add('microsoft').add('edge');
@@ -49,9 +49,16 @@ var userAgent = (() => {
     } else if ((match = /\bChrome\/(\d+)/.exec(ua)) !== null) {
       flavor.major = parseInt(match[1], 10) || 0;
       soup.add('google').add('chromium');
+      if (/\bEdg\/([\d.]+)/.test(ua)) {
+        // Chromium based Edge
+        soup.add('microsoft').add('edge');
+      }
     } else if ((match = /\bSafari\/(\d+)/.exec(ua)) !== null) {
       flavor.major = parseInt(match[1], 10) || 0;
       soup.add('apple').add('safari');
+    } else if ((match = /\bNode\.js\/(\d+)/.exec(ua)) !== null) {
+      flavor.major = parseInt(match[1], 10) || 0;
+      soup.add('node.js');
     }
     return flavor;
 })();

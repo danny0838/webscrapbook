@@ -593,7 +593,14 @@
      */
     get userAgent() {
       const ua = navigator.userAgent;
-      const manifest = browser.runtime.getManifest();
+      const manifest = (() => {
+        try {
+          return browser.runtime.getManifest();
+        } catch (ex) {
+          // dummy object to prevent an error
+          return {};
+        }
+      })();
 
       const soup = new Set(['webext']);
       const flavor = {
@@ -602,31 +609,14 @@
         is: (value) => soup.has(value),
       };
 
-      const dispatch = function() {
-        window.dispatchEvent(new CustomEvent('browserInfoLoaded'));
-      };
-
-      // Whether this is a dev build.
-      if (/^\d+\.\d+\.\d+\D/.test(browser.runtime.getManifest().version)) {
+      // Whether this extension is a dev build.
+      if (/^\d+\.\d+\.\d+\D/.test(manifest.version)) {
         soup.add('devbuild');
       }
 
       if (/\bMobile\b/.test(ua)) {
         soup.add('mobile');
       }
-
-      // Asynchronous -- more accurate detection for Firefox
-      (async () => {
-        try {
-          const info = await browser.runtime.getBrowserInfo();
-          flavor.major = parseInt(info.version, 10) || 0;
-          soup.add(info.vendor.toLowerCase());
-          soup.add(info.name.toLowerCase());
-
-          // dummy event for potential listeners
-          dispatch();
-        } catch (ex) {}
-      })();
 
       // Synchronous -- order of tests is important
       let match;
@@ -647,9 +637,16 @@
       } else if ((match = /\bChrome\/(\d+)/.exec(ua)) !== null) {
         flavor.major = parseInt(match[1], 10) || 0;
         soup.add('google').add('chromium');
+        if (/\bEdg\/([\d.]+)/.test(ua)) {
+          // Chromium based Edge
+          soup.add('microsoft').add('edge');
+        }
       } else if ((match = /\bSafari\/(\d+)/.exec(ua)) !== null) {
         flavor.major = parseInt(match[1], 10) || 0;
         soup.add('apple').add('safari');
+      } else if ((match = /\bNode\.js\/(\d+)/.exec(ua)) !== null) {
+        flavor.major = parseInt(match[1], 10) || 0;
+        soup.add('node.js');
       }
 
       if (manifest.browser_specific_settings && manifest.browser_specific_settings.gecko) {
