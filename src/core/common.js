@@ -2541,15 +2541,16 @@
   };
 
   scrapbook.unescapeCss = function (str) {
-    const replaceRegex = /\\(?:([0-9A-Fa-f]{1,6}) ?|(.))/g;
-    const getCodes = function (n) {
-      if (n < 0x10000) return [n];
-      n -= 0x10000;
-      return [0xD800+(n>>10), 0xDC00+(n&0x3FF)];
-    };
+    const replaceRegex = /\\(?:([0-9A-Fa-f]{1,6}) ?|(.))/gu;
     const replaceFunc = function (m, u, c) {
-      if (c) { return c; }
-      if (u) { return String.fromCharCode.apply(null, getCodes(parseInt(u, 16))); }
+      if (u) {
+        const code = parseInt(u, 16);
+        if (code === 0 || (code >= 0xD800 && code <= 0xDFFF) || (code > 0x10FFFF)) {
+          return '\uFFFD';
+        }
+        return String.fromCodePoint(code);
+      }
+      return c;
     };
     const fn = scrapbook.unescapeCss = function (str) {
       return str.replace(replaceRegex, replaceFunc);
@@ -3401,6 +3402,16 @@
     const REGEX_REWRITE_CSS = new RegExp(r`${pEscaped}|${pDQStr}|${pSQStr}|${pCm}|${pRImport}|${pRFontFace}|${pRNamespace}|(${pUrl})`, "gi");
     const REGEX_PARSE_URL = new RegExp(pUrl2, "gi");
 
+    const REGEX_ESCAPE_CSS_STRING = /([\\"])|[\x00-\x1F\x7F]/g;
+    const FUNC_ESCAPE_CSS_STRING = (m, chr) => {
+      if (chr) { return '\\' + chr; }
+      return '\\' + m.codePointAt(0).toString(16) + ' ';
+    };
+
+    const escapeCssString = (str) => {
+      return str.replace(REGEX_ESCAPE_CSS_STRING, FUNC_ESCAPE_CSS_STRING);
+    };
+
     const fn = scrapbook.rewriteCssText = function (cssText, options = {}) {
       let mapUrlPromise;
 
@@ -3428,7 +3439,7 @@
           return record + 'var(' + name + ')';
         }
 
-        return record + prefix + '"' + scrapbook.escapeQuotes(url) + '"' + postfix;
+        return record + prefix + '"' + escapeCssString(url) + '"' + postfix;
       };
 
       const handleRewritten = function (data, prefix, postfix, noResMap) {

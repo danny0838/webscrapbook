@@ -1537,7 +1537,7 @@ describe('core/common.js', function () {
       assertEqual(scrapbook.rewriteCssText(input, optionsImage), input);
     });
 
-    $it.xfail()('image: certain chars should be escaped or replaced', function () {
+    it('image: certain chars should be escaped or replaced', function () {
       // 0x01~0x1F and 0x7F (except for newlines) should be escaped
       var input = `.mycls { background-image: url("\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0B\x0E\x0F"); }`;
       var expected = r`.mycls { background-image: url("http://example.com/\1 \2 \3 \4 \5 \6 \7 \8 \9 \b \e \f "); }`;
