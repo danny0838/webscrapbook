@@ -955,92 +955,7 @@ ul {
       assertEqual(rules[0].cssRules[0].style.getPropertyValue('line-height'), '2em');
     });
 
-    it('common browser syntax check', function () {
-      // attribute selector: name with quotes is not allowed
-      var rules = getRulesFromCssText(`["myattr"] { }`);
-      assertEqual(rules[0], undefined);
-
-      // attribute selector: value with mixed literal and quotes is not allowed
-      var rules = getRulesFromCssText(`[myattr=my"quoted"value] { }`);
-      assertEqual(rules[0], undefined);
-
-      // attribute selector: value with non-escaped operator is not allowed
-      var rules = getRulesFromCssText(`[myattr=@namespace] { }`);
-      assertEqual(rules[0], undefined);
-
-      var rules = getRulesFromCssText(`[myattr=div{color:red}] { }`);
-      assertEqual(rules[0], undefined);
-
-      var rules = getRulesFromCssText(`[myattr=var(--my-var)] { }`);
-      assertEqual(rules[0], undefined);
-
-      var rules = getRulesFromCssText(`[myattr=my|value] { }`);
-      assertEqual(rules[0], undefined);
-
-      var rules = getRulesFromCssText(`[myattr=foo=bar] { }`);
-      assertEqual(rules[0], undefined);
-
-      var rules = getRulesFromCssText(`[myattr=xlink:href] { }`);
-      assertEqual(rules[0], undefined);
-
-      // space/comment around the namespace separator is not allowed
-      var rules = getRulesFromCssText(`svg | a { }`);
-      assertEqual(rules[0], undefined);
-
-      // space/comment between pseudo-class/element name and parenthesis is not allowed
-      var rules = getRulesFromCssText(`:not (p) { }`);
-      assertEqual(rules[0], undefined);
-
-      var rules = getRulesFromCssText(`::slotted (p) { }`);
-      assertEqual(rules[0], undefined);
-
-      // space/comment between function name and parenthesis is not allowed
-      var rules = getRulesFromCssText(`p { background-image: url (image.jpg); }`);
-      assertEqual(rules[0].cssText, `p { }`);
-
-      var rules = getRulesFromCssText(`p::after { content: attr (id); }`);
-      assertEqual(rules[0].cssText, `p::after { }`);
-
-      var rules = getRulesFromCssText(`p { color: var (--my-var); }`);
-      assertEqual(rules[0].cssText, `p { }`);
-
-      // comment inside a function is not allowed in some cases
-      var rules = getRulesFromCssText(`p { background-image: url(/* comment */"image.jpg"); }`);
-      assertEqual(rules[0].cssText, `p { }`);
-
-      var rules = getRulesFromCssText(`p { background-image: url(image.jpg/* comment */); }`);
-      assertEqual(rules[0].cssText, `p { }`);
-
-      // space/comment inside a function is allowed in some cases
-      var rules = getRulesFromCssText(`p { background-image: url("image.jpg"  ); }`);
-      assertEqual(rules[0].cssText, `p { background-image: url("image.jpg"); }`);
-
-      var rules = getRulesFromCssText(`p { background-image: url("image.jpg"/* comment */); }`);
-      assertEqual(rules[0].cssText, `p { background-image: url("image.jpg"); }`);
-
-      var rules = getRulesFromCssText(`p::after { content: attr(  id  ); }`);
-      assertEqual(rules[0].cssText, `p::after { content: attr(id); }`);
-    });
-
-    $(it).xfailIf(
-      userAgent.is('chromium') && userAgent.major < 101,
-      'var(...) is tidied in Chromium < 101 (possibly upper?)',
-    )('browser syntax check/tidy for var()', function () {
-      var rules = getRulesFromCssText(`p { color: var(  --myvar ); }`);
-      assertEqual(rules[0].cssText, `p { color: var(  --myvar ); }`);
-
-      var rules = getRulesFromCssText(`p { color: var(/* comment */--myvar); }`);
-      assertEqual(rules[0].cssText, `p { color: var(/* comment */--myvar); }`);
-
-      var rules = getRulesFromCssText(`p { color: var(--myvar/* comment */); }`);
-      assertEqual(rules[0].cssText, `p { color: var(--myvar/* comment */); }`);
-    });
-
-    it('common browser tidy', function () {
-      // semicolon after rule is added
-      var rules = getRulesFromCssText(`body { color: red }`);
-      assertEqual(rules[0].cssText, `body { color: red; }`);
-
+    it('browser syntax check/tidy for whitespaces and comments', function () {
       // space between operators are added
       var rules = getRulesFromCssText(`body>div{color:red;}`);
       assertEqual(rules[0].cssText, `body > div { color: red; }`);
@@ -1117,44 +1032,133 @@ ul {
       var rules = getRulesFromCssText(`body > div { color: red; } /* comment`);
       assertEqual(rules[0].cssText, `body > div { color: red; }`);
 
-      // attribute selector: value is double quoted
-      var rules = getRulesFromCssText(`[myattr=myvalue] { }`);
-      assertEqual(rules[0].selectorText, `[myattr="myvalue"]`);
+      // space/comment around the namespace separator is not allowed
+      var rules = getRulesFromCssText(`svg | a { }`);
+      assertEqual(rules[0], undefined);
 
-      var rules = getRulesFromCssText(`[myattr='my value'] { }`);
-      assertEqual(rules[0].selectorText, `[myattr="my value"]`);
+      // space/comment between pseudo-class/element name and parenthesis is not allowed
+      var rules = getRulesFromCssText(`:not (p) { }`);
+      assertEqual(rules[0], undefined);
 
-      // property value is double quoted
-      var rules = getRulesFromCssText(`p::after { content: 'my value'; }`);
-      assertEqual(rules[0].cssText, `p::after { content: "my value"; }`);
+      var rules = getRulesFromCssText(`::slotted (p) { }`);
+      assertEqual(rules[0], undefined);
 
-      // quoting: double quotes and backslashes are escaped
+      // space/comment between function name and parenthesis is not allowed
+      var rules = getRulesFromCssText(`p { background-image: url (image.jpg); }`);
+      assertEqual(rules[0].cssText, `p { }`);
+
+      var rules = getRulesFromCssText(`p::after { content: attr (id); }`);
+      assertEqual(rules[0].cssText, `p::after { }`);
+
+      var rules = getRulesFromCssText(`p { color: var (--my-var); }`);
+      assertEqual(rules[0].cssText, `p { }`);
+
+      // comment inside a function is not allowed in some cases
+      var rules = getRulesFromCssText(`p { background-image: url(/* comment */"image.jpg"); }`);
+      assertEqual(rules[0].cssText, `p { }`);
+
+      var rules = getRulesFromCssText(`p { background-image: url(image.jpg/* comment */); }`);
+      assertEqual(rules[0].cssText, `p { }`);
+
+      // space/comment inside a function is allowed in some cases
+      var rules = getRulesFromCssText(`p { background-image: url("image.jpg"  ); }`);
+      assertEqual(rules[0].cssText, `p { background-image: url("image.jpg"); }`);
+
+      var rules = getRulesFromCssText(`p { background-image: url("image.jpg"/* comment */); }`);
+      assertEqual(rules[0].cssText, `p { background-image: url("image.jpg"); }`);
+
+      var rules = getRulesFromCssText(`p::after { content: attr(  id  ); }`);
+      assertEqual(rules[0].cssText, `p::after { content: attr(id); }`);
+    });
+
+    it('browser syntax check/tidy for quoting', function () {
+      // double quotes and backslashes are escaped
       var rules = getRulesFromCssText(r`[a=\"my\"attr\\value] { }`);
       assertEqual(rules[0].selectorText, r`[a="\"my\"attr\\value"]`);
 
       var rules = getRulesFromCssText(r`[a='"my" attr\\value'] { }`);
       assertEqual(rules[0].selectorText, r`[a="\"my\" attr\\value"]`);
 
-      // quoting: ASCII control chars (0x01~0x19) are hex-escaped with lower case and space
+      // ASCII control chars (0x01~0x19) are hex-escaped with lower case and space
       var rules = getRulesFromCssText(r`[myattr=\1\2\3\4\5\6\7\8\9\A\B\C\D\E\F] { }`);
       assertEqual(rules[0].selectorText, r`[myattr="\1 \2 \3 \4 \5 \6 \7 \8 \9 \a \b \c \d \e \f "]`);
 
       var rules = getRulesFromCssText(r`[myattr=\10\11\12\13\14\15\16\17\18\19\7F] { }`);
       assertEqual(rules[0].selectorText, r`[myattr="\10 \11 \12 \13 \14 \15 \16 \17 \18 \19 \7f "]`);
 
-      // quoting: other ASCII symbols are unescaped
+      // other ASCII symbols are unescaped
       var rules = getRulesFromCssText(r`[myattr=\20\21\22\23\24\25\26\27\28\29\2A\2B\2C\2D\2E\2F] { }`);
       assertEqual(rules[0].selectorText, r`[myattr=" !\"#$%&'()*+,-./"]`);
 
       var rules = getRulesFromCssText(r`[myattr=\3A\3B\3C\3D\3E\3F\40\5B\5D\5E\5F\7B\7C\7D\7E] { }`);
       assertEqual(rules[0].selectorText, r`[myattr=":;<=>?@[]^_{|}~"]`);
 
-      // quoting: Unicode chars are unescaped
+      // Unicode chars are unescaped
       var rules = getRulesFromCssText(r`[myattr=\80\81\9E\9F] { }`);
       assertEqual(rules[0].selectorText, `[myattr="\x80\x81\x9E\x9F"]`);
 
       var rules = getRulesFromCssText(r`[myattr="\3000 \4E00 \20000 \100000"] { }`);
       assertEqual(rules[0].selectorText, `[myattr="\u3000\u4E00\u{20000}\u{100000}"]`);
+    });
+
+    it('browser syntax check/tidy for attribute selector', function () {
+      // value is double quoted
+      var rules = getRulesFromCssText(`[myattr=myvalue] { }`);
+      assertEqual(rules[0].selectorText, `[myattr="myvalue"]`);
+
+      var rules = getRulesFromCssText(`[myattr='my value'] { }`);
+      assertEqual(rules[0].selectorText, `[myattr="my value"]`);
+
+      // name with quotes is not allowed
+      var rules = getRulesFromCssText(`["myattr"] { }`);
+      assertEqual(rules[0], undefined);
+
+      // value with mixed literal and quotes is not allowed
+      var rules = getRulesFromCssText(`[myattr=my"quoted"value] { }`);
+      assertEqual(rules[0], undefined);
+
+      // value with non-escaped operator is not allowed
+      var rules = getRulesFromCssText(`[myattr=@namespace] { }`);
+      assertEqual(rules[0], undefined);
+
+      var rules = getRulesFromCssText(`[myattr=div{color:red}] { }`);
+      assertEqual(rules[0], undefined);
+
+      var rules = getRulesFromCssText(`[myattr=var(--my-var)] { }`);
+      assertEqual(rules[0], undefined);
+
+      var rules = getRulesFromCssText(`[myattr=my|value] { }`);
+      assertEqual(rules[0], undefined);
+
+      var rules = getRulesFromCssText(`[myattr=foo=bar] { }`);
+      assertEqual(rules[0], undefined);
+
+      var rules = getRulesFromCssText(`[myattr=xlink:href] { }`);
+      assertEqual(rules[0], undefined);
+    });
+
+    it('browser syntax check/tidy for declaration', function () {
+      // semicolon after a declaration is added
+      var rules = getRulesFromCssText(`body { color: red }`);
+      assertEqual(rules[0].cssText, `body { color: red; }`);
+
+      // property value is double quoted
+      var rules = getRulesFromCssText(`p::after { content: 'my value'; }`);
+      assertEqual(rules[0].cssText, `p::after { content: "my value"; }`);
+    });
+
+    $(it).xfailIf(
+      userAgent.is('chromium') && userAgent.major < 101,
+      'var(...) is tidied in Chromium < 101 (possibly upper?)',
+    )('browser syntax check/tidy for var()', function () {
+      var rules = getRulesFromCssText(`p { color: var(  --myvar ); }`);
+      assertEqual(rules[0].cssText, `p { color: var(  --myvar ); }`);
+
+      var rules = getRulesFromCssText(`p { color: var(/* comment */--myvar); }`);
+      assertEqual(rules[0].cssText, `p { color: var(/* comment */--myvar); }`);
+
+      var rules = getRulesFromCssText(`p { color: var(--myvar/* comment */); }`);
+      assertEqual(rules[0].cssText, `p { color: var(--myvar/* comment */); }`);
     });
 
   });
