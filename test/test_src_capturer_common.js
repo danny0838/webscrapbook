@@ -1071,6 +1071,17 @@ ul {
       assertEqual(rules[0].cssText, `p::after { content: attr(id); }`);
     });
 
+    it('browser syntax check/tidy for escaping', function () {
+      // chars allowed for an ident are unescaped
+      var rules = getRulesFromCssText(r`.my\-c\la\s\s { }`);
+      assertEqual(rules[0].cssText, `.my-class { }`);
+
+      // escaping a newline in an ident is not allowed
+      var rules = getRulesFromCssText(r`.my\
+class { }`);
+      assertEqual(rules[0], undefined);
+    });
+
     it('browser syntax check/tidy for quoting', function () {
       // double quotes and backslashes are escaped
       var rules = getRulesFromCssText(r`[a=\"my\"attr\\value] { }`);
@@ -1079,12 +1090,16 @@ ul {
       var rules = getRulesFromCssText(r`[a='"my" attr\\value'] { }`);
       assertEqual(rules[0].selectorText, r`[a="\"my\" attr\\value"]`);
 
-      // ASCII control chars (0x01~0x19) are hex-escaped with lower case and space
+      // null, surrogate, and code > 0x10FFFF are replaced with 0xFFFD
+      var rules = getRulesFromCssText(r`[myattr=\0 \D800 \DFFF \110000] { }`);
+      assertEqual(rules[0].selectorText, `[myattr="\uFFFD\uFFFD\uFFFD\uFFFD"]`);
+
+      // ASCII control chars (0x01~0x1F, 0x7F) are hex-escaped with lower case and space
       var rules = getRulesFromCssText(r`[myattr=\1\2\3\4\5\6\7\8\9\A\B\C\D\E\F] { }`);
       assertEqual(rules[0].selectorText, r`[myattr="\1 \2 \3 \4 \5 \6 \7 \8 \9 \a \b \c \d \e \f "]`);
 
-      var rules = getRulesFromCssText(r`[myattr=\10\11\12\13\14\15\16\17\18\19\7F] { }`);
-      assertEqual(rules[0].selectorText, r`[myattr="\10 \11 \12 \13 \14 \15 \16 \17 \18 \19 \7f "]`);
+      var rules = getRulesFromCssText(r`[myattr=\10\11\12\13\14\15\16\17\18\19\1A\1B\1C\1D\1E\1F\7F] { }`);
+      assertEqual(rules[0].selectorText, r`[myattr="\10 \11 \12 \13 \14 \15 \16 \17 \18 \19 \1a \1b \1c \1d \1e \1f \7f "]`);
 
       // other ASCII symbols are unescaped
       var rules = getRulesFromCssText(r`[myattr=\20\21\22\23\24\25\26\27\28\29\2A\2B\2C\2D\2E\2F] { }`);
@@ -1099,6 +1114,20 @@ ul {
 
       var rules = getRulesFromCssText(r`[myattr="\3000 \4E00 \20000 \100000"] { }`);
       assertEqual(rules[0].selectorText, `[myattr="\u3000\u4E00\u{20000}\u{100000}"]`);
+
+      // newline in a string is not allowed (closed as a bad string)
+      var rules = getRulesFromCssText(r`p::after { content: "abc
+123"; }`);
+      assertEqual(rules[0].cssText, `p::after { }`);
+
+      var rules = getRulesFromCssText(r`p::after { content: "abc
+; color: red; }`);
+      assertEqual(rules[0].cssText, `p::after { color: red; }`);
+
+      // escaped newline in a string is stripped
+      var rules = getRulesFromCssText(r`p::after { content: "abc\
+123"; }`);
+      assertEqual(rules[0].cssText, `p::after { content: "abc123"; }`);
     });
 
     it('browser syntax check/tidy for attribute selector', function () {
