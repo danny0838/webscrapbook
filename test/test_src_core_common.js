@@ -1451,12 +1451,28 @@ describe('core/common.js', function () {
       var expected = `body\t{\timage-background\t:\turl(\t"http://example.com/image.jpg"\t)\t;\t}`;
       assertEqual(scrapbook.rewriteCssText(input, optionsImage), expected);
 
+      var input = `body { image-background: url(  "image.jpg"  ) ; }`;
+      var expected = `body { image-background: url(  "http://example.com/image.jpg"  ) ; }`;
+      assertEqual(scrapbook.rewriteCssText(input, optionsImage), expected);
+
+      var input = `body { image-background: url(\t"image.jpg"\t) ; }`;
+      var expected = `body { image-background: url(\t"http://example.com/image.jpg"\t) ; }`;
+      assertEqual(scrapbook.rewriteCssText(input, optionsImage), expected);
+
       // keep original case
       var input = `body { image-background: URL(image.jpg); }`;
       var expected = `body { image-background: URL("http://example.com/image.jpg"); }`;
       assertEqual(scrapbook.rewriteCssText(input, optionsImage), expected);
 
       var input = `body { image-background: uRl(image.jpg); }`;
+      var expected = `body { image-background: uRl("http://example.com/image.jpg"); }`;
+      assertEqual(scrapbook.rewriteCssText(input, optionsImage), expected);
+
+      var input = `body { image-background: URL("image.jpg"); }`;
+      var expected = `body { image-background: URL("http://example.com/image.jpg"); }`;
+      assertEqual(scrapbook.rewriteCssText(input, optionsImage), expected);
+
+      var input = `body { image-background: uRl("image.jpg"); }`;
       var expected = `body { image-background: uRl("http://example.com/image.jpg"); }`;
       assertEqual(scrapbook.rewriteCssText(input, optionsImage), expected);
 
@@ -1500,6 +1516,11 @@ describe('core/common.js', function () {
 
       var input = `[myattr="url(image.jpg)"] { }`;
       assertEqual(scrapbook.rewriteCssText(input, optionsImage), input);
+
+      // don't break normal rewriting
+      var input = r`.my\"class\" { background-image: url("image.jpg"); }`;
+      var expected = r`.my\"class\" { background-image: url("http://example.com/image.jpg"); }`;
+      assertEqual(scrapbook.rewriteCssText(input, optionsImage), expected);
     });
 
     it('image ignore unrelated rules', function () {
@@ -1516,10 +1537,177 @@ describe('core/common.js', function () {
       assertEqual(scrapbook.rewriteCssText(input, optionsImage), input);
     });
 
-    it('image complicated cases', function () {
-      var input = r`.my\"class\" { background-image: url("image.jpg"); }`;
-      var expected = r`.my\"class\" { background-image: url("http://example.com/image.jpg"); }`;
+    $it.xfail()('image: certain chars should be escaped or replaced', function () {
+      // 0x01~0x1F and 0x7F (except for newlines) should be escaped
+      var input = `.mycls { background-image: url("\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0B\x0E\x0F"); }`;
+      var expected = r`.mycls { background-image: url("http://example.com/\1 \2 \3 \4 \5 \6 \7 \8 \9 \b \e \f "); }`;
       assertEqual(scrapbook.rewriteCssText(input, optionsImage), expected);
+
+      var input = `.mycls { background-image: url("\x10\x11\x12\x13\x14\x15\x16\x17\x18\x19\x1A\x1B\x1C\x1D\x1E\x1F\x7F"); }`;
+      var expected = r`.mycls { background-image: url("http://example.com/\10 \11 \12 \13 \14 \15 \16 \17 \18 \19 \1a \1b \1c \1d \1e \1f \7f "); }`;
+      assertEqual(scrapbook.rewriteCssText(input, optionsImage), expected);
+
+      // escaped sequence of 0x01~0x1F and 0x7F should keep escaped
+      var input = r`.mycls { background-image: url("\1 \2 \3 \4 \5 \6 \7 \8 \9 \a \b \c \d \e \f "); }`;
+      var expected = r`.mycls { background-image: url("http://example.com/\1 \2 \3 \4 \5 \6 \7 \8 \9 \a \b \c \d \e \f "); }`;
+      assertEqual(scrapbook.rewriteCssText(input, optionsImage), expected);
+
+      var input = r`.mycls { background-image: url("\10 \11 \12 \13 \14 \15 \16 \17 \18 \19 \1a \1b \1c \1d \1e \1f \7f "); }`;
+      var expected = r`.mycls { background-image: url("http://example.com/\10 \11 \12 \13 \14 \15 \16 \17 \18 \19 \1a \1b \1c \1d \1e \1f \7f "); }`;
+      assertEqual(scrapbook.rewriteCssText(input, optionsImage), expected);
+
+      // null, surrogate, and char code > 0x10FFFF should be replaced with \uFFFD
+      var input = r`.mycls { background-image: url("\0 \D800 \DFFF \110000"); }`;
+      var expected = `.mycls { background-image: url("http://example.com/\uFFFD\uFFFD\uFFFD\uFFFD"); }`;
+      assertEqual(scrapbook.rewriteCssText(input, optionsImage), expected);
+
+      // other chars should be unescaped
+      var input = r`.mycls { background-image: url("\80 \4E00 \20000 \10FFFF "); }`;
+      var expected = `.mycls { background-image: url("http://example.com/\u{80}\u{4E00}\u{20000}\u{10FFFF}"); }`;
+      assertEqual(scrapbook.rewriteCssText(input, optionsImage), expected);
+    });
+
+    $it.xfail()('image: bad extra components after a quoted string', function () {
+      // bad URL, should be skipped
+      var input = r`.mycls { background-image: url("image.jpg"foo); }`;
+      assertEqual(scrapbook.rewriteCssText(input, optionsImage), input);
+
+      var input = r`.mycls { background-image: url("image.jpg" foo); }`;
+      assertEqual(scrapbook.rewriteCssText(input, optionsImage), input);
+
+      var input = r`.mycls { background-image: url("image.jpg""foo"); }`;
+      assertEqual(scrapbook.rewriteCssText(input, optionsImage), input);
+
+      var input = r`.mycls { background-image: url("image.jpg" "foo"); }`;
+      assertEqual(scrapbook.rewriteCssText(input, optionsImage), input);
+
+      var input = r`.mycls { background-image: url("image.jpg"'foo'); }`;
+      assertEqual(scrapbook.rewriteCssText(input, optionsImage), input);
+
+      var input = r`.mycls { background-image: url("image.jpg" 'foo'); }`;
+      assertEqual(scrapbook.rewriteCssText(input, optionsImage), input);
+
+      var input = r`.mycls { background-image: url("image.jpg" url(foo)); }`;
+      assertEqual(scrapbook.rewriteCssText(input, optionsImage), input);
+
+      var input = r`.mycls { background-image: url("image.jpg" url("foo")); }`;
+      assertEqual(scrapbook.rewriteCssText(input, optionsImage), input);
+    });
+
+    it('image: newline in a quoted string', function () {
+      // bad string, should be skipped
+      var input = r`.mycls { background-image: url("image.jpg
+); }`;
+      assertEqual(scrapbook.rewriteCssText(input, optionsImage), input);
+
+      var input = r`.mycls { background-image: url('image.jpg
+); }`;
+      assertEqual(scrapbook.rewriteCssText(input, optionsImage), input);
+    });
+
+    $it.xfail()('image: escaped newline in a quoted string', function () {
+      // escaped newlines should be stripped
+      var input = r`.mycls { background-image: url("my\
+image\
+.jpg"); }`;
+      var expected = r`.mycls { background-image: url("http://example.com/myimage.jpg"); }`;
+      assertEqual(scrapbook.rewriteCssText(input, optionsImage), expected);
+
+      var input = r`.mycls { background-image: url('my\
+image\
+.jpg'); }`;
+      var expected = r`.mycls { background-image: url("http://example.com/myimage.jpg"); }`;
+      assertEqual(scrapbook.rewriteCssText(input, optionsImage), expected);
+    });
+
+    $it.xfail()('image: EOF in a quoted string', function () {
+      // bad string, should be skipped to the end
+      var input = r`.mycls { background-image: url("img.jpg`;
+      assertEqual(scrapbook.rewriteCssText(input, optionsImage), input);
+
+      var input = r`.mycls { background-image: url("url(img.jpg)`;
+      assertEqual(scrapbook.rewriteCssText(input, optionsImage), input);
+
+      var input = r`.mycls { background-image: url('img.jpg`;
+      assertEqual(scrapbook.rewriteCssText(input, optionsImage), input);
+
+      var input = r`.mycls { background-image: url('url(img.jpg)`;
+      assertEqual(scrapbook.rewriteCssText(input, optionsImage), input);
+    });
+
+    $it.xfail()('image: escaped EOF in a quoted string', function () {
+      // bad string, should be skipped to the end
+      var input = `.mycls { background-image: url("img.jpg\\`;
+      assertEqual(scrapbook.rewriteCssText(input, optionsImage), input);
+
+      var input = `.mycls { background-image: url("url(img.jpg)\\`;
+      assertEqual(scrapbook.rewriteCssText(input, optionsImage), input);
+
+      var input = `.mycls { background-image: url('img.jpg\\`;
+      assertEqual(scrapbook.rewriteCssText(input, optionsImage), input);
+
+      var input = `.mycls { background-image: url('url(img.jpg)\\`;
+      assertEqual(scrapbook.rewriteCssText(input, optionsImage), input);
+    });
+
+    $it.xfail()('image: bad chars in an unquoted url', function () {
+      // bad URL, should be skipped
+      var input = r`.mycls { background-image: url(image"foo.jpg); }`;
+      assertEqual(scrapbook.rewriteCssText(input, optionsImage), input);
+
+      var input = r`.mycls { background-image: url(image"foo".jpg); }`;
+      assertEqual(scrapbook.rewriteCssText(input, optionsImage), input);
+
+      var input = r`.mycls { background-image: url(image'foo.jpg); }`;
+      assertEqual(scrapbook.rewriteCssText(input, optionsImage), input);
+
+      var input = r`.mycls { background-image: url(image'foo'.jpg); }`;
+      assertEqual(scrapbook.rewriteCssText(input, optionsImage), input);
+
+      var input = r`.mycls { background-image: url(image(foo.jpg); }`;
+      assertEqual(scrapbook.rewriteCssText(input, optionsImage), input);
+
+      var input = r`.mycls { background-image: url(url(foo).jpg); }`;
+      assertEqual(scrapbook.rewriteCssText(input, optionsImage), input);
+    });
+
+    it('image: last newline in an unquoted url', function () {
+      // last whitespaces, should be stripped
+      var input = r`.mycls { background-image: url(image.jpg
+); }`;
+      var expected = r`.mycls { background-image: url("http://example.com/image.jpg"
+); }`;
+      assertEqual(scrapbook.rewriteCssText(input, optionsImage), expected);
+    });
+
+    $it.xfail()('image: intermediate newline in an unquoted url', function () {
+      // bad url, should be skipped
+      var input = r`.mycls { background-image: url(image.jpg
+foo); }`;
+      assertEqual(scrapbook.rewriteCssText(input, optionsImage), input);
+    });
+
+    it('image: escaped newline in an unquoted url', function () {
+      // bad escape, should be skipped
+      var input = r`.mycls { background-image: url(image\
+.jpg); }`;
+      assertEqual(scrapbook.rewriteCssText(input, optionsImage), input);
+
+      var input = r`.mycls { background-image: url(image.jpg\
+); }`;
+      assertEqual(scrapbook.rewriteCssText(input, optionsImage), input);
+    });
+
+    it('image: EOF in an unquoted url', function () {
+      // bad url, should be skipped to the end
+      var input = `.mycls { background-image: url(img.jpg`;
+      assertEqual(scrapbook.rewriteCssText(input, optionsImage), input);
+    });
+
+    it('image: escaped EOF in an unquoted url', function () {
+      // bad escape, should be skipped to the end
+      var input = `.mycls { background-image: url(img.jpg\\`;
+      assertEqual(scrapbook.rewriteCssText(input, optionsImage), input);
     });
 
     it('image record', function () {
@@ -1618,13 +1806,27 @@ describe('core/common.js', function () {
 
       var input = `[myattr="@font-face{src:url(file.woff)}"] { }`;
       assertEqual(scrapbook.rewriteCssText(input, optionsFont), input);
-    });
 
-    it('@font-face complicated cases', function () {
+      // don't break normal rewriting
       var input = r`.my\"class\" { }
 @font-face { src: url("file.woff"); }`;
       var expected = r`.my\"class\" { }
 @font-face { src: url("http://example.com/file.woff"); }`;
+      assertEqual(scrapbook.rewriteCssText(input, optionsFont), expected);
+    });
+
+    $it.xfail()('@font-face: escaped newline in a quoted string', function () {
+      // escaped newlines should be stripped
+      var input = r`@font-face { font-family: myfont; src: url("my\
+font\
+.woff"); }`;
+      var expected = `@font-face { font-family: myfont; src: url("http://example.com/myfont.woff"); }`;
+      assertEqual(scrapbook.rewriteCssText(input, optionsFont), expected);
+
+      var input = r`@font-face { font-family: myfont; src: url('my\
+font\
+.woff'); }`;
+      var expected = `@font-face { font-family: myfont; src: url("http://example.com/myfont.woff"); }`;
       assertEqual(scrapbook.rewriteCssText(input, optionsFont), expected);
     });
 
@@ -1740,13 +1942,39 @@ describe('core/common.js', function () {
 
       var input = `[myattr="@import url(file.css);"] { }`;
       assertEqual(scrapbook.rewriteCssText(input, optionsImport), input);
-    });
 
-    it('@import complicated cases', function () {
+      // don't break normal rewriting
       var input = r`.my\"class\" { }
 @import "file.css";`;
       var expected = r`.my\"class\" { }
 @import "http://example.com/file.css";`;
+      assertEqual(scrapbook.rewriteCssText(input, optionsImport), expected);
+    });
+
+    $it.xfail()('@import: escaped newline in a quoted string', function () {
+      // escaped newlines should be stripped
+      var input = r`@import "my\
+file\
+.css";`;
+      var expected = `@import "http://example.com/myfile.css";`;
+      assertEqual(scrapbook.rewriteCssText(input, optionsImport), expected);
+
+      var input = r`@import 'my\
+file\
+.css';`;
+      var expected = `@import "http://example.com/myfile.css";`;
+      assertEqual(scrapbook.rewriteCssText(input, optionsImport), expected);
+
+      var input = r`@import url("my\
+file\
+.css");`;
+      var expected = `@import url("http://example.com/myfile.css");`;
+      assertEqual(scrapbook.rewriteCssText(input, optionsImport), expected);
+
+      var input = r`@import url('my\
+file\
+.css');`;
+      var expected = `@import url("http://example.com/myfile.css");`;
       assertEqual(scrapbook.rewriteCssText(input, optionsImport), expected);
     });
 
