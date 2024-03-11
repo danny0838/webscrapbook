@@ -3141,7 +3141,7 @@ height: 100vh;`;
         cmd: "background.invokeEditorCommand",
         args: {
           frameId,
-          code: `document.execCommand('styleWithCSS', false, true); document.execCommand('foreColor', false, "${scrapbook.escapeQuotes(color)}");`,
+          code: `document.execCommand('styleWithCSS', false, true); document.execCommand('foreColor', false, ${JSON.stringify(color)});`,
         },
       });
     },
@@ -3154,7 +3154,7 @@ height: 100vh;`;
         cmd: "background.invokeEditorCommand",
         args: {
           frameId,
-          code: `document.execCommand('styleWithCSS', false, true); document.execCommand('hiliteColor', false, "${scrapbook.escapeQuotes(color)}");`,
+          code: `document.execCommand('styleWithCSS', false, true); document.execCommand('hiliteColor', false, ${JSON.stringify(color)});`,
         },
       });
     },
@@ -3337,7 +3337,7 @@ height: 100vh;`;
         cmd: "background.invokeEditorCommand",
         args: {
           frameId,
-          code: `document.execCommand('createLink', false, "${scrapbook.escapeQuotes(url)}");`,
+          code: `document.execCommand('createLink', false, ${JSON.stringify(url)});`,
         },
       });
     },
@@ -3370,7 +3370,7 @@ height: 100vh;`;
         cmd: "background.invokeEditorCommand",
         args: {
           frameId: await editor.getFocusedFrameId(),
-          code: `document.execCommand('insertText', false, "${scrapbook.escapeQuotes(dateStr)}");`,
+          code: `document.execCommand('insertText', false, ${JSON.stringify(dateStr)});`,
         },
       });
     },
@@ -3383,7 +3383,7 @@ height: 100vh;`;
         cmd: "background.invokeEditorCommand",
         args: {
           frameId,
-          code: `document.execCommand('insertHTML', false, "${scrapbook.escapeQuotes(html)}");`,
+          code: `document.execCommand('insertHTML', false, ${JSON.stringify(html)});`,
         },
       });
     },

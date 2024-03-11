@@ -554,7 +554,7 @@
       // Attempt to find a match from currently visible items; othwise lookup in
       // the whole tree.
       let curElem;
-      for (const elem of this.treeElem.querySelectorAll(`[data-id="${scrapbook.escapeQuotes(id)}"]`)) {
+      for (const elem of this.treeElem.querySelectorAll(`[data-id="${CSS.escape(id)}"]`)) {
         if (elem.offsetParent) {
           curElem = elem;
           break;
@@ -562,7 +562,7 @@
       }
 
       if (!curElem) {
-        curElem = this.treeElem.querySelector(`[data-id="${scrapbook.escapeQuotes(path[0].id)}"]`);
+        curElem = this.treeElem.querySelector(`[data-id="${CSS.escape(path[0].id)}"]`);
         for (let i = 1, I = path.length; i < I; ++i) {
           const {pos} = path[i];
           this.toggleItem(curElem, true);
