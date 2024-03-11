@@ -1534,6 +1534,18 @@ describe('core/common.js', function () {
       assertEqual(scrapbook.rewriteCssText(input, options), expected);
     });
 
+    it('image async', async function () {
+      var options = {
+        rewriteImportUrl: async url => ({url}),
+        rewriteFontFaceUrl: async url => ({url}),
+        rewriteBackgroundUrl: async url => ({url: `http://example.com/${url}`}),
+      };
+
+      var input = `body { image-background: url(image.jpg); }`;
+      var expected = `body { image-background: url("http://example.com/image.jpg"); }`;
+      assertEqual(await scrapbook.rewriteCssText(input, options), expected);
+    });
+
     it('@font-face', function () {
       var input = `@font-face { font-family: myfont; src: url(file.woff); }`;
       var expected = `@font-face { font-family: myfont; src: url("http://example.com/file.woff"); }`;
@@ -1626,6 +1638,18 @@ describe('core/common.js', function () {
       var input = `@font-face { font-family: myfont; src: url(file.woff); }`;
       var expected = `@font-face { font-family: myfont; src: /*scrapbook-orig-url="file.woff"*/url("http://example.com/file.woff"); }`;
       assertEqual(scrapbook.rewriteCssText(input, options), expected);
+    });
+
+    it('@font-face async', async function () {
+      var options = {
+        rewriteImportUrl: async url => ({url}),
+        rewriteFontFaceUrl: async url => ({url: `http://example.com/${url}`}),
+        rewriteBackgroundUrl: async url => ({url}),
+      };
+
+      var input = `@font-face { font-family: myfont; src: url(file.woff); }`;
+      var expected = `@font-face { font-family: myfont; src: url("http://example.com/file.woff"); }`;
+      assertEqual(await scrapbook.rewriteCssText(input, options), expected);
     });
 
     it('@import', function () {
@@ -1742,6 +1766,18 @@ describe('core/common.js', function () {
       assertEqual(scrapbook.rewriteCssText(input, options), expected);
     });
 
+    it('@import async', async function () {
+      var options = {
+        rewriteImportUrl: async url => ({url: `http://example.com/${url}`}),
+        rewriteFontFaceUrl: async url => ({url}),
+        rewriteBackgroundUrl: async url => ({url}),
+      };
+
+      var input = `@import "file.css";`;
+      var expected = `@import "http://example.com/file.css";`;
+      assertEqual(await scrapbook.rewriteCssText(input, options), expected);
+    });
+
     it('resource map', function () {
       const map = {};
       const options = {
@@ -1767,18 +1803,6 @@ div { image-background: var(${/(--sb(\d+)-2)/}); }`;
         "http://image.example.com/image.jpg": match[1],
         "http://image.example.com/image2.jpg": match[3],
       });
-    });
-
-    it('async', async function () {
-      const options = {
-        rewriteImportUrl: async url => ({url}),
-        rewriteFontFaceUrl: async url => ({url}),
-        rewriteBackgroundUrl: async url => ({url: `http://example.com/${url}`}),
-      };
-
-      var input = `body { image-background: url(image.jpg); }`;
-      var expected = `body { image-background: url("http://example.com/image.jpg"); }`;
-      assertEqual(await scrapbook.rewriteCssText(input, options), expected);
     });
 
   });
