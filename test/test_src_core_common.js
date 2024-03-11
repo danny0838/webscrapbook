@@ -1396,25 +1396,34 @@ describe('core/common.js', function () {
   });
 
   describe('scrapbook.rewriteCssText', function () {
+    const optionsImage = {
+      rewriteImportUrl: url => ({url}),
+      rewriteFontFaceUrl: url => ({url}),
+      rewriteBackgroundUrl: url => ({url: `http://example.com/${url}`}),
+    };
+    const optionsFont = {
+      rewriteImportUrl: url => ({url}),
+      rewriteFontFaceUrl: url => ({url: `http://example.com/${url}`}),
+      rewriteBackgroundUrl: url => ({url}),
+    };
+    const optionsImport = {
+      rewriteImportUrl: url => ({url: `http://example.com/${url}`}),
+      rewriteFontFaceUrl: url => ({url}),
+      rewriteBackgroundUrl: url => ({url}),
+    };
 
     it('image', function () {
-      const options = {
-        rewriteImportUrl: url => ({url}),
-        rewriteFontFaceUrl: url => ({url}),
-        rewriteBackgroundUrl: url => ({url: `http://example.com/${url}`}),
-      };
-
       var input = `body { image-background: url(image.jpg); }`;
       var expected = `body { image-background: url("http://example.com/image.jpg"); }`;
-      assertEqual(scrapbook.rewriteCssText(input, options), expected);
+      assertEqual(scrapbook.rewriteCssText(input, optionsImage), expected);
 
       var input = `body { image-background: url('image.jpg'); }`;
       var expected = `body { image-background: url("http://example.com/image.jpg"); }`;
-      assertEqual(scrapbook.rewriteCssText(input, options), expected);
+      assertEqual(scrapbook.rewriteCssText(input, optionsImage), expected);
 
       var input = `body { image-background: url("image.jpg"); }`;
       var expected = `body { image-background: url("http://example.com/image.jpg"); }`;
-      assertEqual(scrapbook.rewriteCssText(input, options), expected);
+      assertEqual(scrapbook.rewriteCssText(input, optionsImage), expected);
 
       // keyframes
       var input = `\
@@ -1427,108 +1436,90 @@ describe('core/common.js', function () {
   from { background-image: url("http://example.com/image.bmp"); }
   to { background-image: url("http://example.com/image.bmp"); }
 }`;
-      assertEqual(scrapbook.rewriteCssText(input, options), expected);
+      assertEqual(scrapbook.rewriteCssText(input, optionsImage), expected);
 
       // keep original spaces
       var input = `body{image-background:url(image.jpg);}`;
       var expected = `body{image-background:url("http://example.com/image.jpg");}`;
-      assertEqual(scrapbook.rewriteCssText(input, options), expected);
+      assertEqual(scrapbook.rewriteCssText(input, optionsImage), expected);
 
       var input = `body { image-background: url(  image.jpg  ) ; }`;
       var expected = `body { image-background: url(  "http://example.com/image.jpg"  ) ; }`;
-      assertEqual(scrapbook.rewriteCssText(input, options), expected);
+      assertEqual(scrapbook.rewriteCssText(input, optionsImage), expected);
 
       var input = `body\t{\timage-background\t:\turl(\timage.jpg\t)\t;\t}`;
       var expected = `body\t{\timage-background\t:\turl(\t"http://example.com/image.jpg"\t)\t;\t}`;
-      assertEqual(scrapbook.rewriteCssText(input, options), expected);
+      assertEqual(scrapbook.rewriteCssText(input, optionsImage), expected);
 
       // keep original case
       var input = `body { image-background: URL(image.jpg); }`;
       var expected = `body { image-background: URL("http://example.com/image.jpg"); }`;
-      assertEqual(scrapbook.rewriteCssText(input, options), expected);
+      assertEqual(scrapbook.rewriteCssText(input, optionsImage), expected);
 
       var input = `body { image-background: uRl(image.jpg); }`;
       var expected = `body { image-background: uRl("http://example.com/image.jpg"); }`;
-      assertEqual(scrapbook.rewriteCssText(input, options), expected);
+      assertEqual(scrapbook.rewriteCssText(input, optionsImage), expected);
 
       // escape quotes
       var input = `body { image-background: url('i "like" it.jpg'); }`;
       var expected = r`body { image-background: url("http://example.com/i \"like\" it.jpg"); }`;
-      assertEqual(scrapbook.rewriteCssText(input, options), expected);
+      assertEqual(scrapbook.rewriteCssText(input, optionsImage), expected);
 
       // skip comments
       var input = `/*url(image.jpg)*/`;
-      assertEqual(scrapbook.rewriteCssText(input, options), input);
+      assertEqual(scrapbook.rewriteCssText(input, optionsImage), input);
 
       var input = `/*url(image.jpg)*/body { color: red; }`;
-      assertEqual(scrapbook.rewriteCssText(input, options), input);
+      assertEqual(scrapbook.rewriteCssText(input, optionsImage), input);
 
       var input = `body/*url(image.jpg)*/{ color: red; }`;
-      assertEqual(scrapbook.rewriteCssText(input, options), input);
+      assertEqual(scrapbook.rewriteCssText(input, optionsImage), input);
 
       var input = `body {/*url(image.jpg)*/color: red; }`;
-      assertEqual(scrapbook.rewriteCssText(input, options), input);
+      assertEqual(scrapbook.rewriteCssText(input, optionsImage), input);
 
       var input = `body { color/*url(image.jpg)*/: red; }`;
-      assertEqual(scrapbook.rewriteCssText(input, options), input);
+      assertEqual(scrapbook.rewriteCssText(input, optionsImage), input);
 
       var input = `body { color:/*url(image.jpg)*/red; }`;
-      assertEqual(scrapbook.rewriteCssText(input, options), input);
+      assertEqual(scrapbook.rewriteCssText(input, optionsImage), input);
 
       var input = `body { color: red/*url(image.jpg)*/; }`;
-      assertEqual(scrapbook.rewriteCssText(input, options), input);
+      assertEqual(scrapbook.rewriteCssText(input, optionsImage), input);
 
       var input = `body { color: red;/*url(image.jpg)*/}`;
-      assertEqual(scrapbook.rewriteCssText(input, options), input);
+      assertEqual(scrapbook.rewriteCssText(input, optionsImage), input);
 
       var input = `body { color: red; }/*url(image.jpg)*/`;
-      assertEqual(scrapbook.rewriteCssText(input, options), input);
+      assertEqual(scrapbook.rewriteCssText(input, optionsImage), input);
     });
 
     it('image ignore unrelated pattern', function () {
-      const options = {
-        rewriteImportUrl: url => ({url}),
-        rewriteFontFaceUrl: url => ({url}),
-        rewriteBackgroundUrl: url => ({url: `http://example.com/${url}`}),
-      };
-
       var input = `div::after { content: "url(image.jpg)" }`;
-      assertEqual(scrapbook.rewriteCssText(input, options), input);
+      assertEqual(scrapbook.rewriteCssText(input, optionsImage), input);
 
       var input = `[myattr="url(image.jpg)"] { }`;
-      assertEqual(scrapbook.rewriteCssText(input, options), input);
+      assertEqual(scrapbook.rewriteCssText(input, optionsImage), input);
     });
 
     it('image ignore unrelated rules', function () {
-      const options = {
-        rewriteImportUrl: url => ({url}),
-        rewriteFontFaceUrl: url => ({url}),
-        rewriteBackgroundUrl: url => ({url: `http://example.com/${url}`}),
-      };
-
       var input = `@import "file.css";`;
-      assertEqual(scrapbook.rewriteCssText(input, options), input);
+      assertEqual(scrapbook.rewriteCssText(input, optionsImage), input);
 
       var input = `@import url("file.css");`;
-      assertEqual(scrapbook.rewriteCssText(input, options), input);
+      assertEqual(scrapbook.rewriteCssText(input, optionsImage), input);
 
       var input = `@namespace url("file.css");`;
-      assertEqual(scrapbook.rewriteCssText(input, options), input);
+      assertEqual(scrapbook.rewriteCssText(input, optionsImage), input);
 
       var input = `@font-face { font-family: myfont; src: url("file.woff"); }`;
-      assertEqual(scrapbook.rewriteCssText(input, options), input);
+      assertEqual(scrapbook.rewriteCssText(input, optionsImage), input);
     });
 
     it('image complicated cases', function () {
-      const options = {
-        rewriteImportUrl: url => ({url}),
-        rewriteFontFaceUrl: url => ({url}),
-        rewriteBackgroundUrl: url => ({url: `http://example.com/${url}`}),
-      };
-
       var input = r`.my\"class\" { background-image: url("image.jpg"); }`;
       var expected = r`.my\"class\" { background-image: url("http://example.com/image.jpg"); }`;
-      assertEqual(scrapbook.rewriteCssText(input, options), expected);
+      assertEqual(scrapbook.rewriteCssText(input, optionsImage), expected);
     });
 
     it('image record', function () {
@@ -1544,103 +1535,85 @@ describe('core/common.js', function () {
     });
 
     it('@font-face', function () {
-      const options = {
-        rewriteImportUrl: url => ({url}),
-        rewriteFontFaceUrl: url => ({url: `http://example.com/${url}`}),
-        rewriteBackgroundUrl: url => ({url}),
-      };
-
       var input = `@font-face { font-family: myfont; src: url(file.woff); }`;
       var expected = `@font-face { font-family: myfont; src: url("http://example.com/file.woff"); }`;
-      assertEqual(scrapbook.rewriteCssText(input, options), expected);
+      assertEqual(scrapbook.rewriteCssText(input, optionsFont), expected);
 
       var input = `@font-face { font-family: myfont; src: url('file.woff'); }`;
       var expected = `@font-face { font-family: myfont; src: url("http://example.com/file.woff"); }`;
-      assertEqual(scrapbook.rewriteCssText(input, options), expected);
+      assertEqual(scrapbook.rewriteCssText(input, optionsFont), expected);
 
       var input = `@font-face { font-family: myfont; src: url("file.woff"); }`;
       var expected = `@font-face { font-family: myfont; src: url("http://example.com/file.woff"); }`;
-      assertEqual(scrapbook.rewriteCssText(input, options), expected);
+      assertEqual(scrapbook.rewriteCssText(input, optionsFont), expected);
 
       // keep original spaces
       var input = `@font-face{font-family:myfont;src:url(file.woff);}`;
       var expected = `@font-face{font-family:myfont;src:url("http://example.com/file.woff");}`;
-      assertEqual(scrapbook.rewriteCssText(input, options), expected);
+      assertEqual(scrapbook.rewriteCssText(input, optionsFont), expected);
 
       var input = `@font-face { font-family: myfont; src  : url(  file.woff  )  ; }`;
       var expected = `@font-face { font-family: myfont; src  : url(  "http://example.com/file.woff"  )  ; }`;
-      assertEqual(scrapbook.rewriteCssText(input, options), expected);
+      assertEqual(scrapbook.rewriteCssText(input, optionsFont), expected);
 
       var input = `\t@font-face\t{\tfont-family\t:\tmyfont\t;\tsrc\t:\turl(\tfile.woff\t)\t;\t}`;
       var expected = `\t@font-face\t{\tfont-family\t:\tmyfont\t;\tsrc\t:\turl(\t"http://example.com/file.woff"\t)\t;\t}`;
-      assertEqual(scrapbook.rewriteCssText(input, options), expected);
+      assertEqual(scrapbook.rewriteCssText(input, optionsFont), expected);
 
       // keep original case
       var input = `@font-face { font-family: myfont; src: URL(file.woff); }`;
       var expected = `@font-face { font-family: myfont; src: URL("http://example.com/file.woff"); }`;
-      assertEqual(scrapbook.rewriteCssText(input, options), expected);
+      assertEqual(scrapbook.rewriteCssText(input, optionsFont), expected);
 
       var input = `@font-face { font-family: myfont; src: UrL(file.woff); }`;
       var expected = `@font-face { font-family: myfont; src: UrL("http://example.com/file.woff"); }`;
-      assertEqual(scrapbook.rewriteCssText(input, options), expected);
+      assertEqual(scrapbook.rewriteCssText(input, optionsFont), expected);
 
       // escape quotes
       var input = `@font-face { font-family: myfont; src: url('i"like"it.woff'); }`;
       var expected = r`@font-face { font-family: myfont; src: url("http://example.com/i\"like\"it.woff"); }`;
-      assertEqual(scrapbook.rewriteCssText(input, options), expected);
+      assertEqual(scrapbook.rewriteCssText(input, optionsFont), expected);
 
       // skip comments
       var input = `/*@font-face{src:url(file.woff)}*/`;
-      assertEqual(scrapbook.rewriteCssText(input, options), input);
+      assertEqual(scrapbook.rewriteCssText(input, optionsFont), input);
 
       var input = `/*@font-face{src:url(file.woff)}*/body { color: red; }`;
-      assertEqual(scrapbook.rewriteCssText(input, options), input);
+      assertEqual(scrapbook.rewriteCssText(input, optionsFont), input);
 
       var input = `body/*@font-face{src:url(file.woff)}*/{ color: red; }`;
-      assertEqual(scrapbook.rewriteCssText(input, options), input);
+      assertEqual(scrapbook.rewriteCssText(input, optionsFont), input);
 
       var input = `body {/*@font-face{src:url(file.woff)}*/color: red; }`;
-      assertEqual(scrapbook.rewriteCssText(input, options), input);
+      assertEqual(scrapbook.rewriteCssText(input, optionsFont), input);
 
       var input = `body { color/*@font-face{src:url(file.woff)}*/: red; }`;
-      assertEqual(scrapbook.rewriteCssText(input, options), input);
+      assertEqual(scrapbook.rewriteCssText(input, optionsFont), input);
 
       var input = `body { color:/*@font-face{src:url(file.woff)}*/red; }`;
-      assertEqual(scrapbook.rewriteCssText(input, options), input);
+      assertEqual(scrapbook.rewriteCssText(input, optionsFont), input);
 
       var input = `body { color: red/*@font-face{src:url(file.woff)}*/; }`;
-      assertEqual(scrapbook.rewriteCssText(input, options), input);
+      assertEqual(scrapbook.rewriteCssText(input, optionsFont), input);
 
       var input = `body { color: red;/*@font-face{src:url(file.woff)}*/}`;
-      assertEqual(scrapbook.rewriteCssText(input, options), input);
+      assertEqual(scrapbook.rewriteCssText(input, optionsFont), input);
     });
 
     it('@font-face ignore unrelated pattern', function () {
-      const options = {
-        rewriteImportUrl: url => ({url}),
-        rewriteFontFaceUrl: url => ({url: `http://example.com/${url}`}),
-        rewriteBackgroundUrl: url => ({url}),
-      };
-
       var input = `div::after { content: "@font-face{src:url(file.woff)}" }`;
-      assertEqual(scrapbook.rewriteCssText(input, options), input);
+      assertEqual(scrapbook.rewriteCssText(input, optionsFont), input);
 
       var input = `[myattr="@font-face{src:url(file.woff)}"] { }`;
-      assertEqual(scrapbook.rewriteCssText(input, options), input);
+      assertEqual(scrapbook.rewriteCssText(input, optionsFont), input);
     });
 
     it('@font-face complicated cases', function () {
-      const options = {
-        rewriteImportUrl: url => ({url}),
-        rewriteFontFaceUrl: url => ({url: `http://example.com/${url}`}),
-        rewriteBackgroundUrl: url => ({url}),
-      };
-
       var input = r`.my\"class\" { }
 @font-face { src: url("file.woff"); }`;
       var expected = r`.my\"class\" { }
 @font-face { src: url("http://example.com/file.woff"); }`;
-      assertEqual(scrapbook.rewriteCssText(input, options), expected);
+      assertEqual(scrapbook.rewriteCssText(input, optionsFont), expected);
     });
 
     it('@font-face record', function () {
@@ -1656,119 +1629,101 @@ describe('core/common.js', function () {
     });
 
     it('@import', function () {
-      const options = {
-        rewriteImportUrl: url => ({url: `http://example.com/${url}`}),
-        rewriteFontFaceUrl: url => ({url}),
-        rewriteBackgroundUrl: url => ({url}),
-      };
-
       var input = `@import "file.css";`;
       var expected = `@import "http://example.com/file.css";`;
-      assertEqual(scrapbook.rewriteCssText(input, options), expected);
+      assertEqual(scrapbook.rewriteCssText(input, optionsImport), expected);
 
       var input = `@import 'file.css';`;
       var expected = `@import "http://example.com/file.css";`;
-      assertEqual(scrapbook.rewriteCssText(input, options), expected);
+      assertEqual(scrapbook.rewriteCssText(input, optionsImport), expected);
 
       var input = `@import url(file.css);`;
       var expected = `@import url("http://example.com/file.css");`;
-      assertEqual(scrapbook.rewriteCssText(input, options), expected);
+      assertEqual(scrapbook.rewriteCssText(input, optionsImport), expected);
 
       var input = `@import url('file.css');`;
       var expected = `@import url("http://example.com/file.css");`;
-      assertEqual(scrapbook.rewriteCssText(input, options), expected);
+      assertEqual(scrapbook.rewriteCssText(input, optionsImport), expected);
 
       var input = `@import url("file.css");`;
       var expected = `@import url("http://example.com/file.css");`;
-      assertEqual(scrapbook.rewriteCssText(input, options), expected);
+      assertEqual(scrapbook.rewriteCssText(input, optionsImport), expected);
 
       // keep original spaces
       var input = `@import   "file.css"  ;`;
       var expected = `@import   "http://example.com/file.css"  ;`;
-      assertEqual(scrapbook.rewriteCssText(input, options), expected);
+      assertEqual(scrapbook.rewriteCssText(input, optionsImport), expected);
 
       var input = `@import\t"file.css"\t;`;
       var expected = `@import\t"http://example.com/file.css"\t;`;
-      assertEqual(scrapbook.rewriteCssText(input, options), expected);
+      assertEqual(scrapbook.rewriteCssText(input, optionsImport), expected);
 
       var input = `@import   url(  file.css   )  ;`;
       var expected = `@import   url(  "http://example.com/file.css"   )  ;`;
-      assertEqual(scrapbook.rewriteCssText(input, options), expected);
+      assertEqual(scrapbook.rewriteCssText(input, optionsImport), expected);
 
       var input = `@import\turl(\tfile.css\t)\t;`;
       var expected = `@import\turl(\t"http://example.com/file.css"\t)\t;`;
-      assertEqual(scrapbook.rewriteCssText(input, options), expected);
+      assertEqual(scrapbook.rewriteCssText(input, optionsImport), expected);
 
       // keep original case
       var input = `@import URL(file.css);`;
       var expected = `@import URL("http://example.com/file.css");`;
-      assertEqual(scrapbook.rewriteCssText(input, options), expected);
+      assertEqual(scrapbook.rewriteCssText(input, optionsImport), expected);
 
       var input = `@import URl(file.css);`;
       var expected = `@import URl("http://example.com/file.css");`;
-      assertEqual(scrapbook.rewriteCssText(input, options), expected);
+      assertEqual(scrapbook.rewriteCssText(input, optionsImport), expected);
 
       // escape quotes
       var input = `@import 'I"love"you.css';`;
       var expected = r`@import "http://example.com/I\"love\"you.css";`;
-      assertEqual(scrapbook.rewriteCssText(input, options), expected);
+      assertEqual(scrapbook.rewriteCssText(input, optionsImport), expected);
 
       var input = `@import url('I"love"you.css');`;
       var expected = r`@import url("http://example.com/I\"love\"you.css");`;
-      assertEqual(scrapbook.rewriteCssText(input, options), expected);
+      assertEqual(scrapbook.rewriteCssText(input, optionsImport), expected);
 
       // skip comments
       var input = `/*@import url(file.css);*/`;
-      assertEqual(scrapbook.rewriteCssText(input, options), input);
+      assertEqual(scrapbook.rewriteCssText(input, optionsImport), input);
 
       var input = `/*@import url(file.css);*/body { color: red; }`;
-      assertEqual(scrapbook.rewriteCssText(input, options), input);
+      assertEqual(scrapbook.rewriteCssText(input, optionsImport), input);
 
       var input = `body/*@import url(file.css);*/{ color: red; }`;
-      assertEqual(scrapbook.rewriteCssText(input, options), input);
+      assertEqual(scrapbook.rewriteCssText(input, optionsImport), input);
 
       var input = `body {/*@import url(file.css);*/color: red; }`;
-      assertEqual(scrapbook.rewriteCssText(input, options), input);
+      assertEqual(scrapbook.rewriteCssText(input, optionsImport), input);
 
       var input = `body { color/*@import url(file.css);*/: red; }`;
-      assertEqual(scrapbook.rewriteCssText(input, options), input);
+      assertEqual(scrapbook.rewriteCssText(input, optionsImport), input);
 
       var input = `body { color:/*@import url(file.css);*/red; }`;
-      assertEqual(scrapbook.rewriteCssText(input, options), input);
+      assertEqual(scrapbook.rewriteCssText(input, optionsImport), input);
 
       var input = `body { color: red/*@import url(file.css);*/; }`;
-      assertEqual(scrapbook.rewriteCssText(input, options), input);
+      assertEqual(scrapbook.rewriteCssText(input, optionsImport), input);
 
       var input = `body { color: red;/*@import url(file.css);*/}`;
-      assertEqual(scrapbook.rewriteCssText(input, options), input);
+      assertEqual(scrapbook.rewriteCssText(input, optionsImport), input);
     });
 
     it('@import ignore unrelated pattern', function () {
-      const options = {
-        rewriteImportUrl: url => ({url: `http://example.com/${url}`}),
-        rewriteFontFaceUrl: url => ({url}),
-        rewriteBackgroundUrl: url => ({url}),
-      };
-
       var input = `div::after { content: "@import url(file.css);" }`;
-      assertEqual(scrapbook.rewriteCssText(input, options), input);
+      assertEqual(scrapbook.rewriteCssText(input, optionsImport), input);
 
       var input = `[myattr="@import url(file.css);"] { }`;
-      assertEqual(scrapbook.rewriteCssText(input, options), input);
+      assertEqual(scrapbook.rewriteCssText(input, optionsImport), input);
     });
 
     it('@import complicated cases', function () {
-      const options = {
-        rewriteImportUrl: url => ({url: `http://example.com/${url}`}),
-        rewriteFontFaceUrl: url => ({url}),
-        rewriteBackgroundUrl: url => ({url}),
-      };
-
       var input = r`.my\"class\" { }
 @import "file.css";`;
       var expected = r`.my\"class\" { }
 @import "http://example.com/file.css";`;
-      assertEqual(scrapbook.rewriteCssText(input, options), expected);
+      assertEqual(scrapbook.rewriteCssText(input, optionsImport), expected);
     });
 
     it('@import record', function () {
