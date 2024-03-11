@@ -30,6 +30,8 @@ const $describe = $(describe);
 const $it = $(it);
 const {userAgent} = utils;
 
+const r = String.raw;
+
 describe('capturer/common.js', function () {
 
   describe('capturer.getRedirectedUrl', function () {
@@ -367,14 +369,14 @@ describe('capturer/common.js', function () {
       ]);
 
       // escaped string
-      assertEqual(tokenizer.run(String.raw`#\*`), [
+      assertEqual(tokenizer.run(r`#\*`), [
         {type: 'operator', value: '#', depth: 0},
-        {type: 'name', value: String.raw`\*`, depth: 0},
+        {type: 'name', value: r`\*`, depth: 0},
       ]);
 
-      assertEqual(tokenizer.run(String.raw`.my\.class\4E00 \20000 \10FFFF x`), [
+      assertEqual(tokenizer.run(r`.my\.class\4E00 \20000 \10FFFF x`), [
         {type: 'operator', value: '.', depth: 0},
-        {type: 'name', value: String.raw`my\.class\4E00 \20000 \10FFFF x`, depth: 0},
+        {type: 'name', value: r`my\.class\4E00 \20000 \10FFFF x`, depth: 0},
       ]);
     });
 
@@ -418,8 +420,8 @@ describe('capturer/common.js', function () {
       ]);
 
       // quoted value with escaping
-      assertEqual(tokenizer.run(String.raw`[myattr=" my escaped\value and \"quoted\" ones "]`), [
-        {type: 'selector', value: String.raw`[myattr=" my escaped\value and \"quoted\" ones "]`, depth: 0},
+      assertEqual(tokenizer.run(r`[myattr=" my escaped\value and \"quoted\" ones "]`), [
+        {type: 'selector', value: r`[myattr=" my escaped\value and \"quoted\" ones "]`, depth: 0},
       ]);
 
       // quoted value with modifier
@@ -764,13 +766,13 @@ ul {
     });
 
     $it.skipIf($.noNestingCss)('escaped "&" should not be rewritten', function () {
-      var rules = getRulesFromCssText(String.raw`blockquote { .my\&class {} }`);
-      assertEqual(getSelectorText(rules[0].cssRules[0]), String.raw`:is(blockquote) .my\&class`);
+      var rules = getRulesFromCssText(r`blockquote { .my\&class {} }`);
+      assertEqual(getSelectorText(rules[0].cssRules[0]), r`:is(blockquote) .my\&class`);
     });
 
     $it.skipIf($.noNestingCss)('"&" in [attr=""] should not be rewritten', function () {
-      var rules = getRulesFromCssText(String.raw`blockquote { [myattr="a & b"] {} }`);
-      assertEqual(getSelectorText(rules[0].cssRules[0]), String.raw`:is(blockquote) [myattr="a & b"]`);
+      var rules = getRulesFromCssText(r`blockquote { [myattr="a & b"] {} }`);
+      assertEqual(getSelectorText(rules[0].cssRules[0]), r`:is(blockquote) [myattr="a & b"]`);
     });
 
   });
@@ -1127,31 +1129,31 @@ ul {
       assertEqual(rules[0].cssText, `p::after { content: "my value"; }`);
 
       // quoting: double quotes and backslashes are escaped
-      var rules = getRulesFromCssText(String.raw`[a=\"my\"attr\\value] { }`);
-      assertEqual(rules[0].selectorText, String.raw`[a="\"my\"attr\\value"]`);
+      var rules = getRulesFromCssText(r`[a=\"my\"attr\\value] { }`);
+      assertEqual(rules[0].selectorText, r`[a="\"my\"attr\\value"]`);
 
-      var rules = getRulesFromCssText(String.raw`[a='"my" attr\\value'] { }`);
-      assertEqual(rules[0].selectorText, String.raw`[a="\"my\" attr\\value"]`);
+      var rules = getRulesFromCssText(r`[a='"my" attr\\value'] { }`);
+      assertEqual(rules[0].selectorText, r`[a="\"my\" attr\\value"]`);
 
       // quoting: ASCII control chars (0x01~0x19) are hex-escaped with lower case and space
-      var rules = getRulesFromCssText(String.raw`[myattr=\1\2\3\4\5\6\7\8\9\A\B\C\D\E\F] { }`);
-      assertEqual(rules[0].selectorText, String.raw`[myattr="\1 \2 \3 \4 \5 \6 \7 \8 \9 \a \b \c \d \e \f "]`);
+      var rules = getRulesFromCssText(r`[myattr=\1\2\3\4\5\6\7\8\9\A\B\C\D\E\F] { }`);
+      assertEqual(rules[0].selectorText, r`[myattr="\1 \2 \3 \4 \5 \6 \7 \8 \9 \a \b \c \d \e \f "]`);
 
-      var rules = getRulesFromCssText(String.raw`[myattr=\10\11\12\13\14\15\16\17\18\19\7F] { }`);
-      assertEqual(rules[0].selectorText, String.raw`[myattr="\10 \11 \12 \13 \14 \15 \16 \17 \18 \19 \7f "]`);
+      var rules = getRulesFromCssText(r`[myattr=\10\11\12\13\14\15\16\17\18\19\7F] { }`);
+      assertEqual(rules[0].selectorText, r`[myattr="\10 \11 \12 \13 \14 \15 \16 \17 \18 \19 \7f "]`);
 
       // quoting: other ASCII symbols are unescaped
-      var rules = getRulesFromCssText(String.raw`[myattr=\20\21\22\23\24\25\26\27\28\29\2A\2B\2C\2D\2E\2F] { }`);
-      assertEqual(rules[0].selectorText, String.raw`[myattr=" !\"#$%&'()*+,-./"]`);
+      var rules = getRulesFromCssText(r`[myattr=\20\21\22\23\24\25\26\27\28\29\2A\2B\2C\2D\2E\2F] { }`);
+      assertEqual(rules[0].selectorText, r`[myattr=" !\"#$%&'()*+,-./"]`);
 
-      var rules = getRulesFromCssText(String.raw`[myattr=\3A\3B\3C\3D\3E\3F\40\5B\5D\5E\5F\7B\7C\7D\7E] { }`);
-      assertEqual(rules[0].selectorText, String.raw`[myattr=":;<=>?@[]^_{|}~"]`);
+      var rules = getRulesFromCssText(r`[myattr=\3A\3B\3C\3D\3E\3F\40\5B\5D\5E\5F\7B\7C\7D\7E] { }`);
+      assertEqual(rules[0].selectorText, r`[myattr=":;<=>?@[]^_{|}~"]`);
 
       // quoting: Unicode chars are unescaped
-      var rules = getRulesFromCssText(String.raw`[myattr=\80\81\9E\9F] { }`);
+      var rules = getRulesFromCssText(r`[myattr=\80\81\9E\9F] { }`);
       assertEqual(rules[0].selectorText, `[myattr="\x80\x81\x9E\x9F"]`);
 
-      var rules = getRulesFromCssText(String.raw`[myattr="\3000 \4E00 \20000 \100000"] { }`);
+      var rules = getRulesFromCssText(r`[myattr="\3000 \4E00 \20000 \100000"] { }`);
       assertEqual(rules[0].selectorText, `[myattr="\u3000\u4E00\u{20000}\u{100000}"]`);
     });
 

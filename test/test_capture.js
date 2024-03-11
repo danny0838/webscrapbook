@@ -39,6 +39,8 @@ const {
   readFileAsText, readFileAsArrayBuffer, readFileAsDataURL, readFileAsDocument,
 } = utils;
 
+const r = String.raw;;
+
 const baseOptions = {
   "capture.saveTo": "memory",
   "capture.saveAs": "zip",
@@ -1676,35 +1678,35 @@ it('test_capture_blob', async function () {
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
-  var uuid = String.raw`[\da-f]{8}-(?:[\da-f]{4}-){3}[\da-f]{12}`;
+  var uuid = r`[\da-f]{8}-(?:[\da-f]{4}-){3}[\da-f]{12}`;
   var m;
 
-  var r = regex`${uuid}\.css`;
-  assert(m = doc.querySelector('link').getAttribute('href').match(r));
+  var re = regex`${uuid}\.css`;
+  assert(m = doc.querySelector('link').getAttribute('href').match(re));
 
-  var r = rawRegex`@import url("${regex`(${uuid}\.css)`}");
+  var re = rawRegex`@import url("${regex`(${uuid}\.css)`}");
 @font-face { font-family: linkFont; src: url("${regex`(${uuid}\.woff)`}"); }
 #link-font { font-family: linkFont; }
 #link-bg { background-image: url("${regex`(${uuid}\.bmp)`}"); }`;
   var cssFile = zip.file(m[0]);
   var cssText = await readFileAsText(await cssFile.async('blob'));
-  assert(m = cssText.trim().match(r));
+  assert(m = cssText.trim().match(re));
   var fontFn = m[2];
   var imgFn = m[3];
 
-  var r = rawRegex`@font-face { font-family: linkImportFont; src: url("${regex`(${uuid}\.woff)`}"); }
+  var re = rawRegex`@font-face { font-family: linkImportFont; src: url("${regex`(${uuid}\.woff)`}"); }
 #link-import-font { font-family: linkImportFont; }
 #link-import-bg { background-image: url("${regex`(${uuid}\.bmp)`}"); }`;
   var cssFile = zip.file(m[1]);
   var cssText = await readFileAsText(await cssFile.async('blob'));
-  assert(m = cssText.trim().match(r));
+  assert(m = cssText.trim().match(re));
   assert(m[1] === fontFn);
   assert(m[2] === imgFn);
 
-  var r = rawRegex`@font-face { font-family: styleFont; src: url("${regex`(${uuid}\.woff)`}"); }
+  var re = rawRegex`@font-face { font-family: styleFont; src: url("${regex`(${uuid}\.woff)`}"); }
 #style-font { font-family: styleFont; }
 #style-bg { background-image: url("${regex`(${uuid}\.bmp)`}"); }`;
-  assert(m = doc.querySelector('style').textContent.trim().match(r));
+  assert(m = doc.querySelector('style').textContent.trim().match(re));
   assert(m[1] === fontFn);
   assert(m[2] === imgFn);
 
@@ -1756,9 +1758,9 @@ it('test_capture_blob_frame', async function () {
   var indexFile = zip.file('index_1.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
-  var uuid = String.raw`[\da-f]{8}-(?:[\da-f]{4}-){3}[\da-f]{12}`;
-  var r = regex`${uuid}\.bmp`;
-  assert(doc.querySelector('img').getAttribute('src').match(r));
+  var uuid = r`[\da-f]{8}-(?:[\da-f]{4}-){3}[\da-f]{12}`;
+  var re = regex`${uuid}\.bmp`;
+  assert(doc.querySelector('img').getAttribute('src').match(re));
 });
 
 /**
@@ -2406,9 +2408,9 @@ it('test_capture_meta_charset', async function () {
   assert(doc.title === 'ABC 中文');
 
   var metaElems = doc.querySelectorAll('meta');
-  assert(metaElems[0].getAttribute('content') === String.raw`text/javascript; KEY=VALUE`);
-  assert(metaElems[1].getAttribute('content') === String.raw`text/plain; charset=UTF-8; data=foo123; data2="中文\"789\""`);
-  assert(metaElems[2].getAttribute('content') === String.raw`text/css; CHARSET="GBK"; data=中文123`);
+  assert(metaElems[0].getAttribute('content') === r`text/javascript; KEY=VALUE`);
+  assert(metaElems[1].getAttribute('content') === r`text/plain; charset=UTF-8; data=foo123; data2="中文\"789\""`);
+  assert(metaElems[2].getAttribute('content') === r`text/css; CHARSET="GBK"; data=中文123`);
 
   /* no meta charset; HTTP header Big5 */
   var blob = await capture({
@@ -6408,15 +6410,15 @@ it('test_capture_imageBackground_used_keyframes_syntax', async function () {
   var doc = await readFileAsDocument(indexBlob);
 
   var styleElems = doc.querySelectorAll('style');
-  assert(styleElems[1].textContent.trim() === String.raw`@keyframes keyframes1 {
+  assert(styleElems[1].textContent.trim() === r`@keyframes keyframes1 {
   from { background-image: url("keyframes-1.bmp"); }
   to { background-image: url("keyframes-2.bmp"); transform: translateX(40px); }
 }`);
-  assert(styleElems[2].textContent.trim() === String.raw`@keyframes keyframes\Awith\ complex\\syntax {
+  assert(styleElems[2].textContent.trim() === r`@keyframes keyframes\Awith\ complex\\syntax {
   from { background-image: url("keyframes-complex-1.bmp"); }
   to { transform: translateX(40px); }
 }`);
-  assert(styleElems[3].textContent.trim() === String.raw`@keyframes multi\ 1 {
+  assert(styleElems[3].textContent.trim() === r`@keyframes multi\ 1 {
   from { background-image: url("keyframes-multi-1.bmp"); }
   to { transform: translateX(40px); }
 }
@@ -6424,7 +6426,7 @@ it('test_capture_imageBackground_used_keyframes_syntax', async function () {
   33% { background-image: url("keyframes-multi-2.bmp"); }
   66% { background-image: url("keyframes-multi-3.bmp"); }
 }`);
-  assert(styleElems[4].textContent.trim() === String.raw`@keyframes after {
+  assert(styleElems[4].textContent.trim() === r`@keyframes after {
   from { background-image: url("keyframes-after.bmp"); }
   to { transform: translateX(40px); }
 }`);
@@ -10927,9 +10929,9 @@ it('test_capture_invalid_tags', async function () {
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
 
-  assert(doc.querySelector('xmp').textContent.trim() === String.raw`Explode <\/xmp> with a bomb!<script>alert("bomb");</script>`);
-  assert(doc.querySelector('style').textContent.trim() === String.raw`/*Explode <\/style> with a bomb!<script>alert("bomb");</script>*/`);
-  assert(doc.querySelector('script').textContent.trim() === String.raw`/*Explode <\/script> with a bomb!<script>alert("bomb");<\/script>*/`);
+  assert(doc.querySelector('xmp').textContent.trim() === r`Explode <\/xmp> with a bomb!<script>alert("bomb");</script>`);
+  assert(doc.querySelector('style').textContent.trim() === r`/*Explode <\/style> with a bomb!<script>alert("bomb");</script>*/`);
+  assert(doc.querySelector('script').textContent.trim() === r`/*Explode <\/script> with a bomb!<script>alert("bomb");<\/script>*/`);
 });
 
 /**
@@ -14541,7 +14543,7 @@ it('test_capture_downLink_blob', async function () {
     url: `${localhost}/capture_downLink_blob/basic.html`,
     options: Object.assign({}, baseOptions, options),
   }, {delay: 500});
-  var uuid = String.raw`[\da-f]{8}-(?:[\da-f]{4}-){3}[\da-f]{12}`;
+  var uuid = r`[\da-f]{8}-(?:[\da-f]{4}-){3}[\da-f]{12}`;
 
   var zip = await new JSZip().loadAsync(blob);
   var indexFile = zip.file('index.html');
@@ -14583,7 +14585,7 @@ $it.xfailIf(
     url: `${localhost}/capture_downLink_blob/basic.html`,
     options: Object.assign({}, baseOptions, options),
   }, {delay: 500});
-  var uuid = String.raw`[\da-f]{8}-(?:[\da-f]{4}-){3}[\da-f]{12}`;
+  var uuid = r`[\da-f]{8}-(?:[\da-f]{4}-){3}[\da-f]{12}`;
 
   var zip = await new JSZip().loadAsync(blob);
   var indexFile = zip.file('index.html');

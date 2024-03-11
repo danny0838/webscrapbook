@@ -30,6 +30,8 @@ const $describe = $(describe);
 const $it = $(it);
 const {userAgent} = utils;
 
+const r = String.raw;
+
 describe('core/common.js', function () {
 
   describe('scrapbook.escapeFilename', function () {
@@ -43,7 +45,7 @@ describe('core/common.js', function () {
 
       // convert "\" to "/"
       assertEqual(
-        scrapbook.escapeFilename(String.raw`this\is\my\path`),
+        scrapbook.escapeFilename(r`this\is\my\path`),
         'this/is/my/path',
       );
 
@@ -1094,8 +1096,8 @@ describe('core/common.js', function () {
         {type: "text/html", parameters: {charset: "utf-8"}},
       );
       assertEqual(
-        scrapbook.parseHeaderContentType(String.raw`text/html; field=" my text\\value with \"quote\" "`),
-        {type: "text/html", parameters: {field: String.raw` my text\value with "quote" `}},
+        scrapbook.parseHeaderContentType(r`text/html; field=" my text\\value with \"quote\" "`),
+        {type: "text/html", parameters: {field: r` my text\value with "quote" `}},
       );
 
       // "'" not treated as a quote
@@ -1169,8 +1171,8 @@ describe('core/common.js', function () {
         {type: "inline", parameters: {filename: " my file.jpg "}},
       );
       assertEqual(
-        scrapbook.parseHeaderContentDisposition(String.raw`inline; filename="my text\\image \"file\".jpg"`),
-        {type: "inline", parameters: {filename: String.raw`my text\image "file".jpg`}},
+        scrapbook.parseHeaderContentDisposition(r`inline; filename="my text\\image \"file\".jpg"`),
+        {type: "inline", parameters: {filename: r`my text\image "file".jpg`}},
       );
     });
 
@@ -1451,7 +1453,7 @@ describe('core/common.js', function () {
 
       // escape quotes
       var input = `body { image-background: url('i "like" it.jpg'); }`;
-      var expected = String.raw`body { image-background: url("http://example.com/i \"like\" it.jpg"); }`;
+      var expected = r`body { image-background: url("http://example.com/i \"like\" it.jpg"); }`;
       assertEqual(scrapbook.rewriteCssText(input, options), expected);
 
       // skip comments
@@ -1524,8 +1526,8 @@ describe('core/common.js', function () {
         rewriteBackgroundUrl: url => ({url: `http://example.com/${url}`}),
       };
 
-      var input = String.raw`.my\"class\" { background-image: url("image.jpg"); }`;
-      var expected = String.raw`.my\"class\" { background-image: url("http://example.com/image.jpg"); }`;
+      var input = r`.my\"class\" { background-image: url("image.jpg"); }`;
+      var expected = r`.my\"class\" { background-image: url("http://example.com/image.jpg"); }`;
       assertEqual(scrapbook.rewriteCssText(input, options), expected);
     });
 
@@ -1584,7 +1586,7 @@ describe('core/common.js', function () {
 
       // escape quotes
       var input = `@font-face { font-family: myfont; src: url('i"like"it.woff'); }`;
-      var expected = String.raw`@font-face { font-family: myfont; src: url("http://example.com/i\"like\"it.woff"); }`;
+      var expected = r`@font-face { font-family: myfont; src: url("http://example.com/i\"like\"it.woff"); }`;
       assertEqual(scrapbook.rewriteCssText(input, options), expected);
 
       // skip comments
@@ -1634,9 +1636,9 @@ describe('core/common.js', function () {
         rewriteBackgroundUrl: url => ({url}),
       };
 
-      var input = String.raw`.my\"class\" { }
+      var input = r`.my\"class\" { }
 @font-face { src: url("file.woff"); }`;
-      var expected = String.raw`.my\"class\" { }
+      var expected = r`.my\"class\" { }
 @font-face { src: url("http://example.com/file.woff"); }`;
       assertEqual(scrapbook.rewriteCssText(input, options), expected);
     });
@@ -1708,11 +1710,11 @@ describe('core/common.js', function () {
 
       // escape quotes
       var input = `@import 'I"love"you.css';`;
-      var expected = String.raw`@import "http://example.com/I\"love\"you.css";`;
+      var expected = r`@import "http://example.com/I\"love\"you.css";`;
       assertEqual(scrapbook.rewriteCssText(input, options), expected);
 
       var input = `@import url('I"love"you.css');`;
-      var expected = String.raw`@import url("http://example.com/I\"love\"you.css");`;
+      var expected = r`@import url("http://example.com/I\"love\"you.css");`;
       assertEqual(scrapbook.rewriteCssText(input, options), expected);
 
       // skip comments
@@ -1762,9 +1764,9 @@ describe('core/common.js', function () {
         rewriteBackgroundUrl: url => ({url}),
       };
 
-      var input = String.raw`.my\"class\" { }
+      var input = r`.my\"class\" { }
 @import "file.css";`;
-      var expected = String.raw`.my\"class\" { }
+      var expected = r`.my\"class\" { }
 @import "http://example.com/file.css";`;
       assertEqual(scrapbook.rewriteCssText(input, options), expected);
     });
