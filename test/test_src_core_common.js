@@ -1650,7 +1650,7 @@ image\
       assertEqual(scrapbook.rewriteCssText(input, optionsImage), input);
     });
 
-    $it.xfail()('image: bad chars in an unquoted url', function () {
+    it('image: bad chars in an unquoted url', function () {
       // bad URL, should be skipped
       var input = r`.mycls { background-image: url(image"foo.jpg); }`;
       assertEqual(scrapbook.rewriteCssText(input, optionsImage), input);
@@ -1680,7 +1680,7 @@ image\
       assertEqual(scrapbook.rewriteCssText(input, optionsImage), expected);
     });
 
-    $it.xfail()('image: intermediate newline in an unquoted url', function () {
+    it('image: intermediate newline in an unquoted url', function () {
       // bad url, should be skipped
       var input = r`.mycls { background-image: url(image.jpg
 foo); }`;

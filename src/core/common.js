@@ -2547,7 +2547,7 @@
    * @return {string} The unescaped CSS string.
    */
   scrapbook.unescapeCss = function (...args) {
-    const replaceRegex = /\\(?:([0-9A-Fa-f]{1,6}) ?|((\r\n?|[\n\f])|.))/gu;
+    const replaceRegex = /\\(?:([0-9A-Fa-f]{1,6}) ?|((\r\n?|[\n\f])|[\s\S]))/gu;
     const replaceFunc = (m, u, c, nl) => {
       if (u) {
         const code = parseInt(u, 16);
@@ -3388,19 +3388,21 @@
    */
   scrapbook.rewriteCssText = function (cssText, options) {
     const r = String.raw;
+    const NL = r`\r\n\f`;  // newline
+
     const pCm = r`(?:/\*[\s\S]*?(?:\*/|$))`; // comment
     const pSp = r`(?:[${ASCII_WHITESPACE}]*)`; // ASCII whitespaces
     const pCmSp = r`(?:(?:${pCm}|${pSp})*)`; // comment or space
     const pCmSp2 = r`(?:(?:${pCm}|${pSp})+)`; // comment or space, at least one
-    const pEscaped = r`\\(?:[0-9A-Fa-f]{1,6} ?|.)`; // an escaped char sequence
+    const pEscaped = r`\\(?:[0-9A-Fa-f]{1,6} ?|[\s\S])`; // an escaped char sequence
     const pChar = r`(?:${pEscaped}|[^\\"'])`; // a non-quote char or an escaped char sequence
     const pStr = r`(?:${pChar}*?)`; // string
     const pSStr = r`(?:${pCmSp}${pStr}${pCmSp})`; // comment-or-space enclosed string
     const pDQStr = r`(?:"[^\\"]*(?:\\[\s\S][^\\"]*)*")`; // double quoted string
     const pSQStr = r`(?:'[^\\']*(?:\\[\s\S][^\\']*)*')`; // single quoted string
     const pES = r`(?:(?:${pCm}|${pDQStr}|${pSQStr}|${pChar})*?)`; // embeded string
-    const pUrl = r`(?:\burl\(${pSp}(?:${pDQStr}|${pSQStr}|${pStr})${pSp}\))`; // URL
-    const pUrl2 = r`(\burl\(${pSp})(${pDQStr}|${pSQStr}|${pStr})(${pSp}\))`; // URL; catch 3
+    const pUrl = r`(?:\burl\(${pSp}(?:${pDQStr}|${pSQStr}|[^'"${ASCII_WHITESPACE}](?:${pEscaped}|[^)])*?)${pSp}\))`; // URL
+    const pUrl2 = r`(\burl\(${pSp})(${pDQStr}|${pSQStr}|[^'"${ASCII_WHITESPACE}](?:${pEscaped}|[^)])*?)(${pSp}\))`; // URL; catch 3
     const pRImport = r`(@import${pCmSp})(${pUrl}|${pDQStr}|${pSQStr})`; // @import; catch 2
     const pRFontFace = r`(@font-face${pCmSp}{${pES}})`; // @font-face; catch 1
     const pRNamespace = r`(@namespace${pCmSp}(?:${pStr}${pCmSp2})?${pUrl})`; // @namespace; catch 1
@@ -3410,6 +3412,7 @@
     const REGEX_RESOURCE_MAP = /^(.+?-)\d+$/;
     const REGEX_REWRITE_CSS = new RegExp(r`${pEscaped}|${pDQStr}|${pSQStr}|${pCm}|${pRImport}|${pRFontFace}|${pRNamespace}|(${pUrl})`, "gi");
     const REGEX_PARSE_URL = new RegExp(pUrl2, "gi");
+    const REGEX_URL_TOKEN = new RegExp(r`^(?:\\[^${NL}]|[^${ASCII_WHITESPACE}"'(])*$`);
 
     const REGEX_ESCAPE_CSS_STRING = /([\\"])|[\x00-\x1F\x7F]/g;
     const FUNC_ESCAPE_CSS_STRING = (m, chr) => {
@@ -3473,7 +3476,8 @@
             const u = scrapbook.unescapeCss(url.slice(1, -1), {stripNewline: true});
             rewritten = callback(u);
           } else {
-            const u = scrapbook.unescapeCss(url.trim());
+            if (!REGEX_URL_TOKEN.test(url)) { return m; }
+            const u = scrapbook.unescapeCss(url);
             rewritten = callback(u);
           }
 
