@@ -2540,9 +2540,15 @@
     return fn(str);
   };
 
-  scrapbook.unescapeCss = function (str) {
-    const replaceRegex = /\\(?:([0-9A-Fa-f]{1,6}) ?|(.))/gu;
-    const replaceFunc = function (m, u, c) {
+  /**
+   * @param {string} str - The string to unescape.
+   * @param {Object} [options]
+   * @param {Object} [options.stripNewline] - Strip escaped newline.
+   * @return {string} The unescaped CSS string.
+   */
+  scrapbook.unescapeCss = function (...args) {
+    const replaceRegex = /\\(?:([0-9A-Fa-f]{1,6}) ?|((\r\n?|[\n\f])|.))/gu;
+    const replaceFunc = (m, u, c, nl) => {
       if (u) {
         const code = parseInt(u, 16);
         if (code === 0 || (code >= 0xD800 && code <= 0xDFFF) || (code > 0x10FFFF)) {
@@ -2550,12 +2556,15 @@
         }
         return String.fromCodePoint(code);
       }
+      if (nl && replaceOptions.stripNewline) { return ''; }
       return c;
     };
-    const fn = scrapbook.unescapeCss = function (str) {
+    let replaceOptions;
+    const fn = scrapbook.unescapeCss = function (str, options = {}) {
+      replaceOptions = options;
       return str.replace(replaceRegex, replaceFunc);
     };
-    return fn(str);
+    return fn(...args);
   };
 
   scrapbook.quoteXPath = function (str) {
@@ -3387,8 +3396,8 @@
     const pChar = r`(?:${pEscaped}|[^\\"'])`; // a non-quote char or an escaped char sequence
     const pStr = r`(?:${pChar}*?)`; // string
     const pSStr = r`(?:${pCmSp}${pStr}${pCmSp})`; // comment-or-space enclosed string
-    const pDQStr = r`(?:"[^\\"]*(?:\\.[^\\"]*)*")`; // double quoted string
-    const pSQStr = r`(?:'[^\\']*(?:\\.[^\\']*)*')`; // single quoted string
+    const pDQStr = r`(?:"[^\\"]*(?:\\[\s\S][^\\"]*)*")`; // double quoted string
+    const pSQStr = r`(?:'[^\\']*(?:\\[\s\S][^\\']*)*')`; // single quoted string
     const pES = r`(?:(?:${pCm}|${pDQStr}|${pSQStr}|${pChar})*?)`; // embeded string
     const pUrl = r`(?:\burl\(${pSp}(?:${pDQStr}|${pSQStr}|${pStr})${pSp}\))`; // URL
     const pUrl2 = r`(\burl\(${pSp})(${pDQStr}|${pSQStr}|${pStr})(${pSp}\))`; // URL; catch 3
@@ -3458,10 +3467,10 @@
         return text.replace(REGEX_PARSE_URL, (m, pre, url, post) => {
           let rewritten;
           if (url.startsWith('"') && url.endsWith('"')) {
-            const u = scrapbook.unescapeCss(url.slice(1, -1));
+            const u = scrapbook.unescapeCss(url.slice(1, -1), {stripNewline: true});
             rewritten = callback(u);
           } else if (url.startsWith("'") && url.endsWith("'")) {
-            const u = scrapbook.unescapeCss(url.slice(1, -1));
+            const u = scrapbook.unescapeCss(url.slice(1, -1), {stripNewline: true});
             rewritten = callback(u);
           } else {
             const u = scrapbook.unescapeCss(url.trim());
@@ -3479,10 +3488,10 @@
           if (im2) {
             let rewritten;
             if (im2.startsWith('"') && im2.endsWith('"')) {
-              const u = scrapbook.unescapeCss(im2.slice(1, -1));
+              const u = scrapbook.unescapeCss(im2.slice(1, -1), {stripNewline: true});
               rewritten = handleRewritten(rewriteImportUrl(u), '', '', true);
             } else if (im2.startsWith("'") && im2.endsWith("'")) {
-              const u = scrapbook.unescapeCss(im2.slice(1, -1));
+              const u = scrapbook.unescapeCss(im2.slice(1, -1), {stripNewline: true});
               rewritten = handleRewritten(rewriteImportUrl(u), '', '', true);
             } else {
               rewritten = parseUrl(im2, rewriteImportUrl, true);

@@ -1605,7 +1605,7 @@ describe('core/common.js', function () {
       assertEqual(scrapbook.rewriteCssText(input, optionsImage), input);
     });
 
-    $it.xfail()('image: escaped newline in a quoted string', function () {
+    it('image: escaped newline in a quoted string', function () {
       // escaped newlines should be stripped
       var input = r`.mycls { background-image: url("my\
 image\
@@ -1815,7 +1815,7 @@ foo); }`;
       assertEqual(scrapbook.rewriteCssText(input, optionsFont), expected);
     });
 
-    $it.xfail()('@font-face: escaped newline in a quoted string', function () {
+    it('@font-face: escaped newline in a quoted string', function () {
       // escaped newlines should be stripped
       var input = r`@font-face { font-family: myfont; src: url("my\
 font\
@@ -1951,7 +1951,7 @@ font\
       assertEqual(scrapbook.rewriteCssText(input, optionsImport), expected);
     });
 
-    $it.xfail()('@import: escaped newline in a quoted string', function () {
+    it('@import: escaped newline in a quoted string', function () {
       // escaped newlines should be stripped
       var input = r`@import "my\
 file\
