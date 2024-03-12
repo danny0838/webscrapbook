@@ -652,7 +652,9 @@ describe('capturer/common.js', function () {
   });
 
   $describe.skipIf($.noBrowser)('capturer.DocumentCssHandler.getSelectorText', function () {
-    const getSelectorText = capturer.DocumentCssHandler.getSelectorText;
+    const getSelectorText = (...args) => {
+      return capturer.DocumentCssHandler.getSelectorText(...args);
+    };
 
     it('basic', function () {
       var rules = getRulesFromCssText(`div, span { background-color: lime; }`);
@@ -774,7 +776,9 @@ ul {
   });
 
   describe('capturer.DocumentCssHandler.getSelectorVerifier', function () {
-    const getSelectorVerifier = capturer.DocumentCssHandler.getSelectorVerifier;
+    const getSelectorVerifier = (...args) => {
+      return capturer.DocumentCssHandler.getSelectorVerifier(...args);
+    };
 
     const testGetSelectorVerifier = (selector1, selector2, validate = true) => {
       if (validate && typeof document !== 'undefined' && document.querySelector) {
@@ -926,7 +930,9 @@ ul {
   });
 
   $describe.skipIf($.noBrowser)('capturer.DocumentCssHandler.getRulesFromCssText', function () {
-    const getRulesFromCssText = capturer.DocumentCssHandler.getRulesFromCssText;
+    const getRulesFromCssText = (...args) => {
+      return capturer.DocumentCssHandler.getRulesFromCssText(...args);
+    };
 
     it('basic', function () {
       var rules = getRulesFromCssText(`\
