@@ -3,6 +3,13 @@
 * Versions before 1.0 are in initial development. APIs are not stable for these versions, even a `y` version can involve a breaking change, and only partial notable changes are summarized in this document. See full commit history in the source repository for details.
 * Backend server requirement in this document refers to the version of [`webscrapbook` Python package](https://github.com/danny0838/pywebscrapbook) (or PyWebScrapBook).
 
+## [2.8.2] - 2024-03-13
+* Fixed fatal error when a link with an invalid URL is encountered during an in-depth capture.
+* Fixed bad tidying of a CSS containing a URL with escaped newlines.
+* Fixed bad tidying of a CSS containing a URL with certain escaped chars.
+* Fixed bad tidying of a CSS containing a bad URL token.
+* Fixed a potential error for the editor and sidebar when dealing with certain special chars.
+
 ## [2.8.1] - 2024-03-10
 * Fixed bad tidying of a CSS rule having an attribute selector with a `|=` operator.
 * Use `text/javascript` as the default MIME type of `js` files.
