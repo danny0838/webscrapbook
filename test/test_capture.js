@@ -14039,6 +14039,75 @@ it('test_capture_downLink_indepth_about', async function () {
 });
 
 /**
+ * Links rebuilding should safely skip invalid URLs.
+ *
+ * capture.downLink.doc.depth
+ */
+it('test_capture_downLink_indepth_invalid', async function () {
+  var options = {
+    "capture.downLink.doc.depth": 1,
+  };
+
+  var blob = await capture({
+    url: `${localhost}/capture_downLink_indepth_invalid/in-depth.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+
+  var anchors = doc.querySelectorAll('a');
+  assert(anchors[0].getAttribute('href') === `https://exa%23mple.org`);
+  assert(anchors[1].getAttribute('href') === `https://#fragment`);
+  assert(anchors[2].getAttribute('href') === `https://:443`);
+  assert(anchors[3].getAttribute('href') === `https://example.org:70000`);
+  assert(anchors[4].getAttribute('href') === `https://example.org:7z`);
+
+  var sitemapBlob = await zip.file('index.json').async('blob');
+  var expectedData = {
+    "version": 3,
+    "indexPages": [
+      "index.html"
+    ],
+    "files": [
+      {
+        "path": "index.json"
+      },
+      {
+        "path": "index.dat"
+      },
+      {
+        "path": "index.rdf"
+      },
+      {
+        "path": "history.rdf"
+      },
+      {
+        "path": "^metadata^"
+      },
+      {
+        "path": "index.html",
+        "url": `${localhost}/capture_downLink_indepth_invalid/in-depth.html`,
+        "role": "document",
+        "token": getToken(`${localhost}/capture_downLink_indepth_invalid/in-depth.html`, "document")
+      },
+      {
+        "path": "index.xhtml",
+        "role": "document"
+      },
+      {
+        "path": "index.svg",
+        "role": "document"
+      }
+    ]
+  };
+  assert(await readFileAsText(sitemapBlob) === JSON.stringify(expectedData, null, 1));
+});
+
+/**
  * An attachment page should be download as a file and not captured.
  * Also check that links in an embedded SVG or MathML are handled correctly.
  *

@@ -2562,11 +2562,9 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
               });
 
               if (primary) {
-                let token;
-                try {
-                  token = capturer.getRegisterToken(url, role);
-                } catch (ex) {
-                  // skip special or undefined URL
+                const token = capturer.getRegisterToken(url, role);
+                if (!token) {
+                  // skip invalid or undefined URL
                   continue;
                 }
 
@@ -2617,6 +2615,10 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
                 // (possibly modified arbitrarily)
                 if (url && role) {
                   const t = capturer.getRegisterToken(url, role);
+                  if (!t) {
+                    // skip invalid URL
+                    continue;
+                  }
                   if (t !== token) {
                     token = t;
                     console.error(`Taking token from url and role for mismatching token: "${path}"`);
@@ -2671,6 +2673,10 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
                 // (possibly modified arbitrarily)
                 if (url && role) {
                   const t = capturer.getRegisterToken(url, role);
+                  if (!t) {
+                    // skip invalid URL
+                    continue;
+                  }
                   if (t !== token) {
                     token = t;
                     console.error(`Taking token from url and role for mismatching token: "${path}"`);
@@ -2780,10 +2786,16 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
   /**
    * @param {string} url
    * @param {string} role
-   * @return {string}
+   * @return {?string} the token, or null for an invalid URL
    */
   capturer.getRegisterToken = function (url, role) {
-    let token = `${scrapbook.normalizeUrl(url)}\t${role}`;
+    try {
+      url = scrapbook.normalizeUrl(url);
+    } catch (ex) {
+      // invalid URL
+      return null;
+    }
+    let token = `${url}\t${role}`;
     token = scrapbook.sha1(token, "TEXT");
     return token;
   };
@@ -2864,6 +2876,9 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
       let response;
       if (role || (isMainPage && isMainFrame)) {
         const token = capturer.getRegisterToken(sourceUrlMain, role);
+        if (!token) {
+          throw new Error(`Invalid document URL: ${sourceUrlMain}`);
+        }
 
         // if a previous registry exists, return it
         const previousRegistry = filenameMap.get(token);
@@ -3037,6 +3052,9 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
       let response;
       if (role) {
         const token = capturer.getRegisterToken(fetchResponse.url, role);
+        if (!token) {
+          throw new Error(`Invalid file URL: ${fetchResponse.url}`);
+        }
 
         // if a previous registry exists, return it
         const previousRegistry = filenameMap.get(token);
@@ -4031,6 +4049,10 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
       }
 
       const token = capturer.getRegisterToken(urlMain, 'document');
+      if (!token) {
+        // skip invalid URL
+        return null;
+      }
       const p = filenameMap.get(token);
       if (!p) { return null; }
 
@@ -4160,13 +4182,9 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
 
     for (let [filename, {path, url, role, token}] of files.entries()) {
       if (!token) {
-        try {
-          const t = capturer.getRegisterToken(url, role);
-          if (filenameMap.has(t)) {
-            token = t;
-          }
-        } catch (ex) {
-          // skip special or undefined URL
+        const t = capturer.getRegisterToken(url, role);
+        if (t && filenameMap.has(t)) {
+          token = t;
         }
       }
 
