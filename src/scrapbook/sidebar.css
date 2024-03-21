@@ -128,7 +128,7 @@ body {
   margin: 0;
   padding: 3px;
   font-size: 0.75em;
-  font-family: inherit;
+  font-family: unset;
 }
 
 #logger .warn {

@@ -24,15 +24,6 @@ body {
   padding: 0;
 }
 
-a:hover {
-  background-color: rgba(196, 221, 252, .5);
-}
-
-a:focus {
-  outline-style: auto;
-  background-color: rgba(196, 221, 252, 1);
-}
-
 .warn {
   color: #f0ad4e;
 }
@@ -53,4 +44,13 @@ a:focus {
 .tree-search-captures li > div:first-child {
   padding-left: 2.72em;
   text-indent: -1.36em;
+}
+
+.tree-search-captures li > div:first-child a:hover {
+  background-color: rgba(196, 221, 252, .5);
+}
+
+.tree-search-captures li > div:first-child a:focus {
+  outline-style: auto;
+  background-color: rgba(196, 221, 252, 1);
 }

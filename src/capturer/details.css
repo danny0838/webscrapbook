@@ -53,8 +53,8 @@
 
 a[data-tooltip] {
   display: inline-block;
-  color: inherit;
-  text-decoration: inherit;
+  color: unset;
+  text-decoration: unset;
   width: 1em;
   height: 1em;
   background: url("../resources/question.png") no-repeat;

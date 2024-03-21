@@ -62,8 +62,8 @@
 .tree a {
   position: relative;
   z-index: 1;
-  text-decoration: none;
-  color: #000000;
+  text-decoration: unset;
+  color: unset;
 }
 
 .tree a > img {

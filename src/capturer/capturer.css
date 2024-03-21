@@ -15,7 +15,7 @@ body {
 #logger {
   margin: 0;
   white-space: pre;
-  font-family: inherit;
+  font-family: unset;
 }
 
 .warn {

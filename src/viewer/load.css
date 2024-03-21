@@ -65,7 +65,7 @@ body {
   margin: 0;
   padding: .5em;
   white-space: pre;
-  font-family: inherit;
+  font-family: unset;
 }
 
 .error {

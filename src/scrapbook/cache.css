@@ -9,7 +9,7 @@ body {
   padding: .5em;
   white-space: pre-wrap;
   word-break: break-all;
-  font-family: inherit;
+  font-family: unset;
 }
 
 .debug {
