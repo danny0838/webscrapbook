@@ -23,13 +23,11 @@
     // AMD
     define(
       ['../lib/jszip', '../lib/sha', '../lib/mime', '../lib/strftime'],
-      (...args) => {
-        return factory(
-          global,
-          global.isDebug,
-          ...args,
-        );
-      },
+      (...args) => factory(
+        global,
+        global.isDebug,
+        ...args,
+      ),
     );
   } else {
     // Browser globals

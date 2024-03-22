@@ -20,12 +20,10 @@
     // AMD
     define(
       ['../core/common', '../lib/map-with-default'],
-      (...args) => {
-        return factory(
-          global.isDebug,
-          ...args,
-        );
-      },
+      (...args) => factory(
+        global.isDebug,
+        ...args,
+      ),
     );
   } else {
     // Browser globals
