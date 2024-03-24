@@ -1180,6 +1180,14 @@ class { }`);
         // property value is double quoted
         var rules = getRulesFromCssText(`p::after { content: 'my value'; }`);
         assertEqual(rules[0].cssText, `p::after { content: "my value"; }`);
+
+        // !important with space after "!"
+        var rules = getRulesFromCssText(`body { color: red ! important; }`);
+        assertEqual(rules[0].cssText, `body { color: red !important; }`);
+
+        // !important with no space before "!"
+        var rules = getRulesFromCssText(`body { color: red!important; }`);
+        assertEqual(rules[0].cssText, `body { color: red !important; }`);
       });
 
       $(it).xfailIf(
