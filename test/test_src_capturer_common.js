@@ -1676,6 +1676,14 @@ class { }`);
           assertEqual(helper.runCommand(command, doc), ' ;,/?#:@&=+$中');
         });
 
+        it("return original string if failed to decode", function () {
+          var helper = new capturer.CaptureHelperHandler();
+          var doc = makeTestDoc();
+
+          var command = ["decode_uri", "%E4"];
+          assertEqual(helper.runCommand(command, doc), '%E4');
+        });
+
         it("resolve parameter commands", function () {
           var helper = new capturer.CaptureHelperHandler();
           var doc = makeTestDoc();

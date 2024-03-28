@@ -5880,7 +5880,11 @@
 
     cmd_decode_uri(rootNode, text) {
       text = String(this.resolve(text, rootNode) || "");
-      return decodeURIComponent(text);
+      try {
+        return decodeURIComponent(text);
+      } catch (ex) {
+        return text;
+      }
     }
 
     cmd_add(rootNode, baseArg, ...args) {
