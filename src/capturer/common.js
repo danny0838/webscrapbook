@@ -6207,6 +6207,10 @@
             elem.parentNode.insertBefore(newNode, elem.nextSibling);
             break;
           }
+          case 'replace': {
+            elem.parentNode.replaceChild(newNode, elem);
+            break;
+          }
           case 'insert': {
             elem.insertBefore(newNode, elem.childNodes[this.resolve(index, elem)]);
             break;

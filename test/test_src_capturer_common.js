@@ -2588,6 +2588,17 @@ insertedText<div class="target"><div id="child-1"></div><div id="child-2"></div>
 <div class="target"><div id="child-1"></div><div id="child-2"></div><div id="child-3"></div></div>insertedText`);
         });
 
+        it("mode = replace", function () {
+          var helper = new capturer.CaptureHelperHandler();
+
+          var doc = makeTestDoc();
+          var command = ["insert", {"css": ".target"}, "insertedText", "replace"];
+          assertEqual(helper.runCommand(command, doc), undefined);
+          assertEqual(doc.body.innerHTML.trim(), `\
+insertedText
+insertedText`);
+        });
+
         it("mode = insert", function () {
           var helper = new capturer.CaptureHelperHandler();
 
