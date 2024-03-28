@@ -5774,33 +5774,41 @@
         };
       }
 
-      const {name, value = null, attrs, children} = nodeData;
-      const tag = this.resolve(name, rootNode) || "#text";
+      let {name, value = null, attrs, children} = nodeData;
+      name = this.resolve(name, rootNode);
+      value = this.resolve(value, rootNode);
+
+      const tag = name || "#text";
       switch (tag) {
         case "#text": {
-          return doc.createTextNode(this.resolve(value, rootNode) || "");
+          return doc.createTextNode(value || "");
         }
         case "#comment": {
-          return doc.createComment(this.resolve(value, rootNode) || "");
+          return doc.createComment(value || "");
         }
         default: {
           const newElem = doc.createElement(tag);
-          if (Array.isArray(attrs)) {
+
+          if (!attrs) {
+            // do nothing
+          } else if (Array.isArray(attrs)) {
             for (const [key, value] of attrs) {
               newElem.setAttribute(this.resolve(key, rootNode), this.resolve(value, rootNode));
             }
-          } else if (attrs) {
+          } else if (typeof attrs === 'object') {
             for (const key in attrs) {
               newElem.setAttribute(key, this.resolve(attrs[key], rootNode));
             }
           }
+
           if (value !== null) {
-            newElem.textContent = this.resolve(value, rootNode);
+            newElem.textContent = value;
           } else if (children) {
             for (const childData of children) {
               newElem.appendChild(this.resolveNodeData(childData, rootNode));
             }
           }
+
           return newElem;
         }
       }
@@ -5836,39 +5844,47 @@
     }
 
     cmd_concat(rootNode, baseArg, ...args) {
-      let rv = String(baseArg);
+      let rv = String(this.resolve(baseArg, rootNode) || "");
       for (const arg of args) {
         const value = this.resolve(arg, rootNode);
-        rv += String(value);
+        rv += String(value || "");
       }
       return rv;
     }
 
     cmd_slice(rootNode, text, beginIndex, endIndex) {
-      return String(text).slice(beginIndex, endIndex);
+      text = String(this.resolve(text, rootNode) || "");
+      beginIndex = this.resolve(beginIndex, rootNode);
+      endIndex = this.resolve(endIndex, rootNode);
+      return text.slice(beginIndex, endIndex);
     }
 
     cmd_upper(rootNode, text) {
-      return String(text).toUpperCase();
+      text = String(this.resolve(text, rootNode) || "");
+      return text.toUpperCase();
     }
 
     cmd_lower(rootNode, text) {
-      return String(text).toLowerCase();
+      text = String(this.resolve(text, rootNode) || "");
+      return text.toLowerCase();
     }
 
     cmd_encode_uri(rootNode, text, safe) {
+      text = String(this.resolve(text, rootNode) || "");
+      safe = String(this.resolve(safe, rootNode) || "");
       if (safe) {
-        return text.replace(new RegExp(`[^${scrapbook.escapeRegExp(String(safe))}]+`, 'ug'), x => encodeURIComponent(x));
+        return text.replace(new RegExp(`[^${scrapbook.escapeRegExp(safe)}]+`, 'ug'), x => encodeURIComponent(x));
       }
       return encodeURIComponent(text);
     }
 
     cmd_decode_uri(rootNode, text) {
+      text = String(this.resolve(text, rootNode) || "");
       return decodeURIComponent(text);
     }
 
     cmd_add(rootNode, baseArg, ...args) {
-      let rv = Number(baseArg);
+      let rv = Number(this.resolve(baseArg, rootNode));
       for (const arg of args) {
         const value = this.resolve(arg, rootNode);
         rv += Number(value);
@@ -5877,7 +5893,7 @@
     }
 
     cmd_subtract(rootNode, baseArg, ...args) {
-      let rv = Number(baseArg);
+      let rv = Number(this.resolve(baseArg, rootNode));
       for (const arg of args) {
         const value = this.resolve(arg, rootNode);
         rv -= Number(value);
@@ -5886,7 +5902,7 @@
     }
 
     cmd_multiply(rootNode, baseArg, ...args) {
-      let rv = Number(baseArg);
+      let rv = Number(this.resolve(baseArg, rootNode));
       for (const arg of args) {
         const value = this.resolve(arg, rootNode);
         rv *= Number(value);
@@ -5895,7 +5911,7 @@
     }
 
     cmd_divide(rootNode, baseArg, ...args) {
-      let rv = Number(baseArg);
+      let rv = Number(this.resolve(baseArg, rootNode));
       for (const arg of args) {
         const value = this.resolve(arg, rootNode);
         rv /= Number(value);
@@ -5904,7 +5920,7 @@
     }
 
     cmd_mod(rootNode, baseArg, ...args) {
-      let rv = Number(baseArg);
+      let rv = Number(this.resolve(baseArg, rootNode));
       for (const arg of args) {
         const value = this.resolve(arg, rootNode);
         rv %= Number(value);
@@ -5913,7 +5929,7 @@
     }
 
     cmd_power(rootNode, baseArg, ...args) {
-      let rv = Number(baseArg);
+      let rv = Number(this.resolve(baseArg, rootNode));
       for (const arg of args) {
         const value = this.resolve(arg, rootNode);
         rv **= Number(value);
@@ -6074,18 +6090,25 @@
       const elems = this.selectNodes(rootNode, this.resolve(selector, rootNode));
       for (const elem of elems) {
         if (!elem.setAttribute) { continue; }
-        if (typeof attrValue !== 'undefined') {
-          // key, value
-          const key = this.resolve(attrs, elem);
+
+        const _attrs = this.resolve(attrs, elem);
+        if (!_attrs) { continue; }
+
+        // key, value
+        if (typeof _attrs === 'string') {
+          const key = _attrs;
           const value = this.resolve(attrValue, elem);
           if (value !== null) {
             elem.setAttribute(key, value);
           } else {
             elem.removeAttribute(key);
           }
-        } else if (Array.isArray(attrs)) {
-          // [[key1, value1], ...]
-          for (let [key, value] of attrs) {
+          continue;
+        }
+
+        // [[key1, value1], ...]
+        if (Array.isArray(_attrs)) {
+          for (let [key, value] of _attrs) {
             key = this.resolve(key, elem);
             value = this.resolve(value, elem);
             if (value !== null) {
@@ -6094,16 +6117,20 @@
               elem.removeAttribute(key);
             }
           }
-        } else {
-          // {key1: value1, ...}
-          for (const key in attrs) {
-            const value = this.resolve(attrs[key], elem);
+          continue;
+        }
+
+        // {key1: value1, ...}
+        if (typeof _attrs === 'object') {
+          for (const key in _attrs) {
+            const value = this.resolve(_attrs[key], elem);
             if (value !== null) {
               elem.setAttribute(key, value);
             } else {
               elem.removeAttribute(key);
             }
           }
+          continue;
         }
       }
     }
@@ -6112,9 +6139,13 @@
       const elems = this.selectNodes(rootNode, this.resolve(selector, rootNode));
       for (const elem of elems) {
         if (!elem.style) { continue; }
-        if (typeof styleValue !== 'undefined' || typeof stylePriority !== 'undefined') {
-          // key, value, priority
-          const key = this.resolve(styles, elem);
+
+        const _styles = this.resolve(styles, elem);
+        if (!_styles) { continue; }
+
+        // key, value, priority
+        if (typeof _styles === 'string') {
+          const key = _styles;
           const value = this.resolve(styleValue, elem);
           const priority = this.resolve(stylePriority, elem);
           if (value !== null) {
@@ -6122,9 +6153,11 @@
           } else {
             elem.style.removeProperty(key);
           }
-        } else if (Array.isArray(styles)) {
-          // [[key1, value1, priority1], ...]
-          for (let [key, value, priority] of styles) {
+        }
+
+        // [[key1, value1, priority1], ...]
+        if (Array.isArray(_styles)) {
+          for (let [key, value, priority] of _styles) {
             key = this.resolve(key, elem);
             value = this.resolve(value, elem);
             priority = this.resolve(priority, elem);
@@ -6134,16 +6167,20 @@
               elem.style.removeProperty(key);
             }
           }
-        } else {
-          // {key1: value1, ...}
-          for (const key in styles) {
-            const value = this.resolve(styles[key], elem);
+          continue;
+        }
+
+        // {key1: value1, ...}
+        if (typeof _styles === 'object') {
+          for (const key in _styles) {
+            const value = this.resolve(_styles[key], elem);
             if (value !== null) {
               elem.style.setProperty(key, value);
             } else {
               elem.style.removeProperty(key);
             }
           }
+          continue;
         }
       }
     }
@@ -6175,24 +6212,37 @@
     }
 
     cmd_options(rootNode, options, optionValue) {
-      if (typeof optionValue !== 'undefined') {
-        // key, value
-        const key = this.resolve(options, rootNode);
+      options = this.resolve(options, rootNode);
+
+      if (!options) {
+        return;
+      }
+
+      // key, value
+      if (typeof options === 'string') {
+        const key = options;
         const value = this.resolve(optionValue, rootNode);
         this.options[key] = value;
-      } else if (Array.isArray(options)) {
-        // [[key1, value1], ...]
+        return;
+      }
+
+      // [[key1, value1], ...]
+      if (Array.isArray(options)) {
         for (let [key, value] of options) {
           key = this.resolve(key, rootNode);
           value = this.resolve(value, rootNode);
           this.options[key] = value;
         }
-      } else {
-        // {key1: value1, ...}
+        return;
+      }
+
+      // {key1: value1, ...}
+      if (typeof options === 'object') {
         for (const key in options) {
           const value = this.resolve(options[key], rootNode);
           this.options[key] = value;
         }
+        return;
       }
     }
   };
