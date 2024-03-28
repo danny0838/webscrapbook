@@ -1996,14 +1996,17 @@ class { }`);
 
           var command = ["get_html", {css: "div"}];
           assertEqual(helper.runCommand(command, doc), "<b>elem1</b>");
+
+          var command = ["get_html", {css: "div"}, true];
+          assertEqual(helper.runCommand(command, doc), "<div><b>elem1</b></div>");
         });
 
         it("resolve parameter commands", function () {
           var helper = new capturer.CaptureHelperHandler();
           var doc = makeTestDoc();
 
-          var command = ["get_html", ["if", true, {css: "div"}]];
-          assertEqual(helper.runCommand(command, doc), "<b>elem1</b>");
+          var command = ["get_html", ["if", true, {css: "div"}], ["if", true, true]];
+          assertEqual(helper.runCommand(command, doc), "<div><b>elem1</b></div>");
         });
 
       });
@@ -2230,17 +2233,24 @@ class { }`);
           assertEqual(doc.body.innerHTML.trim(), `\
 <div><em>text</em></div>
 <div><em>text</em></div>`);
+
+          var doc = makeTestDoc();
+          var command = ["html", {css: "div"}, "<em>text</em>", true];
+          assertEqual(helper.runCommand(command, doc), undefined);
+          assertEqual(doc.body.innerHTML.trim(), `\
+<em>text</em>
+<em>text</em>`);
         });
 
         it("resolve parameter commands", function () {
           var helper = new capturer.CaptureHelperHandler();
 
           var doc = makeTestDoc();
-          var command = ["html", ["if", true, {css: "div"}], ["concat", ["get_html"], "<em>text</em>"]];
+          var command = ["html", ["if", true, {css: "div"}], ["concat", ["get_html", null, true], "<em>text</em>"], ["if", true, true]];
           assertEqual(helper.runCommand(command, doc), undefined);
           assertEqual(doc.body.innerHTML.trim(), `\
-<div><b>elem1</b><em>text</em></div>
-<div><b>elem2</b><em>text</em></div>`);
+<div><b>elem1</b></div><em>text</em>
+<div><b>elem2</b></div><em>text</em>`);
         });
 
       });

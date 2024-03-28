@@ -5984,10 +5984,15 @@
       }
     }
 
-    cmd_get_html(rootNode, selector) {
+    cmd_get_html(rootNode, selector, isOuter) {
       const elems = this.selectNodes(rootNode, this.resolve(selector, rootNode));
       try {
-        return elems[0].innerHTML;
+        const elem = elems[0];
+        if (this.resolve(isOuter, elem)) {
+          return elem.outerHTML;
+        } else {
+          return elem.innerHTML;
+        }
       } catch (ex) {
         return null;
       }
@@ -6072,10 +6077,14 @@
       }
     }
 
-    cmd_html(rootNode, selector, value) {
+    cmd_html(rootNode, selector, value, isOuter) {
       const elems = this.selectNodes(rootNode, this.resolve(selector, rootNode));
       for (const elem of elems) {
-        elem.innerHTML = this.resolve(value, elem);
+        if (this.resolve(isOuter, elem)) {
+          elem.outerHTML = this.resolve(value, elem);
+        } else {
+          elem.innerHTML = this.resolve(value, elem);
+        }
       }
     }
 
