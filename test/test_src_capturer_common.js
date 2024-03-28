@@ -1208,6 +1208,1721 @@ class { }`);
 
   });
 
+  $describe.skipIf($.noBrowser)('capturer.CaptureHelperHandler', function () {
+
+    function makeHtmlDocument(html) {
+      return new DOMParser().parseFromString(html, 'text/html');
+    }
+
+    describe("capturer.CaptureHelperHandler.parseRegexStr", function () {
+
+      it("basic", function () {
+        var {source, flags} = capturer.CaptureHelperHandler.parseRegexStr(`/abc/def/`);
+        assertEqual({source, flags}, {source: r`abc\/def`, flags: ``});
+
+        var {source, flags} = capturer.CaptureHelperHandler.parseRegexStr(`/abc/def/dimguy`);
+        assertEqual({source, flags}, {source: r`abc\/def`, flags: `dgimuy`});
+      });
+
+      it("return null for an invalid regex string", function () {
+        assertEqual(capturer.CaptureHelperHandler.parseRegexStr(`abc/def`), null);
+      });
+
+    });
+
+    describe("capturer.CaptureHelperHandler.isCommand", function () {
+
+      it("basic", function () {
+        assertEqual(capturer.CaptureHelperHandler.isCommand(["if", true, "yes", "no"]), true);
+        assertEqual(capturer.CaptureHelperHandler.isCommand(["if"]), true);
+
+        assertEqual(capturer.CaptureHelperHandler.isCommand(null), false);
+        assertEqual(capturer.CaptureHelperHandler.isCommand(0), false);
+        assertEqual(capturer.CaptureHelperHandler.isCommand(1), false);
+        assertEqual(capturer.CaptureHelperHandler.isCommand(""), false);
+        assertEqual(capturer.CaptureHelperHandler.isCommand(`["if", true, "yes", "no"]`), false);
+        assertEqual(capturer.CaptureHelperHandler.isCommand([]), false);
+        assertEqual(capturer.CaptureHelperHandler.isCommand([1, 2, 3]), false);
+        assertEqual(capturer.CaptureHelperHandler.isCommand({}), false);
+      });
+
+    });
+
+    describe("capturer.CaptureHelperHandler.selectNodes", function () {
+      function makeTestDoc() {
+        return makeHtmlDocument(`\
+<body>
+<div id="parent-prev"></div>
+<div id="parent">
+  <div id="prev"></div>
+  <div id="target">
+    <div id="child-1"></div>
+    <div id="child-2"></div>
+    <div id="child-3"></div>
+  </div>
+  <div id="next"></div>
+</div>
+<div id="parent-next"></div>
+</body>`);
+      }
+
+      function removeElems(elems) {
+        for (const elem of elems) {
+          elem.remove();
+        }
+      }
+
+      describe("Object", function () {
+
+        it(".css", function () {
+          var doc = makeTestDoc();
+          var selector = {css: "div"};
+          removeElems(capturer.CaptureHelperHandler.selectNodes(doc, selector));
+          assertEqual(doc.body.innerHTML.trim(), ``);
+        });
+
+        it(".xpath", function () {
+          var doc = makeTestDoc();
+          var selector = {xpath: "//div"};
+          removeElems(capturer.CaptureHelperHandler.selectNodes(doc, selector));
+          assertEqual(doc.body.innerHTML.trim(), ``);
+        });
+
+      });
+
+      describe("string", function () {
+
+        it("self", function () {
+          var doc = makeTestDoc();
+          var selector = "self";
+          var refNode = doc.querySelector('#target');
+          var result = capturer.CaptureHelperHandler.selectNodes(refNode, selector);
+          assertEqual(result.length, 1);
+          assert(result[0] === refNode);
+        });
+
+        it("root", function () {
+          var doc = makeTestDoc();
+          var selector = "root";
+          var refNode = doc.querySelector('#target');
+          var result = capturer.CaptureHelperHandler.selectNodes(refNode, selector);
+          assertEqual(result.length, 1);
+          assert(result[0] === doc);
+        });
+
+        it("parent", function () {
+          var doc = makeTestDoc();
+          var selector = "parent";
+          var refNode = doc.querySelector('#target');
+          var result = capturer.CaptureHelperHandler.selectNodes(refNode, selector);
+          assertEqual(result.length, 1);
+          assert(result[0] === refNode.parentNode);
+        });
+
+        it("previousSibling", function () {
+          var doc = makeTestDoc();
+          var selector = "previousSibling";
+          var refNode = doc.querySelector('#target');
+          var result = capturer.CaptureHelperHandler.selectNodes(refNode, selector);
+          assertEqual(result.length, 1);
+          assert(result[0] === refNode.previousSibling);
+        });
+
+        it("nextSibling", function () {
+          var doc = makeTestDoc();
+          var selector = "nextSibling";
+          var refNode = doc.querySelector('#target');
+          var result = capturer.CaptureHelperHandler.selectNodes(refNode, selector);
+          assertEqual(result.length, 1);
+          assert(result[0] === refNode.nextSibling);
+        });
+
+        it("firstChild", function () {
+          var doc = makeTestDoc();
+          var selector = "firstChild";
+          var refNode = doc.querySelector('#target');
+          var result = capturer.CaptureHelperHandler.selectNodes(refNode, selector);
+          assertEqual(result.length, 1);
+          assert(result[0] === refNode.firstChild);
+        });
+
+        it("lastChild", function () {
+          var doc = makeTestDoc();
+          var selector = "lastChild";
+          var refNode = doc.querySelector('#target');
+          var result = capturer.CaptureHelperHandler.selectNodes(refNode, selector);
+          assertEqual(result.length, 1);
+          assert(result[0] === refNode.lastChild);
+        });
+
+      });
+
+      describe("falsy", function () {
+
+        it("undefined", function () {
+          var doc = makeTestDoc();
+          var selector;
+          var refNode = doc.querySelector('#target');
+          var result = capturer.CaptureHelperHandler.selectNodes(refNode, selector);
+          assertEqual(result.length, 1);
+          assert(result[0] === refNode);
+        });
+
+        it("null", function () {
+          var doc = makeTestDoc();
+          var selector = null;
+          var refNode = doc.querySelector('#target');
+          var result = capturer.CaptureHelperHandler.selectNodes(refNode, selector);
+          assertEqual(result.length, 1);
+          assert(result[0] === refNode);
+        });
+
+        it("empty string", function () {
+          var doc = makeTestDoc();
+          var selector = "";
+          var refNode = doc.querySelector('#target');
+          var result = capturer.CaptureHelperHandler.selectNodes(refNode, selector);
+          assertEqual(result.length, 1);
+          assert(result[0] === refNode);
+        });
+
+      });
+
+    });
+
+    describe("capturer.CaptureHelperHandler.runCommand", function () {
+      function makeTestDoc() {
+        return makeHtmlDocument(`\
+<div id="target">target</div>
+<div id="target2">target2</div>`);
+      }
+
+      describe("cmd_if", function () {
+
+        it("basic", function () {
+          var helper = new capturer.CaptureHelperHandler();
+          var doc = makeTestDoc();
+
+          var command = ["if", true, 1, 0];
+          assertEqual(helper.runCommand(command, doc), 1);
+
+          var command = ["if", 1, 1, 0];
+          assertEqual(helper.runCommand(command, doc), 1);
+
+          var command = ["if", "yes", 1, 0];
+          assertEqual(helper.runCommand(command, doc), 1);
+
+          var command = ["if", {}, 1, 0];
+          assertEqual(helper.runCommand(command, doc), 1);
+
+          var command = ["if", [], 1, 0];
+          assertEqual(helper.runCommand(command, doc), 1);
+
+          var command = ["if", false, 1, 0];
+          assertEqual(helper.runCommand(command, doc), 0);
+
+          var command = ["if", 0, 1, 0];
+          assertEqual(helper.runCommand(command, doc), 0);
+
+          var command = ["if", "", 1, 0];
+          assertEqual(helper.runCommand(command, doc), 0);
+
+          var command = ["if", null, 1, 0];
+          assertEqual(helper.runCommand(command, doc), 0);
+        });
+
+        it("resolve parameter commands", function () {
+          var helper = new capturer.CaptureHelperHandler();
+          var doc = makeTestDoc();
+
+          var command = ["if", ["concat", "foo"], ["get_text", {css: "#target"}], ["get_text", {css: "#target2"}]];
+          assertEqual(helper.runCommand(command, doc), "target");
+
+          var command = ["if", ["concat", ""], ["get_text", {css: "#target"}], ["get_text", {css: "#target2"}]];
+          assertEqual(helper.runCommand(command, doc), "target2");
+        });
+
+      });
+
+      describe("cmd_and", function () {
+
+        it("return first falsy or last value", function () {
+          var helper = new capturer.CaptureHelperHandler();
+          var doc = makeTestDoc();
+
+          var command = ["and", true];
+          assertEqual(helper.runCommand(command, doc), true);
+
+          var command = ["and", true, 1];
+          assertEqual(helper.runCommand(command, doc), 1);
+
+          var command = ["and", true, 1, "foo"];
+          assertEqual(helper.runCommand(command, doc), "foo");
+
+          var command = ["and", true, 1, "foo", {}];
+          assertEqual(helper.runCommand(command, doc), {});
+
+          var command = ["and", false, 1, "foo", {}];
+          assertEqual(helper.runCommand(command, doc), false);
+
+          var command = ["and", true, 0, "foo", {}];
+          assertEqual(helper.runCommand(command, doc), 0);
+
+          var command = ["and", true, 1, "", {}];
+          assertEqual(helper.runCommand(command, doc), "");
+
+          var command = ["and", true, 1, "foo", null];
+          assertEqual(helper.runCommand(command, doc), null);
+        });
+
+        it("resolve parameter commands", function () {
+          var helper = new capturer.CaptureHelperHandler();
+          var doc = makeTestDoc();
+
+          var command = ["and", ["get_text", {css: "#target"}], ["get_text", {css: "#target2"}]];
+          assertEqual(helper.runCommand(command, doc), "target2");
+        });
+
+      });
+
+      describe("cmd_or", function () {
+
+        it("return first truthy or last value", function () {
+          var helper = new capturer.CaptureHelperHandler();
+          var doc = makeTestDoc();
+
+          var command = ["or", true, 1, "foo", {}];
+          assertEqual(helper.runCommand(command, doc), true);
+
+          var command = ["or", false, 1, "foo", {}];
+          assertEqual(helper.runCommand(command, doc), 1);
+
+          var command = ["or", false, 0, "foo", {}];
+          assertEqual(helper.runCommand(command, doc), "foo");
+
+          var command = ["or", false, 0, "", {}];
+          assertEqual(helper.runCommand(command, doc), {});
+
+          var command = ["or", false];
+          assertEqual(helper.runCommand(command, doc), false);
+
+          var command = ["or", false, 0];
+          assertEqual(helper.runCommand(command, doc), 0);
+
+          var command = ["or", false, 0, ""];
+          assertEqual(helper.runCommand(command, doc), "");
+
+          var command = ["or", false, 0, "", null];
+          assertEqual(helper.runCommand(command, doc), null);
+        });
+
+        it("resolve parameter commands", function () {
+          var helper = new capturer.CaptureHelperHandler();
+          var doc = makeTestDoc();
+
+          var command = ["or", ["get_text", {css: "#target"}], ["get_text", {css: "#target2"}]];
+          assertEqual(helper.runCommand(command, doc), "target");
+        });
+
+      });
+
+      describe("cmd_concat", function () {
+
+        it("basic", function () {
+          var helper = new capturer.CaptureHelperHandler();
+          var doc = makeTestDoc();
+
+          var command = ["concat", "foo"];
+          assertEqual(helper.runCommand(command, doc), "foo");
+
+          var command = ["concat", "foo", "bar"];
+          assertEqual(helper.runCommand(command, doc), "foobar");
+
+          var command = ["concat", "foo", "bar", "baz"];
+          assertEqual(helper.runCommand(command, doc), "foobarbaz");
+        });
+
+        it('coerce truthy non-string value to string', function () {
+          var helper = new capturer.CaptureHelperHandler();
+          var doc = makeTestDoc();
+
+          var command = ["concat", "foo", "bar", 1];
+          assertEqual(helper.runCommand(command, doc), "foobar1");
+
+          var command = ["concat", "foo", "bar", {}];
+          assertEqual(helper.runCommand(command, doc), "foobar[object Object]");
+        });
+
+        it('treat falsy value as empty string', function () {
+          var helper = new capturer.CaptureHelperHandler();
+          var doc = makeTestDoc();
+
+          var command = ["concat", "foo", null, false, 0];
+          assertEqual(helper.runCommand(command, doc), "foo");
+        });
+
+        it("resolve parameter commands", function () {
+          var helper = new capturer.CaptureHelperHandler();
+          var doc = makeTestDoc();
+
+          var command = ["concat", ["get_text", {css: "#target"}], ["get_text", {css: "#target2"}]];
+          assertEqual(helper.runCommand(command, doc), "targettarget2");
+        });
+
+      });
+
+      describe("cmd_slice", function () {
+
+        it("basic", function () {
+          var helper = new capturer.CaptureHelperHandler();
+          var doc = makeTestDoc();
+
+          var command = ["slice", "0123456", 1];
+          assertEqual(helper.runCommand(command, doc), "123456");
+
+          var command = ["slice", "0123456", 1, 4];
+          assertEqual(helper.runCommand(command, doc), "123");
+
+          var command = ["slice", "0123456", 1, 100];
+          assertEqual(helper.runCommand(command, doc), "123456");
+
+          var command = ["slice", "0123456", -2];
+          assertEqual(helper.runCommand(command, doc), "56");
+
+          var command = ["slice", "0123456", 0, -2];
+          assertEqual(helper.runCommand(command, doc), "01234");
+        });
+
+        it("resolve parameter commands", function () {
+          var helper = new capturer.CaptureHelperHandler();
+          var doc = makeTestDoc();
+
+          var command = ["slice", ["get_text", {css: "#target"}], ["if", true, 1], ["if", true, -1]];
+          assertEqual(helper.runCommand(command, doc), "arge");
+        });
+
+      });
+
+      describe("cmd_upper", function () {
+
+        it("basic", function () {
+          var helper = new capturer.CaptureHelperHandler();
+          var doc = makeTestDoc();
+
+          var command = ["upper", "123ABCabc中文"];
+          assertEqual(helper.runCommand(command, doc), "123ABCABC中文");
+        });
+
+        it("resolve parameter commands", function () {
+          var helper = new capturer.CaptureHelperHandler();
+          var doc = makeTestDoc();
+
+          var command = ["upper", ["get_text", {css: "#target"}]];
+          assertEqual(helper.runCommand(command, doc), "TARGET");
+        });
+
+      });
+
+      describe("cmd_lower", function () {
+
+        it("basic", function () {
+          var helper = new capturer.CaptureHelperHandler();
+          var doc = makeTestDoc();
+
+          var command = ["lower", "123ABCabc中文"];
+          assertEqual(helper.runCommand(command, doc), "123abcabc中文");
+        });
+
+        it("resolve parameter commands", function () {
+          var helper = new capturer.CaptureHelperHandler();
+          var doc = makeTestDoc();
+
+          var command = ["lower", ["get_text", {css: "#target"}]];
+          assertEqual(helper.runCommand(command, doc), "target");
+        });
+
+      });
+
+      describe("cmd_encode_uri", function () {
+
+        it("basic", function () {
+          var helper = new capturer.CaptureHelperHandler();
+          var doc = makeTestDoc();
+
+          var command = ["encode_uri", " ;,/?#:@&=+$中"];
+          assertEqual(helper.runCommand(command, doc), '%20%3B%2C%2F%3F%23%3A%40%26%3D%2B%24%E4%B8%AD');
+
+          var command = ["encode_uri", " ;,/?#:@&=+$中", " ;,/?#:@&=+$"];
+          assertEqual(helper.runCommand(command, doc), ' ;,/?#:@&=+$%E4%B8%AD');
+        });
+
+        it("resolve parameter commands", function () {
+          var helper = new capturer.CaptureHelperHandler();
+          var doc = makeTestDoc();
+
+          var command = ["encode_uri", ["concat", " ;,/?#:@&=+$中"], ["concat", " ;,/?#:@&=+$"]];
+          assertEqual(helper.runCommand(command, doc), ' ;,/?#:@&=+$%E4%B8%AD');
+        });
+
+      });
+
+      describe("cmd_decode_uri", function () {
+
+        it("basic", function () {
+          var helper = new capturer.CaptureHelperHandler();
+          var doc = makeTestDoc();
+
+          var command = ["decode_uri", "%20%3B%2C%2F%3F%23%3A%40%26%3D%2B%24%E4%B8%AD"];
+          assertEqual(helper.runCommand(command, doc), ' ;,/?#:@&=+$中');
+        });
+
+        it("resolve parameter commands", function () {
+          var helper = new capturer.CaptureHelperHandler();
+          var doc = makeTestDoc();
+
+          var command = ["decode_uri", ["concat", "%20%3B%2C%2F%3F%23%3A%40%26%3D%2B%24%E4%B8%AD"]];
+          assertEqual(helper.runCommand(command, doc), ' ;,/?#:@&=+$中');
+        });
+
+      });
+
+      describe("cmd_add", function () {
+
+        it("basic", function () {
+          var helper = new capturer.CaptureHelperHandler();
+          var doc = makeTestDoc();
+
+          var command = ["add", 100];
+          assertEqual(helper.runCommand(command, doc), 100);
+
+          var command = ["add", 100, 10];
+          assertEqual(helper.runCommand(command, doc), 110);
+
+          var command = ["add", 100, 10, 1];
+          assertEqual(helper.runCommand(command, doc), 111);
+        });
+
+        it("resolve parameter commands", function () {
+          var helper = new capturer.CaptureHelperHandler();
+          var doc = makeTestDoc();
+
+          var command = ["add", ["if", true, 100], ["if", true, 10], ["if", true, 1]];
+          assertEqual(helper.runCommand(command, doc), 111);
+        });
+
+      });
+
+      describe("cmd_subtract", function () {
+
+        it("basic", function () {
+          var helper = new capturer.CaptureHelperHandler();
+          var doc = makeTestDoc();
+
+          var command = ["subtract", 100];
+          assertEqual(helper.runCommand(command, doc), 100);
+
+          var command = ["subtract", 100, 10];
+          assertEqual(helper.runCommand(command, doc), 90);
+
+          var command = ["subtract", 100, 10, 1];
+          assertEqual(helper.runCommand(command, doc), 89);
+        });
+
+        it("resolve parameter commands", function () {
+          var helper = new capturer.CaptureHelperHandler();
+          var doc = makeTestDoc();
+
+          var command = ["subtract", ["if", true, 100], ["if", true, 10], ["if", true, 1]];
+          assertEqual(helper.runCommand(command, doc), 89);
+        });
+
+      });
+
+      describe("cmd_multiply", function () {
+
+        it("basic", function () {
+          var helper = new capturer.CaptureHelperHandler();
+          var doc = makeTestDoc();
+
+          var command = ["multiply", 100];
+          assertEqual(helper.runCommand(command, doc), 100);
+
+          var command = ["multiply", 100, 10];
+          assertEqual(helper.runCommand(command, doc), 1000);
+
+          var command = ["multiply", 100, 10, 2];
+          assertEqual(helper.runCommand(command, doc), 2000);
+        });
+
+        it("resolve parameter commands", function () {
+          var helper = new capturer.CaptureHelperHandler();
+          var doc = makeTestDoc();
+
+          var command = ["multiply", ["if", true, 100], ["if", true, 10], ["if", true, 2]];
+          assertEqual(helper.runCommand(command, doc), 2000);
+        });
+
+      });
+
+      describe("cmd_divide", function () {
+
+        it("basic", function () {
+          var helper = new capturer.CaptureHelperHandler();
+          var doc = makeTestDoc();
+
+          var command = ["divide", 100];
+          assertEqual(helper.runCommand(command, doc), 100);
+
+          var command = ["divide", 100, 10];
+          assertEqual(helper.runCommand(command, doc), 10);
+
+          var command = ["divide", 100, 10, 2];
+          assertEqual(helper.runCommand(command, doc), 5);
+
+          var command = ["divide", 5, 2];
+          assertEqual(helper.runCommand(command, doc), 2.5);
+        });
+
+        it("resolve parameter commands", function () {
+          var helper = new capturer.CaptureHelperHandler();
+          var doc = makeTestDoc();
+
+          var command = ["divide", ["if", true, 100], ["if", true, 10], ["if", true, 2]];
+          assertEqual(helper.runCommand(command, doc), 5);
+        });
+
+      });
+
+      describe("cmd_mod", function () {
+
+        it("basic", function () {
+          var helper = new capturer.CaptureHelperHandler();
+          var doc = makeTestDoc();
+
+          var command = ["mod", 12];
+          assertEqual(helper.runCommand(command, doc), 12);
+
+          var command = ["mod", 12, 10];
+          assertEqual(helper.runCommand(command, doc), 2);
+
+          var command = ["mod", 12, 6];
+          assertEqual(helper.runCommand(command, doc), 0);
+
+          var command = ["mod", 12, 8, 3];
+          assertEqual(helper.runCommand(command, doc), 1);
+        });
+
+        it("resolve parameter commands", function () {
+          var helper = new capturer.CaptureHelperHandler();
+          var doc = makeTestDoc();
+
+          var command = ["mod", ["if", true, 12], ["if", true, 8], ["if", true, 3]];
+          assertEqual(helper.runCommand(command, doc), 1);
+        });
+
+      });
+
+      describe("cmd_power", function () {
+
+        it("basic", function () {
+          var helper = new capturer.CaptureHelperHandler();
+          var doc = makeTestDoc();
+
+          var command = ["power", 2];
+          assertEqual(helper.runCommand(command, doc), 2);
+
+          var command = ["power", 2, 3];
+          assertEqual(helper.runCommand(command, doc), 8);
+
+          var command = ["power", 2, 3, 2];
+          assertEqual(helper.runCommand(command, doc), 64);
+        });
+
+        it("resolve parameter commands", function () {
+          var helper = new capturer.CaptureHelperHandler();
+          var doc = makeTestDoc();
+
+          var command = ["power", ["if", true, 2], ["if", true, 3], ["if", true, 2]];
+          assertEqual(helper.runCommand(command, doc), 64);
+        });
+
+      });
+
+      describe("cmd_for", function () {
+
+        it("basic", function () {
+          var helper = new capturer.CaptureHelperHandler();
+          var doc = makeTestDoc();
+
+          var command = ["for", ["if", true, {css: "div"}],
+            ["attr", null, "class", ["get_attr", null, "id"]],
+            ["attr", null, "id", null],
+          ];
+          assertEqual(helper.runCommand(command, doc), undefined);
+          assertEqual(doc.body.innerHTML.trim(), `\
+<div class="target">target</div>
+<div class="target2">target2</div>`);
+        });
+
+      });
+
+      describe("cmd_match", function () {
+
+        it("boolean", function () {
+          var helper = new capturer.CaptureHelperHandler();
+          var doc = makeTestDoc();
+
+          var command = ["match", "text", "/TEXT/i"];
+          assertEqual(helper.runCommand(command, doc), true);
+
+          var command = ["match", "text", "/unrelated/"];
+          assertEqual(helper.runCommand(command, doc), false);
+
+          var command = ["match", "text", "/(te)(xt)/"];
+          assertEqual(helper.runCommand(command, doc), true);
+        });
+
+        it("indexed capture group", function () {
+          var helper = new capturer.CaptureHelperHandler();
+          var doc = makeTestDoc();
+
+          var command = ["match", "text", "/(te)(xt)/", 0];
+          assertEqual(helper.runCommand(command, doc), "text");
+
+          var command = ["match", "text", "/(te)(xt)/", 1];
+          assertEqual(helper.runCommand(command, doc), "te");
+
+          var command = ["match", "text", "/(te)(xt)/", 5];
+          assertEqual(helper.runCommand(command, doc), undefined);
+
+          var command = ["match", "text", "/(te)(xt)123/", 1];
+          assertEqual(helper.runCommand(command, doc), null);
+        });
+
+        it("resolve parameter commands", function () {
+          var helper = new capturer.CaptureHelperHandler();
+          var doc = makeTestDoc();
+
+          var command = ["match", ["concat", "text"], ["concat", "/text/"], ["if", true, 0]];
+          assertEqual(helper.runCommand(command, doc), "text");
+        });
+
+      });
+
+      describe("cmd_replace", function () {
+
+        it("basic", function () {
+          var helper = new capturer.CaptureHelperHandler();
+          var doc = makeTestDoc();
+
+          var command = ["replace", "text content", "/(text) (content)/", "modified: $2, $1"];
+          assertEqual(helper.runCommand(command, doc), 'modified: content, text');
+        });
+
+        it("treat missing replacement as an empty string", function () {
+          var helper = new capturer.CaptureHelperHandler();
+          var doc = makeTestDoc();
+
+          var command = ["replace", "text content", "/(text) (content)/"];
+          assertEqual(helper.runCommand(command, doc), "");
+        });
+
+        it("resolve parameter commands", function () {
+          var helper = new capturer.CaptureHelperHandler();
+          var doc = makeTestDoc();
+
+          var command = ["replace", ["concat", "text content"], ["concat", "/(text) (content)/"], ["concat", "modified: $2, $1"]];
+          assertEqual(helper.runCommand(command, doc), 'modified: content, text');
+        });
+
+      });
+
+      describe("cmd_has_node", function () {
+
+        it("basic", function () {
+          var helper = new capturer.CaptureHelperHandler();
+          var doc = makeTestDoc();
+
+          var command = ["has_node", {css: "#target"}];
+          assertEqual(helper.runCommand(command, doc), true);
+
+          var command = ["has_node", {css: "#nonexist"}];
+          assertEqual(helper.runCommand(command, doc), false);
+        });
+
+        it("resolve parameter commands", function () {
+          var helper = new capturer.CaptureHelperHandler();
+          var doc = makeTestDoc();
+
+          var command = ["has_node", ["if", true, {css: "#target"}]];
+          assertEqual(helper.runCommand(command, doc), true);
+        });
+
+      });
+
+      describe("cmd_has_attr", function () {
+
+        it("basic", function () {
+          var helper = new capturer.CaptureHelperHandler();
+          var doc = makeTestDoc();
+
+          var command = ["has_attr", {css: "#target"}, "id"];
+          assertEqual(helper.runCommand(command, doc), true);
+
+          var command = ["has_attr", {css: "#target"}, "class"];
+          assertEqual(helper.runCommand(command, doc), false);
+        });
+
+        it("resolve parameter commands", function () {
+          var helper = new capturer.CaptureHelperHandler();
+          var doc = makeTestDoc();
+
+          var command = ["has_attr", ["if", true, {css: "#target"}], ["concat", "id"]];
+          assertEqual(helper.runCommand(command, doc), true);
+        });
+
+      });
+
+      describe("cmd_get_html", function () {
+        function makeTestDoc() {
+          return makeHtmlDocument(`\
+<div><b>elem1</b></div>
+<div><b>elem2</b></div>`);
+        }
+
+        it("basic", function () {
+          var helper = new capturer.CaptureHelperHandler();
+          var doc = makeTestDoc();
+
+          var command = ["get_html", {css: "div"}];
+          assertEqual(helper.runCommand(command, doc), "<b>elem1</b>");
+        });
+
+        it("resolve parameter commands", function () {
+          var helper = new capturer.CaptureHelperHandler();
+          var doc = makeTestDoc();
+
+          var command = ["get_html", ["if", true, {css: "div"}]];
+          assertEqual(helper.runCommand(command, doc), "<b>elem1</b>");
+        });
+
+      });
+
+      describe("cmd_get_text", function () {
+        function makeTestDoc() {
+          return makeHtmlDocument(`\
+<div><b>elem1-1</b><b>elem1-2</b></div>
+<div><b>elem2-1</b><b>elem2-2</b></div>`);
+        }
+
+        it("basic", function () {
+          var helper = new capturer.CaptureHelperHandler();
+          var doc = makeTestDoc();
+
+          var command = ["get_text", {css: "div"}];
+          assertEqual(helper.runCommand(command, doc), "elem1-1elem1-2");
+        });
+
+        it("resolve parameter commands", function () {
+          var helper = new capturer.CaptureHelperHandler();
+          var doc = makeTestDoc();
+
+          var command = ["get_text", ["if", true, {css: "div"}]];
+          assertEqual(helper.runCommand(command, doc), "elem1-1elem1-2");
+        });
+
+      });
+
+      describe("cmd_get_attr", function () {
+        function makeTestDoc() {
+          return makeHtmlDocument(`\
+<img data-src="image1.jpg">
+<img data-src="image2.jpg">`);
+        }
+
+        it("basic", function () {
+          var helper = new capturer.CaptureHelperHandler();
+          var doc = makeTestDoc();
+
+          var command = ["get_attr", {css: "img"}, "data-src"];
+          assertEqual(helper.runCommand(command, doc), "image1.jpg");
+        });
+
+        it("resolve parameter commands", function () {
+          var helper = new capturer.CaptureHelperHandler();
+          var doc = makeTestDoc();
+
+          var command = ["get_attr", ["if", true, {css: "img"}], ["concat", "data-src"]];
+          assertEqual(helper.runCommand(command, doc), "image1.jpg");
+        });
+
+      });
+
+      describe("cmd_get_css", function () {
+        function makeTestDoc() {
+          return makeHtmlDocument(`\
+<div style="color: green;"></div>
+<div style="color: yellow !important;"></div>`);
+        }
+
+        it("basic", function () {
+          var helper = new capturer.CaptureHelperHandler();
+          var doc = makeTestDoc();
+
+          var command = ["get_css", {css: "div"}, "color"];
+          assertEqual(helper.runCommand(command, doc), "green");
+
+          var command = ["get_css", {css: "div"}, "color", true];
+          assertEqual(helper.runCommand(command, doc), "");
+
+          var command = ["get_css", {css: "div:last-of-type"}, "color", true];
+          assertEqual(helper.runCommand(command, doc), "important");
+        });
+
+        it("resolve parameter commands", function () {
+          var helper = new capturer.CaptureHelperHandler();
+          var doc = makeTestDoc();
+
+          var command = ["get_css", ["if", true, {css: "div"}], ["concat", "color"], ["if", true, true]];
+          assertEqual(helper.runCommand(command, doc), "");
+        });
+
+      });
+
+      describe("cmd_remove", function () {
+        function makeTestDoc() {
+          return makeHtmlDocument(`\
+<div><b>elem1</b></div>
+<div><b>elem2</b></div>`);
+        }
+
+        it("basic", function () {
+          var helper = new capturer.CaptureHelperHandler();
+
+          var doc = makeTestDoc();
+          var command = ["remove", {css: "b"}];
+          assertEqual(helper.runCommand(command, doc), undefined);
+          assertEqual(doc.body.innerHTML.trim(), `\
+<div></div>
+<div></div>`);
+        });
+
+        it("resolve parameter commands", function () {
+          var helper = new capturer.CaptureHelperHandler();
+
+          var doc = makeTestDoc();
+          var command = ["remove", ["if", true, {css: "b"}]];
+          assertEqual(helper.runCommand(command, doc), undefined);
+          assertEqual(doc.body.innerHTML.trim(), `\
+<div></div>
+<div></div>`);
+        });
+
+      });
+
+      describe("cmd_unwrap", function () {
+        function makeTestDoc() {
+          return makeHtmlDocument(`\
+<div><b>elem1</b></div>
+<div><b>elem2</b></div>`);
+        }
+
+        it("basic", function () {
+          var helper = new capturer.CaptureHelperHandler();
+
+          var doc = makeTestDoc();
+          var command = ["unwrap", {css: "div"}];
+          assertEqual(helper.runCommand(command, doc), undefined);
+          assertEqual(doc.body.innerHTML.trim(), `\
+<b>elem1</b>
+<b>elem2</b>`);
+        });
+
+        it("resolve parameter commands", function () {
+          var helper = new capturer.CaptureHelperHandler();
+
+          var doc = makeTestDoc();
+          var command = ["unwrap", ["if", true, {css: "div"}]];
+          assertEqual(helper.runCommand(command, doc), undefined);
+          assertEqual(doc.body.innerHTML.trim(), `\
+<b>elem1</b>
+<b>elem2</b>`);
+        });
+
+      });
+
+      describe("cmd_isolate", function () {
+        function makeTestDoc() {
+          return makeHtmlDocument(`\
+<html>
+<head>
+<meta charset="UTF-8">
+</head>
+<body>
+<section>
+<article>
+<p>other content</p>
+<p class="target"><b>content</b></p>
+<p>other content</p>
+<p class="target"><b>content</b></p>
+<p>other content</p>
+</article>
+</section>
+</body>
+</html>`);
+        }
+
+        it("basic", function () {
+          var helper = new capturer.CaptureHelperHandler();
+
+          var doc = makeTestDoc();
+          var command = ["isolate", {css: ".target"}];
+          assertEqual(helper.runCommand(command, doc), undefined);
+          assertEqual(doc.documentElement.innerHTML.trim(), `\
+<head>
+<meta charset="UTF-8">
+</head>
+<body>\
+<section>\
+<article>\
+<p class="target"><b>content</b></p>\
+<p class="target"><b>content</b></p>\
+</article>\
+</section>\
+</body>`);
+        });
+
+        it("resolve parameter commands", function () {
+          var helper = new capturer.CaptureHelperHandler();
+
+          var doc = makeTestDoc();
+          var command = ["isolate", ["if", true, {css: ".target"}]];
+          assertEqual(helper.runCommand(command, doc), undefined);
+          assertEqual(doc.documentElement.innerHTML.trim(), `\
+<head>
+<meta charset="UTF-8">
+</head>
+<body>\
+<section>\
+<article>\
+<p class="target"><b>content</b></p>\
+<p class="target"><b>content</b></p>\
+</article>\
+</section>\
+</body>`);
+        });
+
+      });
+
+      describe("cmd_html", function () {
+        function makeTestDoc() {
+          return makeHtmlDocument(`\
+<div><b>elem1</b></div>
+<div><b>elem2</b></div>`);
+        }
+
+        it("basic", function () {
+          var helper = new capturer.CaptureHelperHandler();
+
+          var doc = makeTestDoc();
+          var command = ["html", {css: "div"}, "<em>text</em>"];
+          assertEqual(helper.runCommand(command, doc), undefined);
+          assertEqual(doc.body.innerHTML.trim(), `\
+<div><em>text</em></div>
+<div><em>text</em></div>`);
+        });
+
+        it("resolve parameter commands", function () {
+          var helper = new capturer.CaptureHelperHandler();
+
+          var doc = makeTestDoc();
+          var command = ["html", ["if", true, {css: "div"}], ["concat", ["get_html"], "<em>text</em>"]];
+          assertEqual(helper.runCommand(command, doc), undefined);
+          assertEqual(doc.body.innerHTML.trim(), `\
+<div><b>elem1</b><em>text</em></div>
+<div><b>elem2</b><em>text</em></div>`);
+        });
+
+      });
+
+      describe("cmd_text", function () {
+        function makeTestDoc() {
+          return makeHtmlDocument(`\
+<div>text1</div>
+<div>text2</div>`);
+        }
+
+        it("basic", function () {
+          var helper = new capturer.CaptureHelperHandler();
+
+          var doc = makeTestDoc();
+          var command = ["text", {css: "div"}, "<em>text</em>"];
+          assertEqual(helper.runCommand(command, doc), undefined);
+          var elems = doc.querySelectorAll('div');
+          assertEqual(elems[0].textContent, '<em>text</em>');
+          assertEqual(elems[1].textContent, '<em>text</em>');
+        });
+
+        it("resolve parameter commands", function () {
+          var helper = new capturer.CaptureHelperHandler();
+
+          var doc = makeTestDoc();
+          var command = ["text", ["if", true, {css: "div"}], ["concat", ["get_text"], "<em>text</em>"]];
+          assertEqual(helper.runCommand(command, doc), undefined);
+          var elems = doc.querySelectorAll('div');
+          assertEqual(elems[0].textContent, 'text1<em>text</em>');
+          assertEqual(elems[1].textContent, 'text2<em>text</em>');
+        });
+
+      });
+
+      describe("cmd_attr", function () {
+        function makeTestDoc() {
+          return makeHtmlDocument(`\
+<img data-src="image1.jpg">
+<img data-src="image2.jpg">`);
+        }
+
+        it("name, value", function () {
+          var helper = new capturer.CaptureHelperHandler();
+
+          var doc = makeTestDoc();
+          var command = ["attr", {css: "img"}, "data-src", "myimage.jpg"];
+          assertEqual(helper.runCommand(command, doc), undefined);
+          assertEqual(doc.body.innerHTML.trim(), `\
+<img data-src="myimage.jpg">
+<img data-src="myimage.jpg">`);
+
+          var doc = makeTestDoc();
+          var command = ["attr", {css: "img"}, "src", "myimage.jpg"];
+          assertEqual(helper.runCommand(command, doc), undefined);
+          assertEqual(doc.body.innerHTML.trim(), `\
+<img data-src="image1.jpg" src="myimage.jpg">
+<img data-src="image2.jpg" src="myimage.jpg">`);
+        });
+
+        it("name, value (null)", function () {
+          var helper = new capturer.CaptureHelperHandler();
+
+          var doc = makeTestDoc();
+          var command = ["attr", {css: "img"}, "data-src", null];
+          assertEqual(helper.runCommand(command, doc), undefined);
+          assertEqual(doc.body.innerHTML.trim(), `\
+<img>
+<img>`);
+        });
+
+        it("name, value (resolve parameter commands)", function () {
+          var helper = new capturer.CaptureHelperHandler();
+
+          var doc = makeTestDoc();
+          var command = ["attr", ["if", true, {css: "img"}], ["concat", "src"], ["get_attr", null, "data-src"]];
+          assertEqual(helper.runCommand(command, doc), undefined);
+          assertEqual(doc.body.innerHTML.trim(), `\
+<img data-src="image1.jpg" src="image1.jpg">
+<img data-src="image2.jpg" src="image2.jpg">`);
+        });
+
+        it("Object", function () {
+          var helper = new capturer.CaptureHelperHandler();
+
+          var doc = makeTestDoc();
+          var command = ["attr", {css: "img"}, {
+            "src": "myimage.jpg",
+            "data-src": null,
+            "data-extra": "extra-value",
+          }];
+          assertEqual(helper.runCommand(command, doc), undefined);
+          assertEqual(doc.body.innerHTML.trim(), `\
+<img src="myimage.jpg" data-extra="extra-value">
+<img src="myimage.jpg" data-extra="extra-value">`);
+        });
+
+        it("Object (resolve parameter commands)", function () {
+          var helper = new capturer.CaptureHelperHandler();
+
+          var doc = makeTestDoc();
+          var command = ["attr", ["if", true, {css: "img"}], ["if", true, {
+            "src": "myimage.jpg",
+            "data-src": null,
+            "data-extra": "extra-value",
+          }]];
+          assertEqual(helper.runCommand(command, doc), undefined);
+          assertEqual(doc.body.innerHTML.trim(), `\
+<img src="myimage.jpg" data-extra="extra-value">
+<img src="myimage.jpg" data-extra="extra-value">`);
+
+          var doc = makeTestDoc();
+          var command = ["attr", {css: "img"}, {
+            "src": ["get_attr", null, "data-src"],
+            "data-src": ["if", true, null],
+            "data-extra": ["concat", "extra-value"],
+          }];
+          assertEqual(helper.runCommand(command, doc), undefined);
+          assertEqual(doc.body.innerHTML.trim(), `\
+<img src="image1.jpg" data-extra="extra-value">
+<img src="image2.jpg" data-extra="extra-value">`);
+        });
+
+        it("Array", function () {
+          var helper = new capturer.CaptureHelperHandler();
+
+          var doc = makeTestDoc();
+          var command = ["attr", {css: "img"}, [
+            ["src", "myimage.jpg"],
+            ["data-src", null],
+            ["data-extra", "extra-value"],
+          ]];
+          assertEqual(helper.runCommand(command, doc), undefined);
+          assertEqual(doc.body.innerHTML.trim(), `\
+<img src="myimage.jpg" data-extra="extra-value">
+<img src="myimage.jpg" data-extra="extra-value">`);
+        });
+
+        it("Array (resolve parameter commands)", function () {
+          var helper = new capturer.CaptureHelperHandler();
+
+          var doc = makeTestDoc();
+          var command = ["attr", ["if", true, {css: "img"}], ["if", true, [
+            ["src", "myimage.jpg"],
+            ["data-src", null],
+            ["data-extra", "extra-value"],
+          ]]];
+          assertEqual(helper.runCommand(command, doc), undefined);
+          assertEqual(doc.body.innerHTML.trim(), `\
+<img src="myimage.jpg" data-extra="extra-value">
+<img src="myimage.jpg" data-extra="extra-value">`);
+
+          var doc = makeTestDoc();
+          var command = ["attr", {css: "img"}, [
+            [["concat", "src"], ["get_attr", null, "data-src"]],
+            [["concat", "data-src"], ["if", true, null]],
+            [["concat", "data-extra"], ["concat", "extra-value"]],
+          ]];
+          assertEqual(helper.runCommand(command, doc), undefined);
+          assertEqual(doc.body.innerHTML.trim(), `\
+<img src="image1.jpg" data-extra="extra-value">
+<img src="image2.jpg" data-extra="extra-value">`);
+        });
+
+      });
+
+      describe("cmd_css", function () {
+        function makeTestDoc() {
+          return makeHtmlDocument(`\
+<div style="color: green;"></div>
+<div style="color: yellow;"></div>`);
+        }
+
+        it("name, value", function () {
+          var helper = new capturer.CaptureHelperHandler();
+
+          var doc = makeTestDoc();
+          var command = ["css", {css: "div"}, "color", "red"];
+          assertEqual(helper.runCommand(command, doc), undefined);
+          assertEqual(doc.body.innerHTML.trim(), `\
+<div style="color: red;"></div>
+<div style="color: red;"></div>`);
+
+          var doc = makeTestDoc();
+          var command = ["css", {css: "div"}, "display", "inline"];
+          assertEqual(helper.runCommand(command, doc), undefined);
+          assertEqual(doc.body.innerHTML.trim(), `\
+<div style="color: green; display: inline;"></div>
+<div style="color: yellow; display: inline;"></div>`);
+        });
+
+        it("name, value (null)", function () {
+          var helper = new capturer.CaptureHelperHandler();
+
+          var doc = makeTestDoc();
+          var command = ["css", {css: "div"}, "color", null];
+          assertEqual(helper.runCommand(command, doc), undefined);
+          assertEqual(doc.body.innerHTML.trim(), `\
+<div style=""></div>
+<div style=""></div>`);
+        });
+
+        it("name, value, priority", function () {
+          var helper = new capturer.CaptureHelperHandler();
+
+          var doc = makeTestDoc();
+          var command = ["css", {css: "div"}, "color", "red", "important"];
+          assertEqual(helper.runCommand(command, doc), undefined);
+          assertEqual(doc.body.innerHTML.trim(), `\
+<div style="color: red !important;"></div>
+<div style="color: red !important;"></div>`);
+        });
+
+        it("name, value, priority (resolve parameter commands)", function () {
+          var helper = new capturer.CaptureHelperHandler();
+
+          var doc = makeTestDoc();
+          var command = ["css", ["if", true, {css: "div"}], ["concat", "color"], ["get_css", null, "color"], ["concat", "important"]];
+          assertEqual(helper.runCommand(command, doc), undefined);
+          assertEqual(doc.body.innerHTML.trim(), `\
+<div style="color: green !important;"></div>
+<div style="color: yellow !important;"></div>`);
+        });
+
+        it("Object", function () {
+          var helper = new capturer.CaptureHelperHandler();
+
+          var doc = makeTestDoc();
+          var command = ["css", {css: "div"}, {
+            "color": null,
+            "display": "inline",
+          }];
+          assertEqual(helper.runCommand(command, doc), undefined);
+          assertEqual(doc.body.innerHTML.trim(), `\
+<div style="display: inline;"></div>
+<div style="display: inline;"></div>`);
+        });
+
+        it("Object (resolve parameter commands)", function () {
+          var helper = new capturer.CaptureHelperHandler();
+
+          var doc = makeTestDoc();
+          var command = ["css", ["if", true, {css: "div"}], ["if", true, {
+            "color": null,
+            "display": "inline",
+          }]];
+          assertEqual(helper.runCommand(command, doc), undefined);
+          assertEqual(doc.body.innerHTML.trim(), `\
+<div style="display: inline;"></div>
+<div style="display: inline;"></div>`);
+
+          var doc = makeTestDoc();
+          var command = ["css", {css: "div"}, {
+            "background-color": ["get_css", null, "color"],
+            "color": ["if", true, null],
+          }];
+          assertEqual(helper.runCommand(command, doc), undefined);
+          assertEqual(doc.body.innerHTML.trim(), `\
+<div style="background-color: green;"></div>
+<div style="background-color: yellow;"></div>`);
+        });
+
+        it("Array", function () {
+          var helper = new capturer.CaptureHelperHandler();
+
+          var doc = makeTestDoc();
+          var command = ["css", {css: "div"}, [
+            ["color", null],
+            ["display", "inline"],
+            ["font-family", "monospace", "important"],
+          ]];
+          assertEqual(helper.runCommand(command, doc), undefined);
+          assertEqual(doc.body.innerHTML.trim(), `\
+<div style="display: inline; font-family: monospace !important;"></div>
+<div style="display: inline; font-family: monospace !important;"></div>`);
+        });
+
+        it("Array (resolve parameter commands)", function () {
+          var helper = new capturer.CaptureHelperHandler();
+
+          var doc = makeTestDoc();
+          var command = ["css", ["if", true, {css: "div"}], ["if", true, [
+            ["color", null],
+            ["display", "inline"],
+            ["font-family", "monospace", "important"],
+          ]]];
+          assertEqual(helper.runCommand(command, doc), undefined);
+          assertEqual(doc.body.innerHTML.trim(), `\
+<div style="display: inline; font-family: monospace !important;"></div>
+<div style="display: inline; font-family: monospace !important;"></div>`);
+
+          var doc = makeTestDoc();
+          var command = ["css", {css: "div"}, [
+            [["concat", "background-color"], ["get_css", null, "color"], ["concat", "important"]],
+            [["concat", "color"], ["if", true, null]],
+          ]];
+          assertEqual(helper.runCommand(command, doc), undefined);
+          assertEqual(doc.body.innerHTML.trim(), `\
+<div style="background-color: green !important;"></div>
+<div style="background-color: yellow !important;"></div>`);
+        });
+
+      });
+
+      describe("cmd_insert", function () {
+        function makeTestDoc() {
+          return makeHtmlDocument(`\
+<div class="target"><div id="child-1"></div><div id="child-2"></div><div id="child-3"></div></div>
+<div class="target"><div id="child-1"></div><div id="child-2"></div><div id="child-3"></div></div>`);
+        }
+
+        function makeTestDocSimple() {
+          return makeHtmlDocument(`<div></div>`);
+        }
+
+        it("mode = before", function () {
+          var helper = new capturer.CaptureHelperHandler();
+
+          var doc = makeTestDoc();
+          var command = ["insert", {"css": ".target"}, "insertedText", "before"];
+          assertEqual(helper.runCommand(command, doc), undefined);
+          assertEqual(doc.body.innerHTML.trim(), `\
+insertedText<div class="target"><div id="child-1"></div><div id="child-2"></div><div id="child-3"></div></div>
+insertedText<div class="target"><div id="child-1"></div><div id="child-2"></div><div id="child-3"></div></div>`);
+        });
+
+        it("mode = after", function () {
+          var helper = new capturer.CaptureHelperHandler();
+
+          var doc = makeTestDoc();
+          var command = ["insert", {"css": ".target"}, "insertedText", "after"];
+          assertEqual(helper.runCommand(command, doc), undefined);
+          assertEqual(doc.body.innerHTML.trim(), `\
+<div class="target"><div id="child-1"></div><div id="child-2"></div><div id="child-3"></div></div>insertedText
+<div class="target"><div id="child-1"></div><div id="child-2"></div><div id="child-3"></div></div>insertedText`);
+        });
+
+        it("mode = insert", function () {
+          var helper = new capturer.CaptureHelperHandler();
+
+          var doc = makeTestDoc();
+          var command = ["insert", {"css": ".target"}, "insertedText", "insert", 0];
+          assertEqual(helper.runCommand(command, doc), undefined);
+          assertEqual(doc.body.innerHTML.trim(), `\
+<div class="target">insertedText<div id="child-1"></div><div id="child-2"></div><div id="child-3"></div></div>
+<div class="target">insertedText<div id="child-1"></div><div id="child-2"></div><div id="child-3"></div></div>`);
+
+          var doc = makeTestDoc();
+          var command = ["insert", {"css": ".target"}, "insertedText", "insert", 1];
+          assertEqual(helper.runCommand(command, doc), undefined);
+          assertEqual(doc.body.innerHTML.trim(), `\
+<div class="target"><div id="child-1"></div>insertedText<div id="child-2"></div><div id="child-3"></div></div>
+<div class="target"><div id="child-1"></div>insertedText<div id="child-2"></div><div id="child-3"></div></div>`);
+
+          var doc = makeTestDoc();
+          var command = ["insert", {"css": ".target"}, "insertedText", "insert", 100];
+          assertEqual(helper.runCommand(command, doc), undefined);
+          assertEqual(doc.body.innerHTML.trim(), `\
+<div class="target"><div id="child-1"></div><div id="child-2"></div><div id="child-3"></div>insertedText</div>
+<div class="target"><div id="child-1"></div><div id="child-2"></div><div id="child-3"></div>insertedText</div>`);
+
+          var doc = makeTestDoc();
+          var command = ["insert", {"css": ".target"}, "insertedText", "insert"];
+          assertEqual(helper.runCommand(command, doc), undefined);
+          assertEqual(doc.body.innerHTML.trim(), `\
+<div class="target"><div id="child-1"></div><div id="child-2"></div><div id="child-3"></div>insertedText</div>
+<div class="target"><div id="child-1"></div><div id="child-2"></div><div id="child-3"></div>insertedText</div>`);
+        });
+
+        it("mode = append", function () {
+          var helper = new capturer.CaptureHelperHandler();
+
+          var doc = makeTestDoc();
+          var command = ["insert", {"css": ".target"}, "insertedText", "append"];
+          assertEqual(helper.runCommand(command, doc), undefined);
+          assertEqual(doc.body.innerHTML.trim(), `\
+<div class="target"><div id="child-1"></div><div id="child-2"></div><div id="child-3"></div>insertedText</div>
+<div class="target"><div id="child-1"></div><div id="child-2"></div><div id="child-3"></div>insertedText</div>`);
+        });
+
+        it("mode missing or unknown (append by default)", function () {
+          var helper = new capturer.CaptureHelperHandler();
+
+          var doc = makeTestDoc();
+          var command = ["insert", {"css": ".target"}, "insertedText"];
+          assertEqual(helper.runCommand(command, doc), undefined);
+          assertEqual(doc.body.innerHTML.trim(), `\
+<div class="target"><div id="child-1"></div><div id="child-2"></div><div id="child-3"></div>insertedText</div>
+<div class="target"><div id="child-1"></div><div id="child-2"></div><div id="child-3"></div>insertedText</div>`);
+
+          var doc = makeTestDoc();
+          var command = ["insert", {"css": ".target"}, "insertedText", "!unknown"];
+          assertEqual(helper.runCommand(command, doc), undefined);
+          assertEqual(doc.body.innerHTML.trim(), `\
+<div class="target"><div id="child-1"></div><div id="child-2"></div><div id="child-3"></div>insertedText</div>
+<div class="target"><div id="child-1"></div><div id="child-2"></div><div id="child-3"></div>insertedText</div>`);
+        });
+
+        it("nodeData as Object", function () {
+          var helper = new capturer.CaptureHelperHandler();
+
+          var doc = makeTestDoc();
+          var command = ["insert", {"css": ".target"}, {
+            "name": "b",
+            "attrs": [["data-attr1", "value1"], ["data-attr2", "value2"]],
+            "children": [
+              "text",
+              {
+                "name": "i",
+                "attrs": {
+                  "data-a1": "v1",
+                },
+                "value": "elem-child",
+              },
+              {
+                "name": "u",
+                "attrs": {
+                  "data-a1": "v1",
+                },
+                "value": "elem-child",
+                "children": ["elem-child-child"],
+              },
+              {
+                "name": "#comment",
+                "value": "comment-child",
+              },
+              {
+                "name": "#text",
+                "value": "text-child",
+              },
+            ],
+          }];
+          assertEqual(helper.runCommand(command, doc), undefined);
+          assertEqual(doc.body.innerHTML.trim(), `\
+<div class="target"><div id="child-1"></div><div id="child-2"></div><div id="child-3"></div>\
+<b data-attr1="value1" data-attr2="value2">text<i data-a1="v1">elem-child</i><u data-a1="v1">elem-child</u><!--comment-child-->text-child</b>\
+</div>
+<div class="target"><div id="child-1"></div><div id="child-2"></div><div id="child-3"></div>\
+<b data-attr1="value1" data-attr2="value2">text<i data-a1="v1">elem-child</i><u data-a1="v1">elem-child</u><!--comment-child-->text-child</b>\
+</div>`);
+        });
+
+        it("resolve parameter commands", function () {
+          var helper = new capturer.CaptureHelperHandler();
+
+          var doc = makeTestDoc();
+          var command = ["insert", ["if", true, {"css": ".target"}], ["if", true, "insertedText"], ["concat", "insert"], ["if", true, 1]];
+          assertEqual(helper.runCommand(command, doc), undefined);
+          assertEqual(doc.body.innerHTML.trim(), `\
+<div class="target"><div id="child-1"></div>insertedText<div id="child-2"></div><div id="child-3"></div></div>
+<div class="target"><div id="child-1"></div>insertedText<div id="child-2"></div><div id="child-3"></div></div>`);
+
+          var doc = makeTestDocSimple();
+          var command = ["insert", {"css": "div"}, {
+            "name": ["concat", "#text"],
+            "value": ["concat", "myvalue"],
+          }];
+          assertEqual(helper.runCommand(command, doc), undefined);
+          assertEqual(doc.body.innerHTML.trim(), `<div>myvalue</div>`);
+
+          var doc = makeTestDocSimple();
+          var command = ["insert", {"css": "div"}, {
+            "name": ["concat", "#comment"],
+            "value": ["concat", "myvalue"],
+          }];
+          assertEqual(helper.runCommand(command, doc), undefined);
+          assertEqual(doc.body.innerHTML.trim(), `<div><!--myvalue--></div>`);
+
+          var doc = makeTestDocSimple();
+          var command = ["insert", {"css": "div"}, {
+            "name": ["concat", "b"],
+            "value": ["concat", "myvalue"],
+            "attrs": [[["concat", "id"], ["concat", "myid"]], [["concat", "class"], ["concat", "myclass"]]],
+          }];
+          assertEqual(helper.runCommand(command, doc), undefined);
+          assertEqual(doc.body.innerHTML.trim(), `<div><b id="myid" class="myclass">myvalue</b></div>`);
+
+          var doc = makeTestDocSimple();
+          var command = ["insert", {"css": "div"}, {
+            "name": ["concat", "b"],
+            "attrs": {
+              "id": ["concat", "myid"],
+              "class": ["concat", "myclass"],
+            },
+            "children": [
+              ["concat", "first"],
+              {
+                "name": ["concat", "a"],
+                "value": ["concat", "myvalue"],
+                "attrs": {
+                  "href": ["concat", "mylink"],
+                },
+              },
+              ["concat", "last"],
+            ],
+          }];
+          assertEqual(helper.runCommand(command, doc), undefined);
+          assertEqual(doc.body.innerHTML.trim(), `<div><b id="myid" class="myclass">first<a href="mylink">myvalue</a>last</b></div>`);
+        });
+
+      });
+
+      describe("cmd_options", function () {
+
+        it("name, value", function () {
+          var doc = makeTestDoc();
+
+          var helper = new capturer.CaptureHelperHandler();
+          var command = ["options", "capture.rewriteCss", "match"];
+          assertEqual(helper.runCommand(command, doc), undefined);
+          assertEqual(helper.options, {
+            "capture.rewriteCss": "match",
+          });
+        });
+
+        it("name, value (resolve parameter commands)", function () {
+          var doc = makeTestDoc();
+
+          var helper = new capturer.CaptureHelperHandler();
+          var command = ["options", ["concat", "capture.rewriteCss"], ["concat", "match"]];
+          assertEqual(helper.runCommand(command, doc), undefined);
+          assertEqual(helper.options, {
+            "capture.rewriteCss": "match",
+          });
+        });
+
+        it("Object", function () {
+          var doc = makeTestDoc();
+
+          var helper = new capturer.CaptureHelperHandler();
+          var command = ["options", {
+            "capture.style": "save",
+            "capture.rewriteCss": "match",
+          }];
+          assertEqual(helper.runCommand(command, doc), undefined);
+          assertEqual(helper.options, {
+            "capture.style": "save",
+            "capture.rewriteCss": "match",
+          });
+        });
+
+        it("Object (resolve parameter commands)", function () {
+          var doc = makeTestDoc();
+
+          var helper = new capturer.CaptureHelperHandler();
+          var command = ["options", ["if", true, {
+            "capture.style": "save",
+            "capture.rewriteCss": "match",
+          }]];
+          assertEqual(helper.runCommand(command, doc), undefined);
+          assertEqual(helper.options, {
+            "capture.style": "save",
+            "capture.rewriteCss": "match",
+          });
+
+          var helper = new capturer.CaptureHelperHandler();
+          var command = ["options", {
+            "capture.style": ["concat", "save"],
+            "capture.rewriteCss": ["concat", "match"],
+          }];
+          assertEqual(helper.runCommand(command, doc), undefined);
+          assertEqual(helper.options, {
+            "capture.style": "save",
+            "capture.rewriteCss": "match",
+          });
+        });
+
+        it("Array", function () {
+          var doc = makeTestDoc();
+
+          var helper = new capturer.CaptureHelperHandler();
+          var command = ["options", [
+            ["capture.style", "save"],
+            ["capture.rewriteCss", "match"],
+          ]];
+          assertEqual(helper.runCommand(command, doc), undefined);
+          assertEqual(helper.options, {
+            "capture.style": "save",
+            "capture.rewriteCss": "match",
+          });
+        });
+
+        it("Array (resolve parameter commands)", function () {
+          var doc = makeTestDoc();
+
+          var helper = new capturer.CaptureHelperHandler();
+          var command = ["options", ["if", true, [
+            ["capture.style", "save"],
+            ["capture.rewriteCss", "match"],
+          ]]];
+          assertEqual(helper.runCommand(command, doc), undefined);
+          assertEqual(helper.options, {
+            "capture.style": "save",
+            "capture.rewriteCss": "match",
+          });
+
+          var helper = new capturer.CaptureHelperHandler();
+          var command = ["options", [
+            [["concat", "capture.style"], ["concat", "save"]],
+            [["concat", "capture.rewriteCss"], ["concat", "match"]],
+          ]];
+          assertEqual(helper.runCommand(command, doc), undefined);
+          assertEqual(helper.options, {
+            "capture.style": "save",
+            "capture.rewriteCss": "match",
+          });
+        });
+
+      });
+
+    });
+
+    describe("capturer.CaptureHelperHandler.run", function () {
+
+      it("skip helpers with disabled property", function () {
+        var doc = makeHtmlDocument(`\
+<div class="exclude1"></div>
+<div class="exclude2"></div>
+<div class="exclude3"></div>`);
+        var helpers = [
+          {
+            commands: [
+              ["remove", ".exclude1"],
+            ],
+          },
+          {
+            disabled: true,
+            commands: [
+              ["remove", ".exclude2"],
+            ],
+          },
+          {
+            commands: [
+              ["remove", ".exclude3"],
+            ],
+          },
+        ];
+        var helper = new capturer.CaptureHelperHandler({
+          helpers,
+          rootNode: doc,
+        });
+        var result = helper.run();
+        assertEqual(doc.body.innerHTML.trim(), `<div class="exclude2"></div>`);
+      });
+
+      it("skip helpers whose pattern does not match document URL", function () {
+        var doc = makeHtmlDocument(`\
+<div class="exclude1"></div>
+<div class="exclude2"></div>
+<div class="exclude3"></div>`);
+        var helpers = [
+          {
+            commands: [
+              ["remove", ".exclude1"],
+            ],
+          },
+          {
+            pattern: /^$/,
+            commands: [
+              ["remove", ".exclude2"],
+            ],
+          },
+          {
+            pattern: new RegExp(`^http://example\.com`),
+            commands: [
+              ["remove", ".exclude3"],
+            ],
+          },
+        ];
+        var helper = new capturer.CaptureHelperHandler({
+          helpers,
+          rootNode: doc,
+          docUrl: 'http://example.com',
+        });
+        var result = helper.run();
+        assertEqual(doc.body.innerHTML.trim(), `<div class="exclude2"></div>`);
+      });
+
+    });
+
+  });
+
 });
 
 }));

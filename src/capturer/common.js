@@ -5584,7 +5584,7 @@
    * A class that handles capture helpers.
    */
   class CaptureHelperHandler {
-    constructor({helpers, rootNode, docUrl, origNodeMap}) {
+    constructor({helpers, rootNode, docUrl, origNodeMap} = {}) {
       this.helpers = helpers;
       this.rootNode = rootNode;
       this.docUrl = docUrl;
@@ -5656,19 +5656,32 @@
       };
     }
 
-    parseRegexStr(str) {
+    static parseRegexStr(str) {
       const REGEX_PATTERN = /^\/(.*)\/([a-z]*)$/i;
-      const parseRegexStr = this.parseRegexStr = (str) => {
+      const fn = (str) => {
         const m = REGEX_PATTERN.exec(str);
         if (m) {
           return new RegExp(m[1], m[2]);
         }
         return null;
       };
-      return parseRegexStr(str);
+      Object.defineProperty(CaptureHelperHandler, 'parseRegexStr', {value: fn});
+      return fn(str);
     }
 
-    selectNodes(rootNode, selector) {
+    parseRegexStr(...args) {
+      return this.constructor.parseRegexStr.apply(this, args);
+    }
+
+    static getOwnerDocument(node) {
+      return node.nodeType === 9 ? node : node.ownerDocument;
+    }
+
+    getOwnerDocument(...args) {
+      return this.constructor.getOwnerDocument.apply(this, args);
+    }
+
+    static selectNodes(rootNode, selector) {
       if (!selector) {
         return [rootNode];
       }
@@ -5696,7 +5709,8 @@
         return rootNode.querySelectorAll(selector.css);
       }
       if (typeof selector.xpath === 'string') {
-        const iter = rootNode.ownerDocument.evaluate(selector.xpath, rootNode, null, 0, null);
+        const doc = this.getOwnerDocument(rootNode);
+        const iter = doc.evaluate(selector.xpath, rootNode, null, 0, null);
         let elems = [], elem;
         while (elem = iter.iterateNext()) {
           elems.push(elem);
@@ -5706,11 +5720,19 @@
       return [];
     }
 
-    isCommand(obj) {
+    selectNodes(...args) {
+      return this.constructor.selectNodes.apply(this, args);
+    }
+
+    static isCommand(obj) {
       if (Array.isArray(obj) && typeof obj[0] === 'string') {
         return true;
       }
       return false;
+    }
+
+    isCommand(...args) {
+      return this.constructor.isCommand.apply(this, args);
     }
 
     runCommand(command, rootNode) {
@@ -5742,6 +5764,8 @@
     }
 
     resolveNodeData(obj, rootNode) {
+      const doc = this.getOwnerDocument(rootNode);
+
       let nodeData = this.resolve(obj, rootNode);
       if (typeof nodeData === 'string') {
         nodeData = {
@@ -5754,13 +5778,13 @@
       const tag = this.resolve(name, rootNode) || "#text";
       switch (tag) {
         case "#text": {
-          return rootNode.ownerDocument.createTextNode(this.resolve(value, rootNode) || "");
+          return doc.createTextNode(this.resolve(value, rootNode) || "");
         }
         case "#comment": {
-          return rootNode.ownerDocument.createComment(this.resolve(value, rootNode) || "");
+          return doc.createComment(this.resolve(value, rootNode) || "");
         }
         default: {
-          const newElem = rootNode.ownerDocument.createElement(tag);
+          const newElem = doc.createElement(tag);
           if (Array.isArray(attrs)) {
             for (const [key, value] of attrs) {
               newElem.setAttribute(this.resolve(key, rootNode), this.resolve(value, rootNode));
@@ -5999,7 +6023,7 @@
     }
 
     cmd_isolate(rootNode, selector) {
-      const doc = rootNode.ownerDocument;
+      const doc = this.getOwnerDocument(rootNode);
 
       // get a set of nodes to preserve
       const toPreserve = new Set();
