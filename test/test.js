@@ -29,7 +29,7 @@
 
 'use strict';
 
-const {byteStringToArrayBuffer} = unittest;
+const {byteStringToArrayBuffer, escapeRegExp} = unittest;
 const {userAgent, delay, xhr, readFileAsDocument} = utils;
 
 
