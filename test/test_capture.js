@@ -2300,7 +2300,7 @@ it('test_capture_headless_metaRefresh', async function () {
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
   assert(doc.querySelector('meta[http-equiv]').getAttribute('content') === `1; url=${localhost}/capture_headless_metaRefresh/referred.html`);
-  
+
   /* invalid */
   // don't rewrite element, capture the original page.
   var blob = await captureHeadless({
@@ -2311,7 +2311,7 @@ it('test_capture_headless_metaRefresh', async function () {
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
-  assert(doc.querySelector('meta[http-equiv]').getAttribute('content') === "+1 referred.html");  
+  assert(doc.querySelector('meta[http-equiv]').getAttribute('content') === "+1 referred.html");
 });
 
 /**
