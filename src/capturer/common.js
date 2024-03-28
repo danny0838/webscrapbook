@@ -5784,7 +5784,7 @@
           return doc.createTextNode(value || "");
         }
         case "#comment": {
-          return doc.createComment(value || "");
+          return doc.createComment(scrapbook.escapeHtmlComment(value || ""));
         }
         default: {
           const newElem = doc.createElement(tag);

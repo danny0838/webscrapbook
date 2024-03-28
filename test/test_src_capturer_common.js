@@ -2665,7 +2665,7 @@ insertedText<div class="target"><div id="child-1"></div><div id="child-2"></div>
               },
               {
                 "name": "#comment",
-                "value": "comment-child",
+                "value": "safe <-- comment --> text",
               },
               {
                 "name": "#text",
@@ -2676,10 +2676,10 @@ insertedText<div class="target"><div id="child-1"></div><div id="child-2"></div>
           assertEqual(helper.runCommand(command, doc), undefined);
           assertEqual(doc.body.innerHTML.trim(), `\
 <div class="target"><div id="child-1"></div><div id="child-2"></div><div id="child-3"></div>\
-<b data-attr1="value1" data-attr2="value2">text<i data-a1="v1">elem-child</i><u data-a1="v1">elem-child</u><!--comment-child-->text-child</b>\
+<b data-attr1="value1" data-attr2="value2">text<i data-a1="v1">elem-child</i><u data-a1="v1">elem-child</u><!--safe <-\u200B- comment -\u200B-> text-->text-child</b>\
 </div>
 <div class="target"><div id="child-1"></div><div id="child-2"></div><div id="child-3"></div>\
-<b data-attr1="value1" data-attr2="value2">text<i data-a1="v1">elem-child</i><u data-a1="v1">elem-child</u><!--comment-child-->text-child</b>\
+<b data-attr1="value1" data-attr2="value2">text<i data-a1="v1">elem-child</i><u data-a1="v1">elem-child</u><!--safe <-\u200B- comment -\u200B-> text-->text-child</b>\
 </div>`);
         });
 
