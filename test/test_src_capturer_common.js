@@ -1899,6 +1899,20 @@ class { }`);
           assertEqual(helper.runCommand(command, doc), null);
         });
 
+        it("named capture group", function () {
+          var helper = new capturer.CaptureHelperHandler();
+          var doc = makeTestDoc();
+
+          var command = ["match", "text", "/(?<g>te)xt/", "g"];
+          assertEqual(helper.runCommand(command, doc), "te");
+
+          var command = ["match", "text", "/(?<g>te)xt/", "nonexist"];
+          assertEqual(helper.runCommand(command, doc), undefined);
+
+          var command = ["match", "text", "/(?<g>te)xt123/", "g"];
+          assertEqual(helper.runCommand(command, doc), null);
+        });
+
         it("resolve parameter commands", function () {
           var helper = new capturer.CaptureHelperHandler();
           var doc = makeTestDoc();

@@ -5946,16 +5946,22 @@
       }
     }
 
-    cmd_match(rootNode, str, pattern, index) {
+    cmd_match(rootNode, str, pattern, group) {
       str = String(this.resolve(str, rootNode) || "");
       pattern = this.parseRegexStr(this.resolve(pattern, rootNode));
-      index = this.resolve(index, rootNode);
-      if (Number.isInteger(index)) {
-        // subgroup mode
+      group = this.resolve(group, rootNode);
+      if (Number.isInteger(group)) {
+        // subgroup index
         if (!pattern) { return null; }
         const m = str.match(pattern);
         if (!m) { return null; }
-        return m[index];
+        return m[group];
+      } else if (typeof group === 'string') {
+        // subgroup name
+        if (!pattern) { return null; }
+        const m = str.match(pattern);
+        if (!m) { return null; }
+        return m.groups[group];
       } else {
         // boolean mode
         if (!pattern) { return false; }
