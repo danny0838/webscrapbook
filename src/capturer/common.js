@@ -5821,6 +5821,16 @@
       return this.resolve(elseValue, rootNode);
     }
 
+    cmd_equal(rootNode, value1, value2, strict) {
+      value1 = this.resolve(value1, rootNode);
+      value2 = this.resolve(value2, rootNode);
+      strict = this.resolve(strict, rootNode);
+      if (strict) {
+        return value1 === value2;
+      }
+      return value1 == value2;
+    }
+
     cmd_and(rootNode, ...args) {
       let value;
       for (const arg of args) {

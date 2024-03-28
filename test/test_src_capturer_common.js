@@ -1444,6 +1444,46 @@ class { }`);
 
       });
 
+      describe("cmd_equal", function () {
+
+        it("equality", function () {
+          var helper = new capturer.CaptureHelperHandler();
+          var doc = makeTestDoc();
+
+          var command = ["equal", "foo", "foo"];
+          assertEqual(helper.runCommand(command, doc), true);
+
+          var command = ["equal", "foo", "bar"];
+          assertEqual(helper.runCommand(command, doc), false);
+
+          var command = ["equal", "100", 100];
+          assertEqual(helper.runCommand(command, doc), true);
+        });
+
+        it("strict equality", function () {
+          var helper = new capturer.CaptureHelperHandler();
+          var doc = makeTestDoc();
+
+          var command = ["equal", "foo", "foo", true];
+          assertEqual(helper.runCommand(command, doc), true);
+
+          var command = ["equal", "foo", "bar", true];
+          assertEqual(helper.runCommand(command, doc), false);
+
+          var command = ["equal", "100", 100, true];
+          assertEqual(helper.runCommand(command, doc), false);
+        });
+
+        it("resolve parameter commands", function () {
+          var helper = new capturer.CaptureHelperHandler();
+          var doc = makeTestDoc();
+
+          var command = ["equal", ["concat", "100"], ["if", true, 100], ["if", true, true]];
+          assertEqual(helper.runCommand(command, doc), false);
+        });
+
+      });
+
       describe("cmd_and", function () {
 
         it("return first falsy or last value", function () {
