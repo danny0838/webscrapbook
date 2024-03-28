@@ -6045,7 +6045,7 @@
       const toPreserve = new Set();
       const elems = this.selectNodes(rootNode, this.resolve(selector, rootNode));
       for (const elem of elems) {
-        const xResult = doc.evaluate('ancestor-or-self::node() | descendant-or-self::node()', elem, null, XPathResult.ANY_TYPE);
+        const xResult = doc.evaluate('ancestor-or-self::node() | descendant::node()', elem, null, XPathResult.ANY_TYPE);
         let node;
         while (node = xResult.iterateNext()) {
           toPreserve.add(node);
