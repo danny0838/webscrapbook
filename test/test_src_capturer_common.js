@@ -1288,29 +1288,137 @@ class { }`);
           assertEqual(doc.body.innerHTML.trim(), ``);
         });
 
+        describe(".base", function () {
+
+          it("self", function () {
+            var doc = makeTestDoc();
+            var selector = "self";
+            var refNode = doc.querySelector('#target');
+            var result = capturer.CaptureHelperHandler.selectNodes(refNode, selector);
+            assertEqual(result.length, 1);
+            assert(result[0] === refNode);
+          });
+
+          it("root", function () {
+            var doc = makeTestDoc();
+            var selector = "root";
+            var refNode = doc.querySelector('#target');
+            var result = capturer.CaptureHelperHandler.selectNodes(refNode, selector);
+            assertEqual(result.length, 1);
+            assert(result[0] === doc);
+          });
+
+          it("parent", function () {
+            var doc = makeTestDoc();
+            var selector = {base: "parent"};
+            var refNode = doc.querySelector('#target');
+            var result = capturer.CaptureHelperHandler.selectNodes(refNode, selector);
+            assertEqual(result.length, 1);
+            assert(result[0] === refNode.parentNode);
+          });
+
+          it("previousSibling", function () {
+            var doc = makeTestDoc();
+            var selector = {base: "previousSibling"};
+            var refNode = doc.querySelector('#target');
+            var result = capturer.CaptureHelperHandler.selectNodes(refNode, selector);
+            assertEqual(result.length, 1);
+            assert(result[0] === refNode.previousSibling);
+          });
+
+          it("nextSibling", function () {
+            var doc = makeTestDoc();
+            var selector = {base: "nextSibling"};
+            var refNode = doc.querySelector('#target');
+            var result = capturer.CaptureHelperHandler.selectNodes(refNode, selector);
+            assertEqual(result.length, 1);
+            assert(result[0] === refNode.nextSibling);
+          });
+
+          it("firstChild", function () {
+            var doc = makeTestDoc();
+            var selector = {base: "firstChild"};
+            var refNode = doc.querySelector('#target');
+            var result = capturer.CaptureHelperHandler.selectNodes(refNode, selector);
+            assertEqual(result.length, 1);
+            assert(result[0] === refNode.firstChild);
+          });
+
+          it("lastChild", function () {
+            var doc = makeTestDoc();
+            var selector = {base: "lastChild"};
+            var refNode = doc.querySelector('#target');
+            var result = capturer.CaptureHelperHandler.selectNodes(refNode, selector);
+            assertEqual(result.length, 1);
+            assert(result[0] === refNode.lastChild);
+          });
+
+          it("previousElementSibling", function () {
+            var doc = makeTestDoc();
+            var selector = {base: "previousElementSibling"};
+            var refNode = doc.querySelector('#target');
+            var result = capturer.CaptureHelperHandler.selectNodes(refNode, selector);
+            assertEqual(result.length, 1);
+            assert(result[0] === refNode.previousElementSibling);
+          });
+
+          it("nextElementSibling", function () {
+            var doc = makeTestDoc();
+            var selector = {base: "nextElementSibling"};
+            var refNode = doc.querySelector('#target');
+            var result = capturer.CaptureHelperHandler.selectNodes(refNode, selector);
+            assertEqual(result.length, 1);
+            assert(result[0] === refNode.nextElementSibling);
+          });
+
+          it("firstElementChild", function () {
+            var doc = makeTestDoc();
+            var selector = {base: "firstElementChild"};
+            var refNode = doc.querySelector('#target');
+            var result = capturer.CaptureHelperHandler.selectNodes(refNode, selector);
+            assertEqual(result.length, 1);
+            assert(result[0] === refNode.firstElementChild);
+          });
+
+          it("lastElementChild", function () {
+            var doc = makeTestDoc();
+            var selector = {base: "lastElementChild"};
+            var refNode = doc.querySelector('#target');
+            var result = capturer.CaptureHelperHandler.selectNodes(refNode, selector);
+            assertEqual(result.length, 1);
+            assert(result[0] === refNode.lastElementChild);
+          });
+
+          it('chaining', function () {
+            var doc = makeTestDoc();
+            var selector = {base: "firstChild.nextSibling.nextSibling.nextSibling"};
+            var refNode = doc.querySelector('#target');
+            var result = capturer.CaptureHelperHandler.selectNodes(refNode, selector);
+            assertEqual(result.length, 1);
+            assert(result[0] === refNode.firstChild.nextSibling.nextSibling.nextSibling);
+          });
+
+          it('with selector', function () {
+            var doc = makeTestDoc();
+            var selector = {base: "parent", css: "div"};
+            removeElems(capturer.CaptureHelperHandler.selectNodes(doc.querySelector('#target'), selector));
+            assertEqual(doc.body.innerHTML.trim(), `\
+<div id="parent-prev"></div>
+<div id="parent">
+  
+  
+  
+</div>
+<div id="parent-next"></div>`);
+          });
+
+        });
+
       });
 
       describe("string", function () {
 
-        it("self", function () {
-          var doc = makeTestDoc();
-          var selector = "self";
-          var refNode = doc.querySelector('#target');
-          var result = capturer.CaptureHelperHandler.selectNodes(refNode, selector);
-          assertEqual(result.length, 1);
-          assert(result[0] === refNode);
-        });
-
-        it("root", function () {
-          var doc = makeTestDoc();
-          var selector = "root";
-          var refNode = doc.querySelector('#target');
-          var result = capturer.CaptureHelperHandler.selectNodes(refNode, selector);
-          assertEqual(result.length, 1);
-          assert(result[0] === doc);
-        });
-
-        it("parent", function () {
+        it('"parent" (treated as {"base": "parent"}', function () {
           var doc = makeTestDoc();
           var selector = "parent";
           var refNode = doc.querySelector('#target');
@@ -1319,40 +1427,11 @@ class { }`);
           assert(result[0] === refNode.parentNode);
         });
 
-        it("previousSibling", function () {
+        it('"div" (treated as {"css": "div"}', function () {
           var doc = makeTestDoc();
-          var selector = "previousSibling";
-          var refNode = doc.querySelector('#target');
-          var result = capturer.CaptureHelperHandler.selectNodes(refNode, selector);
-          assertEqual(result.length, 1);
-          assert(result[0] === refNode.previousSibling);
-        });
-
-        it("nextSibling", function () {
-          var doc = makeTestDoc();
-          var selector = "nextSibling";
-          var refNode = doc.querySelector('#target');
-          var result = capturer.CaptureHelperHandler.selectNodes(refNode, selector);
-          assertEqual(result.length, 1);
-          assert(result[0] === refNode.nextSibling);
-        });
-
-        it("firstChild", function () {
-          var doc = makeTestDoc();
-          var selector = "firstChild";
-          var refNode = doc.querySelector('#target');
-          var result = capturer.CaptureHelperHandler.selectNodes(refNode, selector);
-          assertEqual(result.length, 1);
-          assert(result[0] === refNode.firstChild);
-        });
-
-        it("lastChild", function () {
-          var doc = makeTestDoc();
-          var selector = "lastChild";
-          var refNode = doc.querySelector('#target');
-          var result = capturer.CaptureHelperHandler.selectNodes(refNode, selector);
-          assertEqual(result.length, 1);
-          assert(result[0] === refNode.lastChild);
+          var selector = "div";
+          removeElems(capturer.CaptureHelperHandler.selectNodes(doc, selector));
+          assertEqual(doc.body.innerHTML.trim(), ``);
         });
 
       });

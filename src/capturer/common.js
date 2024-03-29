@@ -5685,26 +5685,65 @@
       if (!selector) {
         return [rootNode];
       }
-      if (typeof selector === 'string') {
-        switch (selector) {
-          case 'root':
-            return [rootNode.getRootNode()];
-          case 'parent':
-            return [rootNode.parentNode];
-          case 'firstChild':
-            return [rootNode.firstChild];
-          case 'lastChild':
-            return [rootNode.lastChild];
-          case 'previousSibling':
-            return [rootNode.previousSibling];
-          case 'nextSibling':
-            return [rootNode.nextSibling];
-          case 'self':
-            return [rootNode];
-          default:
-            return rootNode.querySelectorAll(selector);
+
+      const isStringSelector = (typeof selector === 'string');
+      if (isStringSelector) {
+        selector = {base: selector};
+      }
+
+      // modify rootNode according to selector.base
+      if (typeof selector.base === 'string') {
+        modifyRootNode: {
+          let newRootNode = rootNode;
+          for (const part of selector.base.split('.')) {
+            switch (scrapbook.trim(part)) {
+              case 'root':
+                newRootNode = newRootNode.getRootNode();
+                break;
+              case 'parent':
+                newRootNode = newRootNode.parentNode;
+                break;
+              case 'firstChild':
+                newRootNode = newRootNode.firstChild;
+                break;
+              case 'lastChild':
+                newRootNode = newRootNode.lastChild;
+                break;
+              case 'firstElementChild':
+                newRootNode = newRootNode.firstElementChild;
+                break;
+              case 'lastElementChild':
+                newRootNode = newRootNode.lastElementChild;
+                break;
+              case 'previousSibling':
+                newRootNode = newRootNode.previousSibling;
+                break;
+              case 'nextSibling':
+                newRootNode = newRootNode.nextSibling;
+                break;
+              case 'previousElementSibling':
+                newRootNode = newRootNode.previousElementSibling;
+                break;
+              case 'nextElementSibling':
+                newRootNode = newRootNode.nextElementSibling;
+                break;
+              case 'self':
+                // do nothing
+                break;
+              default:
+                // invalid base
+                // treat string selector with invalid base as a css selector
+                if (isStringSelector) {
+                  selector = {css: selector.base};
+                }
+                break modifyRootNode;
+            }
+          }
+          rootNode = newRootNode;
         }
       }
+
+      // apply the selector
       if (typeof selector.css === 'string') {
         return rootNode.querySelectorAll(selector.css);
       }
@@ -5717,7 +5756,7 @@
         }
         return elems;
       }
-      return [];
+      return [rootNode];
     }
 
     selectNodes(...args) {
