@@ -5802,10 +5802,9 @@
       return obj;
     }
 
-    resolveNodeData(obj, rootNode) {
+    resolveNodeData(nodeData, rootNode) {
       const doc = this.getOwnerDocument(rootNode);
 
-      let nodeData = this.resolve(obj, rootNode);
       if (typeof nodeData === 'string') {
         nodeData = {
           name: "#text",
@@ -5843,8 +5842,9 @@
           if (value !== null) {
             newElem.textContent = value;
           } else if (children) {
-            for (const childData of children) {
-              newElem.appendChild(this.resolveNodeData(childData, rootNode));
+            for (let childNodeData of children) {
+              childNodeData = this.resolve(childNodeData, rootNode);
+              newElem.appendChild(this.resolveNodeData(childNodeData, rootNode));
             }
           }
 
@@ -6254,9 +6254,22 @@
     }
 
     cmd_insert(rootNode, selector, nodeData, mode, index) {
+      const doc = this.getOwnerDocument(rootNode);
       const elems = this.selectNodes(rootNode, this.resolve(selector, rootNode));
       for (const elem of elems) {
-        const newNode = this.resolveNodeData(nodeData, elem);
+        const _nodeData = this.resolve(nodeData, rootNode);
+        let newNode;
+        if (!_nodeData) {
+          continue;
+        } else if (typeof _nodeData === 'string' || _nodeData.name) {
+          newNode = this.resolveNodeData(_nodeData, elem);
+        } else {
+          newNode = doc.createDocumentFragment();
+          for (const child of this.selectNodes(elem, _nodeData)) {
+            newNode.appendChild(child);
+          }
+        }
+
         switch (this.resolve(mode, elem)) {
           case 'before': {
             elem.parentNode.insertBefore(newNode, elem);

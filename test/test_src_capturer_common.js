@@ -2801,7 +2801,7 @@ insertedText`);
 <div class="target"><div id="child-1"></div><div id="child-2"></div><div id="child-3"></div>insertedText</div>`);
         });
 
-        it("nodeData as Object", function () {
+        it("nodeData as Object (virtual DOM)", function () {
           var helper = new capturer.CaptureHelperHandler();
 
           var doc = makeTestDoc();
@@ -2843,6 +2843,29 @@ insertedText`);
 <div class="target"><div id="child-1"></div><div id="child-2"></div><div id="child-3"></div>\
 <b data-attr1="value1" data-attr2="value2">text<i data-a1="v1">elem-child</i><u data-a1="v1">elem-child</u><!--safe <-\u200B- comment -\u200B-> text-->text-child</b>\
 </div>`);
+        });
+
+        it("nodeData as Object (selector)", function () {
+          var helper = new capturer.CaptureHelperHandler();
+
+          var doc = makeTestDoc();
+          var command = ["insert", {"css": "#child-1"}, {
+            "base": "nextSibling",
+          }];
+          assertEqual(helper.runCommand(command, doc), undefined);
+          assertEqual(doc.body.innerHTML.trim(), `\
+<div class="target"><div id="child-1"><div id="child-2"></div></div><div id="child-3"></div></div>
+<div class="target"><div id="child-1"><div id="child-2"></div></div><div id="child-3"></div></div>`);
+
+          var doc = makeTestDoc();
+          var command = ["insert", {"css": "#child-1"}, {
+            "base": "parent",
+            "css": "div:not(#child-1)",
+          }];
+          assertEqual(helper.runCommand(command, doc), undefined);
+          assertEqual(doc.body.innerHTML.trim(), `\
+<div class="target"><div id="child-1"><div id="child-2"></div><div id="child-3"></div></div></div>
+<div class="target"><div id="child-1"><div id="child-2"></div><div id="child-3"></div></div></div>`);
         });
 
         it("resolve parameter commands", function () {
