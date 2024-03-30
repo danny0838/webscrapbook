@@ -1220,8 +1220,8 @@ class { }`);
         var {source, flags} = capturer.CaptureHelperHandler.parseRegexStr(`/abc/def/`);
         assertEqual({source, flags}, {source: r`abc\/def`, flags: ``});
 
-        var {source, flags} = capturer.CaptureHelperHandler.parseRegexStr(`/abc/def/dimguy`);
-        assertEqual({source, flags}, {source: r`abc\/def`, flags: `dgimuy`});
+        var {source, flags} = capturer.CaptureHelperHandler.parseRegexStr(`/abc/def/imguy`);
+        assertEqual({source, flags}, {source: r`abc\/def`, flags: `gimuy`});
       });
 
       it("return null for an invalid regex string", function () {
@@ -2026,7 +2026,7 @@ class { }`);
           assertEqual(helper.runCommand(command, doc), null);
         });
 
-        it("named capture group", function () {
+        $it.skipIf($.noRegexNamedGroup)("named capture group", function () {
           var helper = new capturer.CaptureHelperHandler();
           var doc = makeTestDoc();
 

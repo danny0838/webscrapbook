@@ -405,6 +405,21 @@
       Object.defineProperty(this, 'noAtLayer', {value});
       return value;
     },
+    get noRegexNamedGroup() {
+      const value = this.noBrowser.condition ? this.noBrowser : new MochaQuery.Query(
+        (() => {
+          try {
+            new RegExp('(?<group>foo)\k<group>');
+          } catch (ex) {
+            return true;
+          }
+          return false;
+        })(),
+        'named capture group of RegExp not supported',
+      );
+      Object.defineProperty(this, 'noRegexNamedGroup', {value});
+      return value;
+    },
   }));
 
   function sha1(data, type) {

@@ -14060,7 +14060,7 @@ it('test_capture_downLink_indepth_invalid', async function () {
   var doc = await readFileAsDocument(indexBlob);
 
   var anchors = doc.querySelectorAll('a');
-  assert(anchors[0].getAttribute('href') === `https://exa%23mple.org`);
+  assert(anchors[0].getAttribute('href') === `https://exa%23mple.org/`);
   assert(anchors[1].getAttribute('href') === `https://#fragment`);
   assert(anchors[2].getAttribute('href') === `https://:443`);
   assert(anchors[3].getAttribute('href') === `https://example.org:70000`);
