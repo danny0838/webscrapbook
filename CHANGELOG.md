@@ -3,6 +3,20 @@
 * Versions before 1.0 are in initial development. APIs are not stable for these versions, even a `y` version can involve a breaking change, and only partial notable changes are summarized in this document. See full commit history in the source repository for details.
 * Backend server requirement in this document refers to the version of [`webscrapbook` Python package](https://github.com/danny0838/pywebscrapbook) (or PyWebScrapBook).
 
+## [2.9.0] - 2024-03-30
+* Fixed and improved capture helpers:
+  * Fixed an issue that many commands do not expand parameters whose value is a command correctly.
+  * A selector can now reset its reference node using `base` property.
+  * Added "equal" command.
+  * "get_html" and "html" commands now support an additional `isOuter` parameter for getting and setting outer HTML.
+  * "match" command now supports getting named capture groups.
+  * "insert" command can now move nodes by specifying a selector as nodeData.
+  * "insert" command now supports "replace" mode.
+  * "insert" command now automatically escapes the content of the generated comment nodes.
+  * "decode_uri" command now returns the original string if the input string is malformed.
+* Improved localization for zh_CN.
+* Improved CSS code for several internal pages.
+
 ## [2.8.2] - 2024-03-13
 * Fixed fatal error when a link with an invalid URL is encountered during an in-depth capture.
 * Fixed bad tidying of a CSS containing a URL with escaped newlines.
