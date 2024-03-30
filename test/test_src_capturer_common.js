@@ -1418,18 +1418,30 @@ class { }`);
 
       describe("string", function () {
 
-        it('"parent" (treated as {"base": "parent"}', function () {
+        it('valid base should be treated as {base: ...}', function () {
           var doc = makeTestDoc();
           var selector = "parent";
           var refNode = doc.querySelector('#target');
           var result = capturer.CaptureHelperHandler.selectNodes(refNode, selector);
           assertEqual(result.length, 1);
           assert(result[0] === refNode.parentNode);
+
+          var doc = makeTestDoc();
+          var selector = "parent.firstChild.nextSibling";
+          var refNode = doc.querySelector('#target');
+          var result = capturer.CaptureHelperHandler.selectNodes(refNode, selector);
+          assertEqual(result.length, 1);
+          assert(result[0] === refNode.parentNode.firstChild.nextSibling);
         });
 
-        it('"div" (treated as {"css": "div"}', function () {
+        it('non-valid base should be treated as {css: ...}', function () {
           var doc = makeTestDoc();
           var selector = "div";
+          removeElems(capturer.CaptureHelperHandler.selectNodes(doc, selector));
+          assertEqual(doc.body.innerHTML.trim(), ``);
+
+          var doc = makeTestDoc();
+          var selector = "body > div";
           removeElems(capturer.CaptureHelperHandler.selectNodes(doc, selector));
           assertEqual(doc.body.innerHTML.trim(), ``);
         });
