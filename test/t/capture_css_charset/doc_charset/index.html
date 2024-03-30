@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="Big5">
+<style>
+blockquote::before { content: attr(id) " - "; }
+</style>
+<link rel="stylesheet" href="link.css">
+<style>@import "./import.css";</style>
+<link rel="stylesheet" href="link-charset.css">
+<style>@import "./import-charset.css";</style>
+</head>
+<body>
+<blockquote id="link"></blockquote>
+<blockquote id="link_import"></blockquote>
+<blockquote id="import"></blockquote>
+<blockquote id="import_import"></blockquote>
+<blockquote id="link-charset"></blockquote>
+<blockquote id="import-charset"></blockquote>
+</body>
+</html>

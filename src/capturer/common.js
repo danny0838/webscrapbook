@@ -697,6 +697,7 @@
                   baseUrl: baseUrlCurrent,
                   refUrl,
                   refPolicy,
+                  envCharset: charset,
                   root: elem.getRootNode(),
                 });
               });
@@ -719,6 +720,7 @@
                     baseUrl: baseUrlCurrent,
                     refUrl,
                     refPolicy,
+                    envCharset: charset,
                     settings,
                     callback: (elem, response) => {
                       // escape </style> as textContent can contain HTML
@@ -908,6 +910,7 @@
               // styles: link element
               const baseUrlCurrent = baseUrl;
               const refPolicy = elem.matches('[rel~="noreferrer"]') ? 'no-referrer' : elem.referrerPolicy || docRefPolicy;
+              const envCharset = elem.getAttribute("charset") || charset;
               let disableCss = false;
               const css = cssHandler.getElemCss(elem);
               if (css) {
@@ -944,6 +947,7 @@
                     baseUrl: css.href || baseUrlCurrent,
                     refUrl: css.href || refUrl,
                     refPolicy,
+                    envCharset,
                     root: elem.getRootNode(),
                   });
                 });
@@ -981,9 +985,11 @@
                       baseUrl: baseUrlCurrent,
                       refUrl,
                       refPolicy,
+                      envCharset,
                       settings,
                       callback: (elem, response) => {
                         captureRewriteAttr(elem, "href", response.url);
+                        captureRewriteAttr(elem, "charset", null);
                       },
                     });
                   });
@@ -1133,6 +1139,7 @@
                   baseUrl: baseUrlCurrent,
                   refUrl,
                   refPolicy,
+                  envCharset: charset,
                   root: elem.getRootNode(),
                 });
               });
@@ -1144,6 +1151,7 @@
                   baseUrl: baseUrlCurrent,
                   refUrl,
                   refPolicy,
+                  envCharset: charset,
                   root: elem.getRootNode(),
                 });
               });
@@ -1172,6 +1180,7 @@
                     baseUrl: baseUrlCurrent,
                     refUrl,
                     refPolicy,
+                    envCharset: charset,
                     settings,
                     callback: (elem, response) => {
                       // escape </style> as textContent can contain HTML
@@ -2671,6 +2680,7 @@
                     baseUrl: baseUrlCurrent,
                     refUrl,
                     refPolicy,
+                    envCharset: charset,
                     isInline: true,
                     settings: {
                       usedCssFontUrl: undefined,
@@ -2690,6 +2700,7 @@
                     baseUrl: baseUrlCurrent,
                     refUrl,
                     refPolicy,
+                    envCharset: charset,
                     isInline: true,
                     settings: {
                       usedCssFontUrl: undefined,
@@ -2755,7 +2766,7 @@
 
     const {doc = document, settings, options} = params;
     const {timeId, isHeadless, isMainPage, isMainFrame} = settings;
-    const {documentElement: docElemNode} = doc;
+    const {documentElement: docElemNode, characterSet: charset} = doc;
 
     // determine docUrl, baseUrl, etc.
     const [metaDocUrl, metaDocUrlHash] = scrapbook.splitUrlByAnchor(params.metaDocUrl || doc.URL);
@@ -4598,13 +4609,15 @@
      *     cross-orign CSS.
      * @param {string} [params.refPolicy] - the referrer policy for retrieving
      *     a cross-orign CSS.
+     * @param {string} [params.envCharset] - the environment charset for
+     *     retrieving a cross-orign CSS.
      * @param {boolean} [params.crossOrigin] - Whether to retrieve CSS via web
      *     request if it's cross origin.
      * @param {boolean} [params.errorWithNull] - Whether to return null if CSS
      *     not retrievable.
      * @return {?CSSStyleRule[]}
      */
-    async getRulesFromCss({css, url, refUrl, refPolicy, crossOrigin = true, errorWithNull = false}) {
+    async getRulesFromCss({css, url, refUrl, refPolicy, envCharset, crossOrigin = true, errorWithNull = false}) {
       let rules = null;
       try {
         // Firefox may get this for a stylesheet with relative URL imported from
@@ -4636,6 +4649,7 @@
                 url: url || css.href,
                 refUrl,
                 refPolicy,
+                envCharset,
                 settings,
                 options,
               });
@@ -4663,6 +4677,8 @@
      * @param {string} params.refUrl - the referrer URL for fetching resources.
      * @param {string} [params.refPolicy] - the referrer policy for fetching
      *     resources.
+     * @param {string} [params.envCharset] - the environment charset for
+     *     fetching resources.
      * @param {CSSStyleSheet} [params.refCss] - the reference CSS (which
      *     holds the @import rule(s), for an imported CSS).
      * @param {Node} [params.rootNode] - the reference root node for an
@@ -4671,7 +4687,7 @@
      * @param {captureSettings} [params.settings]
      * @param {captureOptions} [params.options]
      */
-    async rewriteCssText({cssText, baseUrl, refUrl, refPolicy, refCss = null, rootNode, isInline = false, settings, options}) {
+    async rewriteCssText({cssText, baseUrl, refUrl, refPolicy, envCharset, refCss = null, rootNode, isInline = false, settings, options}) {
       settings = Object.assign({}, this.settings, settings);
       settings = Object.assign(settings, {
         recurseChain: [...settings.recurseChain, scrapbook.splitUrlByAnchor(refUrl)[0]],
@@ -4719,7 +4735,7 @@
       const importRules = [];
       let importRuleIdx = 0;
       if (refCss) {
-        const rules = await this.getRulesFromCss({css: refCss, url: refUrl, refUrl, refPolicy});
+        const rules = await this.getRulesFromCss({css: refCss, url: refUrl, refUrl, refPolicy, envCharset});
         for (const rule of rules) {
           if (rule.type === 3) {
             importRules.push(rule);
@@ -4747,6 +4763,7 @@
                 baseUrl,
                 refUrl,
                 refPolicy,
+                envCharset,
                 rootNode,
                 settings,
                 options,
@@ -4825,7 +4842,7 @@
     /**
      * Rewrite given cssRules to cssText.
      */
-    async rewriteCssRules({cssRules, baseUrl, refUrl, refPolicy, refCss, rootNode, indent = '', settings, options}) {
+    async rewriteCssRules({cssRules, baseUrl, refUrl, refPolicy, envCharset, refCss, rootNode, indent = '', settings, options}) {
       const rules = [];
       for (const cssRule of cssRules) {
         switch (cssRule.type) {
@@ -4842,6 +4859,7 @@
                 baseUrl,
                 refUrl,
                 refPolicy,
+                envCharset,
                 refCss,
                 settings,
                 options,
@@ -4853,6 +4871,7 @@
                 baseUrl,
                 refUrl,
                 refPolicy,
+                envCharset,
                 refCss,
                 rootNode,
                 indent: indent + '  ',
@@ -4872,6 +4891,7 @@
                 baseUrl,
                 refUrl,
                 refPolicy,
+                envCharset,
                 refCss,
                 settings,
                 options,
@@ -4888,6 +4908,7 @@
               baseUrl,
               refUrl,
               refPolicy,
+              envCharset,
               refCss,
               rootNode,
               settings,
@@ -4904,6 +4925,7 @@
               baseUrl,
               refUrl,
               refPolicy,
+              envCharset,
               refCss,
               rootNode,
               indent: indent + '  ',
@@ -4923,6 +4945,7 @@
               baseUrl,
               refUrl,
               refPolicy,
+              envCharset,
               refCss,
               rootNode,
               indent: indent + '  ',
@@ -4942,6 +4965,7 @@
               baseUrl,
               refUrl,
               refPolicy,
+              envCharset,
               refCss,
               rootNode,
               indent: indent + '  ',
@@ -4972,6 +4996,7 @@
               baseUrl,
               refUrl,
               refPolicy,
+              envCharset,
               refCss,
               settings,
               options,
@@ -5008,13 +5033,15 @@
      *     resources.
      * @param {string} [params.refPolicy] - the referrer policy for fetching
      *     resources.
+     * @param {string} [params.envCharset] - the environment charset for
+     *     fetching resources.
      * @param {Node} [params.rootNode] - the reference root node for an
      *     imported CSS.
      * @param {rewriteCssRewriter} params.callback
      * @param {captureSettings} [params.settings]
      * @param {captureOptions} [params.options]
      */
-    async rewriteCss({elem, url, refCss, baseUrl, refUrl, refPolicy, rootNode, callback, settings, options}) {
+    async rewriteCss({elem, url, refCss, baseUrl, refUrl, refPolicy, envCharset, rootNode, callback, settings, options}) {
       settings = settings ? Object.assign({}, this.settings, settings) : this.settings;
       options = options ? Object.assign({}, this.options, options) : this.options;
 
@@ -5034,7 +5061,7 @@
 
           refCss = this.getElemCss(elem);
           cssText = elem.textContent;
-          charset = "UTF-8";
+          charset = envCharset;
           break init;
         }
 
@@ -5056,6 +5083,7 @@
             url: sourceUrl,
             refUrl,
             refPolicy,
+            envCharset,
             settings,
             options,
           });
@@ -5149,7 +5177,8 @@
         const registry = await capturer.invoke("registerFile", {
           url: sourceUrl,
           role: options["capture.saveAs"] === "singleHtml" ? undefined :
-              isDynamic ? `css-${scrapbook.getUuid()}` : 'css',
+              isDynamic ? `css-${scrapbook.getUuid()}` :
+              envCharset ? `css-${envCharset.toLowerCase()}` : 'css',
           settings,
           options,
         });
@@ -5184,6 +5213,7 @@
             baseUrl: sourceUrl || baseUrl,
             refUrl: sourceUrl || refUrl,
             refPolicy,
+            envCharset,
             refCss,
             settings,
             options,
@@ -5208,6 +5238,7 @@
             baseUrl: sourceUrl || baseUrl,
             refUrl: sourceUrl || refUrl,
             refPolicy,
+            envCharset,
             refCss,
             settings,
             options,
@@ -5227,6 +5258,7 @@
               baseUrl: sourceUrl || baseUrl,
               refUrl: sourceUrl || refUrl,
               refPolicy,
+              envCharset,
               refCss,
               rootNode,
               settings,
@@ -5376,14 +5408,15 @@
     }
 
     /** @public */
-    async inspectCss({css, baseUrl, refUrl, refPolicy, root}) {
-      const rules = await this.cssHandler.getRulesFromCss({css, refUrl, refPolicy});
+    async inspectCss({css, baseUrl, refUrl, refPolicy, envCharset, root}) {
+      const rules = await this.cssHandler.getRulesFromCss({css, refUrl, refPolicy, envCharset});
       for (const rule of rules) {
         await this.parseCssRule({
           rule,
           baseUrl: css.href || baseUrl,
           refUrl: css.href || refUrl,
           refPolicy,
+          envCharset,
           root,
         });
       }
@@ -5404,7 +5437,7 @@
       }
     }
 
-    async parseCssRule({rule: cssRule, baseUrl, refUrl, refPolicy, root}) {
+    async parseCssRule({rule: cssRule, baseUrl, refUrl, refPolicy, envCharset, root}) {
       switch (cssRule.type) {
         case CSSRule.STYLE_RULE: {
           // this CSS rule applies to no node in the captured area
@@ -5415,7 +5448,7 @@
           // recurse into sub-rules for nesting CSS
           if (cssRule.cssRules && cssRule.cssRules.length) {
             for (const rule of cssRule.cssRules) {
-              await this.parseCssRule({rule, baseUrl, refUrl, refPolicy, root});
+              await this.parseCssRule({rule, baseUrl, refUrl, refPolicy, envCharset, root});
             }
           }
 
@@ -5426,9 +5459,9 @@
 
           const css = cssRule.styleSheet;
           const url = new URL(cssRule.href, baseUrl).href;
-          const rules = await this.cssHandler.getRulesFromCss({css, url, refUrl, refPolicy});
+          const rules = await this.cssHandler.getRulesFromCss({css, url, refUrl, refPolicy, envCharset});
           for (const rule of rules) {
-            await this.parseCssRule({rule, baseUrl: url, refUrl: url, refPolicy, root});
+            await this.parseCssRule({rule, baseUrl: url, refUrl: url, refPolicy, envCharset, root});
           }
           break;
         }
@@ -5436,7 +5469,7 @@
           if (!cssRule.cssRules) { break; }
 
           for (const rule of cssRule.cssRules) {
-            await this.parseCssRule({rule, baseUrl, refUrl, refPolicy, root});
+            await this.parseCssRule({rule, baseUrl, refUrl, refPolicy, envCharset, root});
           }
           break;
         }
@@ -5465,7 +5498,7 @@
           if (!cssRule.cssRules) { break; }
 
           for (const rule of cssRule.cssRules) {
-            await this.parseCssRule({rule, baseUrl, refUrl, refPolicy, root});
+            await this.parseCssRule({rule, baseUrl, refUrl, refPolicy, envCharset, root});
           }
           break;
         }
@@ -5492,7 +5525,7 @@
           if (!cssRule.cssRules) { break; }
 
           for (const rule of cssRule.cssRules) {
-            await this.parseCssRule({rule, baseUrl, refUrl, refPolicy, root});
+            await this.parseCssRule({rule, baseUrl, refUrl, refPolicy, envCharset, root});
           }
           break;
         }

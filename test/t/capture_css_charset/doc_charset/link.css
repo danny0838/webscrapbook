@@ -1,0 +1,2 @@
+@import "./link_import.css";
+#link::after { content: "¤¤¤å"; }

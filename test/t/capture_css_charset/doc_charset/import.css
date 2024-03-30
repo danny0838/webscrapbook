@@ -1,0 +1,2 @@
+@import "./import_import.css";
+#import::after { content: "¤¤¤å"; }

@@ -3672,6 +3672,7 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
    * @param {string} params.url
    * @param {string} [params.refUrl]
    * @param {string} [params.refPolicy] - the referrer policy
+   * @param {string} [params.envCharset] - the environment charset
    * @param {Blob} [params.overrideBlob]
    * @param {captureSettings} params.settings
    * @param {captureOptions} params.options
@@ -3680,7 +3681,7 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
   capturer.fetchCss = async function (params) {
     isDebug && console.debug("call: fetchCss", params);
 
-    const {url: sourceUrl, refUrl, refPolicy, overrideBlob, settings, options} = params;
+    const {url: sourceUrl, refUrl, refPolicy, envCharset, overrideBlob, settings, options} = params;
     const [sourceUrlMain, sourceUrlHash] = scrapbook.splitUrlByAnchor(sourceUrl);
     const {timeId} = settings;
 
@@ -3697,7 +3698,7 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
       throw new Error(fetchResponse.error.message);
     }
 
-    return await scrapbook.parseCssFile(fetchResponse.blob, fetchResponse.headers.charset);
+    return await scrapbook.parseCssFile(fetchResponse.blob, fetchResponse.headers.charset, envCharset);
   };
 
   /**

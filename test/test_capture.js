@@ -1123,7 +1123,7 @@ it('test_capture_dataUri_css', async function () {
   var url = doc.querySelector('link').getAttribute('href');
   var text = (await xhr({url, responseType: "text"})).response;
   assert(text === `\
-@import "data:text/css;filename=null.css,";
+@import "data:text/css;charset=UTF-8;filename=null.css,";
 @font-face { font-family: myFont; src: url("data:font/woff;filename=null.woff;base64,"); }
 p { background-image: url("data:image/bmp;filename=red.bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAAD/AAAA"); }`);
 
@@ -1519,9 +1519,9 @@ it('test_capture_singleHtml_encoding', async function () {
 #internal { background: url("data:image/bmp;filename=green.bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAP8AAAAA"); }
 #internal::after { content: "內部"; }`);
   assert(doc.querySelector('link').getAttribute('href') === `\
-data:text/css;filename=link.css,%23external%20%7B%20background%3A%20url%28%22data%3Aimage/bmp%3Bfilename%3Dgreen.bmp%3Bbase64%2CQk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAP8AAAAA%22%29%3B%20%7D%0A%23external%3A%3Aafter%20%7B%20content%3A%20%22%E5%A4%96%E9%83%A8%22%3B%20%7D%0A`);
+data:text/css;charset=UTF-8;filename=link.css,%23external%20%7B%20background:%20url(%22data:image/bmp;filename=green.bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAP8AAAAA%22);%20%7D%0A%23external::after%20%7B%20content:%20%22外部%22;%20%7D%0A`);
   assert(doc.querySelectorAll('style')[1].textContent.trim() === `\
-@import "data:text/css;filename=import.css,%23import%20%7B%20background%3A%20url%28%22data%3Aimage/bmp%3Bfilename%3Dgreen.bmp%3Bbase64%2CQk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAP8AAAAA%22%29%3B%20%7D%0A%23import%3A%3Aafter%20%7B%20content%3A%20%22%E5%8C%AF%E5%85%A5%22%3B%20%7D%0A";`);
+@import "data:text/css;charset=UTF-8;filename=import.css,%23import%20%7B%20background:%20url(%22data:image/bmp;filename=green.bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAP8AAAAA%22);%20%7D%0A%23import::after%20%7B%20content:%20%22匯入%22;%20%7D%0A";`);
   assert(doc.querySelector('img').getAttribute('src') === `data:image/bmp;filename=red.bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAAD/AAAA`);
   assert(doc.querySelectorAll('iframe')[1].getAttribute('src') === `data:text/plain;filename=big5.txt,Big5%A4%A4%A4%E5%A4%BA%AEe`);
 
@@ -3170,7 +3170,7 @@ it('test_capture_base_dynamic_frame', async function () {
       var srcdocBlob = new Blob([frame.getAttribute('srcdoc')], {type: "text/html"});
       var srcdoc = await readFileAsDocument(srcdocBlob);
       var text = decodeURIComponent(srcdoc.querySelector('link').getAttribute('href'));
-      assert(text === `data:text/css;filename=link.py.css,:root { --referrer: "${localhost}/" }`);
+      assert(text === `data:text/css;charset=UTF-8;filename=link.py.css,:root { --referrer: "${localhost}/" }`);
     }
   }
 });
@@ -3246,7 +3246,7 @@ it('test_capture_base_dynamic_frame_bad', async function () {
       var srcdocBlob = new Blob([frame.getAttribute('srcdoc')], {type: "text/html"});
       var srcdoc = await readFileAsDocument(srcdocBlob);
       var text = decodeURIComponent(srcdoc.querySelector('link').getAttribute('href'));
-      assert(text === `data:text/css;filename=link.py.css,:root { --referrer: "${localhost}/" }`);
+      assert(text === `data:text/css;charset=UTF-8;filename=link.py.css,:root { --referrer: "${localhost}/" }`);
     }
   }
 });
@@ -5186,64 +5186,359 @@ it('test_capture_css_syntax', async function () {
  */
 it('test_capture_css_charset', async function () {
   const hasBomUtf8 = async function (blob) {
-    var u8ar = new Uint8Array(await readFileAsArrayBuffer(blob));
+    var u8ar = new Uint8Array(await readFileAsArrayBuffer(blob.slice(0, 3)));
     return u8ar[0] === 0xEF && u8ar[1] === 0xBB && u8ar[2] === 0xBF;
   };
 
+  // captureHeadless doen't use dynamic CSS 
+  for (const func of ["capture", "captureHeadless"]) {
+    console.debug("func = %s", func);
+
+    var options = {
+      "capture.style": "save",
+    };
+    var blob = await global[func]({
+      url: `${localhost}/capture_css_charset/basic/index.html`,
+      options: Object.assign({}, baseOptions, options),
+    });
+
+    var zip = await new JSZip().loadAsync(blob);
+
+    var file = zip.file('header_big5.py.css');
+    var blob = new Blob([await file.async('blob')], {type: "text/css"});
+    var text = (await readFileAsText(blob)).trim();
+    assert(text === `#test1::after { content: "中文"; }`);
+    assert(!await hasBomUtf8(blob));
+
+    var file = zip.file('bom_utf16.css');
+    var blob = new Blob([await file.async('blob')], {type: "text/css"});
+    var text = (await readFileAsText(blob)).trim();
+    assert(text === `#test2::after { content: "中文"; }`);
+    assert(!await hasBomUtf8(blob));
+
+    var file = zip.file('at_big5.css');
+    var blob = new Blob([await file.async('blob')], {type: "text/css"});
+    var text = (await readFileAsText(blob)).trim();
+    assert(text === `@charset "Big5";
+#test3::after { content: "中文"; }`);
+    assert(await hasBomUtf8(blob));
+
+    var file = zip.file('utf8.css');
+    var blob = new Blob([await file.async('blob')], {type: "text/css"});
+    var text = (await readFileAsText(blob)).trim();
+    assert(text === `#test4::after { content: "中文"; }`);
+    assert(!await hasBomUtf8(blob));
+
+    var file = zip.file('header_utf8_bom_utf8.py.css');
+    var blob = new Blob([await file.async('blob')], {type: "text/css"});
+    var text = (await readFileAsText(blob)).trim();
+    assert(text === `#test5::after { content: "中文"; }`);
+    assert(!await hasBomUtf8(blob));
+
+    var file = zip.file('header_utf8_at_big5.py.css');
+    var blob = new Blob([await file.async('blob')], {type: "text/css"});
+    var text = (await readFileAsText(blob)).trim();
+    assert(text === `@charset "Big5";
+#test6::after { content: "中文"; }`);
+    assert(await hasBomUtf8(blob));
+
+    var file = zip.file('bom_utf16_at_big5.css');
+    var blob = new Blob([await file.async('blob')], {type: "text/css"});
+    var text = (await readFileAsText(blob)).trim();
+    assert(text === `@charset "Big5";
+#test7::after { content: "中文"; }`);
+    assert(await hasBomUtf8(blob));
+  }
+});
+
+/**
+ * Check handling of document charset
+ *
+ * scrapbook.parseCssFile
+ */
+it('test_capture_css_charset_doc_charset', async function () {
+  const hasBomUtf8 = async function (blob) {
+    var u8ar = new Uint8Array(await readFileAsArrayBuffer(blob.slice(0, 3)));
+    return u8ar[0] === 0xEF && u8ar[1] === 0xBB && u8ar[2] === 0xBF;
+  };
+
+  /* capture: uses dynamic CSS, which is determined by browser parsing */
   var options = {
     "capture.style": "save",
   };
   var blob = await capture({
-    url: `${localhost}/capture_css_charset/index.html`,
+    url: `${localhost}/capture_css_charset/doc_charset/index.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
   var zip = await new JSZip().loadAsync(blob);
 
-  var file = zip.file('header_big5.py.css');
+  var file = zip.file('link.css');
   var blob = new Blob([await file.async('blob')], {type: "text/css"});
   var text = (await readFileAsText(blob)).trim();
-  assert(text === `#test1::after { content: "中文"; }`);
+  assert(text === `@import "link_import.css";
+#link::after { content: "中文"; }`);
   assert(!await hasBomUtf8(blob));
 
-  var file = zip.file('bom_utf16.css');
+  var file = zip.file('link_import.css');
   var blob = new Blob([await file.async('blob')], {type: "text/css"});
   var text = (await readFileAsText(blob)).trim();
-  assert(text === `#test2::after { content: "中文"; }`);
+  assert(text === `#link_import::after { content: "中文"; }`);
   assert(!await hasBomUtf8(blob));
 
-  var file = zip.file('at_big5.css');
+  var file = zip.file('import.css');
   var blob = new Blob([await file.async('blob')], {type: "text/css"});
   var text = (await readFileAsText(blob)).trim();
-  assert(text === `@charset "Big5";
-#test3::after { content: "中文"; }`);
+  assert(text === `@import "import_import.css";
+#import::after { content: "中文"; }`);
+  assert(!await hasBomUtf8(blob));
+
+  var file = zip.file('import_import.css');
+  var blob = new Blob([await file.async('blob')], {type: "text/css"});
+  var text = (await readFileAsText(blob)).trim();
+  assert(text === `#import_import::after { content: "中文"; }`);
+  assert(!await hasBomUtf8(blob));
+
+  /* captureHeadless: no dynamic CSS */
+  var options = {
+    "capture.style": "save",
+  };
+  var blob = await captureHeadless({
+    url: `${localhost}/capture_css_charset/doc_charset/index.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var file = zip.file('link.css');
+  var blob = new Blob([await file.async('blob')], {type: "text/css"});
+  var text = (await readFileAsText(blob)).trim();
+  assert(text === `\
+@import "link_import.css";
+#link::after { content: "中文"; }`);
+  assert(!await hasBomUtf8(blob));
+
+  var file = zip.file('link_import.css');
+  var blob = new Blob([await file.async('blob')], {type: "text/css"});
+  var text = (await readFileAsText(blob)).trim();
+  assert(text === `#link_import::after { content: "中文"; }`);
+  assert(!await hasBomUtf8(blob));
+
+  var file = zip.file('import.css');
+  var blob = new Blob([await file.async('blob')], {type: "text/css"});
+  var text = (await readFileAsText(blob)).trim();
+  assert(text === `\
+@import "import_import.css";
+#import::after { content: "中文"; }`);
+  assert(!await hasBomUtf8(blob));
+
+  var file = zip.file('import_import.css');
+  var blob = new Blob([await file.async('blob')], {type: "text/css"});
+  var text = (await readFileAsText(blob)).trim();
+  assert(text === `#import_import::after { content: "中文"; }`);
+  assert(!await hasBomUtf8(blob));
+
+  var file = zip.file('link-charset.css');
+  var blob = new Blob([await file.async('blob')], {type: "text/css"});
+  var text = (await readFileAsText(blob)).trim();
+  assert(text === `\
+@charset "utf-8";
+#link-charset::after { content: "中文"; }`);
   assert(await hasBomUtf8(blob));
 
-  var file = zip.file('big5.css');
+  var file = zip.file('import-charset.css');
   var blob = new Blob([await file.async('blob')], {type: "text/css"});
-  var text = (await readFileAsText(blob, "big5")).trim();
-  assert(text === `#test4::after { content: "中文"; }`);
+  var text = (await readFileAsText(blob)).trim();
+  assert(text === `\
+@charset "utf-8";
+#import-charset::after { content: "中文"; }`);
+  assert(await hasBomUtf8(blob));
+});
+
+/**
+ * Check handling of deprecated and obsolete link[charset]
+ *
+ * scrapbook.parseCssFile
+ */
+it('test_capture_css_charset_link_charset', async function () {
+  const hasBomUtf8 = async function (blob) {
+    var u8ar = new Uint8Array(await readFileAsArrayBuffer(blob.slice(0, 3)));
+    return u8ar[0] === 0xEF && u8ar[1] === 0xBB && u8ar[2] === 0xBF;
+  };
+
+  /* capture: uses dynamic CSS, which is determined by browser parsing */
+  var options = {
+    "capture.style": "save",
+  };
+  var blob = await capture({
+    url: `${localhost}/capture_css_charset/link_charset/index.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assert(!doc.querySelector('link').hasAttribute('charset'));
+
+  var file = zip.file('link.css');
+  var blob = new Blob([await file.async('blob')], {type: "text/css"});
+  var text = (await readFileAsText(blob)).trim();
+  assert(text === `\
+@import "link_import.css";
+#link::after { content: "中文"; }`);
   assert(!await hasBomUtf8(blob));
 
-  var file = zip.file('header_utf8_bom_utf8.py.css');
+  var file = zip.file('link_import.css');
   var blob = new Blob([await file.async('blob')], {type: "text/css"});
   var text = (await readFileAsText(blob)).trim();
-  assert(text === `#test5::after { content: "中文"; }`);
+  assert(text === `#link_import::after { content: "中文"; }`);
   assert(!await hasBomUtf8(blob));
 
-  var file = zip.file('header_utf8_at_big5.py.css');
-  var blob = new Blob([await file.async('blob')], {type: "text/css"});
-  var text = (await readFileAsText(blob)).trim();
-  assert(text === `@charset "Big5";
-#test6::after { content: "中文"; }`);
-  assert(await hasBomUtf8(blob));
+  /* captureHeadless: no dynamic CSS */
+  var options = {
+    "capture.style": "save",
+  };
+  var blob = await captureHeadless({
+    url: `${localhost}/capture_css_charset/link_charset/index.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
 
-  var file = zip.file('bom_utf16_at_big5.css');
+  var zip = await new JSZip().loadAsync(blob);
+
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assert(!doc.querySelector('link').hasAttribute('charset'));
+
+  var file = zip.file('link.css');
   var blob = new Blob([await file.async('blob')], {type: "text/css"});
   var text = (await readFileAsText(blob)).trim();
-  assert(text === `@charset "Big5";
-#test7::after { content: "中文"; }`);
-  assert(await hasBomUtf8(blob));
+  assert(text === `\
+@import "link_import.css";
+#link::after { content: "中文"; }`);
+  assert(!await hasBomUtf8(blob));
+
+  var file = zip.file('link_import.css');
+  var blob = new Blob([await file.async('blob')], {type: "text/css"});
+  var text = (await readFileAsText(blob)).trim();
+  assert(text === `#link_import::after { content: "中文"; }`);
+  assert(!await hasBomUtf8(blob));
+
+  /* capture.style = link: keep link[charset] */
+  var options = {
+    "capture.style": "link",
+  };
+  var blob = await capture({
+    url: `${localhost}/capture_css_charset/link_charset/index.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assert(doc.querySelector('link').getAttribute('charset') === 'big5');
+
+  /* file with multiple link[charset] should be saved separatedly */
+  var options = {
+    "capture.style": "save",
+    "capture.saveResourcesSequentially": true,
+    "capture.downLink.doc.depth": 0,
+  };
+  var blob = await captureHeadless({
+    url: `${localhost}/capture_css_charset/link_charset/bad.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+
+  var file = zip.file('link.css');
+  var blob = new Blob([await file.async('blob')], {type: "text/css"});
+  var text = (await readFileAsText(blob)).trim();
+  assert(text === `\
+@import "link_import.css";
+#link::after { content: "中文"; }`);
+  assert(!await hasBomUtf8(blob));
+
+  var file = zip.file('link_import.css');
+  var blob = new Blob([await file.async('blob')], {type: "text/css"});
+  var text = (await readFileAsText(blob)).trim();
+  assert(text === `#link_import::after { content: "中文"; }`);
+  assert(!await hasBomUtf8(blob));
+
+  var file = zip.file('link-1.css');
+  var blob = new Blob([await file.async('blob')], {type: "text/css"});
+  var text = (await readFileAsText(blob)).trim();
+  assert(text !== `\
+@import "link_import.css";
+#link::after { content: "中文"; }`);
+  assert(!await hasBomUtf8(blob));
+
+  var sitemapBlob = await zip.file('index.json').async('blob');
+  var expectedData = {
+    "version": 3,
+    "indexPages": [
+      "index.html"
+    ],
+    "files": [
+      {
+        "path": "index.json"
+      },
+      {
+        "path": "index.dat"
+      },
+      {
+        "path": "index.rdf"
+      },
+      {
+        "path": "history.rdf"
+      },
+      {
+        "path": "^metadata^"
+      },
+      {
+        "path": "index.html",
+        "url": `${localhost}/capture_css_charset/link_charset/bad.html`,
+        "role": "document",
+        "token": getToken(`${localhost}/capture_css_charset/link_charset/bad.html`, "document")
+      },
+      {
+        "path": "index.xhtml",
+        "role": "document"
+      },
+      {
+        "path": "index.svg",
+        "role": "document"
+      },
+      {
+       "path": "link.css",
+       "url": `${localhost}/capture_css_charset/link_charset/link.css`,
+       "role": "css-big5",
+       "token": getToken(`${localhost}/capture_css_charset/link_charset/link.css`, "css-big5")
+      },
+      {
+       "path": "link_import.css",
+       "url": `${localhost}/capture_css_charset/link_charset/link_import.css`,
+       "role": "css-big5",
+       "token": getToken(`${localhost}/capture_css_charset/link_charset/link_import.css`, "css-big5")
+      },
+      {
+       "path": "link-1.css",
+       "url": `${localhost}/capture_css_charset/link_charset/link.css`,
+       "role": "css-utf-8",
+       "token": getToken(`${localhost}/capture_css_charset/link_charset/link.css`, "css-utf-8")
+      },
+      {
+       "path": "link_import-1.css",
+       "url": `${localhost}/capture_css_charset/link_charset/link_import.css`,
+       "role": "css-utf-8",
+       "token": getToken(`${localhost}/capture_css_charset/link_charset/link_import.css`, "css-utf-8")
+      },
+    ]
+  };
+  console.warn(await readFileAsText(sitemapBlob))
+  assert(await readFileAsText(sitemapBlob) === JSON.stringify(expectedData, null, 1));
 });
 
 /**
@@ -5403,13 +5698,13 @@ it('test_capture_css_circular', async function () {
   // style1.css
   var url = doc.querySelector('link').getAttribute('href');
   var text = (await xhr({url, responseType: "text"})).response;
-  var match = text.match(rawRegex`${'^'}@import "${'('}data:text/css;filename=style2.css,${'[^"#]*)(?:#[^"]*)?'}";`);
+  var match = text.match(rawRegex`${'^'}@import "${'('}data:text/css;charset=UTF-8;filename=style2.css,${'[^"#]*)(?:#[^"]*)?'}";`);
   assert(match);
 
   // style2.css
   var url = match[1];
   var text = (await xhr({url, responseType: "text"})).response;
-  var match = text.match(rawRegex`${'^'}@import "${'('}data:text/css;filename=style3.css,${'[^"#]*)(?:#[^"]*)?'}";`);
+  var match = text.match(rawRegex`${'^'}@import "${'('}data:text/css;charset=UTF-8;filename=style3.css,${'[^"#]*)(?:#[^"]*)?'}";`);
   assert(match);
 
   // style3.css
