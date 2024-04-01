@@ -51,6 +51,8 @@
     const s2 = JSON.stringify(obj2);
     if (s1 === s2) { return; }
     const err = new AssertionError(`${s1} not equal to ${s2}${message ? ': ' + message : ''}`);
+    err.actual = JSON.stringify(obj1, null, 2);
+    err.expected = JSON.stringify(obj2, null, 2);
     console.error(err);
     throw err;
   }
