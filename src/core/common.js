@@ -2604,12 +2604,18 @@
     return `data:${mime || ""}${charset ? ";charset=" + encodeURIComponent(charset) : ""},${escape(str)}`;
   };
 
-  scrapbook.unicodeToUtf8 = function (chars) {
-    return unescape(encodeURIComponent(chars));
+  /**
+   * Convert a JavaScript string (UTF-16BE) into a UTF-8 byte string.
+   */
+  scrapbook.unicodeToUtf8 = function (str) {
+    return unescape(encodeURIComponent(str));
   };
 
-  scrapbook.utf8ToUnicode = function (bytes) {
-    return decodeURIComponent(escape(bytes));
+  /**
+   * Convert a UTF-8 byte string into a JavaScript string (UTF-16BE).
+   */
+  scrapbook.utf8ToUnicode = function (bstr) {
+    return decodeURIComponent(escape(bstr));
   };
 
   scrapbook.unicodeToBase64 = function (str) {

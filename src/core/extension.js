@@ -211,8 +211,8 @@
    * Advanced API to invoke a capture.
    *
    * @param {Object} params
-   * @param {?string} [params.config]
    * @param {Object} params.taskInfo
+   * @param {?string} [params.dialog]
    * @param {boolean} [params.uniquify]
    * @param {boolean} [params.ignoreTitle]
    * @param {Object} [params.windowCreateData]
