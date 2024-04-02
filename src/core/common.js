@@ -3284,7 +3284,7 @@
     // @charset must be exactly this pattern according to the spec:
     // https://developer.mozilla.org/en-US/docs/Web/CSS/@charset#examples
     // https://drafts.csswg.org/css2/#charset%E2%91%A0
-    const regexAtCharset = new RegExp(`^@charset "([^"{$ASCII_WHITESPACE}]*)";`);
+    const regexAtCharset = new RegExp(`^@charset "([^"${ASCII_WHITESPACE}]*)";`);
 
     const fn = scrapbook.parseCssFile = async function (data, charset) {
       if (charset) {
