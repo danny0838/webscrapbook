@@ -3265,55 +3265,78 @@
   /**
    * Read charset and text of a CSS file.
    *
-   * Browser normally determine the charset of a CSS file via:
-   * 1. HTTP header content-type
-   * 2. Unicode BOM in the CSS file
+   * According to the spec, the encoding of the CSS is determined by:
+   * 1. Unicode BOM in the CSS file
+   * 2. charset parameter of the Content-Type HTTP header
    * 3. @charset rule in the CSS file
-   * 4. assume it's UTF-8
+   * 4. encoding of the referring HTML document
+   * 5. assume it's utf-8
    *
-   * We save the CSS file as UTF-8 for better compatibility.
-   * For case 3, UTF-8 BOM is prepended to inactivate the @charset rule.
-   * We don't follow case 4 and read the CSS file as byte string so that
-   * the user has a chance to correct the encoding manually.
+   * ref: https://www.w3.org/TR/css-syntax-3/#input-byte-stream
+   *
+   * Note:
+   * - We save the CSS file as UTF-8 for better compatibility.
+   * - Case 2 and 4 are provided by the arguments.
+   * - For case 3, UTF-8 BOM is prepended to inactivate the @charset rule.
+   * - For case 5, we read the CSS file as byte string instead, so that the
+   *   user has a chance to correct the encoding manually afterwards.
+   *   This is safe for UTF-8 but gets a bad irrecoverable result when an
+   *   ASCII-conflicting code point is being rewritten for a multi-byte ANSI
+   *   encoding (e.g. the "許功蓋" issue for Big5), or for UTF-16.
    *
    * @param {Blob} data - The CSS file blob.
-   * @param {string} [charset] - Charset of the CSS file blob.
+   * @param {?string} [headerCharset]
+   * @param {?string} [envCharset]
    * @return {{text: string, charset: ?string}}
    */
-  scrapbook.parseCssFile = async function (data, charset) {
+  scrapbook.parseCssFile = async function (...args) {
     // @charset must be exactly this pattern according to the spec:
     // https://developer.mozilla.org/en-US/docs/Web/CSS/@charset#examples
     // https://drafts.csswg.org/css2/#charset%E2%91%A0
-    const regexAtCharset = new RegExp(`^@charset "([^"${ASCII_WHITESPACE}]*)";`);
+    const regexAtCharset = new RegExp(`^@charset "([\x00-\x21\x23-\x7F]*)";`);
 
-    const fn = scrapbook.parseCssFile = async function (data, charset) {
-      if (charset) {
-        let text = await scrapbook.readFileAsText(data, charset);
+    const fn = scrapbook.parseCssFile = async function (data, headerCharset, envCharset) {
+      let charset = null;
 
-        // Add a BOM to inactivate the @charset rule
-        if (regexAtCharset.test(text)) {
-          text = "\ufeff" + text;
-        }
-
-        return {text, charset};
-      }
-
-      const bytes = await scrapbook.readFileAsText(data, false);
-      if (bytes.startsWith("\xEF\xBB\xBF")) {
+      let bom = await scrapbook.readFileAsText(data.slice(0, 3), false);
+      if (bom.startsWith("\xEF\xBB\xBF")) {
         charset = "UTF-8";
-      } else if (bytes.startsWith("\xFE\xFF")) {
+      } else if (bom.startsWith("\xFE\xFF")) {
         charset = "UTF-16BE";
-      } else if (bytes.startsWith("\xFF\xFE")) {
+        bom = bom.slice(0, 2);
+      } else if (bom.startsWith("\xFF\xFE")) {
         charset = "UTF-16LE";
-      } else if (bytes.startsWith("\x00\x00\xFE\xFF")) {
-        charset = "UTF-32BE";
-      } else if (bytes.startsWith("\x00\x00\xFF\xFE")) {
-        charset = "UTF-32LE";
-      } else if (regexAtCharset.test(bytes)) {
-        charset = RegExp.$1;
+        bom = bom.slice(0, 2);
+      } else {
+        bom = '';
+      }
+
+      if (!charset && headerCharset) {
+        charset = headerCharset;
+      }
+
+      let bytes;
+      if (!charset) {
+        bytes = await scrapbook.readFileAsText(data.slice(0, 1024), false);
+        const m = regexAtCharset.exec(bytes);
+        if (m) {
+          let _charset = m[1];
+
+          // replace UTF-16 with UTF-8 according to the spec
+          if (['utf-16be', 'utf-16le'].includes(_charset.toLowerCase())) {
+            _charset = 'utf-8';
+          }
+
+          charset = _charset;
+        }
+      }
+
+      if (!charset && envCharset) {
+        charset = envCharset;
       }
 
       if (charset) {
+        if (bom) { data = data.slice(bom.length); }
         let text = await scrapbook.readFileAsText(data, charset);
 
         // Add a BOM to inactivate the @charset rule
@@ -3324,9 +3347,12 @@
         return {text, charset};
       }
 
+      if (bom) { bytes = bytes.slice(bom.length); }
+      bytes += await scrapbook.readFileAsText(data.slice(1024), false);
       return {text: bytes, charset: null};
     };
-    return await fn(data, charset);
+
+    return await fn(...args);
   };
 
   /**

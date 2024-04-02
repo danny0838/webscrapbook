@@ -1445,180 +1445,208 @@ describe('core/common.js', function () {
 
   $describe.skipIf($.noBrowser)('scrapbook.parseCssFile', function () {
 
-    it('UTF-8', async function () {
-      var str = 'content: "abc中文𠀀"';
-      var u8ar = encodeText(str, 'utf-8');
-      var blob = new Blob([u8ar], {type: 'text/css'});
-
-      assertEqual(await scrapbook.parseCssFile(blob, 'UTF-8'), {
-        text: str,
-        charset: 'UTF-8',
-      });
-
-      assertEqual(await scrapbook.parseCssFile(blob), {
-        text: scrapbook.arrayBufferToByteString(u8ar),
-        charset: null,
-      });
-    });
-
-    it('UTF-8 with BOM', async function () {
-      var str = 'content: "abc中文𠀀"';
-      var u8ar = encodeText('\uFEFF' + str, 'utf-8');
-      var blob = new Blob([u8ar], {type: 'text/css'});
-
-      assertEqual(await scrapbook.parseCssFile(blob), {
-        text: str,
-        charset: 'UTF-8',
-      });
-    });
-
-    it('UTF-8 with BOM and @charset', async function () {
+    it('priority: 1. BOM', async function () {
+      // UTF-8
       var str = '@charset "Big5"; content: "abc中文𠀀"';
       var u8ar = encodeText('\uFEFF' + str, 'utf-8');
       var blob = new Blob([u8ar], {type: 'text/css'});
-
-      assertEqual(await scrapbook.parseCssFile(blob), {
+      assertEqual(await scrapbook.parseCssFile(blob, 'ISO-8859-1', 'GBK'), {
         text: '\uFEFF' + str,
+        charset: 'UTF-8',
+      });
+
+      // UTF-16BE
+      var str = '@charset "Big5"; content: "abc中文𠀀"';
+      var u8ar = encodeText('\uFEFF' + str, 'utf-16be');
+      var blob = new Blob([u8ar], {type: 'text/css'});
+      assertEqual(await scrapbook.parseCssFile(blob, 'ISO-8859-1', 'GBK'), {
+        text: '\uFEFF' + str,
+        charset: 'UTF-16BE',
+      });
+
+      // UTF-16LE
+      var str = '@charset "Big5"; content: "abc中文𠀀"';
+      var u8ar = encodeText('\uFEFF' + str, 'utf-16le');
+      var blob = new Blob([u8ar], {type: 'text/css'});
+      assertEqual(await scrapbook.parseCssFile(blob, 'ISO-8859-1', 'GBK'), {
+        text: '\uFEFF' + str,
+        charset: 'UTF-16LE',
+      });
+
+      // output BOM only for @charset
+      var str = 'content: "abc中文𠀀"';
+      var u8ar = encodeText('\uFEFF' + str, 'utf-8');
+      var blob = new Blob([u8ar], {type: 'text/css'});
+      assertEqual(await scrapbook.parseCssFile(blob, 'ISO-8859-1', 'GBK'), {
+        text: str,
         charset: 'UTF-8',
       });
     });
 
-    it('UTF-8 with @charset', async function () {
+    it('priority: 2. header charset', async function () {
+      // utf-8
+      var str = '@charset "Big5"; content: "abc中文𠀀"';
+      var u8ar = encodeText(str, 'utf-8');
+      var blob = new Blob([u8ar], {type: 'text/css'});
+      assertEqual(await scrapbook.parseCssFile(blob, 'utf-8', 'GBK'), {
+        text: '\uFEFF' + str,
+        charset: 'utf-8',
+      });
+
+      // utf-16be
+      var str = '@charset "Big5"; content: "abc中文𠀀"';
+      var u8ar = encodeText(str, 'utf-16be');
+      var blob = new Blob([u8ar], {type: 'text/css'});
+      assertEqual(await scrapbook.parseCssFile(blob, 'utf-16be', 'GBK'), {
+        text: '\uFEFF' + str,
+        charset: 'utf-16be',
+      });
+
+      // big5
+      var str = '@charset "UTF-8"; content: "abc中文"';
+      var u8ar = encodeText(str, 'big5');
+      var blob = new Blob([u8ar], {type: 'text/css'});
+      assertEqual(await scrapbook.parseCssFile(blob, 'big5', 'GBK'), {
+        text: '\uFEFF' + str,
+        charset: 'big5',
+      });
+
+      // ISO-8859-1
+      var str = '@charset "UTF-8"; content: "abcÆ©®±¼"';
+      var u8ar = encodeText(str, 'iso-8859-1');
+      var blob = new Blob([u8ar], {type: 'text/css'});
+      assertEqual(await scrapbook.parseCssFile(blob, 'ISO-8859-1'), {
+        text: '\uFEFF' + str,
+        charset: 'ISO-8859-1',
+      });
+
+      // output BOM only for @charset
+      var str = 'content: "abc中文𠀀"';
+      var u8ar = encodeText(str, 'utf-8');
+      var blob = new Blob([u8ar], {type: 'text/css'});
+      assertEqual(await scrapbook.parseCssFile(blob, 'UTF-8', 'GBK'), {
+        text: str,
+        charset: 'UTF-8',
+      });
+    });
+
+    it('priority: 3. @charset', async function () {
+      // UTF-8
       var str = '@charset "UTF-8"; content: "abc中文𠀀"';
       var u8ar = encodeText(str, 'utf-8');
       var blob = new Blob([u8ar], {type: 'text/css'});
-
-      assertEqual(await scrapbook.parseCssFile(blob), {
+      assertEqual(await scrapbook.parseCssFile(blob, null, 'Big5'), {
         text: '\uFEFF' + str,
         charset: 'UTF-8',
       });
 
-      // take environment charset in precedence
-      var str = '@charset "Big5"; content: "abc中文𠀀"';
+      // Big5
+      var str = '@charset "Big5"; content: "abc中文"';
+      var u8ar = encodeText(str, 'big5');
+      var blob = new Blob([u8ar], {type: 'text/css'});
+      assertEqual(await scrapbook.parseCssFile(blob, null, 'GBK'), {
+        text: '\uFEFF' + str,
+        charset: 'Big5',
+      });
+
+      // fix bad UTF-16 declaration to UTF-8
+      var str = '@charset "utf-16BE"; content: "abc中文"';
       var u8ar = encodeText(str, 'utf-8');
       var blob = new Blob([u8ar], {type: 'text/css'});
-
-      assertEqual(await scrapbook.parseCssFile(blob, "UTF-8"), {
-        text: '\uFEFF' + str,
-        charset: 'UTF-8',
-      });
-    });
-
-    it('UTF-16BE with BOM', async function () {
-      var str = 'content: "abc中文𠀀"';
-      var u8ar = encodeText('\uFEFF' + str, 'utf-16be');
-      var blob = new Blob([u8ar], {type: 'text/css'});
-
       assertEqual(await scrapbook.parseCssFile(blob), {
+        text: '\uFEFF' + str,
+        charset: 'utf-8',
+      });
+
+      var str = '@charset "UTF-16le"; content: "abc中文"';
+      var u8ar = encodeText(str, 'utf-8');
+      var blob = new Blob([u8ar], {type: 'text/css'});
+      assertEqual(await scrapbook.parseCssFile(blob), {
+        text: '\uFEFF' + str,
+        charset: 'utf-8',
+      });
+
+      // ignore bad @charset
+      var str = '@CHARSET "UTF-8"; content: "abc中文"';
+      var u8ar = encodeText(str, 'big5');
+      var blob = new Blob([u8ar], {type: 'text/css'});
+      assertEqual(await scrapbook.parseCssFile(blob, null, 'big5'), {
         text: str,
-        charset: 'UTF-16BE',
+        charset: 'big5',
       });
-    });
 
-    it('UTF-16BE with BOM and @charset', async function () {
-      var str = '@charset "Big5"; content: "abc中文𠀀"';
-      var u8ar = encodeText('\uFEFF' + str, 'utf-16be');
+      var str = "@charset 'UTF-8'; content: 'abc中文'";
+      var u8ar = encodeText(str, 'big5');
       var blob = new Blob([u8ar], {type: 'text/css'});
-
-      assertEqual(await scrapbook.parseCssFile(blob), {
-        text: '\uFEFF' + str,
-        charset: 'UTF-16BE',
-      });
-    });
-
-    it('UTF-16LE with BOM', async function () {
-      var str = 'content: "abc中文𠀀"';
-      var u8ar = encodeText('\uFEFF' + str, 'utf-16le');
-      var blob = new Blob([u8ar], {type: 'text/css'});
-
-      assertEqual(await scrapbook.parseCssFile(blob), {
-        text: str,
-        charset: 'UTF-16LE',
-      });
-    });
-
-    it('UTF-16LE with BOM and @charset', async function () {
-      var str = '@charset "Big5"; content: "abc中文𠀀"';
-      var u8ar = encodeText('\uFEFF' + str, 'utf-16le');
-      var blob = new Blob([u8ar], {type: 'text/css'});
-
-      assertEqual(await scrapbook.parseCssFile(blob), {
-        text: '\uFEFF' + str,
-        charset: 'UTF-16LE',
-      });
-    });
-
-    it('Big5', async function () {
-      var str = 'content: "abc中文"';
-      var u8ar = encodeText(str, 'Big5');
-      var blob = new Blob([u8ar], {type: 'text/css'});
-
-      assertEqual(await scrapbook.parseCssFile(blob, 'Big5'), {
+      assertEqual(await scrapbook.parseCssFile(blob, null, 'Big5'), {
         text: str,
         charset: 'Big5',
       });
 
+      var str = '@charset  "UTF-8"; content: "abc中文"';
+      var u8ar = encodeText(str, 'big5');
+      var blob = new Blob([u8ar], {type: 'text/css'});
+      assertEqual(await scrapbook.parseCssFile(blob, null, 'Big5'), {
+        text: str,
+        charset: 'Big5',
+      });
+    });
+
+    it('priority: 4. environment charset', async function () {
+      // UTF-8
+      var str = 'content: "abc中文𠀀"';
+      var u8ar = encodeText(str, 'utf-8');
+      var blob = new Blob([u8ar], {type: 'text/css'});
+      assertEqual(await scrapbook.parseCssFile(blob, null, 'UTF-8'), {
+        text: str,
+        charset: 'UTF-8',
+      });
+
+      // Big5
+      var str = 'content: "abc中文"';
+      var u8ar = encodeText(str, 'big5');
+      var blob = new Blob([u8ar], {type: 'text/css'});
+      assertEqual(await scrapbook.parseCssFile(blob, null, 'Big5'), {
+        text: str,
+        charset: 'Big5',
+      });
+
+      // Big5
+      var str = 'content: "abc中文"';
+      var u8ar = encodeText(str, 'big5');
+      var blob = new Blob([u8ar], {type: 'text/css'});
+      assertEqual(await scrapbook.parseCssFile(blob, null, 'Big5'), {
+        text: str,
+        charset: 'Big5',
+      });
+    });
+
+    it('priority: 5. as byte string', async function () {
+      // UTF-8
+      var str = 'content: "abc中文𠀀"';
+      var u8ar = encodeText(str, 'utf-8');
+      var blob = new Blob([u8ar], {type: 'text/css'});
       assertEqual(await scrapbook.parseCssFile(blob), {
         text: scrapbook.arrayBufferToByteString(u8ar),
         charset: null,
       });
-    });
 
-    it('Big5 with @charset', async function () {
-      var str = '@charset "Big5"; content: "abc中文"';
-      var u8ar = encodeText(str, 'Big5');
+      // Big5
+      var str = 'content: "abc中文"';
+      var u8ar = encodeText(str, 'big5');
       var blob = new Blob([u8ar], {type: 'text/css'});
-
       assertEqual(await scrapbook.parseCssFile(blob), {
-        text: '\uFEFF' + str,
-        charset: 'Big5',
+        text: scrapbook.arrayBufferToByteString(u8ar),
+        charset: null,
       });
 
-      // take environment charset in precedence
-      var str = '@charset "ISO-8859-1"; content: "abc中文"';
-      var u8ar = encodeText(str, 'Big5');
-      var blob = new Blob([u8ar], {type: 'text/css'});
-
-      assertEqual(await scrapbook.parseCssFile(blob, "Big5"), {
-        text: '\uFEFF' + str,
-        charset: 'Big5',
-      });
-    });
-
-    it('ISO-8859-1', async function () {
+      // ISO-8859-1
       var str = 'content: "abcÆ©®±¼"';
       var u8ar = encodeText(str, 'ISO-8859-1');
       var blob = new Blob([u8ar], {type: 'text/css'});
-
-      assertEqual(await scrapbook.parseCssFile(blob, 'ISO-8859-1'), {
-        text: str,
-        charset: 'ISO-8859-1',
-      });
-
       assertEqual(await scrapbook.parseCssFile(blob), {
         text: scrapbook.arrayBufferToByteString(u8ar),
         charset: null,
-      });
-    });
-
-    it('ISO-8859-1 with @charset', async function () {
-      var str = '@charset "ISO-8859-1"; content: "abcÆ©®±¼"';
-      var u8ar = encodeText(str, 'ISO-8859-1');
-      var blob = new Blob([u8ar], {type: 'text/css'});
-
-      assertEqual(await scrapbook.parseCssFile(blob), {
-        text: '\uFEFF' + str,
-        charset: 'ISO-8859-1',
-      });
-
-      // take environment charset in precedence
-      var str = '@charset "UTF-8"; content: "abcÆ©®±¼"';
-      var u8ar = encodeText(str, 'ISO-8859-1');
-      var blob = new Blob([u8ar], {type: 'text/css'});
-
-      assertEqual(await scrapbook.parseCssFile(blob, "ISO-8859-1"), {
-        text: '\uFEFF' + str,
-        charset: 'ISO-8859-1',
       });
     });
 
