@@ -25,7 +25,7 @@
 
 'use strict';
 
-const {MochaQuery: $, assert, assertEqual, assertThrows, cssRegex} = unittest;
+const {MochaQuery: $, assert, assertEqual, assertThrows, encodeText, cssRegex} = unittest;
 const $describe = $(describe);
 const $it = $(it);
 const {userAgent} = utils;
@@ -441,6 +441,76 @@ describe('core/common.js', function () {
       assertEqual(scrapbook.crop(string, 10, null, ''), 'foo bar 中文');
       assertEqual(scrapbook.crop(string, 2, null, ''), 'fo');
       assertEqual(scrapbook.crop(string, 1, null, ''), 'f');
+    });
+
+  });
+
+  describe('scrapbook.unicodeToUtf8', function () {
+
+    it('basic', function () {
+      assertEqual(scrapbook.unicodeToUtf8('\u0000'), '\x00');
+      assertEqual(scrapbook.unicodeToUtf8('\u0080'), '\xC2\x80');
+      assertEqual(scrapbook.unicodeToUtf8('\u3000'), '\xE3\x80\x80');
+      assertEqual(scrapbook.unicodeToUtf8('\uD840\uDC00'), '\xF0\xA0\x80\x80');
+      assertEqual(scrapbook.unicodeToUtf8('\u{20000}'), '\xF0\xA0\x80\x80');
+      assertEqual(scrapbook.unicodeToUtf8('\u{10FFFF}'), '\xF4\x8F\xBF\xBF');
+    });
+
+  });
+
+  describe('scrapbook.utf8ToUnicode', function () {
+
+    it('basic', function () {
+      assertEqual(scrapbook.utf8ToUnicode('\x00'), '\u0000');
+      assertEqual(scrapbook.utf8ToUnicode('\xC2\x80'), '\u0080');
+      assertEqual(scrapbook.utf8ToUnicode('\xE3\x80\x80'), '\u3000');
+      assertEqual(scrapbook.utf8ToUnicode('\xF0\xA0\x80\x80'), '\uD840\uDC00');
+      assertEqual(scrapbook.utf8ToUnicode('\xF0\xA0\x80\x80'), '\u{20000}');
+      assertEqual(scrapbook.utf8ToUnicode('\xF4\x8F\xBF\xBF'), '\u{10FFFF}');
+    });
+
+  });
+
+  describe('scrapbook.byteStringToArrayBuffer', function () {
+
+    it('basic', function () {
+      // "一天" in Big5
+      var buffer = scrapbook.byteStringToArrayBuffer('\xA4\x40\xA4\xD1');
+      assertEqual(Array.from(new Uint8Array(buffer)), [0xA4, 0x40, 0xA4, 0xD1]);
+
+      // "𠀀" in UTF-8 with BOM
+      var buffer = scrapbook.byteStringToArrayBuffer('\xEF\xBB\xBF\xF0\xA0\x80\x80');
+      assertEqual(Array.from(new Uint8Array(buffer)), [0xEF, 0xBB, 0xBF, 0xF0, 0xA0, 0x80, 0x80]);
+
+      // "𠀀" in UTF-16BE with BOM
+      var buffer = scrapbook.byteStringToArrayBuffer('\xFE\xFF\xD8\x40\xDC\x00');
+      assertEqual(Array.from(new Uint8Array(buffer)), [0xFE, 0xFF, 0xD8, 0x40, 0xDC, 0x00]);
+
+      // "𠀀" in UTF-16LE with BOM
+      var buffer = scrapbook.byteStringToArrayBuffer('\xFF\xFE\x40\xD8\x00\xDC');
+      assertEqual(Array.from(new Uint8Array(buffer)), [0xFF, 0xFE, 0x40, 0xD8, 0x00, 0xDC]);
+    });
+
+  });
+
+  describe('scrapbook.arrayBufferToByteString', function () {
+
+    it('basic', function () {
+      // "一天" in Big5
+      var buffer = new Uint8Array([0xA4, 0x40, 0xA4, 0xD1]);
+      assertEqual(scrapbook.arrayBufferToByteString(buffer), '\xA4\x40\xA4\xD1');
+
+      // "𠀀" in UTF-8 with BOM
+      var buffer = new Uint8Array([0xEF, 0xBB, 0xBF, 0xF0, 0xA0, 0x80, 0x80]);
+      assertEqual(scrapbook.arrayBufferToByteString(buffer), '\xEF\xBB\xBF\xF0\xA0\x80\x80');
+
+      // "𠀀" in UTF-16BE with BOM
+      var buffer = new Uint8Array([0xFE, 0xFF, 0xD8, 0x40, 0xDC, 0x00]);
+      assertEqual(scrapbook.arrayBufferToByteString(buffer), '\xFE\xFF\xD8\x40\xDC\x00');
+
+      // "𠀀" in UTF-16LE with BOM
+      var buffer = new Uint8Array([0xFF, 0xFE, 0x40, 0xD8, 0x00, 0xDC]);
+      assertEqual(scrapbook.arrayBufferToByteString(buffer), '\xFF\xFE\x40\xD8\x00\xDC');
     });
 
   });
@@ -1373,6 +1443,187 @@ describe('core/common.js', function () {
 
   });
 
+  $describe.skipIf($.noBrowser)('scrapbook.parseCssFile', function () {
+
+    it('UTF-8', async function () {
+      var str = 'content: "abc中文𠀀"';
+      var u8ar = encodeText(str, 'utf-8');
+      var blob = new Blob([u8ar], {type: 'text/css'});
+
+      assertEqual(await scrapbook.parseCssFile(blob, 'UTF-8'), {
+        text: str,
+        charset: 'UTF-8',
+      });
+
+      assertEqual(await scrapbook.parseCssFile(blob), {
+        text: scrapbook.arrayBufferToByteString(u8ar),
+        charset: null,
+      });
+    });
+
+    it('UTF-8 with BOM', async function () {
+      var str = 'content: "abc中文𠀀"';
+      var u8ar = encodeText('\uFEFF' + str, 'utf-8');
+      var blob = new Blob([u8ar], {type: 'text/css'});
+
+      assertEqual(await scrapbook.parseCssFile(blob), {
+        text: str,
+        charset: 'UTF-8',
+      });
+    });
+
+    it('UTF-8 with BOM and @charset', async function () {
+      var str = '@charset "Big5"; content: "abc中文𠀀"';
+      var u8ar = encodeText('\uFEFF' + str, 'utf-8');
+      var blob = new Blob([u8ar], {type: 'text/css'});
+
+      assertEqual(await scrapbook.parseCssFile(blob), {
+        text: '\uFEFF' + str,
+        charset: 'UTF-8',
+      });
+    });
+
+    it('UTF-8 with @charset', async function () {
+      var str = '@charset "UTF-8"; content: "abc中文𠀀"';
+      var u8ar = encodeText(str, 'utf-8');
+      var blob = new Blob([u8ar], {type: 'text/css'});
+
+      assertEqual(await scrapbook.parseCssFile(blob), {
+        text: '\uFEFF' + str,
+        charset: 'UTF-8',
+      });
+
+      // take environment charset in precedence
+      var str = '@charset "Big5"; content: "abc中文𠀀"';
+      var u8ar = encodeText(str, 'utf-8');
+      var blob = new Blob([u8ar], {type: 'text/css'});
+
+      assertEqual(await scrapbook.parseCssFile(blob, "UTF-8"), {
+        text: '\uFEFF' + str,
+        charset: 'UTF-8',
+      });
+    });
+
+    it('UTF-16BE with BOM', async function () {
+      var str = 'content: "abc中文𠀀"';
+      var u8ar = encodeText('\uFEFF' + str, 'utf-16be');
+      var blob = new Blob([u8ar], {type: 'text/css'});
+
+      assertEqual(await scrapbook.parseCssFile(blob), {
+        text: str,
+        charset: 'UTF-16BE',
+      });
+    });
+
+    it('UTF-16BE with BOM and @charset', async function () {
+      var str = '@charset "Big5"; content: "abc中文𠀀"';
+      var u8ar = encodeText('\uFEFF' + str, 'utf-16be');
+      var blob = new Blob([u8ar], {type: 'text/css'});
+
+      assertEqual(await scrapbook.parseCssFile(blob), {
+        text: '\uFEFF' + str,
+        charset: 'UTF-16BE',
+      });
+    });
+
+    it('UTF-16LE with BOM', async function () {
+      var str = 'content: "abc中文𠀀"';
+      var u8ar = encodeText('\uFEFF' + str, 'utf-16le');
+      var blob = new Blob([u8ar], {type: 'text/css'});
+
+      assertEqual(await scrapbook.parseCssFile(blob), {
+        text: str,
+        charset: 'UTF-16LE',
+      });
+    });
+
+    it('UTF-16LE with BOM and @charset', async function () {
+      var str = '@charset "Big5"; content: "abc中文𠀀"';
+      var u8ar = encodeText('\uFEFF' + str, 'utf-16le');
+      var blob = new Blob([u8ar], {type: 'text/css'});
+
+      assertEqual(await scrapbook.parseCssFile(blob), {
+        text: '\uFEFF' + str,
+        charset: 'UTF-16LE',
+      });
+    });
+
+    it('Big5', async function () {
+      var str = 'content: "abc中文"';
+      var u8ar = encodeText(str, 'Big5');
+      var blob = new Blob([u8ar], {type: 'text/css'});
+
+      assertEqual(await scrapbook.parseCssFile(blob, 'Big5'), {
+        text: str,
+        charset: 'Big5',
+      });
+
+      assertEqual(await scrapbook.parseCssFile(blob), {
+        text: scrapbook.arrayBufferToByteString(u8ar),
+        charset: null,
+      });
+    });
+
+    it('Big5 with @charset', async function () {
+      var str = '@charset "Big5"; content: "abc中文"';
+      var u8ar = encodeText(str, 'Big5');
+      var blob = new Blob([u8ar], {type: 'text/css'});
+
+      assertEqual(await scrapbook.parseCssFile(blob), {
+        text: '\uFEFF' + str,
+        charset: 'Big5',
+      });
+
+      // take environment charset in precedence
+      var str = '@charset "ISO-8859-1"; content: "abc中文"';
+      var u8ar = encodeText(str, 'Big5');
+      var blob = new Blob([u8ar], {type: 'text/css'});
+
+      assertEqual(await scrapbook.parseCssFile(blob, "Big5"), {
+        text: '\uFEFF' + str,
+        charset: 'Big5',
+      });
+    });
+
+    it('ISO-8859-1', async function () {
+      var str = 'content: "abcÆ©®±¼"';
+      var u8ar = encodeText(str, 'ISO-8859-1');
+      var blob = new Blob([u8ar], {type: 'text/css'});
+
+      assertEqual(await scrapbook.parseCssFile(blob, 'ISO-8859-1'), {
+        text: str,
+        charset: 'ISO-8859-1',
+      });
+
+      assertEqual(await scrapbook.parseCssFile(blob), {
+        text: scrapbook.arrayBufferToByteString(u8ar),
+        charset: null,
+      });
+    });
+
+    it('ISO-8859-1 with @charset', async function () {
+      var str = '@charset "ISO-8859-1"; content: "abcÆ©®±¼"';
+      var u8ar = encodeText(str, 'ISO-8859-1');
+      var blob = new Blob([u8ar], {type: 'text/css'});
+
+      assertEqual(await scrapbook.parseCssFile(blob), {
+        text: '\uFEFF' + str,
+        charset: 'ISO-8859-1',
+      });
+
+      // take environment charset in precedence
+      var str = '@charset "UTF-8"; content: "abcÆ©®±¼"';
+      var u8ar = encodeText(str, 'ISO-8859-1');
+      var blob = new Blob([u8ar], {type: 'text/css'});
+
+      assertEqual(await scrapbook.parseCssFile(blob, "ISO-8859-1"), {
+        text: '\uFEFF' + str,
+        charset: 'ISO-8859-1',
+      });
+    });
+
+  });
+
   $describe.skipIf($.noBrowser)('scrapbook.rewriteCssFile', function () {
 
     it('force UTF-8 if charset is known', async function () {
@@ -1411,6 +1662,23 @@ describe('core/common.js', function () {
       rewriteFontFaceUrl: url => ({url}),
       rewriteBackgroundUrl: url => ({url}),
     };
+
+    async function testByteStringRewriting(input, expected, charset) {
+      // read as byte string when charset hint is missing
+      var u8ar = encodeText(input, charset);
+      var blob = new Blob([u8ar], {type: 'text/css'});
+      var {text: parsedText, charset: parsedCharset} = await scrapbook.parseCssFile(blob);
+
+      // rewrite the parsed CSS text
+      var bstr = scrapbook.rewriteCssText(parsedText, optionsImage);
+      var ab = scrapbook.byteStringToArrayBuffer(bstr);
+      var blob = new Blob([ab], {type: 'text/css'});
+
+      // re-read as the original charset
+      var {text: output, charset} = await scrapbook.parseCssFile(blob, charset);
+
+      assertEqual(output, expected);
+    }
 
     it('image', function () {
       var input = `body { image-background: url(image.jpg); }`;
@@ -1708,6 +1976,60 @@ foo); }`;
       // bad escape, should be skipped to the end
       var input = `.mycls { background-image: url(img.jpg\\`;
       assertEqual(scrapbook.rewriteCssText(input, optionsImage), input);
+    });
+
+    $it.skipIf($.noBrowser)('image: byte string rewriting', async function () {
+      // A CSS file missing a charset hint should be handled as a byte string
+      // and be recoverable when read as the original charset.
+
+      await testByteStringRewriting(
+        'body { background-image: url("abc中文𠀀"); }',
+        'body { background-image: url("http://example.com/abc中文𠀀"); }',
+        'UTF-8',
+      );
+
+      await testByteStringRewriting(
+        'body { background-image: url("archæology±¼.html"); }',
+        'body { background-image: url("http://example.com/archæology±¼.html"); }',
+        'ISO-8859-1',
+      );
+
+      await testByteStringRewriting(
+        'body { background-image: url("abc中文"); }',
+        'body { background-image: url("http://example.com/abc中文"); }',
+        'big5',
+      );
+    });
+
+    $it.xfail()('image: bad cass of byte string rewriting (UTF-16)', async function () {
+      // UTF-16 is not ASCII compatible, and thus reading as byte string is
+      // not expected to work. Provide BOM instead.
+
+      await testByteStringRewriting(
+        'body { background-image: url("abc中文𠀀"); }',
+        'body { background-image: url("http://example.com/abc中文𠀀"); }',
+        'UTF-16',
+      );
+    });
+
+    $it.xfail()('image: bad cases of byte string rewriting (Big5)', async function () {
+      await testByteStringRewriting(
+        '/* 許功蓋 */ p::after { content: "淚豹"; } /* 璞珮 */',
+        '/* 許功蓋 */ p::after { content: "淚豹"; } /* 璞珮 */',
+        'big5',
+      );
+
+      await testByteStringRewriting(
+        'body { background-image: url("許功蓋"); }',
+        'body { background-image: url("http://example.com/許功蓋"); }',
+        'big5',
+      );
+
+      await testByteStringRewriting(
+        'body { background-image: url("功蓋天"); }',
+        'body { background-image: url("http://example.com/功蓋天"); }',
+        'big5',
+      );
     });
 
     it('image record', function () {

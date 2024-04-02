@@ -449,6 +449,117 @@
     return u8ar.buffer;
   }
 
+  /**
+   * Encode a string into bytes in the specified charset.
+   *
+   * @param {string} str - the string to encode
+   * @param {string} [charset=UTF-8] - the target charset to encode into
+   * @param {?(integer[]|string)} [replacement] - the replacement bytes (or its
+   *     corresponding Unicode char) for a non-encodable char. Empty string to
+   *     replace with nothing. Falsy to throw an error instead.
+   * @return {Uint8Array} The encoded bytes.
+   */
+  var encodeText = (() => {
+    const encodeMaps = new Map();
+
+    function getEncodeMap(charset) {
+      let map = encodeMaps.get(charset);
+      if (typeof map !== 'undefined') { return map; }
+
+      map = new Map();
+      const decoder = new TextDecoder(charset, {fatal: true});
+      for (let hi = 0x00; hi <= 0xFF; hi++) {
+        // single-byte char
+        {
+          let u8ar = new Uint8Array([hi]);
+          let chr;
+          try {
+            chr = decoder.decode(u8ar);
+          } catch (ex) {
+            // do nothing
+          }
+          if (chr && !map.has(chr)) {
+            map.set(chr, u8ar);
+          }
+          if (chr) {
+            continue;
+          }
+        }
+
+        // multi-byte char
+        for (let lo = 0x00; lo <= 0xFF; lo++) {
+          let u8ar = new Uint8Array([hi, lo]);
+          let chr;
+          try {
+            chr = decoder.decode(u8ar);
+          } catch (ex) {
+            // do nothing
+          }
+          if (chr && !map.has(chr)) {
+            map.set(chr, u8ar);
+          }
+        }
+      }
+      encodeMaps.set(charset, map);
+      return map;
+    }
+
+    function encodeText(str, charset = "UTF-8", replacement = null) {
+      charset = charset.toLowerCase();
+
+      // specially handle Unicode transformations
+      // Available UTF names:
+      // https://developer.mozilla.org/en-US/docs/Web/API/Encoding_API/Encodings
+      if (['utf-8', 'utf8', 'unicode-1-1-utf-8'].includes(charset)) {
+        return new TextEncoder().encode(str);
+      } else if (['utf-16be', 'utf-16le', 'utf-16'].includes(charset)) {
+        const littleEndian = !(charset === 'utf-16be');
+        const u8ar = new Uint8Array(str.length * 2);
+        const view = new DataView(u8ar.buffer);
+        for (let i = 0, I = str.length; i < I; i++) {
+          const code = str.charCodeAt(i);
+          view.setUint16(i * 2, code, littleEndian);
+        }
+        return u8ar;
+      }
+
+      const map = getEncodeMap(charset);
+
+      if (typeof replacement === 'string') {
+        if (replacement) {
+          const replacementBytes = map.get(replacement);
+          if (!replacementBytes) {
+            throw new RangeError(`Unable to encode the specified replacement char: ${replacement}`);
+          }
+          replacement = replacementBytes;
+        } else {
+          replacement = [];
+        }
+      }
+
+      const result = [];
+      for (let i = 0, I = str.length; i < I; i++) {
+        const code = str.codePointAt(i);
+        if (code > 0xFFFF) { i++; }
+        const chr = String.fromCodePoint(code);
+        const u8ar = map.get(chr);
+        if (!u8ar) {
+          if (replacement) {
+            result.push(...replacement);
+          } else {
+            const _code = code.toString(16).toUpperCase();
+            throw new RangeError(`Unable to encode char U+${_code} at position ${i}`);
+          }
+          continue;
+        }
+        result.push(...u8ar);
+      }
+      return new Uint8Array(result);
+    }
+
+    return encodeText;
+  })();
+
   function getRulesFromCssText(cssText) {
     const d = document.implementation.createHTMLDocument('');
     const styleElem = d.createElement('style');
@@ -537,6 +648,7 @@
     getToken,
     getUuid,
     byteStringToArrayBuffer,
+    encodeText,
     getRulesFromCssText,
     escapeRegExp,
     regex,
