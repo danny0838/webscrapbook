@@ -2618,14 +2618,6 @@
     return decodeURIComponent(escape(bstr));
   };
 
-  scrapbook.unicodeToBase64 = function (str) {
-    return btoa(unescape(encodeURIComponent(str)));
-  };
-
-  scrapbook.base64ToUnicode = function (str) {
-    return decodeURIComponent(escape(atob(str)));
-  };
-
   /**
    * supported data types: HEX, TEXT, B64, BYTES, or ARRAYBUFFER
    *
