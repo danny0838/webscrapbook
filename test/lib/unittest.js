@@ -457,16 +457,18 @@
     return styleElem.sheet.cssRules;
   }
 
-  function escapeRegExp(str) {
+  var escapeRegExp = (() => {
     // Don't escape "-" as it causes an error for a RegExp with unicode flag.
     // Escaping "-" allows the result be embedded in a character class.
     // Escaping "/" allows the result be embedded in a JS regex literal.
     const regex = /[/\\^$*+?.|()[\]{}]/g;
-    const fn = escapeRegExp = (str) => {
+
+    function escapeRegExp(str) {
       return str.replace(regex, "\\$&");
-    };
-    return fn(str);
-  }
+    }
+
+    return escapeRegExp;
+  })();
 
   /**
    * A RegExp with raw string.
