@@ -9,19 +9,20 @@
   if (typeof exports === "object" && typeof module === "object") {
     // CommonJS
     module.exports = factory(
-      require('../shared/lib/sha'),
+      require('../t/common', '../shared/lib/sha'),
     );
   } else if (typeof define === "function" && define.amd) {
     // AMD
-    define(['../shared/lib/sha'], factory);
+    define(['../t/common', '../shared/lib/sha'], factory);
   } else {
     // Browser globals
     global = typeof globalThis !== "undefined" ? globalThis : global || self;
     global.unittest = factory(
+      global.utils,
       global.jsSHA,
     );
   }
-}(this, function (jsSHA) {
+}(this, function (utils, jsSHA) {
 
   'use strict';
 
@@ -454,57 +455,48 @@
    *
    * @param {string} str - the string to encode
    * @param {string} [charset=UTF-8] - the target charset to encode into
-   * @param {?(integer[]|string)} [replacement] - the replacement bytes (or its
-   *     corresponding Unicode char) for a non-encodable char. Empty string to
-   *     replace with nothing. Falsy to throw an error instead.
-   * @return {Uint8Array} The encoded bytes.
+   * @param {*} [replacement] - the replacement char for a non-encodable char,
+   *     which should be a valid ASCII char. Empty string to replace with
+   *     nothing. Falsy to throw an error instead.
+   * @return {Promise<Uint8Array>} The encoded bytes.
    */
   var encodeText = (() => {
-    const encodeMaps = new Map();
-
-    function getEncodeMap(charset) {
-      let map = encodeMaps.get(charset);
-      if (typeof map !== 'undefined') { return map; }
-
-      map = new Map();
-      const decoder = new TextDecoder(charset, {fatal: true});
-      for (let hi = 0x00; hi <= 0xFF; hi++) {
-        // single-byte char
-        {
-          let u8ar = new Uint8Array([hi]);
-          let chr;
-          try {
-            chr = decoder.decode(u8ar);
-          } catch (ex) {
-            // do nothing
-          }
-          if (chr && !map.has(chr)) {
-            map.set(chr, u8ar);
-          }
-          if (chr) {
-            continue;
-          }
-        }
-
-        // multi-byte char
-        for (let lo = 0x00; lo <= 0xFF; lo++) {
-          let u8ar = new Uint8Array([hi, lo]);
-          let chr;
-          try {
-            chr = decoder.decode(u8ar);
-          } catch (ex) {
-            // do nothing
-          }
-          if (chr && !map.has(chr)) {
-            map.set(chr, u8ar);
-          }
-        }
+    function escapeHtml(str) {
+      const rv = [];
+      for (let i = 0, I = str.length; i < I; i++) {
+        const code = str.codePointAt(i);
+        if (code > 0xFFFF) { i++; }
+        rv.push(`&#${code};`);
       }
-      encodeMaps.set(charset, map);
-      return map;
+      return rv.join('');
     }
 
-    function encodeText(str, charset = "UTF-8", replacement = null) {
+    function unescapeHtml(str, replacement) {
+      return unescape(str).replace(/&#(?:(\d+)|x([\dA-Fa-f]+));/g, (_, dec, hex) => {
+        if (hex) {
+          return String.fromCharCode(parseInt(hex, 16));
+        }
+        if (typeof replacement === 'string') {
+          return replacement;
+        }
+        throw parseInt(dec, 10);
+      });
+    }
+
+    function byteStringToU8Array(bstr) {
+      let n = bstr.length, u8ar = new Uint8Array(n);
+      while (n--) { u8ar[n] = bstr.charCodeAt(n); }
+      return u8ar;
+    }
+
+    async function encodeText(str, charset = "UTF-8", replacement = null) {
+      // test if the charset is available
+      try {
+        new TextDecoder(charset);
+      } catch (ex) {
+        throw new RangeError(`Specified charset "${charset}" is not supported.`);
+      }
+
       charset = charset.toLowerCase();
 
       // specially handle Unicode transformations
@@ -523,38 +515,41 @@
         return u8ar;
       }
 
-      const map = getEncodeMap(charset);
+      const frame = document.createElement("iframe");
+      frame.style.setProperty('display', 'none', 'important');
+      {
+        const js = browser.runtime.getURL('lib/unittest-encoding.js');
+        const _str = escapeHtml(str);
 
-      if (typeof replacement === 'string') {
-        if (replacement) {
-          const replacementBytes = map.get(replacement);
-          if (!replacementBytes) {
-            throw new RangeError(`Unable to encode the specified replacement char: ${replacement}`);
-          }
-          replacement = replacementBytes;
+        // run script in a document with specific charset to get the encoded text
+        // hadnel different CSP rule for Chromium and Gecko
+        if (utils.userAgent.is('chromium')) {
+          frame.src = `data:text/html;charset=${encodeURIComponent(charset)},<script src="${js}" data-text="${encodeURIComponent(_str)}"></script>`;
         } else {
-          replacement = [];
+          const markup = `<script src="${js}" data-text="${_str}"></script>`;
+          const blob = new Blob([markup], {type: `text/html;charset=${charset}`});
+          frame.src = URL.createObjectURL(blob);
         }
       }
-
-      const result = [];
-      for (let i = 0, I = str.length; i < I; i++) {
-        const code = str.codePointAt(i);
-        if (code > 0xFFFF) { i++; }
-        const chr = String.fromCodePoint(code);
-        const u8ar = map.get(chr);
-        if (!u8ar) {
-          if (replacement) {
-            result.push(...replacement);
-          } else {
-            const _code = code.toString(16).toUpperCase();
-            throw new RangeError(`Unable to encode char U+${_code} at position ${i}`);
+      document.body.append(frame);
+      const aborter = new AbortController();
+      let result = await new Promise((resolve) => {
+        addEventListener("message", ({source, data}) => {
+          if (source === frame.contentWindow) {
+            aborter.abort();
+            resolve(data);
           }
-          continue;
-        }
-        result.push(...u8ar);
+        }, {signal: aborter.signal});
+      });
+      frame.remove();
+      try {
+        result = unescapeHtml(result, replacement);
+      } catch (code) {
+        const _code = code.toString(16).toUpperCase();
+        const idx = str.indexOf(String.fromCodePoint(code));
+        throw new RangeError(`Unable to encode char U+${_code} at position ${idx}`);
       }
-      return new Uint8Array(result);
+      return byteStringToU8Array(result);
     }
 
     return encodeText;
