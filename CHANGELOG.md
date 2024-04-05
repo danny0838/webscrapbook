@@ -3,6 +3,12 @@
 * Versions before 1.0 are in initial development. APIs are not stable for these versions, even a `y` version can involve a breaking change, and only partial notable changes are summarized in this document. See full commit history in the source repository for details.
 * Backend server requirement in this document refers to the version of [`webscrapbook` Python package](https://github.com/danny0838/pywebscrapbook) (or PyWebScrapBook).
 
+## [2.9.1] - 2024-04-05
+* Fixed an issue that the `@charset` rule in a CSS file is not correctly handled.
+* Fixed an issue that BOM in a CSS file is not taking as highest precedence for charset detection.
+* Fixed an issue that the document charset and the `charset` attribute of a `link` element are not honored when determining the encoding of a CSS file.
+* Miscellaneous improvements and fixes of the internal code and unit test suite.
+
 ## [2.9.0] - 2024-03-30
 * Fixed and improved capture helpers:
   * Fixed an issue that many commands do not expand parameters whose value is a command correctly.
