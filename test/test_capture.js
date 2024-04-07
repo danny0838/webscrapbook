@@ -5537,7 +5537,6 @@ it('test_capture_css_charset_link_charset', async function () {
       },
     ]
   };
-  console.warn(await readFileAsText(sitemapBlob))
   assert(await readFileAsText(sitemapBlob) === JSON.stringify(expectedData, null, 1));
 });
 
