@@ -3385,6 +3385,63 @@ it('test_capture_favicon', async function () {
   assert(!iconElem);
 });
 
+it('test_capture_favicon_bookmark', async function () {
+  /* capture.favicon = save */
+  var options = {
+    "capture.favicon": "save",
+  };
+  var blob = await capture({
+    url: `${localhost}/capture_favicon/favicon.html`,
+    mode: "bookmark",
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var doc = await readFileAsDocument(blob);
+  assertEqual(
+    doc.querySelector('link[rel="shortcut icon"]').getAttribute('href'),
+    'data:image/bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAAD/AAAA'
+  );
+
+  /* capture.favicon = link */
+  var options = {
+    "capture.favicon": "link",
+  };
+  var blob = await capture({
+    url: `${localhost}/capture_favicon/favicon.html`,
+    mode: "bookmark",
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var doc = await readFileAsDocument(blob);
+  assert(!doc.querySelector('link[rel~="icon"]'));
+
+  /* capture.favicon = blank */
+  var options = {
+    "capture.favicon": "blank",
+  };
+  var blob = await capture({
+    url: `${localhost}/capture_favicon/favicon.html`,
+    mode: "bookmark",
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var doc = await readFileAsDocument(blob);
+  assert(!doc.querySelector('link[rel~="icon"]'));
+
+  /* capture.favicon = remove */
+  var options = {
+    "capture.favicon": "remove",
+  };
+  var blob = await capture({
+    url: `${localhost}/capture_favicon/favicon.html`,
+    mode: "bookmark",
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var doc = await readFileAsDocument(blob);
+  assert(!doc.querySelector('link[rel~="icon"]'));
+});
+
 /**
  * Check if option works
  *
