@@ -1608,6 +1608,24 @@
       }
     }
 
+    // attempt to take site favicon
+    if (!favIconUrl) {
+      const u = new URL(sourceUrlMain);
+      if (['http:', 'https:'].includes(u.protocol)) {
+        const url = u.origin + '/' + 'favicon.ico';
+        const fetchResponse = await capturer.fetch({
+          url,
+          refUrl: sourceUrl,
+          refPolicy,
+          settings,
+          options,
+        });
+        if (!fetchResponse.error) {
+          favIconUrl = url;
+        }
+      }
+    }
+
     // fetch favicon as data URL
     if (favIconUrl && !favIconUrl.startsWith('data:')) {
       try {

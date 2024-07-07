@@ -3205,12 +3205,56 @@
       }
     }
 
-    // force UTF-8
+    // handle meta charset and favicon
     if (rootNode.nodeName.toLowerCase() === "html") {
       if (!metaCharsetNode) {
         metaCharsetNode = headNode.insertBefore(newDoc.createElement("meta"), headNode.firstChild);
         metaCharsetNode.setAttribute("charset", "UTF-8");
         captureRecordAddedNode(metaCharsetNode);
+      }
+      if (!favIconUrl) {
+        switch (options["capture.favicon"]) {
+          case "blank":
+          case "remove":
+            break;
+          case "link":
+          case "save":
+          default: {
+            const u = new URL(docUrl);
+            if (!['http:', 'https:'].includes(u.protocol)) {
+              break;
+            }
+
+            const refPolicy = docRefPolicy;
+            const url = u.origin + '/' + 'favicon.ico';
+            tasks.push(async () => {
+              const fetchResponse = await capturer.invoke("fetch", {
+                url: url,
+                refUrl,
+                refPolicy,
+                settings,
+                options,
+              });
+              if (!fetchResponse.error) {
+                const favIconNode = headNode.appendChild(newDoc.createElement('link'));
+                favIconNode.rel = 'shortcut icon';
+                favIconNode.href = favIconUrl = url;
+                captureRecordAddedNode(favIconNode);
+                if (options["capture.favicon"] !== "link") {
+                  const response = await downloadFile({
+                    url,
+                    refUrl,
+                    refPolicy,
+                    settings,
+                    options,
+                  });
+                  favIconNode.href = favIconUrl = response.url;
+                }
+              }
+            });
+            break;
+          }
+        }
       }
     }
 
