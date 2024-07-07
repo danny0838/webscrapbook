@@ -234,6 +234,7 @@
    * @param {string} [params.refPolicy] - the referrer policy
    * @param {captureSettings} params.settings
    * @param {string} [params.settings.title] - item title
+   * @param {string} [params.settings.favIconUrl] - item favicon
    * @param {captureOptions} params.options
    * @return {Promise<captureDocumentResponse|downloadBlobResponse|transferableBlob>}
    */
