@@ -3046,25 +3046,25 @@
         if (rootNode.nodeName.toLowerCase() === "html") {
           const headNodeBefore = headNode.previousSibling;
           if (!headNodeBefore || headNodeBefore.nodeType != 3) {
-            rootNode.insertBefore(newDoc.createTextNode("\n"), headNode);
+            headNode.before("\n");
           }
           const headNodeStart = headNode.firstChild;
           if (!headNodeStart || headNodeStart.nodeType != 3) {
-            headNode.insertBefore(newDoc.createTextNode("\n"), headNodeStart);
+            headNode.prepend("\n");
           }
           const headNodeEnd = headNode.lastChild;
           if (!headNodeEnd || headNodeEnd.nodeType != 3) {
-            headNode.appendChild(newDoc.createTextNode("\n"));
+            headNode.append("\n");
           }
           const headNodeAfter = headNode.nextSibling;
           if (!headNodeAfter || headNodeAfter.nodeType != 3) {
-            rootNode.insertBefore(newDoc.createTextNode("\n"), headNodeAfter);
+            headNode.after("\n");
           }
           const bodyNode = rootNode.querySelector("body");
           if (bodyNode) {
             const bodyNodeAfter = bodyNode.nextSibling;
             if (!bodyNodeAfter) {
-              rootNode.insertBefore(newDoc.createTextNode("\n"), bodyNodeAfter);
+              bodyNode.after("\n");
             }
           }
         }
@@ -3211,6 +3211,9 @@
         metaCharsetNode = headNode.insertBefore(newDoc.createElement("meta"), headNode.firstChild);
         metaCharsetNode.setAttribute("charset", "UTF-8");
         captureRecordAddedNode(metaCharsetNode);
+        if (options["capture.prettyPrint"]) {
+          metaCharsetNode.before("\n");
+        }
       }
       if (!favIconUrl) {
         switch (options["capture.favicon"]) {
@@ -3240,6 +3243,9 @@
                 favIconNode.rel = 'shortcut icon';
                 favIconNode.href = favIconUrl = url;
                 captureRecordAddedNode(favIconNode);
+                if (options["capture.prettyPrint"]) {
+                  favIconNode.after("\n");
+                }
                 if (options["capture.favicon"] !== "link") {
                   const response = await downloadFile({
                     url,
