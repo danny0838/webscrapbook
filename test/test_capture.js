@@ -8237,8 +8237,8 @@ it('test_capture_frame_cross_origin', async function () {
  * capture.frame
  */
 $it.xfailIf(
-  userAgent.is('firefox'),
-  'content script cannot be injected into a sandboxed iframe in Firefox',
+  userAgent.is('firefox') && userAgent.major < 128,
+  'content script cannot be injected into a sandboxed iframe in Firefox < 128',
 )('test_capture_frame_sandboxed', async function () {
   /* capture.frame = save */
   var options = {
@@ -8265,8 +8265,8 @@ $it.xfailIf(
 });
 
 $it.skipIf(
-  !userAgent.is('firefox'),
-)('test_capture_frame_sandboxed_firefox', async function () {
+  !(userAgent.is('firefox') && userAgent.major < 128),
+)('test_capture_frame_sandboxed_firefox_lt_128', async function () {
   /* capture.frame = save */
   var options = {
     "capture.frame": "save",
