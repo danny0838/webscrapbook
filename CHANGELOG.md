@@ -3,6 +3,9 @@
 * Versions before 1.0 are in initial development. APIs are not stable for these versions, even a `y` version can involve a breaking change, and only partial notable changes are summarized in this document. See full commit history in the source repository for details.
 * Backend server requirement in this document refers to the version of [`webscrapbook` Python package](https://github.com/danny0838/pywebscrapbook) (or PyWebScrapBook).
 
+## [2.10.1] - 2024-07-08
+* Fixed a packaging error.
+
 ## [2.10.0] - 2024-07-08
 * Added support of capturing site favicon.
 * Improved `capture.prettyPrint` for some elements inserted during a capture.
