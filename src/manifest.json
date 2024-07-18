@@ -28,7 +28,7 @@
     "webRequestBlocking",
     "http://*/*",
     "https://*/*",
-    "file://*"
+    "file:///*"
   ],
 
   "background": {
