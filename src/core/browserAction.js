@@ -16,12 +16,7 @@
   'use strict';
 
   document.addEventListener('DOMContentLoaded', async () => {
-    // load languages
-    scrapbook.loadLanguages(document);
-
-    await scrapbook.loadOptionsAuto;
-
-    const selectTabFromDom = async function (baseElem) {
+    async function selectTabFromDom(baseElem) {
       let selector = baseElem.nextSibling;
       if (selector && selector.className === "selector") {
         while (selector.firstChild) { selector.firstChild.remove(); }
@@ -44,7 +39,7 @@
           selector.appendChild(elem);
         }
       });
-    };
+    }
 
     /**
      * @typedef {Object} captureCommandParams
@@ -57,7 +52,7 @@
      * @param {MouseEvent} event
      * @param {captureCommandParams} params
      */
-    const onCaptureCommandClick = async (event, params) => {
+    async function onCaptureCommandClick(event, params) {
       const tabs = params.forAllTabs ? await scrapbook.getContentTabs() :
           targetTab ? await scrapbook.getHighlightedTabs() :
           [await selectTabFromDom(event.currentTarget)];
@@ -90,13 +85,13 @@
           break;
         }
       }
-    };
+    }
 
     /**
      * @param {DragEvent} event
      * @param {captureCommandParams} params
      */
-    const onCaptureCommandDragStart = function (event, params) {
+    function onCaptureCommandDragStart(event, params) {
       event.dataTransfer.setData(
         'application/scrapbook.command+json',
         JSON.stringify(Object.assign({
@@ -112,30 +107,31 @@
       setTimeout(() => {
         document.documentElement.classList.add('dragged-within');
       }, 0);
-    };
+    }
 
-    const onCaptureCommandDragEnd = function (event) {
+    function onCaptureCommandDragEnd(event) {
       document.documentElement.classList.remove('dragged-within');
-    };
+    }
 
-    const {isPrompt, targetTab} = await (async () => {
-      const currentTab = await browser.tabs.getCurrent();
+    // load languages
+    scrapbook.loadLanguages(document);
 
-      // currentTab === undefined => browserAction.html is a prompt diaglog;
-      // otherwise browserAction.html is opened in a tab (e.g. Firefox or
-      // Chromium based mobile browser, or by visiting URL)
-      const isPrompt = !currentTab;
+    await scrapbook.loadOptionsAuto;
 
-      const activeTab = (await browser.tabs.query({active: true, currentWindow: true}))[0];
+    // this browserAction page (browserAction.html)
+    const currentTab = await browser.tabs.getCurrent();
 
-      // Get a target tab whenever determinable.
-      // activeTab is the page where user clicks browserAction in Firefox or
-      // Chromium based mobile browser.
-      // activeTab === currentTab if the browserAction page is opened by visiting URL.
-      const targetTab = (isPrompt || activeTab && activeTab.id !== currentTab.id)  ? activeTab : undefined;
+    // currentTab === undefined => browserAction.html is a prompt diaglog;
+    // otherwise browserAction.html is opened in a tab (e.g. Chromium-based
+    // mobile browser, or by visiting URL)
+    const isPrompt = !currentTab;
 
-      return {isPrompt, targetTab};
-    })();
+    // the page where the user invokes browserAction
+    // activeTab === currentTab if the browserAction page is opened by visiting URL.
+    const activeTab = (await browser.tabs.query({active: true, currentWindow: true}))[0];
+
+    // the target tab for the browserAction commands
+    const targetTab = (isPrompt || activeTab && activeTab.id !== currentTab.id) ? activeTab : undefined;
 
     const allowFileAccess = await browser.extension.isAllowedFileSchemeAccess();
 
@@ -220,7 +216,7 @@
         tabId: tab.id,
         force: true,
       });
-      if (!targetTab || !isPrompt) {
+      if (!isPrompt) {
         return browser.tabs.update(tab.id, {
           active: true,
         });
