@@ -1681,6 +1681,8 @@
       }
     }
 
+    capturer.log(`Saving data...`);
+
     let html;
     {
       const url = sourceUrl.startsWith("data:") ? "data:" : sourceUrl;
