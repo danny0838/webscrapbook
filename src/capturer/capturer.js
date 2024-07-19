@@ -238,12 +238,11 @@
 
           try {
             const item = await new Promise((resolve, reject) => {
-              let id = null;
-              const onChanged = async (delta) => {
+              async function onChanged(delta) {
                 if (delta.id !== id) { return; }
                 try {
                   if (delta.error) {
-                    browser.downloads.onChanged.removeListener(onChanged);
+                    cleanup();
                     await browser.downloads.erase({id});
 
                     // Treat download failure as filename being taken.
@@ -252,26 +251,42 @@
                     // - Firefox will fail to start downloading.
                     resolve(null);
                   } else if (delta.state && delta.state.current === "complete") {
-                    browser.downloads.onChanged.removeListener(onChanged);
+                    cleanup();
                     const [item] = await browser.downloads.search({id});
                     resolve(item);
                   }
                 } catch (ex) {
-                  // reject for an unexpected error
-                  reject(new Error(`Unexpected error: ${ex.message}`));
+                  // reject an unexpected error
+                  reject(ex);
                 }
-              };
+              }
+
+              function cleanup() {
+                if (cleanup.done) { return; }
+                cleanup.done = true;
+                browser.downloads.onChanged.removeListener(onChanged);
+                clearTimeout(timer);
+              }
+
+              let id = null;
+              let timer = null;
               browser.downloads.onChanged.addListener(onChanged);
-              browser.downloads.download({
-                url,
-                filename,
-                conflictAction: "uniquify",
-                saveAs: false,
-              }).catch(ex => {
-                // reject for an unexpected error
-                reject(new Error(`Unable to start downloading: ${ex.message}`));
+
+              // Firefox Android >= 79: browser.downloads.download() halts forever.
+              // Add a timeout to catch it.
+              new Promise((resolve, reject) => {
+                browser.downloads.download({
+                  url,
+                  filename,
+                  conflictAction: "uniquify",
+                  saveAs: false,
+                }).then(resolve).catch(reject);
+                timer = setTimeout(() => reject(new Error('Timeout for downloads.download()')), 5000);
               }).then(downloadId => {
                 id = downloadId;
+              }).catch(ex => {
+                cleanup();
+                reject(ex);
               });
             });
 
@@ -320,7 +335,7 @@
 
             return true;
           } catch (ex) {
-            throw new Error(`Failed to download "${filename}": ${ex.message}`);
+            throw new Error(`Unable to determine target folder name for "${filename}": ${ex.message}`);
           }
         };
         break;
@@ -3923,7 +3938,14 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
     }
 
     isDebug && console.debug("download start", downloadParams);
-    const downloadId = await browser.downloads.download(downloadParams);
+
+    // Firefox Android >= 79: browser.downloads.download() halts forever.
+    // Add a timeout to catch it.
+    const downloadId = await new Promise((resolve, reject) => {
+      browser.downloads.download(downloadParams).then(resolve).catch(reject);
+      setTimeout(() => reject(new Error(`Timeout for downloads.download()`)), 5000);
+    });
+
     isDebug && console.debug("download response", downloadId);
     return await new Promise((resolve, reject) => {
       capturer.downloadHooks.set(downloadId, {
