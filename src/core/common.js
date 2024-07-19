@@ -62,6 +62,7 @@
     "ui.toolbar.showOpenScrapBook": true,
     "ui.toolbar.showOpenViewer": true,
     "ui.toolbar.showOpenOptions": true,
+    "ui.autoCloseBrowserAction": true,
     "ui.showContextMenu": true,
     "ui.autoCloseCaptureDialog": "none", // "none", "nowarn", "noerror", "nofailure", "always"
     "ui.notifyPageCaptured": true,

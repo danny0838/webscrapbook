@@ -113,6 +113,16 @@
       document.documentElement.classList.remove('dragged-within');
     }
 
+    async function autoClose() {
+      if (scrapbook.getOption("ui.autoCloseBrowserAction")) {
+        if (isPrompt) {
+          window.close();
+        } else {
+          return await browser.tabs.remove(currentTab.id);
+        }
+      }
+    }
+
     // load languages
     scrapbook.loadLanguages(document);
 
@@ -171,43 +181,49 @@
     }
 
     document.getElementById("captureTab").addEventListener('click', async (event) => {
-      onCaptureCommandClick(event, {
+      await onCaptureCommandClick(event, {
         cmd: 'capture',
       });
+      autoClose();
     });
 
     document.getElementById("captureTabSource").addEventListener('click', async (event) => {
-      onCaptureCommandClick(event, {
+      await onCaptureCommandClick(event, {
         cmd: 'capture',
         mode: "source",
       });
+      autoClose();
     });
 
     document.getElementById("captureTabBookmark").addEventListener('click', async (event) => {
-      onCaptureCommandClick(event, {
+      await onCaptureCommandClick(event, {
         cmd: 'capture',
         mode: "bookmark",
       });
+      autoClose();
     });
 
     document.getElementById("captureTabAs").addEventListener('click', async (event) => {
-      onCaptureCommandClick(event, {
+      await onCaptureCommandClick(event, {
         cmd: 'captureAs',
       });
+      autoClose();
     });
 
     document.getElementById("batchCapture").addEventListener('click', async (event) => {
-      onCaptureCommandClick(event, {
+      await onCaptureCommandClick(event, {
         cmd: 'batchCapture',
         forAllTabs: true,
       });
+      autoClose();
     });
 
     document.getElementById("batchCaptureLinks").addEventListener('click', async (event) => {
-      onCaptureCommandClick(event, {
+      await onCaptureCommandClick(event, {
         cmd: 'batchCaptureLinks',
         mode: "source",
       });
+      autoClose();
     });
 
     document.getElementById("editTab").addEventListener('click', async (event) => {
@@ -217,35 +233,40 @@
         force: true,
       });
       if (!isPrompt) {
-        return browser.tabs.update(tab.id, {
+        await browser.tabs.update(tab.id, {
           active: true,
         });
       }
+      autoClose();
     });
 
     document.getElementById("searchCaptures").addEventListener('click', async (event) => {
       const tabs = targetTab ? 
           await scrapbook.getHighlightedTabs() : 
           [await selectTabFromDom(event.currentTarget)];
-      return await scrapbook.searchCaptures({
+      await scrapbook.searchCaptures({
         tabs,
-        newTab: !!targetTab,
+        newTab: true,
       });
+      autoClose();
     });
 
     document.getElementById("openScrapBook").addEventListener('click', async (event) => {
-      return await scrapbook.openScrapBook({newTab: !!targetTab});
+      await scrapbook.openScrapBook({newTab: true});
+      autoClose();
     });
 
     document.getElementById("openViewer").addEventListener('click', async (event) => {
-      return await scrapbook.visitLink({
+      await scrapbook.visitLink({
         url: browser.runtime.getURL("viewer/load.html"),
-        newTab: !!targetTab,
+        newTab: true,
       });
+      autoClose();
     });
 
     document.getElementById("openOptions").addEventListener('click', async (event) => {
-      return await browser.runtime.openOptionsPage();
+      await browser.runtime.openOptionsPage();
+      autoClose();
     });
 
     /* drag and drop */
