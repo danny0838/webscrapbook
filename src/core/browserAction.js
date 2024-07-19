@@ -245,11 +245,7 @@
     });
 
     document.getElementById("openOptions").addEventListener('click', async (event) => {
-      return await scrapbook.visitLink({
-        url: browser.runtime.getURL("core/options.html"),
-        newTab: !!targetTab,
-        singleton: true,
-      });
+      return await browser.runtime.openOptionsPage();
     });
 
     /* drag and drop */

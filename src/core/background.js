@@ -32,11 +32,7 @@
       },
 
       async openOptions() {
-        return await scrapbook.visitLink({
-          url: browser.runtime.getURL("core/options.html"),
-          newTab: true,
-          singleton: true,
-        });
+        return await browser.runtime.openOptionsPage();
       },
 
       async openViewer() {
