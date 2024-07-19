@@ -3,6 +3,11 @@
 * Versions before 1.0 are in initial development. APIs are not stable for these versions, even a `y` version can involve a breaking change, and only partial notable changes are summarized in this document. See full commit history in the source repository for details.
 * Backend server requirement in this document refers to the version of [`webscrapbook` Python package](https://github.com/danny0838/pywebscrapbook) (or PyWebScrapBook).
 
+## [2.11.0] - 2024-07-19
+* The toolbar dialog now automatically closes when a command is invoked, which can be tweaked through option `ui.autoCloseBrowserAction`.
+* No more restrict single indexer or checker to be run.
+* Miscellaneous improvements and fixes of the UI and internal code.
+
 ## [2.10.1] - 2024-07-08
 * Fixed a packaging error.
 
