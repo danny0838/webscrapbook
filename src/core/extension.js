@@ -462,13 +462,13 @@
    * @return {undefined|Tab}
    */
   scrapbook.openScrapBook = async function ({newTab = true} = {}) {
-    const url = browser.runtime.getURL("scrapbook/sidebar.html");
-
     if (browser.sidebarAction) {
       // This can only be called in a user action handler.
       // https://developer.mozilla.org/docs/Mozilla/Add-ons/WebExtensions/User_actions
       return await browser.sidebarAction.open();
     }
+
+    const url = browser.runtime.getURL("scrapbook/sidebar.html");
 
     let sidebarTab = (await browser.tabs.query({}))
         .filter(t => scrapbook.splitUrl(t.url)[0] === url)[0];
@@ -545,8 +545,7 @@
 
     // update the sidebar tab if it exists
     if (sidebarTab) {
-      await browser.tabs.update(sidebarTab.id, {active: true});
-      return sidebarTab;
+      return await browser.tabs.update(sidebarTab.id, {active: true});
     }
 
     return await scrapbook.visitLink({url, newTab});
