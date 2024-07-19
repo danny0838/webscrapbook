@@ -283,7 +283,6 @@
     return await scrapbook.visitLink({
       url: u.href,
       newTab: true,
-      singleton: true,
     });
   }
 
@@ -328,7 +327,6 @@
     return await scrapbook.visitLink({
       url: u.href,
       newTab: true,
-      singleton: true,
     });
   }
 

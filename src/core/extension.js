@@ -101,40 +101,14 @@
   /**
    * @param {string} url
    * @param {boolean} [newTab] - Truthy to always open in a new tab.
-   * @param {string|array|boolean} [singleton] - URL match pattern for singleton;
-   *     true: match url with any query; false: not singleton.
    * @param {boolean} [inNormalWindow] - Open in a normal window only.
    * @return {Promise<Tab>}
    */
   scrapbook.visitLink = async function ({
     url,
     newTab = false,
-    singleton = false,
     inNormalWindow = false,
   }) {
-    // If a matched singleton tab exists, return it.
-    if (singleton) {
-      if (singleton === true) {
-        const u = new URL(url);
-        u.search = '';
-        u.hash = '';
-        singleton = [u.href, u.href + "?*"];
-      }
-
-      const existedTab = (await browser.tabs.query({url: singleton}))[0];
-
-      if (existedTab) {
-        if (browser.windows) {
-          // In Chromium for Android (e.g. Kiwi Browser):
-          // - windowId of any tab is 1, which refers a non-existent window.
-          // - browser.windows.update() for a non-existent window does nothing
-          //   rather than throw.
-          await browser.windows.update(existedTab.windowId, {drawAttention: true});
-        }
-        return await browser.tabs.update(existedTab.id, {active: true});
-      }
-    }
-
     if (newTab) {
       // If inNormalWindow, create a tab in the last focused window.
       //

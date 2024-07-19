@@ -1423,7 +1423,7 @@
       }
     },
 
-    async openLink(url, newTab = false, singleton = false) {
+    async openLink(url, newTab = false) {
       // prevent open in self tab if window not supported
       if (!browser.windows) {
         newTab = true;
@@ -1432,7 +1432,6 @@
       return await scrapbook.visitLink({
         url,
         newTab,
-        singleton,
         inNormalWindow: true,
       });
     },
