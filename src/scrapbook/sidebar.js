@@ -1424,9 +1424,18 @@
     },
 
     async openLink(url, newTab = false) {
-      // prevent open in self tab if window not supported
-      if (!browser.windows) {
-        newTab = true;
+      // Specially open the link in another same tab when multi-window is not
+      // supported. Also note that a mobile browser usually requires a parent
+      // session to allow closing a tab using the back button/gesture.
+      // Explicitly check for a mobile browser since a Chromium-based Android
+      // browser (e.g. Kiwi Browser) may support browser.windows, but actually
+      // no visible multi-window.
+      if (scrapbook.userAgent.is('mobile') || !browser.windows) {
+        const a = document.createElement('a');
+        a.href = url;
+        a.target = newTab ? '_blank' : 'scrapbook';
+        a.click();
+        return;
       }
 
       return await scrapbook.visitLink({
