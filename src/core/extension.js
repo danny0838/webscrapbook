@@ -125,15 +125,7 @@
         return await browser.tabs.create({url, windowId: win.id});
       }
 
-      let [targetTab] = win.tabs.filter(x => x.active);
-
-      // If targetTab is the current tab, treat as if no targetTab.
-      if (targetTab) {
-        const currentTab = await browser.tabs.getCurrent();
-        if (currentTab && targetTab.id === currentTab.id) {
-          targetTab = null;
-        }
-      }
+      const [targetTab] = win.tabs.filter(x => x.active);
 
       if (!targetTab) {
         return await browser.tabs.create({url, windowId: win.id});
