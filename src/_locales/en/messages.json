@@ -880,7 +880,7 @@
     "message": "Fonts:"
   },
   "OptionCaptureFontTooltip": {
-    "message": "This determines how fonts are handled.\n\n• Save: Save all fonts to local.\n• Save used: Save only the fonts used by elements in the captured web page area. If the captured page is not displayed (such as capture source), all fonts are still saved.\n• Link: Link the font to its source URL. Note that a network flow will be triggered when browsing the captured document in the future.\n• Blank: Clear fonts from the stylesheets."
+    "message": "This determines how fonts are handled.\n\n• Save: Save all fonts to local.\n• Save used: Save only the fonts used by elements in the captured web page area. If the captured page is not displayed (such as capture source), all fonts are still saved. NOTE: This requires a complex computation and may be erroneous or resource-consuming for certain complicated web pages.\n• Link: Link the font to its source URL. Note that a network flow will be triggered when browsing the captured document in the future.\n• Blank: Clear fonts from the stylesheets."
   },
   "OptionCaptureFormStatusHtmlAllLabel": {
     "message": "Keep all HTML"
@@ -925,7 +925,7 @@
     "message": "Style images:"
   },
   "OptionCaptureImageBackgroundTooltip": {
-    "message": "This determines how style images (images of background, cursor, list-item, etc., used by the stylesheet, and the background attribute of an element in old HTML standard) are handled.\n\n• Save: Save all style images to local.\n• Save used: Save only the style images used by elements in the captured web page area. If the captured page is not displayed (such as capture source), all style images are still saved.\n• Link: Link the style image to its source URL. Note that a network flow will be triggered when browsing the captured document in the future.\n• Blank: Clear style images from the stylesheets."
+    "message": "This determines how style images (images of background, cursor, list-item, etc., used by the stylesheet, and the background attribute of an element in old HTML standard) are handled.\n\n• Save: Save all style images to local.\n• Save used: Save only the style images used by elements in the captured web page area. If the captured page is not displayed (such as capture source), all style images are still saved. NOTE: This requires a complex computation and may be erroneous or resource-consuming for certain complicated web pages.\n• Link: Link the style image to its source URL. Note that a network flow will be triggered when browsing the captured document in the future.\n• Blank: Clear style images from the stylesheets."
   },
   "OptionCaptureImageLabel": {
     "message": "Images:"
