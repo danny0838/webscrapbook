@@ -3,6 +3,10 @@
 * Versions before 1.0 are in initial development. APIs are not stable for these versions, even a `y` version can involve a breaking change, and only partial notable changes are summarized in this document. See full commit history in the source repository for details.
 * Backend server requirement in this document refers to the version of [`webscrapbook` Python package](https://github.com/danny0838/pywebscrapbook) (or PyWebScrapBook).
 
+## [2.12.0] - 2024-07-21
+* Improved the data scheme for constructable stylesheets to prevent a catastrophic volume/memory usage on one shared among different DOMs. Also added an option Added an option `capture.adoptedStyleSheet` for it.
+* Miscellaneous improvements and fixes of the UI.
+
 ## [2.11.1] - 2024-07-20
 * Improved mobile navigation for scrapbooks.
 * Miscellaneous improvements and fixes of the UI and internal code.
