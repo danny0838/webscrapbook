@@ -1144,18 +1144,6 @@
                   root: elem.getRootNode(),
                 });
               });
-            } else if (scrapbook.getScrapbookObjectType(elem) === 'adoptedStyleSheet') {
-              // special handling of adoptedStyleSheets, who has no origNode
-              cssTasks.push(async () => {
-                await cssResourcesHandler.inspectCss({
-                  css: elem.sheet,
-                  baseUrl: baseUrlCurrent,
-                  refUrl,
-                  refPolicy,
-                  envCharset: charset,
-                  root: elem.getRootNode(),
-                });
-              });
             }
 
             switch (options["capture.style"]) {
@@ -2628,8 +2616,8 @@
           const shadowRoot = elem.shadowRoot;
           if (shadowRoot) {
             const shadowRootOrig = origNodeMap.get(shadowRoot);
-            addAdoptedStyleSheets(shadowRootOrig, shadowRoot);
             cssTasks.push(() => { cssResourcesHandler.scopePush(shadowRootOrig); });
+            addAdoptedStyleSheets(shadowRootOrig, shadowRoot);
             rewriteRecursively(shadowRoot, rootName, rewriteNode);
             cssTasks.push(() => { cssResourcesHandler.scopePop(); });
             shadowRootList.push(shadowRoot);
@@ -2754,14 +2742,33 @@
     };
 
     const addAdoptedStyleSheets = (docOrShadowRoot, root) => {
-      for (const refCss of capturer.getAdoptedStyleSheets(docOrShadowRoot)) {
-        const css = root.appendChild(newDoc.createElement("style"));
-        captureRecordAddedNode(css);
-        css.textContent = Array.prototype.map.call(
-          refCss.cssRules,
-          cssRule => cssRule.cssText,
-        ).join("\n");
-        css.setAttribute("data-scrapbook-elem", "adoptedStyleSheet");
+      if (['blank', 'remove'].includes(options["capture.style"]) || options["capture.adoptedStyleSheet"] !== "save") {
+        return;
+      }
+      const baseUrlCurrent = baseUrl;
+      const refPolicy = docRefPolicy;
+      const ids = [];
+      for (const css of capturer.getAdoptedStyleSheets(docOrShadowRoot)) {
+        let id = adoptedStyleSheetMap.get(css);
+        if (typeof id === 'undefined') {
+          id = adoptedStyleSheetMap.size;
+          adoptedStyleSheetMap.set(css, id);
+        }
+        ids.push(id);
+        cssTasks.push(async () => {
+          await cssResourcesHandler.inspectCss({
+            css,
+            baseUrl: baseUrlCurrent,
+            refUrl,
+            refPolicy,
+            envCharset: charset,
+            root,
+          });
+        });
+      }
+      if (ids.length) {
+        const elem = root.host || root;
+        captureRewriteAttr(elem, "data-scrapbook-adoptedstylesheets", ids.join(','));
       }
     };
 
@@ -2853,6 +2860,7 @@
     const origNodeMap = new WeakMap();
     const clonedNodeMap = new WeakMap();
     const shadowRootList = [];
+    const adoptedStyleSheetMap = new Map();
     const customElementNames = new Set();
 
     // create a new document to replicate nodes via import
@@ -3069,8 +3077,6 @@
           }
         }
       }
-
-      addAdoptedStyleSheets(doc, rootNode);
     }
 
     // remove webscrapbook toolbar related
@@ -3172,6 +3178,7 @@
     let metaCharsetNode;
     let favIconUrl;
     let requireBasicLoader = false;
+    addAdoptedStyleSheets(doc, rootNode);
     rewriteRecursively(rootNode, null, rewriteNode);
 
     // record metadata
@@ -3262,6 +3269,34 @@
           }
         }
       }
+    }
+
+    // handle adoptedStyleSheets
+    if (adoptedStyleSheetMap.size && !["blank", "remove"].includes(options["capture.style"])) {
+      const baseUrlCurrent = baseUrl;
+      const refPolicy = docRefPolicy;
+      for (const [css, id] of adoptedStyleSheetMap) {
+        tasks.push(async () => {
+          const cssTexts = await Promise.all(
+            Array.prototype.map.call(
+              css.cssRules,
+              cssRule => cssHandler.rewriteCssRules({
+                cssRules: [cssRule],
+                baseUrl: baseUrlCurrent,
+                refUrl,
+                refPolicy,
+                envCharset: charset,
+                refCss: css,
+                rootNode: null,
+                settings,
+                options,
+              }),
+            )
+          );
+          captureRewriteAttr(rootNode, `data-scrapbook-adoptedstylesheet-${id}`, cssTexts.join('\n\n'));
+        });
+      }
+      requireBasicLoader = true;
     }
 
     // map used background images and fonts
@@ -3421,6 +3456,30 @@
       };
 
       const processRootNode = (rootNode) => {
+        // handle adoptedStyleSheet
+        handleAdoptedStyleSheet: {
+          const elem = rootNode.host || rootNode;
+          elem.removeAttribute("data-scrapbook-adoptedstylesheets");
+
+          const docOrShadowRoot = origNodeMap.get(rootNode).getRootNode();
+          if (!docOrShadowRoot.adoptedStyleSheets) {
+            break handleAdoptedStyleSheet;
+          }
+
+          const ids = [];
+          for (const css of docOrShadowRoot.adoptedStyleSheets) {
+            let id = adoptedStyleSheetMap.get(css);
+            if (typeof id === 'undefined') {
+              id = adoptedStyleSheetMap.size;
+              adoptedStyleSheetMap.set(css, id);
+            }
+            ids.push(id);
+          }
+          if (ids.length) {
+            elem.setAttribute("data-scrapbook-adoptedstylesheets", ids.join(','));
+          }
+        }
+
         // fix noscript
         // noscript cannot be nested
         for (const elem of rootNode.querySelectorAll('noscript')) {
@@ -3572,6 +3631,7 @@
 
       const origNodeMap = new WeakMap();
       const clonedNodeMap = new WeakMap();
+      const adoptedStyleSheetMap = new Map();
 
       // create a new document to replicate nodes via import
       const newDoc = scrapbook.cloneDocument(doc, {origNodeMap, clonedNodeMap});
@@ -3596,6 +3656,28 @@
       }
 
       processRootNode(rootNode);
+
+      // handle adoptedStyleSheet
+      {
+        const regex = /^data-scrapbook-adoptedstylesheet-(\d+)$/;
+        const rootNode = newDoc.documentElement;
+        for (const attrNode of rootNode.attributes) {
+          const attr = attrNode.nodeName;
+          if (regex.test(attr)) {
+            rootNode.removeAttribute(attr);
+          }
+        }
+        if (adoptedStyleSheetMap.size) {
+          for (const [css, id] of adoptedStyleSheetMap) {
+            const cssTexts = Array.prototype.map.call(
+              css.cssRules,
+              cssRule => cssRule.cssText,
+            );
+            rootNode.setAttribute(`data-scrapbook-adoptedstylesheet-${id}`, cssTexts.join('\n\n'));
+          }
+          requireBasicLoader = true;
+        }
+      }
 
       // common pre-save process
       await capturer.preSaveProcess({
@@ -3682,6 +3764,43 @@
             k5 = "data-scrapbook-option-selected",
             k6 = "data-scrapbook-input-value",
             k7 = "data-scrapbook-textarea-value",
+            k8 = "data-scrapbook-adoptedstylesheets",
+            re = /^data-scrapbook-adoptedstylesheet-(\d+)$/,
+            d = document,
+            r = d.documentElement,
+            asl = (function (r) {
+              var l = [], d, E, i, e, m, c, j;
+              if (typeof document.adoptedStyleSheets !== 'undefined') {
+                E = r.attributes;
+                i = E.length;
+                while (i--) {
+                  e = E[i];
+                  if (!(m = e.nodeName.match(re))) { continue; }
+                  c = l[m[1]] = new CSSStyleSheet();
+                  r.removeAttribute(m[0]);
+                  m = e.nodeValue.split('\n\n');
+                  j = m.length;
+                  while (j--) {
+                    try {
+                      m[j] && c.insertRule(m[j]);
+                    } catch (ex) {
+                      console.error(ex);
+                    }
+                  }
+                }
+              }
+              return l;
+            })(r),
+            as = function (d, h) {
+              var l, i, I;
+              if ((l = h.getAttribute(k8)) !== null && asl.length) {
+                l = l.split(',');
+                for (i = 0, I = l.length; i < I; i++) {
+                  d.adoptedStyleSheets.push(asl[l[i]]);
+                }
+                h.removeAttribute(k8);
+              }
+            },
             fn = function (r) {
               var E = r.querySelectorAll ? r.querySelectorAll("*") : r.getElementsByTagName("*"), i = E.length, e, d, s;
               while (i--) {
@@ -3690,6 +3809,7 @@
                   s = e.attachShadow({mode: 'open'});
                   s.innerHTML = d;
                   e.removeAttribute(k1);
+                  as(s, e);
                 }
                 if ((d = e.getAttribute(k2)) !== null) {
                   (function () {
@@ -3724,7 +3844,8 @@
                 }
               }
             };
-        fn(document);
+        as(d, r);
+        fn(d);
       }) + ")()";
     }
     if (insertInfoBar && isMainDocument) {

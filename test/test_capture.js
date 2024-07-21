@@ -76,6 +76,7 @@ const baseOptions = {
   "capture.base": "blank",
   "capture.formStatus": "keep",
   "capture.shadowDom": "save",
+  "capture.adoptedStyleSheet": "save",
   "capture.removeHidden": "none",
   "capture.linkUnsavedUri": false,
   "capture.downLink.file.mode": "none",
@@ -6016,29 +6017,219 @@ it('test_capture_css_dynamic_rename', async function () {
 /**
  * Check if adoptedStyleSheets are handled correctly.
  *
+ * capture.style
+ * capture.adoptedStyleSheet
  * capturer.DocumentCssHandler
  */
 $it.skipIf($.noAdoptedStylesheet)('test_capture_css_adopted', async function () {
+  /* capture.adoptedStyleSheet = save, capture.style = save */
+  var options = {
+    "capture.style": "save",
+    "capture.adoptedStyleSheet": "save",
+  };
   var blob = await capture({
     url: `${localhost}/capture_css_adopted/index.html`,
-    options: baseOptions,
+    options: Object.assign({}, baseOptions, options),
+  });
+  var zip = await new JSZip().loadAsync(blob);
+  assert(zip.file('green.bmp'));
+  assert(zip.file('nonexist.bmp'));
+
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assert(doc.querySelector('script[data-scrapbook-elem="basic-loader"]'));
+
+  var docElem = doc.documentElement;
+  assertEqual(
+    docElem.getAttribute('data-scrapbook-adoptedstylesheets').trim(),
+    '0,1',
+  );
+  assertEqual(
+    docElem.getAttribute('data-scrapbook-adoptedstylesheet-0').trim(),
+    [
+      `#adopted1-1 { background-color: rgb(0, 255, 0); }`,
+      `#adopted1-2 { background-image: url("green.bmp"); }`,
+      `#nonexist { background-image: url("nonexist.bmp"); }`,
+    ].join('\n\n'),
+  );
+  assertEqual(
+    docElem.getAttribute('data-scrapbook-adoptedstylesheet-1').trim(),
+    [
+      `#adopted2-1 { background-color: rgb(0, 255, 0); }`,
+      `#adopted2-2 { background-image: url("green.bmp"); }`,
+      `#nonexist { background-image: url("nonexist.bmp"); }`,
+    ].join('\n\n'),
+  );
+
+  /* capture.adoptedStyleSheet = save, capture.style = link */
+  var options = {
+    "capture.style": "link",
+    "capture.adoptedStyleSheet": "save",
+  };
+  var blob = await capture({
+    url: `${localhost}/capture_css_adopted/index.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+  var zip = await new JSZip().loadAsync(blob);
+  assert(zip.file('green.bmp'));
+  assert(zip.file('nonexist.bmp'));
+
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assert(doc.querySelector('script[data-scrapbook-elem="basic-loader"]'));
+
+  var docElem = doc.documentElement;
+  assertEqual(
+    docElem.getAttribute('data-scrapbook-adoptedstylesheets').trim(),
+    '0,1',
+  );
+  assertEqual(
+    docElem.getAttribute('data-scrapbook-adoptedstylesheet-0').trim(),
+    [
+      `#adopted1-1 { background-color: rgb(0, 255, 0); }`,
+      `#adopted1-2 { background-image: url("green.bmp"); }`,
+      `#nonexist { background-image: url("nonexist.bmp"); }`,
+    ].join('\n\n'),
+  );
+  assertEqual(
+    docElem.getAttribute('data-scrapbook-adoptedstylesheet-1').trim(),
+    [
+      `#adopted2-1 { background-color: rgb(0, 255, 0); }`,
+      `#adopted2-2 { background-image: url("green.bmp"); }`,
+      `#nonexist { background-image: url("nonexist.bmp"); }`,
+    ].join('\n\n'),
+  );
+
+  /* capture.adoptedStyleSheet = save, capture.style = blank */
+  var options = {
+    "capture.style": "blank",
+    "capture.adoptedStyleSheet": "save",
+  };
+  var blob = await capture({
+    url: `${localhost}/capture_css_adopted/index.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+  var zip = await new JSZip().loadAsync(blob);
+  assert(!zip.file('green.bmp'));
+  assert(!zip.file('nonexist.bmp'));
+
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assert(!doc.querySelector('script[data-scrapbook-elem="basic-loader"]'));
+
+  var docElem = doc.documentElement;
+  assert(!docElem.hasAttribute('data-scrapbook-adoptedstylesheets'));
+  assert(!docElem.hasAttribute('data-scrapbook-adoptedstylesheet-0'));
+  assert(!docElem.hasAttribute('data-scrapbook-adoptedstylesheet-1'));
+
+  /* capture.adoptedStyleSheet = save, capture.style = remove */
+  var options = {
+    "capture.style": "remove",
+    "capture.adoptedStyleSheet": "save",
+  };
+  var blob = await capture({
+    url: `${localhost}/capture_css_adopted/index.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+  var zip = await new JSZip().loadAsync(blob);
+  assert(!zip.file('green.bmp'));
+  assert(!zip.file('nonexist.bmp'));
+
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assert(!doc.querySelector('script[data-scrapbook-elem="basic-loader"]'));
+
+  var docElem = doc.documentElement;
+  assert(!docElem.hasAttribute('data-scrapbook-adoptedstylesheets'));
+  assert(!docElem.hasAttribute('data-scrapbook-adoptedstylesheet-0'));
+  assert(!docElem.hasAttribute('data-scrapbook-adoptedstylesheet-1'));
+
+  /* capture.adoptedStyleSheet = remove */
+  var options = {
+    "capture.style": "save",
+    "capture.adoptedStyleSheet": "remove",
+  };
+  var blob = await capture({
+    url: `${localhost}/capture_css_adopted/index.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+  var zip = await new JSZip().loadAsync(blob);
+  assert(!zip.file('green.bmp'));
+  assert(!zip.file('nonexist.bmp'));
+
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assert(!doc.querySelector('script[data-scrapbook-elem="basic-loader"]'));
+
+  var docElem = doc.documentElement;
+  assert(!docElem.hasAttribute('data-scrapbook-adoptedstylesheets'));
+  assert(!docElem.hasAttribute('data-scrapbook-adoptedstylesheet-0'));
+  assert(!docElem.hasAttribute('data-scrapbook-adoptedstylesheet-1'));
+});
+
+$it.skipIf($.noAdoptedStylesheet)('test_capture_css_adopted_shadow', async function () {
+  /* capture.adoptedStyleSheet = save */
+  var options = {
+    "capture.adoptedStyleSheet": "save",
+  };
+  var blob = await capture({
+    url: `${localhost}/capture_css_adopted/shadow.html`,
+    options: Object.assign({}, baseOptions, options),
   });
   var zip = await new JSZip().loadAsync(blob);
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
+  assert(doc.querySelector('script[data-scrapbook-elem="basic-loader"]'));
 
-  var styleElems = doc.querySelectorAll('style');
-  assert(styleElems[1].textContent.trim() === `#adopted { background-color: rgb(0, 255, 0); }`);
-  assert(styleElems[2].textContent.trim() === `#adopted2 { background-color: rgb(0, 255, 0); }`);
+  var docElem = doc.documentElement;
+  assertEqual(
+    docElem.getAttribute('data-scrapbook-adoptedstylesheets').trim(),
+    '0,1',
+  );
+  assertEqual(
+    docElem.getAttribute('data-scrapbook-adoptedstylesheet-0').trim(),
+    '#adopted { background-color: rgb(0, 255, 0); }',
+  );
+  assertEqual(
+    docElem.getAttribute('data-scrapbook-adoptedstylesheet-1').trim(),
+    '#adopted2 { background-color: rgb(0, 255, 0); }',
+  );
 
   var host1 = doc.querySelector('#shadow1');
-  var frag = doc.createElement("template");
-  frag.innerHTML = host1.getAttribute("data-scrapbook-shadowdom");
-  var shadow1 = frag.content;
-  var styleElems = shadow1.querySelectorAll('style');
-  assert(styleElems[1].textContent.trim() === `#adopted { background-color: rgb(0, 255, 0); }`);
+  assertEqual(
+    host1.getAttribute('data-scrapbook-adoptedstylesheets').trim(),
+    '0,2',
+  );
+
+  /* capture.adoptedStyleSheet = remove */
+  var options = {
+    "capture.adoptedStyleSheet": "remove",
+  };
+  var blob = await capture({
+    url: `${localhost}/capture_css_adopted/shadow.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+  var zip = await new JSZip().loadAsync(blob);
+
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assert(doc.querySelector('script[data-scrapbook-elem="basic-loader"]'));
+
+  var docElem = doc.documentElement;
+  assert(!docElem.hasAttribute('data-scrapbook-adoptedstylesheets'));
+  assert(!docElem.hasAttribute('data-scrapbook-adoptedstylesheet-0'));
+  assert(!docElem.hasAttribute('data-scrapbook-adoptedstylesheet-1'));
+
+  var host1 = doc.querySelector('#shadow1');
+  assert(!host1.hasAttribute('data-scrapbook-adoptedstylesheets'));
 });
 
 /**
@@ -7112,13 +7303,25 @@ $it.skipIf($.noAdoptedStylesheet)('test_capture_imageBackground_used_adopted', a
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
 
-  assert(doc.querySelector('style').textContent.trim() === `#adopted { background-image: url("doc.bmp"); }`);
+  var docElem = doc.documentElement;
+  assertEqual(
+    docElem.getAttribute('data-scrapbook-adoptedstylesheets').trim(),
+    '0',
+  );
+  assertEqual(
+    docElem.getAttribute('data-scrapbook-adoptedstylesheet-0').trim(),
+    `#adopted { background-image: url("doc.bmp"); }`,
+  );
+  assertEqual(
+    docElem.getAttribute('data-scrapbook-adoptedstylesheet-1').trim(),
+    `#adopted { background-image: url("shadow.bmp"); }`,
+  );
 
   var host1 = doc.querySelector('#shadow1');
-  var frag = doc.createElement("template");
-  frag.innerHTML = host1.getAttribute("data-scrapbook-shadowdom");
-  var shadow1 = frag.content;
-  assert(shadow1.querySelector('style').textContent.trim() === `#adopted { background-image: url("shadow.bmp"); }`);
+  assertEqual(
+    host1.getAttribute('data-scrapbook-adoptedstylesheets').trim(),
+    '1',
+  );
 });
 
 /**

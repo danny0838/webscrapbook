@@ -8,27 +8,20 @@ blockquote::after { content: "#" attr(id); }
 </style>
 </head>
 <body>
-<blockquote id="adopted"></blockquote>
-<blockquote id="adopted2"></blockquote>
-<div id="shadow1">
-<template>
-  <style>blockquote::after { content: "#" attr(id); }</style>
-  <blockquote id="adopted"></blockquote>
-</template>
-</div>
+<blockquote id="adopted1-1"></blockquote>
+<blockquote id="adopted1-2"></blockquote>
+<blockquote id="adopted2-1"></blockquote>
+<blockquote id="adopted2-2"></blockquote>
 </body>
-<script src="../../common.js"></script>
 <script>
 var css = new CSSStyleSheet();
-css.insertRule('#adopted { background-color: #0F0; }');
+css.insertRule('#adopted1-1 { background-color: #0F0; }', 0);
+css.insertRule('#adopted1-2 { background-image: url(./green.bmp); }', 1);
+css.insertRule('#nonexist { background-image: url(./nonexist.bmp); }', 2);
 var css2 = new CSSStyleSheet();
-css2.insertRule('#adopted2 { background-color: #0F0; }');
+css2.insertRule('#adopted2-1 { background-color: #0F0; }', 0);
+css2.insertRule('#adopted2-2 { background-image: url(./green.bmp); }', 1);
+css2.insertRule('#nonexist { background-image: url(./nonexist.bmp); }', 2);
 document.adoptedStyleSheets = [...document.adoptedStyleSheets, css, css2];
-
-var css = new CSSStyleSheet();
-css.insertRule('#adopted { background-color: #0F0; }');
-utils.loadShadowDoms();
-var s = document.querySelector('#shadow1').shadowRoot;
-s.adoptedStyleSheets = [...s.adoptedStyleSheets, css];
 </script>
 </html>

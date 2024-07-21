@@ -114,6 +114,7 @@
     "capture.base": "blank", // "save", "blank", "remove"
     "capture.formStatus": "keep", // "save-all", "save", "keep-all", "keep", "html-all", "html", "reset"
     "capture.shadowDom": "save", // "save", "remove"
+    "capture.adoptedStyleSheet": "save", // "save", "remove"
     "capture.removeHidden": "none", // "none", "undisplayed"
     "capture.linkUnsavedUri": false,
     "capture.downLink.file.mode": "none", // "none", "url", "header"

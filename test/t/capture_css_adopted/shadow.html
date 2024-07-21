@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Test adoptedStyleSheets</title>
+<style>
+blockquote::after { content: "#" attr(id); }
+</style>
+</head>
+<body>
+<blockquote id="adopted"></blockquote>
+<blockquote id="adopted2"></blockquote>
+<div id="shadow1">
+<template>
+  <style>blockquote::after { content: "#" attr(id); }</style>
+  <blockquote id="adopted"></blockquote>
+  <blockquote id="adopted2"></blockquote>
+</template>
+</div>
+</body>
+<script src="../../common.js"></script>
+<script>
+var css = new CSSStyleSheet();
+css.insertRule('#adopted { background-color: #0F0; }');
+var css2 = new CSSStyleSheet();
+css2.insertRule('#adopted2 { background-color: #0F0; }');
+document.adoptedStyleSheets = [...document.adoptedStyleSheets, css, css2];
+
+utils.loadShadowDoms();
+var css3 = new CSSStyleSheet();
+css3.insertRule('#adopted2 { background-color: #0F0; }');
+var s = document.querySelector('#shadow1').shadowRoot;
+s.adoptedStyleSheets = [...s.adoptedStyleSheets, css, css3];
+</script>
+</html>
