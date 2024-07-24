@@ -3467,7 +3467,7 @@
           }
 
           const ids = [];
-          for (const css of docOrShadowRoot.adoptedStyleSheets) {
+          for (const css of capturer.getAdoptedStyleSheets(docOrShadowRoot)) {
             let id = adoptedStyleSheetMap.get(css);
             if (typeof id === 'undefined') {
               id = adoptedStyleSheetMap.size;
