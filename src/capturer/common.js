@@ -3458,13 +3458,14 @@
       const processRootNode = (rootNode) => {
         // handle adoptedStyleSheet
         handleAdoptedStyleSheet: {
-          const elem = rootNode.host || rootNode;
-          elem.removeAttribute("data-scrapbook-adoptedstylesheets");
-
+          // don't refresh related attributes if not supported by the browser
           const docOrShadowRoot = origNodeMap.get(rootNode).getRootNode();
           if (!docOrShadowRoot.adoptedStyleSheets) {
             break handleAdoptedStyleSheet;
           }
+
+          const elem = rootNode.host || rootNode;
+          elem.removeAttribute("data-scrapbook-adoptedstylesheets");
 
           const ids = [];
           for (const css of capturer.getAdoptedStyleSheets(docOrShadowRoot)) {
@@ -3658,9 +3659,9 @@
       processRootNode(rootNode);
 
       // handle adoptedStyleSheet
-      {
+      // don't refresh related attributes if not supported by the browser
+      if (rootNode.adoptedStyleSheets) {
         const regex = /^data-scrapbook-adoptedstylesheet-(\d+)$/;
-        const rootNode = newDoc.documentElement;
         for (const attrNode of rootNode.attributes) {
           const attr = attrNode.nodeName;
           if (regex.test(attr)) {
