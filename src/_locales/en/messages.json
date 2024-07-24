@@ -1009,7 +1009,7 @@
     "message": "Tidy"
   },
   "OptionCaptureRewriteCssTooltip": {
-    "message": "This determines how stylesheets are rewritten.\n\n• No rewrite: Save stylesheets as-is.\n• Rewrite URL: Rewrite URLs in the stylesheets to get them link to downloaded resources correctly.\n• Tidy: Rewrite URLs and tidy stylesheets, by removing comments, spaces, and style declarations not recognized by the browser. This helps reduce size, but may cause the page not shown correctly on another browser.\n• Advanced tidy: Rewrite URLs, tidy stylesheets, and remove style declarations that is not used by the captured page. This helps further reduce size, but may cause the page not shown correctly on another browser, and could conflict with the saved scripts."
+    "message": "This determines how stylesheets are rewritten.\n\n• No rewrite: Save stylesheets as-is.\n• Rewrite URL: Rewrite URLs in the stylesheets to get them link to downloaded resources correctly.\n• Tidy: Rewrite URLs and tidy stylesheets, by removing comments, spaces, and style declarations not recognized by the browser. This helps reduce size, but may cause the page not shown correctly on another browser.\n• Advanced tidy: Rewrite URLs, tidy stylesheets, and remove style declarations that is not used by the captured page. This helps further reduce size, but may cause the page not shown correctly on another browser, and could conflict with the saved scripts. NOTE: This requires a complex computation and may be erroneous or resource-consuming for certain complicated web pages."
   },
   "OptionCaptureRewriteCssUrlLabel": {
     "message": "Rewrite URL"
