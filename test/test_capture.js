@@ -12662,7 +12662,10 @@ it('test_capture_shadowRoot', async function () {
  *
  * capturer.captureDocument
  */
-$it.xfail()('test_capture_shadowRoot_closed', async function () {
+$it.xfailIf(
+  userAgent.is('chromium') && userAgent.major < 88,
+  'retrieving closed shadow DOM is not supported in Chromium < 88',
+)('test_capture_shadowRoot_closed', async function () {
   /* capture.shadowDom = save */
   var options = {
     "capture.shadowDom": "save",
@@ -12686,12 +12689,14 @@ $it.xfail()('test_capture_shadowRoot_closed', async function () {
   var host1 = doc.querySelector('div');
   var frag = doc.createElement("template");
   frag.innerHTML = host1.getAttribute("data-scrapbook-shadowdom");
+  assert(frag.innerHTML.startsWith('<!--data-scrapbook-shadowdom-mode=closed-->'));
   var shadow1 = frag.content;
   assert(shadow1.querySelector('img').getAttribute('src') === `green.bmp`);
 
   var host2 = shadow1.querySelector('p');
   var frag = doc.createElement("template");
   frag.innerHTML = host2.getAttribute("data-scrapbook-shadowdom");
+  assert(frag.innerHTML.startsWith('<!--data-scrapbook-shadowdom-mode=closed-->'));
   var shadow2 = frag.content;
   assert(shadow2.querySelector('img').getAttribute('src') === `blue.bmp`);
 
@@ -12711,7 +12716,6 @@ it('test_capture_shadowRoot_custom', async function () {
     "capture.script": "remove",
   };
 
-  /* mode: open */
   var blob = await capture({
     url: `${localhost}/capture_shadowRoot_custom/open.html`,
     options: Object.assign({}, baseOptions, options),
@@ -12733,8 +12737,18 @@ it('test_capture_shadowRoot_custom', async function () {
 
   var loader = doc.querySelector('script[data-scrapbook-elem="basic-loader"]');
   assert(loader.textContent.trim().match(rawRegex`${'^'}(function () {${'.+'}})()${'$'}`));
+});
 
-  /* mode: closed */
+$it.xfailIf(
+  userAgent.is('chromium') && userAgent.major < 88,
+  'retrieving closed shadow DOM is not supported in Chromium < 88',
+)('test_capture_shadowRoot_custom_closed', async function () {
+  var options = {
+    "capture.shadowDom": "save",
+    "capture.image": "save",
+    "capture.script": "remove",
+  };
+
   var blob = await capture({
     url: `${localhost}/capture_shadowRoot_custom/closed.html`,
     options: Object.assign({}, baseOptions, options),
@@ -12742,14 +12756,21 @@ it('test_capture_shadowRoot_custom', async function () {
 
   var zip = await new JSZip().loadAsync(blob);
   assert(zip.file("index.html"));
-  assert(!zip.file("green.bmp"));
+  assert(zip.file("green.bmp"));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
 
-  assert(!doc.querySelector('[data-scrapbook-shadowroot]'));
-  assert(!doc.querySelector('script[data-scrapbook-elem="basic-loader"]'));
+  var host1 = doc.querySelector('custom-elem');
+  var frag = doc.createElement("template");
+  frag.innerHTML = host1.getAttribute("data-scrapbook-shadowdom");
+  assert(frag.innerHTML.startsWith('<!--data-scrapbook-shadowdom-mode=closed-->'));
+  var shadow1 = frag.content;
+  assert(shadow1.querySelector('img').getAttribute('src') === `green.bmp`);
+
+  var loader = doc.querySelector('script[data-scrapbook-elem="basic-loader"]');
+  assert(loader.textContent.trim().match(rawRegex`${'^'}(function () {${'.+'}})()${'$'}`));
 });
 
 /**

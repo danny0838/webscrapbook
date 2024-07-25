@@ -1971,6 +1971,18 @@
     return [node];
   };
 
+  scrapbook.getShadowRoot = function (elem) {
+    if (elem.openOrClosedShadowRoot) {
+      // Firefox >= 63
+      return elem.openOrClosedShadowRoot;
+    }
+    try {
+      // Chromium >= 88
+      return browser.dom.openOrClosedShadowRoot(elem);
+    } catch (ex) {}
+    return elem.shadowRoot;
+  };
+
   /**
    * Clone a document and generate relation mapping.
    *
@@ -2008,7 +2020,7 @@
    */
   scrapbook.cloneNode = function (...args) {
     const cloneShadowDom = (node, newNode, options = {}) => {
-      const shadowRoot = node.shadowRoot;
+      const shadowRoot = scrapbook.getShadowRoot(node);
       if (!shadowRoot) { return; }
       const {origNodeMap, clonedNodeMap} = options;
       const newShadowRoot = newNode.attachShadow({mode: shadowRoot.mode});

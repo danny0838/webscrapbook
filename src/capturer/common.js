@@ -2613,7 +2613,7 @@
 
         // handle shadow DOM
         {
-          const shadowRoot = elem.shadowRoot;
+          const shadowRoot = scrapbook.getShadowRoot(elem);
           if (shadowRoot) {
             const shadowRootOrig = origNodeMap.get(shadowRoot);
             cssTasks.push(() => { cssResourcesHandler.scopePush(shadowRootOrig); });
@@ -3332,7 +3332,11 @@
 
     // record after the content of all nested shadow roots have been processed
     for (const shadowRoot of shadowRootList) {
-      captureRewriteAttr(shadowRoot.host, "data-scrapbook-shadowdom", shadowRoot.innerHTML);
+      let data = shadowRoot.innerHTML;
+      if (shadowRoot.mode !== 'open') {
+        data = `<!--data-scrapbook-shadowdom-mode=${scrapbook.escapeHtml(shadowRoot.mode)}-->` + data;
+      }
+      captureRewriteAttr(shadowRoot.host, "data-scrapbook-shadowdom", data);
     }
 
     // attach CSS resource map
@@ -3620,10 +3624,14 @@
         // update shadow root data
         for (const elem of rootNode.querySelectorAll("*")) {
           elem.removeAttribute("data-scrapbook-shadowdom");
-          const shadowRoot = elem.shadowRoot;
+          const shadowRoot = scrapbook.getShadowRoot(elem);
           if (!shadowRoot) { continue; }
           processRootNode(shadowRoot);
-          elem.setAttribute("data-scrapbook-shadowdom", shadowRoot.innerHTML);
+          let data = shadowRoot.innerHTML;
+          if (shadowRoot.mode !== 'open') {
+            data = `<!--data-scrapbook-shadowdom-mode=${scrapbook.escapeHtml(shadowRoot.mode)}-->` + data;
+          }
+          elem.setAttribute("data-scrapbook-shadowdom", data);
           requireBasicLoader = true;
         }
       };
@@ -3766,7 +3774,8 @@
             k6 = "data-scrapbook-input-value",
             k7 = "data-scrapbook-textarea-value",
             k8 = "data-scrapbook-adoptedstylesheets",
-            re = /^data-scrapbook-adoptedstylesheet-(\d+)$/,
+            k9 = /^data-scrapbook-adoptedstylesheet-(\d+)$/,
+            k10 = /^<!--data-scrapbook-shadowdom-mode=([\s\S]*?)-->([\s\S]*)$/,
             d = document,
             r = d.documentElement,
             asl = (function (r) {
@@ -3776,7 +3785,7 @@
                 i = E.length;
                 while (i--) {
                   e = E[i];
-                  if (!(m = e.nodeName.match(re))) { continue; }
+                  if (!(m = e.nodeName.match(k9))) { continue; }
                   c = l[m[1]] = new CSSStyleSheet();
                   r.removeAttribute(m[0]);
                   m = e.nodeValue.split('\n\n');
@@ -3803,11 +3812,18 @@
               }
             },
             fn = function (r) {
-              var E = r.querySelectorAll ? r.querySelectorAll("*") : r.getElementsByTagName("*"), i = E.length, e, d, s;
+              var E = r.querySelectorAll ? r.querySelectorAll("*") : r.getElementsByTagName("*"), i = E.length, e, d, s, m;
               while (i--) {
                 e = E[i];
-                if ((d = e.getAttribute(k1)) !== null && !e.shadowRoot && e.attachShadow) {
-                  s = e.attachShadow({mode: 'open'});
+                s = e.shadowRoot;
+                if (!s && e.attachShadow && (d = e.getAttribute(k1))) {
+                  if (m = d.match(k10)) {
+                    d = m[2];
+                    m = m[1];
+                  } else {
+                    m = 'open';
+                  }
+                  s = e.attachShadow({mode: m});
                   s.innerHTML = d;
                   e.removeAttribute(k1);
                   as(s, e);
@@ -3840,8 +3856,8 @@
                   e.value = d;
                   e.removeAttribute(k7);
                 }
-                if (e.shadowRoot) {
-                  fn(e.shadowRoot);
+                if (s) {
+                  fn(s);
                 }
               }
             };
