@@ -12689,14 +12689,14 @@ $it.xfailIf(
   var host1 = doc.querySelector('div');
   var frag = doc.createElement("template");
   frag.innerHTML = host1.getAttribute("data-scrapbook-shadowdom");
-  assert(frag.innerHTML.startsWith('<!--data-scrapbook-shadowdom-mode=closed-->'));
+  assert(frag.innerHTML.startsWith('<!--scrapbook-shadowdom-mode=closed-->'));
   var shadow1 = frag.content;
   assert(shadow1.querySelector('img').getAttribute('src') === `green.bmp`);
 
   var host2 = shadow1.querySelector('p');
   var frag = doc.createElement("template");
   frag.innerHTML = host2.getAttribute("data-scrapbook-shadowdom");
-  assert(frag.innerHTML.startsWith('<!--data-scrapbook-shadowdom-mode=closed-->'));
+  assert(frag.innerHTML.startsWith('<!--scrapbook-shadowdom-mode=closed-->'));
   var shadow2 = frag.content;
   assert(shadow2.querySelector('img').getAttribute('src') === `blue.bmp`);
 
@@ -12765,7 +12765,7 @@ $it.xfailIf(
   var host1 = doc.querySelector('custom-elem');
   var frag = doc.createElement("template");
   frag.innerHTML = host1.getAttribute("data-scrapbook-shadowdom");
-  assert(frag.innerHTML.startsWith('<!--data-scrapbook-shadowdom-mode=closed-->'));
+  assert(frag.innerHTML.startsWith('<!--scrapbook-shadowdom-mode=closed-->'));
   var shadow1 = frag.content;
   assert(shadow1.querySelector('img').getAttribute('src') === `green.bmp`);
 

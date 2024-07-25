@@ -3334,7 +3334,7 @@
     for (const shadowRoot of shadowRootList) {
       let data = shadowRoot.innerHTML;
       if (shadowRoot.mode !== 'open') {
-        data = `<!--data-scrapbook-shadowdom-mode=${scrapbook.escapeHtml(shadowRoot.mode)}-->` + data;
+        data = `<!--scrapbook-shadowdom-mode=${scrapbook.escapeHtmlComment(shadowRoot.mode)}-->` + data;
       }
       captureRewriteAttr(shadowRoot.host, "data-scrapbook-shadowdom", data);
     }
@@ -3629,7 +3629,7 @@
           processRootNode(shadowRoot);
           let data = shadowRoot.innerHTML;
           if (shadowRoot.mode !== 'open') {
-            data = `<!--data-scrapbook-shadowdom-mode=${scrapbook.escapeHtml(shadowRoot.mode)}-->` + data;
+            data = `<!--scrapbook-shadowdom-mode=${scrapbook.escapeHtmlComment(shadowRoot.mode)}-->` + data;
           }
           elem.setAttribute("data-scrapbook-shadowdom", data);
           requireBasicLoader = true;
@@ -3775,7 +3775,7 @@
             k7 = "data-scrapbook-textarea-value",
             k8 = "data-scrapbook-adoptedstylesheets",
             k9 = /^data-scrapbook-adoptedstylesheet-(\d+)$/,
-            k10 = /^<!--data-scrapbook-shadowdom-mode=([\s\S]*?)-->([\s\S]*)$/,
+            k10 = /^<!--scrapbook-shadowdom-mode=([\s\S]*?)-->([\s\S]*)$/,
             d = document,
             r = d.documentElement,
             asl = (function (r) {
