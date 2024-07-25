@@ -3,6 +3,9 @@
 * Versions before 1.0 are in initial development. APIs are not stable for these versions, even a `y` version can involve a breaking change, and only partial notable changes are summarized in this document. See full commit history in the source repository for details.
 * Backend server requirement in this document refers to the version of [`webscrapbook` Python package](https://github.com/danny0838/pywebscrapbook) (or PyWebScrapBook).
 
+## [2.12.3] - 2024-07-25
+* Adjusted the marking for closed shadow DOM contents.
+
 ## [2.12.2] - 2024-07-25
 * Added support of capturing closed shadow DOM contents.
 * Miscellaneous improvements of the unit test suite.
