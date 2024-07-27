@@ -2039,13 +2039,20 @@
           node2 = walker2.nextNode();
         }
       } else {
-        newShadowRoot = newNode.attachShadow({
-          mode: shadowRoot.mode,
-          clonable: shadowRoot.clonable,
-          delegatesFocus: shadowRoot.delegatesFocus,
-          serializable: shadowRoot.serializable,
-          slotAssignment: shadowRoot.slotAssignment,
-        });
+        try {
+          newShadowRoot = newNode.attachShadow({
+            mode: shadowRoot.mode,
+            clonable: shadowRoot.clonable,
+            delegatesFocus: shadowRoot.delegatesFocus,
+            serializable: shadowRoot.serializable,
+            slotAssignment: shadowRoot.slotAssignment,
+          });
+        } catch (ex) {
+          // Firefox can get the native shadowRoot of an element, but the
+          // cloned one doesn't have the native shadowRoot since it's not yet
+          // attached to a document. Skip mapping for such case.
+          return;
+        }
         origNodeMap && origNodeMap.set(newShadowRoot, shadowRoot);
         clonedNodeMap && clonedNodeMap.set(shadowRoot, newShadowRoot);
         for (const node of shadowRoot.childNodes) {
