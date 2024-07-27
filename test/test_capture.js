@@ -12662,7 +12662,7 @@ it('test_capture_shadowRoot', async function () {
  *
  * capturer.captureDocument
  */
-$it.xfailIf(
+$it.skipIf(
   userAgent.is('chromium') && userAgent.major < 88,
   'retrieving closed shadow DOM is not supported in Chromium < 88',
 )('test_capture_shadowRoot_closed', async function () {
@@ -12739,7 +12739,7 @@ it('test_capture_shadowRoot_custom', async function () {
   assert(loader.textContent.trim().match(rawRegex`${'^'}(function () {${'.+'}})()${'$'}`));
 });
 
-$it.xfailIf(
+$it.skipIf(
   userAgent.is('chromium') && userAgent.major < 88,
   'retrieving closed shadow DOM is not supported in Chromium < 88',
 )('test_capture_shadowRoot_custom_closed', async function () {
