@@ -3,6 +3,10 @@
 * Versions before 1.0 are in initial development. APIs are not stable for these versions, even a `y` version can involve a breaking change, and only partial notable changes are summarized in this document. See full commit history in the source repository for details.
 * Backend server requirement in this document refers to the version of [`webscrapbook` Python package](https://github.com/danny0838/pywebscrapbook) (or PyWebScrapBook).
 
+## [2.12.4] - 2024-07-28
+* Fixed error when capturing a clonable shadow DOM.
+* Reworked handling of further shadow DOM options.
+
 ## [2.12.3] - 2024-07-25
 * Adjusted the marking for closed shadow DOM contents.
 
