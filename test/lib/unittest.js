@@ -286,6 +286,57 @@
       Object.defineProperty(this, 'noMultipleSelection', {value});
       return value;
     },
+    get noShadowRootClonable() {
+      // ShadowRoot.clonable is not supported by Chromium < 124 and Firefox < 123.
+      const value = this.noBrowser.condition ? this.noBrowser : new MochaQuery.Query(
+        (() => {
+          const div = document.createElement('div');
+          const shadowRoot = div.attachShadow({mode: 'open', clonable: true});
+          return typeof shadowRoot.clonable === 'undefined';
+        })(),
+        'ShadowRoot.clonable not supported',
+      );
+      Object.defineProperty(this, 'noShadowRootClonable', {value});
+      return value;
+    },
+    get noShadowRootDelegatesFocus() {
+      // ShadowRoot.delegatesFocus is not supported by Firefox < 94.
+      const value = this.noBrowser.condition ? this.noBrowser : new MochaQuery.Query(
+        (() => {
+          const div = document.createElement('div');
+          const shadowRoot = div.attachShadow({mode: 'open', delegatesFocus: true});
+          return typeof shadowRoot.delegatesFocus === 'undefined';
+        })(),
+        'ShadowRoot.delegatesFocus not supported',
+      );
+      Object.defineProperty(this, 'noShadowRootDelegatesFocus', {value});
+      return value;
+    },
+    get noShadowRootSerializable() {
+      // ShadowRoot.serializable is not supported by Chromium < 125 and Firefox.
+      const value = this.noBrowser.condition ? this.noBrowser : new MochaQuery.Query(
+        (() => {
+          const div = document.createElement('div');
+          const shadowRoot = div.attachShadow({mode: 'open', serializable: true});
+          return typeof shadowRoot.serializable === 'undefined';
+        })(),
+        'ShadowRoot.serializable not supported',
+      );
+      Object.defineProperty(this, 'noShadowRootSerializable', {value});
+      return value;
+    },
+    get noShadowRootSlotAssignment() {
+      const value = this.noBrowser.condition ? this.noBrowser : new MochaQuery.Query(
+        (() => {
+          const div = document.createElement('div');
+          const shadowRoot = div.attachShadow({mode: 'open', slotAssignment: 'manual'});
+          return typeof shadowRoot.slotAssignment === 'undefined';
+        })(),
+        'ShadowRoot.slotAssignment not supported',
+      );
+      Object.defineProperty(this, 'noShadowRootSlotAssignment', {value});
+      return value;
+    },
     get noAdoptedStylesheet() {
       // Document.adoptedStyleSheets is not supported by Firefox < 101.
       const value = this.noBrowser.condition ? this.noBrowser : new MochaQuery.Query(

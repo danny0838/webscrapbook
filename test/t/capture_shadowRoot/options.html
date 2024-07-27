@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Test shadowRoot</title>
+</head>
+<body>
+<div>
+<span>Default</span>
+<span slot="">Default2</span>
+<span slot="person">Mr. Apple</span>
+<span slot="person">Mr. Black</span>
+<span slot="person">Ms. Cindy</span>
+<template>
+  <style>
+  slot { display: block; }
+  ::slotted(*) { background-color: yellow; }
+  </style>
+  <slot>default missing</slot>
+  <slot name="person">person missing</slot>
+</template>
+</div>
+</body>
+<script src="../../common.js"></script>
+<script>
+utils.loadShadowDoms(document, {
+  delegatesFocus: true,
+  serializable: true,
+  slotAssignment: 'manual',
+});
+var elem = document.querySelector('div');
+for (const slot of elem.shadowRoot.querySelectorAll('slot')) {
+  const sel = slot.name ? `[slot="${CSS.escape(slot.name)}"]` : `[slot=""], :not([slot])`;
+  slot.assign(elem.querySelector(sel));
+}
+</script>
+</html>

@@ -12687,16 +12687,16 @@ $it.skipIf(
   var doc = await readFileAsDocument(indexBlob);
 
   var host1 = doc.querySelector('div');
+  assertEqual(host1.getAttribute("data-scrapbook-shadowdom-mode"), "closed");
   var frag = doc.createElement("template");
   frag.innerHTML = host1.getAttribute("data-scrapbook-shadowdom");
-  assert(frag.innerHTML.startsWith('<!--scrapbook-shadowdom-mode=closed-->'));
   var shadow1 = frag.content;
   assert(shadow1.querySelector('img').getAttribute('src') === `green.bmp`);
 
   var host2 = shadow1.querySelector('p');
+  assertEqual(host2.getAttribute("data-scrapbook-shadowdom-mode"), "closed");
   var frag = doc.createElement("template");
   frag.innerHTML = host2.getAttribute("data-scrapbook-shadowdom");
-  assert(frag.innerHTML.startsWith('<!--scrapbook-shadowdom-mode=closed-->'));
   var shadow2 = frag.content;
   assert(shadow2.querySelector('img').getAttribute('src') === `blue.bmp`);
 
@@ -12709,7 +12709,7 @@ $it.skipIf(
  *
  * capturer.captureDocument
  */
-it('test_capture_shadowRoot_clonable', async function () {
+$it.skipIf($.noShadowRootClonable)('test_capture_shadowRoot_clonable', async function () {
   /* capture.shadowDom = save */
   var options = {
     "capture.shadowDom": "save",
@@ -12731,12 +12731,14 @@ it('test_capture_shadowRoot_clonable', async function () {
   var doc = await readFileAsDocument(indexBlob);
 
   var host1 = doc.querySelector('div');
+  assert(host1.hasAttribute("data-scrapbook-shadowdom-clonable"));
   var frag = doc.createElement("template");
   frag.innerHTML = host1.getAttribute("data-scrapbook-shadowdom");
   var shadow1 = frag.content;
   assert(shadow1.querySelector('img').getAttribute('src') === `green.bmp`);
 
   var host2 = shadow1.querySelector('p');
+  assert(host2.hasAttribute("data-scrapbook-shadowdom-clonable"));
   var frag = doc.createElement("template");
   frag.innerHTML = host2.getAttribute("data-scrapbook-shadowdom");
   var shadow2 = frag.content;
@@ -12767,6 +12769,41 @@ it('test_capture_shadowRoot_clonable', async function () {
 
   assert(!doc.querySelector('[data-scrapbook-shadowroot]'));
   assert(!doc.querySelector('script[data-scrapbook-elem="basic-loader"]'));
+});
+
+/**
+ * Check handling of further shadow DOM properties.
+ *
+ * capturer.captureDocument
+ */
+$it.skipIf($.noShadowRootDelegatesFocus)
+    .skipIf($.noShadowRootSerializable)
+    .skipIf($.noShadowRootSlotAssignment)('test_capture_shadowRoot_options', async function () {
+  /* capture.shadowDom = save */
+  var options = {
+    "capture.shadowDom": "save",
+    "capture.image": "save",
+    "capture.script": "remove",
+  };
+  var blob = await capture({
+    url: `${localhost}/capture_shadowRoot/options.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+  assert(zip.file("index.html"));
+
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+
+  var host1 = doc.querySelector('div');
+  assert(host1.hasAttribute("data-scrapbook-shadowdom-delegates-focus"));
+  assert(host1.hasAttribute("data-scrapbook-shadowdom-serializable"));
+  assertEqual(host1.getAttribute("data-scrapbook-shadowdom-slot-assignment"), "manual");
+
+  var loader = doc.querySelector('script[data-scrapbook-elem="basic-loader"]');
+  assert(loader.textContent.trim().match(rawRegex`${'^'}(function () {${'.+'}})()${'$'}`));
 });
 
 /**
@@ -12828,9 +12865,9 @@ $it.skipIf(
   var doc = await readFileAsDocument(indexBlob);
 
   var host1 = doc.querySelector('custom-elem');
+  assertEqual(host1.getAttribute("data-scrapbook-shadowdom-mode"), "closed");
   var frag = doc.createElement("template");
   frag.innerHTML = host1.getAttribute("data-scrapbook-shadowdom");
-  assert(frag.innerHTML.startsWith('<!--scrapbook-shadowdom-mode=closed-->'));
   var shadow1 = frag.content;
   assert(shadow1.querySelector('img').getAttribute('src') === `green.bmp`);
 

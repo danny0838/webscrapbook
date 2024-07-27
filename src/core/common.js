@@ -2039,7 +2039,13 @@
           node2 = walker2.nextNode();
         }
       } else {
-        newShadowRoot = newNode.attachShadow({mode: shadowRoot.mode});
+        newShadowRoot = newNode.attachShadow({
+          mode: shadowRoot.mode,
+          clonable: shadowRoot.clonable,
+          delegatesFocus: shadowRoot.delegatesFocus,
+          serializable: shadowRoot.serializable,
+          slotAssignment: shadowRoot.slotAssignment,
+        });
         origNodeMap && origNodeMap.set(newShadowRoot, shadowRoot);
         clonedNodeMap && clonedNodeMap.set(shadowRoot, newShadowRoot);
         for (const node of shadowRoot.childNodes) {

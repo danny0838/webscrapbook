@@ -3332,11 +3332,23 @@
 
     // record after the content of all nested shadow roots have been processed
     for (const shadowRoot of shadowRootList) {
-      let data = shadowRoot.innerHTML;
+      const host = shadowRoot.host;
+      captureRewriteAttr(host, "data-scrapbook-shadowdom", shadowRoot.innerHTML);
       if (shadowRoot.mode !== 'open') {
-        data = `<!--scrapbook-shadowdom-mode=${scrapbook.escapeHtmlComment(shadowRoot.mode)}-->` + data;
+        captureRewriteAttr(host, "data-scrapbook-shadowdom-mode", shadowRoot.mode);
       }
-      captureRewriteAttr(shadowRoot.host, "data-scrapbook-shadowdom", data);
+      if (shadowRoot.clonable) {
+        captureRewriteAttr(host, "data-scrapbook-shadowdom-clonable", "");
+      }
+      if (shadowRoot.delegatesFocus) {
+        captureRewriteAttr(host, "data-scrapbook-shadowdom-delegates-focus", "");
+      }
+      if (shadowRoot.serializable) {
+        captureRewriteAttr(host, "data-scrapbook-shadowdom-serializable", "");
+      }
+      if (shadowRoot.slotAssignment !== 'named') {
+        captureRewriteAttr(host, "data-scrapbook-shadowdom-slot-assignment", shadowRoot.slotAssignment);
+      }
     }
 
     // attach CSS resource map
@@ -3627,11 +3639,22 @@
           const shadowRoot = scrapbook.getShadowRoot(elem);
           if (!shadowRoot) { continue; }
           processRootNode(shadowRoot);
-          let data = shadowRoot.innerHTML;
+          elem.setAttribute("data-scrapbook-shadowdom", shadowRoot.innerHTML);
           if (shadowRoot.mode !== 'open') {
-            data = `<!--scrapbook-shadowdom-mode=${scrapbook.escapeHtmlComment(shadowRoot.mode)}-->` + data;
+            elem.setAttribute("data-scrapbook-shadowdom-mode", shadowRoot.mode);
           }
-          elem.setAttribute("data-scrapbook-shadowdom", data);
+          if (shadowRoot.clonable) {
+            elem.setAttribute("data-scrapbook-shadowdom-clonable", "");
+          }
+          if (shadowRoot.delegatesFocus) {
+            elem.setAttribute("data-scrapbook-shadowdom-delegates-focus", "");
+          }
+          if (shadowRoot.serializable) {
+            elem.setAttribute("data-scrapbook-shadowdom-serializable", "");
+          }
+          if (shadowRoot.slotAssignment !== 'named') {
+            elem.setAttribute("data-scrapbook-shadowdom-slot-assignment", shadowRoot.slotAssignment);
+          }
           requireBasicLoader = true;
         }
       };
@@ -3775,7 +3798,11 @@
             k7 = "data-scrapbook-textarea-value",
             k8 = "data-scrapbook-adoptedstylesheets",
             k9 = /^data-scrapbook-adoptedstylesheet-(\d+)$/,
-            k10 = /^<!--scrapbook-shadowdom-mode=([\s\S]*?)-->([\s\S]*)$/,
+            k10 = "data-scrapbook-shadowdom-mode",
+            k11 = "data-scrapbook-shadowdom-clonable",
+            k12 = "data-scrapbook-shadowdom-delegates-focus",
+            k13 = "data-scrapbook-shadowdom-serializable",
+            k14 = "data-scrapbook-shadowdom-slot-assignment",
             d = document,
             r = d.documentElement,
             asl = (function (r) {
@@ -3817,15 +3844,20 @@
                 e = E[i];
                 s = e.shadowRoot;
                 if (!s && e.attachShadow && (d = e.getAttribute(k1))) {
-                  if (m = d.match(k10)) {
-                    d = m[2];
-                    m = m[1];
-                  } else {
-                    m = 'open';
-                  }
-                  s = e.attachShadow({mode: m});
+                  s = e.attachShadow({
+                    mode: (m = e.getAttribute(k10)) !== null ? m : 'open',
+                    clonable: e.hasAttribute(k11),
+                    delegatesFocus: e.hasAttribute(k12),
+                    serializable: e.hasAttribute(k13),
+                    slotAssignment: (m = e.getAttribute(k14)) !== null ? m : void(0),
+                  });
                   s.innerHTML = d;
                   e.removeAttribute(k1);
+                  e.removeAttribute(k10);
+                  e.removeAttribute(k11);
+                  e.removeAttribute(k12);
+                  e.removeAttribute(k13);
+                  e.removeAttribute(k14);
                   as(s, e);
                 }
                 if ((d = e.getAttribute(k2)) !== null) {
