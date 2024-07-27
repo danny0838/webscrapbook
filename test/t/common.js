@@ -158,15 +158,15 @@ async function xhr(params = {}) {
  * Load template content as the parent node's shadowRoot.
  */
 function loadShadowDoms(root = document, {
-  recursive = true, clear = true, mode = 'open',
+  recursive = true, clear = true, mode = 'open', clonable = false,
 } = {}) {
   for (const t of root.querySelectorAll('template')) {
     const elem = t.parentNode;
     if (!elem.shadowRoot) {
-      const shadow = elem.attachShadow({mode});
+      const shadow = elem.attachShadow({mode, clonable});
       shadow.innerHTML = t.innerHTML;
       if (recursive) {
-        loadShadowDoms(shadow, {recursive, clear, mode});
+        loadShadowDoms(shadow, {recursive, clear, mode, clonable});
       }
     }
     if (clear) {

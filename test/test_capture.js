@@ -12705,6 +12705,71 @@ $it.skipIf(
 });
 
 /**
+ * Check if clonable shadow DOMs can be captured correctly.
+ *
+ * capturer.captureDocument
+ */
+it('test_capture_shadowRoot_clonable', async function () {
+  /* capture.shadowDom = save */
+  var options = {
+    "capture.shadowDom": "save",
+    "capture.image": "save",
+    "capture.script": "remove",
+  };
+  var blob = await capture({
+    url: `${localhost}/capture_shadowRoot/clonable.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+  assert(zip.file("index.html"));
+  assert(zip.file("green.bmp"));
+  assert(zip.file("blue.bmp"));
+
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+
+  var host1 = doc.querySelector('div');
+  var frag = doc.createElement("template");
+  frag.innerHTML = host1.getAttribute("data-scrapbook-shadowdom");
+  var shadow1 = frag.content;
+  assert(shadow1.querySelector('img').getAttribute('src') === `green.bmp`);
+
+  var host2 = shadow1.querySelector('p');
+  var frag = doc.createElement("template");
+  frag.innerHTML = host2.getAttribute("data-scrapbook-shadowdom");
+  var shadow2 = frag.content;
+  assert(shadow2.querySelector('img').getAttribute('src') === `blue.bmp`);
+
+  var loader = doc.querySelector('script[data-scrapbook-elem="basic-loader"]');
+  assert(loader.textContent.trim().match(rawRegex`${'^'}(function () {${'.+'}})()${'$'}`));
+
+  /* capture.shadowDom = remove */
+  var options = {
+    "capture.shadowDom": "remove",
+    "capture.image": "save",
+    "capture.script": "remove",
+  };
+  var blob = await capture({
+    url: `${localhost}/capture_shadowRoot/clonable.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+  assert(zip.file("index.html"));
+  assert(!zip.file("green.bmp"));
+  assert(!zip.file("blue.bmp"));
+
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+
+  assert(!doc.querySelector('[data-scrapbook-shadowroot]'));
+  assert(!doc.querySelector('script[data-scrapbook-elem="basic-loader"]'));
+});
+
+/**
  * Check for shadow DOM auto-generated via custom elements.
  *
  * capturer.captureDocument

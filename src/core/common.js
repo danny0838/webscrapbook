@@ -2022,12 +2022,29 @@
     const cloneShadowDom = (node, newNode, options = {}) => {
       const shadowRoot = scrapbook.getShadowRoot(node);
       if (!shadowRoot) { return; }
-      const {origNodeMap, clonedNodeMap} = options;
-      const newShadowRoot = newNode.attachShadow({mode: shadowRoot.mode});
-      origNodeMap && origNodeMap.set(newShadowRoot, shadowRoot);
-      clonedNodeMap && clonedNodeMap.set(shadowRoot, newShadowRoot);
-      for (const node of shadowRoot.childNodes) {
-        newShadowRoot.appendChild(scrapbook.cloneNode(node, true, options));
+      const {origNodeMap, clonedNodeMap, includeShadowDom} = options;
+      let newShadowRoot = scrapbook.getShadowRoot(newNode);
+      if (newShadowRoot) {
+        // shadowRoot already cloned (when shadowRoot.clonable = true)
+        // map the shadowRoot and descendant nodes
+        const walker1 = shadowRoot.ownerDocument.createNodeIterator(shadowRoot);
+        const walker2 = newShadowRoot.ownerDocument.createNodeIterator(newShadowRoot);
+        let node1 = walker1.nextNode();
+        let node2 = walker2.nextNode();
+        while (node1) {
+          origNodeMap && origNodeMap.set(node2, node1);
+          clonedNodeMap && clonedNodeMap.set(node1, node2);
+          includeShadowDom && cloneShadowDom(node1, node2, options);
+          node1 = walker1.nextNode();
+          node2 = walker2.nextNode();
+        }
+      } else {
+        newShadowRoot = newNode.attachShadow({mode: shadowRoot.mode});
+        origNodeMap && origNodeMap.set(newShadowRoot, shadowRoot);
+        clonedNodeMap && clonedNodeMap.set(shadowRoot, newShadowRoot);
+        for (const node of shadowRoot.childNodes) {
+          newShadowRoot.appendChild(scrapbook.cloneNode(node, true, options));
+        }
       }
     };
 

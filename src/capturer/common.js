@@ -2612,7 +2612,7 @@
         }
 
         // handle shadow DOM
-        {
+        if (options["capture.shadowDom"] === "save") {
           const shadowRoot = scrapbook.getShadowRoot(elem);
           if (shadowRoot) {
             const shadowRootOrig = origNodeMap.get(shadowRoot);
