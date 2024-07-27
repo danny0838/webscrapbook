@@ -10,25 +10,32 @@ blockquote::after { content: "#" attr(id); }
 <body>
 <blockquote id="adopted"></blockquote>
 <blockquote id="adopted2"></blockquote>
+<blockquote id="adopted3"></blockquote>
 <div id="shadow1">
 <template>
   <style>blockquote::after { content: "#" attr(id); }</style>
   <blockquote id="adopted"></blockquote>
   <blockquote id="adopted2"></blockquote>
+  <blockquote id="adopted4"></blockquote>
 </template>
 </div>
 </body>
 <script src="../../common.js"></script>
 <script>
 var css = new CSSStyleSheet();
-css.insertRule('#adopted { background-color: #0F0; }');
+css.insertRule('#adopted { background-image: url(./green.bmp); }', css.cssRules.length);
+css.insertRule('#adopted3 { background-color: #0F0; }', css.cssRules.length);
+css.insertRule('#adopted4 { background-color: #0F0; }', css.cssRules.length);
+css.insertRule('#nonexist { background-image: url(./nonexist.bmp); }', css.cssRules.length);
 var css2 = new CSSStyleSheet();
-css2.insertRule('#adopted2 { background-color: #0F0; }');
+css2.insertRule('#adopted2 { background-color: #0F0; }', css2.cssRules.length);
+css2.insertRule('#nonexist { background-image: url(./nonexist.bmp); }', css2.cssRules.length);
 document.adoptedStyleSheets = [...document.adoptedStyleSheets, css, css2];
 
 utils.loadShadowDoms();
 var css3 = new CSSStyleSheet();
-css3.insertRule('#adopted2 { background-color: #0F0; }');
+css3.insertRule('#adopted2 { background-color: #0F0; }', css3.cssRules.length);
+css3.insertRule('#nonexist { background-image: url(./nonexist.bmp); }', css3.cssRules.length);
 var s = document.querySelector('#shadow1').shadowRoot;
 s.adoptedStyleSheets = [...s.adoptedStyleSheets, css, css3];
 </script>

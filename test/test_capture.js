@@ -6178,16 +6178,26 @@ $it.skipIf($.noAdoptedStylesheet)('test_capture_css_adopted', async function () 
   ));
 });
 
+/**
+ * Check if adoptedStyleSheets shared among document and shadow roots are handled correctly.
+ *
+ * capture.adoptedStyleSheet
+ * capture.rewriteCss
+ * capturer.DocumentCssHandler
+ */
 $it.skipIf($.noAdoptedStylesheet)('test_capture_css_adopted_shadow', async function () {
-  /* capture.adoptedStyleSheet = save */
+  /* capture.adoptedStyleSheet = save, capture.rewriteCss = match */
   var options = {
     "capture.adoptedStyleSheet": "save",
+    "capture.rewriteCss": "match",
   };
   var blob = await capture({
     url: `${localhost}/capture_css_adopted/shadow.html`,
     options: Object.assign({}, baseOptions, options),
   });
   var zip = await new JSZip().loadAsync(blob);
+  assert(zip.file('green.bmp'));
+  assert(!zip.file('nonexist.bmp'));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -6201,11 +6211,182 @@ $it.skipIf($.noAdoptedStylesheet)('test_capture_css_adopted_shadow', async funct
   );
   assertEqual(
     docElem.getAttribute('data-scrapbook-adoptedstylesheet-0').trim(),
-    '#adopted { background-color: rgb(0, 255, 0); }',
+    [
+      `#adopted { background-image: url("green.bmp"); }`,
+      `#adopted3 { background-color: rgb(0, 255, 0); }`,
+      `#adopted4 { background-color: rgb(0, 255, 0); }`,
+    ].join('\n\n'),
   );
   assertEqual(
     docElem.getAttribute('data-scrapbook-adoptedstylesheet-1').trim(),
-    '#adopted2 { background-color: rgb(0, 255, 0); }',
+    [
+      `#adopted2 { background-color: rgb(0, 255, 0); }`,
+    ].join('\n\n'),
+  );
+  assertEqual(
+    docElem.getAttribute('data-scrapbook-adoptedstylesheet-2').trim(),
+    [
+      `#adopted2 { background-color: rgb(0, 255, 0); }`,
+    ].join('\n\n'),
+  );
+
+  var host1 = doc.querySelector('#shadow1');
+  assertEqual(
+    host1.getAttribute('data-scrapbook-adoptedstylesheets').trim(),
+    '0,2',
+  );
+
+  /* capture.adoptedStyleSheet = save, capture.rewriteCss = tidy */
+  var options = {
+    "capture.adoptedStyleSheet": "save",
+    "capture.rewriteCss": "tidy",
+  };
+  var blob = await capture({
+    url: `${localhost}/capture_css_adopted/shadow.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+  var zip = await new JSZip().loadAsync(blob);
+  assert(zip.file('green.bmp'));
+  assert(zip.file('nonexist.bmp'));
+
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assert(doc.querySelector('script[data-scrapbook-elem="basic-loader"]'));
+
+  var docElem = doc.documentElement;
+  assertEqual(
+    docElem.getAttribute('data-scrapbook-adoptedstylesheets').trim(),
+    '0,1',
+  );
+  assertEqual(
+    docElem.getAttribute('data-scrapbook-adoptedstylesheet-0').trim(),
+    [
+      `#adopted { background-image: url("green.bmp"); }`,
+      `#adopted3 { background-color: rgb(0, 255, 0); }`,
+      `#adopted4 { background-color: rgb(0, 255, 0); }`,
+      `#nonexist { background-image: url("nonexist.bmp"); }`,
+    ].join('\n\n'),
+  );
+  assertEqual(
+    docElem.getAttribute('data-scrapbook-adoptedstylesheet-1').trim(),
+    [
+      `#adopted2 { background-color: rgb(0, 255, 0); }`,
+      `#nonexist { background-image: url("nonexist.bmp"); }`,
+    ].join('\n\n'),
+  );
+  assertEqual(
+    docElem.getAttribute('data-scrapbook-adoptedstylesheet-2').trim(),
+    [
+      `#adopted2 { background-color: rgb(0, 255, 0); }`,
+      `#nonexist { background-image: url("nonexist.bmp"); }`,
+    ].join('\n\n'),
+  );
+
+  var host1 = doc.querySelector('#shadow1');
+  assertEqual(
+    host1.getAttribute('data-scrapbook-adoptedstylesheets').trim(),
+    '0,2',
+  );
+
+  /* capture.adoptedStyleSheet = save, capture.rewriteCss = url */
+  var options = {
+    "capture.adoptedStyleSheet": "save",
+    "capture.rewriteCss": "url",
+  };
+  var blob = await capture({
+    url: `${localhost}/capture_css_adopted/shadow.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+  var zip = await new JSZip().loadAsync(blob);
+  assert(zip.file('green.bmp'));
+  assert(zip.file('nonexist.bmp'));
+
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assert(doc.querySelector('script[data-scrapbook-elem="basic-loader"]'));
+
+  var docElem = doc.documentElement;
+  assertEqual(
+    docElem.getAttribute('data-scrapbook-adoptedstylesheets').trim(),
+    '0,1',
+  );
+  assertEqual(
+    docElem.getAttribute('data-scrapbook-adoptedstylesheet-0').trim(),
+    [
+      `#adopted { background-image: url("green.bmp"); }`,
+      `#adopted3 { background-color: rgb(0, 255, 0); }`,
+      `#adopted4 { background-color: rgb(0, 255, 0); }`,
+      `#nonexist { background-image: url("nonexist.bmp"); }`,
+    ].join('\n\n'),
+  );
+  assertEqual(
+    docElem.getAttribute('data-scrapbook-adoptedstylesheet-1').trim(),
+    [
+      `#adopted2 { background-color: rgb(0, 255, 0); }`,
+      `#nonexist { background-image: url("nonexist.bmp"); }`,
+    ].join('\n\n'),
+  );
+  assertEqual(
+    docElem.getAttribute('data-scrapbook-adoptedstylesheet-2').trim(),
+    [
+      `#adopted2 { background-color: rgb(0, 255, 0); }`,
+      `#nonexist { background-image: url("nonexist.bmp"); }`,
+    ].join('\n\n'),
+  );
+
+  var host1 = doc.querySelector('#shadow1');
+  assertEqual(
+    host1.getAttribute('data-scrapbook-adoptedstylesheets').trim(),
+    '0,2',
+  );
+
+  /* capture.adoptedStyleSheet = save, capture.rewriteCss = none */
+  var options = {
+    "capture.adoptedStyleSheet": "save",
+    "capture.rewriteCss": "none",
+  };
+  var blob = await capture({
+    url: `${localhost}/capture_css_adopted/shadow.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+  var zip = await new JSZip().loadAsync(blob);
+  assert(!zip.file('green.bmp'));
+  assert(!zip.file('nonexist.bmp'));
+
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assert(doc.querySelector('script[data-scrapbook-elem="basic-loader"]'));
+
+  var docElem = doc.documentElement;
+  assertEqual(
+    docElem.getAttribute('data-scrapbook-adoptedstylesheets').trim(),
+    '0,1',
+  );
+  assertEqual(
+    docElem.getAttribute('data-scrapbook-adoptedstylesheet-0').trim(),
+    [
+      `#adopted { background-image: url("./green.bmp"); }`,
+      `#adopted3 { background-color: rgb(0, 255, 0); }`,
+      `#adopted4 { background-color: rgb(0, 255, 0); }`,
+      `#nonexist { background-image: url("./nonexist.bmp"); }`,
+    ].join('\n\n'),
+  );
+  assertEqual(
+    docElem.getAttribute('data-scrapbook-adoptedstylesheet-1').trim(),
+    [
+      `#adopted2 { background-color: rgb(0, 255, 0); }`,
+      `#nonexist { background-image: url("./nonexist.bmp"); }`,
+    ].join('\n\n'),
+  );
+  assertEqual(
+    docElem.getAttribute('data-scrapbook-adoptedstylesheet-2').trim(),
+    [
+      `#adopted2 { background-color: rgb(0, 255, 0); }`,
+      `#nonexist { background-image: url("./nonexist.bmp"); }`,
+    ].join('\n\n'),
   );
 
   var host1 = doc.querySelector('#shadow1');

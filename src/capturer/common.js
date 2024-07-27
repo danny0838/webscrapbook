@@ -2752,14 +2752,19 @@
       }
       const baseUrlCurrent = baseUrl;
       const refPolicy = docRefPolicy;
-      const ids = [];
+      const infos = [];
       for (const css of scrapbook.getAdoptedStyleSheets(docOrShadowRoot)) {
-        let id = adoptedStyleSheetMap.get(css);
-        if (typeof id === 'undefined') {
-          id = adoptedStyleSheetMap.size;
-          adoptedStyleSheetMap.set(css, id);
+        let info = adoptedStyleSheetMap.get(css);
+        if (info) {
+          info.roots.push(root);
+        } else {
+          info = {
+            id: adoptedStyleSheetMap.size,
+            roots: [root],
+          };
+          adoptedStyleSheetMap.set(css, info);
         }
-        ids.push(id);
+        infos.push(info);
         cssTasks.push(async () => {
           await cssResourcesHandler.inspectCss({
             css,
@@ -2771,9 +2776,9 @@
           });
         });
       }
-      if (ids.length) {
+      if (infos.length) {
         const elem = root.host || root;
-        captureRewriteAttr(elem, "data-scrapbook-adoptedstylesheets", ids.join(','));
+        captureRewriteAttr(elem, "data-scrapbook-adoptedstylesheets", infos.map(x => x.id).join(','));
       }
     };
 
@@ -3280,20 +3285,34 @@
     if (adoptedStyleSheetMap.size && !["blank", "remove"].includes(options["capture.style"])) {
       const baseUrlCurrent = baseUrl;
       const refPolicy = docRefPolicy;
-      for (const [css, id] of adoptedStyleSheetMap) {
+      const option = options["capture.rewriteCss"];
+      for (const [css, {id, roots}] of adoptedStyleSheetMap) {
         tasks.push(async () => {
-          const cssText = await cssHandler.rewriteCssRules({
-            cssRules: css.cssRules,
-            baseUrl: baseUrlCurrent,
-            refUrl,
-            refPolicy,
-            envCharset: charset,
-            refCss: css,
-            rootNode: null,
-            sep: '\n\n',
-            settings,
-            options,
-          });
+          let cssText;
+          switch (option) {
+            case "url":
+            case "tidy":
+            case "match": {
+              cssText = await cssHandler.rewriteCssRules({
+                cssRules: css.cssRules,
+                baseUrl: baseUrlCurrent,
+                refUrl,
+                refPolicy,
+                envCharset: charset,
+                refCss: css,
+                rootNode: option === 'match' ? roots : null,
+                sep: '\n\n',
+                settings,
+                options,
+              });
+              break;
+            }
+            case "none":
+            default: {
+              cssText = Array.prototype.map.call(css.cssRules, x => x.cssText).join('\n\n');
+              break;
+            }
+          }
           captureRewriteAttr(rootNode, `data-scrapbook-adoptedstylesheet-${id}`, cssText);
         });
       }
@@ -5041,8 +5060,8 @@
      *     fetching resources.
      * @param {CSSStyleSheet} [params.refCss] - the reference CSS (which
      *     holds the @import rule(s), for an imported CSS).
-     * @param {Node} [params.rootNode] - the document or ShadowRoot node for
-     *     verifying selectors.
+     * @param {Node|Node[]} [params.rootNode] - the document or ShadowRoot
+     *     nodes for verifying selectors.
      * @param {string} [params.indent] - the string to indent the output CSS
      *     text.
      * @param {string} [params.sep] - the string to separate each CSS rule.
@@ -5054,8 +5073,15 @@
       for (const cssRule of cssRules) {
         switch (cssRule.type) {
           case CSSRule.STYLE_RULE: {
-            // this CSS rule applies to no node in the captured area
-            if (rootNode && !this.verifySelector(rootNode, cssRule)) { break; }
+            // skip if this CSS rule applies to no node in the related root nodes
+            if (rootNode) {
+              if (!Array.isArray(rootNode)) {
+                rootNode = [rootNode];
+              }
+              if (rootNode.every(rootNode => !this.verifySelector(rootNode, cssRule))) {
+                break;
+              }
+            }
 
             if (cssRule.cssRules && cssRule.cssRules.length) {
               // nesting CSS
