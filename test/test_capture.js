@@ -6122,8 +6122,10 @@ $it.skipIf($.noAdoptedStylesheet)('test_capture_css_adopted', async function () 
 
   var docElem = doc.documentElement;
   assert(!docElem.hasAttribute('data-scrapbook-adoptedstylesheets'));
-  assert(!docElem.hasAttribute('data-scrapbook-adoptedstylesheet-0'));
-  assert(!docElem.hasAttribute('data-scrapbook-adoptedstylesheet-1'));
+  assert(!Array.prototype.some.call(
+    docElem.attributes,
+    attrNode => attrNode.nodeName.match(/^data-scrapbook-adoptedstylesheet-\d+$/)
+  ));
 
   /* capture.adoptedStyleSheet = save, capture.style = remove */
   var options = {
@@ -6145,8 +6147,10 @@ $it.skipIf($.noAdoptedStylesheet)('test_capture_css_adopted', async function () 
 
   var docElem = doc.documentElement;
   assert(!docElem.hasAttribute('data-scrapbook-adoptedstylesheets'));
-  assert(!docElem.hasAttribute('data-scrapbook-adoptedstylesheet-0'));
-  assert(!docElem.hasAttribute('data-scrapbook-adoptedstylesheet-1'));
+  assert(!Array.prototype.some.call(
+    docElem.attributes,
+    attrNode => attrNode.nodeName.match(/^data-scrapbook-adoptedstylesheet-\d+$/)
+  ));
 
   /* capture.adoptedStyleSheet = remove */
   var options = {
@@ -6168,8 +6172,10 @@ $it.skipIf($.noAdoptedStylesheet)('test_capture_css_adopted', async function () 
 
   var docElem = doc.documentElement;
   assert(!docElem.hasAttribute('data-scrapbook-adoptedstylesheets'));
-  assert(!docElem.hasAttribute('data-scrapbook-adoptedstylesheet-0'));
-  assert(!docElem.hasAttribute('data-scrapbook-adoptedstylesheet-1'));
+  assert(!Array.prototype.some.call(
+    docElem.attributes,
+    attrNode => attrNode.nodeName.match(/^data-scrapbook-adoptedstylesheet-\d+$/)
+  ));
 });
 
 $it.skipIf($.noAdoptedStylesheet)('test_capture_css_adopted_shadow', async function () {
