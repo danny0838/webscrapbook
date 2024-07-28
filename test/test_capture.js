@@ -6074,9 +6074,10 @@ $it.skipIf($.noAdoptedStylesheet)('test_capture_css_adopted', async function () 
   var options = {
     "capture.style": "save",
     "capture.adoptedStyleSheet": "save",
+    "capture.recordRewrites": true,
   };
   var blob = await capture({
-    url: `${localhost}/capture_css_adopted/index.html`,
+    url: `${localhost}/capture_css_adopted/basic.html`,
     options: Object.assign({}, baseOptions, options),
   });
   var zip = await new JSZip().loadAsync(blob);
@@ -6097,26 +6098,28 @@ $it.skipIf($.noAdoptedStylesheet)('test_capture_css_adopted', async function () 
     docElem.getAttribute('data-scrapbook-adoptedstylesheet-0').trim(),
     [
       `#adopted1-1 { background-color: rgb(0, 255, 0); }`,
-      `#adopted1-2 { background-image: url("green.bmp"); }`,
-      `#nonexist { background-image: url("nonexist.bmp"); }`,
+      `#adopted1-2 { background-image: /*scrapbook-orig-url="./green.bmp"*/url("green.bmp"); }`,
+      `#nonexist { background-image: /*scrapbook-orig-url="./nonexist.bmp"*/url("nonexist.bmp"); }`,
     ].join('\n\n'),
   );
   assertEqual(
     docElem.getAttribute('data-scrapbook-adoptedstylesheet-1').trim(),
     [
       `#adopted2-1 { background-color: rgb(0, 255, 0); }`,
-      `#adopted2-2 { background-image: url("green.bmp"); }`,
-      `#nonexist { background-image: url("nonexist.bmp"); }`,
+      `#adopted2-2 { background-image: /*scrapbook-orig-url="./green.bmp"*/url("green.bmp"); }`,
+      `#nonexist { background-image: /*scrapbook-orig-url="./nonexist.bmp"*/url("nonexist.bmp"); }`,
     ].join('\n\n'),
   );
+  assertNoRecord(docElem);
 
   /* capture.adoptedStyleSheet = save, capture.style = link */
   var options = {
     "capture.style": "link",
     "capture.adoptedStyleSheet": "save",
+    "capture.recordRewrites": true,
   };
   var blob = await capture({
-    url: `${localhost}/capture_css_adopted/index.html`,
+    url: `${localhost}/capture_css_adopted/basic.html`,
     options: Object.assign({}, baseOptions, options),
   });
   var zip = await new JSZip().loadAsync(blob);
@@ -6137,26 +6140,28 @@ $it.skipIf($.noAdoptedStylesheet)('test_capture_css_adopted', async function () 
     docElem.getAttribute('data-scrapbook-adoptedstylesheet-0').trim(),
     [
       `#adopted1-1 { background-color: rgb(0, 255, 0); }`,
-      `#adopted1-2 { background-image: url("green.bmp"); }`,
-      `#nonexist { background-image: url("nonexist.bmp"); }`,
+      `#adopted1-2 { background-image: /*scrapbook-orig-url="./green.bmp"*/url("green.bmp"); }`,
+      `#nonexist { background-image: /*scrapbook-orig-url="./nonexist.bmp"*/url("nonexist.bmp"); }`,
     ].join('\n\n'),
   );
   assertEqual(
     docElem.getAttribute('data-scrapbook-adoptedstylesheet-1').trim(),
     [
       `#adopted2-1 { background-color: rgb(0, 255, 0); }`,
-      `#adopted2-2 { background-image: url("green.bmp"); }`,
-      `#nonexist { background-image: url("nonexist.bmp"); }`,
+      `#adopted2-2 { background-image: /*scrapbook-orig-url="./green.bmp"*/url("green.bmp"); }`,
+      `#nonexist { background-image: /*scrapbook-orig-url="./nonexist.bmp"*/url("nonexist.bmp"); }`,
     ].join('\n\n'),
   );
+  assertNoRecord(docElem);
 
   /* capture.adoptedStyleSheet = save, capture.style = blank */
   var options = {
     "capture.style": "blank",
     "capture.adoptedStyleSheet": "save",
+    "capture.recordRewrites": true,
   };
   var blob = await capture({
-    url: `${localhost}/capture_css_adopted/index.html`,
+    url: `${localhost}/capture_css_adopted/basic.html`,
     options: Object.assign({}, baseOptions, options),
   });
   var zip = await new JSZip().loadAsync(blob);
@@ -6176,9 +6181,10 @@ $it.skipIf($.noAdoptedStylesheet)('test_capture_css_adopted', async function () 
   var options = {
     "capture.style": "remove",
     "capture.adoptedStyleSheet": "save",
+    "capture.recordRewrites": true,
   };
   var blob = await capture({
-    url: `${localhost}/capture_css_adopted/index.html`,
+    url: `${localhost}/capture_css_adopted/basic.html`,
     options: Object.assign({}, baseOptions, options),
   });
   var zip = await new JSZip().loadAsync(blob);
@@ -6198,9 +6204,10 @@ $it.skipIf($.noAdoptedStylesheet)('test_capture_css_adopted', async function () 
   var options = {
     "capture.style": "save",
     "capture.adoptedStyleSheet": "remove",
+    "capture.recordRewrites": true,
   };
   var blob = await capture({
-    url: `${localhost}/capture_css_adopted/index.html`,
+    url: `${localhost}/capture_css_adopted/basic.html`,
     options: Object.assign({}, baseOptions, options),
   });
   var zip = await new JSZip().loadAsync(blob);
@@ -6225,18 +6232,33 @@ $it.skipIf($.noAdoptedStylesheet)('test_capture_css_adopted', async function () 
  * capturer.DocumentCssHandler
  */
 $it.skipIf($.noAdoptedStylesheet)('test_capture_css_adopted_shadow', async function () {
-  /* capture.adoptedStyleSheet = save, capture.rewriteCss = match */
   var options = {
+    "capture.imageBackground": "save-used",
+    "capture.font": "save-used",
+  };
+
+  /* capture.adoptedStyleSheet = save, capture.rewriteCss = match */
+  Object.assign(options, {
     "capture.adoptedStyleSheet": "save",
     "capture.rewriteCss": "match",
-  };
+  });
   var blob = await capture({
     url: `${localhost}/capture_css_adopted/shadow.html`,
     options: Object.assign({}, baseOptions, options),
   });
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.file('green.bmp'));
-  assert(!zip.file('nonexist.bmp'));
+  assert(zip.file('image1-1.bmp'));
+  assert(zip.file('image1-2.bmp'));
+  assert(zip.file('image1-3.bmp'));
+  assert(!zip.file('image1-4.bmp'));
+  assert(zip.file('image2-1.bmp'));
+  assert(zip.file('image2-2.bmp'));
+  assert(zip.file('image2-3.bmp'));
+  assert(!zip.file('image2-4.bmp'));
+  assert(zip.file('font1-1.woff'));
+  assert(zip.file('font1-2.woff'));
+  assert(zip.file('font1-3.woff'));
+  assert(!zip.file('font1-4.woff'));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -6251,42 +6273,69 @@ $it.skipIf($.noAdoptedStylesheet)('test_capture_css_adopted_shadow', async funct
   assertEqual(
     docElem.getAttribute('data-scrapbook-adoptedstylesheet-0').trim(),
     [
-      `#adopted { background-image: url("green.bmp"); }`,
-      `#adopted3 { background-color: rgb(0, 255, 0); }`,
-      `#adopted4 { background-color: rgb(0, 255, 0); }`,
+      `#image1-1 { background-image: url("image1-1.bmp"); }`,
+      `#image1-2 { background-image: url("image1-2.bmp"); }`,
+      `#image1-3 { background-image: url("image1-3.bmp"); }`,
     ].join('\n\n'),
   );
   assertEqual(
     docElem.getAttribute('data-scrapbook-adoptedstylesheet-1').trim(),
     [
-      `#adopted2 { background-color: rgb(0, 255, 0); }`,
+      `@font-face { font-family: font1-1; src: url("font1-1.woff"); }`,
+      `#font1-1 { font-family: font1-1; }`,
+      `@font-face { font-family: font1-2; src: url("font1-2.woff"); }`,
+      `#font1-2 { font-family: font1-2; }`,
+      `@font-face { font-family: font1-3; src: url("font1-3.woff"); }`,
+      `#font1-3 { font-family: font1-3; }`,
+      `@font-face { font-family: font1-4; src: url(""); }`,
     ].join('\n\n'),
   );
   assertEqual(
     docElem.getAttribute('data-scrapbook-adoptedstylesheet-2').trim(),
     [
-      `#adopted2 { background-color: rgb(0, 255, 0); }`,
+      `#image2-1 { background-image: url("image2-1.bmp"); }`,
+      `#image2-2 { background-image: url("image2-2.bmp"); }`,
+      `#image2-3 { background-image: url("image2-3.bmp"); }`,
     ].join('\n\n'),
   );
 
   var host1 = doc.querySelector('#shadow1');
   assertEqual(
     host1.getAttribute('data-scrapbook-adoptedstylesheets').trim(),
-    '0,2',
+    '0,1,2',
+  );
+
+  var frag = doc.createElement("template");
+  frag.innerHTML = host1.getAttribute("data-scrapbook-shadowdom");
+  var shadow1 = frag.content;
+  var host2 = shadow1.querySelector('#shadow2');
+  assertEqual(
+    host2.getAttribute('data-scrapbook-adoptedstylesheets').trim(),
+    '2',
   );
 
   /* capture.adoptedStyleSheet = save, capture.rewriteCss = tidy */
-  var options = {
+  Object.assign(options, {
     "capture.adoptedStyleSheet": "save",
     "capture.rewriteCss": "tidy",
-  };
+  });
   var blob = await capture({
     url: `${localhost}/capture_css_adopted/shadow.html`,
     options: Object.assign({}, baseOptions, options),
   });
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.file('green.bmp'));
-  assert(zip.file('nonexist.bmp'));
+  assert(zip.file('image1-1.bmp'));
+  assert(zip.file('image1-2.bmp'));
+  assert(zip.file('image1-3.bmp'));
+  assert(!zip.file('image1-4.bmp'));
+  assert(zip.file('image2-1.bmp'));
+  assert(zip.file('image2-2.bmp'));
+  assert(zip.file('image2-3.bmp'));
+  assert(!zip.file('image2-4.bmp'));
+  assert(zip.file('font1-1.woff'));
+  assert(zip.file('font1-2.woff'));
+  assert(zip.file('font1-3.woff'));
+  assert(!zip.file('font1-4.woff'));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -6301,45 +6350,72 @@ $it.skipIf($.noAdoptedStylesheet)('test_capture_css_adopted_shadow', async funct
   assertEqual(
     docElem.getAttribute('data-scrapbook-adoptedstylesheet-0').trim(),
     [
-      `#adopted { background-image: url("green.bmp"); }`,
-      `#adopted3 { background-color: rgb(0, 255, 0); }`,
-      `#adopted4 { background-color: rgb(0, 255, 0); }`,
-      `#nonexist { background-image: url("nonexist.bmp"); }`,
+      `#image1-1 { background-image: url("image1-1.bmp"); }`,
+      `#image1-2 { background-image: url("image1-2.bmp"); }`,
+      `#image1-3 { background-image: url("image1-3.bmp"); }`,
+      `#image1-4 { background-image: url(""); }`,
     ].join('\n\n'),
   );
   assertEqual(
     docElem.getAttribute('data-scrapbook-adoptedstylesheet-1').trim(),
     [
-      `#adopted2 { background-color: rgb(0, 255, 0); }`,
-      `#nonexist { background-image: url("nonexist.bmp"); }`,
+      `@font-face { font-family: font1-1; src: url("font1-1.woff"); }`,
+      `#font1-1 { font-family: font1-1; }`,
+      `@font-face { font-family: font1-2; src: url("font1-2.woff"); }`,
+      `#font1-2 { font-family: font1-2; }`,
+      `@font-face { font-family: font1-3; src: url("font1-3.woff"); }`,
+      `#font1-3 { font-family: font1-3; }`,
+      `@font-face { font-family: font1-4; src: url(""); }`,
+      `#font1-4 { font-family: font1-4; }`,
     ].join('\n\n'),
   );
   assertEqual(
     docElem.getAttribute('data-scrapbook-adoptedstylesheet-2').trim(),
     [
-      `#adopted2 { background-color: rgb(0, 255, 0); }`,
-      `#nonexist { background-image: url("nonexist.bmp"); }`,
+      `#image2-1 { background-image: url("image2-1.bmp"); }`,
+      `#image2-2 { background-image: url("image2-2.bmp"); }`,
+      `#image2-3 { background-image: url("image2-3.bmp"); }`,
+      `#image2-4 { background-image: url(""); }`,
     ].join('\n\n'),
   );
 
   var host1 = doc.querySelector('#shadow1');
   assertEqual(
     host1.getAttribute('data-scrapbook-adoptedstylesheets').trim(),
-    '0,2',
+    '0,1,2',
+  );
+
+  var frag = doc.createElement("template");
+  frag.innerHTML = host1.getAttribute("data-scrapbook-shadowdom");
+  var shadow1 = frag.content;
+  var host2 = shadow1.querySelector('#shadow2');
+  assertEqual(
+    host2.getAttribute('data-scrapbook-adoptedstylesheets').trim(),
+    '2',
   );
 
   /* capture.adoptedStyleSheet = save, capture.rewriteCss = url */
-  var options = {
+  Object.assign(options, {
     "capture.adoptedStyleSheet": "save",
     "capture.rewriteCss": "url",
-  };
+  });
   var blob = await capture({
     url: `${localhost}/capture_css_adopted/shadow.html`,
     options: Object.assign({}, baseOptions, options),
   });
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.file('green.bmp'));
-  assert(zip.file('nonexist.bmp'));
+  assert(zip.file('image1-1.bmp'));
+  assert(zip.file('image1-2.bmp'));
+  assert(zip.file('image1-3.bmp'));
+  assert(!zip.file('image1-4.bmp'));
+  assert(zip.file('image2-1.bmp'));
+  assert(zip.file('image2-2.bmp'));
+  assert(zip.file('image2-3.bmp'));
+  assert(!zip.file('image2-4.bmp'));
+  assert(zip.file('font1-1.woff'));
+  assert(zip.file('font1-2.woff'));
+  assert(zip.file('font1-3.woff'));
+  assert(!zip.file('font1-4.woff'));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -6354,45 +6430,72 @@ $it.skipIf($.noAdoptedStylesheet)('test_capture_css_adopted_shadow', async funct
   assertEqual(
     docElem.getAttribute('data-scrapbook-adoptedstylesheet-0').trim(),
     [
-      `#adopted { background-image: url("green.bmp"); }`,
-      `#adopted3 { background-color: rgb(0, 255, 0); }`,
-      `#adopted4 { background-color: rgb(0, 255, 0); }`,
-      `#nonexist { background-image: url("nonexist.bmp"); }`,
+      `#image1-1 { background-image: url("image1-1.bmp"); }`,
+      `#image1-2 { background-image: url("image1-2.bmp"); }`,
+      `#image1-3 { background-image: url("image1-3.bmp"); }`,
+      `#image1-4 { background-image: url(""); }`,
     ].join('\n\n'),
   );
   assertEqual(
     docElem.getAttribute('data-scrapbook-adoptedstylesheet-1').trim(),
     [
-      `#adopted2 { background-color: rgb(0, 255, 0); }`,
-      `#nonexist { background-image: url("nonexist.bmp"); }`,
+      `@font-face { font-family: font1-1; src: url("font1-1.woff"); }`,
+      `#font1-1 { font-family: font1-1; }`,
+      `@font-face { font-family: font1-2; src: url("font1-2.woff"); }`,
+      `#font1-2 { font-family: font1-2; }`,
+      `@font-face { font-family: font1-3; src: url("font1-3.woff"); }`,
+      `#font1-3 { font-family: font1-3; }`,
+      `@font-face { font-family: font1-4; src: url(""); }`,
+      `#font1-4 { font-family: font1-4; }`,
     ].join('\n\n'),
   );
   assertEqual(
     docElem.getAttribute('data-scrapbook-adoptedstylesheet-2').trim(),
     [
-      `#adopted2 { background-color: rgb(0, 255, 0); }`,
-      `#nonexist { background-image: url("nonexist.bmp"); }`,
+      `#image2-1 { background-image: url("image2-1.bmp"); }`,
+      `#image2-2 { background-image: url("image2-2.bmp"); }`,
+      `#image2-3 { background-image: url("image2-3.bmp"); }`,
+      `#image2-4 { background-image: url(""); }`,
     ].join('\n\n'),
   );
 
   var host1 = doc.querySelector('#shadow1');
   assertEqual(
     host1.getAttribute('data-scrapbook-adoptedstylesheets').trim(),
-    '0,2',
+    '0,1,2',
+  );
+
+  var frag = doc.createElement("template");
+  frag.innerHTML = host1.getAttribute("data-scrapbook-shadowdom");
+  var shadow1 = frag.content;
+  var host2 = shadow1.querySelector('#shadow2');
+  assertEqual(
+    host2.getAttribute('data-scrapbook-adoptedstylesheets').trim(),
+    '2',
   );
 
   /* capture.adoptedStyleSheet = save, capture.rewriteCss = none */
-  var options = {
+  Object.assign(options, {
     "capture.adoptedStyleSheet": "save",
     "capture.rewriteCss": "none",
-  };
+  });
   var blob = await capture({
     url: `${localhost}/capture_css_adopted/shadow.html`,
     options: Object.assign({}, baseOptions, options),
   });
   var zip = await new JSZip().loadAsync(blob);
-  assert(!zip.file('green.bmp'));
-  assert(!zip.file('nonexist.bmp'));
+  assert(!zip.file('image1-1.bmp'));
+  assert(!zip.file('image1-2.bmp'));
+  assert(!zip.file('image1-3.bmp'));
+  assert(!zip.file('image1-4.bmp'));
+  assert(!zip.file('image2-1.bmp'));
+  assert(!zip.file('image2-2.bmp'));
+  assert(!zip.file('image2-3.bmp'));
+  assert(!zip.file('image2-4.bmp'));
+  assert(!zip.file('font1-1.woff'));
+  assert(!zip.file('font1-2.woff'));
+  assert(!zip.file('font1-3.woff'));
+  assert(!zip.file('font1-4.woff'));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -6407,42 +6510,72 @@ $it.skipIf($.noAdoptedStylesheet)('test_capture_css_adopted_shadow', async funct
   assertEqual(
     docElem.getAttribute('data-scrapbook-adoptedstylesheet-0').trim(),
     [
-      `#adopted { background-image: url("./green.bmp"); }`,
-      `#adopted3 { background-color: rgb(0, 255, 0); }`,
-      `#adopted4 { background-color: rgb(0, 255, 0); }`,
-      `#nonexist { background-image: url("./nonexist.bmp"); }`,
+      `#image1-1 { background-image: url("./image1-1.bmp"); }`,
+      `#image1-2 { background-image: url("./image1-2.bmp"); }`,
+      `#image1-3 { background-image: url("./image1-3.bmp"); }`,
+      `#image1-4 { background-image: url("./image1-4.bmp"); }`,
     ].join('\n\n'),
   );
   assertEqual(
     docElem.getAttribute('data-scrapbook-adoptedstylesheet-1').trim(),
     [
-      `#adopted2 { background-color: rgb(0, 255, 0); }`,
-      `#nonexist { background-image: url("./nonexist.bmp"); }`,
+      `@font-face { font-family: font1-1; src: url("./font1-1.woff"); }`,
+      `#font1-1 { font-family: font1-1; }`,
+      `@font-face { font-family: font1-2; src: url("./font1-2.woff"); }`,
+      `#font1-2 { font-family: font1-2; }`,
+      `@font-face { font-family: font1-3; src: url("./font1-3.woff"); }`,
+      `#font1-3 { font-family: font1-3; }`,
+      `@font-face { font-family: font1-4; src: url("./font1-4.woff"); }`,
+      `#font1-4 { font-family: font1-4; }`,
     ].join('\n\n'),
   );
   assertEqual(
     docElem.getAttribute('data-scrapbook-adoptedstylesheet-2').trim(),
     [
-      `#adopted2 { background-color: rgb(0, 255, 0); }`,
-      `#nonexist { background-image: url("./nonexist.bmp"); }`,
+      `#image2-1 { background-image: url("./image2-1.bmp"); }`,
+      `#image2-2 { background-image: url("./image2-2.bmp"); }`,
+      `#image2-3 { background-image: url("./image2-3.bmp"); }`,
+      `#image2-4 { background-image: url("./image2-4.bmp"); }`,
     ].join('\n\n'),
   );
 
   var host1 = doc.querySelector('#shadow1');
   assertEqual(
     host1.getAttribute('data-scrapbook-adoptedstylesheets').trim(),
-    '0,2',
+    '0,1,2',
+  );
+
+  var frag = doc.createElement("template");
+  frag.innerHTML = host1.getAttribute("data-scrapbook-shadowdom");
+  var shadow1 = frag.content;
+  var host2 = shadow1.querySelector('#shadow2');
+  assertEqual(
+    host2.getAttribute('data-scrapbook-adoptedstylesheets').trim(),
+    '2',
   );
 
   /* capture.adoptedStyleSheet = remove */
-  var options = {
+  Object.assign(options, {
     "capture.adoptedStyleSheet": "remove",
-  };
+    "capture.rewriteCss": "url",
+  });
   var blob = await capture({
     url: `${localhost}/capture_css_adopted/shadow.html`,
     options: Object.assign({}, baseOptions, options),
   });
   var zip = await new JSZip().loadAsync(blob);
+  assert(!zip.file('image1-1.bmp'));
+  assert(!zip.file('image1-2.bmp'));
+  assert(!zip.file('image1-3.bmp'));
+  assert(!zip.file('image1-4.bmp'));
+  assert(!zip.file('image2-1.bmp'));
+  assert(!zip.file('image2-2.bmp'));
+  assert(!zip.file('image2-3.bmp'));
+  assert(!zip.file('image2-4.bmp'));
+  assert(!zip.file('font1-1.woff'));
+  assert(!zip.file('font1-2.woff'));
+  assert(!zip.file('font1-3.woff'));
+  assert(!zip.file('font1-4.woff'));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -6451,11 +6584,16 @@ $it.skipIf($.noAdoptedStylesheet)('test_capture_css_adopted_shadow', async funct
 
   var docElem = doc.documentElement;
   assert(!docElem.hasAttribute('data-scrapbook-adoptedstylesheets'));
-  assert(!docElem.hasAttribute('data-scrapbook-adoptedstylesheet-0'));
-  assert(!docElem.hasAttribute('data-scrapbook-adoptedstylesheet-1'));
+  assertNoRecord(docElem, {filter: {regexAttr: /^data-scrapbook-adoptedstylesheet-\d+$/}});
 
   var host1 = doc.querySelector('#shadow1');
   assert(!host1.hasAttribute('data-scrapbook-adoptedstylesheets'));
+
+  var frag = doc.createElement("template");
+  frag.innerHTML = host1.getAttribute("data-scrapbook-shadowdom");
+  var shadow1 = frag.content;
+  var host2 = shadow1.querySelector('#shadow2');
+  assert(!host2.hasAttribute('data-scrapbook-adoptedstylesheets'));
 });
 
 /**
@@ -10571,11 +10709,13 @@ it('test_capture_video', async function () {
  * capture.canvas
  */
 it('test_capture_canvas', async function () {
-  /* capture.canvas = save */
   var options = {
-    "capture.canvas": "save",
     "capture.script": "remove",
+    "capture.recordRewrites": true,
   };
+
+  /* capture.canvas = save */
+  options["capture.canvas"] = "save";
   var blob = await capture({
     url: `${localhost}/capture_canvas/canvas.html`,
     options: Object.assign({}, baseOptions, options),
@@ -10592,6 +10732,7 @@ it('test_capture_canvas', async function () {
 
   assert(!doc.querySelector('#c1').hasAttribute("data-scrapbook-canvas"));
   assert(doc.querySelector('#c2').getAttribute("data-scrapbook-canvas").match(rawRegex`${'^'}data:image/png;base64,`));
+  assertNoRecord(doc.querySelector('#c2'));
 
   // canvas in the shadow DOM
   var blob = await capture({
@@ -10613,12 +10754,10 @@ it('test_capture_canvas', async function () {
   frag.innerHTML = host.getAttribute("data-scrapbook-shadowdom");
   var shadow = frag.content;
   assert(shadow.querySelector('canvas').getAttribute('data-scrapbook-canvas').match(rawRegex`${'^'}data:image/png;base64,`));
+  assertNoRecord(shadow.querySelector('canvas'));
 
   /* capture.canvas = blank */
-  var options = {
-    "capture.canvas": "blank",
-    "capture.script": "remove",
-  };
+  options["capture.canvas"] = "blank";
   var blob = await capture({
     url: `${localhost}/capture_canvas/canvas.html`,
     options: Object.assign({}, baseOptions, options),
@@ -10656,10 +10795,7 @@ it('test_capture_canvas', async function () {
   assert(!shadow.querySelector('canvas').hasAttribute('data-scrapbook-canvas'));
 
   /* capture.canvas = remove */
-  var options = {
-    "capture.canvas": "remove",
-    "capture.script": "remove",
-  };
+  options["capture.canvas"] = "remove";
   var blob = await capture({
     url: `${localhost}/capture_canvas/canvas.html`,
     options: Object.assign({}, baseOptions, options),
@@ -11346,393 +11482,359 @@ it('test_capture_template', async function () {
  * capture.recordRewrites
  */
 it('test_capture_formStatus', async function () {
-  for (const recordRewrites of [true, false]) {
-    console.debug("capture.recordRewrites = %s", recordRewrites);
+  var options = {
+    "capture.recordRewrites": true,
+  };
 
-    var options = {
-      "capture.recordRewrites": recordRewrites,
-    };
+  /* capture.formStatus = save-all */
+  options["capture.formStatus"] = "save-all";
+  var blob = await capture({
+    url: `${localhost}/capture_form/form-status.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+  var zip = await new JSZip().loadAsync(blob);
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
 
-    /* capture.formStatus = save-all */
-    options["capture.formStatus"] = "save-all";
-    var blob = await capture({
-      url: `${localhost}/capture_form/form-status.html`,
-      options: Object.assign({}, baseOptions, options),
-    });
-    var zip = await new JSZip().loadAsync(blob);
-    var indexFile = zip.file('index.html');
-    var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
-    var doc = await readFileAsDocument(indexBlob);
+  assert(!doc.querySelectorAll('input[type="radio"]')[0].hasAttribute('checked'));
+  assert(doc.querySelectorAll('input[type="radio"]')[0].getAttribute('data-scrapbook-input-checked') === 'true');
+  assert(!doc.querySelectorAll('input[type="radio"]')[1].hasAttribute('checked'));
+  assert(!doc.querySelectorAll('input[type="radio"]')[1].hasAttribute('data-scrapbook-input-checked'));
+  assert(doc.querySelectorAll('input[type="radio"]')[2].hasAttribute('checked'));
+  assert(!doc.querySelectorAll('input[type="radio"]')[2].hasAttribute('data-scrapbook-input-checked'));
+  assert(doc.querySelectorAll('input[type="radio"]')[3].hasAttribute('checked'));
+  assert(doc.querySelectorAll('input[type="radio"]')[3].getAttribute('data-scrapbook-input-checked') === 'false');
+  assert(!doc.querySelectorAll('input[type="checkbox"]')[0].hasAttribute('checked'));
+  assert(doc.querySelectorAll('input[type="checkbox"]')[0].getAttribute('data-scrapbook-input-checked') === 'true');
+  assert(!doc.querySelectorAll('input[type="checkbox"]')[1].hasAttribute('checked'));
+  assert(!doc.querySelectorAll('input[type="checkbox"]')[1].hasAttribute('data-scrapbook-input-checked'));
+  assert(doc.querySelectorAll('input[type="checkbox"]')[2].hasAttribute('checked'));
+  assert(!doc.querySelectorAll('input[type="checkbox"]')[2].hasAttribute('data-scrapbook-input-checked'));
+  assert(doc.querySelectorAll('input[type="checkbox"]')[3].hasAttribute('checked'));
+  assert(doc.querySelectorAll('input[type="checkbox"]')[3].getAttribute('data-scrapbook-input-checked') === 'false');
+  assert(doc.querySelectorAll('input[type="checkbox"]')[4].hasAttribute('checked'));
+  assert(!doc.querySelectorAll('input[type="checkbox"]')[4].hasAttribute('data-scrapbook-input-checked'));
+  assert(doc.querySelectorAll('input[type="checkbox"]')[4].hasAttribute('data-scrapbook-input-indeterminate'));
+  assert(!doc.querySelector('input[type="text"]').hasAttribute('value'));
+  assert(doc.querySelector('input[type="text"]').getAttribute('data-scrapbook-input-value') === "myname");
+  assert(!doc.querySelector('input[type="password"]').hasAttribute('value'));
+  assert(doc.querySelector('input[type="password"]').getAttribute('data-scrapbook-input-value') === "mypassword");
+  assert(!doc.querySelector('input[type="number"]').hasAttribute('value'));
+  assert(doc.querySelector('input[type="number"]').getAttribute('data-scrapbook-input-value') === "3");
+  assert(!doc.querySelector('input[type="search"]').hasAttribute('value'));
+  assert(doc.querySelector('input[type="search"]').getAttribute('data-scrapbook-input-value') === "search input");
+  assert(!doc.querySelector('input[type="color"]').hasAttribute('value'));
+  assert(doc.querySelector('input[type="color"]').hasAttribute('data-scrapbook-input-value'));
+  assert(!doc.querySelector('input[type="range"]').hasAttribute('value'));
+  assert(doc.querySelector('input[type="range"]').hasAttribute('data-scrapbook-input-value'));
+  assert(doc.querySelector('textarea').textContent === "");
+  assert(doc.querySelector('textarea').getAttribute('data-scrapbook-textarea-value') === "textarea input");
+  assert(!doc.querySelectorAll('option')[0].hasAttribute('selected'));
+  assert(doc.querySelectorAll('option')[0].getAttribute('data-scrapbook-option-selected') === "true");
+  assert(doc.querySelectorAll('option')[1].hasAttribute('selected'));
+  assert(doc.querySelectorAll('option')[1].getAttribute('data-scrapbook-option-selected') === "false");
 
-    assert(!doc.querySelectorAll('input[type="radio"]')[0].hasAttribute('checked'));
-    assert(doc.querySelectorAll('input[type="radio"]')[0].getAttribute('data-scrapbook-input-checked') === 'true');
-    assert(!doc.querySelectorAll('input[type="radio"]')[1].hasAttribute('checked'));
-    assert(!doc.querySelectorAll('input[type="radio"]')[1].hasAttribute('data-scrapbook-input-checked'));
-    assert(doc.querySelectorAll('input[type="radio"]')[2].hasAttribute('checked'));
-    assert(!doc.querySelectorAll('input[type="radio"]')[2].hasAttribute('data-scrapbook-input-checked'));
-    assert(doc.querySelectorAll('input[type="radio"]')[3].hasAttribute('checked'));
-    assert(doc.querySelectorAll('input[type="radio"]')[3].getAttribute('data-scrapbook-input-checked') === 'false');
-    assert(!doc.querySelectorAll('input[type="checkbox"]')[0].hasAttribute('checked'));
-    assert(doc.querySelectorAll('input[type="checkbox"]')[0].getAttribute('data-scrapbook-input-checked') === 'true');
-    assert(!doc.querySelectorAll('input[type="checkbox"]')[1].hasAttribute('checked'));
-    assert(!doc.querySelectorAll('input[type="checkbox"]')[1].hasAttribute('data-scrapbook-input-checked'));
-    assert(doc.querySelectorAll('input[type="checkbox"]')[2].hasAttribute('checked'));
-    assert(!doc.querySelectorAll('input[type="checkbox"]')[2].hasAttribute('data-scrapbook-input-checked'));
-    assert(doc.querySelectorAll('input[type="checkbox"]')[3].hasAttribute('checked'));
-    assert(doc.querySelectorAll('input[type="checkbox"]')[3].getAttribute('data-scrapbook-input-checked') === 'false');
-    assert(doc.querySelectorAll('input[type="checkbox"]')[4].hasAttribute('checked'));
-    assert(!doc.querySelectorAll('input[type="checkbox"]')[4].hasAttribute('data-scrapbook-input-checked'));
-    assert(doc.querySelectorAll('input[type="checkbox"]')[4].hasAttribute('data-scrapbook-input-indeterminate'));
-    assert(!doc.querySelector('input[type="text"]').hasAttribute('value'));
-    assert(doc.querySelector('input[type="text"]').getAttribute('data-scrapbook-input-value') === "myname");
-    assert(!doc.querySelector('input[type="password"]').hasAttribute('value'));
-    assert(doc.querySelector('input[type="password"]').getAttribute('data-scrapbook-input-value') === "mypassword");
-    assert(!doc.querySelector('input[type="number"]').hasAttribute('value'));
-    assert(doc.querySelector('input[type="number"]').getAttribute('data-scrapbook-input-value') === "3");
-    assert(!doc.querySelector('input[type="search"]').hasAttribute('value'));
-    assert(doc.querySelector('input[type="search"]').getAttribute('data-scrapbook-input-value') === "search input");
-    assert(!doc.querySelector('input[type="color"]').hasAttribute('value'));
-    assert(doc.querySelector('input[type="color"]').hasAttribute('data-scrapbook-input-value'));
-    assert(!doc.querySelector('input[type="range"]').hasAttribute('value'));
-    assert(doc.querySelector('input[type="range"]').hasAttribute('data-scrapbook-input-value'));
-    assert(doc.querySelector('textarea').textContent === "");
-    assert(doc.querySelector('textarea').getAttribute('data-scrapbook-textarea-value') === "textarea input");
-    assert(!doc.querySelectorAll('option')[0].hasAttribute('selected'));
-    assert(doc.querySelectorAll('option')[0].getAttribute('data-scrapbook-option-selected') === "true");
-    assert(doc.querySelectorAll('option')[1].hasAttribute('selected'));
-    assert(doc.querySelectorAll('option')[1].getAttribute('data-scrapbook-option-selected') === "false");
+  // check records
+  // no attribute change except for added "data-scrapbook-*" ones
+  assertNoRecord(doc);
 
-    // check records
-    if (recordRewrites) {
-      assertNoRecord(doc, {filter: 'scrapbook'});
-    } else {
-      assertNoRecord(doc);
-    }
+  /* capture.formStatus = save */
+  options["capture.formStatus"] = "save";
+  var blob = await capture({
+    url: `${localhost}/capture_form/form-status.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+  var zip = await new JSZip().loadAsync(blob);
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
 
-    /* capture.formStatus = save */
-    options["capture.formStatus"] = "save";
-    var blob = await capture({
-      url: `${localhost}/capture_form/form-status.html`,
-      options: Object.assign({}, baseOptions, options),
-    });
-    var zip = await new JSZip().loadAsync(blob);
-    var indexFile = zip.file('index.html');
-    var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
-    var doc = await readFileAsDocument(indexBlob);
+  assert(!doc.querySelectorAll('input[type="radio"]')[0].hasAttribute('checked'));
+  assert(doc.querySelectorAll('input[type="radio"]')[0].getAttribute('data-scrapbook-input-checked') === 'true');
+  assert(!doc.querySelectorAll('input[type="radio"]')[1].hasAttribute('checked'));
+  assert(!doc.querySelectorAll('input[type="radio"]')[1].hasAttribute('data-scrapbook-input-checked'));
+  assert(doc.querySelectorAll('input[type="radio"]')[2].hasAttribute('checked'));
+  assert(!doc.querySelectorAll('input[type="radio"]')[2].hasAttribute('data-scrapbook-input-checked'));
+  assert(doc.querySelectorAll('input[type="radio"]')[3].hasAttribute('checked'));
+  assert(doc.querySelectorAll('input[type="radio"]')[3].getAttribute('data-scrapbook-input-checked') === 'false');
+  assert(!doc.querySelectorAll('input[type="checkbox"]')[0].hasAttribute('checked'));
+  assert(doc.querySelectorAll('input[type="checkbox"]')[0].getAttribute('data-scrapbook-input-checked') === 'true');
+  assert(!doc.querySelectorAll('input[type="checkbox"]')[1].hasAttribute('checked'));
+  assert(!doc.querySelectorAll('input[type="checkbox"]')[1].hasAttribute('data-scrapbook-input-checked'));
+  assert(doc.querySelectorAll('input[type="checkbox"]')[2].hasAttribute('checked'));
+  assert(!doc.querySelectorAll('input[type="checkbox"]')[2].hasAttribute('data-scrapbook-input-checked'));
+  assert(doc.querySelectorAll('input[type="checkbox"]')[3].hasAttribute('checked'));
+  assert(doc.querySelectorAll('input[type="checkbox"]')[3].getAttribute('data-scrapbook-input-checked') === 'false');
+  assert(doc.querySelectorAll('input[type="checkbox"]')[4].hasAttribute('checked'));
+  assert(!doc.querySelectorAll('input[type="checkbox"]')[4].hasAttribute('data-scrapbook-input-checked'));
+  assert(doc.querySelectorAll('input[type="checkbox"]')[4].hasAttribute('data-scrapbook-input-indeterminate'));
+  assert(!doc.querySelector('input[type="text"]').hasAttribute('value'));
+  assert(doc.querySelector('input[type="text"]').getAttribute('data-scrapbook-input-value') === "myname");
+  assert(!doc.querySelector('input[type="password"]').hasAttribute('value'));
+  assert(!doc.querySelector('input[type="password"]').hasAttribute('data-scrapbook-input-value'));
+  assert(!doc.querySelector('input[type="number"]').hasAttribute('value'));
+  assert(doc.querySelector('input[type="number"]').getAttribute('data-scrapbook-input-value') === "3");
+  assert(!doc.querySelector('input[type="search"]').hasAttribute('value'));
+  assert(doc.querySelector('input[type="search"]').getAttribute('data-scrapbook-input-value') === "search input");
+  assert(!doc.querySelector('input[type="color"]').hasAttribute('value'));
+  assert(doc.querySelector('input[type="color"]').hasAttribute('data-scrapbook-input-value'));
+  assert(!doc.querySelector('input[type="range"]').hasAttribute('value'));
+  assert(doc.querySelector('input[type="range"]').hasAttribute('data-scrapbook-input-value'));
+  assert(doc.querySelector('textarea').textContent === "");
+  assert(doc.querySelector('textarea').getAttribute('data-scrapbook-textarea-value') === "textarea input");
+  assert(!doc.querySelectorAll('option')[0].hasAttribute('selected'));
+  assert(doc.querySelectorAll('option')[0].getAttribute('data-scrapbook-option-selected') === "true");
+  assert(doc.querySelectorAll('option')[1].hasAttribute('selected'));
+  assert(doc.querySelectorAll('option')[1].getAttribute('data-scrapbook-option-selected') === "false");
 
-    assert(!doc.querySelectorAll('input[type="radio"]')[0].hasAttribute('checked'));
-    assert(doc.querySelectorAll('input[type="radio"]')[0].getAttribute('data-scrapbook-input-checked') === 'true');
-    assert(!doc.querySelectorAll('input[type="radio"]')[1].hasAttribute('checked'));
-    assert(!doc.querySelectorAll('input[type="radio"]')[1].hasAttribute('data-scrapbook-input-checked'));
-    assert(doc.querySelectorAll('input[type="radio"]')[2].hasAttribute('checked'));
-    assert(!doc.querySelectorAll('input[type="radio"]')[2].hasAttribute('data-scrapbook-input-checked'));
-    assert(doc.querySelectorAll('input[type="radio"]')[3].hasAttribute('checked'));
-    assert(doc.querySelectorAll('input[type="radio"]')[3].getAttribute('data-scrapbook-input-checked') === 'false');
-    assert(!doc.querySelectorAll('input[type="checkbox"]')[0].hasAttribute('checked'));
-    assert(doc.querySelectorAll('input[type="checkbox"]')[0].getAttribute('data-scrapbook-input-checked') === 'true');
-    assert(!doc.querySelectorAll('input[type="checkbox"]')[1].hasAttribute('checked'));
-    assert(!doc.querySelectorAll('input[type="checkbox"]')[1].hasAttribute('data-scrapbook-input-checked'));
-    assert(doc.querySelectorAll('input[type="checkbox"]')[2].hasAttribute('checked'));
-    assert(!doc.querySelectorAll('input[type="checkbox"]')[2].hasAttribute('data-scrapbook-input-checked'));
-    assert(doc.querySelectorAll('input[type="checkbox"]')[3].hasAttribute('checked'));
-    assert(doc.querySelectorAll('input[type="checkbox"]')[3].getAttribute('data-scrapbook-input-checked') === 'false');
-    assert(doc.querySelectorAll('input[type="checkbox"]')[4].hasAttribute('checked'));
-    assert(!doc.querySelectorAll('input[type="checkbox"]')[4].hasAttribute('data-scrapbook-input-checked'));
-    assert(doc.querySelectorAll('input[type="checkbox"]')[4].hasAttribute('data-scrapbook-input-indeterminate'));
-    assert(!doc.querySelector('input[type="text"]').hasAttribute('value'));
-    assert(doc.querySelector('input[type="text"]').getAttribute('data-scrapbook-input-value') === "myname");
-    assert(!doc.querySelector('input[type="password"]').hasAttribute('value'));
-    assert(!doc.querySelector('input[type="password"]').hasAttribute('data-scrapbook-input-value'));
-    assert(!doc.querySelector('input[type="number"]').hasAttribute('value'));
-    assert(doc.querySelector('input[type="number"]').getAttribute('data-scrapbook-input-value') === "3");
-    assert(!doc.querySelector('input[type="search"]').hasAttribute('value'));
-    assert(doc.querySelector('input[type="search"]').getAttribute('data-scrapbook-input-value') === "search input");
-    assert(!doc.querySelector('input[type="color"]').hasAttribute('value'));
-    assert(doc.querySelector('input[type="color"]').hasAttribute('data-scrapbook-input-value'));
-    assert(!doc.querySelector('input[type="range"]').hasAttribute('value'));
-    assert(doc.querySelector('input[type="range"]').hasAttribute('data-scrapbook-input-value'));
-    assert(doc.querySelector('textarea').textContent === "");
-    assert(doc.querySelector('textarea').getAttribute('data-scrapbook-textarea-value') === "textarea input");
-    assert(!doc.querySelectorAll('option')[0].hasAttribute('selected'));
-    assert(doc.querySelectorAll('option')[0].getAttribute('data-scrapbook-option-selected') === "true");
-    assert(doc.querySelectorAll('option')[1].hasAttribute('selected'));
-    assert(doc.querySelectorAll('option')[1].getAttribute('data-scrapbook-option-selected') === "false");
+  // check records
+  // no attribute change except for added "data-scrapbook-*" ones
+  assertNoRecord(doc);
 
-    // check records
-    if (recordRewrites) {
-      assertNoRecord(doc, {filter: 'scrapbook'});
-    } else {
-      assertNoRecord(doc);
-    }
+  /* capture.formStatus = keep-all */
+  options["capture.formStatus"] = "keep-all";
+  var blob = await capture({
+    url: `${localhost}/capture_form/form-status.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+  var zip = await new JSZip().loadAsync(blob);
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
 
-    /* capture.formStatus = keep-all */
-    options["capture.formStatus"] = "keep-all";
-    var blob = await capture({
-      url: `${localhost}/capture_form/form-status.html`,
-      options: Object.assign({}, baseOptions, options),
-    });
-    var zip = await new JSZip().loadAsync(blob);
-    var indexFile = zip.file('index.html');
-    var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
-    var doc = await readFileAsDocument(indexBlob);
+  assert(doc.querySelectorAll('input[type="radio"]')[0].hasAttribute('checked'));
+  assert(!doc.querySelectorAll('input[type="radio"]')[1].hasAttribute('checked'));
+  assert(doc.querySelectorAll('input[type="radio"]')[2].hasAttribute('checked'));
+  assert(!doc.querySelectorAll('input[type="radio"]')[3].hasAttribute('checked'));
+  assert(doc.querySelectorAll('input[type="checkbox"]')[0].hasAttribute('checked'));
+  assert(!doc.querySelectorAll('input[type="checkbox"]')[1].hasAttribute('checked'));
+  assert(doc.querySelectorAll('input[type="checkbox"]')[2].hasAttribute('checked'));
+  assert(!doc.querySelectorAll('input[type="checkbox"]')[3].hasAttribute('checked'));
+  assert(doc.querySelectorAll('input[type="checkbox"]')[4].hasAttribute('checked'));
+  assert(doc.querySelectorAll('input[type="checkbox"]')[4].hasAttribute('data-scrapbook-input-indeterminate'));
+  assert(doc.querySelector('input[type="text"]').getAttribute('value') === "myname");
+  assert(doc.querySelector('input[type="password"]').getAttribute('value') === "mypassword");
+  assert(doc.querySelector('input[type="number"]').getAttribute('value') === "3");
+  assert(doc.querySelector('input[type="search"]').getAttribute('value') === "search input");
+  assert(doc.querySelector('input[type="color"]').hasAttribute('value'));
+  assert(doc.querySelector('input[type="range"]').hasAttribute('value'));
+  assert(doc.querySelector('textarea').textContent === "textarea input");
+  assert(doc.querySelectorAll('option')[0].hasAttribute('selected'));
+  assert(!doc.querySelectorAll('option')[1].hasAttribute('selected'));
 
-    assert(doc.querySelectorAll('input[type="radio"]')[0].hasAttribute('checked'));
-    assert(!doc.querySelectorAll('input[type="radio"]')[1].hasAttribute('checked'));
-    assert(doc.querySelectorAll('input[type="radio"]')[2].hasAttribute('checked'));
-    assert(!doc.querySelectorAll('input[type="radio"]')[3].hasAttribute('checked'));
-    assert(doc.querySelectorAll('input[type="checkbox"]')[0].hasAttribute('checked'));
-    assert(!doc.querySelectorAll('input[type="checkbox"]')[1].hasAttribute('checked'));
-    assert(doc.querySelectorAll('input[type="checkbox"]')[2].hasAttribute('checked'));
-    assert(!doc.querySelectorAll('input[type="checkbox"]')[3].hasAttribute('checked'));
-    assert(doc.querySelectorAll('input[type="checkbox"]')[4].hasAttribute('checked'));
-    assert(doc.querySelectorAll('input[type="checkbox"]')[4].hasAttribute('data-scrapbook-input-indeterminate'));
-    assert(doc.querySelector('input[type="text"]').getAttribute('value') === "myname");
-    assert(doc.querySelector('input[type="password"]').getAttribute('value') === "mypassword");
-    assert(doc.querySelector('input[type="number"]').getAttribute('value') === "3");
-    assert(doc.querySelector('input[type="search"]').getAttribute('value') === "search input");
-    assert(doc.querySelector('input[type="color"]').hasAttribute('value'));
-    assert(doc.querySelector('input[type="range"]').hasAttribute('value'));
-    assert(doc.querySelector('textarea').textContent === "textarea input");
-    assert(doc.querySelectorAll('option')[0].hasAttribute('selected'));
-    assert(!doc.querySelectorAll('option')[1].hasAttribute('selected'));
+  // check records
+  var timeId = doc.documentElement.getAttribute('data-scrapbook-create');
+  assert(doc.querySelectorAll('input[type="radio"]')[0].getAttribute(`data-scrapbook-orig-null-attr-checked-${timeId}`) === ``);
+  assertNoRecord(doc.querySelectorAll('input[type="radio"]')[1]);
+  assertNoRecord(doc.querySelectorAll('input[type="radio"]')[2]);
+  assert(doc.querySelectorAll('input[type="radio"]')[3].getAttribute(`data-scrapbook-orig-attr-checked-${timeId}`) === ``);
+  assert(doc.querySelectorAll('input[type="checkbox"]')[0].getAttribute(`data-scrapbook-orig-null-attr-checked-${timeId}`) === ``);
+  assertNoRecord(doc.querySelectorAll('input[type="checkbox"]')[1]);
+  assertNoRecord(doc.querySelectorAll('input[type="checkbox"]')[2]);
+  assert(doc.querySelectorAll('input[type="checkbox"]')[3].getAttribute(`data-scrapbook-orig-attr-checked-${timeId}`) === ``);
+  assertNoRecord(doc.querySelectorAll('input[type="checkbox"]')[4]);
+  assert(doc.querySelector('input[type="text"]').getAttribute(`data-scrapbook-orig-null-attr-value-${timeId}`) === ``);
+  assert(doc.querySelector('input[type="password"]').getAttribute(`data-scrapbook-orig-null-attr-value-${timeId}`) === ``);
+  assert(doc.querySelector('input[type="number"]').getAttribute(`data-scrapbook-orig-null-attr-value-${timeId}`) === ``);
+  assert(doc.querySelector('input[type="search"]').getAttribute(`data-scrapbook-orig-null-attr-value-${timeId}`) === ``);
+  assert(doc.querySelector('input[type="color"]').getAttribute(`data-scrapbook-orig-null-attr-value-${timeId}`) === ``);
+  assert(doc.querySelector('input[type="range"]').getAttribute(`data-scrapbook-orig-null-attr-value-${timeId}`) === ``);
+  assert(doc.querySelector('textarea').getAttribute(`data-scrapbook-orig-textcontent-${timeId}`) === ``);
+  assert(doc.querySelectorAll('option')[0].getAttribute(`data-scrapbook-orig-null-attr-selected-${timeId}`) === ``);
+  assert(doc.querySelectorAll('option')[1].getAttribute(`data-scrapbook-orig-attr-selected-${timeId}`) === ``);
+  assertNoRecord(doc, {filter: 'scrapbook'});
 
-    // check records
-    if (recordRewrites) {
-      const timeId = doc.documentElement.getAttribute('data-scrapbook-create');
+  /* capture.formStatus = keep */
+  options["capture.formStatus"] = "keep";
+  var blob = await capture({
+    url: `${localhost}/capture_form/form-status.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+  var zip = await new JSZip().loadAsync(blob);
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
 
-      assert(doc.querySelectorAll('input[type="radio"]')[0].getAttribute(`data-scrapbook-orig-null-attr-checked-${timeId}`) === ``);
-      assertNoRecord(doc.querySelectorAll('input[type="radio"]')[1]);
-      assertNoRecord(doc.querySelectorAll('input[type="radio"]')[2]);
-      assert(doc.querySelectorAll('input[type="radio"]')[3].getAttribute(`data-scrapbook-orig-attr-checked-${timeId}`) === ``);
-      assert(doc.querySelectorAll('input[type="checkbox"]')[0].getAttribute(`data-scrapbook-orig-null-attr-checked-${timeId}`) === ``);
-      assertNoRecord(doc.querySelectorAll('input[type="checkbox"]')[1]);
-      assertNoRecord(doc.querySelectorAll('input[type="checkbox"]')[2]);
-      assert(doc.querySelectorAll('input[type="checkbox"]')[3].getAttribute(`data-scrapbook-orig-attr-checked-${timeId}`) === ``);
-      assertNoRecord(doc.querySelectorAll('input[type="checkbox"]')[4]);
-      assert(doc.querySelector('input[type="text"]').getAttribute(`data-scrapbook-orig-null-attr-value-${timeId}`) === ``);
-      assert(doc.querySelector('input[type="password"]').getAttribute(`data-scrapbook-orig-null-attr-value-${timeId}`) === ``);
-      assert(doc.querySelector('input[type="number"]').getAttribute(`data-scrapbook-orig-null-attr-value-${timeId}`) === ``);
-      assert(doc.querySelector('input[type="search"]').getAttribute(`data-scrapbook-orig-null-attr-value-${timeId}`) === ``);
-      assert(doc.querySelector('input[type="color"]').getAttribute(`data-scrapbook-orig-null-attr-value-${timeId}`) === ``);
-      assert(doc.querySelector('input[type="range"]').getAttribute(`data-scrapbook-orig-null-attr-value-${timeId}`) === ``);
-      assert(doc.querySelector('textarea').getAttribute(`data-scrapbook-orig-textcontent-${timeId}`) === ``);
-      assert(doc.querySelectorAll('option')[0].getAttribute(`data-scrapbook-orig-null-attr-selected-${timeId}`) === ``);
-      assert(doc.querySelectorAll('option')[1].getAttribute(`data-scrapbook-orig-attr-selected-${timeId}`) === ``);
+  assert(doc.querySelectorAll('input[type="radio"]')[0].hasAttribute('checked'));
+  assert(!doc.querySelectorAll('input[type="radio"]')[1].hasAttribute('checked'));
+  assert(doc.querySelectorAll('input[type="radio"]')[2].hasAttribute('checked'));
+  assert(!doc.querySelectorAll('input[type="radio"]')[3].hasAttribute('checked'));
+  assert(doc.querySelectorAll('input[type="checkbox"]')[0].hasAttribute('checked'));
+  assert(!doc.querySelectorAll('input[type="checkbox"]')[1].hasAttribute('checked'));
+  assert(doc.querySelectorAll('input[type="checkbox"]')[2].hasAttribute('checked'));
+  assert(!doc.querySelectorAll('input[type="checkbox"]')[3].hasAttribute('checked'));
+  assert(doc.querySelectorAll('input[type="checkbox"]')[4].hasAttribute('checked'));
+  assert(doc.querySelectorAll('input[type="checkbox"]')[4].hasAttribute('data-scrapbook-input-indeterminate'));
+  assert(doc.querySelector('input[type="text"]').getAttribute('value') === "myname");
+  assert(!doc.querySelector('input[type="password"]').hasAttribute('value'));
+  assert(doc.querySelector('input[type="number"]').getAttribute('value') === "3");
+  assert(doc.querySelector('input[type="search"]').getAttribute('value') === "search input");
+  assert(doc.querySelector('input[type="color"]').hasAttribute('value'));
+  assert(doc.querySelector('input[type="range"]').hasAttribute('value'));
+  assert(doc.querySelector('textarea').textContent === "textarea input");
+  assert(doc.querySelectorAll('option')[0].hasAttribute('selected'));
+  assert(!doc.querySelectorAll('option')[1].hasAttribute('selected'));
 
-      assertNoRecord(doc, {filter: 'scrapbook'});
-    } else {
-      assertNoRecord(doc);
-    }
+  // check records
+  var timeId = doc.documentElement.getAttribute('data-scrapbook-create');
+  assert(doc.querySelectorAll('input[type="radio"]')[0].getAttribute(`data-scrapbook-orig-null-attr-checked-${timeId}`) === ``);
+  assertNoRecord(doc.querySelectorAll('input[type="radio"]')[1]);
+  assertNoRecord(doc.querySelectorAll('input[type="radio"]')[2]);
+  assert(doc.querySelectorAll('input[type="radio"]')[3].getAttribute(`data-scrapbook-orig-attr-checked-${timeId}`) === ``);
+  assert(doc.querySelectorAll('input[type="checkbox"]')[0].getAttribute(`data-scrapbook-orig-null-attr-checked-${timeId}`) === ``);
+  assertNoRecord(doc.querySelectorAll('input[type="checkbox"]')[1]);
+  assertNoRecord(doc.querySelectorAll('input[type="checkbox"]')[2]);
+  assert(doc.querySelectorAll('input[type="checkbox"]')[3].getAttribute(`data-scrapbook-orig-attr-checked-${timeId}`) === ``);
+  assertNoRecord(doc.querySelectorAll('input[type="checkbox"]')[4]);
+  assert(doc.querySelector('input[type="text"]').getAttribute(`data-scrapbook-orig-null-attr-value-${timeId}`) === ``);
+  assertNoRecord(doc.querySelector('input[type="password"]'));
+  assert(doc.querySelector('input[type="number"]').getAttribute(`data-scrapbook-orig-null-attr-value-${timeId}`) === ``);
+  assert(doc.querySelector('input[type="search"]').getAttribute(`data-scrapbook-orig-null-attr-value-${timeId}`) === ``);
+  assert(doc.querySelector('input[type="color"]').getAttribute(`data-scrapbook-orig-null-attr-value-${timeId}`) === ``);
+  assert(doc.querySelector('input[type="range"]').getAttribute(`data-scrapbook-orig-null-attr-value-${timeId}`) === ``);
+  assert(doc.querySelector('textarea').getAttribute(`data-scrapbook-orig-textcontent-${timeId}`) === ``);
+  assert(doc.querySelectorAll('option')[0].getAttribute(`data-scrapbook-orig-null-attr-selected-${timeId}`) === ``);
+  assert(doc.querySelectorAll('option')[1].getAttribute(`data-scrapbook-orig-attr-selected-${timeId}`) === ``);
+  assertNoRecord(doc, {filter: 'scrapbook'});
 
-    /* capture.formStatus = keep */
-    options["capture.formStatus"] = "keep";
-    var blob = await capture({
-      url: `${localhost}/capture_form/form-status.html`,
-      options: Object.assign({}, baseOptions, options),
-    });
-    var zip = await new JSZip().loadAsync(blob);
-    var indexFile = zip.file('index.html');
-    var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
-    var doc = await readFileAsDocument(indexBlob);
+  /* capture.formStatus = html-all */
+  options["capture.formStatus"] = "html-all";
+  var blob = await capture({
+    url: `${localhost}/capture_form/form-status.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+  var zip = await new JSZip().loadAsync(blob);
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
 
-    assert(doc.querySelectorAll('input[type="radio"]')[0].hasAttribute('checked'));
-    assert(!doc.querySelectorAll('input[type="radio"]')[1].hasAttribute('checked'));
-    assert(doc.querySelectorAll('input[type="radio"]')[2].hasAttribute('checked'));
-    assert(!doc.querySelectorAll('input[type="radio"]')[3].hasAttribute('checked'));
-    assert(doc.querySelectorAll('input[type="checkbox"]')[0].hasAttribute('checked'));
-    assert(!doc.querySelectorAll('input[type="checkbox"]')[1].hasAttribute('checked'));
-    assert(doc.querySelectorAll('input[type="checkbox"]')[2].hasAttribute('checked'));
-    assert(!doc.querySelectorAll('input[type="checkbox"]')[3].hasAttribute('checked'));
-    assert(doc.querySelectorAll('input[type="checkbox"]')[4].hasAttribute('checked'));
-    assert(doc.querySelectorAll('input[type="checkbox"]')[4].hasAttribute('data-scrapbook-input-indeterminate'));
-    assert(doc.querySelector('input[type="text"]').getAttribute('value') === "myname");
-    assert(!doc.querySelector('input[type="password"]').hasAttribute('value'));
-    assert(doc.querySelector('input[type="number"]').getAttribute('value') === "3");
-    assert(doc.querySelector('input[type="search"]').getAttribute('value') === "search input");
-    assert(doc.querySelector('input[type="color"]').hasAttribute('value'));
-    assert(doc.querySelector('input[type="range"]').hasAttribute('value'));
-    assert(doc.querySelector('textarea').textContent === "textarea input");
-    assert(doc.querySelectorAll('option')[0].hasAttribute('selected'));
-    assert(!doc.querySelectorAll('option')[1].hasAttribute('selected'));
+  assert(doc.querySelectorAll('input[type="radio"]')[0].hasAttribute('checked'));
+  assert(!doc.querySelectorAll('input[type="radio"]')[1].hasAttribute('checked'));
+  assert(doc.querySelectorAll('input[type="radio"]')[2].hasAttribute('checked'));
+  assert(!doc.querySelectorAll('input[type="radio"]')[3].hasAttribute('checked'));
+  assert(doc.querySelectorAll('input[type="checkbox"]')[0].hasAttribute('checked'));
+  assert(!doc.querySelectorAll('input[type="checkbox"]')[1].hasAttribute('checked'));
+  assert(doc.querySelectorAll('input[type="checkbox"]')[2].hasAttribute('checked'));
+  assert(!doc.querySelectorAll('input[type="checkbox"]')[3].hasAttribute('checked'));
+  assert(doc.querySelectorAll('input[type="checkbox"]')[4].hasAttribute('checked'));
+  assert(!doc.querySelectorAll('input[type="checkbox"]')[4].hasAttribute('data-scrapbook-input-indeterminate'));
+  assert(doc.querySelector('input[type="text"]').getAttribute('value') === "myname");
+  assert(doc.querySelector('input[type="password"]').getAttribute('value') === "mypassword");
+  assert(doc.querySelector('input[type="number"]').getAttribute('value') === "3");
+  assert(doc.querySelector('input[type="search"]').getAttribute('value') === "search input");
+  assert(doc.querySelector('input[type="color"]').hasAttribute('value'));
+  assert(doc.querySelector('input[type="range"]').hasAttribute('value'));
+  assert(doc.querySelector('textarea').textContent === "textarea input");
+  assert(doc.querySelectorAll('option')[0].hasAttribute('selected'));
+  assert(!doc.querySelectorAll('option')[1].hasAttribute('selected'));
 
-    // check records
-    if (recordRewrites) {
-      const timeId = doc.documentElement.getAttribute('data-scrapbook-create');
+  // check records
+  var timeId = doc.documentElement.getAttribute('data-scrapbook-create');
+  assert(doc.querySelectorAll('input[type="radio"]')[0].getAttribute(`data-scrapbook-orig-null-attr-checked-${timeId}`) === ``);
+  assertNoRecord(doc.querySelectorAll('input[type="radio"]')[1]);
+  assertNoRecord(doc.querySelectorAll('input[type="radio"]')[2]);
+  assert(doc.querySelectorAll('input[type="radio"]')[3].getAttribute(`data-scrapbook-orig-attr-checked-${timeId}`) === ``);
+  assert(doc.querySelectorAll('input[type="checkbox"]')[0].getAttribute(`data-scrapbook-orig-null-attr-checked-${timeId}`) === ``);
+  assertNoRecord(doc.querySelectorAll('input[type="checkbox"]')[1]);
+  assertNoRecord(doc.querySelectorAll('input[type="checkbox"]')[2]);
+  assert(doc.querySelectorAll('input[type="checkbox"]')[3].getAttribute(`data-scrapbook-orig-attr-checked-${timeId}`) === ``);
+  assertNoRecord(doc.querySelectorAll('input[type="checkbox"]')[4]);
+  assert(doc.querySelector('input[type="text"]').getAttribute(`data-scrapbook-orig-null-attr-value-${timeId}`) === ``);
+  assert(doc.querySelector('input[type="password"]').getAttribute(`data-scrapbook-orig-null-attr-value-${timeId}`) === ``);
+  assert(doc.querySelector('input[type="number"]').getAttribute(`data-scrapbook-orig-null-attr-value-${timeId}`) === ``);
+  assert(doc.querySelector('input[type="search"]').getAttribute(`data-scrapbook-orig-null-attr-value-${timeId}`) === ``);
+  assert(doc.querySelector('input[type="color"]').getAttribute(`data-scrapbook-orig-null-attr-value-${timeId}`) === ``);
+  assert(doc.querySelector('input[type="range"]').getAttribute(`data-scrapbook-orig-null-attr-value-${timeId}`) === ``);
+  assert(doc.querySelector('textarea').getAttribute(`data-scrapbook-orig-textcontent-${timeId}`) === ``);
+  assert(doc.querySelectorAll('option')[0].getAttribute(`data-scrapbook-orig-null-attr-selected-${timeId}`) === ``);
+  assert(doc.querySelectorAll('option')[1].getAttribute(`data-scrapbook-orig-attr-selected-${timeId}`) === ``);
+  assertNoRecord(doc, {filter: 'scrapbook'});
 
-      assert(doc.querySelectorAll('input[type="radio"]')[0].getAttribute(`data-scrapbook-orig-null-attr-checked-${timeId}`) === ``);
-      assertNoRecord(doc.querySelectorAll('input[type="radio"]')[1]);
-      assertNoRecord(doc.querySelectorAll('input[type="radio"]')[2]);
-      assert(doc.querySelectorAll('input[type="radio"]')[3].getAttribute(`data-scrapbook-orig-attr-checked-${timeId}`) === ``);
-      assert(doc.querySelectorAll('input[type="checkbox"]')[0].getAttribute(`data-scrapbook-orig-null-attr-checked-${timeId}`) === ``);
-      assertNoRecord(doc.querySelectorAll('input[type="checkbox"]')[1]);
-      assertNoRecord(doc.querySelectorAll('input[type="checkbox"]')[2]);
-      assert(doc.querySelectorAll('input[type="checkbox"]')[3].getAttribute(`data-scrapbook-orig-attr-checked-${timeId}`) === ``);
-      assertNoRecord(doc.querySelectorAll('input[type="checkbox"]')[4]);
-      assert(doc.querySelector('input[type="text"]').getAttribute(`data-scrapbook-orig-null-attr-value-${timeId}`) === ``);
-      assertNoRecord(doc.querySelector('input[type="password"]'));
-      assert(doc.querySelector('input[type="number"]').getAttribute(`data-scrapbook-orig-null-attr-value-${timeId}`) === ``);
-      assert(doc.querySelector('input[type="search"]').getAttribute(`data-scrapbook-orig-null-attr-value-${timeId}`) === ``);
-      assert(doc.querySelector('input[type="color"]').getAttribute(`data-scrapbook-orig-null-attr-value-${timeId}`) === ``);
-      assert(doc.querySelector('input[type="range"]').getAttribute(`data-scrapbook-orig-null-attr-value-${timeId}`) === ``);
-      assert(doc.querySelector('textarea').getAttribute(`data-scrapbook-orig-textcontent-${timeId}`) === ``);
-      assert(doc.querySelectorAll('option')[0].getAttribute(`data-scrapbook-orig-null-attr-selected-${timeId}`) === ``);
-      assert(doc.querySelectorAll('option')[1].getAttribute(`data-scrapbook-orig-attr-selected-${timeId}`) === ``);
+  /* capture.formStatus = html */
+  options["capture.formStatus"] = "html";
+  var blob = await capture({
+    url: `${localhost}/capture_form/form-status.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+  var zip = await new JSZip().loadAsync(blob);
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
 
-      assertNoRecord(doc, {filter: 'scrapbook'});
-    } else {
-      assertNoRecord(doc);
-    }
+  assert(doc.querySelectorAll('input[type="radio"]')[0].hasAttribute('checked'));
+  assert(!doc.querySelectorAll('input[type="radio"]')[1].hasAttribute('checked'));
+  assert(doc.querySelectorAll('input[type="radio"]')[2].hasAttribute('checked'));
+  assert(!doc.querySelectorAll('input[type="radio"]')[3].hasAttribute('checked'));
+  assert(doc.querySelectorAll('input[type="checkbox"]')[0].hasAttribute('checked'));
+  assert(!doc.querySelectorAll('input[type="checkbox"]')[1].hasAttribute('checked'));
+  assert(doc.querySelectorAll('input[type="checkbox"]')[2].hasAttribute('checked'));
+  assert(!doc.querySelectorAll('input[type="checkbox"]')[3].hasAttribute('checked'));
+  assert(doc.querySelectorAll('input[type="checkbox"]')[4].hasAttribute('checked'));
+  assert(!doc.querySelectorAll('input[type="checkbox"]')[4].hasAttribute('data-scrapbook-input-indeterminate'));
+  assert(doc.querySelector('input[type="text"]').getAttribute('value') === "myname");
+  assert(!doc.querySelector('input[type="password"]').hasAttribute('value'));
+  assert(doc.querySelector('input[type="number"]').getAttribute('value') === "3");
+  assert(doc.querySelector('input[type="search"]').getAttribute('value') === "search input");
+  assert(doc.querySelector('input[type="color"]').hasAttribute('value'));
+  assert(doc.querySelector('input[type="range"]').hasAttribute('value'));
+  assert(doc.querySelector('textarea').textContent === "textarea input");
+  assert(doc.querySelectorAll('option')[0].hasAttribute('selected'));
+  assert(!doc.querySelectorAll('option')[1].hasAttribute('selected'));
 
-    /* capture.formStatus = html-all */
-    options["capture.formStatus"] = "html-all";
-    var blob = await capture({
-      url: `${localhost}/capture_form/form-status.html`,
-      options: Object.assign({}, baseOptions, options),
-    });
-    var zip = await new JSZip().loadAsync(blob);
-    var indexFile = zip.file('index.html');
-    var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
-    var doc = await readFileAsDocument(indexBlob);
+  // check records
+  var timeId = doc.documentElement.getAttribute('data-scrapbook-create');
+  assert(doc.querySelectorAll('input[type="radio"]')[0].getAttribute(`data-scrapbook-orig-null-attr-checked-${timeId}`) === ``);
+  assertNoRecord(doc.querySelectorAll('input[type="radio"]')[1]);
+  assertNoRecord(doc.querySelectorAll('input[type="radio"]')[2]);
+  assert(doc.querySelectorAll('input[type="radio"]')[3].getAttribute(`data-scrapbook-orig-attr-checked-${timeId}`) === ``);
+  assert(doc.querySelectorAll('input[type="checkbox"]')[0].getAttribute(`data-scrapbook-orig-null-attr-checked-${timeId}`) === ``);
+  assertNoRecord(doc.querySelectorAll('input[type="checkbox"]')[1]);
+  assertNoRecord(doc.querySelectorAll('input[type="checkbox"]')[2]);
+  assert(doc.querySelectorAll('input[type="checkbox"]')[3].getAttribute(`data-scrapbook-orig-attr-checked-${timeId}`) === ``);
+  assertNoRecord(doc.querySelectorAll('input[type="checkbox"]')[4]);
+  assert(doc.querySelector('input[type="text"]').getAttribute(`data-scrapbook-orig-null-attr-value-${timeId}`) === ``);
+  assertNoRecord(doc.querySelector('input[type="password"]'));
+  assert(doc.querySelector('input[type="number"]').getAttribute(`data-scrapbook-orig-null-attr-value-${timeId}`) === ``);
+  assert(doc.querySelector('input[type="search"]').getAttribute(`data-scrapbook-orig-null-attr-value-${timeId}`) === ``);
+  assert(doc.querySelector('input[type="color"]').getAttribute(`data-scrapbook-orig-null-attr-value-${timeId}`) === ``);
+  assert(doc.querySelector('input[type="range"]').getAttribute(`data-scrapbook-orig-null-attr-value-${timeId}`) === ``);
+  assert(doc.querySelector('textarea').getAttribute(`data-scrapbook-orig-textcontent-${timeId}`) === ``);
+  assert(doc.querySelectorAll('option')[0].getAttribute(`data-scrapbook-orig-null-attr-selected-${timeId}`) === ``);
+  assert(doc.querySelectorAll('option')[1].getAttribute(`data-scrapbook-orig-attr-selected-${timeId}`) === ``);
+  assertNoRecord(doc, {filter: 'scrapbook'});
 
-    assert(doc.querySelectorAll('input[type="radio"]')[0].hasAttribute('checked'));
-    assert(!doc.querySelectorAll('input[type="radio"]')[1].hasAttribute('checked'));
-    assert(doc.querySelectorAll('input[type="radio"]')[2].hasAttribute('checked'));
-    assert(!doc.querySelectorAll('input[type="radio"]')[3].hasAttribute('checked'));
-    assert(doc.querySelectorAll('input[type="checkbox"]')[0].hasAttribute('checked'));
-    assert(!doc.querySelectorAll('input[type="checkbox"]')[1].hasAttribute('checked'));
-    assert(doc.querySelectorAll('input[type="checkbox"]')[2].hasAttribute('checked'));
-    assert(!doc.querySelectorAll('input[type="checkbox"]')[3].hasAttribute('checked'));
-    assert(doc.querySelectorAll('input[type="checkbox"]')[4].hasAttribute('checked'));
-    assert(!doc.querySelectorAll('input[type="checkbox"]')[4].hasAttribute('data-scrapbook-input-indeterminate'));
-    assert(doc.querySelector('input[type="text"]').getAttribute('value') === "myname");
-    assert(doc.querySelector('input[type="password"]').getAttribute('value') === "mypassword");
-    assert(doc.querySelector('input[type="number"]').getAttribute('value') === "3");
-    assert(doc.querySelector('input[type="search"]').getAttribute('value') === "search input");
-    assert(doc.querySelector('input[type="color"]').hasAttribute('value'));
-    assert(doc.querySelector('input[type="range"]').hasAttribute('value'));
-    assert(doc.querySelector('textarea').textContent === "textarea input");
-    assert(doc.querySelectorAll('option')[0].hasAttribute('selected'));
-    assert(!doc.querySelectorAll('option')[1].hasAttribute('selected'));
+  /* capture.formStatus = reset */
+  options["capture.formStatus"] = "reset";
+  var blob = await capture({
+    url: `${localhost}/capture_form/form-status.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+  var zip = await new JSZip().loadAsync(blob);
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
 
-    // check records
-    if (recordRewrites) {
-      const timeId = doc.documentElement.getAttribute('data-scrapbook-create');
+  assert(!doc.querySelectorAll('input[type="radio"]')[0].hasAttribute('checked'));
+  assert(!doc.querySelectorAll('input[type="radio"]')[1].hasAttribute('checked'));
+  assert(doc.querySelectorAll('input[type="radio"]')[2].hasAttribute('checked'));
+  assert(!doc.querySelectorAll('input[type="checkbox"]')[0].hasAttribute('checked'));
+  assert(!doc.querySelectorAll('input[type="checkbox"]')[1].hasAttribute('checked'));
+  assert(doc.querySelectorAll('input[type="checkbox"]')[2].hasAttribute('checked'));
+  assert(doc.querySelectorAll('input[type="checkbox"]')[3].hasAttribute('checked'));
+  assert(!doc.querySelectorAll('input[type="checkbox"]')[3].hasAttribute('data-scrapbook-input-indeterminate'));
+  assert(!doc.querySelector('input[type="text"]').hasAttribute('value'));
+  assert(!doc.querySelector('input[type="password"]').hasAttribute('value'));
+  assert(!doc.querySelector('input[type="number"]').hasAttribute('value'));
+  assert(!doc.querySelector('input[type="search"]').hasAttribute('value'));
+  assert(!doc.querySelector('input[type="color"]').hasAttribute('value'));
+  assert(!doc.querySelector('input[type="range"]').hasAttribute('value'));
+  assert(doc.querySelector('textarea').textContent === "");
+  assert(!doc.querySelectorAll('option')[0].hasAttribute('selected'));
+  assert(doc.querySelectorAll('option')[1].hasAttribute('selected'));
 
-      assert(doc.querySelectorAll('input[type="radio"]')[0].getAttribute(`data-scrapbook-orig-null-attr-checked-${timeId}`) === ``);
-      assertNoRecord(doc.querySelectorAll('input[type="radio"]')[1]);
-      assertNoRecord(doc.querySelectorAll('input[type="radio"]')[2]);
-      assert(doc.querySelectorAll('input[type="radio"]')[3].getAttribute(`data-scrapbook-orig-attr-checked-${timeId}`) === ``);
-      assert(doc.querySelectorAll('input[type="checkbox"]')[0].getAttribute(`data-scrapbook-orig-null-attr-checked-${timeId}`) === ``);
-      assertNoRecord(doc.querySelectorAll('input[type="checkbox"]')[1]);
-      assertNoRecord(doc.querySelectorAll('input[type="checkbox"]')[2]);
-      assert(doc.querySelectorAll('input[type="checkbox"]')[3].getAttribute(`data-scrapbook-orig-attr-checked-${timeId}`) === ``);
-      assertNoRecord(doc.querySelectorAll('input[type="checkbox"]')[4]);
-      assert(doc.querySelector('input[type="text"]').getAttribute(`data-scrapbook-orig-null-attr-value-${timeId}`) === ``);
-      assert(doc.querySelector('input[type="password"]').getAttribute(`data-scrapbook-orig-null-attr-value-${timeId}`) === ``);
-      assert(doc.querySelector('input[type="number"]').getAttribute(`data-scrapbook-orig-null-attr-value-${timeId}`) === ``);
-      assert(doc.querySelector('input[type="search"]').getAttribute(`data-scrapbook-orig-null-attr-value-${timeId}`) === ``);
-      assert(doc.querySelector('input[type="color"]').getAttribute(`data-scrapbook-orig-null-attr-value-${timeId}`) === ``);
-      assert(doc.querySelector('input[type="range"]').getAttribute(`data-scrapbook-orig-null-attr-value-${timeId}`) === ``);
-      assert(doc.querySelector('textarea').getAttribute(`data-scrapbook-orig-textcontent-${timeId}`) === ``);
-      assert(doc.querySelectorAll('option')[0].getAttribute(`data-scrapbook-orig-null-attr-selected-${timeId}`) === ``);
-      assert(doc.querySelectorAll('option')[1].getAttribute(`data-scrapbook-orig-attr-selected-${timeId}`) === ``);
-
-      assertNoRecord(doc, {filter: 'scrapbook'});
-    } else {
-      assertNoRecord(doc);
-    }
-
-    /* capture.formStatus = html */
-    options["capture.formStatus"] = "html";
-    var blob = await capture({
-      url: `${localhost}/capture_form/form-status.html`,
-      options: Object.assign({}, baseOptions, options),
-    });
-    var zip = await new JSZip().loadAsync(blob);
-    var indexFile = zip.file('index.html');
-    var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
-    var doc = await readFileAsDocument(indexBlob);
-
-    assert(doc.querySelectorAll('input[type="radio"]')[0].hasAttribute('checked'));
-    assert(!doc.querySelectorAll('input[type="radio"]')[1].hasAttribute('checked'));
-    assert(doc.querySelectorAll('input[type="radio"]')[2].hasAttribute('checked'));
-    assert(!doc.querySelectorAll('input[type="radio"]')[3].hasAttribute('checked'));
-    assert(doc.querySelectorAll('input[type="checkbox"]')[0].hasAttribute('checked'));
-    assert(!doc.querySelectorAll('input[type="checkbox"]')[1].hasAttribute('checked'));
-    assert(doc.querySelectorAll('input[type="checkbox"]')[2].hasAttribute('checked'));
-    assert(!doc.querySelectorAll('input[type="checkbox"]')[3].hasAttribute('checked'));
-    assert(doc.querySelectorAll('input[type="checkbox"]')[4].hasAttribute('checked'));
-    assert(!doc.querySelectorAll('input[type="checkbox"]')[4].hasAttribute('data-scrapbook-input-indeterminate'));
-    assert(doc.querySelector('input[type="text"]').getAttribute('value') === "myname");
-    assert(!doc.querySelector('input[type="password"]').hasAttribute('value'));
-    assert(doc.querySelector('input[type="number"]').getAttribute('value') === "3");
-    assert(doc.querySelector('input[type="search"]').getAttribute('value') === "search input");
-    assert(doc.querySelector('input[type="color"]').hasAttribute('value'));
-    assert(doc.querySelector('input[type="range"]').hasAttribute('value'));
-    assert(doc.querySelector('textarea').textContent === "textarea input");
-    assert(doc.querySelectorAll('option')[0].hasAttribute('selected'));
-    assert(!doc.querySelectorAll('option')[1].hasAttribute('selected'));
-
-    // check records
-    if (recordRewrites) {
-      const timeId = doc.documentElement.getAttribute('data-scrapbook-create');
-
-      assert(doc.querySelectorAll('input[type="radio"]')[0].getAttribute(`data-scrapbook-orig-null-attr-checked-${timeId}`) === ``);
-      assertNoRecord(doc.querySelectorAll('input[type="radio"]')[1]);
-      assertNoRecord(doc.querySelectorAll('input[type="radio"]')[2]);
-      assert(doc.querySelectorAll('input[type="radio"]')[3].getAttribute(`data-scrapbook-orig-attr-checked-${timeId}`) === ``);
-      assert(doc.querySelectorAll('input[type="checkbox"]')[0].getAttribute(`data-scrapbook-orig-null-attr-checked-${timeId}`) === ``);
-      assertNoRecord(doc.querySelectorAll('input[type="checkbox"]')[1]);
-      assertNoRecord(doc.querySelectorAll('input[type="checkbox"]')[2]);
-      assert(doc.querySelectorAll('input[type="checkbox"]')[3].getAttribute(`data-scrapbook-orig-attr-checked-${timeId}`) === ``);
-      assertNoRecord(doc.querySelectorAll('input[type="checkbox"]')[4]);
-      assert(doc.querySelector('input[type="text"]').getAttribute(`data-scrapbook-orig-null-attr-value-${timeId}`) === ``);
-      assertNoRecord(doc.querySelector('input[type="password"]'));
-      assert(doc.querySelector('input[type="number"]').getAttribute(`data-scrapbook-orig-null-attr-value-${timeId}`) === ``);
-      assert(doc.querySelector('input[type="search"]').getAttribute(`data-scrapbook-orig-null-attr-value-${timeId}`) === ``);
-      assert(doc.querySelector('input[type="color"]').getAttribute(`data-scrapbook-orig-null-attr-value-${timeId}`) === ``);
-      assert(doc.querySelector('input[type="range"]').getAttribute(`data-scrapbook-orig-null-attr-value-${timeId}`) === ``);
-      assert(doc.querySelector('textarea').getAttribute(`data-scrapbook-orig-textcontent-${timeId}`) === ``);
-      assert(doc.querySelectorAll('option')[0].getAttribute(`data-scrapbook-orig-null-attr-selected-${timeId}`) === ``);
-      assert(doc.querySelectorAll('option')[1].getAttribute(`data-scrapbook-orig-attr-selected-${timeId}`) === ``);
-
-      assertNoRecord(doc, {filter: 'scrapbook'});
-    } else {
-      assertNoRecord(doc);
-    }
-
-    /* capture.formStatus = reset */
-    options["capture.formStatus"] = "reset";
-    var blob = await capture({
-      url: `${localhost}/capture_form/form-status.html`,
-      options: Object.assign({}, baseOptions, options),
-    });
-    var zip = await new JSZip().loadAsync(blob);
-    var indexFile = zip.file('index.html');
-    var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
-    var doc = await readFileAsDocument(indexBlob);
-
-    assert(!doc.querySelectorAll('input[type="radio"]')[0].hasAttribute('checked'));
-    assert(!doc.querySelectorAll('input[type="radio"]')[1].hasAttribute('checked'));
-    assert(doc.querySelectorAll('input[type="radio"]')[2].hasAttribute('checked'));
-    assert(!doc.querySelectorAll('input[type="checkbox"]')[0].hasAttribute('checked'));
-    assert(!doc.querySelectorAll('input[type="checkbox"]')[1].hasAttribute('checked'));
-    assert(doc.querySelectorAll('input[type="checkbox"]')[2].hasAttribute('checked'));
-    assert(doc.querySelectorAll('input[type="checkbox"]')[3].hasAttribute('checked'));
-    assert(!doc.querySelectorAll('input[type="checkbox"]')[3].hasAttribute('data-scrapbook-input-indeterminate'));
-    assert(!doc.querySelector('input[type="text"]').hasAttribute('value'));
-    assert(!doc.querySelector('input[type="password"]').hasAttribute('value'));
-    assert(!doc.querySelector('input[type="number"]').hasAttribute('value'));
-    assert(!doc.querySelector('input[type="search"]').hasAttribute('value'));
-    assert(!doc.querySelector('input[type="color"]').hasAttribute('value'));
-    assert(!doc.querySelector('input[type="range"]').hasAttribute('value'));
-    assert(doc.querySelector('textarea').textContent === "");
-    assert(!doc.querySelectorAll('option')[0].hasAttribute('selected'));
-    assert(doc.querySelectorAll('option')[1].hasAttribute('selected'));
-
-    // check records
-    assertNoRecord(doc);
-  }
+  // check records
+  assertNoRecord(doc);
 });
 
 /**
@@ -12953,6 +13055,7 @@ it('test_capture_shadowRoot', async function () {
     "capture.shadowDom": "save",
     "capture.image": "save",
     "capture.script": "remove",
+    "capture.recordRewrites": true,
   };
   var blob = await capture({
     url: `${localhost}/capture_shadowRoot/open.html`,
@@ -12983,11 +13086,16 @@ it('test_capture_shadowRoot', async function () {
   var loader = doc.querySelector('script[data-scrapbook-elem="basic-loader"]');
   assert(loader.textContent.trim().match(rawRegex`${'^'}(function () {${'.+'}})()${'$'}`));
 
+  // check records
+  assertNoRecord(host1);
+  assertNoRecord(host2);
+
   /* capture.shadowDom = remove */
   var options = {
     "capture.shadowDom": "remove",
     "capture.image": "save",
     "capture.script": "remove",
+    "capture.recordRewrites": true,
   };
   var blob = await capture({
     url: `${localhost}/capture_shadowRoot/open.html`,
@@ -13005,6 +13113,10 @@ it('test_capture_shadowRoot', async function () {
 
   assert(!doc.querySelector('[data-scrapbook-shadowroot]'));
   assert(!doc.querySelector('script[data-scrapbook-elem="basic-loader"]'));
+
+  // check records
+  var host1 = doc.querySelector('div');
+  assertNoRecord(host1);
 });
 
 /**
@@ -13021,6 +13133,7 @@ $it.skipIf(
     "capture.shadowDom": "save",
     "capture.image": "save",
     "capture.script": "remove",
+    "capture.recordRewrites": true,
   };
   var blob = await capture({
     url: `${localhost}/capture_shadowRoot/closed.html`,
@@ -13052,6 +13165,10 @@ $it.skipIf(
 
   var loader = doc.querySelector('script[data-scrapbook-elem="basic-loader"]');
   assert(loader.textContent.trim().match(rawRegex`${'^'}(function () {${'.+'}})()${'$'}`));
+
+  // check records
+  assertNoRecord(host1);
+  assertNoRecord(host2);
 });
 
 /**
@@ -13065,6 +13182,7 @@ $it.skipIf($.noShadowRootClonable)('test_capture_shadowRoot_clonable', async fun
     "capture.shadowDom": "save",
     "capture.image": "save",
     "capture.script": "remove",
+    "capture.recordRewrites": true,
   };
   var blob = await capture({
     url: `${localhost}/capture_shadowRoot/clonable.html`,
@@ -13097,11 +13215,16 @@ $it.skipIf($.noShadowRootClonable)('test_capture_shadowRoot_clonable', async fun
   var loader = doc.querySelector('script[data-scrapbook-elem="basic-loader"]');
   assert(loader.textContent.trim().match(rawRegex`${'^'}(function () {${'.+'}})()${'$'}`));
 
+  // check records
+  assertNoRecord(host1);
+  assertNoRecord(host2);
+
   /* capture.shadowDom = remove */
   var options = {
     "capture.shadowDom": "remove",
     "capture.image": "save",
     "capture.script": "remove",
+    "capture.recordRewrites": true,
   };
   var blob = await capture({
     url: `${localhost}/capture_shadowRoot/clonable.html`,
@@ -13119,6 +13242,10 @@ $it.skipIf($.noShadowRootClonable)('test_capture_shadowRoot_clonable', async fun
 
   assert(!doc.querySelector('[data-scrapbook-shadowroot]'));
   assert(!doc.querySelector('script[data-scrapbook-elem="basic-loader"]'));
+
+  // check records
+  var host1 = doc.querySelector('div');
+  assertNoRecord(host1);
 });
 
 /**
@@ -13132,8 +13259,7 @@ $it.skipIf($.noShadowRootDelegatesFocus)
   /* capture.shadowDom = save */
   var options = {
     "capture.shadowDom": "save",
-    "capture.image": "save",
-    "capture.script": "remove",
+    "capture.recordRewrites": true,
   };
   var blob = await capture({
     url: `${localhost}/capture_shadowRoot/options.html`,
@@ -13154,6 +13280,9 @@ $it.skipIf($.noShadowRootDelegatesFocus)
 
   var loader = doc.querySelector('script[data-scrapbook-elem="basic-loader"]');
   assert(loader.textContent.trim().match(rawRegex`${'^'}(function () {${'.+'}})()${'$'}`));
+
+  // check records
+  assertNoRecord(host1);
 });
 
 /**
@@ -16259,6 +16388,12 @@ it('test_capture_record_nodes_added', async function () {
 
 /**
  * Check if changed attributes are recorded
+ *
+ * This only checks for a subset of captures to verify that no record is
+ * generated when the option is not set.  Other record details should be tested
+ * in the related tests, which mostly checks only for
+ * capture.recordRewrites = true, with the presumption that every record is
+ * generated through an option-aware function like captureRewriteAttr().
  *
  * capture.recordRewrites
  * capturer.captureDocument

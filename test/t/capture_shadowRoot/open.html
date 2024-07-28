@@ -5,6 +5,7 @@
 <title>Test shadowRoot</title>
 </head>
 <body>
+<p>This is main content before shadowRoot.</p>
 <div>
 <template shadowrootmode="open">
   <style>
@@ -28,6 +29,7 @@
 </template>
 <strong>This</strong> is very good.
 </div>
+<p>This is main content after shadowRoot.</p>
 </body>
 <script src="../../common.js"></script>
 <script>utils.loadShadowDoms();</script>

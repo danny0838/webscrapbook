@@ -326,6 +326,7 @@
       return value;
     },
     get noShadowRootSlotAssignment() {
+      // ShadowRoot.slotAssignment is not supported by Chromium < 86 and Firefox < 92.
       const value = this.noBrowser.condition ? this.noBrowser : new MochaQuery.Query(
         (() => {
           const div = document.createElement('div');

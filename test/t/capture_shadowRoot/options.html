@@ -25,10 +25,10 @@
 <script>
 utils.loadShadowDoms();
 
-var elem = document.querySelector('div');
-for (const slot of elem.shadowRoot.querySelectorAll('slot')) {
-  const sel = slot.name ? `[slot="${CSS.escape(slot.name)}"]` : `[slot=""], :not([slot])`;
-  slot.assign(elem.querySelector(sel));
-}
+var host = document.querySelector('div');
+var slots = host.shadowRoot.querySelectorAll('slot');
+var spans = host.querySelectorAll('span');
+slots[0].assign(spans[0]);
+slots[1].assign(spans[2], spans[3]);
 </script>
 </html>

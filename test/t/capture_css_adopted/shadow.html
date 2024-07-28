@@ -8,15 +8,26 @@ blockquote::after { content: "#" attr(id); }
 </style>
 </head>
 <body>
-<blockquote id="adopted"></blockquote>
-<blockquote id="adopted2"></blockquote>
-<blockquote id="adopted3"></blockquote>
+<blockquote id="image1-1"></blockquote>
+<blockquote id="image1-2"></blockquote>
+<blockquote id="font1-1"></blockquote>
+<blockquote id="font1-2"></blockquote>
 <div id="shadow1">
 <template shadowrootmode="open">
   <style>blockquote::after { content: "#" attr(id); }</style>
-  <blockquote id="adopted"></blockquote>
-  <blockquote id="adopted2"></blockquote>
-  <blockquote id="adopted4"></blockquote>
+  <blockquote id="image1-1"></blockquote>
+  <blockquote id="image1-3"></blockquote>
+  <blockquote id="font1-1"></blockquote>
+  <blockquote id="font1-3"></blockquote>
+  <blockquote id="image2-1"></blockquote>
+  <blockquote id="image2-2"></blockquote>
+  <div id="shadow2">
+  <template shadowrootmode="open">
+    <style>blockquote::after { content: "#" attr(id); }</style>
+    <blockquote id="image2-1"></blockquote>
+    <blockquote id="image2-3"></blockquote>
+  </template>
+  </div>
 </template>
 </div>
 </body>
@@ -25,19 +36,33 @@ blockquote::after { content: "#" attr(id); }
 utils.loadShadowDoms();
 
 var css = new CSSStyleSheet();
-css.insertRule('#adopted { background-image: url(./green.bmp); }', css.cssRules.length);
-css.insertRule('#adopted3 { background-color: #0F0; }', css.cssRules.length);
-css.insertRule('#adopted4 { background-color: #0F0; }', css.cssRules.length);
-css.insertRule('#nonexist { background-image: url(./nonexist.bmp); }', css.cssRules.length);
+css.insertRule('#image1-1 { background-image: url(./image1-1.bmp); }', css.cssRules.length);
+css.insertRule('#image1-2 { background-image: url(./image1-2.bmp); }', css.cssRules.length);
+css.insertRule('#image1-3 { background-image: url(./image1-3.bmp); }', css.cssRules.length);
+css.insertRule('#image1-4 { background-image: url(./image1-4.bmp); }', css.cssRules.length);
+
 var css2 = new CSSStyleSheet();
-css2.insertRule('#adopted2 { background-color: #0F0; }', css2.cssRules.length);
-css2.insertRule('#nonexist { background-image: url(./nonexist.bmp); }', css2.cssRules.length);
-document.adoptedStyleSheets = [...document.adoptedStyleSheets, css, css2];
+css2.insertRule('@font-face { font-family: font1-1; src: url(./font1-1.woff); }', css2.cssRules.length);
+css2.insertRule('#font1-1 { font-family: font1-1; }', css2.cssRules.length);
+css2.insertRule('@font-face { font-family: font1-2; src: url(./font1-2.woff); }', css2.cssRules.length);
+css2.insertRule('#font1-2 { font-family: font1-2; }', css2.cssRules.length);
+css2.insertRule('@font-face { font-family: font1-3; src: url(./font1-3.woff); }', css2.cssRules.length);
+css2.insertRule('#font1-3 { font-family: font1-3; }', css2.cssRules.length);
+css2.insertRule('@font-face { font-family: font1-4; src: url(./font1-4.woff); }', css2.cssRules.length);
+css2.insertRule('#font1-4 { font-family: font1-4; }', css2.cssRules.length);
 
 var css3 = new CSSStyleSheet();
-css3.insertRule('#adopted2 { background-color: #0F0; }', css3.cssRules.length);
-css3.insertRule('#nonexist { background-image: url(./nonexist.bmp); }', css3.cssRules.length);
+css3.insertRule('#image2-1 { background-image: url(./image2-1.bmp); }', css3.cssRules.length);
+css3.insertRule('#image2-2 { background-image: url(./image2-2.bmp); }', css3.cssRules.length);
+css3.insertRule('#image2-3 { background-image: url(./image2-3.bmp); }', css3.cssRules.length);
+css3.insertRule('#image2-4 { background-image: url(./image2-4.bmp); }', css3.cssRules.length);
+
+document.adoptedStyleSheets.push(css, css2);
+
 var s = document.querySelector('#shadow1').shadowRoot;
-s.adoptedStyleSheets = [...s.adoptedStyleSheets, css, css3];
+s.adoptedStyleSheets.push(css, css2, css3);
+
+var s = s.querySelector('#shadow2').shadowRoot;
+s.adoptedStyleSheets.push(css3);
 </script>
 </html>
