@@ -102,6 +102,54 @@ const baseOptions = {
 const RDF = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
 const MAF = "http://maf.mozdev.org/metadata/rdf#";
 
+/**
+ * A helper function to assert whether scrapbook record exists.
+ *
+ * @param {Node} rootNode - the node to check
+ * @param {Object} [options]
+ * @param {boolean} [options.deep] - whether to iterate descendant nodes.
+ * @param {string|Object} [options.filter] - the filter.
+ */
+function assertNoRecord(rootNode, {deep = true, filter = 'any'} = {}) {
+  if (typeof filter === 'string') {
+    filter = {
+      any: {
+        regexAttr: /^(?:\w+:)?data-scrapbook-orig-/,
+        regexCmt: /^scrapbook-orig-/,
+      },
+      scrapbook: {
+        regexAttr: /^(?:\w+:)?data-scrapbook-orig-(?:null-)?attr-data-scrapbook-/,
+        regexCmt: null,
+      },
+    }[filter];
+  }
+  const {regexAttr, regexCmt} = filter;
+
+  const doc = rootNode.ownerDocument || rootNode;
+  const walker = doc.createNodeIterator(rootNode);
+  let node;
+  while (node = walker.nextNode()) {
+    switch (node.nodeType) {
+      // element
+      case 1: {
+        if (!regexAttr) { break; }
+        for (const {nodeName: attr} of node.attributes) {
+          assert(!attr.match(regexAttr), `"${attr}" should not exist on element ${node.nodeName}`);
+        }
+        break;
+      }
+      // comment
+      case 8: {
+        if (!regexCmt) { break; }
+        const cmt = node.nodeValue;
+        assert(!cmt.match(regexCmt), `comment ${JSON.stringify(cmt)} should not exist`);
+        break;
+      }
+    }
+    if (!deep) { break; }
+  }
+}
+
 describe('Capture tests', function () {
 
 /**
@@ -6122,10 +6170,7 @@ $it.skipIf($.noAdoptedStylesheet)('test_capture_css_adopted', async function () 
 
   var docElem = doc.documentElement;
   assert(!docElem.hasAttribute('data-scrapbook-adoptedstylesheets'));
-  assert(!Array.prototype.some.call(
-    docElem.attributes,
-    attrNode => attrNode.nodeName.match(/^data-scrapbook-adoptedstylesheet-\d+$/)
-  ));
+  assertNoRecord(docElem, {filter: {regexAttr: /^data-scrapbook-adoptedstylesheet-\d+$/}});
 
   /* capture.adoptedStyleSheet = save, capture.style = remove */
   var options = {
@@ -6147,10 +6192,7 @@ $it.skipIf($.noAdoptedStylesheet)('test_capture_css_adopted', async function () 
 
   var docElem = doc.documentElement;
   assert(!docElem.hasAttribute('data-scrapbook-adoptedstylesheets'));
-  assert(!Array.prototype.some.call(
-    docElem.attributes,
-    attrNode => attrNode.nodeName.match(/^data-scrapbook-adoptedstylesheet-\d+$/)
-  ));
+  assertNoRecord(docElem, {filter: {regexAttr: /^data-scrapbook-adoptedstylesheet-\d+$/}});
 
   /* capture.adoptedStyleSheet = remove */
   var options = {
@@ -6172,10 +6214,7 @@ $it.skipIf($.noAdoptedStylesheet)('test_capture_css_adopted', async function () 
 
   var docElem = doc.documentElement;
   assert(!docElem.hasAttribute('data-scrapbook-adoptedstylesheets'));
-  assert(!Array.prototype.some.call(
-    docElem.attributes,
-    attrNode => attrNode.nodeName.match(/^data-scrapbook-adoptedstylesheet-\d+$/)
-  ));
+  assertNoRecord(docElem, {filter: {regexAttr: /^data-scrapbook-adoptedstylesheet-\d+$/}});
 });
 
 /**
@@ -15597,7 +15636,9 @@ $it.xfailIf(
 });
 
 /**
- * Check if option works
+ * Check if option works.
+ *
+ * - The original value of "data-scrapbook-" attributes should NOT be recorded.
  *
  * capture.recordDocumentMeta
  * capturer.captureDocument
@@ -15605,10 +15646,12 @@ $it.xfailIf(
  * capturer.captureBookmark
  */
 it('test_capture_record_meta', async function () {
-  /* html; +capture.recordDocumentMeta */
   var options = {
-    "capture.recordDocumentMeta": true,
+    "capture.recordRewrites": true,
   };
+
+  /* html; +capture.recordDocumentMeta */
+  options["capture.recordDocumentMeta"] = true;
   var blob = await capture({
     url: `${localhost}/capture_record/meta.html`,
     options: Object.assign({}, baseOptions, options),
@@ -15621,11 +15664,10 @@ it('test_capture_record_meta', async function () {
 
   assert(html.getAttribute('data-scrapbook-source') === `${localhost}/capture_record/meta.html`);
   assert(html.getAttribute('data-scrapbook-create').match(regex`^\d{17}$`));
+  assertNoRecord(html, {filter: 'scrapbook'});
 
   /* html; -capture.recordDocumentMeta */
-  var options = {
-    "capture.recordDocumentMeta": false,
-  };
+  options["capture.recordDocumentMeta"] = false;
   var blob = await capture({
     url: `${localhost}/capture_record/meta.html`,
     options: Object.assign({}, baseOptions, options),
@@ -15634,15 +15676,11 @@ it('test_capture_record_meta', async function () {
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
-  var html = doc.documentElement;
 
-  assert(!html.hasAttribute('data-scrapbook-source'));
-  assert(!html.hasAttribute('data-scrapbook-create'));
+  assertNoRecord(doc, {filter: {regexAttr: /^data-scrapbook-/}});
 
   /* text (Big5); +capture.recordDocumentMeta */
-  var options = {
-    "capture.recordDocumentMeta": true,
-  };
+  options["capture.recordDocumentMeta"] = true;
   var blob = await capture({
     url: `${localhost}/capture_record/text.py`,
     options: Object.assign({}, baseOptions, options),
@@ -15657,11 +15695,10 @@ it('test_capture_record_meta', async function () {
   assert(html.getAttribute('data-scrapbook-create').match(regex`^\d{17}$`));
   assert(html.getAttribute('data-scrapbook-type') === 'file');
   assert(html.getAttribute('data-scrapbook-charset') === 'Big5');
+  assertNoRecord(html, {filter: 'scrapbook'});
 
   /* text (Big5); -capture.recordDocumentMeta */
-  var options = {
-    "capture.recordDocumentMeta": false,
-  };
+  options["capture.recordDocumentMeta"] = false;
   var blob = await capture({
     url: `${localhost}/capture_record/text.py`,
     options: Object.assign({}, baseOptions, options),
@@ -15670,17 +15707,11 @@ it('test_capture_record_meta', async function () {
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
-  var html = doc.documentElement;
 
-  assert(!html.hasAttribute('data-scrapbook-source'));
-  assert(!html.hasAttribute('data-scrapbook-create'));
-  assert(!html.hasAttribute('data-scrapbook-type'));
-  assert(!html.hasAttribute('data-scrapbook-charset'));
+  assertNoRecord(doc, {filter: {regexAttr: /^data-scrapbook-/}});
 
   /* bookmark; +capture.recordDocumentMeta */
-  var options = {
-    "capture.recordDocumentMeta": true,
-  };
+  options["capture.recordDocumentMeta"] = true;
   var blob = await capture({
     url: `${localhost}/capture_record/meta.html`,
     mode: "bookmark",
@@ -15692,22 +15723,18 @@ it('test_capture_record_meta', async function () {
   assert(html.getAttribute('data-scrapbook-source') === `${localhost}/capture_record/meta.html`);
   assert(html.getAttribute('data-scrapbook-create').match(regex`^\d{17}$`));
   assert(html.getAttribute('data-scrapbook-type') === 'bookmark');
+  assertNoRecord(html, {filter: 'scrapbook'});
 
   /* bookmark; -capture.recordDocumentMeta */
-  var options = {
-    "capture.recordDocumentMeta": false,
-  };
+  options["capture.recordDocumentMeta"] = false;
   var blob = await capture({
     url: `${localhost}/capture_record/meta.html`,
     mode: "bookmark",
     options: Object.assign({}, baseOptions, options),
   });
   var doc = await readFileAsDocument(blob);
-  var html = doc.documentElement;
 
-  assert(!html.hasAttribute('data-scrapbook-source'));
-  assert(!html.hasAttribute('data-scrapbook-create'));
-  assert(!html.hasAttribute('data-scrapbook-type'));
+  assertNoRecord(doc, {filter: {regexAttr: /^data-scrapbook-/}});
 });
 
 /**
@@ -15825,7 +15852,7 @@ it('test_capture_record_meta_redirect', async function () {
 });
 
 /**
- * Record metadata in index.html rather than in *.xhtml
+ * Record metadata in index.html rather than in *.xhtml (except for source)
  *
  * capture.recordDocumentMeta
  * capturer.captureDocument
@@ -15855,8 +15882,7 @@ it('test_capture_record_meta_xhtml', async function () {
   var doc = await readFileAsDocument(indexBlob);
   var html = doc.documentElement;
   assert(html.getAttribute('data-scrapbook-source') === `${localhost}/capture_record/meta.xhtml`);
-  assert(!html.hasAttribute('data-scrapbook-create'));
-  assert(!html.getAttribute('data-scrapbook-type'));
+  assertNoRecord(html, {filter: {regexAttr: /^data-scrapbook-(?!source)/}});
 });
 
 /**
@@ -15986,81 +16012,8 @@ it('test_capture_record_nodes_removed', async function () {
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
-  var head = doc.querySelector('head');
-  var body = doc.body;
-  var timeId = doc.documentElement.getAttribute('data-scrapbook-create');
 
-  assert(!head.innerHTML.match(
-    regex`<!--scrapbook-orig-node-${timeId}=<base[^>]*?>-->`
-  ));
-
-  assert(!head.innerHTML.match(
-    regex`<!--scrapbook-orig-node-${timeId}=<link[^>]*? rel="shortcut icon"[^>]*?>-->`
-  ));
-
-  assert(!head.innerHTML.match(
-    regex`<!--scrapbook-orig-node-${timeId}=<link[^>]*? rel="stylesheet"[^>]*?>-->`
-  ));
-
-  assert(!head.innerHTML.match(
-    regex`<!--scrapbook-orig-node-${timeId}=<link[^>]*? rel="preload"[^>]*?>-->`
-  ));
-
-  assert(!head.innerHTML.match(
-    regex`<!--scrapbook-orig-node-${timeId}=<script[^>]*?>[\s\S]*?</script>-->`
-  ));
-
-  assert(!body.innerHTML.match(
-    regex`<!--scrapbook-orig-node-${timeId}=<img[^>]*? src=[^>]*?>-->`
-  ));
-
-  assert(!body.innerHTML.match(
-    regex`<!--scrapbook-orig-node-${timeId}=<img[^>]*? srcset=[^>]*?>-->`
-  ));
-
-  assert(!body.innerHTML.match(
-    regex`<!--scrapbook-orig-node-${timeId}=<picture>[\s\S]*?</picture>-->`
-  ));
-
-  assert(!body.innerHTML.match(
-    regex`<!--scrapbook-orig-node-${timeId}=<input[^>]*? type="image"[^>]*?>-->`
-  ));
-
-  assert(!body.innerHTML.match(
-    regex`<!--scrapbook-orig-node-${timeId}=<canvas[^>]*?>[\s\S]*?</canvas>-->`
-  ));
-
-  assert(!body.innerHTML.match(
-    regex`<!--scrapbook-orig-node-${timeId}=<audio[^>]*?>[\s\S]*?</audio>-->`
-  ));
-
-  assert(!body.innerHTML.match(
-    regex`<!--scrapbook-orig-node-${timeId}=<video[^>]*?>[\s\S]*?</video>-->`
-  ));
-
-  assert(!body.innerHTML.match(
-    regex`<!--scrapbook-orig-node-${timeId}=<video[^>]*?>[\s\S]*?</video>-->`
-  ));
-
-  assert(!body.innerHTML.match(
-    regex`<!--scrapbook-orig-node-${timeId}=<embed[^>]*?>-->`
-  ));
-
-  assert(!body.innerHTML.match(
-    regex`<!--scrapbook-orig-node-${timeId}=<object[^>]*?>[\s\S]*?</object>-->`
-  ));
-
-  assert(!body.innerHTML.match(
-    regex`<!--scrapbook-orig-node-${timeId}=<applet[^>]*?>[\s\S]*?</applet>-->`
-  ));
-
-  assert(!body.innerHTML.match(
-    regex`<!--scrapbook-orig-node-${timeId}=<iframe[^>]*?>[\s\S]*?</iframe>-->`
-  ));
-
-  assert(!body.innerHTML.match(
-    regex`<!--scrapbook-orig-node-${timeId}=<noscript[^>]*?>[\s\S]*?</noscript>-->`
-  ));
+  assertNoRecord(doc);
 });
 
 /**
@@ -16112,19 +16065,8 @@ it('test_capture_record_nodes_removed_source', async function () {
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
-  var timeId = doc.documentElement.getAttribute('data-scrapbook-create');
 
-  assert(!doc.querySelector('picture').innerHTML.match(
-    regex`<!--scrapbook-orig-node-${timeId}=<source[^>]*?>-->`
-  ));
-
-  assert(!doc.querySelector('audio').innerHTML.match(
-    regex`<!--scrapbook-orig-node-${timeId}=<source[^>]*?>-->`
-  ));
-
-  assert(!doc.querySelector('video').innerHTML.match(
-    regex`<!--scrapbook-orig-node-${timeId}=<source[^>]*?>-->`
-  ));
+  assertNoRecord(doc);
 });
 
 /**
@@ -16178,9 +16120,7 @@ it('test_capture_record_nodes_added', async function () {
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
-  var timeId = doc.documentElement.getAttribute('data-scrapbook-create');
-  assert(doc.querySelector(`head:not([data-scrapbook-orig-null-node-${timeId}])`));
-  assert(doc.querySelector(`meta[charset="UTF-8"]:not([data-scrapbook-orig-null-node-${timeId}])`));
+  assertNoRecord(doc);
 
   var blob = await capture({
     url: `${localhost}/capture_record/nodes4.html`,
@@ -16190,9 +16130,7 @@ it('test_capture_record_nodes_added', async function () {
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
-  var timeId = doc.documentElement.getAttribute('data-scrapbook-create');
-  assert(doc.querySelector(`head:not([data-scrapbook-orig-null-node-${timeId}])`));
-  assert(doc.querySelector(`meta[charset="UTF-8"]:not([data-scrapbook-orig-null-node-${timeId}])`));
+  assertNoRecord(doc);
 });
 
 /**
@@ -16244,17 +16182,8 @@ it('test_capture_record_attrs', async function () {
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
-  var timeId = doc.documentElement.getAttribute('data-scrapbook-create');
 
-  assert(!doc.querySelector('meta').hasAttribute(`data-scrapbook-orig-attr-charset-${timeId}`));
-  assert(!doc.querySelector('body').hasAttribute(`data-scrapbook-orig-attr-onload-${timeId}`));
-  assert(!doc.querySelector('div').hasAttribute(`data-scrapbook-orig-attr-style-${timeId}`));
-  assert(!doc.querySelector('iframe').hasAttribute(`data-scrapbook-orig-attr-srcdoc-${timeId}`));
-  assert(!doc.querySelector('a').hasAttribute(`data-scrapbook-orig-attr-href-${timeId}`));
-  assert(!doc.querySelector('input[type="checkbox"]').hasAttribute(`data-scrapbook-orig-null-attr-checked-${timeId}`));
-  assert(!doc.querySelector('input[type="text"]').hasAttribute(`data-scrapbook-orig-null-attr-value-${timeId}`));
-  assert(!doc.querySelector('textarea').hasAttribute(`data-scrapbook-orig-textcontent-${timeId}`));
-  assert(!doc.querySelector('select option').hasAttribute(`data-scrapbook-orig-null-attr-selected-${timeId}`));
+  assertNoRecord(doc);
 });
 
 /**
@@ -16374,62 +16303,9 @@ p { background-image: /*scrapbook-orig-url="./null.bmp"*/url("null.bmp"); }`);
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
-  var timeId = doc.documentElement.getAttribute('data-scrapbook-create');
 
   // attr
-  assert(!doc.querySelector('link[rel="preload"]').hasAttribute(`data-scrapbook-orig-attr-href-${timeId}`));
-  assert(!doc.querySelector('link[rel="preload"]').hasAttribute(`data-scrapbook-orig-attr-nonce-${timeId}`));
-  assert(!doc.querySelector('link[rel="preload"]').hasAttribute(`data-scrapbook-orig-attr-crossorigin-${timeId}`));
-  assert(!doc.querySelector('link[rel="preload"]').hasAttribute(`data-scrapbook-orig-attr-integrity-${timeId}`));
-  assert(!doc.querySelector('link[rel="prefetch"]').hasAttribute(`data-scrapbook-orig-attr-href-${timeId}`));
-  assert(!doc.querySelector('link[rel="prefetch"]').hasAttribute(`data-scrapbook-orig-attr-nonce-${timeId}`));
-  assert(!doc.querySelector('link[rel="prefetch"]').hasAttribute(`data-scrapbook-orig-attr-crossorigin-${timeId}`));
-  assert(!doc.querySelector('link[rel="prefetch"]').hasAttribute(`data-scrapbook-orig-attr-integrity-${timeId}`));
-  assert(!doc.querySelector('link[rel~="icon"]').hasAttribute(`data-scrapbook-orig-attr-href-${timeId}`));
-  assert(!doc.querySelector('link[rel~="icon"]').hasAttribute(`data-scrapbook-orig-attr-nonce-${timeId}`));
-  assert(!doc.querySelector('link[rel~="icon"]').hasAttribute(`data-scrapbook-orig-attr-crossorigin-${timeId}`));
-  assert(!doc.querySelector('link[rel~="icon"]').hasAttribute(`data-scrapbook-orig-attr-integrity-${timeId}`));
-  assert(!doc.querySelector('link[rel="stylesheet"]').hasAttribute(`data-scrapbook-orig-attr-href-${timeId}`));
-  assert(!doc.querySelector('link[rel="stylesheet"]').hasAttribute(`data-scrapbook-orig-attr-nonce-${timeId}`));
-  assert(!doc.querySelector('link[rel="stylesheet"]').hasAttribute(`data-scrapbook-orig-attr-crossorigin-${timeId}`));
-  assert(!doc.querySelector('link[rel="stylesheet"]').hasAttribute(`data-scrapbook-orig-attr-integrity-${timeId}`));
-  assert(!doc.querySelector('script[src]').hasAttribute(`data-scrapbook-orig-attr-src-${timeId}`));
-  assert(!doc.querySelector('script[src]').hasAttribute(`data-scrapbook-orig-attr-nonce-${timeId}`));
-  assert(!doc.querySelector('script[src]').hasAttribute(`data-scrapbook-orig-attr-crossorigin-${timeId}`));
-  assert(!doc.querySelector('script[src]').hasAttribute(`data-scrapbook-orig-attr-integrity-${timeId}`));
-  assert(!doc.querySelector('script:not([src])').hasAttribute(`data-scrapbook-orig-attr-nonce-${timeId}`));
-  assert(!doc.querySelector('img').hasAttribute(`data-scrapbook-orig-attr-src-${timeId}`));
-  assert(!doc.querySelector('img').hasAttribute(`data-scrapbook-orig-attr-crossorigin-${timeId}`));
-  assert(!doc.querySelector('img[srcset]').hasAttribute(`data-scrapbook-orig-attr-srcset-${timeId}`));
-  assert(!doc.querySelector('img[srcset]').hasAttribute(`data-scrapbook-orig-attr-crossorigin-${timeId}`));
-  assert(!doc.querySelector('picture source').hasAttribute(`data-scrapbook-orig-attr-srcset-${timeId}`));
-  assert(!doc.querySelector('picture img').hasAttribute(`data-scrapbook-orig-attr-src-${timeId}`));
-  assert(!doc.querySelector('picture img').hasAttribute(`data-scrapbook-orig-attr-crossorigin-${timeId}`));
-  assert(!doc.querySelector('input[type="image"]').hasAttribute(`data-scrapbook-orig-attr-src-${timeId}`));
-  assert(!doc.querySelector('table').hasAttribute(`data-scrapbook-orig-attr-background-${timeId}`));
-  assert(!doc.querySelector('table tr').hasAttribute(`data-scrapbook-orig-attr-background-${timeId}`));
-  assert(!doc.querySelector('table tr th').hasAttribute(`data-scrapbook-orig-attr-background-${timeId}`));
-  assert(!doc.querySelector('table tr td').hasAttribute(`data-scrapbook-orig-attr-background-${timeId}`));
-  assert(!doc.querySelector('audio[src]').hasAttribute(`data-scrapbook-orig-attr-src-${timeId}`));
-  assert(!doc.querySelector('audio[src]').hasAttribute(`data-scrapbook-orig-attr-crossorigin-${timeId}`));
-  assert(!doc.querySelector('audio:not([src])').hasAttribute(`data-scrapbook-orig-attr-crossorigin-${timeId}`));
-  assert(!doc.querySelector('audio source').hasAttribute(`data-scrapbook-orig-attr-src-${timeId}`));
-  assert(!doc.querySelector('video[src]').hasAttribute(`data-scrapbook-orig-attr-src-${timeId}`));
-  assert(!doc.querySelector('video[src]').hasAttribute(`data-scrapbook-orig-attr-poster-${timeId}`));
-  assert(!doc.querySelector('video[src]').hasAttribute(`data-scrapbook-orig-attr-crossorigin-${timeId}`));
-  assert(!doc.querySelector('video:not([src])').hasAttribute(`data-scrapbook-orig-attr-crossorigin-${timeId}`));
-  assert(!doc.querySelector('video source').hasAttribute(`data-scrapbook-orig-attr-src-${timeId}`));
-  assert(!doc.querySelector('iframe').hasAttribute(`data-scrapbook-orig-attr-src-${timeId}`));
-  assert(!doc.querySelector('embed').hasAttribute(`data-scrapbook-orig-attr-src-${timeId}`));
-  assert(!doc.querySelector('object').hasAttribute(`data-scrapbook-orig-attr-data-${timeId}`));
-  assert(!doc.querySelector('applet').hasAttribute(`data-scrapbook-orig-attr-code-${timeId}`));
-  assert(!doc.querySelector('applet').hasAttribute(`data-scrapbook-orig-attr-archive-${timeId}`));
-  assert(!doc.querySelector('a').hasAttribute(`data-scrapbook-orig-attr-href-${timeId}`));
-
-  assert(!doc.querySelectorAll('svg a[*|href]')[0].hasAttribute(`data-scrapbook-orig-attr-href-${timeId}`));
-  assert(!doc.querySelectorAll('svg a[*|href]')[1].hasAttribute(`xlink:data-scrapbook-orig-attr-href-${timeId}`));
-  assert(!doc.querySelectorAll('svg image[*|href]')[0].hasAttribute(`data-scrapbook-orig-attr-href-${timeId}`));
-  assert(!doc.querySelectorAll('svg image[*|href]')[1].hasAttribute(`xlink:data-scrapbook-orig-attr-href-${timeId}`));
+  assertNoRecord(doc);
 
   // CSS
   assert(doc.querySelector('style').textContent.trim() === `@import url("null.css");
@@ -16521,33 +16397,9 @@ p { background-image: /*scrapbook-orig-url="./null.bmp"*/url(""); }`);
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
-  var timeId = doc.documentElement.getAttribute('data-scrapbook-create');
 
   // attr
-  assert(!doc.querySelector('link[rel~="icon"]').hasAttribute(`data-scrapbook-orig-attr-href-${timeId}`));
-  assert(!doc.querySelectorAll('script')[0].hasAttribute(`data-scrapbook-orig-attr-src-${timeId}`));
-  assert(!doc.querySelectorAll('script')[0].hasAttribute(`data-scrapbook-orig-attr-nonce-${timeId}`));
-  assert(!doc.querySelectorAll('script')[1].hasAttribute(`data-scrapbook-orig-textContent-${timeId}`));
-  assert(!doc.querySelectorAll('script')[1].hasAttribute(`data-scrapbook-orig-attr-nonce-${timeId}`));
-  assert(!doc.querySelector('img').hasAttribute(`data-scrapbook-orig-attr-src-${timeId}`));
-  assert(!doc.querySelectorAll('img')[1].hasAttribute(`data-scrapbook-orig-attr-srcset-${timeId}`));
-  assert(!doc.querySelector('picture source').hasAttribute(`data-scrapbook-orig-attr-srcset-${timeId}`));
-  assert(!doc.querySelector('picture img').hasAttribute(`data-scrapbook-orig-attr-src-${timeId}`));
-  assert(!doc.querySelector('input[type="image"]').hasAttribute(`data-scrapbook-orig-attr-src-${timeId}`));
-  assert(!doc.querySelector('table').hasAttribute(`data-scrapbook-orig-attr-background-${timeId}`));
-  assert(!doc.querySelector('table tr').hasAttribute(`data-scrapbook-orig-attr-background-${timeId}`));
-  assert(!doc.querySelector('table tr th').hasAttribute(`data-scrapbook-orig-attr-background-${timeId}`));
-  assert(!doc.querySelector('table tr td').hasAttribute(`data-scrapbook-orig-attr-background-${timeId}`));
-  assert(!doc.querySelector('audio[src]').hasAttribute(`data-scrapbook-orig-attr-src-${timeId}`));
-  assert(!doc.querySelector('audio source').hasAttribute(`data-scrapbook-orig-attr-src-${timeId}`));
-  assert(!doc.querySelector('video[src]').hasAttribute(`data-scrapbook-orig-attr-src-${timeId}`));
-  assert(!doc.querySelector('video[src]').hasAttribute(`data-scrapbook-orig-attr-poster-${timeId}`));
-  assert(!doc.querySelector('video source').hasAttribute(`data-scrapbook-orig-attr-src-${timeId}`));
-  assert(!doc.querySelector('iframe').hasAttribute(`data-scrapbook-orig-attr-src-${timeId}`));
-  assert(!doc.querySelector('embed').hasAttribute(`data-scrapbook-orig-attr-src-${timeId}`));
-  assert(!doc.querySelector('object').hasAttribute(`data-scrapbook-orig-attr-data-${timeId}`));
-  assert(!doc.querySelector('applet').hasAttribute(`data-scrapbook-orig-attr-code-${timeId}`));
-  assert(!doc.querySelector('applet').hasAttribute(`data-scrapbook-orig-attr-archive-${timeId}`));
+  assertNoRecord(doc);
 
   // CSS
   assert(doc.querySelector('style').textContent.trim() === `@import url("null.css");
@@ -16610,22 +16462,9 @@ it('test_capture_record_attrs_save_current', async function () {
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
-  var timeId = doc.documentElement.getAttribute('data-scrapbook-create');
 
   // attr
-  assert(!doc.querySelector('link[rel="stylesheet"]').hasAttribute(`data-scrapbook-orig-attr-href-${timeId}`));
-  assert(!doc.querySelector('img').hasAttribute(`data-scrapbook-orig-attr-src-${timeId}`));
-  assert(!doc.querySelectorAll('img')[1].hasAttribute(`data-scrapbook-orig-null-attr-src-${timeId}`));
-  assert(!doc.querySelectorAll('img')[1].hasAttribute(`data-scrapbook-orig-attr-src-${timeId}`));
-  assert(!doc.querySelectorAll('img')[1].hasAttribute(`data-scrapbook-orig-attr-srcset-${timeId}`));
-  assert(!doc.querySelector('picture img').hasAttribute(`data-scrapbook-orig-attr-src-${timeId}`));
-  assert(!doc.querySelector('audio[src]').hasAttribute(`data-scrapbook-orig-attr-src-${timeId}`));
-  assert(!doc.querySelectorAll('audio')[1].hasAttribute(`data-scrapbook-orig-null-attr-src-${timeId}`));
-  assert(!doc.querySelectorAll('audio')[1].hasAttribute(`data-scrapbook-orig-attr-src-${timeId}`));
-  assert(!doc.querySelector('video[src]').hasAttribute(`data-scrapbook-orig-attr-src-${timeId}`));
-  assert(!doc.querySelector('video[src]').hasAttribute(`data-scrapbook-orig-attr-poster-${timeId}`));
-  assert(!doc.querySelectorAll('video')[1].hasAttribute(`data-scrapbook-orig-null-attr-src-${timeId}`));
-  assert(!doc.querySelectorAll('video')[1].hasAttribute(`data-scrapbook-orig-attr-src-${timeId}`));
+  assertNoRecord(doc);
 });
 
 /**
