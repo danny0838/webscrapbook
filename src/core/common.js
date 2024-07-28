@@ -1983,6 +1983,36 @@
     return elem.shadowRoot;
   };
 
+  scrapbook.getAdoptedStyleSheets = function* (docOrShadowRoot) {
+    try {
+      yield* docOrShadowRoot.adoptedStyleSheets;
+    } catch (ex) {
+      // Firefox < 101.0b1: docOrShadowRoot.adoptedStyleSheets is undefined
+      //
+      // Firefox < 101.0b8: docOrShadowRoot.adoptedStyleSheets of a content
+      // script throws an error when accessed.
+      // https://bugzilla.mozilla.org/show_bug.cgi?id=1767819
+      //
+      // Firefox >= 101.0b8: docOrShadowRoot.adoptedStyleSheets of a content
+      // script has all properties unreadable.
+      // https://bugzilla.mozilla.org/show_bug.cgi?id=1770592
+      //
+      // Workaround with document.wrappedJSObject:
+      // https://bugzilla.mozilla.org/show_bug.cgi?id=1817675
+      if (!('adoptedStyleSheets' in docOrShadowRoot)) {
+        return;
+      }
+
+      try {
+        yield* docOrShadowRoot.wrappedJSObject.adoptedStyleSheets;
+      } catch (ex) {
+        // This shouldn't happen.
+        // Catch the error in case of an unexpected implementation change.
+        console.error(ex);
+      }
+    }
+  };
+
   /**
    * Clone a document and generate relation mapping.
    *
