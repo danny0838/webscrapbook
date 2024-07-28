@@ -964,7 +964,7 @@
                 case "link": {
                   if (disableCss) {
                     captureRewriteAttr(elem, "href", null);
-                    captureRewriteAttr(elem, "data-scrapbook-css-disabled", "");
+                    elem.setAttribute("data-scrapbook-css-disabled", "");
                     break;
                   }
                   break;
@@ -983,7 +983,7 @@
                 default: {
                   if (disableCss) {
                     captureRewriteAttr(elem, "href", null);
-                    captureRewriteAttr(elem, "data-scrapbook-css-disabled", "");
+                    elem.setAttribute("data-scrapbook-css-disabled", "");
                     break;
                   }
                   tasks.push(async () => {
@@ -1166,7 +1166,7 @@
               default: {
                 if (disableCss) {
                   captureRewriteTextContent(elem, "");
-                  captureRewriteAttr(elem, "data-scrapbook-css-disabled", "");
+                  elem.setAttribute("data-scrapbook-css-disabled", "");
                   break;
                 }
                 tasks.push(async () => {
@@ -2373,7 +2373,7 @@
 
                 try {
                   if (!scrapbook.isCanvasBlank(elemOrig)) {
-                    captureRewriteAttr(elem, "data-scrapbook-canvas", elemOrig.toDataURL());
+                    elem.setAttribute("data-scrapbook-canvas", elemOrig.toDataURL());
                     requireBasicLoader = true;
                   }
                 } catch (ex) {
@@ -2445,7 +2445,7 @@
                     if (elemOrig) {
                       const value = elemOrig.value;
                       if (value !== elem.getAttribute('value')) {
-                        captureRewriteAttr(elem, "data-scrapbook-input-value", value);
+                        elem.setAttribute("data-scrapbook-input-value", value);
                         requireBasicLoader = true;
                       }
                     }
@@ -2475,12 +2475,12 @@
                     if (elemOrig) {
                       const checked = elemOrig.checked;
                       if (checked !== elem.hasAttribute('checked')) {
-                        captureRewriteAttr(elem, "data-scrapbook-input-checked", String(checked));
+                        elem.setAttribute("data-scrapbook-input-checked", checked);
                         requireBasicLoader = true;
                       }
                       const indeterminate = elemOrig.indeterminate;
                       if (indeterminate && elem.type.toLowerCase() === 'checkbox') {
-                        captureRewriteAttr(elem, "data-scrapbook-input-indeterminate", "");
+                        elem.setAttribute("data-scrapbook-input-indeterminate", "");
                         requireBasicLoader = true;
                       }
                     }
@@ -2490,7 +2490,7 @@
                     if (elemOrig) {
                       const indeterminate = elemOrig.indeterminate;
                       if (indeterminate && elem.type.toLowerCase() === 'checkbox') {
-                        captureRewriteAttr(elem, "data-scrapbook-input-indeterminate", "");
+                        elem.setAttribute("data-scrapbook-input-indeterminate", "");
                         requireBasicLoader = true;
                       }
                     }
@@ -2515,7 +2515,7 @@
                     if (elemOrig) {
                       const value = elemOrig.value;
                       if (value !== elem.getAttribute('value')) {
-                        captureRewriteAttr(elem, "data-scrapbook-input-value", value);
+                        elem.setAttribute("data-scrapbook-input-value", value);
                         requireBasicLoader = true;
                       }
                     }
@@ -2547,7 +2547,7 @@
                 if (elemOrig) {
                   const selected = elemOrig.selected;
                   if (selected !== elem.hasAttribute('selected')) {
-                    captureRewriteAttr(elem, "data-scrapbook-option-selected", String(selected));
+                    elem.setAttribute("data-scrapbook-option-selected", selected);
                     requireBasicLoader = true;
                   }
                 }
@@ -2576,7 +2576,7 @@
                 if (elemOrig) {
                   const value = elemOrig.value;
                   if (value !== elem.textContent) {
-                    captureRewriteAttr(elem, "data-scrapbook-textarea-value", value);
+                    elem.setAttribute("data-scrapbook-textarea-value", value);
                     requireBasicLoader = true;
                   }
                 }
@@ -2784,7 +2784,7 @@
       }
       if (infos.length) {
         const elem = root.host || root;
-        captureRewriteAttr(elem, "data-scrapbook-adoptedstylesheets", infos.map(x => x.id).join(','));
+        elem.setAttribute("data-scrapbook-adoptedstylesheets", infos.map(x => x.id).join(','));
       }
     };
 
@@ -3319,7 +3319,7 @@
               break;
             }
           }
-          captureRewriteAttr(rootNode, `data-scrapbook-adoptedstylesheet-${id}`, cssText);
+          rootNode.setAttribute(`data-scrapbook-adoptedstylesheet-${id}`, cssText);
         });
       }
       requireBasicLoader = true;
@@ -3359,21 +3359,21 @@
     // record after the content of all nested shadow roots have been processed
     for (const shadowRoot of shadowRootList) {
       const host = shadowRoot.host;
-      captureRewriteAttr(host, "data-scrapbook-shadowdom", shadowRoot.innerHTML);
+      host.setAttribute("data-scrapbook-shadowdom", shadowRoot.innerHTML);
       if (shadowRoot.mode !== 'open') {
-        captureRewriteAttr(host, "data-scrapbook-shadowdom-mode", shadowRoot.mode);
+        host.setAttribute("data-scrapbook-shadowdom-mode", shadowRoot.mode);
       }
       if (shadowRoot.clonable) {
-        captureRewriteAttr(host, "data-scrapbook-shadowdom-clonable", "");
+        host.setAttribute("data-scrapbook-shadowdom-clonable", "");
       }
       if (shadowRoot.delegatesFocus) {
-        captureRewriteAttr(host, "data-scrapbook-shadowdom-delegates-focus", "");
+        host.setAttribute("data-scrapbook-shadowdom-delegates-focus", "");
       }
       if (shadowRoot.serializable) {
-        captureRewriteAttr(host, "data-scrapbook-shadowdom-serializable", "");
+        host.setAttribute("data-scrapbook-shadowdom-serializable", "");
       }
       if (shadowRoot.slotAssignment && shadowRoot.slotAssignment !== 'named') {
-        captureRewriteAttr(host, "data-scrapbook-shadowdom-slot-assignment", shadowRoot.slotAssignment);
+        host.setAttribute("data-scrapbook-shadowdom-slot-assignment", shadowRoot.slotAssignment);
       }
     }
 
