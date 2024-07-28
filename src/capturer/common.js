@@ -3585,19 +3585,20 @@
 
         // record form element status
         for (const elem of rootNode.querySelectorAll("input")) {
+          const elemOrig = origNodeMap.get(elem);
+          if (!elemOrig) { continue; }
           switch (elem.type.toLowerCase()) {
             case "checkbox": {
               // indeterminate
-              elem.removeAttribute("data-scrapbook-input-indeterminate");
-              const elemOrig = origNodeMap.get(elem);
-              if (!elemOrig) { continue; }
               if (elemOrig.indeterminate) {
                 elem.setAttribute("data-scrapbook-input-indeterminate", "");
                 requireBasicLoader = true;
+              } else {
+                elem.removeAttribute("data-scrapbook-input-indeterminate");
               }
             }
             case "radio":
-              if (elem.checked) {
+              if (elemOrig.checked) {
                 elem.setAttribute("checked", "");
               } else {
                 elem.removeAttribute("checked");
@@ -3611,13 +3612,25 @@
               break;
             case "text":
             default:
-              elem.setAttribute("value", elem.value);
+              elem.setAttribute("value", elemOrig.value);
               break;
           }
         }
 
+        for (const elem of rootNode.querySelectorAll("option")) {
+          const elemOrig = origNodeMap.get(elem);
+          if (!elemOrig) { continue; }
+          if (elemOrig.selected) {
+            elem.setAttribute("selected", "");
+          } else {
+            elem.removeAttribute("selected");
+          }
+        }
+
         for (const elem of rootNode.querySelectorAll("textarea")) {
-          elem.textContent = elem.value;
+          const elemOrig = origNodeMap.get(elem);
+          if (!elemOrig) { continue; }
+          elem.textContent = elemOrig.value;
         }
 
         // handle special scrapbook elements
