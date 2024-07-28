@@ -3366,7 +3366,7 @@
       if (shadowRoot.serializable) {
         captureRewriteAttr(host, "data-scrapbook-shadowdom-serializable", "");
       }
-      if (shadowRoot.slotAssignment !== 'named') {
+      if (shadowRoot.slotAssignment && shadowRoot.slotAssignment !== 'named') {
         captureRewriteAttr(host, "data-scrapbook-shadowdom-slot-assignment", shadowRoot.slotAssignment);
       }
     }
@@ -3669,7 +3669,7 @@
           if (shadowRoot.serializable) {
             elem.setAttribute("data-scrapbook-shadowdom-serializable", "");
           }
-          if (shadowRoot.slotAssignment !== 'named') {
+          if (shadowRoot.slotAssignment && shadowRoot.slotAssignment !== 'named') {
             elem.setAttribute("data-scrapbook-shadowdom-slot-assignment", shadowRoot.slotAssignment);
           }
           requireBasicLoader = true;
