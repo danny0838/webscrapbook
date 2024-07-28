@@ -3282,23 +3282,19 @@
       const refPolicy = docRefPolicy;
       for (const [css, id] of adoptedStyleSheetMap) {
         tasks.push(async () => {
-          const cssTexts = await Promise.all(
-            Array.prototype.map.call(
-              css.cssRules,
-              cssRule => cssHandler.rewriteCssRules({
-                cssRules: [cssRule],
-                baseUrl: baseUrlCurrent,
-                refUrl,
-                refPolicy,
-                envCharset: charset,
-                refCss: css,
-                rootNode: null,
-                settings,
-                options,
-              }),
-            )
-          );
-          captureRewriteAttr(rootNode, `data-scrapbook-adoptedstylesheet-${id}`, cssTexts.join('\n\n'));
+          const cssText = await cssHandler.rewriteCssRules({
+            cssRules: css.cssRules,
+            baseUrl: baseUrlCurrent,
+            refUrl,
+            refPolicy,
+            envCharset: charset,
+            refCss: css,
+            rootNode: null,
+            sep: '\n\n',
+            settings,
+            options,
+          });
+          captureRewriteAttr(rootNode, `data-scrapbook-adoptedstylesheet-${id}`, cssText);
         });
       }
       requireBasicLoader = true;
@@ -5034,8 +5030,26 @@
 
     /**
      * Rewrite given cssRules to cssText.
+     *
+     * @param {Object} params
+     * @param {CSSRuleList|CSSRule[]} params.cssRules - the CSS rules to rewrite.
+     * @param {string} params.baseUrl - the base URL for URL resolving.
+     * @param {string} params.refUrl - the referrer URL for fetching resources.
+     * @param {string} [params.refPolicy] - the referrer policy for fetching
+     *     resources.
+     * @param {string} [params.envCharset] - the environment charset for
+     *     fetching resources.
+     * @param {CSSStyleSheet} [params.refCss] - the reference CSS (which
+     *     holds the @import rule(s), for an imported CSS).
+     * @param {Node} [params.rootNode] - the document or ShadowRoot node for
+     *     verifying selectors.
+     * @param {string} [params.indent] - the string to indent the output CSS
+     *     text.
+     * @param {string} [params.sep] - the string to separate each CSS rule.
+     * @param {captureSettings} [params.settings]
+     * @param {captureOptions} [params.options]
      */
-    async rewriteCssRules({cssRules, baseUrl, refUrl, refPolicy, envCharset, refCss, rootNode, indent = '', settings, options}) {
+    async rewriteCssRules({cssRules, baseUrl, refUrl, refPolicy, envCharset, refCss, rootNode, indent = '', sep = '\n', settings, options}) {
       const rules = [];
       for (const cssRule of cssRules) {
         switch (cssRule.type) {
@@ -5201,7 +5215,7 @@
           }
         }
       }
-      return rules.join('\n');
+      return rules.join(sep);
     }
 
     /**
