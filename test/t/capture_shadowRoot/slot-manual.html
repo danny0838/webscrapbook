@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Test shadowRoot slots</title>
+</head>
+<body>
+<div>
+<span>Default</span>
+<span slot="">Default2</span>
+Default3
+<span slot="person">Mr. Apple</span>
+<span slot="person">Mr. Black</span>
+<span slot="person">Ms. Cindy</span>
+<template shadowrootmode="*open" shadowrootslotassignment="manual">
+  <style>
+  slot { display: block; }
+  ::slotted(*) { background-color: yellow; }
+  </style>
+  <slot>default missing</slot>
+  <slot name="person">person missing</slot>
+  <div>
+  <span slot="person">person1</span>
+  <span slot="person">person2</span>
+  <span slot="person">person3</span>
+  <template shadowrootmode="*open" shadowrootslotassignment="manual">
+    <style>
+    slot { display: block; }
+    ::slotted(*) { background-color: yellow; }
+    </style>
+    <slot name="person">person missing</slot>
+  </template>
+  </div>
+</template>
+</div>
+</body>
+<script src="../../common.js"></script>
+<script>
+utils.loadShadowDoms();
+
+var host = document.querySelector('div');
+var shadow = host.shadowRoot;
+var slots = shadow.querySelectorAll('slot');
+var spans = host.querySelectorAll('span');
+slots[0].assign(spans[0], spans[1].nextSibling);
+slots[1].assign(spans[2], spans[3]);
+
+var host = shadow.querySelector('div');
+var shadow = host.shadowRoot;
+var slots = shadow.querySelectorAll('slot');
+var spans = host.querySelectorAll('span');
+slots[0].assign(spans[1], spans[2]);
+</script>
+</html>

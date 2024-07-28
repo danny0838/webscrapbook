@@ -13308,6 +13308,113 @@ $it.skipIf($.noShadowRootDelegatesFocus)
 });
 
 /**
+ * Check handling of slots.
+ *
+ * capturer.captureDocument
+ */
+$it.skipIf($.noShadowRootSlotAssignment)('test_capture_shadowRoot_slots', async function () {
+  var options = {
+    "capture.shadowDom": "save",
+    "capture.recordRewrites": true,
+  };
+
+  /* slotAssignment = manual */
+  var blob = await capture({
+    url: `${localhost}/capture_shadowRoot/slot-manual.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  var host = doc.querySelector('div');
+  var frag = doc.createElement("template");
+  frag.innerHTML = host.getAttribute("data-scrapbook-shadowdom");
+  var shadow = frag.content;
+
+  var spans = host.querySelectorAll('span');
+  assertEqual(spans[0].getAttribute('data-scrapbook-slot-index'), "0");
+  assert(!spans[1].hasAttribute('data-scrapbook-slot-index'));
+  assertEqual(spans[2].getAttribute('data-scrapbook-slot-index'), "2");
+  assertEqual(spans[3].getAttribute('data-scrapbook-slot-index'), "3");
+  assert(!spans[4].hasAttribute('data-scrapbook-slot-index'));
+
+  var node = spans[1].nextSibling;
+  assertEqual(node.nodeType, 8);
+  assertEqual(node.nodeValue, 'scrapbook-slot-index=1');
+  var node = node.nextSibling;
+  assertEqual(node.nodeType, 3);
+  assertEqual(node.nodeValue.trim(), 'Default3');
+  var node = node.nextSibling;
+  assertEqual(node.nodeType, 8);
+  assertEqual(node.nodeValue, '/scrapbook-slot-index');
+
+  var slots = shadow.querySelectorAll('slot');
+  assertEqual(slots[0].getAttribute('data-scrapbook-slot-assigned'), "0,1");
+  assertEqual(slots[1].getAttribute('data-scrapbook-slot-assigned'), "2,3");
+
+  var host2 = shadow.querySelector('div');
+  var frag = doc.createElement("template");
+  frag.innerHTML = host2.getAttribute("data-scrapbook-shadowdom");
+  var shadow2 = frag.content;
+
+  var spans = host2.querySelectorAll('span');
+  assert(!spans[0].hasAttribute('data-scrapbook-slot-index'));
+  assertEqual(spans[1].getAttribute('data-scrapbook-slot-index'), "4");
+  assertEqual(spans[2].getAttribute('data-scrapbook-slot-index'), "5");
+
+  var slots = shadow2.querySelectorAll('slot');
+  assertEqual(slots[0].getAttribute('data-scrapbook-slot-assigned'), "4,5");
+
+  var loader = doc.querySelector('script[data-scrapbook-elem="basic-loader"]');
+  assert(loader.textContent.trim().match(rawRegex`${'^'}(function () {${'.+'}})()${'$'}`));
+
+  assertNoRecord(host);
+  assertNoRecord(shadow);
+  assertNoRecord(host2);
+  assertNoRecord(shadow2);
+
+  /* slotAssignment = named */
+  var blob = await capture({
+    url: `${localhost}/capture_shadowRoot/slot-named.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  var host = doc.querySelector('div');
+  var frag = doc.createElement("template");
+  frag.innerHTML = host.getAttribute("data-scrapbook-shadowdom");
+  var shadow = frag.content;
+
+  var spans = host.querySelectorAll('span');
+  var node = spans[1].nextSibling;
+  assertEqual(node.nodeType, 3);
+  assertEqual(node.nodeValue.trim(), 'Default3');
+  assertEqual(node.nextSibling, spans[2]);
+
+  var host2 = shadow.querySelector('div');
+  var frag = doc.createElement("template");
+  frag.innerHTML = host2.getAttribute("data-scrapbook-shadowdom");
+  var shadow2 = frag.content;
+
+  var loader = doc.querySelector('script[data-scrapbook-elem="basic-loader"]');
+  assert(loader.textContent.trim().match(rawRegex`${'^'}(function () {${'.+'}})()${'$'}`));
+
+  assertNoRecord(host);
+  assertNoRecord(host, {filter: {regexAttr: /^data-scrapbook-slot-/}});
+  assertNoRecord(shadow);
+  assertNoRecord(shadow, {filter: {regexAttr: /^data-scrapbook-slot-/}});
+  assertNoRecord(host2);
+  assertNoRecord(host2, {filter: {regexAttr: /^data-scrapbook-slot-/}});
+  assertNoRecord(shadow2);
+  assertNoRecord(shadow2, {filter: {regexAttr: /^data-scrapbook-slot-/}});
+});
+
+/**
  * Check for shadow DOM auto-generated via custom elements.
  *
  * capturer.captureDocument

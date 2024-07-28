@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Test shadowRoot slots</title>
+</head>
+<body>
+<div>
+<span>Default</span>
+<span slot="">Default2</span>
+Default3
+<span slot="person">Mr. Apple</span>
+<span slot="person">Mr. Black</span>
+<span slot="person">Ms. Cindy</span>
+<template shadowrootmode="open">
+  <style>
+  slot { display: block; }
+  ::slotted(*) { background-color: yellow; }
+  </style>
+  <slot>default missing</slot>
+  <slot name="person">person missing</slot>
+  <div>
+  <span slot="person">person1</span>
+  <span slot="person">person2</span>
+  <span slot="person">person3</span>
+  <template shadowrootmode="open">
+    <style>
+    slot { display: block; }
+    ::slotted(*) { background-color: yellow; }
+    </style>
+    <slot name="person">person missing</slot>
+  </template>
+</template>
+</div>
+</body>
+<script src="../../common.js"></script>
+<script>utils.loadShadowDoms();</script>
+</html>

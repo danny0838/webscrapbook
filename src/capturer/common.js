@@ -2610,6 +2610,36 @@
             break;
           }
 
+          // slot
+          case "slot": {
+            const root = elem.getRootNode();
+            if (!(root instanceof ShadowRoot && root.slotAssignment === 'manual')) {
+              break;
+            }
+
+            const elemOrig = origNodeMap.get(elem);
+            const ids = [];
+            for (const targetNodeOrig of elemOrig.assignedNodes()) {
+              const targetNode = clonedNodeMap.get(targetNodeOrig);
+              let id = slotMap.get(targetNode);
+              if (typeof id === 'undefined') {
+                id = slotMap.size;
+                slotMap.set(targetNode, id);
+              }
+              if (targetNode.nodeType === 1) {
+                targetNode.setAttribute("data-scrapbook-slot-index", id);
+              } else {
+                targetNode.before(document.createComment(`scrapbook-slot-index=${id}`));
+                targetNode.after(document.createComment(`/scrapbook-slot-index`));
+              }
+              ids.push(id);
+            }
+            if (ids.length) {
+              elem.setAttribute("data-scrapbook-slot-assigned", ids.join(','));
+            }
+            break;
+          }
+
           // xmp
           case "xmp": {
             // escape </xmp> as textContent can contain HTML
@@ -2872,6 +2902,7 @@
     const origNodeMap = new WeakMap();
     const clonedNodeMap = new WeakMap();
     const shadowRootList = [];
+    const slotMap = new Map();
     const adoptedStyleSheetMap = new Map();
     const customElementNames = new Set();
 
@@ -3670,6 +3701,54 @@
           }
         }
 
+        // update slot data
+        // don't refresh related attributes if not supported by the browser
+        if (rootNode instanceof ShadowRoot && rootNode.slotAssignment === 'manual') {
+          // clear attributes for all slottables
+          const regexes = [/^scrapbook-slot-index=(\d+)$/, /^\/scrapbook-slot-index$/];
+          const children = rootNode.host.childNodes;
+          for (let i = children.length - 1; i >= 0; i--) {
+            const node = children[i];
+            switch (node.nodeType) {
+              case Node.ELEMENT_NODE: {
+                node.removeAttribute("data-scrapbook-slot-index");
+                break;
+              }
+              case Node.COMMENT_NODE: {
+                if (regexes.some(r => r.test(node.nodeValue))) {
+                  node.remove();
+                }
+                break;
+              }
+            }
+          }
+
+          for (const elem of rootNode.querySelectorAll("slot")) {
+            elem.removeAttribute("data-scrapbook-slot-assigned");
+            const elemOrig = origNodeMap.get(elem);
+            if (!elemOrig) { continue; }
+            const ids = [];
+            for (const targetNodeOrig of elemOrig.assignedNodes()) {
+              const targetNode = clonedNodeMap.get(targetNodeOrig);
+              let id = slotMap.get(targetNode);
+              if (typeof id === 'undefined') {
+                id = slotMap.size;
+                slotMap.set(targetNode, id);
+              }
+              if (targetNode.nodeType === 1) {
+                targetNode.setAttribute("data-scrapbook-slot-index", id);
+              } else {
+                targetNode.before(document.createComment(`scrapbook-slot-index=${id}`));
+                targetNode.after(document.createComment(`/scrapbook-slot-index`));
+              }
+              ids.push(id);
+            }
+            if (ids.length) {
+              elem.setAttribute("data-scrapbook-slot-assigned", ids.join(','));
+            }
+          }
+        }
+
         // update shadow root data
         for (const elem of rootNode.querySelectorAll("*")) {
           elem.removeAttribute("data-scrapbook-shadowdom");
@@ -3705,6 +3784,7 @@
 
       const origNodeMap = new WeakMap();
       const clonedNodeMap = new WeakMap();
+      const slotMap = new Map();
       const adoptedStyleSheetMap = new Map();
 
       // create a new document to replicate nodes via import
@@ -3845,11 +3925,57 @@
             k12 = "data-scrapbook-shadowdom-delegates-focus",
             k13 = "data-scrapbook-shadowdom-serializable",
             k14 = "data-scrapbook-shadowdom-slot-assignment",
+            k15 = "data-scrapbook-slot-assigned",
+            k16 = "data-scrapbook-slot-index",
+            k17 = /^scrapbook-slot-index=(\d+)$/;
+            k18 = '/scrapbook-slot-index';
             d = document,
             r = d.documentElement,
             $s = !!r.attachShadow,
             $as = !!d.adoptedStyleSheets,
             $c = !!window.HTMLCanvasElement,
+            $sa = !!d.createElement('slot').assign,
+            sle = [],
+            sls = [],
+            slt = function (r) { 
+              if ($sa) {
+                var E = r.childNodes, i, e, s, m;
+                for (i = 0; i < E.length; i++) {
+                  e = E[i];
+                  if (e.nodeType === 8) {
+                    s = e.nodeValue;
+                    if (m = s.match(k17)) {
+                      s = e.nextSibling;
+                      if (s.nodeType === 3) {
+                        sls[m[1]] = s;
+                      }
+                      r.removeChild(e);
+                      i--;
+                    } else if (s === k18) {
+                      r.removeChild(e);
+                      i--;
+                    }
+                  }
+                }
+              }
+            },
+            sl = function () {
+              var i = sle.length, j, d, e;
+              while (i--) {
+                d = sle[i];
+                e = d.elem;
+                d = d.value.split(',');
+                j = d.length;
+                while (j--) {
+                  d[j] = sls[parseInt(d[j], 10)];
+                }
+                try {
+                  e.assign.apply(e, d);
+                } catch (ex) {
+                  console.error(ex);
+                }
+              }
+            },
             asl = (function (r) {
               var l = [], E, i, e, m, c, j;
               if ($as) {
@@ -3938,7 +4064,16 @@
                   e.value = d;
                   e.removeAttribute(k7);
                 }
+                if ($sa && (d = e.getAttribute(k15)) !== null) {
+                  sle.push({elem: e, value: d});
+                  e.removeAttribute(k15);
+                }
+                if ($sa && (d = e.getAttribute(k16)) !== null) {
+                  sls[d] = e;
+                  e.removeAttribute(k16);
+                }
                 if (s) {
+                  slt(e);
                   as(s, e);
                   fn(s);
                 }
@@ -3946,6 +4081,7 @@
             };
         as(d, r);
         fn(d);
+        sl();
       }) + ")()";
     }
     if (insertInfoBar && isMainDocument) {

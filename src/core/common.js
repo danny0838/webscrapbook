@@ -2175,6 +2175,32 @@
       }
     }
 
+    // handle manual slots if supported by the browser
+    if (elem instanceof ShadowRoot && elem.slotAssignment === 'manual') {
+      const slotMap = new Map();
+      const root = elem;
+      for (const elem of root.querySelectorAll('slot')) {
+        const ids = [];
+        for (const targetNode of elem.assignedNodes()) {
+          let id = slotMap.get(targetNode);
+          if (typeof id === 'undefined') {
+            id = slotMap.size;
+            slotMap.set(targetNode, id);
+          }
+          if (targetNode.nodeType === 1) {
+            targetNode.setAttribute("data-scrapbook-slot-index", id);
+          } else {
+            targetNode.before(document.createComment(`scrapbook-slot-index=${id}`));
+            targetNode.after(document.createComment(`/scrapbook-slot-index`));
+          }
+          ids.push(id);
+        }
+        if (ids.length) {
+          elem.setAttribute("data-scrapbook-slot-assigned", ids.join(','));
+        }
+      }
+    }
+
     if (elem.nodeType !== 1) { return; }
 
     switch (elem.nodeName.toLowerCase()) {
@@ -2320,6 +2346,58 @@
         if (regex.test(attr)) {
           host.removeAttribute(attr);
         }
+      }
+    }
+
+    // handle manual slots
+    if (shadowDom && elem instanceof ShadowRoot && elem.slotAssignment === 'manual') {
+      const regex = /^scrapbook-slot-index=(\d+)$/;
+      const host = elem.host;
+
+      const slotSources = [];
+      const children = host.childNodes;
+      for (let i = children.length - 1; i >= 0; i--) {
+        const node = children[i];
+        switch (node.nodeType) {
+          case Node.ELEMENT_NODE: {
+            const slotIdx = node.getAttribute("data-scrapbook-slot-index");
+            if (slotIdx !== null) {
+              slotSources[parseInt(slotIdx, 10)] = node;
+              node.removeAttribute("data-scrapbook-slot-index");
+            }
+            break;
+          }
+          case Node.COMMENT_NODE: {
+            const value = node.nodeValue;
+            const m = value.match(regex);
+            if (m) {
+              const next = node.nextSibling;
+              if (next.nodeType === 3) {
+                slotSources[parseInt(m[1], 10)] = next;
+              }
+              node.remove();
+              break;
+            } else if (value === '/scrapbook-slot-index') {
+              node.remove();
+              break;
+            }
+            break;
+          }
+        }
+      }
+
+      const rootNode = elem;
+      for (const elem of rootNode.querySelectorAll("slot")) {
+        const slotIdxes = elem.getAttribute("data-scrapbook-slot-assigned");
+        if (slotIdxes !== null && apply) {
+          const srcs = slotIdxes.split(',').map(i => slotSources[parseInt(i, 10)]);
+          try {
+            elem.assign.apply(elem, srcs);
+          } catch (ex) {
+            console.error(ex);
+          }
+        }
+        elem.removeAttribute("data-scrapbook-slot-assigned");
       }
     }
 
