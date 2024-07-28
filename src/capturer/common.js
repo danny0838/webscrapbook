@@ -375,15 +375,19 @@
       }
     };
 
-    // rewrite (or remove if value is null/undefined) the specified attr, record it if option set
+    // rewrite the specified attr, record it if option set
+    // if value is false/null/undefined, remove the attr
+    // if value is true, set attr to "" iff attr not exist
     const captureRewriteAttr = (elem, attr, value, record = options["capture.recordRewrites"]) => {
-      let [ns, att] = scrapbook.splitXmlAttribute(attr);
+      const [ns, att] = scrapbook.splitXmlAttribute(attr);
 
       if (elem.hasAttribute(attr)) {
+        if (value === true) { return; }
+
         const oldValue = elem.getAttribute(attr);
         if (oldValue === value) { return; }
 
-        if (value === null || value === undefined) {
+        if ([false, null, undefined].includes(value)) {
           elem.removeAttribute(attr);
         } else {
           elem.setAttribute(attr, value);
@@ -398,7 +402,9 @@
           }
         }
       } else {
-        if (value === null || value === undefined) { return; }
+        if ([false, null, undefined].includes(value)) { return; }
+
+        if (value === true) { value = ''; }
 
         elem.setAttribute(attr, value);
 
@@ -2469,7 +2475,7 @@
                     if (elemOrig) {
                       const checked = elemOrig.checked;
                       if (checked !== elem.hasAttribute('checked')) {
-                        captureRewriteAttr(elem, "data-scrapbook-input-checked", checked);
+                        captureRewriteAttr(elem, "data-scrapbook-input-checked", String(checked));
                         requireBasicLoader = true;
                       }
                       const indeterminate = elemOrig.indeterminate;
@@ -2491,7 +2497,7 @@
                   case "html-all":
                   case "html":
                     if (elemOrig) {
-                      captureRewriteAttr(elem, "checked", elemOrig.checked ? "checked" : null);
+                      captureRewriteAttr(elem, "checked", elemOrig.checked);
                     }
                     break;
                   case "reset":
@@ -2541,7 +2547,7 @@
                 if (elemOrig) {
                   const selected = elemOrig.selected;
                   if (selected !== elem.hasAttribute('selected')) {
-                    captureRewriteAttr(elem, "data-scrapbook-option-selected", selected);
+                    captureRewriteAttr(elem, "data-scrapbook-option-selected", String(selected));
                     requireBasicLoader = true;
                   }
                 }
@@ -2551,7 +2557,7 @@
               case "html-all":
               case "html":
                 if (elemOrig) {
-                  captureRewriteAttr(elem, "selected", elemOrig.selected ? "selected" : null);
+                  captureRewriteAttr(elem, "selected", elemOrig.selected);
                 }
                 break;
               case "reset":
@@ -3592,7 +3598,7 @@
             }
             case "radio":
               if (elem.checked) {
-                elem.setAttribute("checked", "checked");
+                elem.setAttribute("checked", "");
               } else {
                 elem.removeAttribute("checked");
               }
