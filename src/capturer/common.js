@@ -3672,6 +3672,11 @@
         // update shadow root data
         for (const elem of rootNode.querySelectorAll("*")) {
           elem.removeAttribute("data-scrapbook-shadowdom");
+          elem.removeAttribute("data-scrapbook-shadowdom-mode");
+          elem.removeAttribute("data-scrapbook-shadowdom-clonable");
+          elem.removeAttribute("data-scrapbook-shadowdom-delegates-focus");
+          elem.removeAttribute("data-scrapbook-shadowdom-serializable");
+          elem.removeAttribute("data-scrapbook-shadowdom-slot-assignment");
           const shadowRoot = scrapbook.getShadowRoot(elem);
           if (!shadowRoot) { continue; }
           processRootNode(shadowRoot);
