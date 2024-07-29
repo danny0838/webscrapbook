@@ -3846,9 +3846,12 @@
             k14 = "data-scrapbook-shadowdom-slot-assignment",
             d = document,
             r = d.documentElement,
+            $s = !!r.attachShadow,
+            $as = !!d.adoptedStyleSheets,
+            $c = !!window.HTMLCanvasElement,
             asl = (function (r) {
-              var l = [], d, E, i, e, m, c, j;
-              if (typeof document.adoptedStyleSheets !== 'undefined') {
+              var l = [], E, i, e, m, c, j;
+              if ($as) {
                 E = r.attributes;
                 i = E.length;
                 while (i--) {
@@ -3869,14 +3872,14 @@
               }
               return l;
             })(r),
-            as = function (d, h) {
+            as = function (d, e) {
               var l, i, I;
-              if ((l = h.getAttribute(k8)) !== null && asl.length) {
+              if ($as && (l = e.getAttribute(k8)) !== null) {
                 l = l.split(',');
                 for (i = 0, I = l.length; i < I; i++) {
                   d.adoptedStyleSheets.push(asl[l[i]]);
                 }
-                h.removeAttribute(k8);
+                e.removeAttribute(k8);
               }
             },
             fn = function (r) {
@@ -3884,24 +3887,29 @@
               while (i--) {
                 e = E[i];
                 s = e.shadowRoot;
-                if (!s && e.attachShadow && (d = e.getAttribute(k1))) {
-                  s = e.attachShadow({
-                    mode: (m = e.getAttribute(k10)) !== null ? m : 'open',
-                    clonable: e.hasAttribute(k11),
-                    delegatesFocus: e.hasAttribute(k12),
-                    serializable: e.hasAttribute(k13),
-                    slotAssignment: (m = e.getAttribute(k14)) !== null ? m : void(0),
-                  });
-                  s.innerHTML = d;
+                if ($s && (d = e.getAttribute(k1))) {
+                  if (!s) {
+                    try {
+                      s = e.attachShadow({
+                        mode: (m = e.getAttribute(k10)) !== null ? m : 'open',
+                        clonable: e.hasAttribute(k11),
+                        delegatesFocus: e.hasAttribute(k12),
+                        serializable: e.hasAttribute(k13),
+                        slotAssignment: (m = e.getAttribute(k14)) !== null ? m : void(0),
+                      });
+                      s.innerHTML = d;
+                    } catch (ex) {
+                      console.error(ex);
+                    }
+                  }
                   e.removeAttribute(k1);
                   e.removeAttribute(k10);
                   e.removeAttribute(k11);
                   e.removeAttribute(k12);
                   e.removeAttribute(k13);
                   e.removeAttribute(k14);
-                  as(s, e);
                 }
-                if ((d = e.getAttribute(k2)) !== null) {
+                if ($c && (d = e.getAttribute(k2)) !== null) {
                   (function () {
                     var c = e, g = new Image();
                     g.onload = function () { c.getContext('2d').drawImage(g, 0, 0); };
@@ -3930,6 +3938,7 @@
                   e.removeAttribute(k7);
                 }
                 if (s) {
+                  as(s, e);
                   fn(s);
                 }
               }
