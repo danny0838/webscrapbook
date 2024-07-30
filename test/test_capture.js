@@ -10833,6 +10833,28 @@ it('test_capture_canvas', async function () {
   assert(!shadow.querySelector('canvas'));
 });
 
+it('test_capture_canvas_webgl', async function () {
+  var options = {
+    "capture.canvas": "save",
+    "capture.script": "remove",
+  };
+  var blob = await capture({
+    url: `${localhost}/capture_canvas/canvas_webgl.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+
+  var loader = doc.querySelector('script[data-scrapbook-elem="basic-loader"]');
+  assert(loader.textContent.trim().match(rawRegex`${'^'}(function () {${'.+'}})()${'$'}`));
+
+  assert(doc.querySelector('canvas').getAttribute("data-scrapbook-canvas").match(rawRegex`${'^'}data:image/png;base64,`));
+});
+
 /**
  * Check if option works
  *

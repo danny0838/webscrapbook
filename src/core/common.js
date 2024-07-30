@@ -2136,8 +2136,9 @@
     switch (elem.nodeName.toLowerCase()) {
       case "canvas": {
         try {
-          if (!scrapbook.isCanvasBlank(elem)) {
-            elem.setAttribute('data-scrapbook-canvas', elem.toDataURL());
+          const data = elem.toDataURL();
+          if (data !== scrapbook.getBlankCanvasData(elem)) {
+            elem.setAttribute("data-scrapbook-canvas", data);
           }
         } catch (ex) {
           console.error(ex);
@@ -4068,14 +4069,13 @@
   };
 
   /**
-   * Check if a canvas is blank.
+   * Get data URL of a blank canvas.
    */
-  scrapbook.isCanvasBlank = function (canvas) {
-    const context = canvas.getContext('2d');
-    const pixelBuffer = new Uint32Array(
-      context.getImageData(0, 0, canvas.width, canvas.height).data.buffer
-    );
-    return pixelBuffer.every(color => color === 0);
+  scrapbook.getBlankCanvasData = function (canvas) {
+    const blank = document.createElement('canvas');
+    blank.width = canvas.width;
+    blank.height = canvas.height;
+    return blank.toDataURL();
   };
 
 

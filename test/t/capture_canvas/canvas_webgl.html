@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+</head>
+<body>
+<canvas width="320" height="240" style="border:1px solid #c3c3c3;">
+Your browser does not support the HTML5 canvas tag.
+</canvas>
+
+<script>
+// code adopted from: https://stackoverflow.com/a/45804460/1667884 (CC BY-SA 3.0)
+var squareVerticies = Float32Array.from([
+   0.5, 0.5,
+  -0.5, 0.5,
+   0.5,-0.5,
+   0.5,-0.5,
+  -0.5, 0.5,
+  -0.5,-0.5
+]);
+
+var vertexShaderCode = `
+  precision lowp float;
+  attribute vec2 aPos;
+  void main() {
+    gl_Position = vec4(aPos, 0.0, 1.0);
+  }
+`;
+
+var fragmentShaderCode = `
+  precision lowp float;
+  void main() {
+    gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);
+  }
+`;
+
+var canvas = document.querySelector('canvas');
+
+// toDataURL gets blank image if preserveDrawingBuffer not set
+var gl = canvas.getContext('webgl', {preserveDrawingBuffer: true});
+
+var vertexShader = gl.createShader(gl.VERTEX_SHADER);
+var fragmentShader = gl.createShader(gl.FRAGMENT_SHADER);
+gl.shaderSource(vertexShader, vertexShaderCode);
+gl.shaderSource(fragmentShader, fragmentShaderCode);
+gl.compileShader(vertexShader);
+gl.compileShader(fragmentShader);
+
+var program = gl.createProgram();
+gl.attachShader(program, vertexShader);
+gl.attachShader(program, fragmentShader);
+gl.linkProgram(program);
+gl.deleteShader(vertexShader);
+gl.deleteShader(fragmentShader);
+gl.useProgram(program);
+
+var VBO = gl.createBuffer();
+gl.bindBuffer(gl.ARRAY_BUFFER, VBO);
+gl.bufferData(gl.ARRAY_BUFFER, squareVerticies, gl.STATIC_DRAW);
+
+var posAttributeLocation = gl.getAttribLocation(program, 'aPos');
+gl.vertexAttribPointer(
+  posAttributeLocation,
+  2,
+  gl.FLOAT,
+  gl.FALSE,
+  2 * Float32Array.BYTES_PER_ELEMENT,
+  0 * Float32Array.BYTES_PER_ELEMENT,
+);
+gl.enableVertexAttribArray(posAttributeLocation);
+gl.clearColor(0.5, 0.5, 0.5, 1.0);
+gl.clear(gl.COLOR_BUFFER_BIT);
+gl.drawArrays(gl.TRIANGLES, 0, 6);
+</script>
+</body>
+</html>

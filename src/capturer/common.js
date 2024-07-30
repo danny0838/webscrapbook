@@ -2372,8 +2372,9 @@
                 if (isHeadless || !elemOrig) { break; }
 
                 try {
-                  if (!scrapbook.isCanvasBlank(elemOrig)) {
-                    elem.setAttribute("data-scrapbook-canvas", elemOrig.toDataURL());
+                  const data = elemOrig.toDataURL();
+                  if (data !== scrapbook.getBlankCanvasData(elemOrig)) {
+                    elem.setAttribute("data-scrapbook-canvas", data);
                     requireBasicLoader = true;
                   }
                 } catch (ex) {
@@ -3664,9 +3665,15 @@
           elem.removeAttribute("data-scrapbook-canvas");
           const elemOrig = origNodeMap.get(elem);
           if (!elemOrig) { continue; }
-          if (scrapbook.isCanvasBlank(elemOrig)) { continue; }
-          elem.setAttribute("data-scrapbook-canvas", elemOrig.toDataURL());
-          requireBasicLoader = true;
+          try {
+            const data = elemOrig.toDataURL();
+            if (data !== scrapbook.getBlankCanvasData(elemOrig)) {
+              elem.setAttribute("data-scrapbook-canvas", data);
+              requireBasicLoader = true;
+            }
+          } catch (ex) {
+            console.error(ex);
+          }
         }
 
         // update shadow root data
