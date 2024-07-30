@@ -766,10 +766,10 @@
     "message": "Auto-capture is defined using JSON syntax with the following format:\n\n  [\n   {\n    \"name\": \"Example#1\",\n    \"description\": \"Auto-capture example.com\",\n    \"pattern\": \"/^https?://example\\\\.com//i\",\n    \"delay\": 5000,\n    ...\n   },\n   ...\n  ]\n\n• name: a string to name this config and can be used for debugging identification, optional.\n• description: a string to annotate this config, optional.\n• disabled: disables this config when the value is truthy, optional.\n• tabId: a tab ID to restrict this config to work for. Works for any tab when omitted.\n• pattern: a regular expression string (“/expression/flags”) or an array of them. A URL is included by this config if matched by any of them. Includes any URL when omitted.\n• exclude: a regular expression string (“/expression/flags”) or an array of them. A URL is excluded by this config if matched by any of them. Optional.\n• delay: delay time before the auto-capture starts after the page completes loading (ms). No delay if it's omitted or not greater than 0.\n• repeat: repeat interval for the repeated captures after the first auto-capture starts (ms). No repeated capture if omitted or not greater than 0.\n• allowDuplicate: allow identical page be auto-captured repeatedly if the value is truthy, optional.\n• taskInfo: overriding capture settings, with the same format as the main JSON object of “Capture as...”, optional.\n• eachTaskInfo: overriding capture settings for each task, with the same format as each object in the tasks array of “Capture as...”, optional."
   },
   "OptionCaptureAdoptedStyleSheetLabel": {
-    "message": "Constructable stylesheets:"
+    "message": "Constructed stylesheets:"
   },
   "OptionCaptureAdoptedStyleSheetTooltip": {
-    "message": "This determines how constructable stylesheets are handled. A constructable stylesheet is a stylesheet attached to the document by scripts.\n\n• Save: Record constructable stylesheets in special attributes and create an initialization script to re-generate them on loading.\n• Remove: Do not record constructable stylesheets."
+    "message": "This determines how constructed stylesheets are handled. A constructed stylesheet is a stylesheet attached to the document by scripts.\n\n• Save: Record constructed stylesheets in special attributes and create an initialization script to re-generate them on loading.\n• Remove: Do not record constructed stylesheets."
   },
   "OptionCaptureAppletLabel": {
     "message": "APPLETs:"
@@ -784,16 +784,16 @@
     "message": "This determines how audio elements are handled.\n\n• Save: Save the referenced audio resources to local.\n• Save current: Save the playing audio resource to local and ignore alternatives for other browsers. This considerably reduces size but the audio may be unplayable on another platform. If the captured page is not displayed in the browser (such as capture source), all audio resources are saved.\n• Link: Link the audio to its source URL. Note that a network flow will be triggered when browsing the captured document in the future.\n• Blank: Disable the audio.\n• Remove: Remove the audio element. Note that this could alter the web page layout."
   },
   "OptionCaptureCanvasBlankLabel": {
-    "message": "Save initial status"
+    "message": "Blank"
   },
   "OptionCaptureCanvasLabel": {
     "message": "Canvases:"
   },
   "OptionCaptureCanvasSaveLabel": {
-    "message": "Save current status"
+    "message": "Save"
   },
   "OptionCaptureCanvasTooltip": {
-    "message": "This determines how canvas elements are handled. Canvases are blank initially and drawn by web page scripts.\n\n• Save current status: Generate an initialization script that records the current canvas status to redraw it when the saved web page is loaded. NOTE: The current status of a canvas drawn using certain techniques cannot be recorded faithfully.\n• Save initial status: Save a blank canvas.\n• Remove: Remove the canvas element."
+    "message": "This determines how canvas elements are handled. Canvases are blank initially and drawn by web page scripts.\n\n• Save: Generate an initialization script that records the current canvas status to redraw it when the saved web page is loaded. NOTE: The current status of a canvas drawn using certain techniques cannot be recorded faithfully.\n• Blank: Save a blank canvas.\n• Remove: Remove the canvas element."
   },
   "OptionCaptureCommonBlankLabel": {
     "message": "Blank"
@@ -817,7 +817,7 @@
     "message": "Automatically delete all erased content on capturing"
   },
   "OptionCaptureDeleteErasedOnCaptureTooltip": {
-    "message": "NOTE: those related with the erased content, such as a external resource or an interactive factor, may not be reverted after captured."
+    "message": "NOTE: Even though the erased content is captured, external resources and some script-related interactive factors of it cannot be completely retained and reverted afterwards. It's generally recommended to erase after a capture to preserve such information better."
   },
   "OptionCaptureDeleteErasedOnSaveLabel": {
     "message": "Automatically delete all erased content on saving"
@@ -1099,7 +1099,7 @@
     "message": "Scripts:"
   },
   "OptionCaptureScriptTooltip": {
-    "message": "This determines how all scripts (including SCRIPT elements, links with javascript: protocol, and dynamic attributes like onclick, etc.) are handled.\n\n• Save: Save the referenced script resource to local. NOTE: The saved script may not run normally and may introduce privacy or security issue as the captured page has left the original server environment and has had partial content rewritten. Besides, saved scripts don't run in the archive page viewer due to a security concern. It is generally recommended to perform a capture source, and set capture options to “save”, “canvas” to “save initial status”, “form status” to “reset”, “shadow DOMs” to “remove”, “constructable stylesheets” to “remove”,“remove hidden elements” to “disable”, and “rewrite styles” to non-“advanced tidy”, to reduce the chance of a conflict with the script.\n• Link: Link the script to its source URL. Note that a network flow will be triggered when browsing the captured document in the future.\n• Blank: Disable the script.\n• Remove: Remove the script element."
+    "message": "This determines how all scripts (including SCRIPT elements, links with javascript: protocol, and dynamic attributes like onclick, etc.) are handled.\n\n• Save: Save the referenced script resource to local. NOTE: The saved script may not run normally and may introduce privacy or security issue as the captured page has left the original server environment and has had partial content rewritten. Besides, saved scripts don't run in the archive page viewer due to a security concern. It is generally recommended to perform a capture source, and set capture options to “save”, “canvas” to “blank”, “form status” to “reset”, “shadow DOMs” to “remove”, “constructed stylesheets” to “remove”,“remove hidden elements” to “disable”, and “rewrite styles” to non-“advanced tidy”, to reduce the chance of a conflict with the script.\n• Link: Link the script to its source URL. Note that a network flow will be triggered when browsing the captured document in the future.\n• Blank: Disable the script.\n• Remove: Remove the script element."
   },
   "OptionCaptureShadowDomLabel": {
     "message": "Shadow DOMs:"
