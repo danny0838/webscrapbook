@@ -12,7 +12,7 @@ blockquote::after { content: "#" attr(id); }
 <blockquote id="adopted2"></blockquote>
 <blockquote id="adopted3"></blockquote>
 <div id="shadow1">
-<template>
+<template shadowrootmode="open">
   <style>blockquote::after { content: "#" attr(id); }</style>
   <blockquote id="adopted"></blockquote>
   <blockquote id="adopted2"></blockquote>
@@ -22,6 +22,8 @@ blockquote::after { content: "#" attr(id); }
 </body>
 <script src="../../common.js"></script>
 <script>
+utils.loadShadowDoms();
+
 var css = new CSSStyleSheet();
 css.insertRule('#adopted { background-image: url(./green.bmp); }', css.cssRules.length);
 css.insertRule('#adopted3 { background-color: #0F0; }', css.cssRules.length);
@@ -32,7 +34,6 @@ css2.insertRule('#adopted2 { background-color: #0F0; }', css2.cssRules.length);
 css2.insertRule('#nonexist { background-image: url(./nonexist.bmp); }', css2.cssRules.length);
 document.adoptedStyleSheets = [...document.adoptedStyleSheets, css, css2];
 
-utils.loadShadowDoms();
 var css3 = new CSSStyleSheet();
 css3.insertRule('#adopted2 { background-color: #0F0; }', css3.cssRules.length);
 css3.insertRule('#nonexist { background-image: url(./nonexist.bmp); }', css3.cssRules.length);

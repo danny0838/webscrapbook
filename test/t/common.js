@@ -156,18 +156,29 @@ async function xhr(params = {}) {
 
 /**
  * Load template content as the parent node's shadowRoot.
+ *
+ * Mostly a polyfill for compatibility with older browsers.
  */
-function loadShadowDoms(root = document, {
-  recursive = true, clear = true,
-  mode = 'open', clonable, delegatesFocus, serializable, slotAssignment, 
-} = {}) {
-  for (const t of root.querySelectorAll('template')) {
+function loadShadowDoms(root = document, {recursive = true, clear = true} = {}) {
+  for (const t of root.querySelectorAll('template[shadowrootmode]')) {
     const elem = t.parentNode;
     if (!elem.shadowRoot) {
+      // Allow using e.g. shadowrootmode="*open" for downward compatibility,
+      // e.g. to prevent an issue that ShadowRoot.delegatesFocus is supported
+      // while template[shadowrootdelegatesfocus] is not supported.
+      let mode = t.getAttribute('shadowrootmode');
+      if (!['open', 'closed'].includes(mode)) {
+        if (mode[0] === '*') { mode = mode.slice(1); }
+      }
+
+      const clonable = t.hasAttribute('shadowrootclonable');
+      const delegatesFocus = t.hasAttribute('shadowrootdelegatesfocus');
+      const serializable = t.hasAttribute('shadowrootserializable');
+      const slotAssignment = t.getAttribute('shadowrootslotassignment') || undefined;
       const shadow = elem.attachShadow({mode, clonable, delegatesFocus, serializable, slotAssignment});
       shadow.innerHTML = t.innerHTML;
       if (recursive) {
-        loadShadowDoms(shadow, {recursive, clear, mode, clonable, delegatesFocus, serializable, slotAssignment});
+        loadShadowDoms(shadow, {recursive, clear});
       }
     }
     if (clear) {

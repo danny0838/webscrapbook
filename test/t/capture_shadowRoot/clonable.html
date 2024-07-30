@@ -6,7 +6,7 @@
 </head>
 <body>
 <div>
-<template>
+<template shadowrootmode="*open" shadowrootclonable>
   <style>
   :host { background-color: yellow; }
   div { background-color: red; }
@@ -15,7 +15,7 @@
   <div>This is sub-content.</div>
   <img src="resources/green.bmp">
   <p>
-  <template>
+  <template shadowrootmode="*open" shadowrootclonable>
     <style>
     :host { background-color: gray; }
     img { width: 60px; height: 60px; }
@@ -30,5 +30,5 @@
 </div>
 </body>
 <script src="../../common.js"></script>
-<script>utils.loadShadowDoms(document, {clonable: true});</script>
+<script>utils.loadShadowDoms(document);</script>
 </html>

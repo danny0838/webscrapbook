@@ -6,7 +6,7 @@
 </head>
 <body>
 <div id="host1">
-<template>
+<template shadowrootmode="open">
   <style>blockquote::after { content: attr(id); }</style>
   <style>
 :host-context(body) { background-color: lime; }
@@ -22,7 +22,7 @@
 </template>
 </div>
 <div id="host2">
-<template>
+<template shadowrootmode="open">
   <style>blockquote::after { content: attr(id); }</style>
   <style>
 :host-context(#nonexist) { background-color: lime; }
