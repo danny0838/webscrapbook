@@ -12,20 +12,14 @@
 <a href="javascript:console.log('a');">javascript</a>
 
 <form>
-<input type="checkbox" value="A">AAA
-<input type="text">
-<textarea></textarea>
+<input type="checkbox" value="A" data-checked='true'>AAA
+<input type="text" data-value='"text"'>
+<textarea data-value='"textarea input"'></textarea>
 <select>
-<option value="1">value: 1</option>
+<option value="1" data-selected='true'>value: 1</option>
 </select>
 </form>
-
-<!-- form init -->
-<script>
-document.querySelector('input[type="checkbox"]').checked = true;
-document.querySelector('input[type="text"]').value = 'text';
-document.querySelector('textarea').value = 'textarea input';
-document.querySelector('select').selectedIndex = 0;
-</script>
 </body>
+<script src="../../common.js"></script>
+<script>utils.loadIdlProperties();</script>
 </html>

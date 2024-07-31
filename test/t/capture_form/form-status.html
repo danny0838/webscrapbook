@@ -6,21 +6,21 @@
 <body>
 <form>
 <div>
-<input type="radio" value="a">aaa
+<input type="radio" value="a" data-checked='true'>aaa
 <input type="radio" value="b">bbb
 <input type="radio" value="c" checked>ccc
-<input type="radio" value="d" checked>ddd
+<input type="radio" value="d" checked data-checked='false'>ddd
 </div>
 <div>
-<input type="checkbox" value="A">AAA
+<input type="checkbox" value="A" data-checked='true'>AAA
 <input type="checkbox" value="B">BBB
 <input type="checkbox" value="C" checked>CCC
-<input type="checkbox" value="D" checked>DDD
-<input type="checkbox" value="E" checked>EEE
+<input type="checkbox" value="D" checked data-checked='false'>DDD
+<input type="checkbox" value="E" checked data-indeterminate='true'>EEE
 </div>
 <div>
-<input type="text" placeholder="input name...">
-<input type="password" placeholder="input password...">
+<input type="text" placeholder="input name..." data-value='"myname"'>
+<input type="password" placeholder="input password..." data-value='"mypassword"'>
 <input type="file">
 </div>
 <div>
@@ -31,50 +31,38 @@
 <input type="time">
 </div>
 <div>
-<input type="number">
+<input type="number" data-value='3'>
 <input type="tel">
 <input type="url">
 <input type="email">
-<input type="search">
+<input type="search" data-value='"search input"'>
 </div>
 <div>
-<input type="color">
-<input type="range">
+<input type="color" data-value='"#FF0000"'>
+<input type="range" data-value='75'>
 </div>
 <div>
-<textarea></textarea>
+<textarea data-value='"textarea input"'></textarea>
 </div>
 <div>
 <select>
-<option value="1">value: 1</option>
+<option value="1" data-selected='true'>value: 1</option>
 <option value="2" selected>value: 2</option>
 </select>
 </div>
 <div>
-<input type="hidden">
+<input type="hidden" data-value='"hidden"'>
 <input type="button" value="button">
-<input type="reset">
-<input type="submit">
+<input type="reset" data-value='"reset"'>
+<input type="submit" data-value='"submit"'>
 </div>
 </form>
-
-<script>
-document.querySelectorAll('input[type="radio"]')[0].checked = true;
-document.querySelectorAll('input[type="radio"]')[3].checked = false;
-document.querySelectorAll('input[type="checkbox"]')[0].checked = true;
-document.querySelectorAll('input[type="checkbox"]')[3].checked = false;
-document.querySelectorAll('input[type="checkbox"]')[4].indeterminate = true;
-document.querySelector('input[type="text"]').value = 'myname';
-document.querySelector('input[type="password"]').value = 'mypassword';
-document.querySelector('input[type="number"]').value = 3;
-document.querySelector('input[type="search"]').value = 'search input';
-document.querySelector('input[type="color"]').value = '#FF0000';
-document.querySelector('input[type="range"]').value = 75;
-document.querySelector('textarea').value = 'textarea input';
-document.querySelector('select').selectedIndex = 0;
-document.querySelector('input[type="hidden"]').value = "hidden";
-document.querySelector('input[type="reset"]').value = "reset";
-document.querySelector('input[type="submit"]').value = "submit";
-</script>
 </body>
+<script src="../../common.js"></script>
+<script>
+for (const elem of document.querySelectorAll('script')) {
+  elem.remove();
+}
+utils.loadIdlProperties();
+</script>
 </html>

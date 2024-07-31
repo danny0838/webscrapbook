@@ -6,11 +6,9 @@
 <style>img { width: 60px; }</style>
 </head>
 <body>
-<p>frame2 content</p>
+<p data-text-content='"frame2 content modified"'>frame2 content</p>
 <img src="red.bmp" />
-
-<script>
-document.querySelector('p').textContent = 'frame2 content modified';
-</script>
 </body>
+<script src="../../common.js"></script>
+<script>utils.loadIdlProperties();</script>
 </html>

@@ -155,6 +155,21 @@ async function xhr(params = {}) {
 }
 
 /**
+ * Load data-<attr>='<value>' as IDL property.
+ */
+function loadIdlProperties(root = document, {clear = true} = {}) {
+  for (const elem of root.querySelectorAll('*')) {
+    for (const key in elem.dataset) {
+      const value = JSON.parse(elem.dataset[key]);
+      elem[key] = value;
+      if (clear) {
+        delete elem.dataset[key];
+      }
+    }
+  }
+}
+
+/**
  * Load template content as the parent node's shadowRoot.
  *
  * Mostly a polyfill for compatibility with older browsers.
@@ -195,6 +210,7 @@ return {
   readFileAsDataURL,
   readFileAsDocument,
   xhr,
+  loadIdlProperties,
   loadShadowDoms,
 };
 
