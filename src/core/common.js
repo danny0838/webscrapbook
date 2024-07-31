@@ -2129,17 +2129,9 @@
   /**
    * Convert dynamic information into representable HTML attributes for an
    * element.
-   *
-   * @param {Object} [options]
-   * @param {Map|WeakMap} [options.mapShadowRoot] - mapping from an Element to
-   *     its (possibly closed) shadow root.
    */
   scrapbook.htmlifyElem = function (elem, options = {}) {
     if (elem.nodeType !== 1) { return; }
-
-    const {
-      mapShadowRoot,
-    } = options;
 
     switch (elem.nodeName.toLowerCase()) {
       case "canvas": {
@@ -2158,21 +2150,21 @@
         if (typeof type === 'undefined') { break; }
         switch (type.toLowerCase()) {
           case "image":
+          case "password":
           case "file": {
             break;
           }
-          case "radio":
           case "checkbox": {
-            const checked = elem.checked;
-            if (checked !== elem.hasAttribute('checked')) {
-              elem.setAttribute('data-scrapbook-input-checked', checked);
-            }
-
             const indeterminate = elem.indeterminate;
             if (indeterminate) {
               elem.setAttribute('data-scrapbook-input-indeterminate', '');
             }
-
+          }
+          case "radio": {
+            const checked = elem.checked;
+            if (checked !== elem.hasAttribute('checked')) {
+              elem.setAttribute('data-scrapbook-input-checked', checked);
+            }
             break;
           }
           default: {
@@ -2203,13 +2195,25 @@
       }
     }
 
-    const shadowRoot = mapShadowRoot && mapShadowRoot.get(elem) || elem.shadowRoot;
+    const shadowRoot = scrapbook.getShadowRoot(elem);
     if (shadowRoot) {
       scrapbook.htmlify(shadowRoot, options);
-      elem.setAttribute('data-scrapbook-shadowroot', JSON.stringify({
-        data: shadowRoot.innerHTML,
-        mode: shadowRoot.mode,
-      }));
+      elem.setAttribute("data-scrapbook-shadowdom", shadowRoot.innerHTML);
+      if (shadowRoot.mode !== 'open') {
+        elem.setAttribute("data-scrapbook-shadowdom-mode", shadowRoot.mode);
+      }
+      if (shadowRoot.clonable) {
+        elem.setAttribute("data-scrapbook-shadowdom-clonable", "");
+      }
+      if (shadowRoot.delegatesFocus) {
+        elem.setAttribute("data-scrapbook-shadowdom-delegates-focus", "");
+      }
+      if (shadowRoot.serializable) {
+        elem.setAttribute("data-scrapbook-shadowdom-serializable", "");
+      }
+      if (shadowRoot.slotAssignment && shadowRoot.slotAssignment !== 'named') {
+        elem.setAttribute("data-scrapbook-shadowdom-slot-assignment", shadowRoot.slotAssignment);
+      }
     }
   };
 
@@ -2304,23 +2308,31 @@
       }
     }
 
+    let shadowRoot = scrapbook.getShadowRoot(elem);
     if (shadowDom) {
-      const shadowRootJson = elem.getAttribute('data-scrapbook-shadowroot');
-      if (shadowRootJson !== null) {
-        if (apply && !elem.shadowRoot) {
-          try {
-            const {data, mode} = JSON.parse(shadowRootJson);
-            const shadowRoot = elem.attachShadow({mode});
-            shadowRoot.innerHTML = data;
-          } catch (ex) {
-            console.error(ex);
-          }
+      const html = elem.getAttribute('data-scrapbook-shadowdom');
+      if (html !== null && apply && !shadowRoot) {
+        try {
+          let m;
+          shadowRoot = elem.attachShadow({
+            mode: (m = elem.getAttribute('data-scrapbook-shadowdom-mode')) !== null ? m : 'open',
+            clonable: elem.hasAttribute('data-scrapbook-shadowdom-clonable'),
+            delegatesFocus: elem.hasAttribute('data-scrapbook-shadowdom-delegates-focus'),
+            serializable: elem.hasAttribute('data-scrapbook-shadowdom-serializable'),
+            slotAssignment: (m = elem.getAttribute('data-scrapbook-shadowdom-slot-assignment')) !== null ? m : void(0),
+          });
+          shadowRoot.innerHTML = html;
+        } catch (ex) {
+          console.error(ex);
         }
-        elem.removeAttribute('data-scrapbook-shadowroot');
       }
+      elem.removeAttribute('data-scrapbook-shadowdom');
+      elem.removeAttribute('data-scrapbook-shadowdom-mode');
+      elem.removeAttribute('data-scrapbook-shadowdom-clonable');
+      elem.removeAttribute('data-scrapbook-shadowdom-delegates-focus');
+      elem.removeAttribute('data-scrapbook-shadowdom-serializable');
+      elem.removeAttribute('data-scrapbook-shadowdom-slot-assignment');
     }
-
-    const shadowRoot = elem.shadowRoot;
     if (shadowRoot) {
       scrapbook.unhtmlify(shadowRoot, options);
     }
