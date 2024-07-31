@@ -2884,9 +2884,9 @@
     const newDoc = scrapbook.cloneDocument(doc, {origNodeMap, clonedNodeMap});
 
     let rootNode, headNode;
-    let selection = settings.fullPage ? null : doc.getSelection();
+    let selection = settings.fullPage ? null : scrapbook.getSelection(doc);
     {
-      if (selection && selection.isCollapsed) {
+      if (selection && selection.type !== 'Range') {
         selection = null;
       }
 
@@ -4080,7 +4080,7 @@
       case 'all':
         break;
       default:
-        select = document.getSelection().isCollapsed ? 'all' : 'selected';
+        select = scrapbook.getSelection().type !== 'Range' ? 'all' : 'selected';
         break;
     }
 

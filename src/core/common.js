@@ -3963,6 +3963,56 @@
   };
 
   /**
+   * Cross-platform way to get an appropriate selection.
+   *
+   * - Chromium:
+   *   - shadowRoot.getSelection is supported and gets the selection in the
+   *     shadowRoot.
+   *   - If a selection is made inside a shadowRoot, each selection in its
+   *     ancestor document/shadowRoot is collapsed before the shadow host.
+   *   - If a selection is made across a shadowRoot, only the selection of the
+   *     outermost root node is ranged, and selections of descendant
+   *     shadowRoots are of "None" type.
+   *   - A shadow root related selection inaccurately has .isCollapsed = true,
+   *     check with .type !== 'Range' instead.
+   * - Firefox:
+   *   - document.getSelection gets a selection with ranges, each of which is
+   *     either in the owner document or its descendant shadowRoot.
+   *   - shadowRoot.getSelection is undefined.
+   *   - A selection across a shadowRoot is not allowed and will at last be
+   *     reduced to reside only in a root node.
+   */
+  scrapbook.getSelection = function (rootNode = document) {
+    let sel = rootNode.getSelection();
+
+    getDeepSelection: {
+      if (!sel) {
+        break getDeepSelection;
+      }
+      if (!scrapbook.userAgent.is('chromium')) {
+        break getDeepSelection;
+      }
+      if (!sel.isCollapsed || sel.type === 'None') {
+        break getDeepSelection;
+      }
+      const host = sel.focusNode.childNodes[sel.focusOffset];
+      if (!host) {
+        break getDeepSelection;
+      }
+      const shadowRoot = scrapbook.getShadowRoot(host);
+      if (!shadowRoot) {
+        break getDeepSelection;
+      }
+      const selDeep = scrapbook.getSelection(shadowRoot);
+      if (selDeep && selDeep.type !== 'None') {
+        sel = selDeep;
+      }
+    }
+
+    return sel;
+  };
+
+  /**
    * Get nodes in the selected range(s).
    *
    * @param {Object} params
@@ -4027,7 +4077,7 @@
    * @return {Range[]} The selected ranges.
    */
   scrapbook.getSelectionRanges = function (query = document) {
-    const sel = query.nodeType ? query.getSelection() : query;
+    const sel = query.nodeType ? scrapbook.getSelection(query) : query;
     const result = [];
     if (sel) {
       for (let i = 0; i < sel.rangeCount; i++) {

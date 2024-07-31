@@ -1113,7 +1113,7 @@ height: 100vh;`;
       }
 
       // find current annotation index
-      const sel = document.getSelection();
+      const sel = scrapbook.getSelection();
       let index = getCurrentAnnotationIndex(annotationElems, sel);
       index = offset > 0 ? Math.floor(index) : Math.ceil(index);
 
@@ -1912,9 +1912,9 @@ height: 100vh;`;
 
     // Focus on the context menu element for focusout event to work when the user
     // clicks outside.
-    const sel = window.getSelection();
+    const sel = scrapbook.getSelection();
+    const ranges = scrapbook.getSelectionRanges(sel);
     const wasCollapsed = sel.isCollapsed;
-    const ranges = scrapbook.getSelectionRanges();
 
     if (!elem.hasAttribute('tabindex')) {
       elem.setAttribute('tabindex', -1);
@@ -2153,7 +2153,7 @@ height: 100vh;`;
           // A click event fires when mouse down and up in the same element,
           // including a selection. Exclude selection as the user probably
           // doesn't want a popup when he makes a selection.
-          if (!window.getSelection().isCollapsed) { break; }
+          if (scrapbook.getSelection().type === 'Range') { break; }
 
           event.preventDefault();
 
@@ -2169,7 +2169,7 @@ height: 100vh;`;
         case 'sticky-delete':
         case 'freenote':
         case 'block-comment': {
-          if (!window.getSelection().isCollapsed) { break; }
+          if (scrapbook.getSelection().type === 'Range') { break; }
           if (target.shadowRoot) { break; }
 
           event.preventDefault();
@@ -2476,8 +2476,8 @@ height: 100vh;`;
         }
 
         if (!refNode && refNode !== false) {
-          const sel = window.getSelection();
-          if (sel && !sel.isCollapsed) {
+          const sel = scrapbook.getSelection();
+          if (sel.type === 'Range') {
             refNode = sel.anchorNode;
           }
         }
