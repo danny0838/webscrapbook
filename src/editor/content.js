@@ -972,7 +972,7 @@ height: 100vh;`;
       }
 
       const selectedNodes = scrapbook.getSelectedNodes({
-        range,
+        query: [range],
         whatToShow: NodeFilter.SHOW_ELEMENT + NodeFilter.SHOW_TEXT,
         nodeFilter: node => node.nodeType === 3 || node.matches(LINEMARKABLE_ELEMENTS),
       });

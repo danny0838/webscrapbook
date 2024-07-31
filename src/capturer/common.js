@@ -2914,11 +2914,8 @@
         };
 
         // @FIXME: handle sparsely selected table cells
-        let iRange = 0, iRangeMax = selection.rangeCount, curRange;
-        let caNode, scNode, ecNode, lastTextNode;
-        for (; iRange < iRangeMax; ++iRange) {
-          curRange = selection.getRangeAt(iRange);
-
+        let curRange, caNode, scNode, ecNode, lastTextNode;
+        for (curRange of scrapbook.getSelectionRanges(selection)) {
           // skip a collapsed range
           if (curRange.collapsed) {
             continue;

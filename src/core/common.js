@@ -3966,21 +3966,22 @@
    * Get nodes in the selected range(s).
    *
    * @param {Object} params
-   * @param {Window} params.win - The Window to operate on.
-   * @param {Range} [params.range] - The Range object to get selected nodes within.
+   * @param {Document|ShadowRoot|Range|Range[]} [params.query] - The query to find nodes.
    * @param {integer} [params.whatToShow] - Filter for allowed node types.
    * @param {Function} [params.nodeFilter] - A function to filter allowed nodes.
    * @param {boolean} [params.fuzzy] - Include partially selected nodes.
    * @return {Node[]} Nodes in the selected range(s).
    */
-  scrapbook.getSelectedNodes = function ({win = window, range, whatToShow = -1, nodeFilter, fuzzy = false}) {
-    const doc = win.document;
+  scrapbook.getSelectedNodes = function ({query = document, whatToShow = -1, nodeFilter, fuzzy = false}) {
+    const ranges = query.nodeType ? scrapbook.getSelectionRanges(query) :
+        Array.isArray(query) ? query : [query];
     const result = new Set();
-    const ranges = range ? [range] : scrapbook.getSelectionRanges(win);
     for (let range of ranges) {
       if (range.collapsed) {
         continue;
       }
+
+      const doc = range.commonAncestorContainer.ownerDocument;
 
       // A fuzzy match can include an ancestor of the selected nodes,
       // and thus we must traverse all nodes in the document.
@@ -4021,9 +4022,13 @@
     return Array.from(result);
   };
 
-  scrapbook.getSelectionRanges = function (win = window) {
-    let result = [];
-    const sel = win.getSelection();
+  /**
+   * @param {Document|ShadowRoot|Selection} [query]
+   * @return {Range[]} The selected ranges.
+   */
+  scrapbook.getSelectionRanges = function (query = document) {
+    const sel = query.nodeType ? query.getSelection() : query;
+    const result = [];
     if (sel) {
       for (let i = 0; i < sel.rangeCount; i++) {
         result.push(sel.getRangeAt(i));
@@ -4035,16 +4040,15 @@
   /**
    * See scrapbook.getSafeRanges() for details.
    */
-  scrapbook.getSafeSelectionRanges = function (win = window) {
-    let result = [];
-    const sel = win.getSelection();
-    if (sel) {
-      for (let i = 0; i < sel.rangeCount; i++) {
-        const range = sel.getRangeAt(i);
-        result = result.concat(scrapbook.getSafeRanges(range, win.document));
+  scrapbook.getSafeSelectionRanges = function (query) {
+    const CHUNK_SIZE = 32767;
+    return scrapbook.getSelectionRanges(query).reduce((result, range) => {
+      const ranges = scrapbook.getSafeRanges(range);
+      for (let i = 0, I = ranges.length; i < I; i += CHUNK_SIZE) {
+        result.push.apply(result, ranges.slice(i, i + CHUNK_SIZE));
       }
-    }
-    return result;
+      return result;
+    }, []);
   };
 
   /**
