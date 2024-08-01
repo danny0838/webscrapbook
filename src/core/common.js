@@ -2131,6 +2131,44 @@
    * element.
    */
   scrapbook.htmlifyElem = function (elem, options = {}) {
+    // handle adoptedStyleSheet if supported by the browser
+    // @TODO: merge shared constructed stylesheets among shadow roots
+    if ('adoptedStyleSheets' in document && elem instanceof ShadowRoot) {
+      const adoptedStyleSheetMap = new Map();
+
+      const host = elem.host;
+      host.removeAttribute("data-scrapbook-adoptedstylesheets");
+
+      const ids = [];
+      for (const css of scrapbook.getAdoptedStyleSheets(elem)) {
+        let id = adoptedStyleSheetMap.get(css);
+        if (typeof id === 'undefined') {
+          id = adoptedStyleSheetMap.size;
+          adoptedStyleSheetMap.set(css, id);
+        }
+        ids.push(id);
+      }
+      if (ids.length) {
+        host.setAttribute("data-scrapbook-adoptedstylesheets", ids.join(','));
+      }
+
+      const regex = /^data-scrapbook-adoptedstylesheet-(\d+)$/;
+      for (const {nodeName: attr} of host.attributes) {
+        if (regex.test(attr)) {
+          host.removeAttribute(attr);
+        }
+      }
+      if (adoptedStyleSheetMap.size) {
+        for (const [css, id] of adoptedStyleSheetMap) {
+          const cssTexts = Array.prototype.map.call(
+            css.cssRules,
+            cssRule => cssRule.cssText,
+          );
+          host.setAttribute(`data-scrapbook-adoptedstylesheet-${id}`, cssTexts.join('\n\n'));
+        }
+      }
+    }
+
     if (elem.nodeType !== 1) { return; }
 
     switch (elem.nodeName.toLowerCase()) {
@@ -2238,14 +2276,48 @@
    * @param {boolean} [options.shadowDom] - true to handle shadowDom.
    */
   scrapbook.unhtmlifyElem = function (elem, options = {}) {
-    if (elem.nodeType !== 1) { return; }
-
     const {
       apply = true,
       canvas = true,
       form = true,
       shadowDom = true,
     } = options;
+
+    // handle adoptedStyleSheet
+    if (shadowDom && elem instanceof ShadowRoot) {
+      const regex = /^data-scrapbook-adoptedstylesheet-(\d+)$/;
+      const host = elem.host;
+
+      const cssIndexes = host.getAttribute('data-scrapbook-adoptedstylesheets');
+      if (cssIndexes !== null && apply && 'adoptedStyleSheets' in document) {
+        for (const idx of cssIndexes.split(',')) {
+          const attr = `data-scrapbook-adoptedstylesheet-${parseInt(idx, 10)}`;
+          const sel = `[${attr}]`;
+          const refElem = host.getRootNode().querySelector(sel);
+          if (!refElem) { continue; }
+          const cssText = refElem.getAttribute(attr);
+          if (cssText === null) { continue; }
+          const css = new CSSStyleSheet();
+          const cssTexts = cssText.split('\n\n');
+          for (let i = cssTexts.length - 1; i >= 0; i--) {
+            try {
+              cssTexts[i] && css.insertRule(cssTexts[i]);
+            } catch (ex) {
+              console.error(ex);
+            }
+          }
+          elem.adoptedStyleSheets.push(css);
+        }
+      }
+      host.removeAttribute('data-scrapbook-adoptedstylesheets');
+      for (const attr of Array.prototype.map.call(host.attributes, n => n.nodeName)) {
+        if (regex.test(attr)) {
+          host.removeAttribute(attr);
+        }
+      }
+    }
+
+    if (elem.nodeType !== 1) { return; }
 
     if (canvas) {
       const canvasData = elem.getAttribute('data-scrapbook-canvas');
