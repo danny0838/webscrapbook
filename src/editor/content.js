@@ -974,14 +974,17 @@ height: 100vh;`;
       const selectedNodes = scrapbook.getSelectedNodes({
         query: [range],
         whatToShow: NodeFilter.SHOW_ELEMENT + NodeFilter.SHOW_TEXT,
-        nodeFilter: node => node.nodeType === 3 || node.matches(LINEMARKABLE_ELEMENTS),
+
+        // Allow text nodes and LINEMARKABLE_ELEMENTS.
+        // Skip elements in a shadow root.
+        nodeFilter: node => (node.nodeType === 3 || node.matches(LINEMARKABLE_ELEMENTS)) && !(node.getRootNode() instanceof ShadowRoot),
       });
 
       // reverse the order as a range may be altered when changing a node before it
       let firstWrapper = null;
       let lastWrapper = null;
       for (const node of selectedNodes.reverse()) {
-        if (node.nodeType === 3 && /^[\t\n\f\r ]*$/.test(node.nodeValue)) {
+        if (node.nodeType === 3 && !scrapbook.trim(node.nodeValue)) {
           continue;
         }
 
@@ -1094,12 +1097,25 @@ height: 100vh;`;
 
     const getValidRange = (sel) => {
       for (let i = 0, I = sel.rangeCount; i < I; i++) {
-        const range = sel.getRangeAt(i);
+        let range = sel.getRangeAt(i);
+        let ca = range.commonAncestorContainer;
+
         // Firefox may include selection ranges for elements inside the toolbar.
         // Exclude them to prevent an error.
-        if (editor.internalElement && editor.internalElement.contains(range.commonAncestorContainer)) {
+        if (editor.internalElement && editor.internalElement.contains(ca)) {
           continue;
         }
+
+        // if range is inside a shadow root, treat as selecting the topmost shadow host.
+        let node = ca, host;
+        while (host = node.getRootNode().host) {
+          node = host;
+        }
+        if (node !== ca) {
+          range = new Range();
+          range.selectNode(node);
+        }
+
         return range;
       }
       return null;
@@ -1141,7 +1157,7 @@ height: 100vh;`;
     // reverse the order as a range may be altered when changing a node before it
     const timeId = scrapbook.dateToId();
     for (const range of scrapbook.getSafeSelectionRanges().reverse()) {
-      if (!range.collapsed) {
+      if (!range.collapsed && !(range.commonAncestorContainer.getRootNode() instanceof ShadowRoot)) {
         editor.eraseRange(range, timeId);
       }
     }
@@ -2479,6 +2495,12 @@ height: 100vh;`;
           const sel = scrapbook.getSelection();
           if (sel.type === 'Range') {
             refNode = sel.anchorNode;
+          }
+
+          // Don't allow a relative sticky note in a shadow root, which makes
+          // the annotation CSS not apply on it.
+          if (refNode && refNode.getRootNode() instanceof ShadowRoot) {
+            refNode = false;
           }
         }
 
