@@ -2927,16 +2927,18 @@
           // A selection in a shadow root requires special care.
           // Currently treat as selecting the topmost host for simplicity and
           // prevent an issue if capturing shadow DOM is disabled.
-          if (caNode.getRootNode().nodeType === 11) {
+          handleShadowRoot: {
             let selNode = caNode;
             let selNodeRoot = selNode.getRootNode();
-            while (selNodeRoot.nodeType === 11) {
+            while (selNodeRoot instanceof ShadowRoot) {
               selNode = selNodeRoot.host;
               selNodeRoot = selNode.getRootNode();
             }
-            curRange = new Range();
-            curRange.selectNode(selNode);
-            caNode = curRange.commonAncestorContainer;
+            if (selNode !== caNode) {
+              curRange = new Range();
+              curRange.selectNode(selNode);
+              caNode = curRange.commonAncestorContainer;
+            }
           }
 
           scNode = curRange.startContainer;
