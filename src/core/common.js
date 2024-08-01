@@ -2319,7 +2319,7 @@
 
     if (elem.nodeType !== 1) { return; }
 
-    if (canvas) {
+    if (canvas && elem.matches('canvas')) {
       const canvasData = elem.getAttribute('data-scrapbook-canvas');
       if (canvasData) {
         if (apply) {
@@ -2331,7 +2331,7 @@
       }
     }
 
-    if (form) {
+    if (form && elem.matches('input[type="radio"], input[type="checkbox"]')) {
       const checked = elem.getAttribute('data-scrapbook-input-checked');
       if (checked !== null) {
         if (apply) {
@@ -2341,7 +2341,7 @@
       }
     }
 
-    if (form) {
+    if (form && elem.matches('input[type="checkbox"]')) {
       const indeterminate = elem.getAttribute('data-scrapbook-input-indeterminate');
       if (indeterminate !== null) {
         if (apply) {
@@ -2351,7 +2351,7 @@
       }
     }
 
-    if (form) {
+    if (form && elem.matches('input')) {
       const value = elem.getAttribute('data-scrapbook-input-value');
       if (value !== null) {
         if (apply) {
@@ -2361,7 +2361,7 @@
       }
     }
 
-    if (form) {
+    if (form && elem.matches('textarea')) {
       const value = elem.getAttribute('data-scrapbook-textarea-value');
       if (value !== null) {
         if (apply) {
@@ -2371,7 +2371,7 @@
       }
     }
 
-    if (form) {
+    if (form && elem.matches('option')) {
       const selected = elem.getAttribute('data-scrapbook-option-selected');
       if (selected !== null) {
         if (apply) {
