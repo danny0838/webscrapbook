@@ -1239,7 +1239,7 @@ height: 100vh;`;
 
       // handle descendant node first as it may be altered when handling ancestor
       for (const elem of selectedNodes.reverse()) {
-        if (editor.removeScrapBookObject(elem) !== -1) {
+        if (editor.removeScrapBookObject(elem) === 3) {
           unerased = true;
         }
       }
