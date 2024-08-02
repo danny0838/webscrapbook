@@ -577,6 +577,13 @@
 
   const ASCII_WHITESPACE = String.raw`\t\n\f\r `;
 
+  // https://dom.spec.whatwg.org/#valid-shadow-host-name
+  const VALID_SHADOW_HOST_NAMES = new Set([
+    "article", "aside", "blockquote", "body", "div", "footer",
+    "h1", "h2", "h3", "h4", "h5", "h6",
+    "header", "main", "nav", "p", "section", "span",
+  ]);
+
   /**
    * @global
    * @namespace
@@ -1974,12 +1981,18 @@
   scrapbook.getShadowRoot = function (elem) {
     if (elem.openOrClosedShadowRoot) {
       // Firefox >= 63
-      return elem.openOrClosedShadowRoot;
+      // This API can return the native closed shadowRoot of an element like
+      // audio or video. Add a check to exclude such cases.
+      const nodeName = elem.nodeName.toLowerCase();
+      if (VALID_SHADOW_HOST_NAMES.has(nodeName) || nodeName.includes('-')) {
+        return elem.openOrClosedShadowRoot;
+      }
+    } else {
+      try {
+        // Chromium >= 88
+        return browser.dom.openOrClosedShadowRoot(elem);
+      } catch (ex) {}
     }
-    try {
-      // Chromium >= 88
-      return browser.dom.openOrClosedShadowRoot(elem);
-    } catch (ex) {}
     return elem.shadowRoot;
   };
 
@@ -2069,20 +2082,13 @@
           node2 = walker2.nextNode();
         }
       } else {
-        try {
-          newShadowRoot = newNode.attachShadow({
-            mode: shadowRoot.mode,
-            clonable: shadowRoot.clonable,
-            delegatesFocus: shadowRoot.delegatesFocus,
-            serializable: shadowRoot.serializable,
-            slotAssignment: shadowRoot.slotAssignment,
-          });
-        } catch (ex) {
-          // Firefox can get the native shadowRoot of an element, but the
-          // cloned one doesn't have the native shadowRoot since it's not yet
-          // attached to a document. Skip mapping for such case.
-          return;
-        }
+        newShadowRoot = newNode.attachShadow({
+          mode: shadowRoot.mode,
+          clonable: shadowRoot.clonable,
+          delegatesFocus: shadowRoot.delegatesFocus,
+          serializable: shadowRoot.serializable,
+          slotAssignment: shadowRoot.slotAssignment,
+        });
         origNodeMap && origNodeMap.set(newShadowRoot, shadowRoot);
         clonedNodeMap && clonedNodeMap.set(shadowRoot, newShadowRoot);
         for (const node of shadowRoot.childNodes) {

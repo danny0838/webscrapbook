@@ -2623,17 +2623,12 @@
           const shadowRoot = scrapbook.getShadowRoot(elem);
           if (shadowRoot) {
             const shadowRootOrig = origNodeMap.get(shadowRoot);
-
-            // if elem has a native shadowRoot, it will not be mapped, causing
-            // shadowRootOrig be undefined
-            if (shadowRootOrig) {
-              cssTasks.push(() => { cssResourcesHandler.scopePush(shadowRootOrig); });
-              addAdoptedStyleSheets(shadowRootOrig, shadowRoot);
-              rewriteRecursively(shadowRoot, rootName, rewriteNode);
-              cssTasks.push(() => { cssResourcesHandler.scopePop(); });
-              shadowRootList.push(shadowRoot);
-              requireBasicLoader = true;
-            }
+            cssTasks.push(() => { cssResourcesHandler.scopePush(shadowRootOrig); });
+            addAdoptedStyleSheets(shadowRootOrig, shadowRoot);
+            rewriteRecursively(shadowRoot, rootName, rewriteNode);
+            cssTasks.push(() => { cssResourcesHandler.scopePop(); });
+            shadowRootList.push(shadowRoot);
+            requireBasicLoader = true;
           }
         }
 
