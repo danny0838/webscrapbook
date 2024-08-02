@@ -182,9 +182,7 @@ function loadShadowDoms(root = document, {recursive = true, clear = true} = {}) 
       // e.g. to prevent an issue that ShadowRoot.delegatesFocus is supported
       // while template[shadowrootdelegatesfocus] is not supported.
       let mode = t.getAttribute('shadowrootmode');
-      if (!['open', 'closed'].includes(mode)) {
-        if (mode[0] === '*') { mode = mode.slice(1); }
-      }
+      if (mode[0] === '*') { mode = mode.slice(1); }
 
       const clonable = t.hasAttribute('shadowrootclonable');
       const delegatesFocus = t.hasAttribute('shadowrootdelegatesfocus');
