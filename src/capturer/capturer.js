@@ -1845,15 +1845,15 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
       let blob = new Blob([content], {type: "text/html;charset=UTF-8"});
       blob = await capturer.saveBlobCache(blob);
 
-      const documentFileName = documentName + ".html";
-
       const registry = await capturer.invoke("registerDocument", {
-        docUrl: 'about:blank',
+        docUrl: sourceUrl,
         mime: "text/html",
         role: `document-${scrapbook.getUuid()}`,
         settings,
         options,
       });
+
+			const documentFileName = registry.filename;
 
       {
         const response = await capturer.saveDocument({
