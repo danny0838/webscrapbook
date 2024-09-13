@@ -204,6 +204,30 @@
     }
   }
 
+  function getDetailStatusKey() {
+      return {table: "captureDetailStatus"};
+  }
+
+  async function loadDetailStatus() {
+    const status = await scrapbook.cache.get(getDetailStatusKey(), 'storage');
+    if (!status) { return; }
+
+    for (const id in status) {
+      const elem = document.getElementById(id);
+      if (elem) {
+        elem.open = status[id];
+      }
+    }
+  }
+
+  async function saveDetailStatus() {
+    const status = {};
+    for (const elem of document.querySelectorAll('details')) {
+      status[elem.id] = elem.open;
+    }
+    await scrapbook.cache.set(getDetailStatusKey(), status, 'storage');
+  }
+
   function updateUi() {
     if (gTaskInfo.tasks.length === 1) {
       const captureInfoType = document.getElementById('captureInfoType').value;
@@ -322,6 +346,10 @@
     const taskInfo = parseTasks();
     await capture({taskInfo, ignoreTitle: gIgnoreTitle, uniquify: gUniquify});
     await exit();
+  }
+
+  function onDetailsToggle(event) {
+    saveDetailStatus();
   }
 
   function onInvalid(event) {
@@ -570,6 +598,10 @@
       elem.addEventListener("change", onFormChange);
     }
 
+    for (const elem of document.querySelectorAll('#optionsWrapper details')) {
+      elem.addEventListener("toggle", onDetailsToggle);
+    }
+
     for (const elem of document.querySelectorAll('#wrapper :valid, #wrapper :invalid')) {
       elem.addEventListener("invalid", onInvalid);
     }
@@ -577,6 +609,9 @@
     for (const elem of document.querySelectorAll('a[data-tooltip]')) {
       elem.addEventListener("click", onTooltipClick);
     }
+
+    // load detail status
+    await loadDetailStatus();
 
     init();
   });
