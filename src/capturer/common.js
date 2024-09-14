@@ -58,6 +58,20 @@
     ['origin-when-crossorigin', 'origin-when-cross-origin'],
   ]);
 
+	const CUSTOM_ELEMENT_NAME_PATTERN = /^[a-z](.+)-(.+)$/;
+
+	// ref: https://html.spec.whatwg.org/multipage/custom-elements.html#valid-custom-element-name
+	const CUSTOM_ELEMENT_NAME_FORBIDDEN = new Set([
+		"annotation-xml",
+		"color-profile",
+		"font-face",
+		"font-face-src",
+		"font-face-uri",
+		"font-face-format",
+		"font-face-name",
+		"missing-glyph",
+	]);
+
   const REWRITABLE_SPECIAL_OBJECTS = new Set([false, 'adoptedStyleSheet']);
 
   const REMOVE_HIDDEN_EXCLUDE_HTML = new Set(["html", "head", "title", "meta", "link", "style", "script", "body", "noscript", "template", "source", "track"]);
@@ -2770,7 +2784,7 @@
       // record custom elements
       {
         const nodeName = elem.nodeName.toLowerCase();
-        if (nodeName.includes('-')) {
+        if (CUSTOM_ELEMENT_NAME_PATTERN.test(nodeName) && !CUSTOM_ELEMENT_NAME_FORBIDDEN.has(nodeName)) {
           customElementNames.add(nodeName);
         }
       }

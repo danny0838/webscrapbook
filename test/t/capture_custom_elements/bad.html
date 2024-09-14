@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Test bad custom elements</title>
+</head>
+<body>
+<blockquote></blockquote>
+<blockquote><annotation-xml>something</annotation-xml></blockquote>
+<blockquote><color-profile>something</color-profile></blockquote>
+<blockquote><font-face>something</font-face></blockquote>
+<blockquote><font-face-src>something</font-face-src></blockquote>
+<blockquote><font-face-uri>something</font-face-uri></blockquote>
+<blockquote><font-face-format>something</font-face-format></blockquote>
+<blockquote><font-face-name>something</font-face-name></blockquote>
+<blockquote><missing-glyph>something</missing-glyph></blockquote>
+</body>
+<script>
+var wrapper = document.querySelectorAll('blockquote')[0];
+var elem = wrapper.appendChild(document.createElement('_bad-elem'));
+elem.textContent = 'something';
+</script>
+</html>

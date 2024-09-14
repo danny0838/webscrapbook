@@ -13552,6 +13552,23 @@ it('test_capture_custom_elements', async function () {
   assert(value.match(rawRegex`${'^'}(function (names) {${'.+'}})(["custom-subelem","custom-elem"])${'$'}`));
 });
 
+it('test_capture_custom_elements_bad', async function () {
+	/* capture.script = remove */
+  var options = {
+    "capture.script": "remove",
+  };
+  var blob = await capture({
+    url: `${localhost}/capture_custom_elements/bad.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assert(!doc.querySelector(`script[data-scrapbook-elem="custom-elements-loader"]`));
+});
+
 /**
  * Check if option works
  *
