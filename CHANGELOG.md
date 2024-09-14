@@ -3,6 +3,11 @@
 * Versions before 1.0 are in initial development. APIs are not stable for these versions, even a `y` version can involve a breaking change, and only partial notable changes are summarized in this document. See full commit history in the source repository for details.
 * Backend server requirement in this document refers to the version of [`webscrapbook` Python package](https://github.com/danny0838/pywebscrapbook) (or PyWebScrapBook).
 
+## [2.14.0] - 2024-09-14
+* The expanded/collapsed status of option groups in the capture detail dialog now persists.
+* Fixed a CSS handling error for certain `url()` when capturing a page.
+* Fixed an error on certain invalid custom element names when capturing a page.
+
 ## [2.13.1] - 2024-08-15
 * Fixed script error when performing a merge capture on a file.
 * Miscellaneous improvements of the UI and unit test suite.
