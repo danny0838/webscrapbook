@@ -3666,8 +3666,8 @@
     const pDQStr = r`(?:"[^\\"]*(?:\\[\s\S][^\\"]*)*")`; // double quoted string
     const pSQStr = r`(?:'[^\\']*(?:\\[\s\S][^\\']*)*')`; // single quoted string
     const pES = r`(?:(?:${pCm}|${pDQStr}|${pSQStr}|${pChar})*?)`; // embeded string
-    const pUrl = r`(?:\burl\(${pSp}(?:${pDQStr}|${pSQStr}|[^'"${ASCII_WHITESPACE}](?:${pEscaped}|[^)])*?)${pSp}\))`; // URL
-    const pUrl2 = r`(\burl\(${pSp})(${pDQStr}|${pSQStr}|[^'"${ASCII_WHITESPACE}](?:${pEscaped}|[^)])*?)(${pSp}\))`; // URL; catch 3
+    const pUrl = r`(?:\burl\(${pSp}(?:${pDQStr}|${pSQStr}|(?!['"${ASCII_WHITESPACE}])(?:${pEscaped}|[^)])*?)${pSp}\))`; // URL
+    const pUrl2 = r`(\burl\(${pSp})(${pDQStr}|${pSQStr}|(?!['"${ASCII_WHITESPACE}])(?:${pEscaped}|[^)])*?)(${pSp}\))`; // URL; catch 3
     const pRImport = r`(@import${pCmSp})(${pUrl}|${pDQStr}|${pSQStr})`; // @import; catch 2
     const pRFontFace = r`(@font-face${pCmSp}{${pES}})`; // @font-face; catch 1
     const pRNamespace = r`(@namespace${pCmSp}(?:${pStr}${pCmSp2})?${pUrl})`; // @namespace; catch 1

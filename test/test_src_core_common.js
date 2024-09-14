@@ -1772,6 +1772,22 @@ describe('core/common.js', function () {
       var expected = `body { image-background: uRl("http://example.com/image.jpg"); }`;
       assertEqual(scrapbook.rewriteCssText(input, optionsImage), expected);
 
+			// spaces only
+      var input = `body { image-background: url(); }`;
+      var expected = `body { image-background: url("http://example.com/"); }`;
+      assertEqual(scrapbook.rewriteCssText(input, optionsImage), expected);
+
+      var input = `body { image-background: url( ); }`;
+      var expected = `body { image-background: url( "http://example.com/"); }`;
+
+      var input = `body { image-background: url(  ); }`;
+      var expected = `body { image-background: url(  "http://example.com/"); }`;
+      assertEqual(scrapbook.rewriteCssText(input, optionsImage), expected);
+
+      var input = `body { image-background: url(   ); }`;
+      var expected = `body { image-background: url(   "http://example.com/"); }`;
+      assertEqual(scrapbook.rewriteCssText(input, optionsImage), expected);
+
       // escape quotes
       var input = `body { image-background: url('i "like" it.jpg'); }`;
       var expected = r`body { image-background: url("http://example.com/i \"like\" it.jpg"); }`;
@@ -1804,6 +1820,19 @@ describe('core/common.js', function () {
 
       var input = `body { color: red; }/*url(image.jpg)*/`;
       assertEqual(scrapbook.rewriteCssText(input, optionsImage), input);
+
+			// misc
+      var input = `body { image-background: url(''); }`;
+      var expected = `body { image-background: url("http://example.com/"); }`;
+      assertEqual(scrapbook.rewriteCssText(input, optionsImage), expected);
+
+      var input = r`body { image-background: url(\)); }`;
+      var expected = r`body { image-background: url("http://example.com/)"); }`;
+      assertEqual(scrapbook.rewriteCssText(input, optionsImage), expected);
+
+      var input = r`body { image-background: var(--my-var,url()); }`;
+      var expected = r`body { image-background: var(--my-var,url("http://example.com/")); }`;
+      assertEqual(scrapbook.rewriteCssText(input, optionsImage), expected);
     });
 
     it('image ignore unrelated pattern', function () {
