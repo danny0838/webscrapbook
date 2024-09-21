@@ -151,7 +151,7 @@ def main():
     try:
         while True:
             time.sleep(100)
-    except (KeyboardInterrupt, SystemExit):
+    except KeyboardInterrupt:
         print('')
         print('Keyboard interrupt received, exiting.')
 
