@@ -66,6 +66,8 @@
 
       if (gTaskInfo.options["capture.saveTo"] === "server" ||
           gTaskInfo.tasks.some(task => task.recaptureInfo || task.mergeCaptureInfo)) {
+        document.documentElement.classList.add('ui-saveTo-server');
+
         await scrapbook.loadOptionsAuto;
         await server.init();
         if (gTaskInfo.bookId === null) {
@@ -80,24 +82,14 @@
           opt.textContent = book.name;
         }
 
-        if (gTaskInfo.tasks.length === 1) {
-          if (gTaskInfo.tasks[0].title) {
-            let opt;
-            opt = document.getElementById('task_title-preset').appendChild(document.createElement('option'));
-            opt.value = gTaskInfo.tasks[0].title;
-            opt = document.getElementById('captureInfoType-recapture-task_title-preset').appendChild(document.createElement('option'));
-            opt.value = gTaskInfo.tasks[0].title;
-          }
-        } else {
-          for (const elem of document.querySelectorAll('.ui-single-item')) {
-            elem.hidden = elem.disabled = true;
-          }
+        if (gTaskInfo.tasks.length === 1 && gTaskInfo.tasks[0].title) {
+          let opt;
+          opt = document.getElementById('task_title-preset').appendChild(document.createElement('option'));
+          opt.value = gTaskInfo.tasks[0].title;
+          opt = document.getElementById('captureInfoType-recapture-task_title-preset').appendChild(document.createElement('option'));
+          opt.value = gTaskInfo.tasks[0].title;
         }
       } else {
-        for (const elem of document.querySelectorAll('.ui-saveTo-server')) {
-          elem.hidden = elem.disabled = true;
-        }
-
         // replace #tasks_bookId to allow filling null value
         const bookIdElem = document.createElement('input');
         bookIdElem.id = 'tasks_bookId';
@@ -105,10 +97,12 @@
         document.getElementById('tasks_bookId').replaceWith(bookIdElem);
       }
 
-      if (gTaskInfo.options["capture.saveAs"] === "singleHtml") {
-        for (const elem of document.querySelectorAll('.ui-downLink-inDepth')) {
-          elem.hidden = elem.disabled = true;
-        }
+      if (gTaskInfo.tasks.length === 1) {
+        document.documentElement.classList.add('ui-single-item');
+      }
+
+      if (gTaskInfo.options["capture.saveAs"] !== "singleHtml") {
+        document.documentElement.classList.add('ui-downLink-inDepth');
       }
 
       for (const elem of document.querySelectorAll('[id^="tasks_"]')) {
@@ -231,11 +225,21 @@
   }
 
   function updateUi() {
-    if (gTaskInfo.tasks.length === 1) {
-      const captureInfoType = document.getElementById('captureInfoType').value;
-      for (const elem of document.querySelectorAll(`.ui-captureInfoType-normal, .ui-captureInfoType-recapture, .ui-captureInfoType-mergeCapture`)) {
-        elem.hidden = elem.disabled = !elem.matches(`.ui-captureInfoType-${captureInfoType}`);
-      }
+    const captureInfoType = document.getElementById('captureInfoType').value;
+    for (const elem of document.querySelectorAll([
+      `.ui-captureInfoType-normal`,
+      `.ui-captureInfoType-recapture`,
+      `.ui-captureInfoType-mergeCapture`,
+    ].join(', '))) {
+      elem.hidden = elem.disabled = !elem.matches(`.ui-captureInfoType-${captureInfoType}`);
+    }
+
+    for (const elem of document.querySelectorAll([
+      `:root:not(.ui-saveTo-server) .ui-saveTo-server`,
+      `:root:not(.ui-single-item) .ui-single-item`,
+      `:root:not(.ui-downLink-inDepth) .ui-downLink-inDepth`,
+    ].join(', '))) {
+      elem.hidden = elem.disabled = true;
     }
 
     for (const elem of document.querySelectorAll('[id^="opt_"]')) {
@@ -284,37 +288,45 @@
     // special handling
     taskInfo.parentId = taskInfo.parentId || "root";
 
-    if (taskInfo.tasks.length === 1) {
-      for (const elem of document.querySelectorAll('[id^="task_"]')) {
-        const key = elem.id.slice(5);
-        const value = getOptionFromElement(elem);
-        taskInfo.tasks[0][key] = value;
+    const options = {};
+    switch (document.getElementById('captureInfoType').value) {
+      case "recapture": {
+        const titleElem = document.getElementById('captureInfoType-recapture-task_title');
+        const commentElem = document.getElementById('captureInfoType-recapture-task_comment');
+        Object.assign(options, {
+          ...(!titleElem.matches(':disabled') ? {title: titleElem.value} : {}),
+          ...(!commentElem.matches(':disabled') ? {comment: commentElem.value} : {}),
+          recaptureInfo: {
+            bookId: taskInfo.bookId,
+            itemId: taskInfo.parentId,
+          },
+        });
+        break;
       }
-
-      switch (document.getElementById('captureInfoType').value) {
-        case "recapture": {
-          Object.assign(taskInfo.tasks[0], {
-            title: document.getElementById('captureInfoType-recapture-task_title').value,
-            comment: document.getElementById('captureInfoType-recapture-task_comment').value,
-            recaptureInfo: {
-              bookId: taskInfo.bookId,
-              itemId: taskInfo.parentId,
-            },
-          });
-          break;
-        }
-        case "mergeCapture": {
-          Object.assign(taskInfo.tasks[0], {
-            title: void 0,
-            comment: void 0,
-            mergeCaptureInfo: {
-              bookId: taskInfo.bookId,
-              itemId: taskInfo.parentId,
-            },
-          });
-          break;
-        }
+      case "mergeCapture": {
+        Object.assign(options, {
+          title: void 0,
+          comment: void 0,
+          mergeCaptureInfo: {
+            bookId: taskInfo.bookId,
+            itemId: taskInfo.parentId,
+          },
+        });
+        break;
       }
+      case "normal":
+      default: {
+        for (const elem of document.querySelectorAll('[id^="task_"]')) {
+          if (elem.matches(':disabled')) { continue; }
+          const key = elem.id.slice(5);
+          const value = getOptionFromElement(elem);
+          options[key] = value;
+        }
+        break;
+      }
+    }
+    for (const task of taskInfo.tasks) {
+      Object.assign(task, options);
     }
 
     return taskInfo;
