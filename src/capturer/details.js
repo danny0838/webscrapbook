@@ -64,10 +64,6 @@
         }
       }
 
-      for (const elem of document.querySelectorAll('style')) {
-        elem.sheet.disabled = true;
-      }
-
       if (gTaskInfo.options["capture.saveTo"] === "server" ||
           gTaskInfo.tasks.some(task => task.recaptureInfo || task.mergeCaptureInfo)) {
         await scrapbook.loadOptionsAuto;
@@ -93,10 +89,14 @@
             opt.value = gTaskInfo.tasks[0].title;
           }
         } else {
-          document.querySelector('style.ui-single-item').sheet.disabled = false;
+          for (const elem of document.querySelectorAll('.ui-single-item')) {
+            elem.hidden = elem.disabled = true;
+          }
         }
       } else {
-        document.querySelector('style.ui-saveTo-server').sheet.disabled = false;
+        for (const elem of document.querySelectorAll('.ui-saveTo-server')) {
+          elem.hidden = elem.disabled = true;
+        }
 
         // replace #tasks_bookId to allow filling null value
         const bookIdElem = document.createElement('input');
@@ -106,7 +106,9 @@
       }
 
       if (gTaskInfo.options["capture.saveAs"] === "singleHtml") {
-        document.querySelector('style.ui-downLink-inDepth').sheet.disabled = false;
+        for (const elem of document.querySelectorAll('.ui-downLink-inDepth')) {
+          elem.hidden = elem.disabled = true;
+        }
       }
 
       for (const elem of document.querySelectorAll('[id^="tasks_"]')) {
@@ -231,8 +233,8 @@
   function updateUi() {
     if (gTaskInfo.tasks.length === 1) {
       const captureInfoType = document.getElementById('captureInfoType').value;
-      for (const elem of document.querySelectorAll(`style.ui-captureInfoType-normal, style.ui-captureInfoType-recapture, style.ui-captureInfoType-mergeCapture`)) {
-        elem.sheet.disabled = elem.matches(`.ui-captureInfoType-${captureInfoType}`);
+      for (const elem of document.querySelectorAll(`.ui-captureInfoType-normal, .ui-captureInfoType-recapture, .ui-captureInfoType-mergeCapture`)) {
+        elem.hidden = elem.disabled = !elem.matches(`.ui-captureInfoType-${captureInfoType}`);
       }
     }
 
