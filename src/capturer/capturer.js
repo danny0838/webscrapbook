@@ -62,6 +62,7 @@
    * @property {Map<string~token, Promise<fetchResponse>>} fetchMap
    * @property {Map<string~token, missionCaptureInfoFilenameMapEntry>} filenameMap
    * @property {Map<string~url, missionCaptureInfoLinkedPagesEntry>} linkedPages
+   * @property {Map<string~url, string~redirectedUrl>} redirects
    */
 
   /**
@@ -89,6 +90,7 @@
     filenameMap: new Map(),
 
     linkedPages: new Map(),
+    redirects: new Map(),
   }));
 
   /**
@@ -3873,8 +3875,12 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
       isHeadless: true,
     });
 
-    const {linkedPages} = capturer.captureInfo.get(timeId);
+    const {linkedPages, redirects} = capturer.captureInfo.get(timeId);
     for (const [sourceUrl, {url, refUrl, depth}] of linkedPages) {
+      if (sourceUrl !== url) {
+        redirects.set(sourceUrl, url);
+      }
+
       capturer.log(`Capturing linked page (${depth}) ${sourceUrl} ...`);
 
       Object.assign(subSettings, {
@@ -3915,7 +3921,7 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
    * @param {captureOptions} params.options
    */
   capturer.rebuildLinks = async function (params) {
-    const rewriteUrl = (url, filenameMap, linkedPages) => {
+    const rewriteUrl = (url, filenameMap, redirects) => {
       // assume a non-absolute URL to be already mapped
       if (!scrapbook.isUrlAbsolute(url)) {
         return null;
@@ -3924,9 +3930,9 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
       let [urlMain, urlHash] = scrapbook.splitUrlByAnchor(url);
 
       // handle possible redirect
-      const linkedPageItem = linkedPages.get(urlMain);
-      if (linkedPageItem) {
-        [urlMain, urlHash] = scrapbook.splitUrlByAnchor(capturer.getRedirectedUrl(linkedPageItem.url, urlHash));
+      const redirectedUrl = redirects.get(urlMain);
+      if (redirectedUrl) {
+        [urlMain, urlHash] = scrapbook.splitUrlByAnchor(capturer.getRedirectedUrl(redirectedUrl, urlHash));
       }
 
       const token = capturer.getRegisterToken(urlMain, 'document');
@@ -3940,36 +3946,36 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
       return capturer.getRedirectedUrl(p.url, urlHash);
     };
 
-    const rewriteHref = (elem, attr, filenameMap, linkedPages) => {
+    const rewriteHref = (elem, attr, filenameMap, redirects) => {
       const url = elem.getAttribute(attr);
-      const newUrl = rewriteUrl(url, filenameMap, linkedPages);
+      const newUrl = rewriteUrl(url, filenameMap, redirects);
       if (!newUrl) { return; }
       elem.setAttribute(attr, newUrl);
     };
 
-    const rewriteMetaRefresh = (elem, filenameMap, linkedPages) => {
+    const rewriteMetaRefresh = (elem, filenameMap, redirects) => {
       const {time, url} = scrapbook.parseHeaderRefresh(elem.getAttribute("content"));
       if (!url) { return; }
-      const newUrl = rewriteUrl(url, filenameMap, linkedPages);
+      const newUrl = rewriteUrl(url, filenameMap, redirects);
       if (!newUrl) { return; }
       elem.setAttribute("content", `${time}; url=${newUrl}`);
     };
 
-    const processRootNode = (rootNode, filenameMap, linkedPages) => {
+    const processRootNode = (rootNode, filenameMap, redirects) => {
       // rewrite links
       switch (rootNode.nodeName.toLowerCase()) {
         case 'svg': {
           for (const elem of rootNode.querySelectorAll('a[*|href]')) {
             for (const attr of REBUILD_LINK_SVG_HREF_ATTRS) {
               if (!elem.hasAttribute(attr)) { continue; }
-              rewriteHref(elem, attr, filenameMap, linkedPages);
+              rewriteHref(elem, attr, filenameMap, redirects);
             }
           }
           break;
         }
         case 'math': {
           for (const elem of rootNode.querySelectorAll('[href]')) {
-            rewriteHref(elem, 'href', filenameMap, linkedPages);
+            rewriteHref(elem, 'href', filenameMap, redirects);
           }
           break;
         }
@@ -3978,18 +3984,18 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
           for (const elem of rootNode.querySelectorAll('a[href], area[href]')) {
             if (elem.closest('svg, math')) { continue; }
             if (elem.hasAttribute('download')) { continue; }
-            rewriteHref(elem, 'href', filenameMap, linkedPages);
+            rewriteHref(elem, 'href', filenameMap, redirects);
           }
           for (const elem of rootNode.querySelectorAll('meta[http-equiv="refresh" i][content]')) {
-            rewriteMetaRefresh(elem, filenameMap, linkedPages);
+            rewriteMetaRefresh(elem, filenameMap, redirects);
           }
           for (const elem of rootNode.querySelectorAll('iframe[srcdoc]')) {
             const doc = (new DOMParser()).parseFromString(elem.srcdoc, 'text/html');
-            processRootNode(doc.documentElement, filenameMap, linkedPages);
+            processRootNode(doc.documentElement, filenameMap, redirects);
             elem.srcdoc = doc.documentElement.outerHTML;
           }
           for (const elem of rootNode.querySelectorAll('svg, math')) {
-            processRootNode(elem, filenameMap, linkedPages);
+            processRootNode(elem, filenameMap, redirects);
           }
           break;
         }
@@ -3999,13 +4005,13 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
       for (const elem of rootNode.querySelectorAll('[data-scrapbook-shadowdom]')) {
         const shadowRoot = elem.attachShadow({mode: 'open'});
         shadowRoot.innerHTML = elem.getAttribute('data-scrapbook-shadowdom');
-        processRootNode(shadowRoot, filenameMap, linkedPages);
+        processRootNode(shadowRoot, filenameMap, redirects);
         elem.setAttribute("data-scrapbook-shadowdom", shadowRoot.innerHTML);
       }
     };
 
     const rebuildLinks = capturer.rebuildLinks = async ({timeId, options}) => {
-      const {files, filenameMap, linkedPages} = capturer.captureInfo.get(timeId);
+      const {files, filenameMap, redirects} = capturer.captureInfo.get(timeId);
 
       for (const [filename, {path, role, blob}] of files) {
         if (!blob) {
@@ -4022,7 +4028,7 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
           continue;
         }
 
-        processRootNode(doc.documentElement, filenameMap, linkedPages);
+        processRootNode(doc.documentElement, filenameMap, redirects);
 
         const content = scrapbook.documentToString(doc, options["capture.prettyPrint"]);
         await capturer.saveFileCache({
@@ -4045,13 +4051,14 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
     const version = 3;
     const {
       files, filenameMap,
-      initialVersion, indexPages,
+      initialVersion, indexPages, redirects,
     } = capturer.captureInfo.get(timeId);
 
     const sitemap = {
       version,
       ...(initialVersion !== version && {initialVersion}),
       indexPages: [...indexPages],
+      redirects: [...redirects],
       files: [],
     };
 
@@ -4187,6 +4194,11 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
         case 3: {
           for (const indexPage of sitemap.indexPages) {
             info.indexPages.add(indexPage);
+          }
+          for (const [sourceUrl, url] of (sitemap.redirects || [])) {
+            if (sourceUrl !== url) {
+              info.redirects.set(sourceUrl, url);
+            }
           }
           for (let {path, url, role, token} of sitemap.files) {
             info.files.set(path.toLowerCase(), {

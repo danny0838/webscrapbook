@@ -5735,6 +5735,7 @@ it('test_capture_css_charset_link_charset', async function () {
     "indexPages": [
       "index.html"
     ],
+    "redirects": [],
     "files": [
       {
         "path": "index.json"
@@ -14391,6 +14392,7 @@ it('test_capture_downLink_indepth', async function () {
     "indexPages": [
       "index.html"
     ],
+    "redirects": [],
     "files": [
       {
         "path": "index.json"
@@ -14485,6 +14487,7 @@ it('test_capture_downLink_indepth', async function () {
     "indexPages": [
       "index.html"
     ],
+    "redirects": [],
     "files": [
       {
         "path": "index.json"
@@ -14615,6 +14618,7 @@ it('test_capture_downLink_indepth', async function () {
     "indexPages": [
       "index.html"
     ],
+    "redirects": [],
     "files": [
       {
         "path": "index.json"
@@ -15254,6 +15258,58 @@ it('test_capture_downLink_indepth_redirect', async function () {
   var doc = await readFileAsDocument(indexBlob);
   assert.strictEqual(doc.querySelectorAll('a')[0].getAttribute('href'), `redirected.html#in-depth`);
   assert.strictEqual(doc.querySelectorAll('a')[1].getAttribute('href'), `${localhost}/capture_downLink_indepth_redirect/linked1-2.pyr#in-depth`);
+
+  var sitemapBlob = await zip.file('index.json').async('blob');
+  var expectedData = {
+   "version": 3,
+   "indexPages": [
+    "index.html"
+   ],
+   "redirects": [
+    [
+     `${localhost}/capture_downLink_indepth_redirect/linked1-1.pyr`,
+     `${localhost}/capture_downLink_indepth_redirect/redirected.html`
+    ]
+   ],
+   "files": [
+    {
+     "path": "index.json"
+    },
+    {
+     "path": "index.dat"
+    },
+    {
+     "path": "index.rdf"
+    },
+    {
+     "path": "history.rdf"
+    },
+    {
+     "path": "^metadata^"
+    },
+    {
+     "path": "index.html",
+     "url": `${localhost}/capture_downLink_indepth_redirect/in-depth.html`,
+     "role": "document",
+     "token": getToken(`${localhost}/capture_downLink_indepth_redirect/in-depth.html`, "document")
+    },
+    {
+     "path": "index.xhtml",
+     "role": "document"
+    },
+    {
+     "path": "index.svg",
+     "role": "document"
+    },
+    {
+     "path": "redirected.html",
+     "url": `${localhost}/capture_downLink_indepth_redirect/redirected.html`,
+     "role": "document",
+     "token": getToken(`${localhost}/capture_downLink_indepth_redirect/redirected.html`, "document")
+    }
+   ]
+  };
+  assert.deepEqual(JSON.parse(await readFileAsText(sitemapBlob)), expectedData);
 });
 
 /**
@@ -15287,6 +15343,7 @@ it('test_capture_downLink_indepth_datauri', async function () {
     "indexPages": [
       "index.html"
     ],
+    "redirects": [],
     "files": [
       {
         "path": "index.json"
@@ -15366,6 +15423,7 @@ it('test_capture_downLink_indepth_blob', async function () {
     "indexPages": [
       "index.html"
     ],
+    "redirects": [],
     "files": [
       {
         "path": "index.json"
@@ -15444,6 +15502,7 @@ it('test_capture_downLink_indepth_about', async function () {
     "indexPages": [
       "index.html"
     ],
+    "redirects": [],
     "files": [
       {
         "path": "index.json"
@@ -15513,6 +15572,7 @@ it('test_capture_downLink_indepth_invalid', async function () {
     "indexPages": [
       "index.html"
     ],
+    "redirects": [],
     "files": [
       {
         "path": "index.json"
@@ -15813,6 +15873,7 @@ ${localhost}/capture_downLink_indepth_urlExtra/1-3.txt`,
       "index.html",
       "1-1.html",
     ],
+    "redirects": [],
     "files": [
       {
         "path": "index.json"
@@ -15893,6 +15954,7 @@ ${localhost}/capture_downLink_indepth_urlExtra/1-3.txt`,
       "index.html",
       "1-1.html",
     ],
+    "redirects": [],
     "files": [
       {
         "path": "index.json"
@@ -15983,6 +16045,7 @@ it('test_capture_downLink_indepth_case', async function () {
     "indexPages": [
       "index.html"
     ],
+    "redirects": [],
     "files": [
       {
         "path": "index.json"
@@ -18323,6 +18386,7 @@ it('test_mergeCapture', async function () {
       "linked1-3.svg",
       "linked1-4.txt.html"
     ],
+    "redirects": [],
     "files": [
       {
         "path": "index.json"
@@ -18382,6 +18446,134 @@ it('test_mergeCapture', async function () {
         "url": `${localhost}/capture_mergeCapture/linked1-4.txt`,
         "role": "document",
         "token": getToken(`${localhost}/capture_mergeCapture/linked1-4.txt`, "document")
+      }
+    ]
+  };
+  assert.deepEqual(sitemap, expectedData);
+});
+
+it('test_mergeCapture_redirect', async function () {
+  var options = Object.assign({}, baseOptions, {
+    "capture.saveTo": "server",
+    "capture.saveAs": "folder",
+    "capture.downLink.doc.depth": 0,
+  });
+
+  var response = await capture({
+    url: `${localhost}/capture_mergeCapture_redirect/main.html`,
+    options,
+  }, {rawResponse: true});
+
+  var bookId = "";
+  var {timeId: itemId} = response;
+
+  var sitemap = await backendRequest({
+    url: `${backend}/data/${itemId}/index.json`,
+  }).then(r => r.json());
+
+  sitemap.redirects = [
+    [
+      `${localhost}/capture_mergeCapture_redirect/linked1-1.pyr`,
+      `${localhost}/capture_mergeCapture_redirect/redirected1-1.html`,
+    ],
+    [
+      `${localhost}/capture_mergeCapture_redirect/linked1-2.pyr`,
+      `${localhost}/capture_mergeCapture_redirect/redirected1-2.xhtml`,
+    ],
+  ];
+
+  var response = await backendRequest({
+    url: `${backend}/data/${itemId}/index.json`,
+    body: {
+      a: 'save',
+      f: 'json',
+      upload: new File([JSON.stringify(sitemap, null, 1)], `index.json`, {type: "text/javascript"}),
+    },
+    csrfToken: true,
+  }).then(r => r.json());
+
+  var response = await capture({
+    url: `${localhost}/capture_mergeCapture_redirect/redirected1-1.html`,
+    options,
+    mergeCaptureInfo: {bookId, itemId},
+  }, {rawResponse: true});
+
+  var response = await capture({
+    url: `${localhost}/capture_mergeCapture_redirect/redirected1-2.xhtml`,
+    options,
+    mergeCaptureInfo: {bookId, itemId},
+  }, {rawResponse: true});
+
+  var doc = (await xhr({
+    url: `${backend}/data/${itemId}/index.html`,
+    responseType: "document",
+  })).response;
+
+  var anchors = doc.querySelectorAll('a[href]');
+  assert.strictEqual(anchors[0].getAttribute('href'), `redirected1-1.html#111`);
+  assert.strictEqual(anchors[1].getAttribute('href'), `redirected1-2.xhtml#222`);
+
+  var sitemap = await backendRequest({
+    url: `${backend}/data/${itemId}/index.json`,
+  }).then(r => r.json());
+  var expectedData = {
+    "version": 3,
+    "indexPages": [
+      "index.html",
+      "redirected1-1.html",
+      "redirected1-2.xhtml"
+    ],
+    "redirects": [
+      [
+        `${localhost}/capture_mergeCapture_redirect/linked1-1.pyr`,
+        `${localhost}/capture_mergeCapture_redirect/redirected1-1.html`,
+      ],
+      [
+        `${localhost}/capture_mergeCapture_redirect/linked1-2.pyr`,
+        `${localhost}/capture_mergeCapture_redirect/redirected1-2.xhtml`,
+      ],
+    ],
+    "files": [
+      {
+        "path": "index.json"
+      },
+      {
+        "path": "index.dat"
+      },
+      {
+        "path": "index.rdf"
+      },
+      {
+        "path": "history.rdf"
+      },
+      {
+        "path": "^metadata^"
+      },
+      {
+        "path": "index.html",
+        "url": `${localhost}/capture_mergeCapture_redirect/main.html`,
+        "role": "document",
+        "token": getToken(`${localhost}/capture_mergeCapture_redirect/main.html`, "document")
+      },
+      {
+        "path": "index.xhtml",
+        "role": "document"
+      },
+      {
+        "path": "index.svg",
+        "role": "document"
+      },
+      {
+        "path": "redirected1-1.html",
+        "url": `${localhost}/capture_mergeCapture_redirect/redirected1-1.html`,
+        "role": "document",
+        "token": getToken(`${localhost}/capture_mergeCapture_redirect/redirected1-1.html`, "document")
+      },
+      {
+        "path": "redirected1-2.xhtml",
+        "url": `${localhost}/capture_mergeCapture_redirect/redirected1-2.xhtml`,
+        "role": "document",
+        "token": getToken(`${localhost}/capture_mergeCapture_redirect/redirected1-2.xhtml`, "document")
       }
     ]
   };
