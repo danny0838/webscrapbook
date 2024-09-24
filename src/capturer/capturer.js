@@ -174,7 +174,7 @@
    * @return {string} The uniquified filename.
    */
   capturer.getUniqueFilename = function (timeId, filename, options) {
-    const files = capturer.captureInfo.get(timeId).files;
+    const {files} = capturer.captureInfo.get(timeId);
 
     let newFilename = filename || "untitled";
     let [newFilenameBase, newFilenameExt] = scrapbook.filenameParts(newFilename);
@@ -360,7 +360,7 @@
       blob = await scrapbook.cache.get(key, 'indexedDB');
     }
 
-    const files = capturer.captureInfo.get(timeId).files;
+    const {files} = capturer.captureInfo.get(timeId);
     const filename = scrapbook.filepathParts(path)[1].toLowerCase();
     Object.assign(files.get(filename), {
       path,
@@ -369,7 +369,7 @@
   };
 
   capturer.loadFileCache = async function ({timeId}) {
-    const files = capturer.captureInfo.get(timeId).files;
+    const {files} = capturer.captureInfo.get(timeId);
     const result = [];
     let indexEntry;
 
@@ -412,7 +412,7 @@
     }
 
     const zip = new JSZip();
-    const files = capturer.captureInfo.get(timeId).files;
+    const {files} = capturer.captureInfo.get(timeId);
     for (const [filename, {path, url, blob}] of files) {
       if (!blob) { continue; }
       scrapbook.zipAddFile(zip, path, blob, zipOptions);
@@ -507,7 +507,16 @@
     const fetch = capturer.fetch = async function (params) {
       isDebug && console.debug("call: fetch", params);
 
-      const {url: sourceUrl, refUrl, refPolicy, overrideBlob, headerOnly = false, ignoreSizeLimit = false, settings: {timeId}, options} = params;
+      const {
+        url: sourceUrl,
+        refUrl,
+        refPolicy,
+        overrideBlob,
+        headerOnly = false,
+        ignoreSizeLimit = false,
+        settings: {timeId},
+        options,
+      } = params;
       const [sourceUrlMain, sourceUrlHash] = scrapbook.splitUrlByAnchor(sourceUrl);
 
       let headers = {};
@@ -552,7 +561,7 @@
         });
       }
 
-      const fetchMap = capturer.captureInfo.get(timeId).fetchMap;
+      const {fetchMap} = capturer.captureInfo.get(timeId);
       const fetchRole = headerOnly ? 'head' : 'blob';
 
       // fail out if sourceUrl is invalid
@@ -1437,7 +1446,7 @@
       if (downLinkDoc && doc) {
         // for a document suitable for downLinkDoc, register in linkedPages and return null
         if (downLinkDocValid || downLinkExtra) {
-          const linkedPages = capturer.captureInfo.get(timeId).linkedPages;
+          const {linkedPages} = capturer.captureInfo.get(timeId);
           if (!linkedPages.has(sourceUrlMain)) {
             linkedPages.set(sourceUrlMain, {
               url: fetchResponse.url,
@@ -1507,7 +1516,7 @@
         // (meta refresh or JavaScript re-location)
         const redirectedUrlMain = response.sourceUrl;
         if (redirectedUrlMain && redirectedUrlMain !== sourceUrlMain) {
-          const linkedPages = capturer.captureInfo.get(timeId).linkedPages;
+          const {linkedPages} = capturer.captureInfo.get(timeId);
           linkedPages.set(sourceUrlMain, {
             url: redirectedUrlMain,
             refUrl,
@@ -2638,7 +2647,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
             break;
           }
           case 2: {
-            for (let indexPage of sitemap.indexPages) {
+            for (const indexPage of sitemap.indexPages) {
               info.indexPages.add(indexPage);
             }
             for (let {path, url, role, token} of sitemap.files) {
@@ -2695,7 +2704,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
             break;
           }
           case 3: {
-            for (let indexPage of sitemap.indexPages) {
+            for (const indexPage of sitemap.indexPages) {
               info.indexPages.add(indexPage);
             }
             for (let {path, url, role, token} of sitemap.files) {
@@ -2905,8 +2914,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
       const [sourceUrlMain, sourceUrlHash] = scrapbook.splitUrlByAnchor(sourceUrl);
 
       const {timeId, isMainPage, isMainFrame, documentName} = settings;
-      const filenameMap = capturer.captureInfo.get(timeId).filenameMap;
-      const files = capturer.captureInfo.get(timeId).files;
+      const {filenameMap, files} = capturer.captureInfo.get(timeId);
 
       const fetchResponse = await capturer.fetch({
         url: sourceUrl,
@@ -2971,7 +2979,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
           role,
         });
       } else {
-        let documentFileName = getDocumentFileName({
+        const documentFileName = getDocumentFileName({
           url: fetchResponse.url,
           mime,
           headers: fetchResponse.headers,
@@ -3081,8 +3089,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
       const [sourceUrlMain, sourceUrlHash] = scrapbook.splitUrlByAnchor(sourceUrl);
 
       const {timeId} = settings;
-      const filenameMap = capturer.captureInfo.get(timeId).filenameMap;
-      const files = capturer.captureInfo.get(timeId).files;
+      const {filenameMap, files} = capturer.captureInfo.get(timeId);
 
       const fetchResponse = await capturer.fetch({
         url: sourceUrl,
@@ -4040,10 +4047,8 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
       isHeadless: true,
     });
 
-    const linkedPages = capturer.captureInfo.get(timeId).linkedPages;
-    for (const [sourceUrl, info] of linkedPages.entries()) {
-      const {url, refUrl, depth} = info;
-
+    const {linkedPages} = capturer.captureInfo.get(timeId);
+    for (const [sourceUrl, {url, refUrl, depth}] of linkedPages) {
       capturer.log(`Capturing linked page (${depth}) ${sourceUrl} ...`);
 
       Object.assign(subSettings, {
@@ -4174,18 +4179,14 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
     };
 
     const rebuildLinks = capturer.rebuildLinks = async ({timeId, options}) => {
-      const info = capturer.captureInfo.get(timeId);
-      const files = info.files;
-      const filenameMap = info.filenameMap;
-      const linkedPages = info.linkedPages;
+      const {files, filenameMap, linkedPages} = capturer.captureInfo.get(timeId);
 
-      for (const [filename, item] of files.entries()) {
-        const blob = item.blob;
+      for (const [filename, {path, role, blob}] of files) {
         if (!blob) {
           continue;
         }
 
-        if (!REBUILD_LINK_ROLE_PATTERN.test(item.role)) {
+        if (!REBUILD_LINK_ROLE_PATTERN.test(role)) {
           continue;
         }
 
@@ -4200,7 +4201,7 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
         const content = scrapbook.documentToString(doc, options["capture.prettyPrint"]);
         await capturer.saveFileCache({
           timeId,
-          path: item.path,
+          path,
           blob: new Blob([content], {type: blob.type}),
         });
       }
@@ -4215,22 +4216,20 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
    * @param {string} params.path
    */
   capturer.generateSiteMap = async function ({timeId, path}) {
-    const info = capturer.captureInfo.get(timeId);
-    const files = info.files;
-    const filenameMap = info.filenameMap;
+    const version = 3;
+    const {
+      files, filenameMap,
+      initialVersion, indexPages,
+    } = capturer.captureInfo.get(timeId);
 
     const sitemap = {
-      version: 3,
-      initialVersion: info.initialVersion,
-      indexPages: [...info.indexPages],
+      version,
+      ...(initialVersion !== version && {initialVersion}),
+      indexPages: [...indexPages],
       files: [],
     };
 
-    if (sitemap.initialVersion === sitemap.version) {
-      delete sitemap.initialVersion;
-    }
-
-    for (let [filename, {path, url, role, token}] of files.entries()) {
+    for (let [filename, {path, url, role, token}] of files) {
       if (!token) {
         const t = capturer.getRegisterToken(url, role);
         if (t && filenameMap.has(t)) {
