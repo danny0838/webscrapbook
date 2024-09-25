@@ -89,7 +89,7 @@
    * @typedef {Object} captureSettings
    * @property {string} missionId - missionId ID for the current capture tasks
    * @property {string} timeId - scrapbook ID for the current capture task
-   * @property {string} documentName
+   * @property {?string} documentName - document name for registering
    * @property {string[]} recurseChain
    * @property {number} depth
    * @property {boolean} isHeadless
@@ -97,8 +97,8 @@
    * @property {boolean} isMainPage
    * @property {boolean} isMainFrame
    * @property {boolean} fullPage
-   * @property {string} title - item title (also used as index page title)
-   * @property {string} favIconUrl - item favicon (also used as index page favicon)
+   * @property {string} title - item title
+   * @property {string} favIconUrl - item favicon
    */
 
   /**
@@ -116,6 +116,7 @@
    *   details.frameWindow.
    *
    * @memberof capturer
+   * @variation 2
    * @param {string} method - The capturer method to invoke.
    * @param {Object} [args] - The arguments to pass to the capturer method.
    * @param {Object} [details] - Data to determine invocation behavior.
@@ -147,7 +148,7 @@
    * @type invokable
    * @memberof capturer
    * @variation 2
-   * @param {Object} params
+   * @param {Object} params - See {@link capturer.downloadFile}.
    * @return {Promise<downloadBlobResponse>}
    */
   capturer.downloadFile = async function (params) {
@@ -178,7 +179,7 @@
    * @type invokable
    * @memberof capturer
    * @variation 2
-   * @param {Object} params
+   * @param {Object} params - See {@link capturer.fetchCss}.
    * @return {Promise<fetchCssResponse>}
    */
   capturer.fetchCss = async function (params) {
@@ -209,7 +210,7 @@
    * @type invokable
    * @memberof capturer
    * @variation 2
-   * @param {Object} params
+   * @param {Object} params - See {@link capturer.captureUrl}.
    * @return {Promise<captureDocumentResponse|transferableBlob|null>}
    */
   capturer.captureUrl = async function (params) {
@@ -299,7 +300,7 @@
   };
 
   /**
-   * @typedef {saveMainDocumentResponse} captureDocumentResponse
+   * @typedef {saveMainDocumentResponse|registerDocumentResponse} captureDocumentResponse
    * @property {string} url - URL of the saved filename (with hash).
    */
 
@@ -3278,6 +3279,8 @@
           metaCharsetNode.before("\n");
         }
       }
+
+      // attempt to take site favicon if none yet
       if (!favIconUrl) {
         switch (options["capture.favicon"]) {
           case "blank":

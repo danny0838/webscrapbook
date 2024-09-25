@@ -807,7 +807,7 @@
    * @typedef {Object} serializedBlob
    * @property {string} __type__
    * @property {string} type
-   * @property {string} data
+   * @property {string[]} data
    */
 
   /**
@@ -816,7 +816,7 @@
    * @property {string} name
    * @property {string} type
    * @property {number} lastModified
-   * @property {string} data
+   * @property {string[]} data
    */
 
   /**
@@ -3367,7 +3367,7 @@
 
   /**
    * @param {Blob} blob - The Blob of File object to be read.
-   * @param {string|false} [charset] - Read as UTF-8 if undefined and as raw bytes if falsy.
+   * @param {string|false} [charset] - Read as UTF-8 if undefined and as byte string if falsy.
    * @return {Promise<string>}
    */
   scrapbook.readFileAsText = async function (blob, charset = "UTF-8") {

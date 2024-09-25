@@ -7,7 +7,6 @@
  * @require {Object} server
  * @require {Object} capturer
  * @extends capturer
- * @override {Function} capturer.invoke
  *****************************************************************************/
 
 (function (global, factory) {
@@ -36,6 +35,7 @@
    * @property {string} [path]
    * @property {string} [url]
    * @property {string} [role]
+   * @property {string} [token]
    * @property {Blob} [blob]
    */
 
@@ -56,6 +56,7 @@
   /**
    * @typedef {Object} missionCaptureInfo
    * @property {boolean} useDiskCache
+   * @property {(integer|undefined)} initialVersion
    * @property {Set<string~filename>} indexPages
    * @property {Map<string~filename, missionCaptureInfoFilesEntry>} files
    * @property {Map<string~token, Promise<fetchResponse>>} fetchMap
@@ -2762,13 +2763,17 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
         const subOptions = Object.assign({}, options, {
           // capture to server
           "capture.saveTo": "server",
+
           // only saving as folder can be effectively merged,
-          // and prevents a conflict of different types
+          // and prevents a conflict with different types
           "capture.saveAs": "folder",
+
           // save to the same directory
           "capture.saveFilename": item.index.slice(0, -11),
           "capture.saveOverwrite": true,
+
           // always rebuild links and update index.json
+          // also force depth 0 for NaN
           "capture.downLink.doc.depth": depth > 0 ? depth : 0,
         });
 
