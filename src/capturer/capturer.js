@@ -3279,29 +3279,28 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
     isDebug && console.debug("call: saveDocument", params);
 
     const {data, documentFileName, sourceUrl, settings, options} = params;
+    const {isMainPage, isMainFrame} = settings;
 
-    // special handling for saving file as data URI
-    if (options["capture.saveAs"] === "singleHtml") {
-      if (settings.isMainPage && settings.isMainFrame) {
-        return capturer.saveMainDocument({data, sourceUrl, documentFileName, settings, options});
-      }
+    const downloadBlob = async () => {
+      const blob = await capturer.loadBlobCache(data.blob);
+      return await capturer.downloadBlob({
+        blob,
+        filename: documentFileName,
+        sourceUrl,
+        settings,
+        options,
+      });
+    };
+
+    if (!(isMainPage && isMainFrame)) {
+      return await downloadBlob();
     }
 
-    let {blob} = data;
-    blob = await capturer.loadBlobCache(blob);
-    const response = await capturer.downloadBlob({
-      blob,
-      filename: documentFileName,
-      sourceUrl,
-      settings,
-      options,
-    });
-
-    if (settings.isMainPage && settings.isMainFrame) {
-      return capturer.saveMainDocument({data, sourceUrl, documentFileName, settings, options});
+    if (options["capture.saveAs"] !== "singleHtml") {
+      await downloadBlob();
     }
 
-    return response;
+    return capturer.saveMainDocument({data, sourceUrl, documentFileName, settings, options});
   };
 
   /**
