@@ -3611,7 +3611,6 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
           const dir = scrapbook.filepathParts(settings.indexFilename)[0];
           const newFilename = await capturer.invoke("getAvailableSaveFilename", {
             filename: settings.indexFilename,
-            settings,
             options,
           });
           settings.indexFilename = (dir ? dir + '/' : '') + newFilename;
