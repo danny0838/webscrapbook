@@ -1814,17 +1814,7 @@ Bookmark for <a href="${scrapbook.escapeHtml(sourceUrl)}">${scrapbook.escapeHtml
     const [sourceUrlMain, sourceUrlHash] = scrapbook.splitUrlByAnchor(sourceUrl);
     const {timeId, isMainPage, isMainFrame, documentName, title} = settings;
 
-    if (isMainPage && isMainFrame) {
-      settings.indexFilename = await capturer.formatIndexFilename({
-        title: title || scrapbook.urlToFilename(sourceUrl) || "untitled",
-        sourceUrl,
-        isFolder: options["capture.saveAs"] === "folder",
-        settings,
-        options,
-      });
-    }
-
-    const response = await capturer.downloadFile({
+    let response = await capturer.downloadFile({
       url: sourceUrl,
       refUrl,
       refPolicy,
@@ -1832,17 +1822,22 @@ Bookmark for <a href="${scrapbook.escapeHtml(sourceUrl)}">${scrapbook.escapeHtml
       options,
     });
 
-    if (isMainPage && isMainFrame) {
-      // for the main frame, create a index.html that redirects to the file
-      const url = sourceUrl.startsWith("data:") ? "data:" : sourceUrl;
-      const meta = params.options["capture.recordDocumentMeta"] ? 
-          ' data-scrapbook-source="' + scrapbook.escapeHtml(scrapbook.normalizeUrl(url)) + '"' + 
-          ' data-scrapbook-create="' + scrapbook.escapeHtml(timeId) + '"' + 
-          ' data-scrapbook-type="file"' + 
-          (charset ? ' data-scrapbook-charset="' + charset + '"' : "") : 
-          "";
+    if (!(isMainPage && isMainFrame)) {
+      return Object.assign({}, response, {
+        url: capturer.getRedirectedUrl(response.url, sourceUrlHash),
+      });
+    }
 
-      const content =`<!DOCTYPE html>
+    // for the main frame, create a index.html that redirects to the file
+    const url = sourceUrl.startsWith("data:") ? "data:" : sourceUrl;
+    const meta = params.options["capture.recordDocumentMeta"] ? 
+        ' data-scrapbook-source="' + scrapbook.escapeHtml(scrapbook.normalizeUrl(url)) + '"' + 
+        ' data-scrapbook-create="' + scrapbook.escapeHtml(timeId) + '"' + 
+        ' data-scrapbook-type="file"' + 
+        (charset ? ' data-scrapbook-charset="' + charset + '"' : "") : 
+        "";
+
+    const content =`<!DOCTYPE html>
 <html${meta}>
 <head>
 <meta charset="UTF-8">
@@ -1852,47 +1847,48 @@ ${title ? '<title>' + scrapbook.escapeHtml(title, false) + '</title>\n' : ''}</h
 Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.escapeHtml(response.filename, false)}</a>
 </body>
 </html>`;
-      let blob = new Blob([content], {type: "text/html;charset=UTF-8"});
-      blob = await capturer.saveBlobCache(blob);
+    let blob = new Blob([content], {type: "text/html;charset=UTF-8"});
+    blob = await capturer.saveBlobCache(blob);
 
-      const registry = await capturer.invoke("registerDocument", {
-        docUrl: sourceUrl,
-        mime: "text/html",
-        role: `document-${scrapbook.getUuid()}`,
-        settings,
-        options,
-      });
+    settings.indexFilename = await capturer.formatIndexFilename({
+      title: title || scrapbook.urlToFilename(sourceUrl) || "untitled",
+      sourceUrl,
+      isFolder: options["capture.saveAs"] === "folder",
+      settings,
+      options,
+    });
 
-			const documentFileName = registry.filename;
+    const registry = await capturer.invoke("registerDocument", {
+      docUrl: sourceUrl,
+      mime: "text/html",
+      role: `document-${scrapbook.getUuid()}`,
+      settings,
+      options,
+    });
 
-      {
-        const response = await capturer.saveDocument({
-          sourceUrl,
-          documentFileName,
-          settings,
-          options,
-          data: {
-            title,
-            blob,
-          },
-        });
+    const documentFileName = registry.filename;
 
-        // special handling for blob response
-        if (!('url' in response)) {
-          return response;
-        }
+    response = await capturer.saveDocument({
+      sourceUrl,
+      documentFileName,
+      settings,
+      options,
+      data: {
+        title,
+        blob,
+      },
+    });
 
-        return Object.assign({}, response, {
-          type: "file",
-          charset: charset || undefined,
-          url: capturer.getRedirectedUrl(response.url, sourceUrlHash),
-        });
-      }
-    } else {
-      return Object.assign({}, response, {
-        url: capturer.getRedirectedUrl(response.url, sourceUrlHash),
-      });
+    // special handling for blob response
+    if (!('url' in response)) {
+      return response;
     }
+
+    return Object.assign({}, response, {
+      type: "file",
+      charset: charset || undefined,
+      url: capturer.getRedirectedUrl(response.url, sourceUrlHash),
+    });
   };
 
   /**
