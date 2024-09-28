@@ -1844,7 +1844,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
     const registry = await capturer.invoke("registerDocument", {
       docUrl: sourceUrl,
       mime: "text/html",
-      role: `document-${scrapbook.getUuid()}`,
+      role: "document",
       settings,
       options,
     });
