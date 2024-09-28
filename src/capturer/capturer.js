@@ -1010,6 +1010,7 @@
     settings: {
       timeId = scrapbook.dateToId(),
       documentName = 'index',
+      indexFilename,
       fullPage,
       title,
       favIconUrl,
@@ -1038,7 +1039,7 @@
       recurseChain: [],
       depth: 0,
       isHeadless: false,
-      indexFilename: null,
+      indexFilename,
       isMainPage: true,
       isMainFrame: true,
       fullPage,
@@ -1699,7 +1700,7 @@ Bookmark for <a href="${scrapbook.escapeHtml(sourceUrl)}">${scrapbook.escapeHtml
     const blob = new Blob([html], {type: "text/html"});
     const ext = ".htm";
 
-    settings.indexFilename = await capturer.formatIndexFilename({
+    settings.indexFilename = settings.indexFilename || await capturer.formatIndexFilename({
       title: title || scrapbook.filenameParts(scrapbook.urlToFilename(sourceUrl))[0] || "untitled",
       sourceUrl,
       isFolder: false,
@@ -1832,7 +1833,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
     let blob = new Blob([html], {type: "text/html;charset=UTF-8"});
     blob = await capturer.saveBlobCache(blob);
 
-    settings.indexFilename = await capturer.formatIndexFilename({
+    settings.indexFilename = settings.indexFilename || await capturer.formatIndexFilename({
       title: title || scrapbook.urlToFilename(sourceUrl) || "untitled",
       sourceUrl,
       isFolder: options["capture.saveAs"] === "folder",
@@ -2761,6 +2762,9 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
         const settings = {
           timeId, fullPage, title, favIconUrl,
           documentName: null,
+
+          // save to the same directory (strip "/index.html")
+          indexFilename: item.index.slice(0, -11),
         };
         options = Object.assign({}, options, {
           // capture to server
@@ -2770,8 +2774,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
           // and prevents a conflict with different types
           "capture.saveAs": "folder",
 
-          // save to the same directory
-          "capture.saveFilename": item.index.slice(0, -11),
+          // overwrite existing files (if mapped to same path)
           "capture.saveOverwrite": true,
 
           // always rebuild links and update index.json

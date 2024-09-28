@@ -2877,7 +2877,7 @@
     let docRefPolicy = capturer.isAboutUrl(metaDocUrl) ? (params.refPolicy || "") : "";
 
     if (isMainPage && isMainFrame) {
-      settings.indexFilename = await capturer.formatIndexFilename({
+      settings.indexFilename = settings.indexFilename || await capturer.formatIndexFilename({
         title: settings.title || doc.title || scrapbook.filenameParts(scrapbook.urlToFilename(docUrl))[0] || "untitled",
         sourceUrl: docUrl,
         isFolder: options["capture.saveAs"] === "folder",
