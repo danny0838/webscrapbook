@@ -17,6 +17,27 @@
 
 'use strict';
 
+// Polyfill for Chromium 73
+if (!Object.fromEntries) {
+  Object.defineProperty(Object, 'fromEntries', {
+    value(entries) {
+      if (!entries || !entries[Symbol.iterator]) {
+        throw new Error('Object.fromEntries() requires a single iterable argument');
+      }
+
+      const o = {};
+
+      Object.keys(entries).forEach((key) => {
+        const [k, v] = entries[key];
+
+        o[k] = v;
+      });
+
+      return o;
+    },
+  });
+}
+
 /**
  * Slightly different from WebScrapBook version as checking
  * `browser_specific_settings` doesn't work for the test extension.

@@ -57,8 +57,20 @@ class TestSuite {
     })();
 
     const config = this.config = Object.assign({}, config1, config2);
+    this.backend = `http://localhost${config["backend_port"] === 80 ? "" : ":" + config["backend_port"]}`;
     this.localhost = `http://localhost${config["server_port"] === 80 ? "" : ":" + config["server_port"]}`;
     this.localhost2 = `http://localhost${config["server_port2"] === 80 ? "" : ":" + config["server_port2"]}`;
+  }
+
+  async checkBackendServer() {
+    try {
+      await this.backendRequest({
+        query: {a: 'config', f: 'json'},
+      }).then(r => r.json());
+    } catch (ex) {
+      console.error(ex);
+      throw new Error(`Unable to connect to backend server "${backend}". Make sure PyWebScrapBook module has been installed, the server has been started, and the port is not occupied by another application.`);
+    }
   }
 
   async checkTestServer() {
@@ -192,9 +204,10 @@ class TestSuite {
    * @param {Object} options
    * @param {boolean} options.headless
    * @param {float} options.delay
+   * @param {boolean} options.rawResponse
    */
   async capture(params, options = {}) {
-    const {headless = false, delay: delayTime} = options;
+    const {headless = false, delay: delayTime, rawResponse = false} = options;
     const pageTab = !headless && await this.openPageTab(params.url);
 
     if (typeof delayTime === 'number') {
@@ -233,6 +246,10 @@ class TestSuite {
     await browser.tabs.remove(response.tab.id);
     !headless && await browser.tabs.remove(pageTab.id);
 
+    if (rawResponse) {
+      return result;
+    }
+
     if (result.error) {
       return result;
     }
@@ -252,6 +269,86 @@ class TestSuite {
       Object.assign({mode: "source"}, params),
       Object.assign({}, options, {headless: true}),
     );
+  }
+
+  /**
+   * @param {Object} params
+   * @param {string|URL} [params.url]
+   * @param {string|Object|Array|URLSearchParams} [params.query]
+   * @param {string} [params.method]
+   * @param {Object|Array|Headers} [params.headers]
+   * @param {Object|Array|FormData} [params.body]
+   * @param {string} [params.credentials]
+   * @param {string} [params.cache]
+   * @param {boolean} [params.csrfToken]
+   */
+  async backendRequest({
+    url = this.backend,
+    query,
+    method,
+    headers,
+    body,
+    credentials = 'include',
+    cache = 'no-cache',
+    csrfToken = false,
+  }) {
+    if (!method) {
+      method = (body || csrfToken) ? 'POST' : 'GET';
+    }
+
+    if (!(url instanceof URL)) {
+      url = new URL(url);
+    }
+
+    if (query) {
+      if (!(query instanceof URLSearchParams)) {
+        query = new URLSearchParams(query);
+      }
+      for (const [key, value] of query) {
+        url.searchParams.append(key, value);
+      }
+    }
+
+    if (headers && !(headers instanceof Headers)) {
+      headers = new Headers(headers);
+    }
+
+    if (body && !(body instanceof FormData)) {
+      const b = new FormData();
+      for (const [key, value] of Object.entries(body)) {
+        if (typeof value !== 'undefined') {
+          b.append(key, value);
+        }
+      }
+      body = b;
+    }
+
+    if (csrfToken) {
+      const token = await fetch(`${this.backend}?a=token`, {
+        method: "POST",
+        credentials,
+        cache,
+      }).then(r => r.text());
+
+      if (!body) {
+        body = new FormData();
+      }
+      body.append('token', token);
+    }
+
+    const response = await fetch(url, {
+      method,
+      headers,
+      body,
+      credentials,
+      cache,
+    });
+
+    if (!response.ok) {
+      throw new Error(`Bad response: ${response.status} ${response.statusText}`);
+    }
+
+    return response;
   }
 }
 
@@ -288,13 +385,16 @@ class TestSuite {
 
   // expose to global scope
   Object.assign(global, {
+    backend: suite.backend,
     localhost: suite.localhost,
     localhost2: suite.localhost2,
+    checkBackendServer: suite.checkBackendServer.bind(suite),
     checkTestServer: suite.checkTestServer.bind(suite),
     checkExtension: suite.checkExtension.bind(suite),
     capture: suite.capture.bind(suite),
     captureHeadless: suite.captureHeadless.bind(suite),
     openTestTab: suite.openTestTab.bind(suite),
+    backendRequest: suite.backendRequest.bind(suite),
   });
 
   // import all tests

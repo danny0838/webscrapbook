@@ -157,6 +157,7 @@ describe('Capture tests', function () {
 
 before(async function () {
   await Promise.all([
+    checkBackendServer(),
     checkTestServer(),
     checkExtension(),
   ]);
@@ -2395,6 +2396,47 @@ it('test_capture_bookmark', async function () {
   assert.exists(doc.querySelector(`meta[http-equiv="refresh"][content="0; url=${localhost}/capture_bookmark/index.html"]`));
   assert.exists(doc.querySelector(`a[href="${localhost}/capture_bookmark/index.html"]`));
   assert.exists(doc.querySelector(`link[rel="shortcut icon"][href="data:image/bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAAD/AAAA"]`));
+});
+
+/**
+ * Save to backend server as an item.
+ *
+ * capturer.captureBookmark
+ */
+it('test_capture_bookmark_backend', async function () {
+  var options = Object.assign({}, baseOptions, {
+    "capture.saveTo": "server",
+    "capture.saveAs": "folder",
+  });
+
+  var response = await capture({
+    url: `${localhost}/capture_bookmark/index.html`,
+    mode: "bookmark",
+    options,
+  }, {rawResponse: true});
+  var {timeId: itemId} = response;
+
+  var {data: [response]} = await backendRequest({
+    body: {
+      a: 'query',
+      f: 'json',
+      q: JSON.stringify({
+        book: '',
+        cmd: 'get_item',
+        args: [itemId],
+      }),
+      details: 1,
+    },
+    csrfToken: true,
+  }).then(r => r.json());
+  assert.deepInclude(response.meta, {
+    index: "",
+    title: "ABC 中文 𠀀 にほんご",
+    type: "bookmark",
+    create: itemId,
+    source: `${localhost}/capture_bookmark/index.html`,
+    icon: "../tree/favicon/ecb6e0b0acec8b20d5f0360a52fe336a7a7cb475.bmp",
+  });
 });
 
 /**
@@ -18012,6 +18054,338 @@ it('test_capture_helpers_nesting', async function () {
   var doc = await readFileAsDocument(indexBlob);
 
   assert.exists(doc.querySelector('img[src="green.bmp"]'));
+});
+
+it('test_recapture', async function () {
+  var options = Object.assign({}, baseOptions, {
+    "capture.saveTo": "server",
+    "capture.saveAs": "folder",
+  });
+
+  var response = await capture({
+    url: `${localhost}/capture_recapture/page1/index.html`,
+    options,
+  }, {rawResponse: true});
+  var {timeId: itemId} = response;
+
+  var response = await captureHeadless({
+    url: `${localhost}/capture_recapture/page2/index.html`,
+    options,
+    recaptureInfo: {bookId: "", itemId},
+  }, {rawResponse: true});
+  var {timeId: itemId2} = response;
+
+  var doc = (await xhr({
+    url: `${backend}/data/${itemId2}/index.html`,
+    responseType: "document",
+  })).response;
+  assert.strictEqual(doc.querySelector('p').textContent, `Page content 2`);
+  assert.strictEqual(doc.querySelector('img').getAttribute('src'), `yellow.bmp`);
+
+  var {data: response} = await backendRequest({
+    url: `${backend}/data/${itemId2}`,
+    body: {f: 'json', a: 'list'},
+  }).then(r => r.json());
+  assert.sameMembers(response.map(r => r.name), [
+    "index.html",
+    "fav2.bmp",
+    "yellow.bmp",
+  ]);
+
+  var {data: [response]} = await backendRequest({
+    body: {
+      a: 'query',
+      f: 'json',
+      q: JSON.stringify({
+        book: '',
+        cmd: 'get_items',
+        args: [[itemId, itemId2]],
+      }),
+      details: 1,
+    },
+    csrfToken: true,
+  }).then(r => r.json());
+  assert.hasAllKeys(response, [itemId]);
+  assert.deepInclude(response[itemId].meta, {
+    index: `${itemId2}/index.html`,
+    title: "Page1",
+    type: "",
+    create: itemId,
+    source: `${localhost}/capture_recapture/page2/index.html`,
+    icon: "fav2.bmp",
+  });
+});
+
+it('test_recapture_migrate_linemarker', async function () {
+  var options = Object.assign({}, baseOptions, {
+    "capture.saveTo": "server",
+    "capture.saveAs": "folder",
+  });
+
+  var response = await capture({
+    url: `${localhost}/capture_recapture_migrate/page1/index.html`,
+    options,
+  }, {rawResponse: true});
+  var {timeId: itemId} = response;
+
+  var html = await backendRequest({
+    url: `${backend}/data/${itemId}/index.html`,
+  }).then(r => r.text());
+  var body = `<p>Lorem ipsum dolor sit amet, <scrapbook-linemarker data-scrapbook-id="20240928140450705" data-scrapbook-elem="linemarker" style="background-color: yellow;" class="first last">consectetur adipiscing elit</scrapbook-linemarker>. Maecenas suscipit maximus. Sed urna nisl, rhoncus vel finibus eget, elementum sed massa. Interdum et malesuada fames ac ante ipsum primis in faucibus.</p>
+<p>Integer placerat viverra augue quis fermentum. <scrapbook-linemarker data-scrapbook-id="20240928140505409" data-scrapbook-elem="linemarker" style="background-color: yellow;" class="first last">Quisque at felis interdum, finibus sapien eu, feugiat ipsum.</scrapbook-linemarker> Etiam sed massa at felis maximus semper. Quisque eu orci fringilla odio lobortis elementum.</p>
+`;
+  html = html.replace(regex`<body>([\s\S]*?)</body>`, `<body>${body}</body>`);
+
+  /* recapture same document */
+  var response = await backendRequest({
+    url: `${backend}/data/${itemId}/index.html`,
+    body: {
+      a: 'save',
+      f: 'json',
+      upload: new File([html], `index.json`, {type: "text/javascript"}),
+    },
+    csrfToken: true,
+  }).then(r => r.json());
+
+  var response = await captureHeadless({
+    url: `${localhost}/capture_recapture_migrate/page1/index.html`,
+    options,
+    recaptureInfo: {bookId: "", itemId},
+  }, {rawResponse: true});
+  var {timeId: itemId2} = response;
+
+  var doc = (await xhr({
+    url: `${backend}/data/${itemId2}/index.html`,
+    responseType: "document",
+  })).response;
+  assert.exists(doc.querySelector('scrapbook-linemarker[data-scrapbook-id="20240928140450705"]'));
+  assert.exists(doc.querySelector('scrapbook-linemarker[data-scrapbook-id="20240928140505409"]'));
+
+  /* recapture slightly modified document */
+  var response = await captureHeadless({
+    url: `${localhost}/capture_recapture_migrate/page2/index.html`,
+    options,
+    recaptureInfo: {bookId: "", itemId},
+  }, {rawResponse: true});
+  var {timeId: itemId3} = response;
+
+  var doc = (await xhr({
+    url: `${backend}/data/${itemId3}/index.html`,
+    responseType: "document",
+  })).response;
+  var pElems = doc.querySelectorAll('p');
+  assert.strictEqual(pElems[0].innerHTML, `Lorem ipsum dolor sit amet, <scrapbook-linemarker data-scrapbook-id="20240928140450705" data-scrapbook-elem="linemarker" style="background-color: yellow;" class="first last">consectetur adipiscing elit</scrapbook-linemarker>. Maecenas tincidunt suscipit maximus. Interdum et malesuada faucibus.`);
+  assert.strictEqual(pElems[1].innerHTML, `Integer placerat viverra augue quis fermentum. Quisque at felis interdum, feugiat ipsum. Etiam sed massa at felis maximus semper. Quisque eu orci fringilla odio lobortis elementum.`);
+});
+
+it('test_recapture_migrate_sticky', async function () {
+  var options = Object.assign({}, baseOptions, {
+    "capture.saveTo": "server",
+    "capture.saveAs": "folder",
+  });
+
+  var response = await capture({
+    url: `${localhost}/capture_recapture_migrate/page1/index.html`,
+    options,
+  }, {rawResponse: true});
+  var {timeId: itemId} = response;
+
+  var html = await backendRequest({
+    url: `${backend}/data/${itemId}/index.html`,
+  }).then(r => r.text());
+  var body = `<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas suscipit maximus. Sed urna nisl, rhoncus vel finibus eget, elementum sed massa. Interdum et malesuada fames ac ante ipsum primis in faucibus.</p><scrapbook-sticky data-scrapbook-id="20240928140529186" data-scrapbook-elem="sticky" class="styled plaintext relative">relative note</scrapbook-sticky>
+<p>Integer placerat viverra augue quis fermentum. Quisque at felis interdum, finibus sapien eu, feugiat ipsum. Etiam sed massa at felis maximus semper. Quisque eu orci fringilla odio lobortis elementum.</p>
+<scrapbook-sticky data-scrapbook-id="20240928140509146" data-scrapbook-elem="sticky" class="styled plaintext" style="left: 265px; top: 169px; width: 250px; height: 100px;">absolute note</scrapbook-sticky><style data-scrapbook-elem="annotation-css">[data-scrapbook-elem="linemarker"][title] { cursor: help; } [data-scrapbook-elem="sticky"] { display: block; overflow: auto; } [data-scrapbook-elem="sticky"].styled { position: absolute; z-index: 2147483647; opacity: .95; box-sizing: border-box; margin: 0; border: 1px solid #CCCCCC; border-top-width: 1.25em; border-radius: .25em; padding: .25em; min-width: 6em; min-height: 4em; background: #FAFFFA; box-shadow: .15em .15em .3em black; font: .875em/1.2 sans-serif; color: black; overflow-wrap: break-word; cursor: help; } [data-scrapbook-elem="sticky"].styled.relative { position: relative; margin: 16px auto; } [data-scrapbook-elem="sticky"].styled.plaintext { white-space: pre-wrap; } [data-scrapbook-elem="sticky"].dragging { opacity: .75; } </style><script data-scrapbook-elem="annotation-loader">(function () { var w = window, d = document, r = d.documentElement, e; d.addEventListener('click', function (E) { if (r.hasAttribute('data-scrapbook-toolbar-active')) { return; } if (!w.getSelection().isCollapsed) { return; } e = E.target; if (e.matches('[data-scrapbook-elem="linemarker"]')) { if (e.title) { if (!confirm(e.title)) { E.preventDefault(); E.stopPropagation(); } } } else if (e.matches('[data-scrapbook-elem="sticky"]')) { if (confirm('刪除這個批註嗎？')) { e.parentNode.removeChild(e); E.preventDefault(); E.stopPropagation(); } } }, true); })()</script>`;
+  html = html.replace(regex`<body>([\s\S]*?)</body>`, `<body>${body}</body>`);
+
+  /* recapture same document */
+  var response = await backendRequest({
+    url: `${backend}/data/${itemId}/index.html`,
+    body: {
+      a: 'save',
+      f: 'json',
+      upload: new File([html], `index.json`, {type: "text/javascript"}),
+    },
+    csrfToken: true,
+  }).then(r => r.json());
+
+  var response = await captureHeadless({
+    url: `${localhost}/capture_recapture_migrate/page1/index.html`,
+    options,
+    recaptureInfo: {bookId: "", itemId},
+  }, {rawResponse: true});
+  var {timeId: itemId2} = response;
+
+  var doc = (await xhr({
+    url: `${backend}/data/${itemId2}/index.html`,
+    responseType: "document",
+  })).response;
+  assert.exists(doc.querySelector('scrapbook-sticky[data-scrapbook-id="20240928140529186"]'));
+  assert.exists(doc.querySelector('scrapbook-sticky[data-scrapbook-id="20240928140509146"]'));
+
+  /* recapture slightly modified document */
+  var response = await captureHeadless({
+    url: `${localhost}/capture_recapture_migrate/page2/index.html`,
+    options,
+    recaptureInfo: {bookId: "", itemId},
+  }, {rawResponse: true});
+  var {timeId: itemId3} = response;
+
+  var doc = (await xhr({
+    url: `${backend}/data/${itemId3}/index.html`,
+    responseType: "document",
+  })).response;
+  assert.exists(doc.querySelector('scrapbook-sticky[data-scrapbook-id="20240928140529186"]'));
+  assert.exists(doc.querySelector('scrapbook-sticky[data-scrapbook-id="20240928140509146"]'));
+});
+
+it('test_mergeCapture', async function () {
+  var options = Object.assign({}, baseOptions, {
+    "capture.saveTo": "server",
+    "capture.saveAs": "folder",
+    "capture.downLink.doc.depth": 0,
+  });
+
+  var response = await capture({
+    url: `${localhost}/capture_mergeCapture/main.html`,
+    options,
+  }, {rawResponse: true});
+
+  var {timeId: itemId} = response;
+  var mergeCaptureInfo = {bookId: "", itemId};
+
+  var response = await capture({
+    url: `${localhost}/capture_mergeCapture/linked1-1.html`,
+    options,
+    mergeCaptureInfo,
+  }, {rawResponse: true});
+
+  var response = await capture({
+    url: `${localhost}/capture_mergeCapture/linked1-2.xhtml`,
+    options,
+    mergeCaptureInfo,
+  }, {rawResponse: true});
+
+  var response = await capture({
+    url: `${localhost}/capture_mergeCapture/linked1-3.svg`,
+    options,
+    mergeCaptureInfo,
+  }, {rawResponse: true});
+
+  var response = await capture({
+    url: `${localhost}/capture_mergeCapture/linked1-4.txt`,
+    options,
+    mergeCaptureInfo,
+  }, {rawResponse: true});
+
+  var doc = (await xhr({
+    url: `${backend}/data/${itemId}/index.html`,
+    responseType: "document",
+  })).response;
+  var anchors = doc.querySelectorAll('a[href]');
+  assert.strictEqual(anchors[0].getAttribute('href'), `linked1-1.html#111`);
+  assert.strictEqual(anchors[1].getAttribute('href'), `linked1-2.xhtml#222`);
+  assert.strictEqual(anchors[2].getAttribute('href'), `linked1-3.svg#333`);
+  assert.strictEqual(anchors[3].getAttribute('href'), `linked1-4.txt.html#444`);
+
+  var doc = (await xhr({
+    url: `${backend}/data/${itemId}/linked1-1.html`,
+    responseType: "document",
+  })).response;
+  assert.strictEqual(doc.querySelector('p').textContent, `Linked page 1-1.`);
+
+  var doc = (await xhr({
+    url: `${backend}/data/${itemId}/linked1-2.xhtml`,
+    responseType: "document",
+  })).response;
+  assert.strictEqual(doc.querySelector('p').textContent, `Linked page 1-2.`);
+
+  var doc = (await xhr({
+    url: `${backend}/data/${itemId}/linked1-3.svg`,
+    responseType: "document",
+  })).response;
+  assert.exists(doc.querySelector('rect'));
+
+  var text = (await xhr({
+    url: `${backend}/data/${itemId}/linked1-4.txt`,
+  })).response;
+  assert.strictEqual(text, 'Linked file 1-4.');
+
+  var sitemap = await backendRequest({
+    url: `${backend}/data/${itemId}/index.json`,
+  }).then(r => r.json());
+  var expectedData = {
+    "version": 3,
+    "indexPages": [
+      "index.html",
+      "linked1-1.html",
+      "linked1-2.xhtml",
+      "linked1-3.svg",
+      "linked1-4.txt.html"
+    ],
+    "files": [
+      {
+        "path": "index.json"
+      },
+      {
+        "path": "index.dat"
+      },
+      {
+        "path": "index.rdf"
+      },
+      {
+        "path": "history.rdf"
+      },
+      {
+        "path": "^metadata^"
+      },
+      {
+        "path": "index.html",
+        "url": `${localhost}/capture_mergeCapture/main.html`,
+        "role": "document",
+        "token": getToken(`${localhost}/capture_mergeCapture/main.html`, "document")
+      },
+      {
+        "path": "index.xhtml",
+        "role": "document"
+      },
+      {
+        "path": "index.svg",
+        "role": "document"
+      },
+      {
+        "path": "linked1-1.html",
+        "url": `${localhost}/capture_mergeCapture/linked1-1.html`,
+        "role": "document",
+        "token": getToken(`${localhost}/capture_mergeCapture/linked1-1.html`, "document")
+      },
+      {
+        "path": "linked1-2.xhtml",
+        "url": `${localhost}/capture_mergeCapture/linked1-2.xhtml`,
+        "role": "document",
+        "token": getToken(`${localhost}/capture_mergeCapture/linked1-2.xhtml`, "document")
+      },
+      {
+        "path": "linked1-3.svg",
+        "url": `${localhost}/capture_mergeCapture/linked1-3.svg`,
+        "role": "document",
+        "token": getToken(`${localhost}/capture_mergeCapture/linked1-3.svg`, "document")
+      },
+      {
+        "path": "linked1-4.txt",
+        "url": `${localhost}/capture_mergeCapture/linked1-4.txt`,
+        "role": "resource",
+        "token": getToken(`${localhost}/capture_mergeCapture/linked1-4.txt`, "resource")
+      },
+      {
+        "path": "linked1-4.txt.html",
+        "url": `${localhost}/capture_mergeCapture/linked1-4.txt`,
+        "role": "document",
+        "token": getToken(`${localhost}/capture_mergeCapture/linked1-4.txt`, "document")
+      }
+    ]
+  };
+  assert.deepEqual(sitemap, expectedData);
 });
 
 });  // Capture tests

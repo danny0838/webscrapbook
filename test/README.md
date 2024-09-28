@@ -5,12 +5,13 @@ Unit tests
 
 * Firefox ≥ 68, Chromium ≥ 73
 * Python ≥ 3.7
+* PyWebScrapBook (compatible version)
 
 ### Usage
 
 1. Copy `config.json` to `config.local.json` and edit it:
-   * Make sure "wsb_extension_id" matches the extension ID of WebScrapBook.
-   * Make sure "server_port" and "server_port2" are available (not used by other applications).
+   * Make sure `wsb_extension_id` matches the extension ID of WebScrapBook.
+   * Make sure `server_port`, `server_port2`, and `backend_port` are available (not used by other applications).
 
 2. Run `server.py` to start the local hosting server and do some initialization.
 
@@ -18,7 +19,10 @@ Unit tests
 
 4. Install `WebScrapBook Test Suite` extension in this directory (as a temporary extension).
 
-5. Click on the browser action of the test suite extension. A tab will be opened and the test will start automatically. Alternatively, right-click on the browser action for subgroup tests.
+5. Configure WebScrapBook options:
+   * Make sure backend server URL matches the configured `backend_port`.
+
+6. Click on the browser action of the test suite extension. A tab will be opened and the test will start automatically. Alternatively, right-click on the browser action for subgroup tests.
 
 ### Notes
 

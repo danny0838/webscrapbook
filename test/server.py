@@ -4,6 +4,7 @@ import json
 import os
 import shutil
 import time
+import tempfile
 from threading import Thread
 
 
@@ -66,6 +67,50 @@ class HTTPRequestHandler(http.server.CGIHTTPRequestHandler):
             self.cgi_info = head, tail
             return True
         return False
+
+
+def backend(port):
+    try:
+        from webscrapbook import WSB_DIR, WSB_CONFIG
+        import webscrapbook.server
+    except ImportError:
+        print('WARNING: unable to import PyWebScrapBook')
+        return
+
+    with tempfile.TemporaryDirectory() as root:
+        config_file = os.path.normpath(os.path.join(root, WSB_DIR, WSB_CONFIG))
+        config = f"""\
+[app]
+name = WebScrapBook
+theme = default
+locale =
+root = .
+backup_dir = .wsb/backup
+
+[book ""]
+name = scrapbook
+top_dir = 
+data_dir = data
+tree_dir = tree
+index = tree/map.html
+no_tree = false
+new_at_top = false
+inclusive_frames = true
+static_index = false
+rss_root = 
+rss_item_count = 50
+
+[server]
+port = {port}
+host = localhost
+ssl_on = false
+browse = false
+"""
+        os.makedirs(os.path.dirname(config_file))
+        with open(config_file, 'w', encoding='UTF-8') as fh:
+            fh.write(config)
+
+        webscrapbook.server.serve(root)
 
 
 def main():
@@ -153,6 +198,12 @@ def main():
         'HandlerClass': HTTPRequestHandler,
         'port': int(config['server_port2']),
         'bind': '127.0.0.1',
+    })
+    thread.daemon = True
+    thread.start()
+
+    thread = Thread(target=backend, kwargs={
+        'port': int(config['backend_port']),
     })
     thread.daemon = True
     thread.start()
