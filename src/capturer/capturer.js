@@ -928,25 +928,31 @@
         } else if (recaptureInfo) {
           // recapture
           result = await capturer.recapture({
-            tabId, frameId, fullPage,
-            url, refUrl, title, favIconUrl,
-            mode, options, comment,
+            tabId, frameId,
+            url, refUrl,
+            mode,
+            settings: {fullPage, title, favIconUrl},
+            options, comment,
             recaptureInfo,
           });
         } else if (mergeCaptureInfo) {
           // merge capture
           result = await capturer.mergeCapture({
-            tabId, frameId, fullPage,
-            url, refUrl, title, favIconUrl,
-            mode, options,
+            tabId, frameId,
+            url, refUrl,
+            mode,
+            settings: {fullPage, title, favIconUrl},
+            options,
             mergeCaptureInfo,
           });
         } else {
           // capture general
           result = await capturer.captureGeneral({
-            tabId, frameId, fullPage,
-            url, refUrl, title, favIconUrl,
-            mode, options, comment,
+            tabId, frameId,
+            url, refUrl,
+            mode,
+            settings: {fullPage, title, favIconUrl},
+            options, comment,
             bookId, parentId, index,
           });
 
@@ -981,34 +987,37 @@
 
   /**
    * @param {Object} params
-   * @param {string} [params.timeId] - an overriding timeId
-   * @param {?string} [params.documentName] - default filename for the main
-   *     document
-   * @param {boolean} [params.captureOnly] - skip adding item and clean up
-   *     (for special modes like recapture and mergeCapture)
-   * @param {integer} [params.tabId]
-   * @param {integer} [params.frameId]
-   * @param {boolean} [params.fullPage]
-   * @param {string} [params.url]
-   * @param {string} [params.refUrl]
-   * @param {string} [params.title] - item title
-   * @param {string} [params.favIconUrl] - item favicon
+   * @param {integer} [params.tabId] - ID of the tab to capture
+   * @param {integer} [params.frameId] - ID of the frame to capture
+   * @param {string} [params.url] - source URL of the page to capture (ignored
+   *     when tabId is set)
+   * @param {string} [params.refUrl] - the referrer policy
    * @param {string} [params.mode] - "tab", "source", "bookmark"
-   * @param {captureOptions} params.options
+   * @param {captureSettings} [params.settings] - overriding settings
+   * @param {captureOptions} params.options - options for the capture
    * @param {string} [params.comment] - comment for the captured item
    * @param {?string} [params.bookId] - bookId ID for the captured items
    * @param {string} [params.parentId] - parent item ID for the captured items
    * @param {integer} [params.index] - position index for the captured items
+   * @param {boolean} [params.captureOnly] - skip adding item and clean up
+   *     (for special modes like recapture and mergeCapture)
    * @return {Promise<captureDocumentResponse|transferableBlob>}
    */
   capturer.captureGeneral = async function ({
-    timeId = scrapbook.dateToId(),
-    documentName = 'index',
-    captureOnly = false,
-    tabId, frameId, fullPage,
-    url, refUrl, title, favIconUrl,
-    mode, options, comment,
+    tabId, frameId,
+    url, refUrl,
+    mode,
+    settings: {
+      timeId = scrapbook.dateToId(),
+      documentName = 'index',
+      fullPage,
+      title,
+      favIconUrl,
+    } = {},
+    options,
+    comment,
     bookId = null, parentId, index,
+    captureOnly = false,
   }) {
     // determine bookId at the start of a capture
     if (options["capture.saveTo"] === 'server') {
@@ -1019,23 +1028,36 @@
       server.bookId = bookId;
     }
 
+    // use disk cache for in-depth capture to prevent memory exhaustion
+    capturer.captureInfo.get(timeId).useDiskCache = parseInt(options["capture.downLink.doc.depth"], 10) > 0;
+
+    const settings = {
+      missionId: capturer.missionId,
+      timeId,
+      documentName,
+      recurseChain: [],
+      depth: 0,
+      isHeadless: false,
+      indexFilename: null,
+      isMainPage: true,
+      isMainFrame: true,
+      fullPage,
+      title,
+      favIconUrl,
+    };
+
     let response;
     if (Number.isInteger(tabId)) {
       // capture tab
       response = await capturer.captureTab({
-        timeId,
-        tabId, frameId, fullPage,
-        title, favIconUrl,
-        mode, options,
-        documentName,
+        tabId, frameId,
+        mode, settings, options,
       });
     } else if (typeof url === 'string') {
       // capture headless
       response = await capturer.captureRemote({
-        timeId,
-        url, refUrl, title, favIconUrl,
-        mode, options,
-        documentName,
+        url, refUrl,
+        mode, settings, options,
       });
     } else {
       // nothing to capture
@@ -1081,23 +1103,16 @@
 
   /**
    * @param {Object} params
-   * @param {string} params.timeId
-   * @param {?string} [params.documentName]
    * @param {integer} params.tabId
    * @param {integer} [params.frameId]
-   * @param {boolean} [params.fullPage]
-   * @param {string} [params.title] - item title
-   * @param {string} [params.favIconUrl] - item favicon
    * @param {string} [params.mode] - "tab", "source", "bookmark"
+   * @param {captureSettings} params.settings
    * @param {captureOptions} params.options
    * @return {Promise<captureDocumentResponse|transferableBlob>}
    */
   capturer.captureTab = async function ({
-    timeId,
-    documentName,
-    tabId, frameId, fullPage,
-    title, favIconUrl,
-    mode, options,
+    tabId, frameId,
+    mode, settings, options,
   }) {
     let {url, discarded} = await browser.tabs.get(tabId);
 
@@ -1110,34 +1125,19 @@
           ({url} = await browser.webNavigation.getFrame({tabId, frameId}));
         }
         return await capturer.captureRemote({
-          timeId,
-          documentName,
-          url, title, favIconUrl,
-          mode, options,
+          url,
+          mode, settings, options,
         });
       }
     }
 
     const source = `[${tabId}${(frameId ? ':' + frameId : '')}] ${url}`;
     const message = {
-      settings: {
-        missionId: capturer.missionId,
-        timeId,
-        documentName,
-        recurseChain: [],
-        depth: 0,
-        indexFilename: null,
-        isMainPage: true,
-        isMainFrame: true,
-        fullPage,
-        title,
-        favIconUrl,
-      },
+      settings: Object.assign({}, settings, {
+        isHeadless: false,
+      }),
       options,
     };
-
-    // use disk cache for in-depth capture to prevent memory exhaustion
-    capturer.captureInfo.get(timeId).useDiskCache = parseInt(options["capture.downLink.doc.depth"], 10) > 0;
 
     capturer.log(`Capturing (document) ${source} ...`);
 
@@ -1164,46 +1164,27 @@
 
   /**
    * @param {Object} params
-   * @param {string} params.timeId
-   * @param {?string} [params.documentName]
    * @param {string} params.url
    * @param {string} [params.refUrl]
    * @param {string} [params.refPolicy] - the referrer policy
-   * @param {string} [params.title] - item title
-   * @param {string} [params.favIconUrl] - item favicon
    * @param {string} [params.mode] - "tab", "source", "bookmark"
+   * @param {captureSettings} params.settings
    * @param {captureOptions} params.options
    * @return {Promise<captureDocumentResponse|transferableBlob>}
    */
   capturer.captureRemote = async function ({
-    timeId,
-    documentName,
-    url, refUrl, refPolicy, title, favIconUrl,
-    mode, options,
+    url, refUrl, refPolicy,
+    mode, settings, options,
   }) {
     const source = `${url}`;
     const message = {
-      url,
-      refUrl,
-      refPolicy,
-      settings: {
-        missionId: capturer.missionId,
-        timeId,
-        documentName,
-        recurseChain: [],
-        depth: 0,
+      url, refUrl, refPolicy,
+      settings: Object.assign({}, settings, {
         isHeadless: true,
-        indexFilename: null,
-        isMainPage: true,
-        isMainFrame: true,
-        title,
-        favIconUrl,
-      },
+        fullPage: true,
+      }),
       options,
     };
-
-    // use disk cache for in-depth capture to prevent memory exhaustion
-    capturer.captureInfo.get(timeId).useDiskCache = parseInt(options["capture.downLink.doc.depth"], 10) > 0;
 
     isDebug && console.debug("(main) capture", source, message);
 
@@ -2168,9 +2149,16 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
    * @return {Promise<captureDocumentResponse>}
    */
   capturer.recapture = async function ({
-    tabId, frameId, fullPage,
-    url, refUrl, title, favIconUrl,
-    mode, options, comment, recaptureInfo,
+    tabId, frameId,
+    url, refUrl,
+    mode,
+    settings: {
+      timeId = scrapbook.dateToId(),
+      fullPage,
+      title,
+      favIconUrl,
+    } = {},
+    options, comment, recaptureInfo,
   }) {
     const {bookId, itemId} = recaptureInfo;
 
@@ -2181,8 +2169,6 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
     if (!book || book.config.no_tree) {
       throw new Error(`Recapture reference book invalid: "${bookId}".`);
     }
-
-    const timeId = scrapbook.dateToId();
 
     let result;
     await book.transaction({
@@ -2201,15 +2187,15 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
         const oldIndex = item.index;
 
         // enforce capture to server
-        const subOptions = Object.assign({}, options, {
+        const settings = {timeId, fullPage, title, favIconUrl};
+        options = Object.assign({}, options, {
           "capture.saveTo": "server"
         });
 
         result = await capturer.captureGeneral({
-          timeId,
-          tabId, frameId, fullPage,
-          url: url || item.source, refUrl, title, favIconUrl,
-          mode, options: subOptions,
+          tabId, frameId,
+          url: url || item.source, refUrl,
+          mode, settings, options,
           bookId,
           captureOnly: true,
         });
@@ -2532,9 +2518,15 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
    * @return {Promise<captureDocumentResponse>}
    */
   capturer.mergeCapture = async function ({
-    tabId, frameId, fullPage,
-    url, refUrl, title, favIconUrl,
-    mode, options,
+    tabId, frameId,
+    url, refUrl,
+    mode,
+    settings: {
+      fullPage,
+      title,
+      favIconUrl,
+    } = {},
+    options,
     mergeCaptureInfo,
   }) {
     const {bookId, itemId} = mergeCaptureInfo;
@@ -2765,8 +2757,12 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
         }
 
         // enforce some capture options
-        let depth = parseInt(options["capture.downLink.doc.depth"], 10);
-        const subOptions = Object.assign({}, options, {
+        const depth = parseInt(options["capture.downLink.doc.depth"], 10);
+        const settings = {
+          timeId, fullPage, title, favIconUrl,
+          documentName: null,
+        };
+        options = Object.assign({}, options, {
           // capture to server
           "capture.saveTo": "server",
 
@@ -2787,12 +2783,10 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
         info.useDiskCache = true;
 
         result = await capturer.captureGeneral({
-          timeId,
-          tabId, frameId, fullPage,
-          url, refUrl, title, favIconUrl,
-          mode, options: subOptions,
+          tabId, frameId,
+          url, refUrl,
+          mode, settings, options,
           bookId,
-          documentName: null,
           captureOnly: true,
         });
 
