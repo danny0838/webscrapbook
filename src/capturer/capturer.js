@@ -3345,7 +3345,7 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
 
       capturer.log('Rebuilding links...');
       await capturer.rebuildLinks({timeId, options});
-      await capturer.generateSiteMap({timeId, path: sitemapPath});
+      await capturer.dumpSiteMap({timeId, path: sitemapPath});
     }
 
     // save captured data to files
@@ -4040,7 +4040,7 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
    * @param {string} params.timeId - timeId of the capture
    * @param {string} params.path - path to save the sitemap
    */
-  capturer.generateSiteMap = async function ({timeId, path}) {
+  capturer.dumpSiteMap = async function ({timeId, path}) {
     const version = 3;
     const {
       files, filenameMap,
