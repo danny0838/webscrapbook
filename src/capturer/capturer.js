@@ -3353,7 +3353,7 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
     const title = data.title || scrapbook.urlToFilename(sourceUrl);
     let targetDir;
     let filename;
-    let [, ext] = scrapbook.filenameParts(documentFileName);
+    let [basename, ext] = scrapbook.filenameParts(documentFileName);
     switch (options["capture.saveAs"]) {
       case "singleHtml": {
         let {blob} = data;
@@ -3373,8 +3373,8 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
 
       case "zip": {
         // create index.html that redirects to index.xhtml|.svg
-        if (ext !== "html") {
-          await addIndexHtml("index.html", `index.${ext}`, title);
+        if (basename === "index" && ext !== "html") {
+          await addIndexHtml(`${basename}.html`, documentFileName, title);
         }
 
         // generate and download the zip file
@@ -3390,8 +3390,8 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
 
       case "maff": {
         // create index.html that redirects to index.xhtml|.svg
-        if (ext !== "html") {
-          await addIndexHtml(`${timeId}/index.html`, `index.${ext}`, title);
+        if (basename === "index" && ext !== "html") {
+          await addIndexHtml(`${timeId}/${basename}.html`, documentFileName, title);
         }
 
         // generate index.rdf
@@ -3428,9 +3428,12 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
 
       case "folder":
       default: {
+        filename = documentFileName;
+
         // create index.html that redirects to index.xhtml|.svg
-        if (ext !== "html") {
-          await addIndexHtml("index.html", `index.${ext}`, title);
+        if (basename === "index" && ext !== "html") {
+          filename = `${basename}.html`;
+          await addIndexHtml(filename, documentFileName, title);
         }
 
         getTargetDirName: {
@@ -3441,8 +3444,6 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
           });
           settings.indexFilename = (dir ? dir + '/' : '') + newFilename;
         }
-
-        filename = 'index.html';
 
         const entries = await capturer.loadFileCache({timeId});
         const rv = await saveEntries(entries);
