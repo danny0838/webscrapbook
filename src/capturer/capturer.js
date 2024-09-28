@@ -2588,174 +2588,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
           throw new Error(`Unable to access "index.json" for item "${itemId}".`);
         }
 
-        info.initialVersion = sitemap.initialVersion || sitemap.version;
-
-        switch (sitemap.version) {
-          case 1: {
-            for (const {path, url, role, primary} of sitemap.files) {
-              info.files.set(path, {
-                url,
-                role,
-              });
-
-              if (primary) {
-                const token = capturer.getRegisterToken(url, role);
-                if (!token) {
-                  // skip invalid or undefined URL
-                  continue;
-                }
-
-                info.filenameMap.set(token, {
-                  filename: path,
-                  url: scrapbook.escapeFilename(path),
-                });
-
-                // load previously captured pages to blob
-                if (REBUILD_LINK_ROLE_PATTERN.test(role)) {
-                  const fileUrl = new URL(scrapbook.escapeFilename(path), indexUrl).href;
-                  try {
-                    const response = await server.request({
-                      url: fileUrl,
-                    });
-                    if (!response.ok) {
-                      throw new Error(`Bad status: ${response.status}`);
-                    }
-                    const blob = await response.blob();
-                    await capturer.saveFileCache({
-                      timeId,
-                      path,
-                      url,
-                      blob,
-                    });
-                  } catch (ex) {
-                    // skip missing resource
-                    continue;
-                  }
-                }
-              }
-            }
-            break;
-          }
-          case 2: {
-            for (const indexPage of sitemap.indexPages) {
-              info.indexPages.add(indexPage);
-            }
-            for (let {path, url, role, token} of sitemap.files) {
-              info.files.set(path, {
-                url,
-                role,
-                token,
-              });
-
-              if (token) {
-                // use url and role if token not matched
-                // (possibly modified arbitrarily)
-                if (url && role) {
-                  const t = capturer.getRegisterToken(url, role);
-                  if (!t) {
-                    // skip invalid URL
-                    continue;
-                  }
-                  if (t !== token) {
-                    token = t;
-                    console.error(`Taking token from url and role for mismatching token: "${path}"`);
-                  }
-                }
-
-                info.filenameMap.set(token, {
-                  filename: path,
-                  url: scrapbook.escapeFilename(path),
-                });
-
-                // load previously captured pages to blob
-                if (REBUILD_LINK_ROLE_PATTERN.test(role)) {
-                  const fileUrl = new URL(scrapbook.escapeFilename(path), indexUrl).href;
-                  try {
-                    const response = await server.request({
-                      url: fileUrl,
-                    });
-                    if (!response.ok) {
-                      throw new Error(`Bad status: ${response.status}`);
-                    }
-                    const blob = await response.blob();
-                    await capturer.saveFileCache({
-                      timeId,
-                      path,
-                      url,
-                      blob,
-                    });
-                  } catch (ex) {
-                    // skip missing resource
-                    continue;
-                  }
-                }
-              }
-            }
-            break;
-          }
-          case 3: {
-            for (const indexPage of sitemap.indexPages) {
-              info.indexPages.add(indexPage);
-            }
-            for (let {path, url, role, token} of sitemap.files) {
-              info.files.set(path.toLowerCase(), {
-                path,
-                url,
-                role,
-                token,
-              });
-
-              if (token) {
-                // use url and role if token not matched
-                // (possibly modified arbitrarily)
-                if (url && role) {
-                  const t = capturer.getRegisterToken(url, role);
-                  if (!t) {
-                    // skip invalid URL
-                    continue;
-                  }
-                  if (t !== token) {
-                    token = t;
-                    console.error(`Taking token from url and role for mismatching token: "${path}"`);
-                  }
-                }
-
-                info.filenameMap.set(token, {
-                  filename: path,
-                  url: scrapbook.escapeFilename(path),
-                });
-
-                // load previously captured pages to blob
-                if (REBUILD_LINK_ROLE_PATTERN.test(role)) {
-                  const fileUrl = new URL(scrapbook.escapeFilename(path), indexUrl).href;
-                  try {
-                    const response = await server.request({
-                      url: fileUrl,
-                    });
-                    if (!response.ok) {
-                      throw new Error(`Bad status: ${response.status}`);
-                    }
-                    const blob = await response.blob();
-                    await capturer.saveFileCache({
-                      timeId,
-                      path,
-                      url,
-                      blob,
-                    });
-                  } catch (ex) {
-                    // skip missing resource
-                    continue;
-                  }
-                }
-              }
-            }
-            break;
-          }
-          default: {
-            throw new Error(`Sitemap version ${sitemap.version} not supported.`);
-            break;
-          }
-        }
+        await capturer.loadSiteMap({sitemap, info, timeId, indexUrl});
 
         // enforce some capture options
         const depth = parseInt(options["capture.downLink.doc.depth"], 10);
@@ -4204,8 +4037,8 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
 
   /**
    * @param {Object} params
-   * @param {string} params.timeId
-   * @param {string} params.path
+   * @param {string} params.timeId - timeId of the capture
+   * @param {string} params.path - path to save the sitemap
    */
   capturer.generateSiteMap = async function ({timeId, path}) {
     const version = 3;
@@ -4251,6 +4084,184 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
       path,
       blob,
     });
+  };
+
+  /**
+   * @param {Object} params
+   * @param {Object} params.sitemap
+   * @param {missionCaptureInfo} params.info
+   * @param {string} params.timeId
+   * @param {string} params.indexUrl
+   */
+  capturer.loadSiteMap = async function ({sitemap, info, timeId, indexUrl}) {
+    info.initialVersion = sitemap.initialVersion || sitemap.version;
+
+    switch (sitemap.version) {
+      case 1: {
+        for (const {path, url, role, primary} of sitemap.files) {
+          info.files.set(path, {
+            url,
+            role,
+          });
+
+          if (primary) {
+            const token = capturer.getRegisterToken(url, role);
+            if (!token) {
+              // skip invalid or undefined URL
+              continue;
+            }
+
+            info.filenameMap.set(token, {
+              filename: path,
+              url: scrapbook.escapeFilename(path),
+            });
+
+            // load previously captured pages to blob
+            if (REBUILD_LINK_ROLE_PATTERN.test(role)) {
+              const fileUrl = new URL(scrapbook.escapeFilename(path), indexUrl).href;
+              try {
+                const response = await server.request({
+                  url: fileUrl,
+                });
+                if (!response.ok) {
+                  throw new Error(`Bad status: ${response.status}`);
+                }
+                const blob = await response.blob();
+                await capturer.saveFileCache({
+                  timeId,
+                  path,
+                  url,
+                  blob,
+                });
+              } catch (ex) {
+                // skip missing resource
+                continue;
+              }
+            }
+          }
+        }
+        break;
+      }
+      case 2: {
+        for (const indexPage of sitemap.indexPages) {
+          info.indexPages.add(indexPage);
+        }
+        for (let {path, url, role, token} of sitemap.files) {
+          info.files.set(path, {
+            url,
+            role,
+            token,
+          });
+
+          if (token) {
+            // use url and role if token not matched
+            // (possibly modified arbitrarily)
+            if (url && role) {
+              const t = capturer.getRegisterToken(url, role);
+              if (!t) {
+                // skip invalid URL
+                continue;
+              }
+              if (t !== token) {
+                token = t;
+                console.error(`Taking token from url and role for mismatching token: "${path}"`);
+              }
+            }
+
+            info.filenameMap.set(token, {
+              filename: path,
+              url: scrapbook.escapeFilename(path),
+            });
+
+            // load previously captured pages to blob
+            if (REBUILD_LINK_ROLE_PATTERN.test(role)) {
+              const fileUrl = new URL(scrapbook.escapeFilename(path), indexUrl).href;
+              try {
+                const response = await server.request({
+                  url: fileUrl,
+                });
+                if (!response.ok) {
+                  throw new Error(`Bad status: ${response.status}`);
+                }
+                const blob = await response.blob();
+                await capturer.saveFileCache({
+                  timeId,
+                  path,
+                  url,
+                  blob,
+                });
+              } catch (ex) {
+                // skip missing resource
+                continue;
+              }
+            }
+          }
+        }
+        break;
+      }
+      case 3: {
+        for (const indexPage of sitemap.indexPages) {
+          info.indexPages.add(indexPage);
+        }
+        for (let {path, url, role, token} of sitemap.files) {
+          info.files.set(path.toLowerCase(), {
+            path,
+            url,
+            role,
+            token,
+          });
+
+          if (token) {
+            // use url and role if token not matched
+            // (possibly modified arbitrarily)
+            if (url && role) {
+              const t = capturer.getRegisterToken(url, role);
+              if (!t) {
+                // skip invalid URL
+                continue;
+              }
+              if (t !== token) {
+                token = t;
+                console.error(`Taking token from url and role for mismatching token: "${path}"`);
+              }
+            }
+
+            info.filenameMap.set(token, {
+              filename: path,
+              url: scrapbook.escapeFilename(path),
+            });
+
+            // load previously captured pages to blob
+            if (REBUILD_LINK_ROLE_PATTERN.test(role)) {
+              const fileUrl = new URL(scrapbook.escapeFilename(path), indexUrl).href;
+              try {
+                const response = await server.request({
+                  url: fileUrl,
+                });
+                if (!response.ok) {
+                  throw new Error(`Bad status: ${response.status}`);
+                }
+                const blob = await response.blob();
+                await capturer.saveFileCache({
+                  timeId,
+                  path,
+                  url,
+                  blob,
+                });
+              } catch (ex) {
+                // skip missing resource
+                continue;
+              }
+            }
+          }
+        }
+        break;
+      }
+      default: {
+        throw new Error(`Sitemap version ${sitemap.version} not supported.`);
+        break;
+      }
+    }
   };
 
 
