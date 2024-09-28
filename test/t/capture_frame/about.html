@@ -19,7 +19,7 @@ setTimeout(() => {
   for (const iframe of document.querySelectorAll('iframe')) {
     i++;
     try {
-      iframe.contentDocument.body.textContent = `iframe modified ${i}`; 
+      iframe.contentDocument.body.textContent = `iframe modified ${i}`;
     } catch (ex) {
       console.error(`failurd to write iframe %s: %s`, i, ex);
     }

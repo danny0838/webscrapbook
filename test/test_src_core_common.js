@@ -1772,7 +1772,7 @@ describe('core/common.js', function () {
       var expected = `body { image-background: uRl("http://example.com/image.jpg"); }`;
       assertEqual(scrapbook.rewriteCssText(input, optionsImage), expected);
 
-			// spaces only
+      // spaces only
       var input = `body { image-background: url(); }`;
       var expected = `body { image-background: url("http://example.com/"); }`;
       assertEqual(scrapbook.rewriteCssText(input, optionsImage), expected);
@@ -1821,7 +1821,7 @@ describe('core/common.js', function () {
       var input = `body { color: red; }/*url(image.jpg)*/`;
       assertEqual(scrapbook.rewriteCssText(input, optionsImage), input);
 
-			// misc
+      // misc
       var input = `body { image-background: url(''); }`;
       var expected = `body { image-background: url("http://example.com/"); }`;
       assertEqual(scrapbook.rewriteCssText(input, optionsImage), expected);

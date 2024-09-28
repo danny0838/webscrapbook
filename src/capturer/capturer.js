@@ -4019,7 +4019,7 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
    * @param {Object} params
    * @param {captureSettings} params.settings
    * @param {captureOptions} params.options
-   * @return {Promise<string>} 
+   * @return {Promise<string>}
    */
   capturer.captureLinkedPages = async function (params) {
     isDebug && console.debug("call: captureLinkedPages", params);

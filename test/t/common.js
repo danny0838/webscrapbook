@@ -18,49 +18,49 @@
 'use strict';
 
 var userAgent = (() => {
-    const ua = navigator.userAgent;
-    const soup = new Set();
-    const flavor = {
-      major: 0,
-      soup: soup,
-      is: (value) => soup.has(value),
-    };
+  const ua = navigator.userAgent;
+  const soup = new Set();
+  const flavor = {
+    major: 0,
+    soup: soup,
+    is: (value) => soup.has(value),
+  };
 
-    if (/\bMobile\b/.test(ua)) {
-      soup.add('mobile');
-    }
+  if (/\bMobile\b/.test(ua)) {
+    soup.add('mobile');
+  }
 
-    // Synchronous -- order of tests is important
-    let match;
-    if ((match = /\bFirefox\/(\d+)/.exec(ua)) !== null) {
-      flavor.major = parseInt(match[1], 10) || 0;
-      soup.add('mozilla').add('firefox').add('gecko');
-    } else if ((match = /\bEdge\/(\d+)/.exec(ua)) !== null) {
-      flavor.major = parseInt(match[1], 10) || 0;
+  // Synchronous -- order of tests is important
+  let match;
+  if ((match = /\bFirefox\/(\d+)/.exec(ua)) !== null) {
+    flavor.major = parseInt(match[1], 10) || 0;
+    soup.add('mozilla').add('firefox').add('gecko');
+  } else if ((match = /\bEdge\/(\d+)/.exec(ua)) !== null) {
+    flavor.major = parseInt(match[1], 10) || 0;
+    soup.add('microsoft').add('edge');
+  } else if ((match = /\bOPR\/(\d+)/.exec(ua)) !== null) {
+    const reEx = /\bChrom(?:e|ium)\/([\d.]+)/;
+    if (reEx.test(ua)) { match = reEx.exec(ua); }
+    flavor.major = parseInt(match[1], 10) || 0;
+    soup.add('opera').add('chromium');
+  } else if ((match = /\bChromium\/(\d+)/.exec(ua)) !== null) {
+    flavor.major = parseInt(match[1], 10) || 0;
+    soup.add('chromium');
+  } else if ((match = /\bChrome\/(\d+)/.exec(ua)) !== null) {
+    flavor.major = parseInt(match[1], 10) || 0;
+    soup.add('google').add('chromium');
+    if (/\bEdg\/([\d.]+)/.test(ua)) {
+      // Chromium based Edge
       soup.add('microsoft').add('edge');
-    } else if ((match = /\bOPR\/(\d+)/.exec(ua)) !== null) {
-      const reEx = /\bChrom(?:e|ium)\/([\d.]+)/;
-      if (reEx.test(ua)) { match = reEx.exec(ua); }
-      flavor.major = parseInt(match[1], 10) || 0;
-      soup.add('opera').add('chromium');
-    } else if ((match = /\bChromium\/(\d+)/.exec(ua)) !== null) {
-      flavor.major = parseInt(match[1], 10) || 0;
-      soup.add('chromium');
-    } else if ((match = /\bChrome\/(\d+)/.exec(ua)) !== null) {
-      flavor.major = parseInt(match[1], 10) || 0;
-      soup.add('google').add('chromium');
-      if (/\bEdg\/([\d.]+)/.test(ua)) {
-        // Chromium based Edge
-        soup.add('microsoft').add('edge');
-      }
-    } else if ((match = /\bSafari\/(\d+)/.exec(ua)) !== null) {
-      flavor.major = parseInt(match[1], 10) || 0;
-      soup.add('apple').add('safari');
-    } else if ((match = /\bNode\.js\/(\d+)/.exec(ua)) !== null) {
-      flavor.major = parseInt(match[1], 10) || 0;
-      soup.add('node.js');
     }
-    return flavor;
+  } else if ((match = /\bSafari\/(\d+)/.exec(ua)) !== null) {
+    flavor.major = parseInt(match[1], 10) || 0;
+    soup.add('apple').add('safari');
+  } else if ((match = /\bNode\.js\/(\d+)/.exec(ua)) !== null) {
+    flavor.major = parseInt(match[1], 10) || 0;
+    soup.add('node.js');
+  }
+  return flavor;
 })();
 
 async function delay(ms) {

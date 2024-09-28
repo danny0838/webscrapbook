@@ -58,19 +58,19 @@
     ['origin-when-crossorigin', 'origin-when-cross-origin'],
   ]);
 
-	const CUSTOM_ELEMENT_NAME_PATTERN = /^[a-z](.+)-(.+)$/;
+  const CUSTOM_ELEMENT_NAME_PATTERN = /^[a-z](.+)-(.+)$/;
 
-	// ref: https://html.spec.whatwg.org/multipage/custom-elements.html#valid-custom-element-name
-	const CUSTOM_ELEMENT_NAME_FORBIDDEN = new Set([
-		"annotation-xml",
-		"color-profile",
-		"font-face",
-		"font-face-src",
-		"font-face-uri",
-		"font-face-format",
-		"font-face-name",
-		"missing-glyph",
-	]);
+  // ref: https://html.spec.whatwg.org/multipage/custom-elements.html#valid-custom-element-name
+  const CUSTOM_ELEMENT_NAME_FORBIDDEN = new Set([
+    "annotation-xml",
+    "color-profile",
+    "font-face",
+    "font-face-src",
+    "font-face-uri",
+    "font-face-format",
+    "font-face-name",
+    "missing-glyph",
+  ]);
 
   const REWRITABLE_SPECIAL_OBJECTS = new Set([false, 'adoptedStyleSheet']);
 
@@ -3951,7 +3951,7 @@
             $sa = !!d.createElement('slot').assign,
             sle = [],
             sls = [],
-            slt = function (r) { 
+            slt = function (r) {
               if ($sa) {
                 var E = r.childNodes, i, e, s, m;
                 for (i = 0; i < E.length; i++) {
