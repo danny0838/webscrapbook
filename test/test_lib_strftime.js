@@ -23,7 +23,7 @@
 
 'use strict';
 
-const {MochaQuery: $, assert, assertEqual} = unittest;
+const {MochaQuery: $, assert} = unittest;
 
 describe('lib/strftime.js', function () {
 
@@ -32,22 +32,22 @@ describe('lib/strftime.js', function () {
     it('isUtc = true', function () {
       var date = new Date(Date.UTC(2020, 1, 1, 0, 0, 0));
       var formatter = new Strftime({date, isUtc: true});
-      assertEqual(formatter.format('%Y-%m-%dT%H:%M:%SZ'), '2020-02-01T00:00:00Z');
-      assertEqual(formatter.format('%p'), 'AM');
-      assertEqual(formatter.format('%%'), '%');
-      assertEqual(formatter.format('%z'), '+0000');
+      assert.strictEqual(formatter.format('%Y-%m-%dT%H:%M:%SZ'), '2020-02-01T00:00:00Z');
+      assert.strictEqual(formatter.format('%p'), 'AM');
+      assert.strictEqual(formatter.format('%%'), '%');
+      assert.strictEqual(formatter.format('%z'), '+0000');
     });
 
     it('isUtc = false', function () {
       var date = new Date(Date.UTC(2020, 0, 1, 0, 0, 0));
       var formatter = new Strftime({date});
-      assertEqual(formatter.format('%Y'), date.getFullYear().toString());
-      assertEqual(formatter.format('%y'), date.getFullYear().toString().slice(0, -2));
-      assertEqual(parseInt(formatter.format('%m'), 10), date.getMonth() + 1);
-      assertEqual(parseInt(formatter.format('%d'), 10), date.getDate());
-      assertEqual(parseInt(formatter.format('%H'), 10), date.getHours());
-      assertEqual(parseInt(formatter.format('%M'), 10), date.getMinutes());
-      assertEqual(parseInt(formatter.format('%S'), 10), date.getSeconds());
+      assert.strictEqual(formatter.format('%Y'), date.getFullYear().toString());
+      assert.strictEqual(formatter.format('%y'), date.getFullYear().toString().slice(0, -2));
+      assert.strictEqual(parseInt(formatter.format('%m'), 10), date.getMonth() + 1);
+      assert.strictEqual(parseInt(formatter.format('%d'), 10), date.getDate());
+      assert.strictEqual(parseInt(formatter.format('%H'), 10), date.getHours());
+      assert.strictEqual(parseInt(formatter.format('%M'), 10), date.getMinutes());
+      assert.strictEqual(parseInt(formatter.format('%S'), 10), date.getSeconds());
     });
 
     it('use current date if not provided', function () {
@@ -70,7 +70,7 @@ describe('lib/strftime.js', function () {
     });
 
     it('isUtc = true', function () {
-      assertEqual(Strftime.format('%z', {isUtc: true}), '+0000');
+      assert.strictEqual(Strftime.format('%z', {isUtc: true}), '+0000');
     });
 
   });

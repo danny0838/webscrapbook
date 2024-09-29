@@ -25,7 +25,7 @@
 
 'use strict';
 
-const {MochaQuery: $, assert, assertEqual, assertThrows, encodeText, cssRegex} = unittest;
+const {MochaQuery: $, assert, encodeText, cssRegex} = unittest;
 const $describe = $(describe);
 const $it = $(it);
 const {userAgent} = utils;
@@ -38,25 +38,25 @@ describe('core/common.js', function () {
 
     it('basic', function () {
       // escape " ", "%", "?", "#"
-      assertEqual(
+      assert.strictEqual(
         scrapbook.escapeFilename('path 100% with space? and #frag'),
         'path%20100%25%20with%20space?%20and%20%23frag',
       );
 
       // convert "\" to "/"
-      assertEqual(
+      assert.strictEqual(
         scrapbook.escapeFilename(r`this\is\my\path`),
         'this/is/my/path',
       );
 
       // keep non-ASCII chars
-      assertEqual(
+      assert.strictEqual(
         scrapbook.escapeFilename('http://example.com/中文/路徑/文件.txt'),
         'http://example.com/中文/路徑/文件.txt',
       );
 
       // keep special chars
-      assertEqual(
+      assert.strictEqual(
         scrapbook.escapeFilename("!\"$&'()*+,-./:;<=>?@[]^_`{|}~"),
         "!\"$&'()*+,-./:;<=>?@[]^_`{|}~",
       );
@@ -67,7 +67,7 @@ describe('core/common.js', function () {
   describe('scrapbook.quote', function () {
 
     it('basic', function () {
-      assertEqual(
+      assert.strictEqual(
         scrapbook.quote('中文/路徑/文件.txt'),
         '%E4%B8%AD%E6%96%87/%E8%B7%AF%E5%BE%91/%E6%96%87%E4%BB%B6.txt',
       );
@@ -80,141 +80,141 @@ describe('core/common.js', function () {
 
     it('basic', function () {
       // general chars
-      assertEqual(
+      assert.strictEqual(
         scrapbook.validateFilename(chars),
         "!_#$%&'()_+,-._0123456789_;_=__@ABCDEFGHIJKLMNOPQRSTUVWXYZ[_]^_`abcdefghijklmnopqrstuvwxyz{_}_",
       );
 
       // prevent empty
-      assertEqual(
+      assert.strictEqual(
         scrapbook.validateFilename(''),
         '_',
       );
 
       // "~" not allowed by downloads.download() in Chromium
-      assertEqual(
+      assert.strictEqual(
         scrapbook.validateFilename('~filename'),
         '_filename',
       );
 
       // [\xA0\u2000-\u200A\u202F\u205F]: spaces not allowed by downloads.download() in Firefox
-      assertEqual(
+      assert.strictEqual(
         scrapbook.validateFilename('file\xA0\u202F\u205Fname'),
         'file___name',
       );
       for (let i = 0x2000, I = 0x200A; i <= I; i++) {
-        assertEqual(
+        assert.strictEqual(
           scrapbook.validateFilename(`my${String.fromCodePoint(i)}file`),
           'my_file',
         );
       }
 
       // keep Unicode chars
-      assertEqual(
+      assert.strictEqual(
         scrapbook.validateFilename('中文𠀀'),
         '中文𠀀',
       );
     });
 
     it("Windows restricts leading/trailing spaces and dots", function () {
-      assertEqual(
+      assert.strictEqual(
         scrapbook.validateFilename(' '),
         '_',
       );
-      assertEqual(
+      assert.strictEqual(
         scrapbook.validateFilename('  '),
         '_',
       );
-      assertEqual(
+      assert.strictEqual(
         scrapbook.validateFilename('  wsb  '),
         'wsb',
       );
 
-      assertEqual(
+      assert.strictEqual(
         scrapbook.validateFilename('.'),
         '_',
       );
-      assertEqual(
+      assert.strictEqual(
         scrapbook.validateFilename('..'),
         '_',
       );
 
-      assertEqual(
+      assert.strictEqual(
         scrapbook.validateFilename('.wsb'),
         '_.wsb',
       );
-      assertEqual(
+      assert.strictEqual(
         scrapbook.validateFilename('..wsb'),
         '_..wsb',
       );
-      assertEqual(
+      assert.strictEqual(
         scrapbook.validateFilename('  ..wsb'),
         '_..wsb',
       );
-      assertEqual(
+      assert.strictEqual(
         scrapbook.validateFilename('foo.'),
         'foo',
       );
-      assertEqual(
+      assert.strictEqual(
         scrapbook.validateFilename('foo..  '),
         'foo',
       );
     });
 
     it('Windows special filenames', function () {
-      assertEqual(
+      assert.strictEqual(
         scrapbook.validateFilename('con'),
         'con_',
       );
-      assertEqual(
+      assert.strictEqual(
         scrapbook.validateFilename('prn'),
         'prn_',
       );
-      assertEqual(
+      assert.strictEqual(
         scrapbook.validateFilename('aux'),
         'aux_',
       );
-      assertEqual(
+      assert.strictEqual(
         scrapbook.validateFilename('com0'),
         'com0_',
       );
-      assertEqual(
+      assert.strictEqual(
         scrapbook.validateFilename('com9'),
         'com9_',
       );
-      assertEqual(
+      assert.strictEqual(
         scrapbook.validateFilename('lpt0'),
         'lpt0_',
       );
-      assertEqual(
+      assert.strictEqual(
         scrapbook.validateFilename('lpt9'),
         'lpt9_',
       );
-      assertEqual(
+      assert.strictEqual(
         scrapbook.validateFilename('con.txt'),
         'con_.txt',
       );
-      assertEqual(
+      assert.strictEqual(
         scrapbook.validateFilename('prn.txt'),
         'prn_.txt',
       );
-      assertEqual(
+      assert.strictEqual(
         scrapbook.validateFilename('aux.txt'),
         'aux_.txt',
       );
-      assertEqual(
+      assert.strictEqual(
         scrapbook.validateFilename('com0.txt'),
         'com0_.txt',
       );
-      assertEqual(
+      assert.strictEqual(
         scrapbook.validateFilename('com9.txt'),
         'com9_.txt',
       );
-      assertEqual(
+      assert.strictEqual(
         scrapbook.validateFilename('lpt0.txt'),
         'lpt0_.txt',
       );
-      assertEqual(
+      assert.strictEqual(
         scrapbook.validateFilename('lpt9.txt'),
         'lpt9_.txt',
       );
@@ -222,13 +222,13 @@ describe('core/common.js', function () {
 
     it('force ASCII', function () {
       // general chars
-      assertEqual(
+      assert.strictEqual(
         scrapbook.validateFilename(chars, true),
         "!_#$%&'()_+,-._0123456789_;_=__@ABCDEFGHIJKLMNOPQRSTUVWXYZ[_]^_`abcdefghijklmnopqrstuvwxyz{_}_",
       );
 
       // escape Unicode chars
-      assertEqual(
+      assert.strictEqual(
         scrapbook.validateFilename('中文𠀀', true),
         '%E4%B8%AD%E6%96%87%F0%A0%80%80',
       );
@@ -240,7 +240,7 @@ describe('core/common.js', function () {
 
     it('basic', function () {
       // create an ID from a Date object
-      assertEqual(
+      assert.strictEqual(
         scrapbook.dateToId(new Date(Date.UTC(2020, 0, 2, 3, 4, 5, 67))),
         '20200102030405067',
       );
@@ -252,11 +252,11 @@ describe('core/common.js', function () {
     });
 
     it('round to nearest if date is too large or too small', function () {
-      assertEqual(
+      assert.strictEqual(
         scrapbook.dateToId(new Date(Date.UTC(10000, 0, 1, 0, 0, 0, 0))),
         '99991231235959999',
       );
-      assertEqual(
+      assert.strictEqual(
         scrapbook.dateToId(new Date(Date.UTC(-1, 0, 1, 0, 0, 0, 0))),
         '00000101000000000',
       );
@@ -267,35 +267,35 @@ describe('core/common.js', function () {
   describe('scrapbook.idToDate', function () {
 
     it('basic', function () {
-      assertEqual(
+      assert.deepEqual(
         scrapbook.idToDate('20200102030405067'),
-        "2020-01-02T03:04:05.067Z",
+        new Date("2020-01-02T03:04:05.067Z"),
       );
     });
 
     it('return null for invalid ID string', function () {
-      assertEqual(
+      assert.strictEqual(
         scrapbook.idToDate('2020010203040506'),
         null,
       );
-      assertEqual(
+      assert.strictEqual(
         scrapbook.idToDate('wtf'),
         null,
       );
-      assertEqual(
+      assert.strictEqual(
         scrapbook.idToDate(''),
         null,
       );
     });
 
     it('round to nearest if date is too large or too small', function () {
-      assertEqual(
+      assert.deepEqual(
         scrapbook.idToDate('9'.repeat(17)),
-        "9999-12-31T23:59:59.999Z",
+        new Date("9999-12-31T23:59:59.999Z"),
       );
-      assertEqual(
+      assert.deepEqual(
         scrapbook.idToDate('0'.repeat(17)),
-        "0000-01-01T00:00:00.000Z",
+        new Date("0000-01-01T00:00:00.000Z"),
       );
     });
 
@@ -305,7 +305,7 @@ describe('core/common.js', function () {
 
     it('basic', function () {
       // create an ID from a Date object
-      assertEqual(
+      assert.strictEqual(
         scrapbook.dateToIdOld(new Date(2020, 0, 2, 3, 4, 5, 67)),
         '20200102030405',
       );
@@ -317,11 +317,11 @@ describe('core/common.js', function () {
     });
 
     it('round to nearest if date is too large or too small', function () {
-      assertEqual(
+      assert.strictEqual(
         scrapbook.dateToIdOld(new Date(10000, 0, 1, 0, 0, 0, 0)),
         '99991231235959',
       );
-      assertEqual(
+      assert.strictEqual(
         scrapbook.dateToIdOld(new Date(-1, 0, 1, 0, 0, 0, 0)),
         '00000101000000',
       );
@@ -332,36 +332,36 @@ describe('core/common.js', function () {
   describe('scrapbook.idToDateOld', function () {
 
     it('basic', function () {
-      assertEqual(
+      assert.strictEqual(
         scrapbook.idToDateOld('20200102030405').valueOf(),
         new Date(2020, 0, 2, 3, 4, 5).valueOf(),
       );
     });
 
     it('return null for invalid ID string', function () {
-      assertEqual(
+      assert.strictEqual(
         scrapbook.idToDateOld('202001020304050'),
         null,
       );
-      assertEqual(
+      assert.strictEqual(
         scrapbook.idToDateOld('wtf'),
         null,
       );
-      assertEqual(
+      assert.strictEqual(
         scrapbook.idToDateOld(''),
         null,
       );
     });
 
     it('round to nearest if date is too large or too small', function () {
-      assertEqual(
+      assert.strictEqual(
         scrapbook.idToDateOld('9'.repeat(14)).valueOf(),
         new Date(9999, 11, 31, 23, 59, 59, 999).valueOf(),
       );
 
       var date = new Date(0, 0, 1, 0, 0, 0);
       date.setFullYear(0);
-      assertEqual(
+      assert.strictEqual(
         scrapbook.idToDateOld('0'.repeat(14)).valueOf(),
         date.valueOf(),
       );
@@ -375,72 +375,72 @@ describe('core/common.js', function () {
       var string = 'foo bar 中文𠀀字';
 
       // incomplete char should not appear
-      assertEqual(scrapbook.crop(string, 14), 'foo bar 中文𠀀字');
-      assertEqual(scrapbook.crop(string, 13), 'foo bar 中文𠀀字');
-      assertEqual(scrapbook.crop(string, 12), 'foo bar 中...');
-      assertEqual(scrapbook.crop(string, 11), 'foo bar ...');
-      assertEqual(scrapbook.crop(string, 10), 'foo bar...');
-      assertEqual(scrapbook.crop(string, 9), 'foo ba...');
-      assertEqual(scrapbook.crop(string, 3), '...');
-      assertEqual(scrapbook.crop(string, 2), '...');
-      assertEqual(scrapbook.crop(string, 1), '...');
+      assert.strictEqual(scrapbook.crop(string, 14), 'foo bar 中文𠀀字');
+      assert.strictEqual(scrapbook.crop(string, 13), 'foo bar 中文𠀀字');
+      assert.strictEqual(scrapbook.crop(string, 12), 'foo bar 中...');
+      assert.strictEqual(scrapbook.crop(string, 11), 'foo bar ...');
+      assert.strictEqual(scrapbook.crop(string, 10), 'foo bar...');
+      assert.strictEqual(scrapbook.crop(string, 9), 'foo ba...');
+      assert.strictEqual(scrapbook.crop(string, 3), '...');
+      assert.strictEqual(scrapbook.crop(string, 2), '...');
+      assert.strictEqual(scrapbook.crop(string, 1), '...');
 
       // falsy value means no crop
-      assertEqual(scrapbook.crop(string, 0), 'foo bar 中文𠀀字');
-      assertEqual(scrapbook.crop(string, null), 'foo bar 中文𠀀字');
-      assertEqual(scrapbook.crop(string), 'foo bar 中文𠀀字');
+      assert.strictEqual(scrapbook.crop(string, 0), 'foo bar 中文𠀀字');
+      assert.strictEqual(scrapbook.crop(string, null), 'foo bar 中文𠀀字');
+      assert.strictEqual(scrapbook.crop(string), 'foo bar 中文𠀀字');
     });
 
     it('byteLimit', function () {
       var string = 'foo bar 中文𠀀字';
 
       // incomplete char should not appear
-      assertEqual(scrapbook.crop(string, 0, 22), 'foo bar 中文𠀀字');
-      assertEqual(scrapbook.crop(string, 0, 21), 'foo bar 中文𠀀字');
-      assertEqual(scrapbook.crop(string, 0, 20), 'foo bar 中文...');
-      assertEqual(scrapbook.crop(string, 0, 19), 'foo bar 中文...');
-      assertEqual(scrapbook.crop(string, 0, 18), 'foo bar 中文...');
-      assertEqual(scrapbook.crop(string, 0, 17), 'foo bar 中文...');
-      assertEqual(scrapbook.crop(string, 0, 16), 'foo bar 中...');
-      assertEqual(scrapbook.crop(string, 0, 15), 'foo bar 中...');
-      assertEqual(scrapbook.crop(string, 0, 14), 'foo bar 中...');
-      assertEqual(scrapbook.crop(string, 0, 13), 'foo bar ...');
-      assertEqual(scrapbook.crop(string, 0, 12), 'foo bar ...');
-      assertEqual(scrapbook.crop(string, 0, 11), 'foo bar ...');
-      assertEqual(scrapbook.crop(string, 0, 10), 'foo bar...');
-      assertEqual(scrapbook.crop(string, 0, 4), 'f...');
-      assertEqual(scrapbook.crop(string, 0, 3), '...');
-      assertEqual(scrapbook.crop(string, 0, 2), '...');
-      assertEqual(scrapbook.crop(string, 0, 1), '...');
+      assert.strictEqual(scrapbook.crop(string, 0, 22), 'foo bar 中文𠀀字');
+      assert.strictEqual(scrapbook.crop(string, 0, 21), 'foo bar 中文𠀀字');
+      assert.strictEqual(scrapbook.crop(string, 0, 20), 'foo bar 中文...');
+      assert.strictEqual(scrapbook.crop(string, 0, 19), 'foo bar 中文...');
+      assert.strictEqual(scrapbook.crop(string, 0, 18), 'foo bar 中文...');
+      assert.strictEqual(scrapbook.crop(string, 0, 17), 'foo bar 中文...');
+      assert.strictEqual(scrapbook.crop(string, 0, 16), 'foo bar 中...');
+      assert.strictEqual(scrapbook.crop(string, 0, 15), 'foo bar 中...');
+      assert.strictEqual(scrapbook.crop(string, 0, 14), 'foo bar 中...');
+      assert.strictEqual(scrapbook.crop(string, 0, 13), 'foo bar ...');
+      assert.strictEqual(scrapbook.crop(string, 0, 12), 'foo bar ...');
+      assert.strictEqual(scrapbook.crop(string, 0, 11), 'foo bar ...');
+      assert.strictEqual(scrapbook.crop(string, 0, 10), 'foo bar...');
+      assert.strictEqual(scrapbook.crop(string, 0, 4), 'f...');
+      assert.strictEqual(scrapbook.crop(string, 0, 3), '...');
+      assert.strictEqual(scrapbook.crop(string, 0, 2), '...');
+      assert.strictEqual(scrapbook.crop(string, 0, 1), '...');
 
       // falsy value means no crop
-      assertEqual(scrapbook.crop(string, 0, 0), 'foo bar 中文𠀀字');
-      assertEqual(scrapbook.crop(string, 0, null), 'foo bar 中文𠀀字');
-      assertEqual(scrapbook.crop(string, 0), 'foo bar 中文𠀀字');
+      assert.strictEqual(scrapbook.crop(string, 0, 0), 'foo bar 中文𠀀字');
+      assert.strictEqual(scrapbook.crop(string, 0, null), 'foo bar 中文𠀀字');
+      assert.strictEqual(scrapbook.crop(string, 0), 'foo bar 中文𠀀字');
     });
 
     it('charLimit and sizeLimit', function () {
       var string = 'foo bar 中文𠀀字';
 
       // crop at the smaller limit
-      assertEqual(scrapbook.crop(string, 13, 19), 'foo bar 中文...');
-      assertEqual(scrapbook.crop(string, 12, 21), 'foo bar 中...');
+      assert.strictEqual(scrapbook.crop(string, 13, 19), 'foo bar 中文...');
+      assert.strictEqual(scrapbook.crop(string, 12, 21), 'foo bar 中...');
     });
 
     it('custom ellipsis', function () {
       var string = 'foo bar 中文𠀀字';
 
-      assertEqual(scrapbook.crop(string, 12, null, '…'), 'foo bar 中文…');
-      assertEqual(scrapbook.crop(string, 11, null, '…'), 'foo bar 中文…');
-      assertEqual(scrapbook.crop(string, 10, null, '…'), 'foo bar 中…');
-      assertEqual(scrapbook.crop(string, 2, null, '…'), 'f…');
-      assertEqual(scrapbook.crop(string, 1, null, '…'), '…');
+      assert.strictEqual(scrapbook.crop(string, 12, null, '…'), 'foo bar 中文…');
+      assert.strictEqual(scrapbook.crop(string, 11, null, '…'), 'foo bar 中文…');
+      assert.strictEqual(scrapbook.crop(string, 10, null, '…'), 'foo bar 中…');
+      assert.strictEqual(scrapbook.crop(string, 2, null, '…'), 'f…');
+      assert.strictEqual(scrapbook.crop(string, 1, null, '…'), '…');
 
-      assertEqual(scrapbook.crop(string, 12, null, ''), 'foo bar 中文𠀀');
-      assertEqual(scrapbook.crop(string, 11, null, ''), 'foo bar 中文');
-      assertEqual(scrapbook.crop(string, 10, null, ''), 'foo bar 中文');
-      assertEqual(scrapbook.crop(string, 2, null, ''), 'fo');
-      assertEqual(scrapbook.crop(string, 1, null, ''), 'f');
+      assert.strictEqual(scrapbook.crop(string, 12, null, ''), 'foo bar 中文𠀀');
+      assert.strictEqual(scrapbook.crop(string, 11, null, ''), 'foo bar 中文');
+      assert.strictEqual(scrapbook.crop(string, 10, null, ''), 'foo bar 中文');
+      assert.strictEqual(scrapbook.crop(string, 2, null, ''), 'fo');
+      assert.strictEqual(scrapbook.crop(string, 1, null, ''), 'f');
     });
 
   });
@@ -448,12 +448,12 @@ describe('core/common.js', function () {
   describe('scrapbook.unicodeToUtf8', function () {
 
     it('basic', function () {
-      assertEqual(scrapbook.unicodeToUtf8('\u0000'), '\x00');
-      assertEqual(scrapbook.unicodeToUtf8('\u0080'), '\xC2\x80');
-      assertEqual(scrapbook.unicodeToUtf8('\u3000'), '\xE3\x80\x80');
-      assertEqual(scrapbook.unicodeToUtf8('\uD840\uDC00'), '\xF0\xA0\x80\x80');
-      assertEqual(scrapbook.unicodeToUtf8('\u{20000}'), '\xF0\xA0\x80\x80');
-      assertEqual(scrapbook.unicodeToUtf8('\u{10FFFF}'), '\xF4\x8F\xBF\xBF');
+      assert.strictEqual(scrapbook.unicodeToUtf8('\u0000'), '\x00');
+      assert.strictEqual(scrapbook.unicodeToUtf8('\u0080'), '\xC2\x80');
+      assert.strictEqual(scrapbook.unicodeToUtf8('\u3000'), '\xE3\x80\x80');
+      assert.strictEqual(scrapbook.unicodeToUtf8('\uD840\uDC00'), '\xF0\xA0\x80\x80');
+      assert.strictEqual(scrapbook.unicodeToUtf8('\u{20000}'), '\xF0\xA0\x80\x80');
+      assert.strictEqual(scrapbook.unicodeToUtf8('\u{10FFFF}'), '\xF4\x8F\xBF\xBF');
     });
 
   });
@@ -461,12 +461,12 @@ describe('core/common.js', function () {
   describe('scrapbook.utf8ToUnicode', function () {
 
     it('basic', function () {
-      assertEqual(scrapbook.utf8ToUnicode('\x00'), '\u0000');
-      assertEqual(scrapbook.utf8ToUnicode('\xC2\x80'), '\u0080');
-      assertEqual(scrapbook.utf8ToUnicode('\xE3\x80\x80'), '\u3000');
-      assertEqual(scrapbook.utf8ToUnicode('\xF0\xA0\x80\x80'), '\uD840\uDC00');
-      assertEqual(scrapbook.utf8ToUnicode('\xF0\xA0\x80\x80'), '\u{20000}');
-      assertEqual(scrapbook.utf8ToUnicode('\xF4\x8F\xBF\xBF'), '\u{10FFFF}');
+      assert.strictEqual(scrapbook.utf8ToUnicode('\x00'), '\u0000');
+      assert.strictEqual(scrapbook.utf8ToUnicode('\xC2\x80'), '\u0080');
+      assert.strictEqual(scrapbook.utf8ToUnicode('\xE3\x80\x80'), '\u3000');
+      assert.strictEqual(scrapbook.utf8ToUnicode('\xF0\xA0\x80\x80'), '\uD840\uDC00');
+      assert.strictEqual(scrapbook.utf8ToUnicode('\xF0\xA0\x80\x80'), '\u{20000}');
+      assert.strictEqual(scrapbook.utf8ToUnicode('\xF4\x8F\xBF\xBF'), '\u{10FFFF}');
     });
 
   });
@@ -476,24 +476,24 @@ describe('core/common.js', function () {
     it('basic', function () {
       // "一天" in Big5
       var buffer = scrapbook.byteStringToArrayBuffer('\xA4\x40\xA4\xD1');
-      assertEqual([...new Uint8Array(buffer)], [0xA4, 0x40, 0xA4, 0xD1]);
+      assert.deepEqual([...new Uint8Array(buffer)], [0xA4, 0x40, 0xA4, 0xD1]);
 
       // "𠀀" in UTF-8 with BOM
       var buffer = scrapbook.byteStringToArrayBuffer('\xEF\xBB\xBF\xF0\xA0\x80\x80');
-      assertEqual([...new Uint8Array(buffer)], [0xEF, 0xBB, 0xBF, 0xF0, 0xA0, 0x80, 0x80]);
+      assert.deepEqual([...new Uint8Array(buffer)], [0xEF, 0xBB, 0xBF, 0xF0, 0xA0, 0x80, 0x80]);
 
       // "𠀀" in UTF-16BE with BOM
       var buffer = scrapbook.byteStringToArrayBuffer('\xFE\xFF\xD8\x40\xDC\x00');
-      assertEqual([...new Uint8Array(buffer)], [0xFE, 0xFF, 0xD8, 0x40, 0xDC, 0x00]);
+      assert.deepEqual([...new Uint8Array(buffer)], [0xFE, 0xFF, 0xD8, 0x40, 0xDC, 0x00]);
 
       // "𠀀" in UTF-16LE with BOM
       var buffer = scrapbook.byteStringToArrayBuffer('\xFF\xFE\x40\xD8\x00\xDC');
-      assertEqual([...new Uint8Array(buffer)], [0xFF, 0xFE, 0x40, 0xD8, 0x00, 0xDC]);
+      assert.deepEqual([...new Uint8Array(buffer)], [0xFF, 0xFE, 0x40, 0xD8, 0x00, 0xDC]);
 
       // blob of green bmp
       var bstr = atob('Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAP8AAAAA');
       var buffer = scrapbook.byteStringToArrayBuffer(bstr);
-      assertEqual(
+      assert.deepEqual(
         [...new Uint8Array(buffer)],
         [66,77,60,0,0,0,0,0,0,0,54,0,0,0,40,0,0,0,1,0,0,0,1,0,0,0,1,0,32,0,0,0,0,0,6,0,0,0,18,11,0,0,18,11,0,0,0,0,0,0,0,0,0,0,0,255,0,0,0,0],
       );
@@ -506,23 +506,23 @@ describe('core/common.js', function () {
     it('basic', function () {
       // "一天" in Big5
       var buffer = new Uint8Array([0xA4, 0x40, 0xA4, 0xD1]);
-      assertEqual(scrapbook.arrayBufferToByteString(buffer), '\xA4\x40\xA4\xD1');
+      assert.strictEqual(scrapbook.arrayBufferToByteString(buffer), '\xA4\x40\xA4\xD1');
 
       // "𠀀" in UTF-8 with BOM
       var buffer = new Uint8Array([0xEF, 0xBB, 0xBF, 0xF0, 0xA0, 0x80, 0x80]);
-      assertEqual(scrapbook.arrayBufferToByteString(buffer), '\xEF\xBB\xBF\xF0\xA0\x80\x80');
+      assert.strictEqual(scrapbook.arrayBufferToByteString(buffer), '\xEF\xBB\xBF\xF0\xA0\x80\x80');
 
       // "𠀀" in UTF-16BE with BOM
       var buffer = new Uint8Array([0xFE, 0xFF, 0xD8, 0x40, 0xDC, 0x00]);
-      assertEqual(scrapbook.arrayBufferToByteString(buffer), '\xFE\xFF\xD8\x40\xDC\x00');
+      assert.strictEqual(scrapbook.arrayBufferToByteString(buffer), '\xFE\xFF\xD8\x40\xDC\x00');
 
       // "𠀀" in UTF-16LE with BOM
       var buffer = new Uint8Array([0xFF, 0xFE, 0x40, 0xD8, 0x00, 0xDC]);
-      assertEqual(scrapbook.arrayBufferToByteString(buffer), '\xFF\xFE\x40\xD8\x00\xDC');
+      assert.strictEqual(scrapbook.arrayBufferToByteString(buffer), '\xFF\xFE\x40\xD8\x00\xDC');
 
       // blob of green bmp
       var buffer = new Uint8Array([66,77,60,0,0,0,0,0,0,0,54,0,0,0,40,0,0,0,1,0,0,0,1,0,0,0,1,0,32,0,0,0,0,0,6,0,0,0,18,11,0,0,18,11,0,0,0,0,0,0,0,0,0,0,0,255,0,0,0,0]);
-      assertEqual(
+      assert.strictEqual(
         btoa(scrapbook.arrayBufferToByteString(buffer)),
         "Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAP8AAAAA",
       );
@@ -537,22 +537,22 @@ describe('core/common.js', function () {
 
       // individual ASCII white space
       for (const space of [' ', '\t', '\n', '\r', '\f']) {
-        assertEqual(scrapbook.trim(space + strings.join(space)), strings.join(space));
-        assertEqual(scrapbook.trim(strings.join(space) + space), strings.join(space));
-        assertEqual(scrapbook.trim(space + strings.join(space) + space), strings.join(space));
-        assertEqual(scrapbook.trim(space.repeat(3) + strings.join(space) + space.repeat(3)), strings.join(space));
+        assert.strictEqual(scrapbook.trim(space + strings.join(space)), strings.join(space));
+        assert.strictEqual(scrapbook.trim(strings.join(space) + space), strings.join(space));
+        assert.strictEqual(scrapbook.trim(space + strings.join(space) + space), strings.join(space));
+        assert.strictEqual(scrapbook.trim(space.repeat(3) + strings.join(space) + space.repeat(3)), strings.join(space));
       }
 
       // non-ASCII-whitespaces should be ignored
       for (const space of ['\u00A0', '\u2009', '\u200A', '\u200B', '\u3000', '\uFEFF']) {
         var s = space + strings.join(space);
-        assertEqual(scrapbook.trim(s), s);
+        assert.strictEqual(scrapbook.trim(s), s);
 
         var s = strings.join(space) + space;
-        assertEqual(scrapbook.trim(s), s);
+        assert.strictEqual(scrapbook.trim(s), s);
 
         var s = space + strings.join(space) + space;
-        assertEqual(scrapbook.trim(s), s);
+        assert.strictEqual(scrapbook.trim(s), s);
       }
     });
 
@@ -565,24 +565,24 @@ describe('core/common.js', function () {
 
       // individual ASCII white space
       for (const space of [' ', '\t', '\n', '\r', '\f']) {
-        assertEqual(scrapbook.split(strings.join(space)), strings);
+        assert.deepEqual(scrapbook.split(strings.join(space)), strings);
       }
 
       // mixed ASCII white spaces
-      assertEqual(scrapbook.split(strings.join(' \t\r\n\f')), strings);
+      assert.deepEqual(scrapbook.split(strings.join(' \t\r\n\f')), strings);
 
       // non-ASCII-whitespaces should be ignored
       for (const space of ['\u00A0', '\u2009', '\u200A', '\u200B', '\u3000', '\uFEFF']) {
-        assertEqual(scrapbook.split(strings.join(space)), [strings.join(space)]);
+        assert.deepEqual(scrapbook.split(strings.join(space)), [strings.join(space)]);
       }
     });
 
     it('discard empty starting or ending components', function () {
       // starting space
-      assertEqual(scrapbook.split(' foo'), ['foo']);
+      assert.deepEqual(scrapbook.split(' foo'), ['foo']);
 
       // ending space
-      assertEqual(scrapbook.split('foo '), ['foo']);
+      assert.deepEqual(scrapbook.split('foo '), ['foo']);
     });
 
   });
@@ -590,15 +590,15 @@ describe('core/common.js', function () {
   describe('scrapbook.normalizeUrl', function () {
 
     it('encode chars that requires percent encoding with all upper case', function () {
-      assertEqual(
+      assert.strictEqual(
         scrapbook.normalizeUrl(`http://example.com/中文`),
         `http://example.com/%E4%B8%AD%E6%96%87`,
       );
-      assertEqual(
+      assert.strictEqual(
         scrapbook.normalizeUrl(`http://example.com/%e4%b8%ad%e6%96%87`),
         `http://example.com/%E4%B8%AD%E6%96%87`,
       );
-      assertEqual(
+      assert.strictEqual(
         scrapbook.normalizeUrl(`http://example.com/#中文`),
         `http://example.com/#%E4%B8%AD%E6%96%87`,
       );
@@ -606,55 +606,55 @@ describe('core/common.js', function () {
 
     it('encode standalone "%"s', function () {
       // standalone % => %25
-      assertEqual(
+      assert.strictEqual(
         scrapbook.normalizeUrl(`http://example.com/?123%`),
         `http://example.com/?123%25`,
       );
 
       // don't touch normal %-encoding
-      assertEqual(
+      assert.strictEqual(
         scrapbook.normalizeUrl(`http://example.com/?123%20456`),
         `http://example.com/?123%20456`,
       );
     });
 
     it('decode over-encoded chars, such as [0-9a-z:!()+,;=], in pathname', function () {
-      assertEqual(
+      assert.strictEqual(
         scrapbook.normalizeUrl(`http://example.com/%70%61%67%65%3d%28%33%29`),
         `http://example.com/page=(3)`,
       );
-      assertEqual(
+      assert.strictEqual(
         scrapbook.normalizeUrl(`http://example.com/%3a%21%28%29%2b%2c%3b%3d`),
         `http://example.com/:!()+,;=`,
       );
     });
 
     it('decode unreserved chars [0-9A-Za-z\-_.~] in search and hash', function () {
-      assertEqual(
+      assert.strictEqual(
         scrapbook.normalizeUrl(`http://example.com/?%70%61%67%65%2d%33=(5)`),
         `http://example.com/?page-3=(5)`,
       );
-      assertEqual(
+      assert.strictEqual(
         scrapbook.normalizeUrl(`http://example.com/?p=%2d%5f%2e%7e`),
         `http://example.com/?p=-_.~`,
       );
 
-      assertEqual(
+      assert.strictEqual(
         scrapbook.normalizeUrl(`http://example.com/#%70%61%67%65%2d%33=(5)`),
         `http://example.com/#page-3=(5)`,
       );
-      assertEqual(
+      assert.strictEqual(
         scrapbook.normalizeUrl(`http://example.com/#p=%2d%5f%2e%7e`),
         `http://example.com/#p=-_.~`,
       );
     });
 
     it('empty search/hash is normalized as none', function () {
-      assertEqual(
+      assert.strictEqual(
         scrapbook.normalizeUrl(`http://example.com/?`),
         `http://example.com/`,
       );
-      assertEqual(
+      assert.strictEqual(
         scrapbook.normalizeUrl(`http://example.com/#`),
         `http://example.com/`,
       );
@@ -666,21 +666,21 @@ describe('core/common.js', function () {
 
     it('basic', function () {
       // absolute URL cases
-      assertEqual(scrapbook.isUrlAbsolute(`http://example.com:8000/foo?bar=baz#frag`), true);
-      assertEqual(scrapbook.isUrlAbsolute(`https://example.com/`), true);
-      assertEqual(scrapbook.isUrlAbsolute(`file:///c/foo/bar`), true);
-      assertEqual(scrapbook.isUrlAbsolute(`about:blank`), true);
+      assert.strictEqual(scrapbook.isUrlAbsolute(`http://example.com:8000/foo?bar=baz#frag`), true);
+      assert.strictEqual(scrapbook.isUrlAbsolute(`https://example.com/`), true);
+      assert.strictEqual(scrapbook.isUrlAbsolute(`file:///c/foo/bar`), true);
+      assert.strictEqual(scrapbook.isUrlAbsolute(`about:blank`), true);
 
       // relative URL cases
-      assertEqual(scrapbook.isUrlAbsolute(`image.png`), false);
-      assertEqual(scrapbook.isUrlAbsolute(`中文.png`), false);
-      assertEqual(scrapbook.isUrlAbsolute(`/image.png`), false);
-      assertEqual(scrapbook.isUrlAbsolute(`//example.com/page`), false);
+      assert.strictEqual(scrapbook.isUrlAbsolute(`image.png`), false);
+      assert.strictEqual(scrapbook.isUrlAbsolute(`中文.png`), false);
+      assert.strictEqual(scrapbook.isUrlAbsolute(`/image.png`), false);
+      assert.strictEqual(scrapbook.isUrlAbsolute(`//example.com/page`), false);
     });
 
     it('do not throw for non-string', function () {
-      assertEqual(scrapbook.isUrlAbsolute(undefined), false);
-      assertEqual(scrapbook.isUrlAbsolute(null), false);
+      assert.strictEqual(scrapbook.isUrlAbsolute(undefined), false);
+      assert.strictEqual(scrapbook.isUrlAbsolute(null), false);
     });
 
   });
@@ -689,7 +689,7 @@ describe('core/common.js', function () {
 
     it('absolute URLs', function () {
       // different since protocol
-      assertEqual(
+      assert.strictEqual(
         scrapbook.getRelativeUrl(
           `http://example.com/page`,
           `https://example.com/ref`,
@@ -698,7 +698,7 @@ describe('core/common.js', function () {
       );
 
       // different since host
-      assertEqual(
+      assert.strictEqual(
         scrapbook.getRelativeUrl(
           `http://sub.example.com/page`,
           `http://example.com/ref`,
@@ -707,28 +707,28 @@ describe('core/common.js', function () {
       );
 
       // different since path
-      assertEqual(
+      assert.strictEqual(
         scrapbook.getRelativeUrl(
           `http://example.com/page`,
           `http://example.com/ref`,
         ),
         `page`,
       );
-      assertEqual(
+      assert.strictEqual(
         scrapbook.getRelativeUrl(
           `http://example.com/page/`,
           `http://example.com/ref`,
         ),
         `page/`,
       );
-      assertEqual(
+      assert.strictEqual(
         scrapbook.getRelativeUrl(
           `http://example.com/page`,
           `http://example.com/ref/`,
         ),
         `../page`,
       );
-      assertEqual(
+      assert.strictEqual(
         scrapbook.getRelativeUrl(
           `http://example.com/page/`,
           `http://example.com/ref/`,
@@ -736,28 +736,28 @@ describe('core/common.js', function () {
         `../page/`,
       );
 
-      assertEqual(
+      assert.strictEqual(
         scrapbook.getRelativeUrl(
           `http://example.com/page`,
           `http://example.com/sub/ref`,
         ),
         `../page`,
       );
-      assertEqual(
+      assert.strictEqual(
         scrapbook.getRelativeUrl(
           `http://example.com/page/`,
           `http://example.com/sub/ref`,
         ),
         `../page/`,
       );
-      assertEqual(
+      assert.strictEqual(
         scrapbook.getRelativeUrl(
           `http://example.com/page`,
           `http://example.com/sub/ref/`,
         ),
         `../../page`,
       );
-      assertEqual(
+      assert.strictEqual(
         scrapbook.getRelativeUrl(
           `http://example.com/page/`,
           `http://example.com/sub/ref/`,
@@ -765,28 +765,28 @@ describe('core/common.js', function () {
         `../../page/`,
       );
 
-      assertEqual(
+      assert.strictEqual(
         scrapbook.getRelativeUrl(
           `http://example.com/sub/page`,
           `http://example.com/ref`,
         ),
         `sub/page`,
       );
-      assertEqual(
+      assert.strictEqual(
         scrapbook.getRelativeUrl(
           `http://example.com/sub/page/`,
           `http://example.com/ref`,
         ),
         `sub/page/`,
       );
-      assertEqual(
+      assert.strictEqual(
         scrapbook.getRelativeUrl(
           `http://example.com/sub/page`,
           `http://example.com/ref/`,
         ),
         `../sub/page`,
       );
-      assertEqual(
+      assert.strictEqual(
         scrapbook.getRelativeUrl(
           `http://example.com/sub/page/`,
           `http://example.com/ref/`,
@@ -795,14 +795,14 @@ describe('core/common.js', function () {
       );
 
       // different since search
-      assertEqual(
+      assert.strictEqual(
         scrapbook.getRelativeUrl(
           `http://example.com/page?foo=bar#abc`,
           `http://example.com/page`,
         ),
         `?foo=bar#abc`,
       );
-      assertEqual(
+      assert.strictEqual(
         scrapbook.getRelativeUrl(
           `http://example.com/page`,
           `http://example.com/page?foo=bar#abc`,
@@ -811,14 +811,14 @@ describe('core/common.js', function () {
       );
 
       // different since hash
-      assertEqual(
+      assert.strictEqual(
         scrapbook.getRelativeUrl(
           `http://example.com/page?foo=bar#abc`,
           `http://example.com/page?foo=bar`,
         ),
         `#abc`,
       );
-      assertEqual(
+      assert.strictEqual(
         scrapbook.getRelativeUrl(
           `http://example.com/page`,
           `http://example.com/page#frag`,
@@ -827,7 +827,7 @@ describe('core/common.js', function () {
       );
 
       // no difference
-      assertEqual(
+      assert.strictEqual(
         scrapbook.getRelativeUrl(
           `http://example.com/page?foo=bar#abc`,
           `http://example.com/page?foo=bar#abc`,
@@ -837,7 +837,7 @@ describe('core/common.js', function () {
     });
 
     it('return original URL if input is absolute and base is relative', function () {
-      assertEqual(
+      assert.strictEqual(
         scrapbook.getRelativeUrl(
           `http://example.com/page`,
           `image.png`,
@@ -847,7 +847,7 @@ describe('core/common.js', function () {
     });
 
     it('throw if input is realative and base is absolute', function () {
-      assertThrows(() => {
+      assert.throws(() => {
         scrapbook.getRelativeUrl(
           `image.png`,
           `http://example.com/page`,
@@ -857,7 +857,7 @@ describe('core/common.js', function () {
 
     it('protocol-relative URLs', function () {
       // different since host
-      assertEqual(
+      assert.strictEqual(
         scrapbook.getRelativeUrl(
           `//sub.example.com/page`,
           `//example.com/ref`,
@@ -866,7 +866,7 @@ describe('core/common.js', function () {
       );
 
       // different since path
-      assertEqual(
+      assert.strictEqual(
         scrapbook.getRelativeUrl(
           `//example.com/page`,
           `//example.com/ref`,
@@ -876,7 +876,7 @@ describe('core/common.js', function () {
     });
 
     it('return original URL if input is protocol-relative and base is not', function () {
-      assertEqual(
+      assert.strictEqual(
         scrapbook.getRelativeUrl(
           `//sub.example.com/page`,
           `/ref`,
@@ -886,14 +886,14 @@ describe('core/common.js', function () {
     });
 
     it('throw if base is protocol-relative and input is not', function () {
-      assertThrows(() => {
+      assert.throws(() => {
         scrapbook.getRelativeUrl(
           `/page`,
           `//example.com/ref`,
         );
       });
 
-      assertThrows(() => {
+      assert.throws(() => {
         scrapbook.getRelativeUrl(
           `page`,
           `//example.com/ref`,
@@ -903,7 +903,7 @@ describe('core/common.js', function () {
 
     it('root-relative URLs', function () {
       // different since path
-      assertEqual(
+      assert.strictEqual(
         scrapbook.getRelativeUrl(
           `/page`,
           `/ref`,
@@ -913,7 +913,7 @@ describe('core/common.js', function () {
     });
 
     it('return original URL if input is root-relative and base is not', function () {
-      assertEqual(
+      assert.strictEqual(
         scrapbook.getRelativeUrl(
           `/page`,
           `ref`,
@@ -938,21 +938,21 @@ describe('core/common.js', function () {
 
     it('relative URLs (since path)', function () {
       // different since path
-      assertEqual(
+      assert.strictEqual(
         scrapbook.getRelativeUrl(
           `myroot/page/`,
           `myroot/ref`,
         ),
         `page/`,
       );
-      assertEqual(
+      assert.strictEqual(
         scrapbook.getRelativeUrl(
           `myroot/page`,
           `myroot/ref/`,
         ),
         `../page`,
       );
-      assertEqual(
+      assert.strictEqual(
         scrapbook.getRelativeUrl(
           `myroot/page/`,
           `myroot/ref/`,
@@ -960,28 +960,28 @@ describe('core/common.js', function () {
         `../page/`,
       );
 
-      assertEqual(
+      assert.strictEqual(
         scrapbook.getRelativeUrl(
           `myroot/page`,
           `myroot/sub/ref`,
         ),
         `../page`,
       );
-      assertEqual(
+      assert.strictEqual(
         scrapbook.getRelativeUrl(
           `myroot/page/`,
           `myroot/sub/ref`,
         ),
         `../page/`,
       );
-      assertEqual(
+      assert.strictEqual(
         scrapbook.getRelativeUrl(
           `myroot/page`,
           `myroot/sub/ref/`,
         ),
         `../../page`,
       );
-      assertEqual(
+      assert.strictEqual(
         scrapbook.getRelativeUrl(
           `myroot/page/`,
           `myroot/sub/ref/`,
@@ -989,28 +989,28 @@ describe('core/common.js', function () {
         `../../page/`,
       );
 
-      assertEqual(
+      assert.strictEqual(
         scrapbook.getRelativeUrl(
           `myroot/sub/page`,
           `myroot/ref`,
         ),
         `sub/page`,
       );
-      assertEqual(
+      assert.strictEqual(
         scrapbook.getRelativeUrl(
           `myroot/sub/page/`,
           `myroot/ref`,
         ),
         `sub/page/`,
       );
-      assertEqual(
+      assert.strictEqual(
         scrapbook.getRelativeUrl(
           `myroot/sub/page`,
           `myroot/ref/`,
         ),
         `../sub/page`,
       );
-      assertEqual(
+      assert.strictEqual(
         scrapbook.getRelativeUrl(
           `myroot/sub/page/`,
           `myroot/ref/`,
@@ -1019,14 +1019,14 @@ describe('core/common.js', function () {
       );
 
       // different since search
-      assertEqual(
+      assert.strictEqual(
         scrapbook.getRelativeUrl(
           `myroot/page?foo=bar#abc`,
           `myroot/page`,
         ),
         `?foo=bar#abc`,
       );
-      assertEqual(
+      assert.strictEqual(
         scrapbook.getRelativeUrl(
           `myroot/page`,
           `myroot/page?foo=bar#abc`,
@@ -1035,14 +1035,14 @@ describe('core/common.js', function () {
       );
 
       // different since hash
-      assertEqual(
+      assert.strictEqual(
         scrapbook.getRelativeUrl(
           `myroot/page?foo=bar#abc`,
           `myroot/page?foo=bar`,
         ),
         `#abc`,
       );
-      assertEqual(
+      assert.strictEqual(
         scrapbook.getRelativeUrl(
           `myroot/page`,
           `myroot/page#frag`,
@@ -1051,7 +1051,7 @@ describe('core/common.js', function () {
       );
 
       // no difference
-      assertEqual(
+      assert.strictEqual(
         scrapbook.getRelativeUrl(
           `myroot/page?foo=bar#abc`,
           `myroot/page?foo=bar#abc`,
@@ -1062,7 +1062,7 @@ describe('core/common.js', function () {
 
     it('relative URLs (missing path or so)', function () {
       // path and no path
-      assertEqual(
+      assert.strictEqual(
         scrapbook.getRelativeUrl(
           `myroot/page?foo=bar#frag`,
           `?foo1=bar1#frag1`,
@@ -1071,7 +1071,7 @@ describe('core/common.js', function () {
       );
 
       // no path and path
-      assertEqual(
+      assert.strictEqual(
         scrapbook.getRelativeUrl(
           `?foo=bar#frag`,
           `ref`,
@@ -1080,7 +1080,7 @@ describe('core/common.js', function () {
       );
 
       // search and no search
-      assertEqual(
+      assert.strictEqual(
         scrapbook.getRelativeUrl(
           `?foo=bar#frag`,
           `#frag1`,
@@ -1089,7 +1089,7 @@ describe('core/common.js', function () {
       );
 
       // no search and search
-      assertEqual(
+      assert.strictEqual(
         scrapbook.getRelativeUrl(
           `#frag`,
           `?foo1=bar1#frag1`,
@@ -1098,7 +1098,7 @@ describe('core/common.js', function () {
       );
 
       // hash and no hash
-      assertEqual(
+      assert.strictEqual(
         scrapbook.getRelativeUrl(
           `#frag`,
           ``,
@@ -1107,7 +1107,7 @@ describe('core/common.js', function () {
       );
 
       // no hash and hash
-      assertEqual(
+      assert.strictEqual(
         scrapbook.getRelativeUrl(
           ``,
           `#frag1`,
@@ -1121,101 +1121,101 @@ describe('core/common.js', function () {
   describe('scrapbook.parseHeaderContentType', function () {
 
     it('basic', function () {
-      assertEqual(
+      assert.deepEqual(
         scrapbook.parseHeaderContentType(`text/html`),
         {type: "text/html", parameters: {}},
       );
-      assertEqual(
+      assert.deepEqual(
         scrapbook.parseHeaderContentType(`image/svg+xml`),
         {type: "image/svg+xml", parameters: {}},
       );
-      assertEqual(
+      assert.deepEqual(
         scrapbook.parseHeaderContentType(`image/vnd.microsoft.icon`),
         {type: "image/vnd.microsoft.icon", parameters: {}},
       );
     });
 
     it('invalid type', function () {
-      assertEqual(
+      assert.deepEqual(
         scrapbook.parseHeaderContentType(`noslash`),
         {type: "", parameters: {}},
       );
-      assertEqual(
+      assert.deepEqual(
         scrapbook.parseHeaderContentType(`text/bad?token`),
         {type: "text/bad", parameters: {}},
       );
     });
 
     it('parameters', function () {
-      assertEqual(
+      assert.deepEqual(
         scrapbook.parseHeaderContentType(`text/html;charset=utf-8`),
         {type: "text/html", parameters: {charset: "utf-8"}},
       );
-      assertEqual(
+      assert.deepEqual(
         scrapbook.parseHeaderContentType(`text/html; charset=utf-8; param1=value1; param2=value2`),
         {type: "text/html", parameters: {charset: "utf-8", param1: "value1", param2: "value2"}},
       );
     });
 
     it('spaces around type and parameter should be ignored', function () {
-      assertEqual(
+      assert.deepEqual(
         scrapbook.parseHeaderContentType(`text/html  ; charset=utf-8  `),
         {type: "text/html", parameters: {charset: "utf-8"}},
       );
     });
 
     it('spaces around "=" are not allowed by the spec', function () {
-      assertEqual(
+      assert.deepEqual(
         scrapbook.parseHeaderContentType(`text/html; charset =utf-8`),
         {type: "text/html", parameters: {}},
       );
-      assertEqual(
+      assert.deepEqual(
         scrapbook.parseHeaderContentType(`text/html; charset= utf-8`),
         {type: "text/html", parameters: {charset: ""}},
       );
     });
 
     it('quotes and escapes', function () {
-      assertEqual(
+      assert.deepEqual(
         scrapbook.parseHeaderContentType(`text/html; charset="utf-8"`),
         {type: "text/html", parameters: {charset: "utf-8"}},
       );
-      assertEqual(
+      assert.deepEqual(
         scrapbook.parseHeaderContentType(r`text/html; field=" my text\\value with \"quote\" "`),
         {type: "text/html", parameters: {field: r` my text\value with "quote" `}},
       );
 
       // "'" not treated as a quote
-      assertEqual(
+      assert.deepEqual(
         scrapbook.parseHeaderContentType(`text/html; charset='utf-8'`),
         {type: "text/html", parameters: {charset: "'utf-8'"}},
       );
     });
 
     it('type should be case-insensitive (lower case)', function () {
-      assertEqual(
+      assert.deepEqual(
         scrapbook.parseHeaderContentType(`TEXT/HTML`),
         {type: "text/html", parameters: {}},
       );
-      assertEqual(
+      assert.deepEqual(
         scrapbook.parseHeaderContentType(`Text/Html`),
         {type: "text/html", parameters: {}},
       );
     });
 
     it('parameter name should be case-insensitive (lower case)', function () {
-      assertEqual(
+      assert.deepEqual(
         scrapbook.parseHeaderContentType(`text/html; CHARSET=utf-8; MyKey=myvalue`),
         {type: "text/html", parameters: {charset: "utf-8", mykey: "myvalue"}},
       );
     });
 
     it('duplicated parameters are invalid (ignored)', function () {
-      assertEqual(
+      assert.deepEqual(
         scrapbook.parseHeaderContentType(`text/html; charset=utf-8; charset=big5`),
         {type: "text/html", parameters: {charset: "utf-8"}},
       );
-      assertEqual(
+      assert.deepEqual(
         scrapbook.parseHeaderContentType(`text/html; charset=utf-8; CHARSET=big5`),
         {type: "text/html", parameters: {charset: "utf-8"}},
       );
@@ -1225,37 +1225,37 @@ describe('core/common.js', function () {
   describe('scrapbook.parseHeaderContentDisposition', function () {
 
     it('basic', function () {
-      assertEqual(
+      assert.deepEqual(
         scrapbook.parseHeaderContentDisposition(`attachment; filename=file.html`),
         {type: "attachment", parameters: {filename: "file.html"}},
       );
-      assertEqual(
+      assert.deepEqual(
         scrapbook.parseHeaderContentDisposition(`inline; filename=file.html`),
         {type: "inline", parameters: {filename: "file.html"}},
       );
-      assertEqual(
+      assert.deepEqual(
         scrapbook.parseHeaderContentDisposition(`unknown; filename=file.html`),
         {type: "unknown", parameters: {filename: "file.html"}},
       );
     });
 
     it('spaces between parameters and between parname and value should be ignored', function () {
-      assertEqual(
+      assert.deepEqual(
         scrapbook.parseHeaderContentDisposition(`attachment;filename=file.html`),
         {type: "attachment", parameters: {filename: "file.html"}},
       );
-      assertEqual(
+      assert.deepEqual(
         scrapbook.parseHeaderContentDisposition(`inline  ; filename  =  file.html `),
         {type: "inline", parameters: {filename: "file.html"}},
       );
     });
 
     it('quotes and escapes', function () {
-      assertEqual(
+      assert.deepEqual(
         scrapbook.parseHeaderContentDisposition(`inline; filename=" my file.jpg "`),
         {type: "inline", parameters: {filename: " my file.jpg "}},
       );
-      assertEqual(
+      assert.deepEqual(
         scrapbook.parseHeaderContentDisposition(r`inline; filename="my text\\image \"file\".jpg"`),
         {type: "inline", parameters: {filename: r`my text\image "file".jpg`}},
       );
@@ -1263,77 +1263,77 @@ describe('core/common.js', function () {
 
     it('ext-value as parname*', function () {
       // filename*
-      assertEqual(
+      assert.deepEqual(
         scrapbook.parseHeaderContentDisposition(`inline; filename="US-$ rates"; filename*=iso-8859-1'en'%A3%20rates.bmp`),
         {type: "inline", parameters: {filename: "£ rates.bmp"}},
       );
-      assertEqual(
+      assert.deepEqual(
         scrapbook.parseHeaderContentDisposition(`inline; filename*=UTF-8''a%E4%B8%ADb%23c.php`),
         {type: "inline", parameters: {filename: "a中b#c.php"}},
       );
-      assertEqual(
+      assert.deepEqual(
         scrapbook.parseHeaderContentDisposition(`inline; filename*=UTF-8''%22I%20love%20you%22.html`),
         {type: "inline", parameters: {filename: `"I love you".html`}},
       );
 
       // ignore unsupported encoding
-      assertEqual(
+      assert.deepEqual(
         scrapbook.parseHeaderContentDisposition(`inline; filename*=big5''a%E4%B8%ADb%23c.php`),
         {type: "inline", parameters: {}},
       );
 
       // ignore invalid UTF-8 sequence
-      assertEqual(
+      assert.deepEqual(
         scrapbook.parseHeaderContentDisposition(`inline; filename*=UTF-8''%EB%EE%EC.txt`),
         {type: "inline", parameters: {}},
       );
 
       // filename* has higher priority than filename regardless of order
-      assertEqual(
+      assert.deepEqual(
         scrapbook.parseHeaderContentDisposition(`inline; filename=_.bmp; filename*=UTF-8''%E4%B8%AD%E6%96%87%F0%A0%80%80.bmp`),
         {type: "inline", parameters: {filename: "中文𠀀.bmp"}},
       );
-      assertEqual(
+      assert.deepEqual(
         scrapbook.parseHeaderContentDisposition(`inline; filename*=UTF-8''%E4%B8%AD%E6%96%87%F0%A0%80%80.bmp; filename=_.bmp`),
         {type: "inline", parameters: {filename: "中文𠀀.bmp"}},
       );
     });
 
     it('type should be case-insensitive (lower case)', function () {
-      assertEqual(
+      assert.deepEqual(
         scrapbook.parseHeaderContentDisposition(`ATTACHMENT; filename=file.html`),
         {type: "attachment", parameters: {filename: "file.html"}},
       );
 
-      assertEqual(
+      assert.deepEqual(
         scrapbook.parseHeaderContentDisposition(`AttachMent; filename=file.html`),
         {type: "attachment", parameters: {filename: "file.html"}},
       );
     });
 
     it('parameter name should be case-insensitive (lower case)', function () {
-      assertEqual(
+      assert.deepEqual(
         scrapbook.parseHeaderContentDisposition(`attachment; FILENAME=file.html`),
         {type: "attachment", parameters: {filename: "file.html"}},
       );
 
-      assertEqual(
+      assert.deepEqual(
         scrapbook.parseHeaderContentDisposition(`attachment; FileName=file.html`),
         {type: "attachment", parameters: {filename: "file.html"}},
       );
 
-      assertEqual(
+      assert.deepEqual(
         scrapbook.parseHeaderContentDisposition(`inline; filename=file.bmp; Size=84`),
         {type: "inline", parameters: {filename: "file.bmp", size: "84"}},
       );
     });
 
     it('duplicated parameters are invalid (ignored)', function () {
-      assertEqual(
+      assert.deepEqual(
         scrapbook.parseHeaderContentDisposition(`attachment; filename=file.html; filename=file2.html; size=3; size=5`),
         {type: "attachment", parameters: {filename: "file.html", size: "3"}},
       );
-      assertEqual(
+      assert.deepEqual(
         scrapbook.parseHeaderContentDisposition(`attachment; filename=file.html; FILENAME=file2.html; size=3; Size=5`),
         {type: "attachment", parameters: {filename: "file.html", size: "3"}},
       );
@@ -1344,69 +1344,69 @@ describe('core/common.js', function () {
   describe('scrapbook.parseHeaderRefresh', function () {
 
     it('basic', function () {
-      assertEqual(scrapbook.parseHeaderRefresh(``), {});
-      assertEqual(scrapbook.parseHeaderRefresh(` `), {});
-      assertEqual(scrapbook.parseHeaderRefresh(` ;`), {});
-      assertEqual(scrapbook.parseHeaderRefresh(` ,`), {});
+      assert.deepEqual(scrapbook.parseHeaderRefresh(``), {time: undefined, url: undefined});
+      assert.deepEqual(scrapbook.parseHeaderRefresh(` `), {time: undefined, url: undefined});
+      assert.deepEqual(scrapbook.parseHeaderRefresh(` ;`), {time: undefined, url: undefined});
+      assert.deepEqual(scrapbook.parseHeaderRefresh(` ,`), {time: undefined, url: undefined});
 
-      assertEqual(scrapbook.parseHeaderRefresh(`referred.html`), {});
-      assertEqual(scrapbook.parseHeaderRefresh(`url=referred.html`), {});
-      assertEqual(scrapbook.parseHeaderRefresh(`;url=referred.html`), {});
+      assert.deepEqual(scrapbook.parseHeaderRefresh(`referred.html`), {time: undefined, url: undefined});
+      assert.deepEqual(scrapbook.parseHeaderRefresh(`url=referred.html`), {time: undefined, url: undefined});
+      assert.deepEqual(scrapbook.parseHeaderRefresh(`;url=referred.html`), {time: undefined, url: undefined});
 
-      assertEqual(scrapbook.parseHeaderRefresh(`9`), {time: 9, url: ``});
-      assertEqual(scrapbook.parseHeaderRefresh(`0`), {time: 0, url: ``});
-      assertEqual(scrapbook.parseHeaderRefresh(`3.5.1`), {time: 3, url: ``});
-      assertEqual(scrapbook.parseHeaderRefresh(`-1`), {});
-      assertEqual(scrapbook.parseHeaderRefresh(`+1`), {});
-      assertEqual(scrapbook.parseHeaderRefresh(`.123.456`), {time: 0, url: ``});
-      assertEqual(scrapbook.parseHeaderRefresh(`.123.456.`), {time: 0, url: ``});
+      assert.deepEqual(scrapbook.parseHeaderRefresh(`9`), {time: 9, url: ``});
+      assert.deepEqual(scrapbook.parseHeaderRefresh(`0`), {time: 0, url: ``});
+      assert.deepEqual(scrapbook.parseHeaderRefresh(`3.5.1`), {time: 3, url: ``});
+      assert.deepEqual(scrapbook.parseHeaderRefresh(`-1`), {time: undefined, url: undefined});
+      assert.deepEqual(scrapbook.parseHeaderRefresh(`+1`), {time: undefined, url: undefined});
+      assert.deepEqual(scrapbook.parseHeaderRefresh(`.123.456`), {time: 0, url: ``});
+      assert.deepEqual(scrapbook.parseHeaderRefresh(`.123.456.`), {time: 0, url: ``});
 
-      assertEqual(scrapbook.parseHeaderRefresh(`9 `), {time: 9, url: ``});
-      assertEqual(scrapbook.parseHeaderRefresh(`9;`), {time: 9, url: ``});
-      assertEqual(scrapbook.parseHeaderRefresh(`9,`), {time: 9, url: ``});
-      assertEqual(scrapbook.parseHeaderRefresh(`9 ; `), {time: 9, url: ``});
-      assertEqual(scrapbook.parseHeaderRefresh(`9 , `), {time: 9, url: ``});
+      assert.deepEqual(scrapbook.parseHeaderRefresh(`9 `), {time: 9, url: ``});
+      assert.deepEqual(scrapbook.parseHeaderRefresh(`9;`), {time: 9, url: ``});
+      assert.deepEqual(scrapbook.parseHeaderRefresh(`9,`), {time: 9, url: ``});
+      assert.deepEqual(scrapbook.parseHeaderRefresh(`9 ; `), {time: 9, url: ``});
+      assert.deepEqual(scrapbook.parseHeaderRefresh(`9 , `), {time: 9, url: ``});
 
-      assertEqual(scrapbook.parseHeaderRefresh(`1 referred.html`), {time: 1, url: `referred.html`});
-      assertEqual(scrapbook.parseHeaderRefresh(`1;referred.html`), {time: 1, url: `referred.html`});
-      assertEqual(scrapbook.parseHeaderRefresh(`1,referred.html`), {time: 1, url: `referred.html`});
-      assertEqual(scrapbook.parseHeaderRefresh(`1 ; referred.html`), {time: 1, url: `referred.html`});
-      assertEqual(scrapbook.parseHeaderRefresh(`1 , referred.html`), {time: 1, url: `referred.html`});
+      assert.deepEqual(scrapbook.parseHeaderRefresh(`1 referred.html`), {time: 1, url: `referred.html`});
+      assert.deepEqual(scrapbook.parseHeaderRefresh(`1;referred.html`), {time: 1, url: `referred.html`});
+      assert.deepEqual(scrapbook.parseHeaderRefresh(`1,referred.html`), {time: 1, url: `referred.html`});
+      assert.deepEqual(scrapbook.parseHeaderRefresh(`1 ; referred.html`), {time: 1, url: `referred.html`});
+      assert.deepEqual(scrapbook.parseHeaderRefresh(`1 , referred.html`), {time: 1, url: `referred.html`});
 
-      assertEqual(scrapbook.parseHeaderRefresh(`-1 referred.html`), {});
-      assertEqual(scrapbook.parseHeaderRefresh(`+1 referred.html`), {});
-      assertEqual(scrapbook.parseHeaderRefresh(`. referred.html`), {time: 0, url: `referred.html`});
-      assertEqual(scrapbook.parseHeaderRefresh(`.123.456 referred.html`), {time: 0, url: `referred.html`});
-      assertEqual(scrapbook.parseHeaderRefresh(`.123.456. referred.html`), {time: 0, url: `referred.html`});
+      assert.deepEqual(scrapbook.parseHeaderRefresh(`-1 referred.html`), {time: undefined, url: undefined});
+      assert.deepEqual(scrapbook.parseHeaderRefresh(`+1 referred.html`), {time: undefined, url: undefined});
+      assert.deepEqual(scrapbook.parseHeaderRefresh(`. referred.html`), {time: 0, url: `referred.html`});
+      assert.deepEqual(scrapbook.parseHeaderRefresh(`.123.456 referred.html`), {time: 0, url: `referred.html`});
+      assert.deepEqual(scrapbook.parseHeaderRefresh(`.123.456. referred.html`), {time: 0, url: `referred.html`});
 
-      assertEqual(scrapbook.parseHeaderRefresh(`1:referred.html`), {time: 1, url: ``});
-      assertEqual(scrapbook.parseHeaderRefresh(`1 u=referred.html`), {time: 1, url: `u=referred.html`});
-      assertEqual(scrapbook.parseHeaderRefresh(`1 u = referred.html`), {time: 1, url: `u = referred.html`});
-      assertEqual(scrapbook.parseHeaderRefresh(`1 url referred.html`), {time: 1, url: `url referred.html`});
+      assert.deepEqual(scrapbook.parseHeaderRefresh(`1:referred.html`), {time: 1, url: ``});
+      assert.deepEqual(scrapbook.parseHeaderRefresh(`1 u=referred.html`), {time: 1, url: `u=referred.html`});
+      assert.deepEqual(scrapbook.parseHeaderRefresh(`1 u = referred.html`), {time: 1, url: `u = referred.html`});
+      assert.deepEqual(scrapbook.parseHeaderRefresh(`1 url referred.html`), {time: 1, url: `url referred.html`});
 
-      assertEqual(scrapbook.parseHeaderRefresh(`1 url=referred.html`), {time: 1, url: `referred.html`});
+      assert.deepEqual(scrapbook.parseHeaderRefresh(`1 url=referred.html`), {time: 1, url: `referred.html`});
 
-      assertEqual(scrapbook.parseHeaderRefresh(`1 "referred.html"`), {time: 1, url: `referred.html`});
-      assertEqual(scrapbook.parseHeaderRefresh(`1 'referred.html'`), {time: 1, url: `referred.html`});
-      assertEqual(scrapbook.parseHeaderRefresh(`1 "referred.html 123`), {time: 1, url: `referred.html 123`});
-      assertEqual(scrapbook.parseHeaderRefresh(`1 "referred.html'123`), {time: 1, url: `referred.html'123`});
-      assertEqual(scrapbook.parseHeaderRefresh(`1 "referred.html"123`), {time: 1, url: `referred.html`});
-      assertEqual(scrapbook.parseHeaderRefresh(`1 'referred.html"123'`), {time: 1, url: `referred.html"123`});
-      assertEqual(scrapbook.parseHeaderRefresh(`1 'referred.html'123`), {time: 1, url: `referred.html`});
+      assert.deepEqual(scrapbook.parseHeaderRefresh(`1 "referred.html"`), {time: 1, url: `referred.html`});
+      assert.deepEqual(scrapbook.parseHeaderRefresh(`1 'referred.html'`), {time: 1, url: `referred.html`});
+      assert.deepEqual(scrapbook.parseHeaderRefresh(`1 "referred.html 123`), {time: 1, url: `referred.html 123`});
+      assert.deepEqual(scrapbook.parseHeaderRefresh(`1 "referred.html'123`), {time: 1, url: `referred.html'123`});
+      assert.deepEqual(scrapbook.parseHeaderRefresh(`1 "referred.html"123`), {time: 1, url: `referred.html`});
+      assert.deepEqual(scrapbook.parseHeaderRefresh(`1 'referred.html"123'`), {time: 1, url: `referred.html"123`});
+      assert.deepEqual(scrapbook.parseHeaderRefresh(`1 'referred.html'123`), {time: 1, url: `referred.html`});
 
-      assertEqual(scrapbook.parseHeaderRefresh(`1 url="referred.html"`), {time: 1, url: `referred.html`});
-      assertEqual(scrapbook.parseHeaderRefresh(`1 url='referred.html'`), {time: 1, url: `referred.html`});
-      assertEqual(scrapbook.parseHeaderRefresh(`1 url="referred.html `), {time: 1, url: `referred.html`});
-      assertEqual(scrapbook.parseHeaderRefresh(`1 url="referred.html'123`), {time: 1, url: `referred.html'123`});
-      assertEqual(scrapbook.parseHeaderRefresh(`1 url='referred.html"123'`), {time: 1, url: `referred.html"123`});
-      assertEqual(scrapbook.parseHeaderRefresh(`1 url='referred.html'123`), {time: 1, url: `referred.html`});
+      assert.deepEqual(scrapbook.parseHeaderRefresh(`1 url="referred.html"`), {time: 1, url: `referred.html`});
+      assert.deepEqual(scrapbook.parseHeaderRefresh(`1 url='referred.html'`), {time: 1, url: `referred.html`});
+      assert.deepEqual(scrapbook.parseHeaderRefresh(`1 url="referred.html `), {time: 1, url: `referred.html`});
+      assert.deepEqual(scrapbook.parseHeaderRefresh(`1 url="referred.html'123`), {time: 1, url: `referred.html'123`});
+      assert.deepEqual(scrapbook.parseHeaderRefresh(`1 url='referred.html"123'`), {time: 1, url: `referred.html"123`});
+      assert.deepEqual(scrapbook.parseHeaderRefresh(`1 url='referred.html'123`), {time: 1, url: `referred.html`});
 
-      assertEqual(scrapbook.parseHeaderRefresh(`1; URL=referred.html`), {time: 1, url: `referred.html`});
-      assertEqual(scrapbook.parseHeaderRefresh(`1, URL=referred.html`), {time: 1, url: `referred.html`});
-      assertEqual(scrapbook.parseHeaderRefresh(`1 ; URL = referred.html`), {time: 1, url: `referred.html`});
-      assertEqual(scrapbook.parseHeaderRefresh(`1 , URL = referred.html`), {time: 1, url: `referred.html`});
+      assert.deepEqual(scrapbook.parseHeaderRefresh(`1; URL=referred.html`), {time: 1, url: `referred.html`});
+      assert.deepEqual(scrapbook.parseHeaderRefresh(`1, URL=referred.html`), {time: 1, url: `referred.html`});
+      assert.deepEqual(scrapbook.parseHeaderRefresh(`1 ; URL = referred.html`), {time: 1, url: `referred.html`});
+      assert.deepEqual(scrapbook.parseHeaderRefresh(`1 , URL = referred.html`), {time: 1, url: `referred.html`});
 
-      assertEqual(scrapbook.parseHeaderRefresh(`1; uRl=referred.html`), {time: 1, url: `referred.html`});
+      assert.deepEqual(scrapbook.parseHeaderRefresh(`1; uRl=referred.html`), {time: 1, url: `referred.html`});
     });
 
   });
@@ -1416,7 +1416,7 @@ describe('core/common.js', function () {
     it('basic', async function () {
       var blob = new Blob(["ABC123 中文 𠀀"], {type: "text/plain"});
       var ab = await scrapbook.readFileAsArrayBuffer(blob);
-      assertEqual([...new Uint8Array(ab)], [65,66,67,49,50,51,32,228,184,173,230,150,135,32,240,160,128,128]);
+      assert.deepEqual([...new Uint8Array(ab)], [65,66,67,49,50,51,32,228,184,173,230,150,135,32,240,160,128,128]);
     });
 
   });
@@ -1428,7 +1428,7 @@ describe('core/common.js', function () {
       var ab = scrapbook.byteStringToArrayBuffer(greenBmp);
       var blob = new Blob([ab], {type: "image/bmp"});
       var datauri = await scrapbook.readFileAsDataURL(blob);
-      assertEqual(datauri, "data:image/bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAP8AAAAA");
+      assert.strictEqual(datauri, "data:image/bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAP8AAAAA");
     });
 
   });
@@ -1438,19 +1438,19 @@ describe('core/common.js', function () {
     it('return string in specified charset', async function () {
       var blob = new Blob(["ABC123 中文 𠀀"], {type: "text/plain"});
       var str = await await scrapbook.readFileAsText(blob, 'UTF-8');
-      assertEqual(str, "ABC123 中文 𠀀");
+      assert.strictEqual(str, "ABC123 中文 𠀀");
     });
 
     it('return string in UTF-8 if charset not specified', async function () {
       var blob = new Blob(["ABC123 中文 𠀀"], {type: "text/plain"});
       var str = await await scrapbook.readFileAsText(blob);
-      assertEqual(str, "ABC123 中文 𠀀");
+      assert.strictEqual(str, "ABC123 中文 𠀀");
     });
 
     it('return byte string if charset is falsy', async function () {
       var blob = new Blob(["ABC123 中文 𠀀"], {type: "text/plain"});
       var str = await await scrapbook.readFileAsText(blob, false);
-      assertEqual(scrapbook.utf8ToUnicode(str), "ABC123 中文 𠀀");
+      assert.strictEqual(scrapbook.utf8ToUnicode(str), "ABC123 中文 𠀀");
     });
 
   });
@@ -1461,8 +1461,8 @@ describe('core/common.js', function () {
       var html = `<a href="http://example.com">ABC123 中文 𠀀</a>`;
       var blob = new Blob([html], {type: "text/html"});
       var doc = await scrapbook.readFileAsDocument(blob);
-      assertEqual(doc.querySelector('a').textContent, 'ABC123 中文 𠀀');
-      assertEqual(doc.querySelector('a').getAttribute('href'), 'http://example.com');
+      assert.strictEqual(doc.querySelector('a').textContent, 'ABC123 中文 𠀀');
+      assert.strictEqual(doc.querySelector('a').getAttribute('href'), 'http://example.com');
     });
 
   });
@@ -1472,43 +1472,43 @@ describe('core/common.js', function () {
     it('take filename when useFilename not specified', async function () {
       var datauri = `data:image/bmp;filename=${encodeURIComponent('ABC123中文𠀀')};base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAP8AAAAA`;
       var file = await scrapbook.dataUriToFile(datauri);
-      assertEqual(file.name, "ABC123中文𠀀");
-      assertEqual(file.type, "image/bmp;filename=abc123%e4%b8%ad%e6%96%87%f0%a0%80%80");
-      assertEqual(file.size, 60);
+      assert.strictEqual(file.name, "ABC123中文𠀀");
+      assert.strictEqual(file.type, "image/bmp;filename=abc123%e4%b8%ad%e6%96%87%f0%a0%80%80");
+      assert.strictEqual(file.size, 60);
 
       var datauri = `data:image/bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAP8AAAAA`;
       var file = await scrapbook.dataUriToFile(datauri);
-      assertEqual(file.name, "dbc82be549e49d6db9a5719086722a4f1c5079cd.bmp");
-      assertEqual(file.type, "image/bmp");
-      assertEqual(file.size, 60);
+      assert.strictEqual(file.name, "dbc82be549e49d6db9a5719086722a4f1c5079cd.bmp");
+      assert.strictEqual(file.type, "image/bmp");
+      assert.strictEqual(file.size, 60);
     });
 
     it('take filename when useFilename is truthy', async function () {
       var datauri = `data:image/bmp;filename=${encodeURIComponent('ABC123中文𠀀')};base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAP8AAAAA`;
       var file = await scrapbook.dataUriToFile(datauri, true);
-      assertEqual(file.name, "ABC123中文𠀀");
-      assertEqual(file.type, "image/bmp;filename=abc123%e4%b8%ad%e6%96%87%f0%a0%80%80");
-      assertEqual(file.size, 60);
+      assert.strictEqual(file.name, "ABC123中文𠀀");
+      assert.strictEqual(file.type, "image/bmp;filename=abc123%e4%b8%ad%e6%96%87%f0%a0%80%80");
+      assert.strictEqual(file.size, 60);
 
       var datauri = `data:image/bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAP8AAAAA`;
       var file = await scrapbook.dataUriToFile(datauri, true);
-      assertEqual(file.name, "dbc82be549e49d6db9a5719086722a4f1c5079cd.bmp");
-      assertEqual(file.type, "image/bmp");
-      assertEqual(file.size, 60);
+      assert.strictEqual(file.name, "dbc82be549e49d6db9a5719086722a4f1c5079cd.bmp");
+      assert.strictEqual(file.type, "image/bmp");
+      assert.strictEqual(file.size, 60);
     });
 
     it('do not take filename when useFilename is falsy', async function () {
       var datauri = `data:image/bmp;filename=${encodeURIComponent('ABC123中文𠀀')};base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAP8AAAAA`;
       var file = await scrapbook.dataUriToFile(datauri, false);
-      assertEqual(file.name, "dbc82be549e49d6db9a5719086722a4f1c5079cd.bmp");
-      assertEqual(file.type, "image/bmp;filename=abc123%e4%b8%ad%e6%96%87%f0%a0%80%80");
-      assertEqual(file.size, 60);
+      assert.strictEqual(file.name, "dbc82be549e49d6db9a5719086722a4f1c5079cd.bmp");
+      assert.strictEqual(file.type, "image/bmp;filename=abc123%e4%b8%ad%e6%96%87%f0%a0%80%80");
+      assert.strictEqual(file.size, 60);
 
       var datauri = `data:image/bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAP8AAAAA`;
       var file = await scrapbook.dataUriToFile(datauri, false);
-      assertEqual(file.name, "dbc82be549e49d6db9a5719086722a4f1c5079cd.bmp");
-      assertEqual(file.type, "image/bmp");
-      assertEqual(file.size, 60);
+      assert.strictEqual(file.name, "dbc82be549e49d6db9a5719086722a4f1c5079cd.bmp");
+      assert.strictEqual(file.type, "image/bmp");
+      assert.strictEqual(file.size, 60);
     });
 
   });
@@ -1517,45 +1517,45 @@ describe('core/common.js', function () {
 
     it('basic', function () {
       // text/*
-      assertEqual(scrapbook.mimeIsText('text/plain'), true);
-      assertEqual(scrapbook.mimeIsText('text/html'), true);
-      assertEqual(scrapbook.mimeIsText('text/css'), true);
-      assertEqual(scrapbook.mimeIsText('text/javascript'), true);
+      assert.strictEqual(scrapbook.mimeIsText('text/plain'), true);
+      assert.strictEqual(scrapbook.mimeIsText('text/html'), true);
+      assert.strictEqual(scrapbook.mimeIsText('text/css'), true);
+      assert.strictEqual(scrapbook.mimeIsText('text/javascript'), true);
 
       // +xml
-      assertEqual(scrapbook.mimeIsText('application/xhtml+xml'), true);
-      assertEqual(scrapbook.mimeIsText('text/svg+xml'), true);
-      assertEqual(scrapbook.mimeIsText('application/rdf+xml'), true);
-      assertEqual(scrapbook.mimeIsText('application/xslt+xml'), true);
+      assert.strictEqual(scrapbook.mimeIsText('application/xhtml+xml'), true);
+      assert.strictEqual(scrapbook.mimeIsText('text/svg+xml'), true);
+      assert.strictEqual(scrapbook.mimeIsText('application/rdf+xml'), true);
+      assert.strictEqual(scrapbook.mimeIsText('application/xslt+xml'), true);
 
       // +json
-      assertEqual(scrapbook.mimeIsText('application/ld+json'), true);
+      assert.strictEqual(scrapbook.mimeIsText('application/ld+json'), true);
 
       // special text
-      assertEqual(scrapbook.mimeIsText('application/javascript'), true);
-      assertEqual(scrapbook.mimeIsText('application/ecmascript'), true);
-      assertEqual(scrapbook.mimeIsText('application/json'), true);
-      assertEqual(scrapbook.mimeIsText('application/xml'), true);
-      assertEqual(scrapbook.mimeIsText('application/sql'), true);
+      assert.strictEqual(scrapbook.mimeIsText('application/javascript'), true);
+      assert.strictEqual(scrapbook.mimeIsText('application/ecmascript'), true);
+      assert.strictEqual(scrapbook.mimeIsText('application/json'), true);
+      assert.strictEqual(scrapbook.mimeIsText('application/xml'), true);
+      assert.strictEqual(scrapbook.mimeIsText('application/sql'), true);
 
       // +zip are not text
-      assertEqual(scrapbook.mimeIsText('application/epub+zip'), false);
+      assert.strictEqual(scrapbook.mimeIsText('application/epub+zip'), false);
 
       // others are not text
-      assertEqual(scrapbook.mimeIsText('image/bmp'), false);
-      assertEqual(scrapbook.mimeIsText('image/jpeg'), false);
-      assertEqual(scrapbook.mimeIsText('image/gif'), false);
-      assertEqual(scrapbook.mimeIsText('image/png'), false);
-      assertEqual(scrapbook.mimeIsText('image/webp'), false);
-      assertEqual(scrapbook.mimeIsText('image/vnd.microsoft.icon'), false);
-      assertEqual(scrapbook.mimeIsText('image/x-icon'), false);
-      assertEqual(scrapbook.mimeIsText('audio/mpeg'), false);
-      assertEqual(scrapbook.mimeIsText('video/mp4'), false);
-      assertEqual(scrapbook.mimeIsText('font/ttf'), false);
-      assertEqual(scrapbook.mimeIsText('font/woff'), false);
-      assertEqual(scrapbook.mimeIsText('application/zip'), false);
-      assertEqual(scrapbook.mimeIsText('application/pdf'), false);
-      assertEqual(scrapbook.mimeIsText('application/octet-stream'), false);
+      assert.strictEqual(scrapbook.mimeIsText('image/bmp'), false);
+      assert.strictEqual(scrapbook.mimeIsText('image/jpeg'), false);
+      assert.strictEqual(scrapbook.mimeIsText('image/gif'), false);
+      assert.strictEqual(scrapbook.mimeIsText('image/png'), false);
+      assert.strictEqual(scrapbook.mimeIsText('image/webp'), false);
+      assert.strictEqual(scrapbook.mimeIsText('image/vnd.microsoft.icon'), false);
+      assert.strictEqual(scrapbook.mimeIsText('image/x-icon'), false);
+      assert.strictEqual(scrapbook.mimeIsText('audio/mpeg'), false);
+      assert.strictEqual(scrapbook.mimeIsText('video/mp4'), false);
+      assert.strictEqual(scrapbook.mimeIsText('font/ttf'), false);
+      assert.strictEqual(scrapbook.mimeIsText('font/woff'), false);
+      assert.strictEqual(scrapbook.mimeIsText('application/zip'), false);
+      assert.strictEqual(scrapbook.mimeIsText('application/pdf'), false);
+      assert.strictEqual(scrapbook.mimeIsText('application/octet-stream'), false);
     });
 
   });
@@ -1567,7 +1567,7 @@ describe('core/common.js', function () {
       var str = '@charset "Big5"; content: "abc中文𠀀"';
       var u8ar = await encodeText('\uFEFF' + str, 'utf-8');
       var blob = new Blob([u8ar], {type: 'text/css'});
-      assertEqual(await scrapbook.parseCssFile(blob, 'ISO-8859-1', 'GBK'), {
+      assert.deepEqual(await scrapbook.parseCssFile(blob, 'ISO-8859-1', 'GBK'), {
         text: '\uFEFF' + str,
         charset: 'UTF-8',
       });
@@ -1576,7 +1576,7 @@ describe('core/common.js', function () {
       var str = '@charset "Big5"; content: "abc中文𠀀"';
       var u8ar = await encodeText('\uFEFF' + str, 'utf-16be');
       var blob = new Blob([u8ar], {type: 'text/css'});
-      assertEqual(await scrapbook.parseCssFile(blob, 'ISO-8859-1', 'GBK'), {
+      assert.deepEqual(await scrapbook.parseCssFile(blob, 'ISO-8859-1', 'GBK'), {
         text: '\uFEFF' + str,
         charset: 'UTF-16BE',
       });
@@ -1585,7 +1585,7 @@ describe('core/common.js', function () {
       var str = '@charset "Big5"; content: "abc中文𠀀"';
       var u8ar = await encodeText('\uFEFF' + str, 'utf-16le');
       var blob = new Blob([u8ar], {type: 'text/css'});
-      assertEqual(await scrapbook.parseCssFile(blob, 'ISO-8859-1', 'GBK'), {
+      assert.deepEqual(await scrapbook.parseCssFile(blob, 'ISO-8859-1', 'GBK'), {
         text: '\uFEFF' + str,
         charset: 'UTF-16LE',
       });
@@ -1594,7 +1594,7 @@ describe('core/common.js', function () {
       var str = 'content: "abc中文𠀀"';
       var u8ar = await encodeText('\uFEFF' + str, 'utf-8');
       var blob = new Blob([u8ar], {type: 'text/css'});
-      assertEqual(await scrapbook.parseCssFile(blob, 'ISO-8859-1', 'GBK'), {
+      assert.deepEqual(await scrapbook.parseCssFile(blob, 'ISO-8859-1', 'GBK'), {
         text: str,
         charset: 'UTF-8',
       });
@@ -1605,7 +1605,7 @@ describe('core/common.js', function () {
       var str = '@charset "Big5"; content: "abc中文𠀀"';
       var u8ar = await encodeText(str, 'utf-8');
       var blob = new Blob([u8ar], {type: 'text/css'});
-      assertEqual(await scrapbook.parseCssFile(blob, 'utf-8', 'GBK'), {
+      assert.deepEqual(await scrapbook.parseCssFile(blob, 'utf-8', 'GBK'), {
         text: '\uFEFF' + str,
         charset: 'utf-8',
       });
@@ -1614,7 +1614,7 @@ describe('core/common.js', function () {
       var str = '@charset "Big5"; content: "abc中文𠀀"';
       var u8ar = await encodeText(str, 'utf-16be');
       var blob = new Blob([u8ar], {type: 'text/css'});
-      assertEqual(await scrapbook.parseCssFile(blob, 'utf-16be', 'GBK'), {
+      assert.deepEqual(await scrapbook.parseCssFile(blob, 'utf-16be', 'GBK'), {
         text: '\uFEFF' + str,
         charset: 'utf-16be',
       });
@@ -1623,7 +1623,7 @@ describe('core/common.js', function () {
       var str = '@charset "UTF-8"; content: "abc中文"';
       var u8ar = await encodeText(str, 'big5');
       var blob = new Blob([u8ar], {type: 'text/css'});
-      assertEqual(await scrapbook.parseCssFile(blob, 'big5', 'GBK'), {
+      assert.deepEqual(await scrapbook.parseCssFile(blob, 'big5', 'GBK'), {
         text: '\uFEFF' + str,
         charset: 'big5',
       });
@@ -1632,7 +1632,7 @@ describe('core/common.js', function () {
       var str = '@charset "UTF-8"; content: "abcÆ©®±¼"';
       var u8ar = await encodeText(str, 'iso-8859-1');
       var blob = new Blob([u8ar], {type: 'text/css'});
-      assertEqual(await scrapbook.parseCssFile(blob, 'ISO-8859-1'), {
+      assert.deepEqual(await scrapbook.parseCssFile(blob, 'ISO-8859-1'), {
         text: '\uFEFF' + str,
         charset: 'ISO-8859-1',
       });
@@ -1641,7 +1641,7 @@ describe('core/common.js', function () {
       var str = 'content: "abc中文𠀀"';
       var u8ar = await encodeText(str, 'utf-8');
       var blob = new Blob([u8ar], {type: 'text/css'});
-      assertEqual(await scrapbook.parseCssFile(blob, 'UTF-8', 'GBK'), {
+      assert.deepEqual(await scrapbook.parseCssFile(blob, 'UTF-8', 'GBK'), {
         text: str,
         charset: 'UTF-8',
       });
@@ -1652,7 +1652,7 @@ describe('core/common.js', function () {
       var str = '@charset "UTF-8"; content: "abc中文𠀀"';
       var u8ar = await encodeText(str, 'utf-8');
       var blob = new Blob([u8ar], {type: 'text/css'});
-      assertEqual(await scrapbook.parseCssFile(blob, null, 'Big5'), {
+      assert.deepEqual(await scrapbook.parseCssFile(blob, null, 'Big5'), {
         text: '\uFEFF' + str,
         charset: 'UTF-8',
       });
@@ -1661,7 +1661,7 @@ describe('core/common.js', function () {
       var str = '@charset "Big5"; content: "abc中文"';
       var u8ar = await encodeText(str, 'big5');
       var blob = new Blob([u8ar], {type: 'text/css'});
-      assertEqual(await scrapbook.parseCssFile(blob, null, 'GBK'), {
+      assert.deepEqual(await scrapbook.parseCssFile(blob, null, 'GBK'), {
         text: '\uFEFF' + str,
         charset: 'Big5',
       });
@@ -1670,7 +1670,7 @@ describe('core/common.js', function () {
       var str = '@charset "utf-16BE"; content: "abc中文"';
       var u8ar = await encodeText(str, 'utf-8');
       var blob = new Blob([u8ar], {type: 'text/css'});
-      assertEqual(await scrapbook.parseCssFile(blob), {
+      assert.deepEqual(await scrapbook.parseCssFile(blob), {
         text: '\uFEFF' + str,
         charset: 'utf-8',
       });
@@ -1678,7 +1678,7 @@ describe('core/common.js', function () {
       var str = '@charset "UTF-16le"; content: "abc中文"';
       var u8ar = await encodeText(str, 'utf-8');
       var blob = new Blob([u8ar], {type: 'text/css'});
-      assertEqual(await scrapbook.parseCssFile(blob), {
+      assert.deepEqual(await scrapbook.parseCssFile(blob), {
         text: '\uFEFF' + str,
         charset: 'utf-8',
       });
@@ -1687,7 +1687,7 @@ describe('core/common.js', function () {
       var str = '@CHARSET "UTF-8"; content: "abc中文"';
       var u8ar = await encodeText(str, 'big5');
       var blob = new Blob([u8ar], {type: 'text/css'});
-      assertEqual(await scrapbook.parseCssFile(blob, null, 'big5'), {
+      assert.deepEqual(await scrapbook.parseCssFile(blob, null, 'big5'), {
         text: str,
         charset: 'big5',
       });
@@ -1695,7 +1695,7 @@ describe('core/common.js', function () {
       var str = "@charset 'UTF-8'; content: 'abc中文'";
       var u8ar = await encodeText(str, 'big5');
       var blob = new Blob([u8ar], {type: 'text/css'});
-      assertEqual(await scrapbook.parseCssFile(blob, null, 'Big5'), {
+      assert.deepEqual(await scrapbook.parseCssFile(blob, null, 'Big5'), {
         text: str,
         charset: 'Big5',
       });
@@ -1703,7 +1703,7 @@ describe('core/common.js', function () {
       var str = '@charset  "UTF-8"; content: "abc中文"';
       var u8ar = await encodeText(str, 'big5');
       var blob = new Blob([u8ar], {type: 'text/css'});
-      assertEqual(await scrapbook.parseCssFile(blob, null, 'Big5'), {
+      assert.deepEqual(await scrapbook.parseCssFile(blob, null, 'Big5'), {
         text: str,
         charset: 'Big5',
       });
@@ -1714,7 +1714,7 @@ describe('core/common.js', function () {
       var str = 'content: "abc中文𠀀"';
       var u8ar = await encodeText(str, 'utf-8');
       var blob = new Blob([u8ar], {type: 'text/css'});
-      assertEqual(await scrapbook.parseCssFile(blob, null, 'UTF-8'), {
+      assert.deepEqual(await scrapbook.parseCssFile(blob, null, 'UTF-8'), {
         text: str,
         charset: 'UTF-8',
       });
@@ -1723,7 +1723,7 @@ describe('core/common.js', function () {
       var str = 'content: "abc中文"';
       var u8ar = await encodeText(str, 'big5');
       var blob = new Blob([u8ar], {type: 'text/css'});
-      assertEqual(await scrapbook.parseCssFile(blob, null, 'Big5'), {
+      assert.deepEqual(await scrapbook.parseCssFile(blob, null, 'Big5'), {
         text: str,
         charset: 'Big5',
       });
@@ -1732,7 +1732,7 @@ describe('core/common.js', function () {
       var str = 'content: "abc中文"';
       var u8ar = await encodeText(str, 'big5');
       var blob = new Blob([u8ar], {type: 'text/css'});
-      assertEqual(await scrapbook.parseCssFile(blob, null, 'Big5'), {
+      assert.deepEqual(await scrapbook.parseCssFile(blob, null, 'Big5'), {
         text: str,
         charset: 'Big5',
       });
@@ -1743,7 +1743,7 @@ describe('core/common.js', function () {
       var str = 'content: "abc中文𠀀"';
       var u8ar = await encodeText(str, 'utf-8');
       var blob = new Blob([u8ar], {type: 'text/css'});
-      assertEqual(await scrapbook.parseCssFile(blob), {
+      assert.deepEqual(await scrapbook.parseCssFile(blob), {
         text: scrapbook.arrayBufferToByteString(u8ar),
         charset: null,
       });
@@ -1752,7 +1752,7 @@ describe('core/common.js', function () {
       var str = 'content: "abc中文"';
       var u8ar = await encodeText(str, 'big5');
       var blob = new Blob([u8ar], {type: 'text/css'});
-      assertEqual(await scrapbook.parseCssFile(blob), {
+      assert.deepEqual(await scrapbook.parseCssFile(blob), {
         text: scrapbook.arrayBufferToByteString(u8ar),
         charset: null,
       });
@@ -1761,7 +1761,7 @@ describe('core/common.js', function () {
       var str = 'content: "abcÆ©®±¼"';
       var u8ar = await encodeText(str, 'ISO-8859-1');
       var blob = new Blob([u8ar], {type: 'text/css'});
-      assertEqual(await scrapbook.parseCssFile(blob), {
+      assert.deepEqual(await scrapbook.parseCssFile(blob), {
         text: scrapbook.arrayBufferToByteString(u8ar),
         charset: null,
       });
@@ -1776,8 +1776,8 @@ describe('core/common.js', function () {
 
       var data = new Blob([`div::after { content: "中文"; }`], {type: 'text/css'});
       var result = await scrapbook.rewriteCssFile(data, 'utf-8', rewriter);
-      assertEqual(result.type.toLowerCase(), 'text/css;charset=utf-8');
-      assertEqual(await scrapbook.readFileAsText(result, 'UTF-8'), 'div::after { content: "中文"; } /* rewritten */');
+      assert.strictEqual(result.type.toLowerCase(), 'text/css;charset=utf-8');
+      assert.strictEqual(await scrapbook.readFileAsText(result, 'UTF-8'), 'div::after { content: "中文"; } /* rewritten */');
     });
 
     it('no charset if charset is unknown', async function () {
@@ -1785,8 +1785,8 @@ describe('core/common.js', function () {
 
       var data = new Blob([`div::after { content: "中文"; }`], {type: 'text/css'});
       var result = await scrapbook.rewriteCssFile(data, undefined, rewriter);
-      assertEqual(result.type.toLowerCase(), 'text/css');
-      assertEqual(await scrapbook.readFileAsText(result, 'UTF-8'), 'div::after { content: "中文"; } /* rewritten */');
+      assert.strictEqual(result.type.toLowerCase(), 'text/css');
+      assert.strictEqual(await scrapbook.readFileAsText(result, 'UTF-8'), 'div::after { content: "中文"; } /* rewritten */');
     });
 
   });
@@ -1822,21 +1822,21 @@ describe('core/common.js', function () {
       // re-read as the original charset
       var {text: output, charset} = await scrapbook.parseCssFile(blob, charset);
 
-      assertEqual(output, expected);
+      assert.strictEqual(output, expected);
     }
 
     it('image', function () {
       var input = `body { image-background: url(image.jpg); }`;
       var expected = `body { image-background: url("http://example.com/image.jpg"); }`;
-      assertEqual(scrapbook.rewriteCssText(input, optionsImage), expected);
+      assert.strictEqual(scrapbook.rewriteCssText(input, optionsImage), expected);
 
       var input = `body { image-background: url('image.jpg'); }`;
       var expected = `body { image-background: url("http://example.com/image.jpg"); }`;
-      assertEqual(scrapbook.rewriteCssText(input, optionsImage), expected);
+      assert.strictEqual(scrapbook.rewriteCssText(input, optionsImage), expected);
 
       var input = `body { image-background: url("image.jpg"); }`;
       var expected = `body { image-background: url("http://example.com/image.jpg"); }`;
-      assertEqual(scrapbook.rewriteCssText(input, optionsImage), expected);
+      assert.strictEqual(scrapbook.rewriteCssText(input, optionsImage), expected);
 
       // keyframes
       var input = `\
@@ -1849,202 +1849,202 @@ describe('core/common.js', function () {
   from { background-image: url("http://example.com/image.bmp"); }
   to { background-image: url("http://example.com/image.bmp"); }
 }`;
-      assertEqual(scrapbook.rewriteCssText(input, optionsImage), expected);
+      assert.strictEqual(scrapbook.rewriteCssText(input, optionsImage), expected);
 
       // keep original spaces
       var input = `body{image-background:url(image.jpg);}`;
       var expected = `body{image-background:url("http://example.com/image.jpg");}`;
-      assertEqual(scrapbook.rewriteCssText(input, optionsImage), expected);
+      assert.strictEqual(scrapbook.rewriteCssText(input, optionsImage), expected);
 
       var input = `body { image-background: url(  image.jpg  ) ; }`;
       var expected = `body { image-background: url(  "http://example.com/image.jpg"  ) ; }`;
-      assertEqual(scrapbook.rewriteCssText(input, optionsImage), expected);
+      assert.strictEqual(scrapbook.rewriteCssText(input, optionsImage), expected);
 
       var input = `body\t{\timage-background\t:\turl(\timage.jpg\t)\t;\t}`;
       var expected = `body\t{\timage-background\t:\turl(\t"http://example.com/image.jpg"\t)\t;\t}`;
-      assertEqual(scrapbook.rewriteCssText(input, optionsImage), expected);
+      assert.strictEqual(scrapbook.rewriteCssText(input, optionsImage), expected);
 
       var input = `body { image-background: url(  "image.jpg"  ) ; }`;
       var expected = `body { image-background: url(  "http://example.com/image.jpg"  ) ; }`;
-      assertEqual(scrapbook.rewriteCssText(input, optionsImage), expected);
+      assert.strictEqual(scrapbook.rewriteCssText(input, optionsImage), expected);
 
       var input = `body { image-background: url(\t"image.jpg"\t) ; }`;
       var expected = `body { image-background: url(\t"http://example.com/image.jpg"\t) ; }`;
-      assertEqual(scrapbook.rewriteCssText(input, optionsImage), expected);
+      assert.strictEqual(scrapbook.rewriteCssText(input, optionsImage), expected);
 
       // keep original case
       var input = `body { image-background: URL(image.jpg); }`;
       var expected = `body { image-background: URL("http://example.com/image.jpg"); }`;
-      assertEqual(scrapbook.rewriteCssText(input, optionsImage), expected);
+      assert.strictEqual(scrapbook.rewriteCssText(input, optionsImage), expected);
 
       var input = `body { image-background: uRl(image.jpg); }`;
       var expected = `body { image-background: uRl("http://example.com/image.jpg"); }`;
-      assertEqual(scrapbook.rewriteCssText(input, optionsImage), expected);
+      assert.strictEqual(scrapbook.rewriteCssText(input, optionsImage), expected);
 
       var input = `body { image-background: URL("image.jpg"); }`;
       var expected = `body { image-background: URL("http://example.com/image.jpg"); }`;
-      assertEqual(scrapbook.rewriteCssText(input, optionsImage), expected);
+      assert.strictEqual(scrapbook.rewriteCssText(input, optionsImage), expected);
 
       var input = `body { image-background: uRl("image.jpg"); }`;
       var expected = `body { image-background: uRl("http://example.com/image.jpg"); }`;
-      assertEqual(scrapbook.rewriteCssText(input, optionsImage), expected);
+      assert.strictEqual(scrapbook.rewriteCssText(input, optionsImage), expected);
 
       // spaces only
       var input = `body { image-background: url(); }`;
       var expected = `body { image-background: url("http://example.com/"); }`;
-      assertEqual(scrapbook.rewriteCssText(input, optionsImage), expected);
+      assert.strictEqual(scrapbook.rewriteCssText(input, optionsImage), expected);
 
       var input = `body { image-background: url( ); }`;
       var expected = `body { image-background: url( "http://example.com/"); }`;
 
       var input = `body { image-background: url(  ); }`;
       var expected = `body { image-background: url(  "http://example.com/"); }`;
-      assertEqual(scrapbook.rewriteCssText(input, optionsImage), expected);
+      assert.strictEqual(scrapbook.rewriteCssText(input, optionsImage), expected);
 
       var input = `body { image-background: url(   ); }`;
       var expected = `body { image-background: url(   "http://example.com/"); }`;
-      assertEqual(scrapbook.rewriteCssText(input, optionsImage), expected);
+      assert.strictEqual(scrapbook.rewriteCssText(input, optionsImage), expected);
 
       // escape quotes
       var input = `body { image-background: url('i "like" it.jpg'); }`;
       var expected = r`body { image-background: url("http://example.com/i \"like\" it.jpg"); }`;
-      assertEqual(scrapbook.rewriteCssText(input, optionsImage), expected);
+      assert.strictEqual(scrapbook.rewriteCssText(input, optionsImage), expected);
 
       // skip comments
       var input = `/*url(image.jpg)*/`;
-      assertEqual(scrapbook.rewriteCssText(input, optionsImage), input);
+      assert.strictEqual(scrapbook.rewriteCssText(input, optionsImage), input);
 
       var input = `/*url(image.jpg)*/body { color: red; }`;
-      assertEqual(scrapbook.rewriteCssText(input, optionsImage), input);
+      assert.strictEqual(scrapbook.rewriteCssText(input, optionsImage), input);
 
       var input = `body/*url(image.jpg)*/{ color: red; }`;
-      assertEqual(scrapbook.rewriteCssText(input, optionsImage), input);
+      assert.strictEqual(scrapbook.rewriteCssText(input, optionsImage), input);
 
       var input = `body {/*url(image.jpg)*/color: red; }`;
-      assertEqual(scrapbook.rewriteCssText(input, optionsImage), input);
+      assert.strictEqual(scrapbook.rewriteCssText(input, optionsImage), input);
 
       var input = `body { color/*url(image.jpg)*/: red; }`;
-      assertEqual(scrapbook.rewriteCssText(input, optionsImage), input);
+      assert.strictEqual(scrapbook.rewriteCssText(input, optionsImage), input);
 
       var input = `body { color:/*url(image.jpg)*/red; }`;
-      assertEqual(scrapbook.rewriteCssText(input, optionsImage), input);
+      assert.strictEqual(scrapbook.rewriteCssText(input, optionsImage), input);
 
       var input = `body { color: red/*url(image.jpg)*/; }`;
-      assertEqual(scrapbook.rewriteCssText(input, optionsImage), input);
+      assert.strictEqual(scrapbook.rewriteCssText(input, optionsImage), input);
 
       var input = `body { color: red;/*url(image.jpg)*/}`;
-      assertEqual(scrapbook.rewriteCssText(input, optionsImage), input);
+      assert.strictEqual(scrapbook.rewriteCssText(input, optionsImage), input);
 
       var input = `body { color: red; }/*url(image.jpg)*/`;
-      assertEqual(scrapbook.rewriteCssText(input, optionsImage), input);
+      assert.strictEqual(scrapbook.rewriteCssText(input, optionsImage), input);
 
       // misc
       var input = `body { image-background: url(''); }`;
       var expected = `body { image-background: url("http://example.com/"); }`;
-      assertEqual(scrapbook.rewriteCssText(input, optionsImage), expected);
+      assert.strictEqual(scrapbook.rewriteCssText(input, optionsImage), expected);
 
       var input = r`body { image-background: url(\)); }`;
       var expected = r`body { image-background: url("http://example.com/)"); }`;
-      assertEqual(scrapbook.rewriteCssText(input, optionsImage), expected);
+      assert.strictEqual(scrapbook.rewriteCssText(input, optionsImage), expected);
 
       var input = r`body { image-background: var(--my-var,url()); }`;
       var expected = r`body { image-background: var(--my-var,url("http://example.com/")); }`;
-      assertEqual(scrapbook.rewriteCssText(input, optionsImage), expected);
+      assert.strictEqual(scrapbook.rewriteCssText(input, optionsImage), expected);
     });
 
     it('image ignore unrelated pattern', function () {
       var input = `div::after { content: "url(image.jpg)" }`;
-      assertEqual(scrapbook.rewriteCssText(input, optionsImage), input);
+      assert.strictEqual(scrapbook.rewriteCssText(input, optionsImage), input);
 
       var input = `[myattr="url(image.jpg)"] { }`;
-      assertEqual(scrapbook.rewriteCssText(input, optionsImage), input);
+      assert.strictEqual(scrapbook.rewriteCssText(input, optionsImage), input);
 
       // don't break normal rewriting
       var input = r`.my\"class\" { background-image: url("image.jpg"); }`;
       var expected = r`.my\"class\" { background-image: url("http://example.com/image.jpg"); }`;
-      assertEqual(scrapbook.rewriteCssText(input, optionsImage), expected);
+      assert.strictEqual(scrapbook.rewriteCssText(input, optionsImage), expected);
     });
 
     it('image ignore unrelated rules', function () {
       var input = `@import "file.css";`;
-      assertEqual(scrapbook.rewriteCssText(input, optionsImage), input);
+      assert.strictEqual(scrapbook.rewriteCssText(input, optionsImage), input);
 
       var input = `@import url("file.css");`;
-      assertEqual(scrapbook.rewriteCssText(input, optionsImage), input);
+      assert.strictEqual(scrapbook.rewriteCssText(input, optionsImage), input);
 
       var input = `@namespace url("file.css");`;
-      assertEqual(scrapbook.rewriteCssText(input, optionsImage), input);
+      assert.strictEqual(scrapbook.rewriteCssText(input, optionsImage), input);
 
       var input = `@font-face { font-family: myfont; src: url("file.woff"); }`;
-      assertEqual(scrapbook.rewriteCssText(input, optionsImage), input);
+      assert.strictEqual(scrapbook.rewriteCssText(input, optionsImage), input);
     });
 
     it('image: certain chars should be escaped or replaced', function () {
       // 0x01~0x1F and 0x7F (except for newlines) should be escaped
       var input = `.mycls { background-image: url("\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0B\x0E\x0F"); }`;
       var expected = r`.mycls { background-image: url("http://example.com/\1 \2 \3 \4 \5 \6 \7 \8 \9 \b \e \f "); }`;
-      assertEqual(scrapbook.rewriteCssText(input, optionsImage), expected);
+      assert.strictEqual(scrapbook.rewriteCssText(input, optionsImage), expected);
 
       var input = `.mycls { background-image: url("\x10\x11\x12\x13\x14\x15\x16\x17\x18\x19\x1A\x1B\x1C\x1D\x1E\x1F\x7F"); }`;
       var expected = r`.mycls { background-image: url("http://example.com/\10 \11 \12 \13 \14 \15 \16 \17 \18 \19 \1a \1b \1c \1d \1e \1f \7f "); }`;
-      assertEqual(scrapbook.rewriteCssText(input, optionsImage), expected);
+      assert.strictEqual(scrapbook.rewriteCssText(input, optionsImage), expected);
 
       // escaped sequence of 0x01~0x1F and 0x7F should keep escaped
       var input = r`.mycls { background-image: url("\1 \2 \3 \4 \5 \6 \7 \8 \9 \a \b \c \d \e \f "); }`;
       var expected = r`.mycls { background-image: url("http://example.com/\1 \2 \3 \4 \5 \6 \7 \8 \9 \a \b \c \d \e \f "); }`;
-      assertEqual(scrapbook.rewriteCssText(input, optionsImage), expected);
+      assert.strictEqual(scrapbook.rewriteCssText(input, optionsImage), expected);
 
       var input = r`.mycls { background-image: url("\10 \11 \12 \13 \14 \15 \16 \17 \18 \19 \1a \1b \1c \1d \1e \1f \7f "); }`;
       var expected = r`.mycls { background-image: url("http://example.com/\10 \11 \12 \13 \14 \15 \16 \17 \18 \19 \1a \1b \1c \1d \1e \1f \7f "); }`;
-      assertEqual(scrapbook.rewriteCssText(input, optionsImage), expected);
+      assert.strictEqual(scrapbook.rewriteCssText(input, optionsImage), expected);
 
       // null, surrogate, and char code > 0x10FFFF should be replaced with \uFFFD
       var input = r`.mycls { background-image: url("\0 \D800 \DFFF \110000"); }`;
       var expected = `.mycls { background-image: url("http://example.com/\uFFFD\uFFFD\uFFFD\uFFFD"); }`;
-      assertEqual(scrapbook.rewriteCssText(input, optionsImage), expected);
+      assert.strictEqual(scrapbook.rewriteCssText(input, optionsImage), expected);
 
       // other chars should be unescaped
       var input = r`.mycls { background-image: url("\80 \4E00 \20000 \10FFFF "); }`;
       var expected = `.mycls { background-image: url("http://example.com/\u{80}\u{4E00}\u{20000}\u{10FFFF}"); }`;
-      assertEqual(scrapbook.rewriteCssText(input, optionsImage), expected);
+      assert.strictEqual(scrapbook.rewriteCssText(input, optionsImage), expected);
     });
 
     $it.xfail()('image: bad extra components after a quoted string', function () {
       // bad URL, should be skipped
       var input = r`.mycls { background-image: url("image.jpg"foo); }`;
-      assertEqual(scrapbook.rewriteCssText(input, optionsImage), input);
+      assert.strictEqual(scrapbook.rewriteCssText(input, optionsImage), input);
 
       var input = r`.mycls { background-image: url("image.jpg" foo); }`;
-      assertEqual(scrapbook.rewriteCssText(input, optionsImage), input);
+      assert.strictEqual(scrapbook.rewriteCssText(input, optionsImage), input);
 
       var input = r`.mycls { background-image: url("image.jpg""foo"); }`;
-      assertEqual(scrapbook.rewriteCssText(input, optionsImage), input);
+      assert.strictEqual(scrapbook.rewriteCssText(input, optionsImage), input);
 
       var input = r`.mycls { background-image: url("image.jpg" "foo"); }`;
-      assertEqual(scrapbook.rewriteCssText(input, optionsImage), input);
+      assert.strictEqual(scrapbook.rewriteCssText(input, optionsImage), input);
 
       var input = r`.mycls { background-image: url("image.jpg"'foo'); }`;
-      assertEqual(scrapbook.rewriteCssText(input, optionsImage), input);
+      assert.strictEqual(scrapbook.rewriteCssText(input, optionsImage), input);
 
       var input = r`.mycls { background-image: url("image.jpg" 'foo'); }`;
-      assertEqual(scrapbook.rewriteCssText(input, optionsImage), input);
+      assert.strictEqual(scrapbook.rewriteCssText(input, optionsImage), input);
 
       var input = r`.mycls { background-image: url("image.jpg" url(foo)); }`;
-      assertEqual(scrapbook.rewriteCssText(input, optionsImage), input);
+      assert.strictEqual(scrapbook.rewriteCssText(input, optionsImage), input);
 
       var input = r`.mycls { background-image: url("image.jpg" url("foo")); }`;
-      assertEqual(scrapbook.rewriteCssText(input, optionsImage), input);
+      assert.strictEqual(scrapbook.rewriteCssText(input, optionsImage), input);
     });
 
     it('image: newline in a quoted string', function () {
       // bad string, should be skipped
       var input = r`.mycls { background-image: url("image.jpg
 ); }`;
-      assertEqual(scrapbook.rewriteCssText(input, optionsImage), input);
+      assert.strictEqual(scrapbook.rewriteCssText(input, optionsImage), input);
 
       var input = r`.mycls { background-image: url('image.jpg
 ); }`;
-      assertEqual(scrapbook.rewriteCssText(input, optionsImage), input);
+      assert.strictEqual(scrapbook.rewriteCssText(input, optionsImage), input);
     });
 
     it('image: escaped newline in a quoted string', function () {
@@ -2053,64 +2053,64 @@ describe('core/common.js', function () {
 image\
 .jpg"); }`;
       var expected = r`.mycls { background-image: url("http://example.com/myimage.jpg"); }`;
-      assertEqual(scrapbook.rewriteCssText(input, optionsImage), expected);
+      assert.strictEqual(scrapbook.rewriteCssText(input, optionsImage), expected);
 
       var input = r`.mycls { background-image: url('my\
 image\
 .jpg'); }`;
       var expected = r`.mycls { background-image: url("http://example.com/myimage.jpg"); }`;
-      assertEqual(scrapbook.rewriteCssText(input, optionsImage), expected);
+      assert.strictEqual(scrapbook.rewriteCssText(input, optionsImage), expected);
     });
 
     $it.xfail()('image: EOF in a quoted string', function () {
       // bad string, should be skipped to the end
       var input = r`.mycls { background-image: url("img.jpg`;
-      assertEqual(scrapbook.rewriteCssText(input, optionsImage), input);
+      assert.strictEqual(scrapbook.rewriteCssText(input, optionsImage), input);
 
       var input = r`.mycls { background-image: url("url(img.jpg)`;
-      assertEqual(scrapbook.rewriteCssText(input, optionsImage), input);
+      assert.strictEqual(scrapbook.rewriteCssText(input, optionsImage), input);
 
       var input = r`.mycls { background-image: url('img.jpg`;
-      assertEqual(scrapbook.rewriteCssText(input, optionsImage), input);
+      assert.strictEqual(scrapbook.rewriteCssText(input, optionsImage), input);
 
       var input = r`.mycls { background-image: url('url(img.jpg)`;
-      assertEqual(scrapbook.rewriteCssText(input, optionsImage), input);
+      assert.strictEqual(scrapbook.rewriteCssText(input, optionsImage), input);
     });
 
     $it.xfail()('image: escaped EOF in a quoted string', function () {
       // bad string, should be skipped to the end
       var input = `.mycls { background-image: url("img.jpg\\`;
-      assertEqual(scrapbook.rewriteCssText(input, optionsImage), input);
+      assert.strictEqual(scrapbook.rewriteCssText(input, optionsImage), input);
 
       var input = `.mycls { background-image: url("url(img.jpg)\\`;
-      assertEqual(scrapbook.rewriteCssText(input, optionsImage), input);
+      assert.strictEqual(scrapbook.rewriteCssText(input, optionsImage), input);
 
       var input = `.mycls { background-image: url('img.jpg\\`;
-      assertEqual(scrapbook.rewriteCssText(input, optionsImage), input);
+      assert.strictEqual(scrapbook.rewriteCssText(input, optionsImage), input);
 
       var input = `.mycls { background-image: url('url(img.jpg)\\`;
-      assertEqual(scrapbook.rewriteCssText(input, optionsImage), input);
+      assert.strictEqual(scrapbook.rewriteCssText(input, optionsImage), input);
     });
 
     it('image: bad chars in an unquoted url', function () {
       // bad URL, should be skipped
       var input = r`.mycls { background-image: url(image"foo.jpg); }`;
-      assertEqual(scrapbook.rewriteCssText(input, optionsImage), input);
+      assert.strictEqual(scrapbook.rewriteCssText(input, optionsImage), input);
 
       var input = r`.mycls { background-image: url(image"foo".jpg); }`;
-      assertEqual(scrapbook.rewriteCssText(input, optionsImage), input);
+      assert.strictEqual(scrapbook.rewriteCssText(input, optionsImage), input);
 
       var input = r`.mycls { background-image: url(image'foo.jpg); }`;
-      assertEqual(scrapbook.rewriteCssText(input, optionsImage), input);
+      assert.strictEqual(scrapbook.rewriteCssText(input, optionsImage), input);
 
       var input = r`.mycls { background-image: url(image'foo'.jpg); }`;
-      assertEqual(scrapbook.rewriteCssText(input, optionsImage), input);
+      assert.strictEqual(scrapbook.rewriteCssText(input, optionsImage), input);
 
       var input = r`.mycls { background-image: url(image(foo.jpg); }`;
-      assertEqual(scrapbook.rewriteCssText(input, optionsImage), input);
+      assert.strictEqual(scrapbook.rewriteCssText(input, optionsImage), input);
 
       var input = r`.mycls { background-image: url(url(foo).jpg); }`;
-      assertEqual(scrapbook.rewriteCssText(input, optionsImage), input);
+      assert.strictEqual(scrapbook.rewriteCssText(input, optionsImage), input);
     });
 
     it('image: last newline in an unquoted url', function () {
@@ -2119,37 +2119,37 @@ image\
 ); }`;
       var expected = r`.mycls { background-image: url("http://example.com/image.jpg"
 ); }`;
-      assertEqual(scrapbook.rewriteCssText(input, optionsImage), expected);
+      assert.strictEqual(scrapbook.rewriteCssText(input, optionsImage), expected);
     });
 
     it('image: intermediate newline in an unquoted url', function () {
       // bad url, should be skipped
       var input = r`.mycls { background-image: url(image.jpg
 foo); }`;
-      assertEqual(scrapbook.rewriteCssText(input, optionsImage), input);
+      assert.strictEqual(scrapbook.rewriteCssText(input, optionsImage), input);
     });
 
     it('image: escaped newline in an unquoted url', function () {
       // bad escape, should be skipped
       var input = r`.mycls { background-image: url(image\
 .jpg); }`;
-      assertEqual(scrapbook.rewriteCssText(input, optionsImage), input);
+      assert.strictEqual(scrapbook.rewriteCssText(input, optionsImage), input);
 
       var input = r`.mycls { background-image: url(image.jpg\
 ); }`;
-      assertEqual(scrapbook.rewriteCssText(input, optionsImage), input);
+      assert.strictEqual(scrapbook.rewriteCssText(input, optionsImage), input);
     });
 
     it('image: EOF in an unquoted url', function () {
       // bad url, should be skipped to the end
       var input = `.mycls { background-image: url(img.jpg`;
-      assertEqual(scrapbook.rewriteCssText(input, optionsImage), input);
+      assert.strictEqual(scrapbook.rewriteCssText(input, optionsImage), input);
     });
 
     it('image: escaped EOF in an unquoted url', function () {
       // bad escape, should be skipped to the end
       var input = `.mycls { background-image: url(img.jpg\\`;
-      assertEqual(scrapbook.rewriteCssText(input, optionsImage), input);
+      assert.strictEqual(scrapbook.rewriteCssText(input, optionsImage), input);
     });
 
     $it.skipIf($.noBrowser)('image: byte string rewriting', async function () {
@@ -2215,7 +2215,7 @@ foo); }`;
 
       var input = `body { image-background: url(image.jpg); }`;
       var expected = `body { image-background: /*scrapbook-orig-url="image.jpg"*/url("http://example.com/image.jpg"); }`;
-      assertEqual(scrapbook.rewriteCssText(input, options), expected);
+      assert.strictEqual(scrapbook.rewriteCssText(input, options), expected);
     });
 
     it('image async', async function () {
@@ -2227,88 +2227,88 @@ foo); }`;
 
       var input = `body { image-background: url(image.jpg); }`;
       var expected = `body { image-background: url("http://example.com/image.jpg"); }`;
-      assertEqual(await scrapbook.rewriteCssText(input, options), expected);
+      assert.strictEqual(await scrapbook.rewriteCssText(input, options), expected);
     });
 
     it('@font-face', function () {
       var input = `@font-face { font-family: myfont; src: url(file.woff); }`;
       var expected = `@font-face { font-family: myfont; src: url("http://example.com/file.woff"); }`;
-      assertEqual(scrapbook.rewriteCssText(input, optionsFont), expected);
+      assert.strictEqual(scrapbook.rewriteCssText(input, optionsFont), expected);
 
       var input = `@font-face { font-family: myfont; src: url('file.woff'); }`;
       var expected = `@font-face { font-family: myfont; src: url("http://example.com/file.woff"); }`;
-      assertEqual(scrapbook.rewriteCssText(input, optionsFont), expected);
+      assert.strictEqual(scrapbook.rewriteCssText(input, optionsFont), expected);
 
       var input = `@font-face { font-family: myfont; src: url("file.woff"); }`;
       var expected = `@font-face { font-family: myfont; src: url("http://example.com/file.woff"); }`;
-      assertEqual(scrapbook.rewriteCssText(input, optionsFont), expected);
+      assert.strictEqual(scrapbook.rewriteCssText(input, optionsFont), expected);
 
       // keep original spaces
       var input = `@font-face{font-family:myfont;src:url(file.woff);}`;
       var expected = `@font-face{font-family:myfont;src:url("http://example.com/file.woff");}`;
-      assertEqual(scrapbook.rewriteCssText(input, optionsFont), expected);
+      assert.strictEqual(scrapbook.rewriteCssText(input, optionsFont), expected);
 
       var input = `@font-face { font-family: myfont; src  : url(  file.woff  )  ; }`;
       var expected = `@font-face { font-family: myfont; src  : url(  "http://example.com/file.woff"  )  ; }`;
-      assertEqual(scrapbook.rewriteCssText(input, optionsFont), expected);
+      assert.strictEqual(scrapbook.rewriteCssText(input, optionsFont), expected);
 
       var input = `\t@font-face\t{\tfont-family\t:\tmyfont\t;\tsrc\t:\turl(\tfile.woff\t)\t;\t}`;
       var expected = `\t@font-face\t{\tfont-family\t:\tmyfont\t;\tsrc\t:\turl(\t"http://example.com/file.woff"\t)\t;\t}`;
-      assertEqual(scrapbook.rewriteCssText(input, optionsFont), expected);
+      assert.strictEqual(scrapbook.rewriteCssText(input, optionsFont), expected);
 
       // keep original case
       var input = `@font-face { font-family: myfont; src: URL(file.woff); }`;
       var expected = `@font-face { font-family: myfont; src: URL("http://example.com/file.woff"); }`;
-      assertEqual(scrapbook.rewriteCssText(input, optionsFont), expected);
+      assert.strictEqual(scrapbook.rewriteCssText(input, optionsFont), expected);
 
       var input = `@font-face { font-family: myfont; src: UrL(file.woff); }`;
       var expected = `@font-face { font-family: myfont; src: UrL("http://example.com/file.woff"); }`;
-      assertEqual(scrapbook.rewriteCssText(input, optionsFont), expected);
+      assert.strictEqual(scrapbook.rewriteCssText(input, optionsFont), expected);
 
       // escape quotes
       var input = `@font-face { font-family: myfont; src: url('i"like"it.woff'); }`;
       var expected = r`@font-face { font-family: myfont; src: url("http://example.com/i\"like\"it.woff"); }`;
-      assertEqual(scrapbook.rewriteCssText(input, optionsFont), expected);
+      assert.strictEqual(scrapbook.rewriteCssText(input, optionsFont), expected);
 
       // skip comments
       var input = `/*@font-face{src:url(file.woff)}*/`;
-      assertEqual(scrapbook.rewriteCssText(input, optionsFont), input);
+      assert.strictEqual(scrapbook.rewriteCssText(input, optionsFont), input);
 
       var input = `/*@font-face{src:url(file.woff)}*/body { color: red; }`;
-      assertEqual(scrapbook.rewriteCssText(input, optionsFont), input);
+      assert.strictEqual(scrapbook.rewriteCssText(input, optionsFont), input);
 
       var input = `body/*@font-face{src:url(file.woff)}*/{ color: red; }`;
-      assertEqual(scrapbook.rewriteCssText(input, optionsFont), input);
+      assert.strictEqual(scrapbook.rewriteCssText(input, optionsFont), input);
 
       var input = `body {/*@font-face{src:url(file.woff)}*/color: red; }`;
-      assertEqual(scrapbook.rewriteCssText(input, optionsFont), input);
+      assert.strictEqual(scrapbook.rewriteCssText(input, optionsFont), input);
 
       var input = `body { color/*@font-face{src:url(file.woff)}*/: red; }`;
-      assertEqual(scrapbook.rewriteCssText(input, optionsFont), input);
+      assert.strictEqual(scrapbook.rewriteCssText(input, optionsFont), input);
 
       var input = `body { color:/*@font-face{src:url(file.woff)}*/red; }`;
-      assertEqual(scrapbook.rewriteCssText(input, optionsFont), input);
+      assert.strictEqual(scrapbook.rewriteCssText(input, optionsFont), input);
 
       var input = `body { color: red/*@font-face{src:url(file.woff)}*/; }`;
-      assertEqual(scrapbook.rewriteCssText(input, optionsFont), input);
+      assert.strictEqual(scrapbook.rewriteCssText(input, optionsFont), input);
 
       var input = `body { color: red;/*@font-face{src:url(file.woff)}*/}`;
-      assertEqual(scrapbook.rewriteCssText(input, optionsFont), input);
+      assert.strictEqual(scrapbook.rewriteCssText(input, optionsFont), input);
     });
 
     it('@font-face ignore unrelated pattern', function () {
       var input = `div::after { content: "@font-face{src:url(file.woff)}" }`;
-      assertEqual(scrapbook.rewriteCssText(input, optionsFont), input);
+      assert.strictEqual(scrapbook.rewriteCssText(input, optionsFont), input);
 
       var input = `[myattr="@font-face{src:url(file.woff)}"] { }`;
-      assertEqual(scrapbook.rewriteCssText(input, optionsFont), input);
+      assert.strictEqual(scrapbook.rewriteCssText(input, optionsFont), input);
 
       // don't break normal rewriting
       var input = r`.my\"class\" { }
 @font-face { src: url("file.woff"); }`;
       var expected = r`.my\"class\" { }
 @font-face { src: url("http://example.com/file.woff"); }`;
-      assertEqual(scrapbook.rewriteCssText(input, optionsFont), expected);
+      assert.strictEqual(scrapbook.rewriteCssText(input, optionsFont), expected);
     });
 
     it('@font-face: escaped newline in a quoted string', function () {
@@ -2317,13 +2317,13 @@ foo); }`;
 font\
 .woff"); }`;
       var expected = `@font-face { font-family: myfont; src: url("http://example.com/myfont.woff"); }`;
-      assertEqual(scrapbook.rewriteCssText(input, optionsFont), expected);
+      assert.strictEqual(scrapbook.rewriteCssText(input, optionsFont), expected);
 
       var input = r`@font-face { font-family: myfont; src: url('my\
 font\
 .woff'); }`;
       var expected = `@font-face { font-family: myfont; src: url("http://example.com/myfont.woff"); }`;
-      assertEqual(scrapbook.rewriteCssText(input, optionsFont), expected);
+      assert.strictEqual(scrapbook.rewriteCssText(input, optionsFont), expected);
     });
 
     it('@font-face record', function () {
@@ -2335,7 +2335,7 @@ font\
 
       var input = `@font-face { font-family: myfont; src: url(file.woff); }`;
       var expected = `@font-face { font-family: myfont; src: /*scrapbook-orig-url="file.woff"*/url("http://example.com/file.woff"); }`;
-      assertEqual(scrapbook.rewriteCssText(input, options), expected);
+      assert.strictEqual(scrapbook.rewriteCssText(input, options), expected);
     });
 
     it('@font-face async', async function () {
@@ -2347,104 +2347,104 @@ font\
 
       var input = `@font-face { font-family: myfont; src: url(file.woff); }`;
       var expected = `@font-face { font-family: myfont; src: url("http://example.com/file.woff"); }`;
-      assertEqual(await scrapbook.rewriteCssText(input, options), expected);
+      assert.strictEqual(await scrapbook.rewriteCssText(input, options), expected);
     });
 
     it('@import', function () {
       var input = `@import "file.css";`;
       var expected = `@import "http://example.com/file.css";`;
-      assertEqual(scrapbook.rewriteCssText(input, optionsImport), expected);
+      assert.strictEqual(scrapbook.rewriteCssText(input, optionsImport), expected);
 
       var input = `@import 'file.css';`;
       var expected = `@import "http://example.com/file.css";`;
-      assertEqual(scrapbook.rewriteCssText(input, optionsImport), expected);
+      assert.strictEqual(scrapbook.rewriteCssText(input, optionsImport), expected);
 
       var input = `@import url(file.css);`;
       var expected = `@import url("http://example.com/file.css");`;
-      assertEqual(scrapbook.rewriteCssText(input, optionsImport), expected);
+      assert.strictEqual(scrapbook.rewriteCssText(input, optionsImport), expected);
 
       var input = `@import url('file.css');`;
       var expected = `@import url("http://example.com/file.css");`;
-      assertEqual(scrapbook.rewriteCssText(input, optionsImport), expected);
+      assert.strictEqual(scrapbook.rewriteCssText(input, optionsImport), expected);
 
       var input = `@import url("file.css");`;
       var expected = `@import url("http://example.com/file.css");`;
-      assertEqual(scrapbook.rewriteCssText(input, optionsImport), expected);
+      assert.strictEqual(scrapbook.rewriteCssText(input, optionsImport), expected);
 
       // keep original spaces
       var input = `@import   "file.css"  ;`;
       var expected = `@import   "http://example.com/file.css"  ;`;
-      assertEqual(scrapbook.rewriteCssText(input, optionsImport), expected);
+      assert.strictEqual(scrapbook.rewriteCssText(input, optionsImport), expected);
 
       var input = `@import\t"file.css"\t;`;
       var expected = `@import\t"http://example.com/file.css"\t;`;
-      assertEqual(scrapbook.rewriteCssText(input, optionsImport), expected);
+      assert.strictEqual(scrapbook.rewriteCssText(input, optionsImport), expected);
 
       var input = `@import   url(  file.css   )  ;`;
       var expected = `@import   url(  "http://example.com/file.css"   )  ;`;
-      assertEqual(scrapbook.rewriteCssText(input, optionsImport), expected);
+      assert.strictEqual(scrapbook.rewriteCssText(input, optionsImport), expected);
 
       var input = `@import\turl(\tfile.css\t)\t;`;
       var expected = `@import\turl(\t"http://example.com/file.css"\t)\t;`;
-      assertEqual(scrapbook.rewriteCssText(input, optionsImport), expected);
+      assert.strictEqual(scrapbook.rewriteCssText(input, optionsImport), expected);
 
       // keep original case
       var input = `@import URL(file.css);`;
       var expected = `@import URL("http://example.com/file.css");`;
-      assertEqual(scrapbook.rewriteCssText(input, optionsImport), expected);
+      assert.strictEqual(scrapbook.rewriteCssText(input, optionsImport), expected);
 
       var input = `@import URl(file.css);`;
       var expected = `@import URl("http://example.com/file.css");`;
-      assertEqual(scrapbook.rewriteCssText(input, optionsImport), expected);
+      assert.strictEqual(scrapbook.rewriteCssText(input, optionsImport), expected);
 
       // escape quotes
       var input = `@import 'I"love"you.css';`;
       var expected = r`@import "http://example.com/I\"love\"you.css";`;
-      assertEqual(scrapbook.rewriteCssText(input, optionsImport), expected);
+      assert.strictEqual(scrapbook.rewriteCssText(input, optionsImport), expected);
 
       var input = `@import url('I"love"you.css');`;
       var expected = r`@import url("http://example.com/I\"love\"you.css");`;
-      assertEqual(scrapbook.rewriteCssText(input, optionsImport), expected);
+      assert.strictEqual(scrapbook.rewriteCssText(input, optionsImport), expected);
 
       // skip comments
       var input = `/*@import url(file.css);*/`;
-      assertEqual(scrapbook.rewriteCssText(input, optionsImport), input);
+      assert.strictEqual(scrapbook.rewriteCssText(input, optionsImport), input);
 
       var input = `/*@import url(file.css);*/body { color: red; }`;
-      assertEqual(scrapbook.rewriteCssText(input, optionsImport), input);
+      assert.strictEqual(scrapbook.rewriteCssText(input, optionsImport), input);
 
       var input = `body/*@import url(file.css);*/{ color: red; }`;
-      assertEqual(scrapbook.rewriteCssText(input, optionsImport), input);
+      assert.strictEqual(scrapbook.rewriteCssText(input, optionsImport), input);
 
       var input = `body {/*@import url(file.css);*/color: red; }`;
-      assertEqual(scrapbook.rewriteCssText(input, optionsImport), input);
+      assert.strictEqual(scrapbook.rewriteCssText(input, optionsImport), input);
 
       var input = `body { color/*@import url(file.css);*/: red; }`;
-      assertEqual(scrapbook.rewriteCssText(input, optionsImport), input);
+      assert.strictEqual(scrapbook.rewriteCssText(input, optionsImport), input);
 
       var input = `body { color:/*@import url(file.css);*/red; }`;
-      assertEqual(scrapbook.rewriteCssText(input, optionsImport), input);
+      assert.strictEqual(scrapbook.rewriteCssText(input, optionsImport), input);
 
       var input = `body { color: red/*@import url(file.css);*/; }`;
-      assertEqual(scrapbook.rewriteCssText(input, optionsImport), input);
+      assert.strictEqual(scrapbook.rewriteCssText(input, optionsImport), input);
 
       var input = `body { color: red;/*@import url(file.css);*/}`;
-      assertEqual(scrapbook.rewriteCssText(input, optionsImport), input);
+      assert.strictEqual(scrapbook.rewriteCssText(input, optionsImport), input);
     });
 
     it('@import ignore unrelated pattern', function () {
       var input = `div::after { content: "@import url(file.css);" }`;
-      assertEqual(scrapbook.rewriteCssText(input, optionsImport), input);
+      assert.strictEqual(scrapbook.rewriteCssText(input, optionsImport), input);
 
       var input = `[myattr="@import url(file.css);"] { }`;
-      assertEqual(scrapbook.rewriteCssText(input, optionsImport), input);
+      assert.strictEqual(scrapbook.rewriteCssText(input, optionsImport), input);
 
       // don't break normal rewriting
       var input = r`.my\"class\" { }
 @import "file.css";`;
       var expected = r`.my\"class\" { }
 @import "http://example.com/file.css";`;
-      assertEqual(scrapbook.rewriteCssText(input, optionsImport), expected);
+      assert.strictEqual(scrapbook.rewriteCssText(input, optionsImport), expected);
     });
 
     it('@import: escaped newline in a quoted string', function () {
@@ -2453,25 +2453,25 @@ font\
 file\
 .css";`;
       var expected = `@import "http://example.com/myfile.css";`;
-      assertEqual(scrapbook.rewriteCssText(input, optionsImport), expected);
+      assert.strictEqual(scrapbook.rewriteCssText(input, optionsImport), expected);
 
       var input = r`@import 'my\
 file\
 .css';`;
       var expected = `@import "http://example.com/myfile.css";`;
-      assertEqual(scrapbook.rewriteCssText(input, optionsImport), expected);
+      assert.strictEqual(scrapbook.rewriteCssText(input, optionsImport), expected);
 
       var input = r`@import url("my\
 file\
 .css");`;
       var expected = `@import url("http://example.com/myfile.css");`;
-      assertEqual(scrapbook.rewriteCssText(input, optionsImport), expected);
+      assert.strictEqual(scrapbook.rewriteCssText(input, optionsImport), expected);
 
       var input = r`@import url('my\
 file\
 .css');`;
       var expected = `@import url("http://example.com/myfile.css");`;
-      assertEqual(scrapbook.rewriteCssText(input, optionsImport), expected);
+      assert.strictEqual(scrapbook.rewriteCssText(input, optionsImport), expected);
     });
 
     it('@import record', function () {
@@ -2483,11 +2483,11 @@ file\
 
       var input = `@import "file.css";`;
       var expected = `@import /*scrapbook-orig-url="file.css"*/"http://example.com/file.css";`;
-      assertEqual(scrapbook.rewriteCssText(input, options), expected);
+      assert.strictEqual(scrapbook.rewriteCssText(input, options), expected);
 
       var input = `@import url(file.css);`;
       var expected = `@import /*scrapbook-orig-url="file.css"*/url("http://example.com/file.css");`;
-      assertEqual(scrapbook.rewriteCssText(input, options), expected);
+      assert.strictEqual(scrapbook.rewriteCssText(input, options), expected);
     });
 
     it('@import async', async function () {
@@ -2499,7 +2499,7 @@ file\
 
       var input = `@import "file.css";`;
       var expected = `@import "http://example.com/file.css";`;
-      assertEqual(await scrapbook.rewriteCssText(input, options), expected);
+      assert.strictEqual(await scrapbook.rewriteCssText(input, options), expected);
     });
 
     it('resource map', function () {
@@ -2522,8 +2522,8 @@ div { image-background: var(${/(--sb(\d+)-2)/}); }`;
       var result = scrapbook.rewriteCssText(input, options);
       var match = result.match(regex);
       assert(match);
-      assertEqual(match[2], match[4]);
-      assertEqual(map, {
+      assert.strictEqual(match[2], match[4]);
+      assert.deepEqual(map, {
         "http://image.example.com/image.jpg": match[1],
         "http://image.example.com/image2.jpg": match[3],
       });
@@ -2569,19 +2569,19 @@ div { image-background: var(${/(--sb(\d+)-2)/}); }`;
           if (testCase === testCases[2]) {
             var input = testCase.map(p => p.join(space)).join(',' + space);
             var expected = testCase.map(p => [`<${p[0]}>`].concat(p.slice(1)).join(space)).join(',' + space);
-            assertEqual(scrapbook.rewriteSrcset(input, rewriter), expected);
+            assert.strictEqual(scrapbook.rewriteSrcset(input, rewriter), expected);
             continue;
           }
 
           // least spaces
           var input = testCase.map(p => p.join(space)).join(',');
           var expected = testCase.map(p => [`<${p[0]}>`].concat(p.slice(1)).join(space)).join(',');
-          assertEqual(scrapbook.rewriteSrcset(input, rewriter), expected);
+          assert.strictEqual(scrapbook.rewriteSrcset(input, rewriter), expected);
 
           // more spaces
           var input = testCase.map(p => space + p.join(space) + space).join(',');
           var expected = testCase.map(p => space + [`<${p[0]}>`].concat(p.slice(1)).join(space) + space).join(',');
-          assertEqual(scrapbook.rewriteSrcset(input, rewriter), expected);
+          assert.strictEqual(scrapbook.rewriteSrcset(input, rewriter), expected);
         }
 
         // non-ASCII-whitespaces should be ignored (treated as part of the URL)
@@ -2589,12 +2589,12 @@ div { image-background: var(${/(--sb(\d+)-2)/}); }`;
           // least spaces
           var input = testCase.map(p => p.join(space)).join(',');
           var expected = `<${input}>`;
-          assertEqual(scrapbook.rewriteSrcset(input, rewriter), expected);
+          assert.strictEqual(scrapbook.rewriteSrcset(input, rewriter), expected);
 
           // more spaces
           var input = testCase.map(p => space + p.join(space) + space).join(',');
           var expected = `<${input}>`;
-          assertEqual(scrapbook.rewriteSrcset(input, rewriter), expected);
+          assert.strictEqual(scrapbook.rewriteSrcset(input, rewriter), expected);
         }
       }
     });
@@ -2635,19 +2635,19 @@ div { image-background: var(${/(--sb(\d+)-2)/}); }`;
           if (testCase === testCases[2]) {
             var input = testCase.map(p => p.join(space)).join(',' + space);
             var expected = testCase.map(p => [`<${p[0]}>`].concat(p.slice(1)).join(space)).join(',' + space);
-            assertEqual(await scrapbook.rewriteSrcset(input, rewriter), expected);
+            assert.strictEqual(await scrapbook.rewriteSrcset(input, rewriter), expected);
             continue;
           }
 
           // least spaces
           var input = testCase.map(p => p.join(space)).join(',');
           var expected = testCase.map(p => [`<${p[0]}>`].concat(p.slice(1)).join(space)).join(',');
-          assertEqual(await scrapbook.rewriteSrcset(input, rewriter), expected);
+          assert.strictEqual(await scrapbook.rewriteSrcset(input, rewriter), expected);
 
           // more spaces
           var input = testCase.map(p => space + p.join(space) + space).join(',');
           var expected = testCase.map(p => space + [`<${p[0]}>`].concat(p.slice(1)).join(space) + space).join(',');
-          assertEqual(await scrapbook.rewriteSrcset(input, rewriter), expected);
+          assert.strictEqual(await scrapbook.rewriteSrcset(input, rewriter), expected);
         }
 
         // non-ASCII-whitespaces should be ignored (treated as part of the URL)
@@ -2655,12 +2655,12 @@ div { image-background: var(${/(--sb(\d+)-2)/}); }`;
           // least spaces
           var input = testCase.map(p => p.join(space)).join(',');
           var expected = `<${input}>`;
-          assertEqual(await scrapbook.rewriteSrcset(input, rewriter), expected);
+          assert.strictEqual(await scrapbook.rewriteSrcset(input, rewriter), expected);
 
           // more spaces
           var input = testCase.map(p => space + p.join(space) + space).join(',');
           var expected = `<${input}>`;
-          assertEqual(await scrapbook.rewriteSrcset(input, rewriter), expected);
+          assert.strictEqual(await scrapbook.rewriteSrcset(input, rewriter), expected);
         }
       }
     });
@@ -2686,14 +2686,14 @@ div { image-background: var(${/(--sb(\d+)-2)/}); }`;
       for (const space of [' ', '\t', '\n', '\r', '\f', ' \t ']) {
         const input = urls.join(space);
         const expected = urls.map(url => `<${url}>`).join(' ');
-        assertEqual(scrapbook.rewriteUrls(input, rewriter), expected);
+        assert.strictEqual(scrapbook.rewriteUrls(input, rewriter), expected);
       }
 
       // non-ASCII-whitespaces should be ignored (treated as part of the URL)
       for (const space of ['\u00A0', '\u2009', '\u200A', '\u200B', '\u3000', '\uFEFF']) {
         const input = urls.join(space);
         const expected = `<${input}>`;
-        assertEqual(scrapbook.rewriteUrls(input, rewriter), expected);
+        assert.strictEqual(scrapbook.rewriteUrls(input, rewriter), expected);
       }
     });
 
@@ -2714,14 +2714,14 @@ div { image-background: var(${/(--sb(\d+)-2)/}); }`;
       for (const space of [' ', '\t', '\n', '\r', '\f', ' \t ']) {
         const input = urls.join(space);
         const expected = urls.map(url => `<${url}>`).join(' ');
-        assertEqual(await scrapbook.rewriteUrls(input, rewriter), expected);
+        assert.strictEqual(await scrapbook.rewriteUrls(input, rewriter), expected);
       }
 
       // non-ASCII-whitespaces should be ignored (treated as part of the URL)
       for (const space of ['\u00A0', '\u2009', '\u200A', '\u200B', '\u3000', '\uFEFF']) {
         const input = urls.join(space);
         const expected = `<${input}>`;
-        assertEqual(await scrapbook.rewriteUrls(input, rewriter), expected);
+        assert.strictEqual(await scrapbook.rewriteUrls(input, rewriter), expected);
       }
     });
 

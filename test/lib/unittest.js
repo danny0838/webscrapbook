@@ -9,118 +9,31 @@
   if (typeof exports === "object" && typeof module === "object") {
     // CommonJS
     module.exports = factory(
-      require('../t/common', '../shared/lib/sha'),
+      require('./chai'),
+      require('../t/common'),
+      require('../shared/lib/sha'),
     );
   } else if (typeof define === "function" && define.amd) {
     // AMD
-    define(['../t/common', '../shared/lib/sha'], factory);
+    define(['./chai', '../t/common', '../shared/lib/sha'], factory);
   } else {
     // Browser globals
     global = typeof globalThis !== "undefined" ? globalThis : global || self;
     global.unittest = factory(
+      global.chai,
       global.utils,
       global.jsSHA,
     );
   }
-}(this, function (utils, jsSHA) {
+}(this, function (chai, utils, jsSHA) {
 
   'use strict';
 
-  class AssertionError extends Error {
-    constructor(...args) {
-      super(...args);
-      this.name = 'AssertionError';
-      this.message = this.message || "Assertion failed";
-    }
-  }
+  Object.assign(chai.config, {
+    truncateThreshold: 1024,
+  });
 
-  /**
-   * Simple assertion that outputs the error to the console for later tracing.
-   */
-  function assert(condition, message) {
-    if (condition) { return; }
-    const err = new AssertionError(message);
-    console.error(err);
-    throw err;
-  }
-
-  /**
-   * Check two objects (JSONifiable) are deeply identical.
-   */
-  function assertEqual(obj1, obj2, message) {
-    const s1 = JSON.stringify(obj1);
-    const s2 = JSON.stringify(obj2);
-    if (s1 === s2) { return; }
-    const err = new AssertionError(`${s1} not equal to ${s2}${message ? ': ' + message : ''}`);
-    err.actual = JSON.stringify(obj1, null, 2);
-    err.expected = JSON.stringify(obj2, null, 2);
-    console.error(err);
-    throw err;
-  }
-
-  /**
-   * An Error object that the thrown error object must be an instance of it.
-   *
-   * @typedef {Error} assertThrowsError
-   */
-
-  /**
-   * An object that each property is tested against the thrown error object.
-   *
-   * If the property value is a RegExp, the error property value must match it;
-   * otherwise the error property value must be equal to it.
-   *
-   * @typedef {Object<string, (RegExp|*)>} assertThrowsSpec
-   */
-
-  /**
-   * @callback assertThrowsCallback
-   * @param {Error} [error] - the thrown error object to be tested
-   * @return {boolean} Truthy to pass the assersion.
-   */
-
-  /**
-   * Check if the function throws with the exception
-   *
-   * @param {Function} func - the function to test
-   * @param {assertThrowsError|assertThrowsSpec|assertThrowsCallback} [expected]
-   *     the expected error
-   */
-  function assertThrows(func, expected, message) {
-    let error;
-    try {
-      func();
-    } catch (ex) {
-      error = ex;
-    }
-    if (!error) {
-      throw new AssertionError(`Expected error not thrown${message ? ': ' + message : ''}`);
-    }
-    if (!expected) { return; }
-    if (expected.prototype instanceof Error) {
-      if (!(error instanceof expected)) {
-        throw new AssertionError(`Thrown error ${String(error)} is not an instance of ${expected.name}${message ? ': ' + message : ''}`);
-      }
-    } else if (typeof expected === 'function') {
-      if (!expected(error)) {
-        throw new AssertionError(`Thrown error ${String(error)} is not expected${message ? ': ' + message : ''}`);
-      }
-    } else {
-      for (const key in expected) {
-        const value = expected[key];
-        const valueError = error[key];
-        if (value instanceof RegExp) {
-          if (!value.test(valueError)) {
-            throw new AssertionError(`Thrown error property "${key}" ${JSON.stringify(valueError)} does not match ${value.toString()}${message ? ': ' + message : ''}`);
-          }
-        } else {
-          if (valueError !== value) {
-            throw new AssertionError(`Thrown error property "${key}" ${JSON.stringify(valueError)} not equal to ${JSON.stringify(value)}${message ? ': ' + message : ''}`);
-          }
-        }
-      }
-    }
-  }
+  const {assert} = chai;
 
   /**
    * A jQuery-style extension of describe or it for chainable and conditional
@@ -688,8 +601,6 @@
 
   return {
     assert,
-    assertEqual,
-    assertThrows,
     MochaQuery,
     sha1,
     getToken,

@@ -25,7 +25,7 @@
 
 'use strict';
 
-const {MochaQuery: $, assert, assertEqual, assertThrows, getRulesFromCssText, cssRegex} = unittest;
+const {MochaQuery: $, assert, getRulesFromCssText, cssRegex} = unittest;
 const $describe = $(describe);
 const $it = $(it);
 const {userAgent} = utils;
@@ -37,81 +37,81 @@ describe('capturer/common.js', function () {
   describe('capturer.getRedirectedUrl', function () {
 
     it("use the redirected URL hash if it exists", function () {
-      assertEqual(
+      assert.strictEqual(
         capturer.getRedirectedUrl("http://example.com/page#", ""),
         "http://example.com/page#",
       );
-      assertEqual(
+      assert.strictEqual(
         capturer.getRedirectedUrl("http://example.com/page?id=123#", ""),
         "http://example.com/page?id=123#",
       );
-      assertEqual(
+      assert.strictEqual(
         capturer.getRedirectedUrl("http://example.com/page#", "#frag"),
         "http://example.com/page#",
       );
-      assertEqual(
+      assert.strictEqual(
         capturer.getRedirectedUrl("http://example.com/page?id=123#", "#frag"),
         "http://example.com/page?id=123#",
       );
-      assertEqual(
+      assert.strictEqual(
         capturer.getRedirectedUrl("http://example.com/page#foo", ""),
         "http://example.com/page#foo",
       );
-      assertEqual(
+      assert.strictEqual(
         capturer.getRedirectedUrl("http://example.com/page?id=123#foo", ""),
         "http://example.com/page?id=123#foo",
       );
-      assertEqual(
+      assert.strictEqual(
         capturer.getRedirectedUrl("http://example.com/page#foo", "#frag"),
         "http://example.com/page#foo",
       );
-      assertEqual(
+      assert.strictEqual(
         capturer.getRedirectedUrl("http://example.com/page?id=123#foo", "#frag"),
         "http://example.com/page?id=123#foo",
       );
     });
 
     it("use the original URL hash if the redirected URL has no hash", function () {
-      assertEqual(
+      assert.strictEqual(
         capturer.getRedirectedUrl("http://example.com/page", ""),
         "http://example.com/page",
       );
-      assertEqual(
+      assert.strictEqual(
         capturer.getRedirectedUrl("http://example.com/page?id=123", ""),
         "http://example.com/page?id=123",
       );
-      assertEqual(
+      assert.strictEqual(
         capturer.getRedirectedUrl("http://example.com/page", "#"),
         "http://example.com/page#",
       );
-      assertEqual(
+      assert.strictEqual(
         capturer.getRedirectedUrl("http://example.com/page?id=123", "#"),
         "http://example.com/page?id=123#",
       );
-      assertEqual(
+      assert.strictEqual(
         capturer.getRedirectedUrl("http://example.com/page", "#frag"),
         "http://example.com/page#frag",
       );
-      assertEqual(
+      assert.strictEqual(
         capturer.getRedirectedUrl("http://example.com/page?id=123", "#frag"),
         "http://example.com/page?id=123#frag",
       );
     });
 
     it("don't include hash for data URL", function () {
-      assertEqual(
+      assert.strictEqual(
         capturer.getRedirectedUrl("data:text/html,foo#", ""),
         "data:text/html,foo",
       );
-      assertEqual(
+      assert.strictEqual(
         capturer.getRedirectedUrl("data:text/html,foo#", "#frag"),
         "data:text/html,foo",
       );
-      assertEqual(
+      assert.strictEqual(
         capturer.getRedirectedUrl("data:text/html,foo", ""),
         "data:text/html,foo",
       );
-      assertEqual(
+      assert.strictEqual(
         capturer.getRedirectedUrl("data:text/html,foo", "#frag"),
         "data:text/html,foo",
       );
@@ -122,41 +122,41 @@ describe('capturer/common.js', function () {
   describe('capturer.resolveRelativeUrl', function () {
 
     it("resolve a relative URL using the base URL", function () {
-      assertEqual(
+      assert.strictEqual(
         capturer.resolveRelativeUrl("mypage.html", "http://example.com/"),
         "http://example.com/mypage.html",
       );
-      assertEqual(
+      assert.strictEqual(
         capturer.resolveRelativeUrl("mypage.html?id=123", "http://example.com/"),
         "http://example.com/mypage.html?id=123",
       );
-      assertEqual(
+      assert.strictEqual(
         capturer.resolveRelativeUrl("mypage.html?id=123#frag", "http://example.com/"),
         "http://example.com/mypage.html?id=123#frag",
       );
-      assertEqual(
+      assert.strictEqual(
         capturer.resolveRelativeUrl("?id=123", "http://example.com/"),
         "http://example.com/?id=123",
       );
-      assertEqual(
+      assert.strictEqual(
         capturer.resolveRelativeUrl("?", "http://example.com/"),
         "http://example.com/?",
       );
     });
 
     it("don't resolve an empty URL", function () {
-      assertEqual(
+      assert.strictEqual(
         capturer.resolveRelativeUrl("", "http://example.com/"),
         "",
       );
     });
 
     it("don't resolve a pure hash URL", function () {
-      assertEqual(
+      assert.strictEqual(
         capturer.resolveRelativeUrl("#hash", "http://example.com/"),
         "#hash",
       );
-      assertEqual(
+      assert.strictEqual(
         capturer.resolveRelativeUrl("#", "http://example.com/"),
         "#",
       );
@@ -167,89 +167,89 @@ describe('capturer/common.js', function () {
   describe('capturer.isAboutUrl', function () {
 
     it("true for exactly about:srcdoc", function () {
-      assertEqual(
+      assert.strictEqual(
         capturer.isAboutUrl("about:srcdoc"),
         true,
       );
-      assertEqual(
+      assert.strictEqual(
         capturer.isAboutUrl("about:srcdoc/subdir"),
         false,
       );
-      assertEqual(
+      assert.strictEqual(
         capturer.isAboutUrl("about:srcdoc?"),
         false,
       );
-      assertEqual(
+      assert.strictEqual(
         capturer.isAboutUrl("about:srcdoc?id=123"),
         false,
       );
-      assertEqual(
+      assert.strictEqual(
         capturer.isAboutUrl("about:srcdoc#"),
         false,
       );
-      assertEqual(
+      assert.strictEqual(
         capturer.isAboutUrl("about:srcdoc#frag"),
         false,
       );
     });
 
     it("true for about:blank", function () {
-      assertEqual(
+      assert.strictEqual(
         capturer.isAboutUrl("about:blank"),
         true,
       );
-      assertEqual(
+      assert.strictEqual(
         capturer.isAboutUrl("about:blank/subdir"),
         false,
       );
-      assertEqual(
+      assert.strictEqual(
         capturer.isAboutUrl("about:blank?"),
         true,
       );
-      assertEqual(
+      assert.strictEqual(
         capturer.isAboutUrl("about:blank?id=123"),
         true,
       );
-      assertEqual(
+      assert.strictEqual(
         capturer.isAboutUrl("about:blank#"),
         true,
       );
-      assertEqual(
+      assert.strictEqual(
         capturer.isAboutUrl("about:blank#frag"),
         true,
       );
     });
 
     it("false for other URLs", function () {
-      assertEqual(
+      assert.strictEqual(
         capturer.isAboutUrl("about:invalid"),
         false,
       );
-      assertEqual(
+      assert.strictEqual(
         capturer.isAboutUrl("about:newtab"),
         false,
       );
-      assertEqual(
+      assert.strictEqual(
         capturer.isAboutUrl("http://example.com/page"),
         false,
       );
-      assertEqual(
+      assert.strictEqual(
         capturer.isAboutUrl("https://example.com/page"),
         false,
       );
-      assertEqual(
+      assert.strictEqual(
         capturer.isAboutUrl("ws://example.com/page"),
         false,
       );
-      assertEqual(
+      assert.strictEqual(
         capturer.isAboutUrl("wss://example.com/page"),
         false,
       );
-      assertEqual(
+      assert.strictEqual(
         capturer.isAboutUrl("file:///foo/bar"),
         false,
       );
-      assertEqual(
+      assert.strictEqual(
         capturer.isAboutUrl("data:text/html,foo"),
         false,
       );
@@ -262,85 +262,85 @@ describe('capturer/common.js', function () {
     const optionsLinkUnsavedUri = {"capture.linkUnsavedUri": true};
 
     it("rewrite http:, https:, file:, and about:", function () {
-      assertEqual(
+      assert.strictEqual(
         capturer.getErrorUrl("http://example.com/?id=123#456", optionsBasic),
         "urn:scrapbook:download:error:http://example.com/?id=123#456",
       );
-      assertEqual(
+      assert.strictEqual(
         capturer.getErrorUrl("https://example.com/?id=123#456", optionsBasic),
         "urn:scrapbook:download:error:https://example.com/?id=123#456",
       );
-      assertEqual(
+      assert.strictEqual(
         capturer.getErrorUrl("file:///foo/bar", optionsBasic),
         "urn:scrapbook:download:error:file:///foo/bar",
       );
-      assertEqual(
+      assert.strictEqual(
         capturer.getErrorUrl("about:blank", optionsBasic),
         "urn:scrapbook:download:error:about:blank",
       );
-      assertEqual(
+      assert.strictEqual(
         capturer.getErrorUrl("about:srcdoc", optionsBasic),
         "urn:scrapbook:download:error:about:srcdoc",
       );
     });
 
     it("strip details for data: and blob:", function () {
-      assertEqual(
+      assert.strictEqual(
         capturer.getErrorUrl("data:text/css,foo", optionsBasic),
         "urn:scrapbook:download:error:data:",
       );
-      assertEqual(
+      assert.strictEqual(
         capturer.getErrorUrl("blob:https://example.com/58eead10-e54d-4b72-9ae4-150381dcb68c", optionsBasic),
         "urn:scrapbook:download:error:blob:",
       );
     });
 
     it("don't rewrite other protocols", function () {
-      assertEqual(
+      assert.strictEqual(
         capturer.getErrorUrl("ftp://example.com/file.png", optionsBasic),
         "ftp://example.com/file.png",
       );
-      assertEqual(
+      assert.strictEqual(
         capturer.getErrorUrl("ws://example.com/?id=123", optionsBasic),
         "ws://example.com/?id=123",
       );
-      assertEqual(
+      assert.strictEqual(
         capturer.getErrorUrl("wss://example.com/?id=123", optionsBasic),
         "wss://example.com/?id=123",
       );
-      assertEqual(
+      assert.strictEqual(
         capturer.getErrorUrl("urn:scrapbook:download:error:http://example.com", optionsBasic),
         "urn:scrapbook:download:error:http://example.com",
       );
     });
 
     it("don't rewrite if capture.linkUnsavedUri is truthy", function () {
-      assertEqual(
+      assert.strictEqual(
         capturer.getErrorUrl("http://example.com/?id=123#456", optionsLinkUnsavedUri),
         "http://example.com/?id=123#456",
       );
-      assertEqual(
+      assert.strictEqual(
         capturer.getErrorUrl("https://example.com/?id=123#456", optionsLinkUnsavedUri),
         "https://example.com/?id=123#456",
       );
-      assertEqual(
+      assert.strictEqual(
         capturer.getErrorUrl("file:///foo/bar", optionsLinkUnsavedUri),
         "file:///foo/bar",
       );
-      assertEqual(
+      assert.strictEqual(
         capturer.getErrorUrl("about:blank", optionsLinkUnsavedUri),
         "about:blank",
       );
-      assertEqual(
+      assert.strictEqual(
         capturer.getErrorUrl("about:srcdoc", optionsLinkUnsavedUri),
         "about:srcdoc",
       );
 
-      assertEqual(
+      assert.strictEqual(
         capturer.getErrorUrl("data:text/css,foo", optionsLinkUnsavedUri),
         "data:text/css,foo",
       );
-      assertEqual(
+      assert.strictEqual(
         capturer.getErrorUrl("blob:https://example.com/58eead10-e54d-4b72-9ae4-150381dcb68c", optionsLinkUnsavedUri),
         "blob:https://example.com/58eead10-e54d-4b72-9ae4-150381dcb68c",
       );
@@ -354,29 +354,29 @@ describe('capturer/common.js', function () {
       const tokenizer = new capturer.CssSelectorTokenizer();
 
       it('basic selectors', function () {
-        assertEqual(tokenizer.run(''), []);
-        assertEqual(tokenizer.run('body'), [
+        assert.deepEqual(tokenizer.run(''), []);
+        assert.deepEqual(tokenizer.run('body'), [
           {type: 'name', value: 'body', depth: 0},
         ]);
-        assertEqual(tokenizer.run('*'), [
+        assert.deepEqual(tokenizer.run('*'), [
           {type: 'operator', value: '*', depth: 0},
         ]);
-        assertEqual(tokenizer.run('#my-id'), [
+        assert.deepEqual(tokenizer.run('#my-id'), [
           {type: 'operator', value: '#', depth: 0},
           {type: 'name', value: 'my-id', depth: 0},
         ]);
-        assertEqual(tokenizer.run('.my-class'), [
+        assert.deepEqual(tokenizer.run('.my-class'), [
           {type: 'operator', value: '.', depth: 0},
           {type: 'name', value: 'my-class', depth: 0},
         ]);
 
         // escaped string
-        assertEqual(tokenizer.run(r`#\*`), [
+        assert.deepEqual(tokenizer.run(r`#\*`), [
           {type: 'operator', value: '#', depth: 0},
           {type: 'name', value: r`\*`, depth: 0},
         ]);
 
-        assertEqual(tokenizer.run(r`.my\.class\4E00 \20000 \10FFFF x`), [
+        assert.deepEqual(tokenizer.run(r`.my\.class\4E00 \20000 \10FFFF x`), [
           {type: 'operator', value: '.', depth: 0},
           {type: 'name', value: r`my\.class\4E00 \20000 \10FFFF x`, depth: 0},
         ]);
@@ -384,55 +384,55 @@ describe('capturer/common.js', function () {
 
       it('attribute selector ([attr="..."])', function () {
         // attr only
-        assertEqual(tokenizer.run('[myattr]'), [
+        assert.deepEqual(tokenizer.run('[myattr]'), [
           {type: 'selector', value: '[myattr]', depth: 0},
         ]);
 
         // attr and value
-        assertEqual(tokenizer.run('[myattr=myvalue]'), [
+        assert.deepEqual(tokenizer.run('[myattr=myvalue]'), [
           {type: 'selector', value: '[myattr=myvalue]', depth: 0},
         ]);
-        assertEqual(tokenizer.run('[myattr~=myvalue]'), [
+        assert.deepEqual(tokenizer.run('[myattr~=myvalue]'), [
           {type: 'selector', value: '[myattr~=myvalue]', depth: 0},
         ]);
-        assertEqual(tokenizer.run('[myattr|=myvalue]'), [
+        assert.deepEqual(tokenizer.run('[myattr|=myvalue]'), [
           {type: 'selector', value: '[myattr|=myvalue]', depth: 0},
         ]);
-        assertEqual(tokenizer.run('[myattr^=myvalue]'), [
+        assert.deepEqual(tokenizer.run('[myattr^=myvalue]'), [
           {type: 'selector', value: '[myattr^=myvalue]', depth: 0},
         ]);
-        assertEqual(tokenizer.run('[myattr$=myvalue]'), [
+        assert.deepEqual(tokenizer.run('[myattr$=myvalue]'), [
           {type: 'selector', value: '[myattr$=myvalue]', depth: 0},
         ]);
-        assertEqual(tokenizer.run('[myattr*=myvalue]'), [
+        assert.deepEqual(tokenizer.run('[myattr*=myvalue]'), [
           {type: 'selector', value: '[myattr*=myvalue]', depth: 0},
         ]);
 
         // attr and value with modifier
-        assertEqual(tokenizer.run('[myattr=myvalue i]'), [
+        assert.deepEqual(tokenizer.run('[myattr=myvalue i]'), [
           {type: 'selector', value: '[myattr=myvalue i]', depth: 0},
         ]);
-        assertEqual(tokenizer.run('[myattr=myvalue s]'), [
+        assert.deepEqual(tokenizer.run('[myattr=myvalue s]'), [
           {type: 'selector', value: '[myattr=myvalue s]', depth: 0},
         ]);
 
         // quoted value
-        assertEqual(tokenizer.run('[myattr="my complex value"]'), [
+        assert.deepEqual(tokenizer.run('[myattr="my complex value"]'), [
           {type: 'selector', value: '[myattr="my complex value"]', depth: 0},
         ]);
 
         // quoted value with escaping
-        assertEqual(tokenizer.run(r`[myattr=" my escaped\value and \"quoted\" ones "]`), [
+        assert.deepEqual(tokenizer.run(r`[myattr=" my escaped\value and \"quoted\" ones "]`), [
           {type: 'selector', value: r`[myattr=" my escaped\value and \"quoted\" ones "]`, depth: 0},
         ]);
 
         // quoted value with modifier
-        assertEqual(tokenizer.run('[myattr="my complex value" i]'), [
+        assert.deepEqual(tokenizer.run('[myattr="my complex value" i]'), [
           {type: 'selector', value: '[myattr="my complex value" i]', depth: 0},
         ]);
 
         // combine with other selectors
-        assertEqual(tokenizer.run('div [myattr]'), [
+        assert.deepEqual(tokenizer.run('div [myattr]'), [
           {type: 'name', value: 'div', depth: 0},
           {type: 'operator', value: ' ', depth: 0},
           {type: 'selector', value: '[myattr]', depth: 0},
@@ -440,12 +440,12 @@ describe('capturer/common.js', function () {
       });
 
       it('descendant combinator (" ")', function () {
-        assertEqual(tokenizer.run('div span'), [
+        assert.deepEqual(tokenizer.run('div span'), [
           {type: 'name', value: 'div', depth: 0},
           {type: 'operator', value: ' ', depth: 0},
           {type: 'name', value: 'span', depth: 0},
         ]);
-        assertEqual(tokenizer.run('div    span'), [
+        assert.deepEqual(tokenizer.run('div    span'), [
           {type: 'name', value: 'div', depth: 0},
           {type: 'operator', value: ' ', depth: 0},
           {type: 'operator', value: ' ', depth: 0},
@@ -454,13 +454,13 @@ describe('capturer/common.js', function () {
           {type: 'name', value: 'span', depth: 0},
         ]);
 
-        assertEqual(tokenizer.run('div\tspan'), [
+        assert.deepEqual(tokenizer.run('div\tspan'), [
           {type: 'name', value: 'div', depth: 0},
           {type: 'operator', value: '\t', depth: 0},
           {type: 'name', value: 'span', depth: 0},
         ]);
 
-        assertEqual(tokenizer.run('div \t span'), [
+        assert.deepEqual(tokenizer.run('div \t span'), [
           {type: 'name', value: 'div', depth: 0},
           {type: 'operator', value: ' ', depth: 0},
           {type: 'operator', value: '\t', depth: 0},
@@ -469,14 +469,14 @@ describe('capturer/common.js', function () {
         ]);
 
         // non-ascii white space is a name rather than a combinator
-        assertEqual(tokenizer.run('div　span'), [
+        assert.deepEqual(tokenizer.run('div　span'), [
           {type: 'name', value: 'div　span', depth: 0},
         ]);
-        assertEqual(tokenizer.run('.my-class　span'), [
+        assert.deepEqual(tokenizer.run('.my-class　span'), [
           {type: 'operator', value: '.', depth: 0},
           {type: 'name', value: 'my-class　span', depth: 0},
         ]);
-        assertEqual(tokenizer.run('div 　 span'), [
+        assert.deepEqual(tokenizer.run('div 　 span'), [
           {type: 'name', value: 'div', depth: 0},
           {type: 'operator', value: ' ', depth: 0},
           {type: 'name', value: '　', depth: 0},
@@ -486,28 +486,28 @@ describe('capturer/common.js', function () {
       });
 
       it('other combinators', function () {
-        assertEqual(tokenizer.run('div > span'), [
+        assert.deepEqual(tokenizer.run('div > span'), [
           {type: 'name', value: 'div', depth: 0},
           {type: 'operator', value: ' ', depth: 0},
           {type: 'operator', value: '>', depth: 0},
           {type: 'operator', value: ' ', depth: 0},
           {type: 'name', value: 'span', depth: 0},
         ]);
-        assertEqual(tokenizer.run('div + span'), [
+        assert.deepEqual(tokenizer.run('div + span'), [
           {type: 'name', value: 'div', depth: 0},
           {type: 'operator', value: ' ', depth: 0},
           {type: 'operator', value: '+', depth: 0},
           {type: 'operator', value: ' ', depth: 0},
           {type: 'name', value: 'span', depth: 0},
         ]);
-        assertEqual(tokenizer.run('div ~ span'), [
+        assert.deepEqual(tokenizer.run('div ~ span'), [
           {type: 'name', value: 'div', depth: 0},
           {type: 'operator', value: ' ', depth: 0},
           {type: 'operator', value: '~', depth: 0},
           {type: 'operator', value: ' ', depth: 0},
           {type: 'name', value: 'span', depth: 0},
         ]);
-        assertEqual(tokenizer.run('div || span'), [
+        assert.deepEqual(tokenizer.run('div || span'), [
           {type: 'name', value: 'div', depth: 0},
           {type: 'operator', value: ' ', depth: 0},
           {type: 'operator', value: '||', depth: 0},
@@ -518,19 +518,19 @@ describe('capturer/common.js', function () {
 
       it('pseudo-class', function () {
         // simple
-        assertEqual(tokenizer.run(':root'), [
+        assert.deepEqual(tokenizer.run(':root'), [
           {type: 'operator', value: ':', depth: 0},
           {type: 'name', value: 'root', depth: 0},
         ]);
 
         // vander prefix
-        assertEqual(tokenizer.run(':-webkit-autofill'), [
+        assert.deepEqual(tokenizer.run(':-webkit-autofill'), [
           {type: 'operator', value: ':', depth: 0},
           {type: 'name', value: '-webkit-autofill', depth: 0},
         ]);
 
         // chained
-        assertEqual(tokenizer.run('a:hover:visited'), [
+        assert.deepEqual(tokenizer.run('a:hover:visited'), [
           {type: 'name', value: 'a', depth: 0},
           {type: 'operator', value: ':', depth: 0},
           {type: 'name', value: 'hover', depth: 0},
@@ -539,7 +539,7 @@ describe('capturer/common.js', function () {
         ]);
 
         // parenthesized
-        assertEqual(tokenizer.run('td:nth-child(-n + 3)'), [
+        assert.deepEqual(tokenizer.run('td:nth-child(-n + 3)'), [
           {type: 'name', value: 'td', depth: 0},
           {type: 'operator', value: ':', depth: 0},
           {type: 'name', value: 'nth-child', depth: 0},
@@ -553,7 +553,7 @@ describe('capturer/common.js', function () {
         ]);
 
         // recursive
-        assertEqual(tokenizer.run('a:not([href])'), [
+        assert.deepEqual(tokenizer.run('a:not([href])'), [
           {type: 'name', value: 'a', depth: 0},
           {type: 'operator', value: ':', depth: 0},
           {type: 'name', value: 'not', depth: 0},
@@ -561,7 +561,7 @@ describe('capturer/common.js', function () {
           {type: 'selector', value: '[href]', depth: 1},
           {type: 'operator', value: ')', depth: 0},
         ]);
-        assertEqual(tokenizer.run('p:is(#id1, :is(#id2))'), [
+        assert.deepEqual(tokenizer.run('p:is(#id1, :is(#id2))'), [
           {type: 'name', value: 'p', depth: 0},
           {type: 'operator', value: ':', depth: 0},
           {type: 'name', value: 'is', depth: 0},
@@ -582,14 +582,14 @@ describe('capturer/common.js', function () {
 
       it('pseudo-element', function () {
         // simple
-        assertEqual(tokenizer.run('p::before'), [
+        assert.deepEqual(tokenizer.run('p::before'), [
           {type: 'name', value: 'p', depth: 0},
           {type: 'operator', value: '::', depth: 0},
           {type: 'name', value: 'before', depth: 0},
         ]);
 
         // recursive
-        assertEqual(tokenizer.run('p::slotted(*)'), [
+        assert.deepEqual(tokenizer.run('p::slotted(*)'), [
           {type: 'name', value: 'p', depth: 0},
           {type: 'operator', value: '::', depth: 0},
           {type: 'name', value: 'slotted', depth: 0},
@@ -600,21 +600,21 @@ describe('capturer/common.js', function () {
       });
 
       it('namespaced type selector', function () {
-        assertEqual(tokenizer.run('|a'), [
+        assert.deepEqual(tokenizer.run('|a'), [
           {type: 'operator', value: '|', depth: 0},
           {type: 'name', value: 'a', depth: 0},
         ]);
-        assertEqual(tokenizer.run('svg|a'), [
+        assert.deepEqual(tokenizer.run('svg|a'), [
           {type: 'name', value: 'svg', depth: 0},
           {type: 'operator', value: '|', depth: 0},
           {type: 'name', value: 'a', depth: 0},
         ]);
-        assertEqual(tokenizer.run('*|a'), [
+        assert.deepEqual(tokenizer.run('*|a'), [
           {type: 'operator', value: '*', depth: 0},
           {type: 'operator', value: '|', depth: 0},
           {type: 'name', value: 'a', depth: 0},
         ]);
-        assertEqual(tokenizer.run('svg|*'), [
+        assert.deepEqual(tokenizer.run('svg|*'), [
           {type: 'name', value: 'svg', depth: 0},
           {type: 'operator', value: '|', depth: 0},
           {type: 'operator', value: '*', depth: 0},
@@ -622,20 +622,20 @@ describe('capturer/common.js', function () {
       });
 
       it('namespaced attribute selector', function () {
-        assertEqual(tokenizer.run('[|attr]'), [
+        assert.deepEqual(tokenizer.run('[|attr]'), [
           {type: 'selector', value: '[|attr]', depth: 0},
         ]);
-        assertEqual(tokenizer.run('[svg|attr]'), [
+        assert.deepEqual(tokenizer.run('[svg|attr]'), [
           {type: 'selector', value: '[svg|attr]', depth: 0},
         ]);
-        assertEqual(tokenizer.run('[*|attr]'), [
+        assert.deepEqual(tokenizer.run('[*|attr]'), [
           {type: 'selector', value: '[*|attr]', depth: 0},
         ]);
 
-        assertEqual(tokenizer.run('[*|attr=value]'), [
+        assert.deepEqual(tokenizer.run('[*|attr=value]'), [
           {type: 'selector', value: '[*|attr=value]', depth: 0},
         ]);
-        assertEqual(tokenizer.run('[*|attr="value"]'), [
+        assert.deepEqual(tokenizer.run('[*|attr="value"]'), [
           {type: 'selector', value: '[*|attr="value"]', depth: 0},
         ]);
       });
@@ -646,7 +646,7 @@ describe('capturer/common.js', function () {
       const tokenizer = new capturer.CssSelectorTokenizer();
 
       it('basic', function () {
-        assertEqual(tokenizer.tokensToString([
+        assert.deepEqual(tokenizer.tokensToString([
           {type: 'name', value: 'div', depth: 0},
           {type: 'operator', value: ' ', depth: 0},
           {type: 'name', value: 'span', depth: 0},
@@ -666,7 +666,7 @@ describe('capturer/common.js', function () {
 
       it('basic', function () {
         var rules = getRulesFromCssText(`div, span { background-color: lime; }`);
-        assertEqual(getSelectorText(rules[0]), 'div, span');
+        assert.strictEqual(getSelectorText(rules[0]), 'div, span');
       });
 
       $it.skipIf($.noNestingCss)('prepend :is() wrapped parent selector text for a nested rule', function () {
@@ -676,9 +676,9 @@ div, span {
     b {}
   }
 }`);
-        assertEqual(getSelectorText(rules[0]), 'div, span');
-        assertEqual(getSelectorText(rules[0].cssRules[0]), ':is(div, span) a');
-        assertEqual(getSelectorText(rules[0].cssRules[0].cssRules[0]), ':is(:is(div, span) a) b');
+        assert.strictEqual(getSelectorText(rules[0]), 'div, span');
+        assert.strictEqual(getSelectorText(rules[0].cssRules[0]), ':is(div, span) a');
+        assert.strictEqual(getSelectorText(rules[0].cssRules[0].cssRules[0]), ':is(:is(div, span) a) b');
       });
 
       $it.skipIf($.noNestingCss)('prepend parent selector for all top-level selector list items', function () {
@@ -704,12 +704,12 @@ div, span {
   .case4& {}
   & .case5 & & {}
 }`);
-        assertEqual(getSelectorText(rules[0]), 'div, span');
-        assertEqual(getSelectorText(rules[0].cssRules[0]), ':is(div, span) .case1');
-        assertEqual(getSelectorText(rules[0].cssRules[1]), ':is(div, span).case2');
-        assertEqual(getSelectorText(rules[0].cssRules[2]), '.case3 :is(div, span)');
-        assertEqual(getSelectorText(rules[0].cssRules[3]), '.case4:is(div, span)');
-        assertEqual(getSelectorText(rules[0].cssRules[4]), ':is(div, span) .case5 :is(div, span) :is(div, span)');
+        assert.strictEqual(getSelectorText(rules[0]), 'div, span');
+        assert.strictEqual(getSelectorText(rules[0].cssRules[0]), ':is(div, span) .case1');
+        assert.strictEqual(getSelectorText(rules[0].cssRules[1]), ':is(div, span).case2');
+        assert.strictEqual(getSelectorText(rules[0].cssRules[2]), '.case3 :is(div, span)');
+        assert.strictEqual(getSelectorText(rules[0].cssRules[3]), '.case4:is(div, span)');
+        assert.strictEqual(getSelectorText(rules[0].cssRules[4]), ':is(div, span) .case5 :is(div, span) :is(div, span)');
       });
 
       $it.skipIf($.noNestingCss)('prepend parent selector for top-level selector list items without "&"', function () {
@@ -736,11 +736,11 @@ div {
   :is(.case1, & .case2) {}
   :is(.case1, .case2 &) {}
 }`);
-        assertEqual(getSelectorText(rules[0].cssRules[0]), ':is(div) :is(.case1, .case2)');
-        assertEqual(getSelectorText(rules[0].cssRules[1]), ':is(:is(div) .case1, .case2)');
-        assertEqual(getSelectorText(rules[0].cssRules[2]), ':is(.case1 :is(div), .case2)');
-        assertEqual(getSelectorText(rules[0].cssRules[3]), ':is(.case1, :is(div) .case2)');
-        assertEqual(getSelectorText(rules[0].cssRules[4]), ':is(.case1, .case2 :is(div))');
+        assert.strictEqual(getSelectorText(rules[0].cssRules[0]), ':is(div) :is(.case1, .case2)');
+        assert.strictEqual(getSelectorText(rules[0].cssRules[1]), ':is(:is(div) .case1, .case2)');
+        assert.strictEqual(getSelectorText(rules[0].cssRules[2]), ':is(.case1 :is(div), .case2)');
+        assert.strictEqual(getSelectorText(rules[0].cssRules[3]), ':is(.case1, :is(div) .case2)');
+        assert.strictEqual(getSelectorText(rules[0].cssRules[4]), ':is(.case1, .case2 :is(div))');
       });
 
       $it.skipIf($.noNestingCss)('imply parent selector for a relative selector even if "&" exists', function () {
@@ -773,12 +773,12 @@ ul {
 
       $it.skipIf($.noNestingCss)('escaped "&" should not be rewritten', function () {
         var rules = getRulesFromCssText(r`blockquote { .my\&class {} }`);
-        assertEqual(getSelectorText(rules[0].cssRules[0]), r`:is(blockquote) .my\&class`);
+        assert.strictEqual(getSelectorText(rules[0].cssRules[0]), r`:is(blockquote) .my\&class`);
       });
 
       $it.skipIf($.noNestingCss)('"&" in [attr=""] should not be rewritten', function () {
         var rules = getRulesFromCssText(r`blockquote { [myattr="a & b"] {} }`);
-        assertEqual(getSelectorText(rules[0].cssRules[0]), r`:is(blockquote) [myattr="a & b"]`);
+        assert.strictEqual(getSelectorText(rules[0].cssRules[0]), r`:is(blockquote) [myattr="a & b"]`);
       });
 
     });
@@ -801,7 +801,7 @@ ul {
             throw new Error(`Invalid control CSS selector: ${selector2}`);
           }
         }
-        assertEqual(getSelectorVerifier(selector1), selector2);
+        assert.strictEqual(getSelectorVerifier(selector1), selector2);
       };
 
       it('general selectors', function () {
@@ -952,242 +952,242 @@ ul {
 }`);
 
         assert(rules[0] instanceof CSSMediaRule);
-        assertEqual(rules[0].media[0], 'screen and (min-width: 300px)');
-        assertEqual(rules[0].media[1], 'print');
+        assert.strictEqual(rules[0].media[0], 'screen and (min-width: 300px)');
+        assert.strictEqual(rules[0].media[1], 'print');
 
         assert(rules[0].cssRules[0] instanceof CSSStyleRule);
-        assertEqual(rules[0].cssRules[0].selectorText, 'body');
-        assertEqual(rules[0].cssRules[0].style.getPropertyValue('font-size'), '1.5em');
-        assertEqual(rules[0].cssRules[0].style.getPropertyValue('line-height'), '2em');
+        assert.strictEqual(rules[0].cssRules[0].selectorText, 'body');
+        assert.strictEqual(rules[0].cssRules[0].style.getPropertyValue('font-size'), '1.5em');
+        assert.strictEqual(rules[0].cssRules[0].style.getPropertyValue('line-height'), '2em');
       });
 
       it('browser syntax check/tidy for whitespaces and comments', function () {
         // space between operators are added
         var rules = getRulesFromCssText(`body>div{color:red;}`);
-        assertEqual(rules[0].cssText, `body > div { color: red; }`);
+        assert.strictEqual(rules[0].cssText, `body > div { color: red; }`);
 
         var rules = getRulesFromCssText(`p{}`);
-        assertEqual(rules[0].cssText, `p { }`);
+        assert.strictEqual(rules[0].cssText, `p { }`);
 
         // extra spaces are removed
         var rules = getRulesFromCssText(`   body    div    {  color  :   red  ;  }  `);
-        assertEqual(rules[0].cssText, `body div { color: red; }`);
+        assert.strictEqual(rules[0].cssText, `body div { color: red; }`);
 
         var rules = getRulesFromCssText(`[  myattr  ] { }`);
-        assertEqual(rules[0].selectorText, `[myattr]`);
+        assert.strictEqual(rules[0].selectorText, `[myattr]`);
 
         var rules = getRulesFromCssText(`[  myattr  =  myvalue  ] { }`);
-        assertEqual(rules[0].selectorText, `[myattr="myvalue"]`);
+        assert.strictEqual(rules[0].selectorText, `[myattr="myvalue"]`);
 
         var rules = getRulesFromCssText(`[  myattr  =  " myvalue "  ] { }`);
-        assertEqual(rules[0].selectorText, `[myattr=" myvalue "]`);
+        assert.strictEqual(rules[0].selectorText, `[myattr=" myvalue "]`);
 
         var rules = getRulesFromCssText(`:not( div ) { }`);
-        assertEqual(rules[0].selectorText, `:not(div)`);
+        assert.strictEqual(rules[0].selectorText, `:not(div)`);
 
         // comments are removed (in the same way of spaces)
         var rules = getRulesFromCssText(`/* comment */ body > div { color: red; }`);
-        assertEqual(rules[0].cssText, `body > div { color: red; }`);
+        assert.strictEqual(rules[0].cssText, `body > div { color: red; }`);
 
         var rules = getRulesFromCssText(`body /* comment */ > div { color: red; }`);
-        assertEqual(rules[0].cssText, `body > div { color: red; }`);
+        assert.strictEqual(rules[0].cssText, `body > div { color: red; }`);
 
         var rules = getRulesFromCssText(`body > /* comment */ div { color: red; }`);
-        assertEqual(rules[0].cssText, `body > div { color: red; }`);
+        assert.strictEqual(rules[0].cssText, `body > div { color: red; }`);
 
         var rules = getRulesFromCssText(`body > div /* comment */ { color: red; }`);
-        assertEqual(rules[0].cssText, `body > div { color: red; }`);
+        assert.strictEqual(rules[0].cssText, `body > div { color: red; }`);
 
         var rules = getRulesFromCssText(`body > div { /* comment */ color: red; }`);
-        assertEqual(rules[0].cssText, `body > div { color: red; }`);
+        assert.strictEqual(rules[0].cssText, `body > div { color: red; }`);
 
         var rules = getRulesFromCssText(`body > div { color /* comment */ : red; }`);
-        assertEqual(rules[0].cssText, `body > div { color: red; }`);
+        assert.strictEqual(rules[0].cssText, `body > div { color: red; }`);
 
         var rules = getRulesFromCssText(`body > div { color : /* comment */ red; }`);
-        assertEqual(rules[0].cssText, `body > div { color: red; }`);
+        assert.strictEqual(rules[0].cssText, `body > div { color: red; }`);
 
         var rules = getRulesFromCssText(`body > div { color : red /* comment */; }`);
-        assertEqual(rules[0].cssText, `body > div { color: red; }`);
+        assert.strictEqual(rules[0].cssText, `body > div { color: red; }`);
 
         var rules = getRulesFromCssText(`body > div { color : red; /* comment */ }`);
-        assertEqual(rules[0].cssText, `body > div { color: red; }`);
+        assert.strictEqual(rules[0].cssText, `body > div { color: red; }`);
 
         var rules = getRulesFromCssText(`body > div { color : red; } /* comment */`);
-        assertEqual(rules[0].cssText, `body > div { color: red; }`);
+        assert.strictEqual(rules[0].cssText, `body > div { color: red; }`);
 
         var rules = getRulesFromCssText(`[ /* comment */ myattr="myvalue"] { }`);
-        assertEqual(rules[0].cssText, `[myattr="myvalue"] { }`);
+        assert.strictEqual(rules[0].cssText, `[myattr="myvalue"] { }`);
 
         var rules = getRulesFromCssText(`[myattr /* comment */ ="myvalue"] { }`);
-        assertEqual(rules[0].cssText, `[myattr="myvalue"] { }`);
+        assert.strictEqual(rules[0].cssText, `[myattr="myvalue"] { }`);
 
         var rules = getRulesFromCssText(`[myattr= /* comment */ "myvalue"] { }`);
-        assertEqual(rules[0].cssText, `[myattr="myvalue"] { }`);
+        assert.strictEqual(rules[0].cssText, `[myattr="myvalue"] { }`);
 
         var rules = getRulesFromCssText(`[myattr="myvalue" /* comment */ ] { }`);
-        assertEqual(rules[0].cssText, `[myattr="myvalue"] { }`);
+        assert.strictEqual(rules[0].cssText, `[myattr="myvalue"] { }`);
 
         var rules = getRulesFromCssText(`:not( /* comment */ div) { }`);
-        assertEqual(rules[0].cssText, `:not(div) { }`);
+        assert.strictEqual(rules[0].cssText, `:not(div) { }`);
 
         var rules = getRulesFromCssText(`:not(div /* comment */ ) { }`);
-        assertEqual(rules[0].cssText, `:not(div) { }`);
+        assert.strictEqual(rules[0].cssText, `:not(div) { }`);
 
         // unpaired comments are removed
         var rules = getRulesFromCssText(`body > div { color: red; } /* comment`);
-        assertEqual(rules[0].cssText, `body > div { color: red; }`);
+        assert.strictEqual(rules[0].cssText, `body > div { color: red; }`);
 
         // space/comment around the namespace separator is not allowed
         var rules = getRulesFromCssText(`svg | a { }`);
-        assertEqual(rules[0], undefined);
+        assert.strictEqual(rules[0], undefined);
 
         // space/comment between pseudo-class/element name and parenthesis is not allowed
         var rules = getRulesFromCssText(`:not (p) { }`);
-        assertEqual(rules[0], undefined);
+        assert.strictEqual(rules[0], undefined);
 
         var rules = getRulesFromCssText(`::slotted (p) { }`);
-        assertEqual(rules[0], undefined);
+        assert.strictEqual(rules[0], undefined);
 
         // space/comment between function name and parenthesis is not allowed
         var rules = getRulesFromCssText(`p { background-image: url (image.jpg); }`);
-        assertEqual(rules[0].cssText, `p { }`);
+        assert.strictEqual(rules[0].cssText, `p { }`);
 
         var rules = getRulesFromCssText(`p::after { content: attr (id); }`);
-        assertEqual(rules[0].cssText, `p::after { }`);
+        assert.strictEqual(rules[0].cssText, `p::after { }`);
 
         var rules = getRulesFromCssText(`p { color: var (--my-var); }`);
-        assertEqual(rules[0].cssText, `p { }`);
+        assert.strictEqual(rules[0].cssText, `p { }`);
 
         // comment inside a function is not allowed in some cases
         var rules = getRulesFromCssText(`p { background-image: url(/* comment */"image.jpg"); }`);
-        assertEqual(rules[0].cssText, `p { }`);
+        assert.strictEqual(rules[0].cssText, `p { }`);
 
         var rules = getRulesFromCssText(`p { background-image: url(image.jpg/* comment */); }`);
-        assertEqual(rules[0].cssText, `p { }`);
+        assert.strictEqual(rules[0].cssText, `p { }`);
 
         // space/comment inside a function is allowed in some cases
         var rules = getRulesFromCssText(`p { background-image: url("image.jpg"  ); }`);
-        assertEqual(rules[0].cssText, `p { background-image: url("image.jpg"); }`);
+        assert.strictEqual(rules[0].cssText, `p { background-image: url("image.jpg"); }`);
 
         var rules = getRulesFromCssText(`p { background-image: url("image.jpg"/* comment */); }`);
-        assertEqual(rules[0].cssText, `p { background-image: url("image.jpg"); }`);
+        assert.strictEqual(rules[0].cssText, `p { background-image: url("image.jpg"); }`);
 
         var rules = getRulesFromCssText(`p::after { content: attr(  id  ); }`);
-        assertEqual(rules[0].cssText, `p::after { content: attr(id); }`);
+        assert.strictEqual(rules[0].cssText, `p::after { content: attr(id); }`);
       });
 
       it('browser syntax check/tidy for escaping', function () {
         // chars allowed for an ident are unescaped
         var rules = getRulesFromCssText(r`.my\-c\la\s\s { }`);
-        assertEqual(rules[0].cssText, `.my-class { }`);
+        assert.strictEqual(rules[0].cssText, `.my-class { }`);
 
         // escaping a newline in an ident is not allowed
         var rules = getRulesFromCssText(r`.my\
 class { }`);
-        assertEqual(rules[0], undefined);
+        assert.strictEqual(rules[0], undefined);
       });
 
       it('browser syntax check/tidy for quoting', function () {
         // double quotes and backslashes are escaped
         var rules = getRulesFromCssText(r`[a=\"my\"attr\\value] { }`);
-        assertEqual(rules[0].selectorText, r`[a="\"my\"attr\\value"]`);
+        assert.strictEqual(rules[0].selectorText, r`[a="\"my\"attr\\value"]`);
 
         var rules = getRulesFromCssText(r`[a='"my" attr\\value'] { }`);
-        assertEqual(rules[0].selectorText, r`[a="\"my\" attr\\value"]`);
+        assert.strictEqual(rules[0].selectorText, r`[a="\"my\" attr\\value"]`);
 
         // null, surrogate, and code > 0x10FFFF are replaced with 0xFFFD
         var rules = getRulesFromCssText(r`[myattr=\0 \D800 \DFFF \110000] { }`);
-        assertEqual(rules[0].selectorText, `[myattr="\uFFFD\uFFFD\uFFFD\uFFFD"]`);
+        assert.strictEqual(rules[0].selectorText, `[myattr="\uFFFD\uFFFD\uFFFD\uFFFD"]`);
 
         // ASCII control chars (0x01~0x1F, 0x7F) are hex-escaped with lower case and space
         var rules = getRulesFromCssText(r`[myattr=\1\2\3\4\5\6\7\8\9\A\B\C\D\E\F] { }`);
-        assertEqual(rules[0].selectorText, r`[myattr="\1 \2 \3 \4 \5 \6 \7 \8 \9 \a \b \c \d \e \f "]`);
+        assert.strictEqual(rules[0].selectorText, r`[myattr="\1 \2 \3 \4 \5 \6 \7 \8 \9 \a \b \c \d \e \f "]`);
 
         var rules = getRulesFromCssText(r`[myattr=\10\11\12\13\14\15\16\17\18\19\1A\1B\1C\1D\1E\1F\7F] { }`);
-        assertEqual(rules[0].selectorText, r`[myattr="\10 \11 \12 \13 \14 \15 \16 \17 \18 \19 \1a \1b \1c \1d \1e \1f \7f "]`);
+        assert.strictEqual(rules[0].selectorText, r`[myattr="\10 \11 \12 \13 \14 \15 \16 \17 \18 \19 \1a \1b \1c \1d \1e \1f \7f "]`);
 
         // other ASCII symbols are unescaped
         var rules = getRulesFromCssText(r`[myattr=\20\21\22\23\24\25\26\27\28\29\2A\2B\2C\2D\2E\2F] { }`);
-        assertEqual(rules[0].selectorText, r`[myattr=" !\"#$%&'()*+,-./"]`);
+        assert.strictEqual(rules[0].selectorText, r`[myattr=" !\"#$%&'()*+,-./"]`);
 
         var rules = getRulesFromCssText(r`[myattr=\3A\3B\3C\3D\3E\3F\40\5B\5D\5E\5F\7B\7C\7D\7E] { }`);
-        assertEqual(rules[0].selectorText, r`[myattr=":;<=>?@[]^_{|}~"]`);
+        assert.strictEqual(rules[0].selectorText, r`[myattr=":;<=>?@[]^_{|}~"]`);
 
         // Unicode chars are unescaped
         var rules = getRulesFromCssText(r`[myattr=\80\81\9E\9F] { }`);
-        assertEqual(rules[0].selectorText, `[myattr="\x80\x81\x9E\x9F"]`);
+        assert.strictEqual(rules[0].selectorText, `[myattr="\x80\x81\x9E\x9F"]`);
 
         var rules = getRulesFromCssText(r`[myattr="\3000 \4E00 \20000 \100000"] { }`);
-        assertEqual(rules[0].selectorText, `[myattr="\u3000\u4E00\u{20000}\u{100000}"]`);
+        assert.strictEqual(rules[0].selectorText, `[myattr="\u3000\u4E00\u{20000}\u{100000}"]`);
 
         // newline in a string is not allowed (closed as a bad string)
         var rules = getRulesFromCssText(r`p::after { content: "abc
 123"; }`);
-        assertEqual(rules[0].cssText, `p::after { }`);
+        assert.strictEqual(rules[0].cssText, `p::after { }`);
 
         var rules = getRulesFromCssText(r`p::after { content: "abc
 ; color: red; }`);
-        assertEqual(rules[0].cssText, `p::after { color: red; }`);
+        assert.strictEqual(rules[0].cssText, `p::after { color: red; }`);
 
         // escaped newline in a string is stripped
         var rules = getRulesFromCssText(r`p::after { content: "abc\
 123"; }`);
-        assertEqual(rules[0].cssText, `p::after { content: "abc123"; }`);
+        assert.strictEqual(rules[0].cssText, `p::after { content: "abc123"; }`);
       });
 
       it('browser syntax check/tidy for attribute selector', function () {
         // value is double quoted
         var rules = getRulesFromCssText(`[myattr=myvalue] { }`);
-        assertEqual(rules[0].selectorText, `[myattr="myvalue"]`);
+        assert.strictEqual(rules[0].selectorText, `[myattr="myvalue"]`);
 
         var rules = getRulesFromCssText(`[myattr='my value'] { }`);
-        assertEqual(rules[0].selectorText, `[myattr="my value"]`);
+        assert.strictEqual(rules[0].selectorText, `[myattr="my value"]`);
 
         // name with quotes is not allowed
         var rules = getRulesFromCssText(`["myattr"] { }`);
-        assertEqual(rules[0], undefined);
+        assert.strictEqual(rules[0], undefined);
 
         // value with mixed literal and quotes is not allowed
         var rules = getRulesFromCssText(`[myattr=my"quoted"value] { }`);
-        assertEqual(rules[0], undefined);
+        assert.strictEqual(rules[0], undefined);
 
         // value with non-escaped operator is not allowed
         var rules = getRulesFromCssText(`[myattr=@namespace] { }`);
-        assertEqual(rules[0], undefined);
+        assert.strictEqual(rules[0], undefined);
 
         var rules = getRulesFromCssText(`[myattr=div{color:red}] { }`);
-        assertEqual(rules[0], undefined);
+        assert.strictEqual(rules[0], undefined);
 
         var rules = getRulesFromCssText(`[myattr=var(--my-var)] { }`);
-        assertEqual(rules[0], undefined);
+        assert.strictEqual(rules[0], undefined);
 
         var rules = getRulesFromCssText(`[myattr=my|value] { }`);
-        assertEqual(rules[0], undefined);
+        assert.strictEqual(rules[0], undefined);
 
         var rules = getRulesFromCssText(`[myattr=foo=bar] { }`);
-        assertEqual(rules[0], undefined);
+        assert.strictEqual(rules[0], undefined);
 
         var rules = getRulesFromCssText(`[myattr=xlink:href] { }`);
-        assertEqual(rules[0], undefined);
+        assert.strictEqual(rules[0], undefined);
       });
 
       it('browser syntax check/tidy for declaration', function () {
         // semicolon after a declaration is added
         var rules = getRulesFromCssText(`body { color: red }`);
-        assertEqual(rules[0].cssText, `body { color: red; }`);
+        assert.strictEqual(rules[0].cssText, `body { color: red; }`);
 
         // property value is double quoted
         var rules = getRulesFromCssText(`p::after { content: 'my value'; }`);
-        assertEqual(rules[0].cssText, `p::after { content: "my value"; }`);
+        assert.strictEqual(rules[0].cssText, `p::after { content: "my value"; }`);
 
         // !important with space after "!"
         var rules = getRulesFromCssText(`body { color: red ! important; }`);
-        assertEqual(rules[0].cssText, `body { color: red !important; }`);
+        assert.strictEqual(rules[0].cssText, `body { color: red !important; }`);
 
         // !important with no space before "!"
         var rules = getRulesFromCssText(`body { color: red!important; }`);
-        assertEqual(rules[0].cssText, `body { color: red !important; }`);
+        assert.strictEqual(rules[0].cssText, `body { color: red !important; }`);
       });
 
       $(it).xfailIf(
@@ -1195,13 +1195,13 @@ class { }`);
         'var(...) is tidied in Chromium < 101 (possibly upper?)',
       )('browser syntax check/tidy for var()', function () {
         var rules = getRulesFromCssText(`p { color: var(  --myvar ); }`);
-        assertEqual(rules[0].cssText, `p { color: var(  --myvar ); }`);
+        assert.strictEqual(rules[0].cssText, `p { color: var(  --myvar ); }`);
 
         var rules = getRulesFromCssText(`p { color: var(/* comment */--myvar); }`);
-        assertEqual(rules[0].cssText, `p { color: var(/* comment */--myvar); }`);
+        assert.strictEqual(rules[0].cssText, `p { color: var(/* comment */--myvar); }`);
 
         var rules = getRulesFromCssText(`p { color: var(--myvar/* comment */); }`);
-        assertEqual(rules[0].cssText, `p { color: var(--myvar/* comment */); }`);
+        assert.strictEqual(rules[0].cssText, `p { color: var(--myvar/* comment */); }`);
       });
 
     });
@@ -1218,14 +1218,14 @@ class { }`);
 
       it("basic", function () {
         var {source, flags} = capturer.CaptureHelperHandler.parseRegexStr(`/abc/def/`);
-        assertEqual({source, flags}, {source: r`abc\/def`, flags: ``});
+        assert.deepEqual({source, flags}, {source: r`abc\/def`, flags: ``});
 
         var {source, flags} = capturer.CaptureHelperHandler.parseRegexStr(`/abc/def/imguy`);
-        assertEqual({source, flags}, {source: r`abc\/def`, flags: `gimuy`});
+        assert.deepEqual({source, flags}, {source: r`abc\/def`, flags: `gimuy`});
       });
 
       it("return null for an invalid regex string", function () {
-        assertEqual(capturer.CaptureHelperHandler.parseRegexStr(`abc/def`), null);
+        assert.strictEqual(capturer.CaptureHelperHandler.parseRegexStr(`abc/def`), null);
       });
 
     });
@@ -1233,17 +1233,17 @@ class { }`);
     describe("capturer.CaptureHelperHandler.isCommand", function () {
 
       it("basic", function () {
-        assertEqual(capturer.CaptureHelperHandler.isCommand(["if", true, "yes", "no"]), true);
-        assertEqual(capturer.CaptureHelperHandler.isCommand(["if"]), true);
+        assert.strictEqual(capturer.CaptureHelperHandler.isCommand(["if", true, "yes", "no"]), true);
+        assert.strictEqual(capturer.CaptureHelperHandler.isCommand(["if"]), true);
 
-        assertEqual(capturer.CaptureHelperHandler.isCommand(null), false);
-        assertEqual(capturer.CaptureHelperHandler.isCommand(0), false);
-        assertEqual(capturer.CaptureHelperHandler.isCommand(1), false);
-        assertEqual(capturer.CaptureHelperHandler.isCommand(""), false);
-        assertEqual(capturer.CaptureHelperHandler.isCommand(`["if", true, "yes", "no"]`), false);
-        assertEqual(capturer.CaptureHelperHandler.isCommand([]), false);
-        assertEqual(capturer.CaptureHelperHandler.isCommand([1, 2, 3]), false);
-        assertEqual(capturer.CaptureHelperHandler.isCommand({}), false);
+        assert.strictEqual(capturer.CaptureHelperHandler.isCommand(null), false);
+        assert.strictEqual(capturer.CaptureHelperHandler.isCommand(0), false);
+        assert.strictEqual(capturer.CaptureHelperHandler.isCommand(1), false);
+        assert.strictEqual(capturer.CaptureHelperHandler.isCommand(""), false);
+        assert.strictEqual(capturer.CaptureHelperHandler.isCommand(`["if", true, "yes", "no"]`), false);
+        assert.strictEqual(capturer.CaptureHelperHandler.isCommand([]), false);
+        assert.strictEqual(capturer.CaptureHelperHandler.isCommand([1, 2, 3]), false);
+        assert.strictEqual(capturer.CaptureHelperHandler.isCommand({}), false);
       });
 
     });
@@ -1278,14 +1278,14 @@ class { }`);
           var doc = makeTestDoc();
           var selector = {css: "div"};
           removeElems(capturer.CaptureHelperHandler.selectNodes(doc, selector));
-          assertEqual(doc.body.innerHTML.trim(), ``);
+          assert.strictEqual(doc.body.innerHTML.trim(), ``);
         });
 
         it(".xpath", function () {
           var doc = makeTestDoc();
           var selector = {xpath: "//div"};
           removeElems(capturer.CaptureHelperHandler.selectNodes(doc, selector));
-          assertEqual(doc.body.innerHTML.trim(), ``);
+          assert.strictEqual(doc.body.innerHTML.trim(), ``);
         });
 
         describe(".base", function () {
@@ -1295,7 +1295,7 @@ class { }`);
             var selector = "self";
             var refNode = doc.querySelector('#target');
             var result = capturer.CaptureHelperHandler.selectNodes(refNode, selector);
-            assertEqual(result.length, 1);
+            assert.strictEqual(result.length, 1);
             assert(result[0] === refNode);
           });
 
@@ -1304,7 +1304,7 @@ class { }`);
             var selector = "root";
             var refNode = doc.querySelector('#target');
             var result = capturer.CaptureHelperHandler.selectNodes(refNode, selector);
-            assertEqual(result.length, 1);
+            assert.strictEqual(result.length, 1);
             assert(result[0] === doc);
           });
 
@@ -1313,7 +1313,7 @@ class { }`);
             var selector = {base: "parent"};
             var refNode = doc.querySelector('#target');
             var result = capturer.CaptureHelperHandler.selectNodes(refNode, selector);
-            assertEqual(result.length, 1);
+            assert.strictEqual(result.length, 1);
             assert(result[0] === refNode.parentNode);
           });
 
@@ -1322,7 +1322,7 @@ class { }`);
             var selector = {base: "previousSibling"};
             var refNode = doc.querySelector('#target');
             var result = capturer.CaptureHelperHandler.selectNodes(refNode, selector);
-            assertEqual(result.length, 1);
+            assert.strictEqual(result.length, 1);
             assert(result[0] === refNode.previousSibling);
           });
 
@@ -1331,7 +1331,7 @@ class { }`);
             var selector = {base: "nextSibling"};
             var refNode = doc.querySelector('#target');
             var result = capturer.CaptureHelperHandler.selectNodes(refNode, selector);
-            assertEqual(result.length, 1);
+            assert.strictEqual(result.length, 1);
             assert(result[0] === refNode.nextSibling);
           });
 
@@ -1340,7 +1340,7 @@ class { }`);
             var selector = {base: "firstChild"};
             var refNode = doc.querySelector('#target');
             var result = capturer.CaptureHelperHandler.selectNodes(refNode, selector);
-            assertEqual(result.length, 1);
+            assert.strictEqual(result.length, 1);
             assert(result[0] === refNode.firstChild);
           });
 
@@ -1349,7 +1349,7 @@ class { }`);
             var selector = {base: "lastChild"};
             var refNode = doc.querySelector('#target');
             var result = capturer.CaptureHelperHandler.selectNodes(refNode, selector);
-            assertEqual(result.length, 1);
+            assert.strictEqual(result.length, 1);
             assert(result[0] === refNode.lastChild);
           });
 
@@ -1358,7 +1358,7 @@ class { }`);
             var selector = {base: "previousElementSibling"};
             var refNode = doc.querySelector('#target');
             var result = capturer.CaptureHelperHandler.selectNodes(refNode, selector);
-            assertEqual(result.length, 1);
+            assert.strictEqual(result.length, 1);
             assert(result[0] === refNode.previousElementSibling);
           });
 
@@ -1367,7 +1367,7 @@ class { }`);
             var selector = {base: "nextElementSibling"};
             var refNode = doc.querySelector('#target');
             var result = capturer.CaptureHelperHandler.selectNodes(refNode, selector);
-            assertEqual(result.length, 1);
+            assert.strictEqual(result.length, 1);
             assert(result[0] === refNode.nextElementSibling);
           });
 
@@ -1376,7 +1376,7 @@ class { }`);
             var selector = {base: "firstElementChild"};
             var refNode = doc.querySelector('#target');
             var result = capturer.CaptureHelperHandler.selectNodes(refNode, selector);
-            assertEqual(result.length, 1);
+            assert.strictEqual(result.length, 1);
             assert(result[0] === refNode.firstElementChild);
           });
 
@@ -1385,7 +1385,7 @@ class { }`);
             var selector = {base: "lastElementChild"};
             var refNode = doc.querySelector('#target');
             var result = capturer.CaptureHelperHandler.selectNodes(refNode, selector);
-            assertEqual(result.length, 1);
+            assert.strictEqual(result.length, 1);
             assert(result[0] === refNode.lastElementChild);
           });
 
@@ -1394,7 +1394,7 @@ class { }`);
             var selector = {base: "firstChild.nextSibling.nextSibling.nextSibling"};
             var refNode = doc.querySelector('#target');
             var result = capturer.CaptureHelperHandler.selectNodes(refNode, selector);
-            assertEqual(result.length, 1);
+            assert.strictEqual(result.length, 1);
             assert(result[0] === refNode.firstChild.nextSibling.nextSibling.nextSibling);
           });
 
@@ -1402,7 +1402,7 @@ class { }`);
             var doc = makeTestDoc();
             var selector = {base: "parent", css: "div"};
             removeElems(capturer.CaptureHelperHandler.selectNodes(doc.querySelector('#target'), selector));
-            assertEqual(doc.body.innerHTML.trim(), `\
+            assert.strictEqual(doc.body.innerHTML.trim(), `\
 <div id="parent-prev"></div>
 <div id="parent">
   
@@ -1423,14 +1423,14 @@ class { }`);
           var selector = "parent";
           var refNode = doc.querySelector('#target');
           var result = capturer.CaptureHelperHandler.selectNodes(refNode, selector);
-          assertEqual(result.length, 1);
+          assert.strictEqual(result.length, 1);
           assert(result[0] === refNode.parentNode);
 
           var doc = makeTestDoc();
           var selector = "parent.firstChild.nextSibling";
           var refNode = doc.querySelector('#target');
           var result = capturer.CaptureHelperHandler.selectNodes(refNode, selector);
-          assertEqual(result.length, 1);
+          assert.strictEqual(result.length, 1);
           assert(result[0] === refNode.parentNode.firstChild.nextSibling);
         });
 
@@ -1438,12 +1438,12 @@ class { }`);
           var doc = makeTestDoc();
           var selector = "div";
           removeElems(capturer.CaptureHelperHandler.selectNodes(doc, selector));
-          assertEqual(doc.body.innerHTML.trim(), ``);
+          assert.strictEqual(doc.body.innerHTML.trim(), ``);
 
           var doc = makeTestDoc();
           var selector = "body > div";
           removeElems(capturer.CaptureHelperHandler.selectNodes(doc, selector));
-          assertEqual(doc.body.innerHTML.trim(), ``);
+          assert.strictEqual(doc.body.innerHTML.trim(), ``);
         });
 
       });
@@ -1455,7 +1455,7 @@ class { }`);
           var selector;
           var refNode = doc.querySelector('#target');
           var result = capturer.CaptureHelperHandler.selectNodes(refNode, selector);
-          assertEqual(result.length, 1);
+          assert.strictEqual(result.length, 1);
           assert(result[0] === refNode);
         });
 
@@ -1464,7 +1464,7 @@ class { }`);
           var selector = null;
           var refNode = doc.querySelector('#target');
           var result = capturer.CaptureHelperHandler.selectNodes(refNode, selector);
-          assertEqual(result.length, 1);
+          assert.strictEqual(result.length, 1);
           assert(result[0] === refNode);
         });
 
@@ -1473,7 +1473,7 @@ class { }`);
           var selector = "";
           var refNode = doc.querySelector('#target');
           var result = capturer.CaptureHelperHandler.selectNodes(refNode, selector);
-          assertEqual(result.length, 1);
+          assert.strictEqual(result.length, 1);
           assert(result[0] === refNode);
         });
 
@@ -1495,31 +1495,31 @@ class { }`);
           var doc = makeTestDoc();
 
           var command = ["if", true, 1, 0];
-          assertEqual(helper.runCommand(command, doc), 1);
+          assert.strictEqual(helper.runCommand(command, doc), 1);
 
           var command = ["if", 1, 1, 0];
-          assertEqual(helper.runCommand(command, doc), 1);
+          assert.strictEqual(helper.runCommand(command, doc), 1);
 
           var command = ["if", "yes", 1, 0];
-          assertEqual(helper.runCommand(command, doc), 1);
+          assert.strictEqual(helper.runCommand(command, doc), 1);
 
           var command = ["if", {}, 1, 0];
-          assertEqual(helper.runCommand(command, doc), 1);
+          assert.strictEqual(helper.runCommand(command, doc), 1);
 
           var command = ["if", [], 1, 0];
-          assertEqual(helper.runCommand(command, doc), 1);
+          assert.strictEqual(helper.runCommand(command, doc), 1);
 
           var command = ["if", false, 1, 0];
-          assertEqual(helper.runCommand(command, doc), 0);
+          assert.strictEqual(helper.runCommand(command, doc), 0);
 
           var command = ["if", 0, 1, 0];
-          assertEqual(helper.runCommand(command, doc), 0);
+          assert.strictEqual(helper.runCommand(command, doc), 0);
 
           var command = ["if", "", 1, 0];
-          assertEqual(helper.runCommand(command, doc), 0);
+          assert.strictEqual(helper.runCommand(command, doc), 0);
 
           var command = ["if", null, 1, 0];
-          assertEqual(helper.runCommand(command, doc), 0);
+          assert.strictEqual(helper.runCommand(command, doc), 0);
         });
 
         it("resolve parameter commands", function () {
@@ -1527,10 +1527,10 @@ class { }`);
           var doc = makeTestDoc();
 
           var command = ["if", ["concat", "foo"], ["get_text", {css: "#target"}], ["get_text", {css: "#target2"}]];
-          assertEqual(helper.runCommand(command, doc), "target");
+          assert.strictEqual(helper.runCommand(command, doc), "target");
 
           var command = ["if", ["concat", ""], ["get_text", {css: "#target"}], ["get_text", {css: "#target2"}]];
-          assertEqual(helper.runCommand(command, doc), "target2");
+          assert.strictEqual(helper.runCommand(command, doc), "target2");
         });
 
       });
@@ -1542,13 +1542,13 @@ class { }`);
           var doc = makeTestDoc();
 
           var command = ["equal", "foo", "foo"];
-          assertEqual(helper.runCommand(command, doc), true);
+          assert.strictEqual(helper.runCommand(command, doc), true);
 
           var command = ["equal", "foo", "bar"];
-          assertEqual(helper.runCommand(command, doc), false);
+          assert.strictEqual(helper.runCommand(command, doc), false);
 
           var command = ["equal", "100", 100];
-          assertEqual(helper.runCommand(command, doc), true);
+          assert.strictEqual(helper.runCommand(command, doc), true);
         });
 
         it("strict equality", function () {
@@ -1556,13 +1556,13 @@ class { }`);
           var doc = makeTestDoc();
 
           var command = ["equal", "foo", "foo", true];
-          assertEqual(helper.runCommand(command, doc), true);
+          assert.strictEqual(helper.runCommand(command, doc), true);
 
           var command = ["equal", "foo", "bar", true];
-          assertEqual(helper.runCommand(command, doc), false);
+          assert.strictEqual(helper.runCommand(command, doc), false);
 
           var command = ["equal", "100", 100, true];
-          assertEqual(helper.runCommand(command, doc), false);
+          assert.strictEqual(helper.runCommand(command, doc), false);
         });
 
         it("resolve parameter commands", function () {
@@ -1570,7 +1570,7 @@ class { }`);
           var doc = makeTestDoc();
 
           var command = ["equal", ["concat", "100"], ["if", true, 100], ["if", true, true]];
-          assertEqual(helper.runCommand(command, doc), false);
+          assert.strictEqual(helper.runCommand(command, doc), false);
         });
 
       });
@@ -1582,28 +1582,28 @@ class { }`);
           var doc = makeTestDoc();
 
           var command = ["and", true];
-          assertEqual(helper.runCommand(command, doc), true);
+          assert.strictEqual(helper.runCommand(command, doc), true);
 
           var command = ["and", true, 1];
-          assertEqual(helper.runCommand(command, doc), 1);
+          assert.strictEqual(helper.runCommand(command, doc), 1);
 
           var command = ["and", true, 1, "foo"];
-          assertEqual(helper.runCommand(command, doc), "foo");
+          assert.strictEqual(helper.runCommand(command, doc), "foo");
 
           var command = ["and", true, 1, "foo", {}];
-          assertEqual(helper.runCommand(command, doc), {});
+          assert.deepEqual(helper.runCommand(command, doc), {});
 
           var command = ["and", false, 1, "foo", {}];
-          assertEqual(helper.runCommand(command, doc), false);
+          assert.strictEqual(helper.runCommand(command, doc), false);
 
           var command = ["and", true, 0, "foo", {}];
-          assertEqual(helper.runCommand(command, doc), 0);
+          assert.strictEqual(helper.runCommand(command, doc), 0);
 
           var command = ["and", true, 1, "", {}];
-          assertEqual(helper.runCommand(command, doc), "");
+          assert.strictEqual(helper.runCommand(command, doc), "");
 
           var command = ["and", true, 1, "foo", null];
-          assertEqual(helper.runCommand(command, doc), null);
+          assert.strictEqual(helper.runCommand(command, doc), null);
         });
 
         it("resolve parameter commands", function () {
@@ -1611,7 +1611,7 @@ class { }`);
           var doc = makeTestDoc();
 
           var command = ["and", ["get_text", {css: "#target"}], ["get_text", {css: "#target2"}]];
-          assertEqual(helper.runCommand(command, doc), "target2");
+          assert.strictEqual(helper.runCommand(command, doc), "target2");
         });
 
       });
@@ -1623,28 +1623,28 @@ class { }`);
           var doc = makeTestDoc();
 
           var command = ["or", true, 1, "foo", {}];
-          assertEqual(helper.runCommand(command, doc), true);
+          assert.strictEqual(helper.runCommand(command, doc), true);
 
           var command = ["or", false, 1, "foo", {}];
-          assertEqual(helper.runCommand(command, doc), 1);
+          assert.strictEqual(helper.runCommand(command, doc), 1);
 
           var command = ["or", false, 0, "foo", {}];
-          assertEqual(helper.runCommand(command, doc), "foo");
+          assert.strictEqual(helper.runCommand(command, doc), "foo");
 
           var command = ["or", false, 0, "", {}];
-          assertEqual(helper.runCommand(command, doc), {});
+          assert.deepEqual(helper.runCommand(command, doc), {});
 
           var command = ["or", false];
-          assertEqual(helper.runCommand(command, doc), false);
+          assert.strictEqual(helper.runCommand(command, doc), false);
 
           var command = ["or", false, 0];
-          assertEqual(helper.runCommand(command, doc), 0);
+          assert.strictEqual(helper.runCommand(command, doc), 0);
 
           var command = ["or", false, 0, ""];
-          assertEqual(helper.runCommand(command, doc), "");
+          assert.strictEqual(helper.runCommand(command, doc), "");
 
           var command = ["or", false, 0, "", null];
-          assertEqual(helper.runCommand(command, doc), null);
+          assert.strictEqual(helper.runCommand(command, doc), null);
         });
 
         it("resolve parameter commands", function () {
@@ -1652,7 +1652,7 @@ class { }`);
           var doc = makeTestDoc();
 
           var command = ["or", ["get_text", {css: "#target"}], ["get_text", {css: "#target2"}]];
-          assertEqual(helper.runCommand(command, doc), "target");
+          assert.strictEqual(helper.runCommand(command, doc), "target");
         });
 
       });
@@ -1664,13 +1664,13 @@ class { }`);
           var doc = makeTestDoc();
 
           var command = ["concat", "foo"];
-          assertEqual(helper.runCommand(command, doc), "foo");
+          assert.strictEqual(helper.runCommand(command, doc), "foo");
 
           var command = ["concat", "foo", "bar"];
-          assertEqual(helper.runCommand(command, doc), "foobar");
+          assert.strictEqual(helper.runCommand(command, doc), "foobar");
 
           var command = ["concat", "foo", "bar", "baz"];
-          assertEqual(helper.runCommand(command, doc), "foobarbaz");
+          assert.strictEqual(helper.runCommand(command, doc), "foobarbaz");
         });
 
         it('coerce truthy non-string value to string', function () {
@@ -1678,10 +1678,10 @@ class { }`);
           var doc = makeTestDoc();
 
           var command = ["concat", "foo", "bar", 1];
-          assertEqual(helper.runCommand(command, doc), "foobar1");
+          assert.strictEqual(helper.runCommand(command, doc), "foobar1");
 
           var command = ["concat", "foo", "bar", {}];
-          assertEqual(helper.runCommand(command, doc), "foobar[object Object]");
+          assert.strictEqual(helper.runCommand(command, doc), "foobar[object Object]");
         });
 
         it('treat falsy value as empty string', function () {
@@ -1689,7 +1689,7 @@ class { }`);
           var doc = makeTestDoc();
 
           var command = ["concat", "foo", null, false, 0];
-          assertEqual(helper.runCommand(command, doc), "foo");
+          assert.strictEqual(helper.runCommand(command, doc), "foo");
         });
 
         it("resolve parameter commands", function () {
@@ -1697,7 +1697,7 @@ class { }`);
           var doc = makeTestDoc();
 
           var command = ["concat", ["get_text", {css: "#target"}], ["get_text", {css: "#target2"}]];
-          assertEqual(helper.runCommand(command, doc), "targettarget2");
+          assert.strictEqual(helper.runCommand(command, doc), "targettarget2");
         });
 
       });
@@ -1709,19 +1709,19 @@ class { }`);
           var doc = makeTestDoc();
 
           var command = ["slice", "0123456", 1];
-          assertEqual(helper.runCommand(command, doc), "123456");
+          assert.strictEqual(helper.runCommand(command, doc), "123456");
 
           var command = ["slice", "0123456", 1, 4];
-          assertEqual(helper.runCommand(command, doc), "123");
+          assert.strictEqual(helper.runCommand(command, doc), "123");
 
           var command = ["slice", "0123456", 1, 100];
-          assertEqual(helper.runCommand(command, doc), "123456");
+          assert.strictEqual(helper.runCommand(command, doc), "123456");
 
           var command = ["slice", "0123456", -2];
-          assertEqual(helper.runCommand(command, doc), "56");
+          assert.strictEqual(helper.runCommand(command, doc), "56");
 
           var command = ["slice", "0123456", 0, -2];
-          assertEqual(helper.runCommand(command, doc), "01234");
+          assert.strictEqual(helper.runCommand(command, doc), "01234");
         });
 
         it("resolve parameter commands", function () {
@@ -1729,7 +1729,7 @@ class { }`);
           var doc = makeTestDoc();
 
           var command = ["slice", ["get_text", {css: "#target"}], ["if", true, 1], ["if", true, -1]];
-          assertEqual(helper.runCommand(command, doc), "arge");
+          assert.strictEqual(helper.runCommand(command, doc), "arge");
         });
 
       });
@@ -1741,7 +1741,7 @@ class { }`);
           var doc = makeTestDoc();
 
           var command = ["upper", "123ABCabc中文"];
-          assertEqual(helper.runCommand(command, doc), "123ABCABC中文");
+          assert.strictEqual(helper.runCommand(command, doc), "123ABCABC中文");
         });
 
         it("resolve parameter commands", function () {
@@ -1749,7 +1749,7 @@ class { }`);
           var doc = makeTestDoc();
 
           var command = ["upper", ["get_text", {css: "#target"}]];
-          assertEqual(helper.runCommand(command, doc), "TARGET");
+          assert.strictEqual(helper.runCommand(command, doc), "TARGET");
         });
 
       });
@@ -1761,7 +1761,7 @@ class { }`);
           var doc = makeTestDoc();
 
           var command = ["lower", "123ABCabc中文"];
-          assertEqual(helper.runCommand(command, doc), "123abcabc中文");
+          assert.strictEqual(helper.runCommand(command, doc), "123abcabc中文");
         });
 
         it("resolve parameter commands", function () {
@@ -1769,7 +1769,7 @@ class { }`);
           var doc = makeTestDoc();
 
           var command = ["lower", ["get_text", {css: "#target"}]];
-          assertEqual(helper.runCommand(command, doc), "target");
+          assert.strictEqual(helper.runCommand(command, doc), "target");
         });
 
       });
@@ -1781,10 +1781,10 @@ class { }`);
           var doc = makeTestDoc();
 
           var command = ["encode_uri", " ;,/?#:@&=+$中"];
-          assertEqual(helper.runCommand(command, doc), '%20%3B%2C%2F%3F%23%3A%40%26%3D%2B%24%E4%B8%AD');
+          assert.strictEqual(helper.runCommand(command, doc), '%20%3B%2C%2F%3F%23%3A%40%26%3D%2B%24%E4%B8%AD');
 
           var command = ["encode_uri", " ;,/?#:@&=+$中", " ;,/?#:@&=+$"];
-          assertEqual(helper.runCommand(command, doc), ' ;,/?#:@&=+$%E4%B8%AD');
+          assert.strictEqual(helper.runCommand(command, doc), ' ;,/?#:@&=+$%E4%B8%AD');
         });
 
         it("resolve parameter commands", function () {
@@ -1792,7 +1792,7 @@ class { }`);
           var doc = makeTestDoc();
 
           var command = ["encode_uri", ["concat", " ;,/?#:@&=+$中"], ["concat", " ;,/?#:@&=+$"]];
-          assertEqual(helper.runCommand(command, doc), ' ;,/?#:@&=+$%E4%B8%AD');
+          assert.strictEqual(helper.runCommand(command, doc), ' ;,/?#:@&=+$%E4%B8%AD');
         });
 
       });
@@ -1804,7 +1804,7 @@ class { }`);
           var doc = makeTestDoc();
 
           var command = ["decode_uri", "%20%3B%2C%2F%3F%23%3A%40%26%3D%2B%24%E4%B8%AD"];
-          assertEqual(helper.runCommand(command, doc), ' ;,/?#:@&=+$中');
+          assert.strictEqual(helper.runCommand(command, doc), ' ;,/?#:@&=+$中');
         });
 
         it("return original string if failed to decode", function () {
@@ -1812,7 +1812,7 @@ class { }`);
           var doc = makeTestDoc();
 
           var command = ["decode_uri", "%E4"];
-          assertEqual(helper.runCommand(command, doc), '%E4');
+          assert.strictEqual(helper.runCommand(command, doc), '%E4');
         });
 
         it("resolve parameter commands", function () {
@@ -1820,7 +1820,7 @@ class { }`);
           var doc = makeTestDoc();
 
           var command = ["decode_uri", ["concat", "%20%3B%2C%2F%3F%23%3A%40%26%3D%2B%24%E4%B8%AD"]];
-          assertEqual(helper.runCommand(command, doc), ' ;,/?#:@&=+$中');
+          assert.strictEqual(helper.runCommand(command, doc), ' ;,/?#:@&=+$中');
         });
 
       });
@@ -1832,13 +1832,13 @@ class { }`);
           var doc = makeTestDoc();
 
           var command = ["add", 100];
-          assertEqual(helper.runCommand(command, doc), 100);
+          assert.strictEqual(helper.runCommand(command, doc), 100);
 
           var command = ["add", 100, 10];
-          assertEqual(helper.runCommand(command, doc), 110);
+          assert.strictEqual(helper.runCommand(command, doc), 110);
 
           var command = ["add", 100, 10, 1];
-          assertEqual(helper.runCommand(command, doc), 111);
+          assert.strictEqual(helper.runCommand(command, doc), 111);
         });
 
         it("resolve parameter commands", function () {
@@ -1846,7 +1846,7 @@ class { }`);
           var doc = makeTestDoc();
 
           var command = ["add", ["if", true, 100], ["if", true, 10], ["if", true, 1]];
-          assertEqual(helper.runCommand(command, doc), 111);
+          assert.strictEqual(helper.runCommand(command, doc), 111);
         });
 
       });
@@ -1858,13 +1858,13 @@ class { }`);
           var doc = makeTestDoc();
 
           var command = ["subtract", 100];
-          assertEqual(helper.runCommand(command, doc), 100);
+          assert.strictEqual(helper.runCommand(command, doc), 100);
 
           var command = ["subtract", 100, 10];
-          assertEqual(helper.runCommand(command, doc), 90);
+          assert.strictEqual(helper.runCommand(command, doc), 90);
 
           var command = ["subtract", 100, 10, 1];
-          assertEqual(helper.runCommand(command, doc), 89);
+          assert.strictEqual(helper.runCommand(command, doc), 89);
         });
 
         it("resolve parameter commands", function () {
@@ -1872,7 +1872,7 @@ class { }`);
           var doc = makeTestDoc();
 
           var command = ["subtract", ["if", true, 100], ["if", true, 10], ["if", true, 1]];
-          assertEqual(helper.runCommand(command, doc), 89);
+          assert.strictEqual(helper.runCommand(command, doc), 89);
         });
 
       });
@@ -1884,13 +1884,13 @@ class { }`);
           var doc = makeTestDoc();
 
           var command = ["multiply", 100];
-          assertEqual(helper.runCommand(command, doc), 100);
+          assert.strictEqual(helper.runCommand(command, doc), 100);
 
           var command = ["multiply", 100, 10];
-          assertEqual(helper.runCommand(command, doc), 1000);
+          assert.strictEqual(helper.runCommand(command, doc), 1000);
 
           var command = ["multiply", 100, 10, 2];
-          assertEqual(helper.runCommand(command, doc), 2000);
+          assert.strictEqual(helper.runCommand(command, doc), 2000);
         });
 
         it("resolve parameter commands", function () {
@@ -1898,7 +1898,7 @@ class { }`);
           var doc = makeTestDoc();
 
           var command = ["multiply", ["if", true, 100], ["if", true, 10], ["if", true, 2]];
-          assertEqual(helper.runCommand(command, doc), 2000);
+          assert.strictEqual(helper.runCommand(command, doc), 2000);
         });
 
       });
@@ -1910,16 +1910,16 @@ class { }`);
           var doc = makeTestDoc();
 
           var command = ["divide", 100];
-          assertEqual(helper.runCommand(command, doc), 100);
+          assert.strictEqual(helper.runCommand(command, doc), 100);
 
           var command = ["divide", 100, 10];
-          assertEqual(helper.runCommand(command, doc), 10);
+          assert.strictEqual(helper.runCommand(command, doc), 10);
 
           var command = ["divide", 100, 10, 2];
-          assertEqual(helper.runCommand(command, doc), 5);
+          assert.strictEqual(helper.runCommand(command, doc), 5);
 
           var command = ["divide", 5, 2];
-          assertEqual(helper.runCommand(command, doc), 2.5);
+          assert.strictEqual(helper.runCommand(command, doc), 2.5);
         });
 
         it("resolve parameter commands", function () {
@@ -1927,7 +1927,7 @@ class { }`);
           var doc = makeTestDoc();
 
           var command = ["divide", ["if", true, 100], ["if", true, 10], ["if", true, 2]];
-          assertEqual(helper.runCommand(command, doc), 5);
+          assert.strictEqual(helper.runCommand(command, doc), 5);
         });
 
       });
@@ -1939,16 +1939,16 @@ class { }`);
           var doc = makeTestDoc();
 
           var command = ["mod", 12];
-          assertEqual(helper.runCommand(command, doc), 12);
+          assert.strictEqual(helper.runCommand(command, doc), 12);
 
           var command = ["mod", 12, 10];
-          assertEqual(helper.runCommand(command, doc), 2);
+          assert.strictEqual(helper.runCommand(command, doc), 2);
 
           var command = ["mod", 12, 6];
-          assertEqual(helper.runCommand(command, doc), 0);
+          assert.strictEqual(helper.runCommand(command, doc), 0);
 
           var command = ["mod", 12, 8, 3];
-          assertEqual(helper.runCommand(command, doc), 1);
+          assert.strictEqual(helper.runCommand(command, doc), 1);
         });
 
         it("resolve parameter commands", function () {
@@ -1956,7 +1956,7 @@ class { }`);
           var doc = makeTestDoc();
 
           var command = ["mod", ["if", true, 12], ["if", true, 8], ["if", true, 3]];
-          assertEqual(helper.runCommand(command, doc), 1);
+          assert.strictEqual(helper.runCommand(command, doc), 1);
         });
 
       });
@@ -1968,13 +1968,13 @@ class { }`);
           var doc = makeTestDoc();
 
           var command = ["power", 2];
-          assertEqual(helper.runCommand(command, doc), 2);
+          assert.strictEqual(helper.runCommand(command, doc), 2);
 
           var command = ["power", 2, 3];
-          assertEqual(helper.runCommand(command, doc), 8);
+          assert.strictEqual(helper.runCommand(command, doc), 8);
 
           var command = ["power", 2, 3, 2];
-          assertEqual(helper.runCommand(command, doc), 64);
+          assert.strictEqual(helper.runCommand(command, doc), 64);
         });
 
         it("resolve parameter commands", function () {
@@ -1982,7 +1982,7 @@ class { }`);
           var doc = makeTestDoc();
 
           var command = ["power", ["if", true, 2], ["if", true, 3], ["if", true, 2]];
-          assertEqual(helper.runCommand(command, doc), 64);
+          assert.strictEqual(helper.runCommand(command, doc), 64);
         });
 
       });
@@ -1997,8 +1997,8 @@ class { }`);
             ["attr", null, "class", ["get_attr", null, "id"]],
             ["attr", null, "id", null],
           ];
-          assertEqual(helper.runCommand(command, doc), undefined);
-          assertEqual(doc.body.innerHTML.trim(), `\
+          assert.strictEqual(helper.runCommand(command, doc), undefined);
+          assert.strictEqual(doc.body.innerHTML.trim(), `\
 <div class="target">target</div>
 <div class="target2">target2</div>`);
         });
@@ -2012,13 +2012,13 @@ class { }`);
           var doc = makeTestDoc();
 
           var command = ["match", "text", "/TEXT/i"];
-          assertEqual(helper.runCommand(command, doc), true);
+          assert.strictEqual(helper.runCommand(command, doc), true);
 
           var command = ["match", "text", "/unrelated/"];
-          assertEqual(helper.runCommand(command, doc), false);
+          assert.strictEqual(helper.runCommand(command, doc), false);
 
           var command = ["match", "text", "/(te)(xt)/"];
-          assertEqual(helper.runCommand(command, doc), true);
+          assert.strictEqual(helper.runCommand(command, doc), true);
         });
 
         it("indexed capture group", function () {
@@ -2026,16 +2026,16 @@ class { }`);
           var doc = makeTestDoc();
 
           var command = ["match", "text", "/(te)(xt)/", 0];
-          assertEqual(helper.runCommand(command, doc), "text");
+          assert.strictEqual(helper.runCommand(command, doc), "text");
 
           var command = ["match", "text", "/(te)(xt)/", 1];
-          assertEqual(helper.runCommand(command, doc), "te");
+          assert.strictEqual(helper.runCommand(command, doc), "te");
 
           var command = ["match", "text", "/(te)(xt)/", 5];
-          assertEqual(helper.runCommand(command, doc), undefined);
+          assert.strictEqual(helper.runCommand(command, doc), undefined);
 
           var command = ["match", "text", "/(te)(xt)123/", 1];
-          assertEqual(helper.runCommand(command, doc), null);
+          assert.strictEqual(helper.runCommand(command, doc), null);
         });
 
         $it.skipIf($.noRegexNamedGroup)("named capture group", function () {
@@ -2043,13 +2043,13 @@ class { }`);
           var doc = makeTestDoc();
 
           var command = ["match", "text", "/(?<g>te)xt/", "g"];
-          assertEqual(helper.runCommand(command, doc), "te");
+          assert.strictEqual(helper.runCommand(command, doc), "te");
 
           var command = ["match", "text", "/(?<g>te)xt/", "nonexist"];
-          assertEqual(helper.runCommand(command, doc), undefined);
+          assert.strictEqual(helper.runCommand(command, doc), undefined);
 
           var command = ["match", "text", "/(?<g>te)xt123/", "g"];
-          assertEqual(helper.runCommand(command, doc), null);
+          assert.strictEqual(helper.runCommand(command, doc), null);
         });
 
         it("resolve parameter commands", function () {
@@ -2057,7 +2057,7 @@ class { }`);
           var doc = makeTestDoc();
 
           var command = ["match", ["concat", "text"], ["concat", "/text/"], ["if", true, 0]];
-          assertEqual(helper.runCommand(command, doc), "text");
+          assert.strictEqual(helper.runCommand(command, doc), "text");
         });
 
       });
@@ -2069,7 +2069,7 @@ class { }`);
           var doc = makeTestDoc();
 
           var command = ["replace", "text content", "/(text) (content)/", "modified: $2, $1"];
-          assertEqual(helper.runCommand(command, doc), 'modified: content, text');
+          assert.strictEqual(helper.runCommand(command, doc), 'modified: content, text');
         });
 
         it("treat missing replacement as an empty string", function () {
@@ -2077,7 +2077,7 @@ class { }`);
           var doc = makeTestDoc();
 
           var command = ["replace", "text content", "/(text) (content)/"];
-          assertEqual(helper.runCommand(command, doc), "");
+          assert.strictEqual(helper.runCommand(command, doc), "");
         });
 
         it("resolve parameter commands", function () {
@@ -2085,7 +2085,7 @@ class { }`);
           var doc = makeTestDoc();
 
           var command = ["replace", ["concat", "text content"], ["concat", "/(text) (content)/"], ["concat", "modified: $2, $1"]];
-          assertEqual(helper.runCommand(command, doc), 'modified: content, text');
+          assert.strictEqual(helper.runCommand(command, doc), 'modified: content, text');
         });
 
       });
@@ -2097,10 +2097,10 @@ class { }`);
           var doc = makeTestDoc();
 
           var command = ["has_node", {css: "#target"}];
-          assertEqual(helper.runCommand(command, doc), true);
+          assert.strictEqual(helper.runCommand(command, doc), true);
 
           var command = ["has_node", {css: "#nonexist"}];
-          assertEqual(helper.runCommand(command, doc), false);
+          assert.strictEqual(helper.runCommand(command, doc), false);
         });
 
         it("resolve parameter commands", function () {
@@ -2108,7 +2108,7 @@ class { }`);
           var doc = makeTestDoc();
 
           var command = ["has_node", ["if", true, {css: "#target"}]];
-          assertEqual(helper.runCommand(command, doc), true);
+          assert.strictEqual(helper.runCommand(command, doc), true);
         });
 
       });
@@ -2120,10 +2120,10 @@ class { }`);
           var doc = makeTestDoc();
 
           var command = ["has_attr", {css: "#target"}, "id"];
-          assertEqual(helper.runCommand(command, doc), true);
+          assert.strictEqual(helper.runCommand(command, doc), true);
 
           var command = ["has_attr", {css: "#target"}, "class"];
-          assertEqual(helper.runCommand(command, doc), false);
+          assert.strictEqual(helper.runCommand(command, doc), false);
         });
 
         it("resolve parameter commands", function () {
@@ -2131,7 +2131,7 @@ class { }`);
           var doc = makeTestDoc();
 
           var command = ["has_attr", ["if", true, {css: "#target"}], ["concat", "id"]];
-          assertEqual(helper.runCommand(command, doc), true);
+          assert.strictEqual(helper.runCommand(command, doc), true);
         });
 
       });
@@ -2148,10 +2148,10 @@ class { }`);
           var doc = makeTestDoc();
 
           var command = ["get_html", {css: "div"}];
-          assertEqual(helper.runCommand(command, doc), "<b>elem1</b>");
+          assert.strictEqual(helper.runCommand(command, doc), "<b>elem1</b>");
 
           var command = ["get_html", {css: "div"}, true];
-          assertEqual(helper.runCommand(command, doc), "<div><b>elem1</b></div>");
+          assert.strictEqual(helper.runCommand(command, doc), "<div><b>elem1</b></div>");
         });
 
         it("resolve parameter commands", function () {
@@ -2159,7 +2159,7 @@ class { }`);
           var doc = makeTestDoc();
 
           var command = ["get_html", ["if", true, {css: "div"}], ["if", true, true]];
-          assertEqual(helper.runCommand(command, doc), "<div><b>elem1</b></div>");
+          assert.strictEqual(helper.runCommand(command, doc), "<div><b>elem1</b></div>");
         });
 
       });
@@ -2176,7 +2176,7 @@ class { }`);
           var doc = makeTestDoc();
 
           var command = ["get_text", {css: "div"}];
-          assertEqual(helper.runCommand(command, doc), "elem1-1elem1-2");
+          assert.strictEqual(helper.runCommand(command, doc), "elem1-1elem1-2");
         });
 
         it("resolve parameter commands", function () {
@@ -2184,7 +2184,7 @@ class { }`);
           var doc = makeTestDoc();
 
           var command = ["get_text", ["if", true, {css: "div"}]];
-          assertEqual(helper.runCommand(command, doc), "elem1-1elem1-2");
+          assert.strictEqual(helper.runCommand(command, doc), "elem1-1elem1-2");
         });
 
       });
@@ -2201,7 +2201,7 @@ class { }`);
           var doc = makeTestDoc();
 
           var command = ["get_attr", {css: "img"}, "data-src"];
-          assertEqual(helper.runCommand(command, doc), "image1.jpg");
+          assert.strictEqual(helper.runCommand(command, doc), "image1.jpg");
         });
 
         it("resolve parameter commands", function () {
@@ -2209,7 +2209,7 @@ class { }`);
           var doc = makeTestDoc();
 
           var command = ["get_attr", ["if", true, {css: "img"}], ["concat", "data-src"]];
-          assertEqual(helper.runCommand(command, doc), "image1.jpg");
+          assert.strictEqual(helper.runCommand(command, doc), "image1.jpg");
         });
 
       });
@@ -2226,13 +2226,13 @@ class { }`);
           var doc = makeTestDoc();
 
           var command = ["get_css", {css: "div"}, "color"];
-          assertEqual(helper.runCommand(command, doc), "green");
+          assert.strictEqual(helper.runCommand(command, doc), "green");
 
           var command = ["get_css", {css: "div"}, "color", true];
-          assertEqual(helper.runCommand(command, doc), "");
+          assert.strictEqual(helper.runCommand(command, doc), "");
 
           var command = ["get_css", {css: "div:last-of-type"}, "color", true];
-          assertEqual(helper.runCommand(command, doc), "important");
+          assert.strictEqual(helper.runCommand(command, doc), "important");
         });
 
         it("resolve parameter commands", function () {
@@ -2240,7 +2240,7 @@ class { }`);
           var doc = makeTestDoc();
 
           var command = ["get_css", ["if", true, {css: "div"}], ["concat", "color"], ["if", true, true]];
-          assertEqual(helper.runCommand(command, doc), "");
+          assert.strictEqual(helper.runCommand(command, doc), "");
         });
 
       });
@@ -2257,8 +2257,8 @@ class { }`);
 
           var doc = makeTestDoc();
           var command = ["remove", {css: "b"}];
-          assertEqual(helper.runCommand(command, doc), undefined);
-          assertEqual(doc.body.innerHTML.trim(), `\
+          assert.strictEqual(helper.runCommand(command, doc), undefined);
+          assert.strictEqual(doc.body.innerHTML.trim(), `\
 <div></div>
 <div></div>`);
         });
@@ -2268,8 +2268,8 @@ class { }`);
 
           var doc = makeTestDoc();
           var command = ["remove", ["if", true, {css: "b"}]];
-          assertEqual(helper.runCommand(command, doc), undefined);
-          assertEqual(doc.body.innerHTML.trim(), `\
+          assert.strictEqual(helper.runCommand(command, doc), undefined);
+          assert.strictEqual(doc.body.innerHTML.trim(), `\
 <div></div>
 <div></div>`);
         });
@@ -2288,8 +2288,8 @@ class { }`);
 
           var doc = makeTestDoc();
           var command = ["unwrap", {css: "div"}];
-          assertEqual(helper.runCommand(command, doc), undefined);
-          assertEqual(doc.body.innerHTML.trim(), `\
+          assert.strictEqual(helper.runCommand(command, doc), undefined);
+          assert.strictEqual(doc.body.innerHTML.trim(), `\
 <b>elem1</b>
 <b>elem2</b>`);
         });
@@ -2299,8 +2299,8 @@ class { }`);
 
           var doc = makeTestDoc();
           var command = ["unwrap", ["if", true, {css: "div"}]];
-          assertEqual(helper.runCommand(command, doc), undefined);
-          assertEqual(doc.body.innerHTML.trim(), `\
+          assert.strictEqual(helper.runCommand(command, doc), undefined);
+          assert.strictEqual(doc.body.innerHTML.trim(), `\
 <b>elem1</b>
 <b>elem2</b>`);
         });
@@ -2333,8 +2333,8 @@ class { }`);
 
           var doc = makeTestDoc();
           var command = ["isolate", {css: ".target"}];
-          assertEqual(helper.runCommand(command, doc), undefined);
-          assertEqual(doc.documentElement.innerHTML.trim(), `\
+          assert.strictEqual(helper.runCommand(command, doc), undefined);
+          assert.strictEqual(doc.documentElement.innerHTML.trim(), `\
 <head>
 <meta charset="UTF-8">
 </head>
@@ -2353,8 +2353,8 @@ class { }`);
 
           var doc = makeTestDoc();
           var command = ["isolate", ["if", true, {css: ".target"}]];
-          assertEqual(helper.runCommand(command, doc), undefined);
-          assertEqual(doc.documentElement.innerHTML.trim(), `\
+          assert.strictEqual(helper.runCommand(command, doc), undefined);
+          assert.strictEqual(doc.documentElement.innerHTML.trim(), `\
 <head>
 <meta charset="UTF-8">
 </head>
@@ -2382,15 +2382,15 @@ class { }`);
 
           var doc = makeTestDoc();
           var command = ["html", {css: "div"}, "<em>text</em>"];
-          assertEqual(helper.runCommand(command, doc), undefined);
-          assertEqual(doc.body.innerHTML.trim(), `\
+          assert.strictEqual(helper.runCommand(command, doc), undefined);
+          assert.strictEqual(doc.body.innerHTML.trim(), `\
 <div><em>text</em></div>
 <div><em>text</em></div>`);
 
           var doc = makeTestDoc();
           var command = ["html", {css: "div"}, "<em>text</em>", true];
-          assertEqual(helper.runCommand(command, doc), undefined);
-          assertEqual(doc.body.innerHTML.trim(), `\
+          assert.strictEqual(helper.runCommand(command, doc), undefined);
+          assert.strictEqual(doc.body.innerHTML.trim(), `\
 <em>text</em>
 <em>text</em>`);
         });
@@ -2400,8 +2400,8 @@ class { }`);
 
           var doc = makeTestDoc();
           var command = ["html", ["if", true, {css: "div"}], ["concat", ["get_html", null, true], "<em>text</em>"], ["if", true, true]];
-          assertEqual(helper.runCommand(command, doc), undefined);
-          assertEqual(doc.body.innerHTML.trim(), `\
+          assert.strictEqual(helper.runCommand(command, doc), undefined);
+          assert.strictEqual(doc.body.innerHTML.trim(), `\
 <div><b>elem1</b></div><em>text</em>
 <div><b>elem2</b></div><em>text</em>`);
         });
@@ -2420,10 +2420,10 @@ class { }`);
 
           var doc = makeTestDoc();
           var command = ["text", {css: "div"}, "<em>text</em>"];
-          assertEqual(helper.runCommand(command, doc), undefined);
+          assert.strictEqual(helper.runCommand(command, doc), undefined);
           var elems = doc.querySelectorAll('div');
-          assertEqual(elems[0].textContent, '<em>text</em>');
-          assertEqual(elems[1].textContent, '<em>text</em>');
+          assert.strictEqual(elems[0].textContent, '<em>text</em>');
+          assert.strictEqual(elems[1].textContent, '<em>text</em>');
         });
 
         it("resolve parameter commands", function () {
@@ -2431,10 +2431,10 @@ class { }`);
 
           var doc = makeTestDoc();
           var command = ["text", ["if", true, {css: "div"}], ["concat", ["get_text"], "<em>text</em>"]];
-          assertEqual(helper.runCommand(command, doc), undefined);
+          assert.strictEqual(helper.runCommand(command, doc), undefined);
           var elems = doc.querySelectorAll('div');
-          assertEqual(elems[0].textContent, 'text1<em>text</em>');
-          assertEqual(elems[1].textContent, 'text2<em>text</em>');
+          assert.strictEqual(elems[0].textContent, 'text1<em>text</em>');
+          assert.strictEqual(elems[1].textContent, 'text2<em>text</em>');
         });
 
       });
@@ -2451,15 +2451,15 @@ class { }`);
 
           var doc = makeTestDoc();
           var command = ["attr", {css: "img"}, "data-src", "myimage.jpg"];
-          assertEqual(helper.runCommand(command, doc), undefined);
-          assertEqual(doc.body.innerHTML.trim(), `\
+          assert.strictEqual(helper.runCommand(command, doc), undefined);
+          assert.strictEqual(doc.body.innerHTML.trim(), `\
 <img data-src="myimage.jpg">
 <img data-src="myimage.jpg">`);
 
           var doc = makeTestDoc();
           var command = ["attr", {css: "img"}, "src", "myimage.jpg"];
-          assertEqual(helper.runCommand(command, doc), undefined);
-          assertEqual(doc.body.innerHTML.trim(), `\
+          assert.strictEqual(helper.runCommand(command, doc), undefined);
+          assert.strictEqual(doc.body.innerHTML.trim(), `\
 <img data-src="image1.jpg" src="myimage.jpg">
 <img data-src="image2.jpg" src="myimage.jpg">`);
         });
@@ -2469,8 +2469,8 @@ class { }`);
 
           var doc = makeTestDoc();
           var command = ["attr", {css: "img"}, "data-src", null];
-          assertEqual(helper.runCommand(command, doc), undefined);
-          assertEqual(doc.body.innerHTML.trim(), `\
+          assert.strictEqual(helper.runCommand(command, doc), undefined);
+          assert.strictEqual(doc.body.innerHTML.trim(), `\
 <img>
 <img>`);
         });
@@ -2480,8 +2480,8 @@ class { }`);
 
           var doc = makeTestDoc();
           var command = ["attr", ["if", true, {css: "img"}], ["concat", "src"], ["get_attr", null, "data-src"]];
-          assertEqual(helper.runCommand(command, doc), undefined);
-          assertEqual(doc.body.innerHTML.trim(), `\
+          assert.strictEqual(helper.runCommand(command, doc), undefined);
+          assert.strictEqual(doc.body.innerHTML.trim(), `\
 <img data-src="image1.jpg" src="image1.jpg">
 <img data-src="image2.jpg" src="image2.jpg">`);
         });
@@ -2495,8 +2495,8 @@ class { }`);
             "data-src": null,
             "data-extra": "extra-value",
           }];
-          assertEqual(helper.runCommand(command, doc), undefined);
-          assertEqual(doc.body.innerHTML.trim(), `\
+          assert.strictEqual(helper.runCommand(command, doc), undefined);
+          assert.strictEqual(doc.body.innerHTML.trim(), `\
 <img src="myimage.jpg" data-extra="extra-value">
 <img src="myimage.jpg" data-extra="extra-value">`);
         });
@@ -2510,8 +2510,8 @@ class { }`);
             "data-src": null,
             "data-extra": "extra-value",
           }]];
-          assertEqual(helper.runCommand(command, doc), undefined);
-          assertEqual(doc.body.innerHTML.trim(), `\
+          assert.strictEqual(helper.runCommand(command, doc), undefined);
+          assert.strictEqual(doc.body.innerHTML.trim(), `\
 <img src="myimage.jpg" data-extra="extra-value">
 <img src="myimage.jpg" data-extra="extra-value">`);
 
@@ -2521,8 +2521,8 @@ class { }`);
             "data-src": ["if", true, null],
             "data-extra": ["concat", "extra-value"],
           }];
-          assertEqual(helper.runCommand(command, doc), undefined);
-          assertEqual(doc.body.innerHTML.trim(), `\
+          assert.strictEqual(helper.runCommand(command, doc), undefined);
+          assert.strictEqual(doc.body.innerHTML.trim(), `\
 <img src="image1.jpg" data-extra="extra-value">
 <img src="image2.jpg" data-extra="extra-value">`);
         });
@@ -2536,8 +2536,8 @@ class { }`);
             ["data-src", null],
             ["data-extra", "extra-value"],
           ]];
-          assertEqual(helper.runCommand(command, doc), undefined);
-          assertEqual(doc.body.innerHTML.trim(), `\
+          assert.strictEqual(helper.runCommand(command, doc), undefined);
+          assert.strictEqual(doc.body.innerHTML.trim(), `\
 <img src="myimage.jpg" data-extra="extra-value">
 <img src="myimage.jpg" data-extra="extra-value">`);
         });
@@ -2551,8 +2551,8 @@ class { }`);
             ["data-src", null],
             ["data-extra", "extra-value"],
           ]]];
-          assertEqual(helper.runCommand(command, doc), undefined);
-          assertEqual(doc.body.innerHTML.trim(), `\
+          assert.strictEqual(helper.runCommand(command, doc), undefined);
+          assert.strictEqual(doc.body.innerHTML.trim(), `\
 <img src="myimage.jpg" data-extra="extra-value">
 <img src="myimage.jpg" data-extra="extra-value">`);
 
@@ -2562,8 +2562,8 @@ class { }`);
             [["concat", "data-src"], ["if", true, null]],
             [["concat", "data-extra"], ["concat", "extra-value"]],
           ]];
-          assertEqual(helper.runCommand(command, doc), undefined);
-          assertEqual(doc.body.innerHTML.trim(), `\
+          assert.strictEqual(helper.runCommand(command, doc), undefined);
+          assert.strictEqual(doc.body.innerHTML.trim(), `\
 <img src="image1.jpg" data-extra="extra-value">
 <img src="image2.jpg" data-extra="extra-value">`);
         });
@@ -2582,15 +2582,15 @@ class { }`);
 
           var doc = makeTestDoc();
           var command = ["css", {css: "div"}, "color", "red"];
-          assertEqual(helper.runCommand(command, doc), undefined);
-          assertEqual(doc.body.innerHTML.trim(), `\
+          assert.strictEqual(helper.runCommand(command, doc), undefined);
+          assert.strictEqual(doc.body.innerHTML.trim(), `\
 <div style="color: red;"></div>
 <div style="color: red;"></div>`);
 
           var doc = makeTestDoc();
           var command = ["css", {css: "div"}, "display", "inline"];
-          assertEqual(helper.runCommand(command, doc), undefined);
-          assertEqual(doc.body.innerHTML.trim(), `\
+          assert.strictEqual(helper.runCommand(command, doc), undefined);
+          assert.strictEqual(doc.body.innerHTML.trim(), `\
 <div style="color: green; display: inline;"></div>
 <div style="color: yellow; display: inline;"></div>`);
         });
@@ -2600,8 +2600,8 @@ class { }`);
 
           var doc = makeTestDoc();
           var command = ["css", {css: "div"}, "color", null];
-          assertEqual(helper.runCommand(command, doc), undefined);
-          assertEqual(doc.body.innerHTML.trim(), `\
+          assert.strictEqual(helper.runCommand(command, doc), undefined);
+          assert.strictEqual(doc.body.innerHTML.trim(), `\
 <div style=""></div>
 <div style=""></div>`);
         });
@@ -2611,8 +2611,8 @@ class { }`);
 
           var doc = makeTestDoc();
           var command = ["css", {css: "div"}, "color", "red", "important"];
-          assertEqual(helper.runCommand(command, doc), undefined);
-          assertEqual(doc.body.innerHTML.trim(), `\
+          assert.strictEqual(helper.runCommand(command, doc), undefined);
+          assert.strictEqual(doc.body.innerHTML.trim(), `\
 <div style="color: red !important;"></div>
 <div style="color: red !important;"></div>`);
         });
@@ -2622,8 +2622,8 @@ class { }`);
 
           var doc = makeTestDoc();
           var command = ["css", ["if", true, {css: "div"}], ["concat", "color"], ["get_css", null, "color"], ["concat", "important"]];
-          assertEqual(helper.runCommand(command, doc), undefined);
-          assertEqual(doc.body.innerHTML.trim(), `\
+          assert.strictEqual(helper.runCommand(command, doc), undefined);
+          assert.strictEqual(doc.body.innerHTML.trim(), `\
 <div style="color: green !important;"></div>
 <div style="color: yellow !important;"></div>`);
         });
@@ -2636,8 +2636,8 @@ class { }`);
             "color": null,
             "display": "inline",
           }];
-          assertEqual(helper.runCommand(command, doc), undefined);
-          assertEqual(doc.body.innerHTML.trim(), `\
+          assert.strictEqual(helper.runCommand(command, doc), undefined);
+          assert.strictEqual(doc.body.innerHTML.trim(), `\
 <div style="display: inline;"></div>
 <div style="display: inline;"></div>`);
         });
@@ -2650,8 +2650,8 @@ class { }`);
             "color": null,
             "display": "inline",
           }]];
-          assertEqual(helper.runCommand(command, doc), undefined);
-          assertEqual(doc.body.innerHTML.trim(), `\
+          assert.strictEqual(helper.runCommand(command, doc), undefined);
+          assert.strictEqual(doc.body.innerHTML.trim(), `\
 <div style="display: inline;"></div>
 <div style="display: inline;"></div>`);
 
@@ -2660,8 +2660,8 @@ class { }`);
             "background-color": ["get_css", null, "color"],
             "color": ["if", true, null],
           }];
-          assertEqual(helper.runCommand(command, doc), undefined);
-          assertEqual(doc.body.innerHTML.trim(), `\
+          assert.strictEqual(helper.runCommand(command, doc), undefined);
+          assert.strictEqual(doc.body.innerHTML.trim(), `\
 <div style="background-color: green;"></div>
 <div style="background-color: yellow;"></div>`);
         });
@@ -2675,8 +2675,8 @@ class { }`);
             ["display", "inline"],
             ["font-family", "monospace", "important"],
           ]];
-          assertEqual(helper.runCommand(command, doc), undefined);
-          assertEqual(doc.body.innerHTML.trim(), `\
+          assert.strictEqual(helper.runCommand(command, doc), undefined);
+          assert.strictEqual(doc.body.innerHTML.trim(), `\
 <div style="display: inline; font-family: monospace !important;"></div>
 <div style="display: inline; font-family: monospace !important;"></div>`);
         });
@@ -2690,8 +2690,8 @@ class { }`);
             ["display", "inline"],
             ["font-family", "monospace", "important"],
           ]]];
-          assertEqual(helper.runCommand(command, doc), undefined);
-          assertEqual(doc.body.innerHTML.trim(), `\
+          assert.strictEqual(helper.runCommand(command, doc), undefined);
+          assert.strictEqual(doc.body.innerHTML.trim(), `\
 <div style="display: inline; font-family: monospace !important;"></div>
 <div style="display: inline; font-family: monospace !important;"></div>`);
 
@@ -2700,8 +2700,8 @@ class { }`);
             [["concat", "background-color"], ["get_css", null, "color"], ["concat", "important"]],
             [["concat", "color"], ["if", true, null]],
           ]];
-          assertEqual(helper.runCommand(command, doc), undefined);
-          assertEqual(doc.body.innerHTML.trim(), `\
+          assert.strictEqual(helper.runCommand(command, doc), undefined);
+          assert.strictEqual(doc.body.innerHTML.trim(), `\
 <div style="background-color: green !important;"></div>
 <div style="background-color: yellow !important;"></div>`);
         });
@@ -2724,8 +2724,8 @@ class { }`);
 
           var doc = makeTestDoc();
           var command = ["insert", {"css": ".target"}, "insertedText", "before"];
-          assertEqual(helper.runCommand(command, doc), undefined);
-          assertEqual(doc.body.innerHTML.trim(), `\
+          assert.strictEqual(helper.runCommand(command, doc), undefined);
+          assert.strictEqual(doc.body.innerHTML.trim(), `\
 insertedText<div class="target"><div id="child-1"></div><div id="child-2"></div><div id="child-3"></div></div>
 insertedText<div class="target"><div id="child-1"></div><div id="child-2"></div><div id="child-3"></div></div>`);
         });
@@ -2735,8 +2735,8 @@ insertedText<div class="target"><div id="child-1"></div><div id="child-2"></div>
 
           var doc = makeTestDoc();
           var command = ["insert", {"css": ".target"}, "insertedText", "after"];
-          assertEqual(helper.runCommand(command, doc), undefined);
-          assertEqual(doc.body.innerHTML.trim(), `\
+          assert.strictEqual(helper.runCommand(command, doc), undefined);
+          assert.strictEqual(doc.body.innerHTML.trim(), `\
 <div class="target"><div id="child-1"></div><div id="child-2"></div><div id="child-3"></div></div>insertedText
 <div class="target"><div id="child-1"></div><div id="child-2"></div><div id="child-3"></div></div>insertedText`);
         });
@@ -2746,8 +2746,8 @@ insertedText<div class="target"><div id="child-1"></div><div id="child-2"></div>
 
           var doc = makeTestDoc();
           var command = ["insert", {"css": ".target"}, "insertedText", "replace"];
-          assertEqual(helper.runCommand(command, doc), undefined);
-          assertEqual(doc.body.innerHTML.trim(), `\
+          assert.strictEqual(helper.runCommand(command, doc), undefined);
+          assert.strictEqual(doc.body.innerHTML.trim(), `\
 insertedText
 insertedText`);
         });
@@ -2757,29 +2757,29 @@ insertedText`);
 
           var doc = makeTestDoc();
           var command = ["insert", {"css": ".target"}, "insertedText", "insert", 0];
-          assertEqual(helper.runCommand(command, doc), undefined);
-          assertEqual(doc.body.innerHTML.trim(), `\
+          assert.strictEqual(helper.runCommand(command, doc), undefined);
+          assert.strictEqual(doc.body.innerHTML.trim(), `\
 <div class="target">insertedText<div id="child-1"></div><div id="child-2"></div><div id="child-3"></div></div>
 <div class="target">insertedText<div id="child-1"></div><div id="child-2"></div><div id="child-3"></div></div>`);
 
           var doc = makeTestDoc();
           var command = ["insert", {"css": ".target"}, "insertedText", "insert", 1];
-          assertEqual(helper.runCommand(command, doc), undefined);
-          assertEqual(doc.body.innerHTML.trim(), `\
+          assert.strictEqual(helper.runCommand(command, doc), undefined);
+          assert.strictEqual(doc.body.innerHTML.trim(), `\
 <div class="target"><div id="child-1"></div>insertedText<div id="child-2"></div><div id="child-3"></div></div>
 <div class="target"><div id="child-1"></div>insertedText<div id="child-2"></div><div id="child-3"></div></div>`);
 
           var doc = makeTestDoc();
           var command = ["insert", {"css": ".target"}, "insertedText", "insert", 100];
-          assertEqual(helper.runCommand(command, doc), undefined);
-          assertEqual(doc.body.innerHTML.trim(), `\
+          assert.strictEqual(helper.runCommand(command, doc), undefined);
+          assert.strictEqual(doc.body.innerHTML.trim(), `\
 <div class="target"><div id="child-1"></div><div id="child-2"></div><div id="child-3"></div>insertedText</div>
 <div class="target"><div id="child-1"></div><div id="child-2"></div><div id="child-3"></div>insertedText</div>`);
 
           var doc = makeTestDoc();
           var command = ["insert", {"css": ".target"}, "insertedText", "insert"];
-          assertEqual(helper.runCommand(command, doc), undefined);
-          assertEqual(doc.body.innerHTML.trim(), `\
+          assert.strictEqual(helper.runCommand(command, doc), undefined);
+          assert.strictEqual(doc.body.innerHTML.trim(), `\
 <div class="target"><div id="child-1"></div><div id="child-2"></div><div id="child-3"></div>insertedText</div>
 <div class="target"><div id="child-1"></div><div id="child-2"></div><div id="child-3"></div>insertedText</div>`);
         });
@@ -2789,8 +2789,8 @@ insertedText`);
 
           var doc = makeTestDoc();
           var command = ["insert", {"css": ".target"}, "insertedText", "append"];
-          assertEqual(helper.runCommand(command, doc), undefined);
-          assertEqual(doc.body.innerHTML.trim(), `\
+          assert.strictEqual(helper.runCommand(command, doc), undefined);
+          assert.strictEqual(doc.body.innerHTML.trim(), `\
 <div class="target"><div id="child-1"></div><div id="child-2"></div><div id="child-3"></div>insertedText</div>
 <div class="target"><div id="child-1"></div><div id="child-2"></div><div id="child-3"></div>insertedText</div>`);
         });
@@ -2800,15 +2800,15 @@ insertedText`);
 
           var doc = makeTestDoc();
           var command = ["insert", {"css": ".target"}, "insertedText"];
-          assertEqual(helper.runCommand(command, doc), undefined);
-          assertEqual(doc.body.innerHTML.trim(), `\
+          assert.strictEqual(helper.runCommand(command, doc), undefined);
+          assert.strictEqual(doc.body.innerHTML.trim(), `\
 <div class="target"><div id="child-1"></div><div id="child-2"></div><div id="child-3"></div>insertedText</div>
 <div class="target"><div id="child-1"></div><div id="child-2"></div><div id="child-3"></div>insertedText</div>`);
 
           var doc = makeTestDoc();
           var command = ["insert", {"css": ".target"}, "insertedText", "!unknown"];
-          assertEqual(helper.runCommand(command, doc), undefined);
-          assertEqual(doc.body.innerHTML.trim(), `\
+          assert.strictEqual(helper.runCommand(command, doc), undefined);
+          assert.strictEqual(doc.body.innerHTML.trim(), `\
 <div class="target"><div id="child-1"></div><div id="child-2"></div><div id="child-3"></div>insertedText</div>
 <div class="target"><div id="child-1"></div><div id="child-2"></div><div id="child-3"></div>insertedText</div>`);
         });
@@ -2847,8 +2847,8 @@ insertedText`);
               },
             ],
           }];
-          assertEqual(helper.runCommand(command, doc), undefined);
-          assertEqual(doc.body.innerHTML.trim(), `\
+          assert.strictEqual(helper.runCommand(command, doc), undefined);
+          assert.strictEqual(doc.body.innerHTML.trim(), `\
 <div class="target"><div id="child-1"></div><div id="child-2"></div><div id="child-3"></div>\
 <b data-attr1="value1" data-attr2="value2">text<i data-a1="v1">elem-child</i><u data-a1="v1">elem-child</u><!--safe <-\u200B- comment -\u200B-> text-->text-child</b>\
 </div>
@@ -2864,8 +2864,8 @@ insertedText`);
           var command = ["insert", {"css": "#child-1"}, {
             "base": "nextSibling",
           }];
-          assertEqual(helper.runCommand(command, doc), undefined);
-          assertEqual(doc.body.innerHTML.trim(), `\
+          assert.strictEqual(helper.runCommand(command, doc), undefined);
+          assert.strictEqual(doc.body.innerHTML.trim(), `\
 <div class="target"><div id="child-1"><div id="child-2"></div></div><div id="child-3"></div></div>
 <div class="target"><div id="child-1"><div id="child-2"></div></div><div id="child-3"></div></div>`);
 
@@ -2874,8 +2874,8 @@ insertedText`);
             "base": "parent",
             "css": "div:not(#child-1)",
           }];
-          assertEqual(helper.runCommand(command, doc), undefined);
-          assertEqual(doc.body.innerHTML.trim(), `\
+          assert.strictEqual(helper.runCommand(command, doc), undefined);
+          assert.strictEqual(doc.body.innerHTML.trim(), `\
 <div class="target"><div id="child-1"><div id="child-2"></div><div id="child-3"></div></div></div>
 <div class="target"><div id="child-1"><div id="child-2"></div><div id="child-3"></div></div></div>`);
         });
@@ -2885,8 +2885,8 @@ insertedText`);
 
           var doc = makeTestDoc();
           var command = ["insert", ["if", true, {"css": ".target"}], ["if", true, "insertedText"], ["concat", "insert"], ["if", true, 1]];
-          assertEqual(helper.runCommand(command, doc), undefined);
-          assertEqual(doc.body.innerHTML.trim(), `\
+          assert.strictEqual(helper.runCommand(command, doc), undefined);
+          assert.strictEqual(doc.body.innerHTML.trim(), `\
 <div class="target"><div id="child-1"></div>insertedText<div id="child-2"></div><div id="child-3"></div></div>
 <div class="target"><div id="child-1"></div>insertedText<div id="child-2"></div><div id="child-3"></div></div>`);
 
@@ -2895,16 +2895,16 @@ insertedText`);
             "name": ["concat", "#text"],
             "value": ["concat", "myvalue"],
           }];
-          assertEqual(helper.runCommand(command, doc), undefined);
-          assertEqual(doc.body.innerHTML.trim(), `<div>myvalue</div>`);
+          assert.strictEqual(helper.runCommand(command, doc), undefined);
+          assert.strictEqual(doc.body.innerHTML.trim(), `<div>myvalue</div>`);
 
           var doc = makeTestDocSimple();
           var command = ["insert", {"css": "div"}, {
             "name": ["concat", "#comment"],
             "value": ["concat", "myvalue"],
           }];
-          assertEqual(helper.runCommand(command, doc), undefined);
-          assertEqual(doc.body.innerHTML.trim(), `<div><!--myvalue--></div>`);
+          assert.strictEqual(helper.runCommand(command, doc), undefined);
+          assert.strictEqual(doc.body.innerHTML.trim(), `<div><!--myvalue--></div>`);
 
           var doc = makeTestDocSimple();
           var command = ["insert", {"css": "div"}, {
@@ -2912,8 +2912,8 @@ insertedText`);
             "value": ["concat", "myvalue"],
             "attrs": [[["concat", "id"], ["concat", "myid"]], [["concat", "class"], ["concat", "myclass"]]],
           }];
-          assertEqual(helper.runCommand(command, doc), undefined);
-          assertEqual(doc.body.innerHTML.trim(), `<div><b id="myid" class="myclass">myvalue</b></div>`);
+          assert.strictEqual(helper.runCommand(command, doc), undefined);
+          assert.strictEqual(doc.body.innerHTML.trim(), `<div><b id="myid" class="myclass">myvalue</b></div>`);
 
           var doc = makeTestDocSimple();
           var command = ["insert", {"css": "div"}, {
@@ -2934,8 +2934,8 @@ insertedText`);
               ["concat", "last"],
             ],
           }];
-          assertEqual(helper.runCommand(command, doc), undefined);
-          assertEqual(doc.body.innerHTML.trim(), `<div><b id="myid" class="myclass">first<a href="mylink">myvalue</a>last</b></div>`);
+          assert.strictEqual(helper.runCommand(command, doc), undefined);
+          assert.strictEqual(doc.body.innerHTML.trim(), `<div><b id="myid" class="myclass">first<a href="mylink">myvalue</a>last</b></div>`);
         });
 
       });
@@ -2947,8 +2947,8 @@ insertedText`);
 
           var helper = new capturer.CaptureHelperHandler();
           var command = ["options", "capture.rewriteCss", "match"];
-          assertEqual(helper.runCommand(command, doc), undefined);
-          assertEqual(helper.options, {
+          assert.strictEqual(helper.runCommand(command, doc), undefined);
+          assert.deepEqual(helper.options, {
             "capture.rewriteCss": "match",
           });
         });
@@ -2958,8 +2958,8 @@ insertedText`);
 
           var helper = new capturer.CaptureHelperHandler();
           var command = ["options", ["concat", "capture.rewriteCss"], ["concat", "match"]];
-          assertEqual(helper.runCommand(command, doc), undefined);
-          assertEqual(helper.options, {
+          assert.strictEqual(helper.runCommand(command, doc), undefined);
+          assert.deepEqual(helper.options, {
             "capture.rewriteCss": "match",
           });
         });
@@ -2972,8 +2972,8 @@ insertedText`);
             "capture.style": "save",
             "capture.rewriteCss": "match",
           }];
-          assertEqual(helper.runCommand(command, doc), undefined);
-          assertEqual(helper.options, {
+          assert.strictEqual(helper.runCommand(command, doc), undefined);
+          assert.deepEqual(helper.options, {
             "capture.style": "save",
             "capture.rewriteCss": "match",
           });
@@ -2987,8 +2987,8 @@ insertedText`);
             "capture.style": "save",
             "capture.rewriteCss": "match",
           }]];
-          assertEqual(helper.runCommand(command, doc), undefined);
-          assertEqual(helper.options, {
+          assert.strictEqual(helper.runCommand(command, doc), undefined);
+          assert.deepEqual(helper.options, {
             "capture.style": "save",
             "capture.rewriteCss": "match",
           });
@@ -2998,8 +2998,8 @@ insertedText`);
             "capture.style": ["concat", "save"],
             "capture.rewriteCss": ["concat", "match"],
           }];
-          assertEqual(helper.runCommand(command, doc), undefined);
-          assertEqual(helper.options, {
+          assert.strictEqual(helper.runCommand(command, doc), undefined);
+          assert.deepEqual(helper.options, {
             "capture.style": "save",
             "capture.rewriteCss": "match",
           });
@@ -3013,8 +3013,8 @@ insertedText`);
             ["capture.style", "save"],
             ["capture.rewriteCss", "match"],
           ]];
-          assertEqual(helper.runCommand(command, doc), undefined);
-          assertEqual(helper.options, {
+          assert.strictEqual(helper.runCommand(command, doc), undefined);
+          assert.deepEqual(helper.options, {
             "capture.style": "save",
             "capture.rewriteCss": "match",
           });
@@ -3028,8 +3028,8 @@ insertedText`);
             ["capture.style", "save"],
             ["capture.rewriteCss", "match"],
           ]]];
-          assertEqual(helper.runCommand(command, doc), undefined);
-          assertEqual(helper.options, {
+          assert.strictEqual(helper.runCommand(command, doc), undefined);
+          assert.deepEqual(helper.options, {
             "capture.style": "save",
             "capture.rewriteCss": "match",
           });
@@ -3039,8 +3039,8 @@ insertedText`);
             [["concat", "capture.style"], ["concat", "save"]],
             [["concat", "capture.rewriteCss"], ["concat", "match"]],
           ]];
-          assertEqual(helper.runCommand(command, doc), undefined);
-          assertEqual(helper.options, {
+          assert.strictEqual(helper.runCommand(command, doc), undefined);
+          assert.deepEqual(helper.options, {
             "capture.style": "save",
             "capture.rewriteCss": "match",
           });
@@ -3080,7 +3080,7 @@ insertedText`);
           rootNode: doc,
         });
         var result = helper.run();
-        assertEqual(doc.body.innerHTML.trim(), `<div class="exclude2"></div>`);
+        assert.strictEqual(doc.body.innerHTML.trim(), `<div class="exclude2"></div>`);
       });
 
       it("skip helpers whose pattern does not match document URL", function () {
@@ -3113,7 +3113,7 @@ insertedText`);
           docUrl: 'http://example.com',
         });
         var result = helper.run();
-        assertEqual(doc.body.innerHTML.trim(), `<div class="exclude2"></div>`);
+        assert.strictEqual(doc.body.innerHTML.trim(), `<div class="exclude2"></div>`);
       });
 
     });

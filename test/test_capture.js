@@ -32,7 +32,7 @@
 'use strict';
 
 const {
-  MochaQuery: $, assert, assertEqual, assertThrows,
+  MochaQuery: $, assert,
   getRulesFromCssText, getToken, escapeRegExp, regex, rawRegex, cssRegex,
 } = unittest;
 const $it = $(it);
@@ -1485,7 +1485,7 @@ $it.xfail()('test_capture_dataUri_frame_dynamic', async function () {
   var indexFile = zip.file('index_1.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
-  assertEqual(doc.querySelector('p').textContent, 'page content modified');
+  assert.strictEqual(doc.querySelector('p').textContent, 'page content modified');
 });
 
 /**
@@ -3456,7 +3456,7 @@ it('test_capture_favicon_bookmark', async function () {
   });
 
   var doc = await readFileAsDocument(blob);
-  assertEqual(
+  assert.strictEqual(
     doc.querySelector('link[rel="shortcut icon"]').getAttribute('href'),
     'data:image/bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAAD/AAAA'
   );
@@ -4232,26 +4232,26 @@ it('test_capture_css_rewriteCss_namespace_element', async function () {
   var doc = await readFileAsDocument(indexBlob);
   var styleElems = doc.querySelectorAll('style');
 
-  assertEqual(styleElems[0].textContent.trim(), `\
+  assert.strictEqual(styleElems[0].textContent.trim(), `\
 @namespace myns url("http://example.com/myns");
 myns|elem-1 { background-color: lime; }`);
 
-  assertEqual(styleElems[1].textContent.trim(), `\
+  assert.strictEqual(styleElems[1].textContent.trim(), `\
 @namespace url("http://example.com/myns");
 elem-2 { background-color: lime; }`);
 
-  assertEqual(styleElems[2].textContent.trim(), `\
+  assert.strictEqual(styleElems[2].textContent.trim(), `\
 @namespace myns url("http://example.com/myns");
 myns|elem-3 { background-color: lime; }`);
 
-  assertEqual(styleElems[3].textContent.trim(), `\
+  assert.strictEqual(styleElems[3].textContent.trim(), `\
 @namespace url("http://example.com/myns");
 elem-4 { background-color: lime; }`);
 
-  assertEqual(styleElems[4].textContent.trim(), `\
+  assert.strictEqual(styleElems[4].textContent.trim(), `\
 @namespace myns url("http://example.com/myns");`);
 
-  assertEqual(styleElems[5].textContent.trim(), `\
+  assert.strictEqual(styleElems[5].textContent.trim(), `\
 @namespace url("http://example.com/myns");`);
 });
 
@@ -4274,26 +4274,26 @@ it('test_capture_css_rewriteCss_namespace_attribute', async function () {
   var doc = await readFileAsDocument(indexBlob);
   var styleElems = doc.querySelectorAll('style');
 
-  assertEqual(styleElems[0].textContent.trim(), `\
+  assert.strictEqual(styleElems[0].textContent.trim(), `\
 @namespace myns url("http://example.com/myns");
 [myns|attr1] { background-color: lime; }`);
 
-  assertEqual(styleElems[1].textContent.trim(), `\
+  assert.strictEqual(styleElems[1].textContent.trim(), `\
 @namespace url("http://example.com/myns");
 [attr2] { background-color: lime; }`);
 
-  assertEqual(styleElems[2].textContent.trim(), `\
+  assert.strictEqual(styleElems[2].textContent.trim(), `\
 @namespace myns url("http://example.com/myns");
 [myns|attr3] { background-color: lime; }`);
 
-  assertEqual(styleElems[3].textContent.trim(), `\
+  assert.strictEqual(styleElems[3].textContent.trim(), `\
 @namespace url("http://example.com/myns");
 [attr4] { background-color: lime; }`);
 
-  assertEqual(styleElems[4].textContent.trim(), `\
+  assert.strictEqual(styleElems[4].textContent.trim(), `\
 @namespace myns url("http://example.com/myns");`);
 
-  assertEqual(styleElems[5].textContent.trim(), `\
+  assert.strictEqual(styleElems[5].textContent.trim(), `\
 @namespace url("http://example.com/myns");`);
 });
 
@@ -6100,11 +6100,11 @@ $it.skipIf($.noAdoptedStylesheet)('test_capture_css_adopted', async function () 
   assert(doc.querySelector('script[data-scrapbook-elem="basic-loader"]'));
 
   var docElem = doc.documentElement;
-  assertEqual(
+  assert.strictEqual(
     docElem.getAttribute('data-scrapbook-adoptedstylesheets').trim(),
     '0,1',
   );
-  assertEqual(
+  assert.strictEqual(
     docElem.getAttribute('data-scrapbook-adoptedstylesheet-0').trim(),
     [
       `#adopted1-1 { background-color: rgb(0, 255, 0); }`,
@@ -6112,7 +6112,7 @@ $it.skipIf($.noAdoptedStylesheet)('test_capture_css_adopted', async function () 
       `#nonexist { background-image: /*scrapbook-orig-url="./nonexist.bmp"*/url("nonexist.bmp"); }`,
     ].join('\n\n'),
   );
-  assertEqual(
+  assert.strictEqual(
     docElem.getAttribute('data-scrapbook-adoptedstylesheet-1').trim(),
     [
       `#adopted2-1 { background-color: rgb(0, 255, 0); }`,
@@ -6142,11 +6142,11 @@ $it.skipIf($.noAdoptedStylesheet)('test_capture_css_adopted', async function () 
   assert(doc.querySelector('script[data-scrapbook-elem="basic-loader"]'));
 
   var docElem = doc.documentElement;
-  assertEqual(
+  assert.strictEqual(
     docElem.getAttribute('data-scrapbook-adoptedstylesheets').trim(),
     '0,1',
   );
-  assertEqual(
+  assert.strictEqual(
     docElem.getAttribute('data-scrapbook-adoptedstylesheet-0').trim(),
     [
       `#adopted1-1 { background-color: rgb(0, 255, 0); }`,
@@ -6154,7 +6154,7 @@ $it.skipIf($.noAdoptedStylesheet)('test_capture_css_adopted', async function () 
       `#nonexist { background-image: /*scrapbook-orig-url="./nonexist.bmp"*/url("nonexist.bmp"); }`,
     ].join('\n\n'),
   );
-  assertEqual(
+  assert.strictEqual(
     docElem.getAttribute('data-scrapbook-adoptedstylesheet-1').trim(),
     [
       `#adopted2-1 { background-color: rgb(0, 255, 0); }`,
@@ -6276,11 +6276,11 @@ $it.skipIf($.noAdoptedStylesheet)('test_capture_css_adopted_shadow', async funct
   assert(doc.querySelector('script[data-scrapbook-elem="basic-loader"]'));
 
   var docElem = doc.documentElement;
-  assertEqual(
+  assert.strictEqual(
     docElem.getAttribute('data-scrapbook-adoptedstylesheets').trim(),
     '0,1',
   );
-  assertEqual(
+  assert.strictEqual(
     docElem.getAttribute('data-scrapbook-adoptedstylesheet-0').trim(),
     [
       `#image1-1 { background-image: url("image1-1.bmp"); }`,
@@ -6288,7 +6288,7 @@ $it.skipIf($.noAdoptedStylesheet)('test_capture_css_adopted_shadow', async funct
       `#image1-3 { background-image: url("image1-3.bmp"); }`,
     ].join('\n\n'),
   );
-  assertEqual(
+  assert.strictEqual(
     docElem.getAttribute('data-scrapbook-adoptedstylesheet-1').trim(),
     [
       `@font-face { font-family: font1-1; src: url("font1-1.woff"); }`,
@@ -6300,7 +6300,7 @@ $it.skipIf($.noAdoptedStylesheet)('test_capture_css_adopted_shadow', async funct
       `@font-face { font-family: font1-4; src: url(""); }`,
     ].join('\n\n'),
   );
-  assertEqual(
+  assert.strictEqual(
     docElem.getAttribute('data-scrapbook-adoptedstylesheet-2').trim(),
     [
       `#image2-1 { background-image: url("image2-1.bmp"); }`,
@@ -6310,7 +6310,7 @@ $it.skipIf($.noAdoptedStylesheet)('test_capture_css_adopted_shadow', async funct
   );
 
   var host1 = doc.querySelector('#shadow1');
-  assertEqual(
+  assert.strictEqual(
     host1.getAttribute('data-scrapbook-adoptedstylesheets').trim(),
     '0,1,2',
   );
@@ -6319,7 +6319,7 @@ $it.skipIf($.noAdoptedStylesheet)('test_capture_css_adopted_shadow', async funct
   frag.innerHTML = host1.getAttribute("data-scrapbook-shadowdom");
   var shadow1 = frag.content;
   var host2 = shadow1.querySelector('#shadow2');
-  assertEqual(
+  assert.strictEqual(
     host2.getAttribute('data-scrapbook-adoptedstylesheets').trim(),
     '2',
   );
@@ -6353,11 +6353,11 @@ $it.skipIf($.noAdoptedStylesheet)('test_capture_css_adopted_shadow', async funct
   assert(doc.querySelector('script[data-scrapbook-elem="basic-loader"]'));
 
   var docElem = doc.documentElement;
-  assertEqual(
+  assert.strictEqual(
     docElem.getAttribute('data-scrapbook-adoptedstylesheets').trim(),
     '0,1',
   );
-  assertEqual(
+  assert.strictEqual(
     docElem.getAttribute('data-scrapbook-adoptedstylesheet-0').trim(),
     [
       `#image1-1 { background-image: url("image1-1.bmp"); }`,
@@ -6366,7 +6366,7 @@ $it.skipIf($.noAdoptedStylesheet)('test_capture_css_adopted_shadow', async funct
       `#image1-4 { background-image: url(""); }`,
     ].join('\n\n'),
   );
-  assertEqual(
+  assert.strictEqual(
     docElem.getAttribute('data-scrapbook-adoptedstylesheet-1').trim(),
     [
       `@font-face { font-family: font1-1; src: url("font1-1.woff"); }`,
@@ -6379,7 +6379,7 @@ $it.skipIf($.noAdoptedStylesheet)('test_capture_css_adopted_shadow', async funct
       `#font1-4 { font-family: font1-4; }`,
     ].join('\n\n'),
   );
-  assertEqual(
+  assert.strictEqual(
     docElem.getAttribute('data-scrapbook-adoptedstylesheet-2').trim(),
     [
       `#image2-1 { background-image: url("image2-1.bmp"); }`,
@@ -6390,7 +6390,7 @@ $it.skipIf($.noAdoptedStylesheet)('test_capture_css_adopted_shadow', async funct
   );
 
   var host1 = doc.querySelector('#shadow1');
-  assertEqual(
+  assert.strictEqual(
     host1.getAttribute('data-scrapbook-adoptedstylesheets').trim(),
     '0,1,2',
   );
@@ -6399,7 +6399,7 @@ $it.skipIf($.noAdoptedStylesheet)('test_capture_css_adopted_shadow', async funct
   frag.innerHTML = host1.getAttribute("data-scrapbook-shadowdom");
   var shadow1 = frag.content;
   var host2 = shadow1.querySelector('#shadow2');
-  assertEqual(
+  assert.strictEqual(
     host2.getAttribute('data-scrapbook-adoptedstylesheets').trim(),
     '2',
   );
@@ -6433,11 +6433,11 @@ $it.skipIf($.noAdoptedStylesheet)('test_capture_css_adopted_shadow', async funct
   assert(doc.querySelector('script[data-scrapbook-elem="basic-loader"]'));
 
   var docElem = doc.documentElement;
-  assertEqual(
+  assert.strictEqual(
     docElem.getAttribute('data-scrapbook-adoptedstylesheets').trim(),
     '0,1',
   );
-  assertEqual(
+  assert.strictEqual(
     docElem.getAttribute('data-scrapbook-adoptedstylesheet-0').trim(),
     [
       `#image1-1 { background-image: url("image1-1.bmp"); }`,
@@ -6446,7 +6446,7 @@ $it.skipIf($.noAdoptedStylesheet)('test_capture_css_adopted_shadow', async funct
       `#image1-4 { background-image: url(""); }`,
     ].join('\n\n'),
   );
-  assertEqual(
+  assert.strictEqual(
     docElem.getAttribute('data-scrapbook-adoptedstylesheet-1').trim(),
     [
       `@font-face { font-family: font1-1; src: url("font1-1.woff"); }`,
@@ -6459,7 +6459,7 @@ $it.skipIf($.noAdoptedStylesheet)('test_capture_css_adopted_shadow', async funct
       `#font1-4 { font-family: font1-4; }`,
     ].join('\n\n'),
   );
-  assertEqual(
+  assert.strictEqual(
     docElem.getAttribute('data-scrapbook-adoptedstylesheet-2').trim(),
     [
       `#image2-1 { background-image: url("image2-1.bmp"); }`,
@@ -6470,7 +6470,7 @@ $it.skipIf($.noAdoptedStylesheet)('test_capture_css_adopted_shadow', async funct
   );
 
   var host1 = doc.querySelector('#shadow1');
-  assertEqual(
+  assert.strictEqual(
     host1.getAttribute('data-scrapbook-adoptedstylesheets').trim(),
     '0,1,2',
   );
@@ -6479,7 +6479,7 @@ $it.skipIf($.noAdoptedStylesheet)('test_capture_css_adopted_shadow', async funct
   frag.innerHTML = host1.getAttribute("data-scrapbook-shadowdom");
   var shadow1 = frag.content;
   var host2 = shadow1.querySelector('#shadow2');
-  assertEqual(
+  assert.strictEqual(
     host2.getAttribute('data-scrapbook-adoptedstylesheets').trim(),
     '2',
   );
@@ -6513,11 +6513,11 @@ $it.skipIf($.noAdoptedStylesheet)('test_capture_css_adopted_shadow', async funct
   assert(doc.querySelector('script[data-scrapbook-elem="basic-loader"]'));
 
   var docElem = doc.documentElement;
-  assertEqual(
+  assert.strictEqual(
     docElem.getAttribute('data-scrapbook-adoptedstylesheets').trim(),
     '0,1',
   );
-  assertEqual(
+  assert.strictEqual(
     docElem.getAttribute('data-scrapbook-adoptedstylesheet-0').trim(),
     [
       `#image1-1 { background-image: url("./image1-1.bmp"); }`,
@@ -6526,7 +6526,7 @@ $it.skipIf($.noAdoptedStylesheet)('test_capture_css_adopted_shadow', async funct
       `#image1-4 { background-image: url("./image1-4.bmp"); }`,
     ].join('\n\n'),
   );
-  assertEqual(
+  assert.strictEqual(
     docElem.getAttribute('data-scrapbook-adoptedstylesheet-1').trim(),
     [
       `@font-face { font-family: font1-1; src: url("./font1-1.woff"); }`,
@@ -6539,7 +6539,7 @@ $it.skipIf($.noAdoptedStylesheet)('test_capture_css_adopted_shadow', async funct
       `#font1-4 { font-family: font1-4; }`,
     ].join('\n\n'),
   );
-  assertEqual(
+  assert.strictEqual(
     docElem.getAttribute('data-scrapbook-adoptedstylesheet-2').trim(),
     [
       `#image2-1 { background-image: url("./image2-1.bmp"); }`,
@@ -6550,7 +6550,7 @@ $it.skipIf($.noAdoptedStylesheet)('test_capture_css_adopted_shadow', async funct
   );
 
   var host1 = doc.querySelector('#shadow1');
-  assertEqual(
+  assert.strictEqual(
     host1.getAttribute('data-scrapbook-adoptedstylesheets').trim(),
     '0,1,2',
   );
@@ -6559,7 +6559,7 @@ $it.skipIf($.noAdoptedStylesheet)('test_capture_css_adopted_shadow', async funct
   frag.innerHTML = host1.getAttribute("data-scrapbook-shadowdom");
   var shadow1 = frag.content;
   var host2 = shadow1.querySelector('#shadow2');
-  assertEqual(
+  assert.strictEqual(
     host2.getAttribute('data-scrapbook-adoptedstylesheets').trim(),
     '2',
   );
@@ -7678,21 +7678,21 @@ $it.skipIf($.noAdoptedStylesheet)('test_capture_imageBackground_used_adopted', a
   var doc = await readFileAsDocument(indexBlob);
 
   var docElem = doc.documentElement;
-  assertEqual(
+  assert.strictEqual(
     docElem.getAttribute('data-scrapbook-adoptedstylesheets').trim(),
     '0',
   );
-  assertEqual(
+  assert.strictEqual(
     docElem.getAttribute('data-scrapbook-adoptedstylesheet-0').trim(),
     `#adopted { background-image: url("doc.bmp"); }`,
   );
-  assertEqual(
+  assert.strictEqual(
     docElem.getAttribute('data-scrapbook-adoptedstylesheet-1').trim(),
     `#adopted { background-image: url("shadow.bmp"); }`,
   );
 
   var host1 = doc.querySelector('#shadow1');
-  assertEqual(
+  assert.strictEqual(
     host1.getAttribute('data-scrapbook-adoptedstylesheets').trim(),
     '1',
   );
@@ -8097,11 +8097,11 @@ it('test_capture_font_used_unloaded', async function () {
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
-  assertEqual(
+  assert.strictEqual(
     doc.querySelector('style.alternative').textContent.trim(),
     `@font-face { font-family: alternative; src: url("alternative-1.woff"), url("alternative-2.woff"), url("alternative-3.woff"); }`,
   );
-  assertEqual(
+  assert.strictEqual(
     doc.querySelector('style.unicode-range').textContent.trim(),
     `\
 @font-face { font-family: unicode-range; src: url("unicode-range-1.woff"); unicode-range: U+30; }
@@ -8832,13 +8832,13 @@ $it.xfailIf(
   var indexFile = zip.file('index_1.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
-  assertEqual(doc.querySelector('p').textContent.trim(), `frame1 content modified`);
-  assertEqual(doc.querySelector('img').getAttribute('src'), 'red.bmp');
+  assert.strictEqual(doc.querySelector('p').textContent.trim(), `frame1 content modified`);
+  assert.strictEqual(doc.querySelector('img').getAttribute('src'), 'red.bmp');
 
   var imgFile = zip.file('red.bmp');
   assert(imgFile);
   var imgData = await imgFile.async('base64');
-  assertEqual(imgData, 'Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAAD/AAAA');
+  assert.strictEqual(imgData, 'Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAAD/AAAA');
 });
 
 $it.skipIf(
@@ -8859,13 +8859,13 @@ $it.skipIf(
   var indexFile = zip.file('index_1.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
-  assertEqual(doc.querySelector('p').textContent.trim(), `frame1 content`);
-  assertEqual(doc.querySelector('img').getAttribute('src'), 'red.bmp');
+  assert.strictEqual(doc.querySelector('p').textContent.trim(), `frame1 content`);
+  assert.strictEqual(doc.querySelector('img').getAttribute('src'), 'red.bmp');
 
   var imgFile = zip.file('red.bmp');
   assert(imgFile);
   var imgData = await imgFile.async('base64');
-  assertEqual(imgData, 'Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAAD/AAAA');
+  assert.strictEqual(imgData, 'Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAAD/AAAA');
 });
 
 /**
@@ -9929,56 +9929,56 @@ it('test_capture_anchor_basic', async function () {
   var doc = await readFileAsDocument(indexBlob);
   var anchors = doc.querySelectorAll('a');
 
-  assertEqual(anchors[0].getAttribute('href'), ``);
-  assertEqual(anchors[1].getAttribute('href'), `#`);
-  assertEqual(anchors[2].getAttribute('href'), `#123`);
-  assertEqual(anchors[3].getAttribute('href'), `${localhost}/capture_anchor/basic/basic.html?`);
-  assertEqual(anchors[4].getAttribute('href'), `${localhost}/capture_anchor/basic/basic.html?id=123`);
-  assertEqual(anchors[5].getAttribute('href'), `${localhost}/capture_anchor/basic/basic.html?id=123#456`);
+  assert.strictEqual(anchors[0].getAttribute('href'), ``);
+  assert.strictEqual(anchors[1].getAttribute('href'), `#`);
+  assert.strictEqual(anchors[2].getAttribute('href'), `#123`);
+  assert.strictEqual(anchors[3].getAttribute('href'), `${localhost}/capture_anchor/basic/basic.html?`);
+  assert.strictEqual(anchors[4].getAttribute('href'), `${localhost}/capture_anchor/basic/basic.html?id=123`);
+  assert.strictEqual(anchors[5].getAttribute('href'), `${localhost}/capture_anchor/basic/basic.html?id=123#456`);
 
-  assertEqual(anchors[6].getAttribute('href'), ``);
-  assertEqual(anchors[7].getAttribute('href'), `#`);
-  assertEqual(anchors[8].getAttribute('href'), `#123`);
-  assertEqual(anchors[9].getAttribute('href'), `${localhost}/capture_anchor/basic/basic.html?`);
-  assertEqual(anchors[10].getAttribute('href'), `${localhost}/capture_anchor/basic/basic.html?id=123`);
-  assertEqual(anchors[11].getAttribute('href'), `${localhost}/capture_anchor/basic/basic.html?id=123#456`);
+  assert.strictEqual(anchors[6].getAttribute('href'), ``);
+  assert.strictEqual(anchors[7].getAttribute('href'), `#`);
+  assert.strictEqual(anchors[8].getAttribute('href'), `#123`);
+  assert.strictEqual(anchors[9].getAttribute('href'), `${localhost}/capture_anchor/basic/basic.html?`);
+  assert.strictEqual(anchors[10].getAttribute('href'), `${localhost}/capture_anchor/basic/basic.html?id=123`);
+  assert.strictEqual(anchors[11].getAttribute('href'), `${localhost}/capture_anchor/basic/basic.html?id=123#456`);
 
-  assertEqual(anchors[12].getAttribute('href'), `${localhost}/capture_anchor/basic/linked.html`);
-  assertEqual(anchors[13].getAttribute('href'), `${localhost}/capture_anchor/basic/linked.html#`);
-  assertEqual(anchors[14].getAttribute('href'), `${localhost}/capture_anchor/basic/linked.html#123`);
-  assertEqual(anchors[15].getAttribute('href'), `${localhost}/capture_anchor/basic/linked.html?`);
-  assertEqual(anchors[16].getAttribute('href'), `${localhost}/capture_anchor/basic/linked.html?id=123`);
-  assertEqual(anchors[17].getAttribute('href'), `${localhost}/capture_anchor/basic/linked.html?id=123#456`);
+  assert.strictEqual(anchors[12].getAttribute('href'), `${localhost}/capture_anchor/basic/linked.html`);
+  assert.strictEqual(anchors[13].getAttribute('href'), `${localhost}/capture_anchor/basic/linked.html#`);
+  assert.strictEqual(anchors[14].getAttribute('href'), `${localhost}/capture_anchor/basic/linked.html#123`);
+  assert.strictEqual(anchors[15].getAttribute('href'), `${localhost}/capture_anchor/basic/linked.html?`);
+  assert.strictEqual(anchors[16].getAttribute('href'), `${localhost}/capture_anchor/basic/linked.html?id=123`);
+  assert.strictEqual(anchors[17].getAttribute('href'), `${localhost}/capture_anchor/basic/linked.html?id=123#456`);
 
-  assertEqual(anchors[18].getAttribute('href'), `${localhost}/capture_anchor/basic/subdir/linked.html`);
-  assertEqual(anchors[19].getAttribute('href'), `${localhost}/capture_anchor/basic/subdir/linked.html#`);
-  assertEqual(anchors[20].getAttribute('href'), `${localhost}/capture_anchor/basic/subdir/linked.html#123`);
-  assertEqual(anchors[21].getAttribute('href'), `${localhost}/capture_anchor/basic/subdir/linked.html?`);
-  assertEqual(anchors[22].getAttribute('href'), `${localhost}/capture_anchor/basic/subdir/linked.html?id=123`);
-  assertEqual(anchors[23].getAttribute('href'), `${localhost}/capture_anchor/basic/subdir/linked.html?id=123#456`);
+  assert.strictEqual(anchors[18].getAttribute('href'), `${localhost}/capture_anchor/basic/subdir/linked.html`);
+  assert.strictEqual(anchors[19].getAttribute('href'), `${localhost}/capture_anchor/basic/subdir/linked.html#`);
+  assert.strictEqual(anchors[20].getAttribute('href'), `${localhost}/capture_anchor/basic/subdir/linked.html#123`);
+  assert.strictEqual(anchors[21].getAttribute('href'), `${localhost}/capture_anchor/basic/subdir/linked.html?`);
+  assert.strictEqual(anchors[22].getAttribute('href'), `${localhost}/capture_anchor/basic/subdir/linked.html?id=123`);
+  assert.strictEqual(anchors[23].getAttribute('href'), `${localhost}/capture_anchor/basic/subdir/linked.html?id=123#456`);
 
-  assertEqual(anchors[24].getAttribute('href'), `http://example.com/`); // fixed from http://example.com
-  assertEqual(anchors[25].getAttribute('href'), `http://example.com/#`);
-  assertEqual(anchors[26].getAttribute('href'), `http://example.com/#123`);
-  assertEqual(anchors[27].getAttribute('href'), `http://example.com/?`);
-  assertEqual(anchors[28].getAttribute('href'), `http://example.com/?id=123`);
-  assertEqual(anchors[29].getAttribute('href'), `http://example.com/?id=123#456`);
+  assert.strictEqual(anchors[24].getAttribute('href'), `http://example.com/`); // fixed from http://example.com
+  assert.strictEqual(anchors[25].getAttribute('href'), `http://example.com/#`);
+  assert.strictEqual(anchors[26].getAttribute('href'), `http://example.com/#123`);
+  assert.strictEqual(anchors[27].getAttribute('href'), `http://example.com/?`);
+  assert.strictEqual(anchors[28].getAttribute('href'), `http://example.com/?id=123`);
+  assert.strictEqual(anchors[29].getAttribute('href'), `http://example.com/?id=123#456`);
 
-  assertEqual(anchors[30].getAttribute('href'), `about:blank`);
-  assertEqual(anchors[31].getAttribute('href'), `about:blank#`);
-  assertEqual(anchors[32].getAttribute('href'), `about:blank#123`);
-  assertEqual(anchors[33].getAttribute('href'), `about:blank?`);
-  assertEqual(anchors[34].getAttribute('href'), `about:blank?id=123`);
-  assertEqual(anchors[35].getAttribute('href'), `about:blank?id=123#456`);
+  assert.strictEqual(anchors[30].getAttribute('href'), `about:blank`);
+  assert.strictEqual(anchors[31].getAttribute('href'), `about:blank#`);
+  assert.strictEqual(anchors[32].getAttribute('href'), `about:blank#123`);
+  assert.strictEqual(anchors[33].getAttribute('href'), `about:blank?`);
+  assert.strictEqual(anchors[34].getAttribute('href'), `about:blank?id=123`);
+  assert.strictEqual(anchors[35].getAttribute('href'), `about:blank?id=123#456`);
 
-  assertEqual(anchors[36].getAttribute('href'), `urn:scrapbook:download:error:http://example.com`);
-  assertEqual(anchors[37].getAttribute('href'), `urn:scrapbook:download:error:http://example.com#`);
-  assertEqual(anchors[38].getAttribute('href'), `urn:scrapbook:download:error:http://example.com#123`);
-  assertEqual(anchors[39].getAttribute('href'), `urn:scrapbook:download:error:http://example.com?`);
-  assertEqual(anchors[40].getAttribute('href'), `urn:scrapbook:download:error:http://example.com?id=123`);
-  assertEqual(anchors[41].getAttribute('href'), `urn:scrapbook:download:error:http://example.com?id=123#456`);
+  assert.strictEqual(anchors[36].getAttribute('href'), `urn:scrapbook:download:error:http://example.com`);
+  assert.strictEqual(anchors[37].getAttribute('href'), `urn:scrapbook:download:error:http://example.com#`);
+  assert.strictEqual(anchors[38].getAttribute('href'), `urn:scrapbook:download:error:http://example.com#123`);
+  assert.strictEqual(anchors[39].getAttribute('href'), `urn:scrapbook:download:error:http://example.com?`);
+  assert.strictEqual(anchors[40].getAttribute('href'), `urn:scrapbook:download:error:http://example.com?id=123`);
+  assert.strictEqual(anchors[41].getAttribute('href'), `urn:scrapbook:download:error:http://example.com?id=123#456`);
 
-  assertEqual(anchors[42].getAttribute('href'), `mailto:noresponse@example.com`);
+  assert.strictEqual(anchors[42].getAttribute('href'), `mailto:noresponse@example.com`);
 });
 
 /**
@@ -9999,15 +9999,15 @@ it('test_capture_anchor_partial', async function () {
   var doc = await readFileAsDocument(indexBlob);
   var anchors = doc.querySelectorAll('a');
 
-  assertEqual(anchors[0].getAttribute('href'), ``);
-  assertEqual(anchors[1].getAttribute('href'), `#`);
-  assertEqual(anchors[2].getAttribute('href'), `${localhost}/capture_anchor/partial_noncaptured/partial.html#target_id`);
-  assertEqual(anchors[3].getAttribute('href'), `${localhost}/capture_anchor/partial_noncaptured/partial.html#target_name`);
+  assert.strictEqual(anchors[0].getAttribute('href'), ``);
+  assert.strictEqual(anchors[1].getAttribute('href'), `#`);
+  assert.strictEqual(anchors[2].getAttribute('href'), `${localhost}/capture_anchor/partial_noncaptured/partial.html#target_id`);
+  assert.strictEqual(anchors[3].getAttribute('href'), `${localhost}/capture_anchor/partial_noncaptured/partial.html#target_name`);
 
-  assertEqual(anchors[4].getAttribute('href'), ``);
-  assertEqual(anchors[5].getAttribute('href'), `#`);
-  assertEqual(anchors[6].getAttribute('href'), `${localhost}/capture_anchor/partial_noncaptured/partial.html#target_id`);
-  assertEqual(anchors[7].getAttribute('href'), `${localhost}/capture_anchor/partial_noncaptured/partial.html#target_name`);
+  assert.strictEqual(anchors[4].getAttribute('href'), ``);
+  assert.strictEqual(anchors[5].getAttribute('href'), `#`);
+  assert.strictEqual(anchors[6].getAttribute('href'), `${localhost}/capture_anchor/partial_noncaptured/partial.html#target_id`);
+  assert.strictEqual(anchors[7].getAttribute('href'), `${localhost}/capture_anchor/partial_noncaptured/partial.html#target_name`);
 
   /* hash link target captured */
   var blob = await capture({
@@ -10020,15 +10020,15 @@ it('test_capture_anchor_partial', async function () {
   var doc = await readFileAsDocument(indexBlob);
   var anchors = doc.querySelectorAll('a');
 
-  assertEqual(anchors[0].getAttribute('href'), ``);
-  assertEqual(anchors[1].getAttribute('href'), `#`);
-  assertEqual(anchors[2].getAttribute('href'), `#target_id`);
-  assertEqual(anchors[3].getAttribute('href'), `#target_name`);
+  assert.strictEqual(anchors[0].getAttribute('href'), ``);
+  assert.strictEqual(anchors[1].getAttribute('href'), `#`);
+  assert.strictEqual(anchors[2].getAttribute('href'), `#target_id`);
+  assert.strictEqual(anchors[3].getAttribute('href'), `#target_name`);
 
-  assertEqual(anchors[4].getAttribute('href'), ``);
-  assertEqual(anchors[5].getAttribute('href'), `#`);
-  assertEqual(anchors[6].getAttribute('href'), `#target_id`);
-  assertEqual(anchors[7].getAttribute('href'), `#target_name`);
+  assert.strictEqual(anchors[4].getAttribute('href'), ``);
+  assert.strictEqual(anchors[5].getAttribute('href'), `#`);
+  assert.strictEqual(anchors[6].getAttribute('href'), `#target_id`);
+  assert.strictEqual(anchors[7].getAttribute('href'), `#target_name`);
 });
 
 /**
@@ -10060,19 +10060,19 @@ it('test_capture_anchor_srcdoc', async function () {
   var frameDoc = await readFileAsDocument(frameBlob);
   var anchors = frameDoc.querySelectorAll('a');
 
-  assertEqual(anchors[0].getAttribute('href'), `${localhost}/capture_anchor/srcdoc/srcdoc.html`);
-  assertEqual(anchors[1].getAttribute('href'), `${localhost}/capture_anchor/srcdoc/srcdoc.html#`);
-  assertEqual(anchors[2].getAttribute('href'), `${localhost}/capture_anchor/srcdoc/srcdoc.html#123`);
-  assertEqual(anchors[3].getAttribute('href'), `${localhost}/capture_anchor/srcdoc/srcdoc.html?`);
-  assertEqual(anchors[4].getAttribute('href'), `${localhost}/capture_anchor/srcdoc/srcdoc.html?id=123`);
+  assert.strictEqual(anchors[0].getAttribute('href'), `${localhost}/capture_anchor/srcdoc/srcdoc.html`);
+  assert.strictEqual(anchors[1].getAttribute('href'), `${localhost}/capture_anchor/srcdoc/srcdoc.html#`);
+  assert.strictEqual(anchors[2].getAttribute('href'), `${localhost}/capture_anchor/srcdoc/srcdoc.html#123`);
+  assert.strictEqual(anchors[3].getAttribute('href'), `${localhost}/capture_anchor/srcdoc/srcdoc.html?`);
+  assert.strictEqual(anchors[4].getAttribute('href'), `${localhost}/capture_anchor/srcdoc/srcdoc.html?id=123`);
 
-  assertEqual(anchors[5].getAttribute('href'), `${localhost}/capture_anchor/srcdoc/srcdoc.html`);
-  assertEqual(anchors[6].getAttribute('href'), `${localhost}/capture_anchor/srcdoc/srcdoc.html#`);
-  assertEqual(anchors[7].getAttribute('href'), `${localhost}/capture_anchor/srcdoc/srcdoc.html#123`);
-  assertEqual(anchors[8].getAttribute('href'), `${localhost}/capture_anchor/srcdoc/srcdoc.html?`);
-  assertEqual(anchors[9].getAttribute('href'), `${localhost}/capture_anchor/srcdoc/srcdoc.html?id=123`);
+  assert.strictEqual(anchors[5].getAttribute('href'), `${localhost}/capture_anchor/srcdoc/srcdoc.html`);
+  assert.strictEqual(anchors[6].getAttribute('href'), `${localhost}/capture_anchor/srcdoc/srcdoc.html#`);
+  assert.strictEqual(anchors[7].getAttribute('href'), `${localhost}/capture_anchor/srcdoc/srcdoc.html#123`);
+  assert.strictEqual(anchors[8].getAttribute('href'), `${localhost}/capture_anchor/srcdoc/srcdoc.html?`);
+  assert.strictEqual(anchors[9].getAttribute('href'), `${localhost}/capture_anchor/srcdoc/srcdoc.html?id=123`);
 
-  assertEqual(anchors[10].getAttribute('href'), `about:srcdoc`);
+  assert.strictEqual(anchors[10].getAttribute('href'), `about:srcdoc`);
 
   /* depth = 0 */
   // links to the original page should be rewritten to be the captured one
@@ -10095,19 +10095,19 @@ it('test_capture_anchor_srcdoc', async function () {
   var frameDoc = await readFileAsDocument(frameBlob);
   var anchors = frameDoc.querySelectorAll('a');
 
-  assertEqual(anchors[0].getAttribute('href'), `index.html`);
-  assertEqual(anchors[1].getAttribute('href'), `index.html#`);
-  assertEqual(anchors[2].getAttribute('href'), `index.html#123`);
-  assertEqual(anchors[3].getAttribute('href'), `index.html`);  // "srcdoc.html?" is normalized to "srcdoc.html"
-  assertEqual(anchors[4].getAttribute('href'), `${localhost}/capture_anchor/srcdoc/srcdoc.html?id=123`);
+  assert.strictEqual(anchors[0].getAttribute('href'), `index.html`);
+  assert.strictEqual(anchors[1].getAttribute('href'), `index.html#`);
+  assert.strictEqual(anchors[2].getAttribute('href'), `index.html#123`);
+  assert.strictEqual(anchors[3].getAttribute('href'), `index.html`);  // "srcdoc.html?" is normalized to "srcdoc.html"
+  assert.strictEqual(anchors[4].getAttribute('href'), `${localhost}/capture_anchor/srcdoc/srcdoc.html?id=123`);
 
-  assertEqual(anchors[5].getAttribute('href'), `index.html`);
-  assertEqual(anchors[6].getAttribute('href'), `index.html#`);
-  assertEqual(anchors[7].getAttribute('href'), `index.html#123`);
-  assertEqual(anchors[8].getAttribute('href'), `index.html`);  // "srcdoc.html?" is normalized to "srcdoc.html"
-  assertEqual(anchors[9].getAttribute('href'), `${localhost}/capture_anchor/srcdoc/srcdoc.html?id=123`);
+  assert.strictEqual(anchors[5].getAttribute('href'), `index.html`);
+  assert.strictEqual(anchors[6].getAttribute('href'), `index.html#`);
+  assert.strictEqual(anchors[7].getAttribute('href'), `index.html#123`);
+  assert.strictEqual(anchors[8].getAttribute('href'), `index.html`);  // "srcdoc.html?" is normalized to "srcdoc.html"
+  assert.strictEqual(anchors[9].getAttribute('href'), `${localhost}/capture_anchor/srcdoc/srcdoc.html?id=123`);
 
-  assertEqual(anchors[10].getAttribute('href'), `about:srcdoc`);
+  assert.strictEqual(anchors[10].getAttribute('href'), `about:srcdoc`);
 });
 
 /**
@@ -10126,17 +10126,17 @@ it('test_capture_anchor_base', async function () {
   var doc = await readFileAsDocument(indexBlob);
   var anchors = doc.querySelectorAll('a');
 
-  assertEqual(anchors[0].getAttribute('href'), `${localhost}/capture_anchor/base/subdir/linked.html`);
-  assertEqual(anchors[1].getAttribute('href'), `${localhost}/capture_anchor/base/subdir/linked.html#`);
-  assertEqual(anchors[2].getAttribute('href'), `${localhost}/capture_anchor/base/subdir/linked.html#123`);
-  assertEqual(anchors[3].getAttribute('href'), `${localhost}/capture_anchor/base/subdir/linked.html?id=123`);
+  assert.strictEqual(anchors[0].getAttribute('href'), `${localhost}/capture_anchor/base/subdir/linked.html`);
+  assert.strictEqual(anchors[1].getAttribute('href'), `${localhost}/capture_anchor/base/subdir/linked.html#`);
+  assert.strictEqual(anchors[2].getAttribute('href'), `${localhost}/capture_anchor/base/subdir/linked.html#123`);
+  assert.strictEqual(anchors[3].getAttribute('href'), `${localhost}/capture_anchor/base/subdir/linked.html?id=123`);
 
-  assertEqual(anchors[4].getAttribute('href'), ``);
-  assertEqual(anchors[5].getAttribute('href'), `#`);
-  assertEqual(anchors[6].getAttribute('href'), `#123`);
-  assertEqual(anchors[7].getAttribute('href'), `${localhost}/capture_anchor/base/base.html?id=123`);
+  assert.strictEqual(anchors[4].getAttribute('href'), ``);
+  assert.strictEqual(anchors[5].getAttribute('href'), `#`);
+  assert.strictEqual(anchors[6].getAttribute('href'), `#123`);
+  assert.strictEqual(anchors[7].getAttribute('href'), `${localhost}/capture_anchor/base/base.html?id=123`);
 
-  assertEqual(anchors[8].getAttribute('href'), `http://example.com/`); // slight changed from http://example.com
+  assert.strictEqual(anchors[8].getAttribute('href'), `http://example.com/`); // slight changed from http://example.com
 });
 
 /**
@@ -10159,7 +10159,7 @@ it('test_capture_anchor_ping', async function () {
   var doc = await readFileAsDocument(indexBlob);
   var a = doc.querySelector('a');
 
-  assertEqual(a.getAttribute('ping'), `${localhost}/capture_anchor/ping/ping.py ${localhost}/capture_anchor/ping/ping2.py`);
+  assert.strictEqual(a.getAttribute('ping'), `${localhost}/capture_anchor/ping/ping.py ${localhost}/capture_anchor/ping/ping2.py`);
 
   /* capture.ping = blank */
   var options = {
@@ -10175,7 +10175,7 @@ it('test_capture_anchor_ping', async function () {
   var doc = await readFileAsDocument(indexBlob);
   var a = doc.querySelector('a');
 
-  assertEqual(a.hasAttribute('ping'), false);
+  assert.strictEqual(a.hasAttribute('ping'), false);
 });
 
 /**
@@ -13182,14 +13182,14 @@ $it.skipIf(
   var doc = await readFileAsDocument(indexBlob);
 
   var host1 = doc.querySelector('div');
-  assertEqual(host1.getAttribute("data-scrapbook-shadowdom-mode"), "closed");
+  assert.strictEqual(host1.getAttribute("data-scrapbook-shadowdom-mode"), "closed");
   var frag = doc.createElement("template");
   frag.innerHTML = host1.getAttribute("data-scrapbook-shadowdom");
   var shadow1 = frag.content;
   assert(shadow1.querySelector('img').getAttribute('src') === `green.bmp`);
 
   var host2 = shadow1.querySelector('p');
-  assertEqual(host2.getAttribute("data-scrapbook-shadowdom-mode"), "closed");
+  assert.strictEqual(host2.getAttribute("data-scrapbook-shadowdom-mode"), "closed");
   var frag = doc.createElement("template");
   frag.innerHTML = host2.getAttribute("data-scrapbook-shadowdom");
   var shadow2 = frag.content;
@@ -13308,7 +13308,7 @@ $it.skipIf($.noShadowRootDelegatesFocus)
   var host1 = doc.querySelector('div');
   assert(host1.hasAttribute("data-scrapbook-shadowdom-delegates-focus"));
   assert(host1.hasAttribute("data-scrapbook-shadowdom-serializable"));
-  assertEqual(host1.getAttribute("data-scrapbook-shadowdom-slot-assignment"), "manual");
+  assert.strictEqual(host1.getAttribute("data-scrapbook-shadowdom-slot-assignment"), "manual");
 
   var loader = doc.querySelector('script[data-scrapbook-elem="basic-loader"]');
   assert(loader.textContent.trim().match(rawRegex`${'^'}(function () {${'.+'}})()${'$'}`));
@@ -13344,25 +13344,25 @@ $it.skipIf($.noShadowRootSlotAssignment)('test_capture_shadowRoot_slots', async 
   var shadow = frag.content;
 
   var spans = host.querySelectorAll('span');
-  assertEqual(spans[0].getAttribute('data-scrapbook-slot-index'), "0");
+  assert.strictEqual(spans[0].getAttribute('data-scrapbook-slot-index'), "0");
   assert(!spans[1].hasAttribute('data-scrapbook-slot-index'));
-  assertEqual(spans[2].getAttribute('data-scrapbook-slot-index'), "2");
-  assertEqual(spans[3].getAttribute('data-scrapbook-slot-index'), "3");
+  assert.strictEqual(spans[2].getAttribute('data-scrapbook-slot-index'), "2");
+  assert.strictEqual(spans[3].getAttribute('data-scrapbook-slot-index'), "3");
   assert(!spans[4].hasAttribute('data-scrapbook-slot-index'));
 
   var node = spans[1].nextSibling;
-  assertEqual(node.nodeType, 8);
-  assertEqual(node.nodeValue, 'scrapbook-slot-index=1');
+  assert.strictEqual(node.nodeType, 8);
+  assert.strictEqual(node.nodeValue, 'scrapbook-slot-index=1');
   var node = node.nextSibling;
-  assertEqual(node.nodeType, 3);
-  assertEqual(node.nodeValue.trim(), 'Default3');
+  assert.strictEqual(node.nodeType, 3);
+  assert.strictEqual(node.nodeValue.trim(), 'Default3');
   var node = node.nextSibling;
-  assertEqual(node.nodeType, 8);
-  assertEqual(node.nodeValue, '/scrapbook-slot-index');
+  assert.strictEqual(node.nodeType, 8);
+  assert.strictEqual(node.nodeValue, '/scrapbook-slot-index');
 
   var slots = shadow.querySelectorAll('slot');
-  assertEqual(slots[0].getAttribute('data-scrapbook-slot-assigned'), "0,1");
-  assertEqual(slots[1].getAttribute('data-scrapbook-slot-assigned'), "2,3");
+  assert.strictEqual(slots[0].getAttribute('data-scrapbook-slot-assigned'), "0,1");
+  assert.strictEqual(slots[1].getAttribute('data-scrapbook-slot-assigned'), "2,3");
 
   var host2 = shadow.querySelector('div');
   var frag = doc.createElement("template");
@@ -13371,11 +13371,11 @@ $it.skipIf($.noShadowRootSlotAssignment)('test_capture_shadowRoot_slots', async 
 
   var spans = host2.querySelectorAll('span');
   assert(!spans[0].hasAttribute('data-scrapbook-slot-index'));
-  assertEqual(spans[1].getAttribute('data-scrapbook-slot-index'), "4");
-  assertEqual(spans[2].getAttribute('data-scrapbook-slot-index'), "5");
+  assert.strictEqual(spans[1].getAttribute('data-scrapbook-slot-index'), "4");
+  assert.strictEqual(spans[2].getAttribute('data-scrapbook-slot-index'), "5");
 
   var slots = shadow2.querySelectorAll('slot');
-  assertEqual(slots[0].getAttribute('data-scrapbook-slot-assigned'), "4,5");
+  assert.strictEqual(slots[0].getAttribute('data-scrapbook-slot-assigned'), "4,5");
 
   var loader = doc.querySelector('script[data-scrapbook-elem="basic-loader"]');
   assert(loader.textContent.trim().match(rawRegex`${'^'}(function () {${'.+'}})()${'$'}`));
@@ -13402,9 +13402,9 @@ $it.skipIf($.noShadowRootSlotAssignment)('test_capture_shadowRoot_slots', async 
 
   var spans = host.querySelectorAll('span');
   var node = spans[1].nextSibling;
-  assertEqual(node.nodeType, 3);
-  assertEqual(node.nodeValue.trim(), 'Default3');
-  assertEqual(node.nextSibling, spans[2]);
+  assert.strictEqual(node.nodeType, 3);
+  assert.strictEqual(node.nodeValue.trim(), 'Default3');
+  assert.strictEqual(node.nextSibling, spans[2]);
 
   var host2 = shadow.querySelector('div');
   var frag = doc.createElement("template");
@@ -13483,7 +13483,7 @@ $it.skipIf(
   var doc = await readFileAsDocument(indexBlob);
 
   var host1 = doc.querySelector('custom-elem');
-  assertEqual(host1.getAttribute("data-scrapbook-shadowdom-mode"), "closed");
+  assert.strictEqual(host1.getAttribute("data-scrapbook-shadowdom-mode"), "closed");
   var frag = doc.createElement("template");
   frag.innerHTML = host1.getAttribute("data-scrapbook-shadowdom");
   var shadow1 = frag.content;

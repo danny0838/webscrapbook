@@ -23,7 +23,7 @@
 
 'use strict';
 
-const {MochaQuery: $, assertEqual} = unittest;
+const {MochaQuery: $, assert} = unittest;
 
 describe('lib/map-with-default.js', function () {
 
@@ -31,25 +31,25 @@ describe('lib/map-with-default.js', function () {
 
     it('factory function', function () {
       var myMap = new MapWithDefault(() => ({}));
-      assertEqual(myMap.has('key'), false);
-      assertEqual(myMap.get('key'), {});
-      assertEqual(myMap.has('key'), true);
+      assert.strictEqual(myMap.has('key'), false);
+      assert.deepEqual(myMap.get('key'), {});
+      assert.strictEqual(myMap.has('key'), true);
     });
 
     it('factory function with key parameter', function () {
       var myMap = new MapWithDefault((key) => ({default: key}));
-      assertEqual(myMap.has('mykey'), false);
-      assertEqual(myMap.get('mykey'), {default: 'mykey'});
-      assertEqual(myMap.has('mykey'), true);
+      assert.strictEqual(myMap.has('mykey'), false);
+      assert.deepEqual(myMap.get('mykey'), {default: 'mykey'});
+      assert.strictEqual(myMap.has('mykey'), true);
     });
 
     it('factory function and default entries', function () {
       var myMap = new MapWithDefault(() => 'default', [['k1', 'v1'], ['k2', 'v2']]);
-      assertEqual(myMap.get('k1'), 'v1');
-      assertEqual(myMap.get('k2'), 'v2');
-      assertEqual(myMap.has('mykey'), false);
-      assertEqual(myMap.get('mykey'), 'default');
-      assertEqual(myMap.has('mykey'), true);
+      assert.strictEqual(myMap.get('k1'), 'v1');
+      assert.strictEqual(myMap.get('k2'), 'v2');
+      assert.strictEqual(myMap.has('mykey'), false);
+      assert.strictEqual(myMap.get('mykey'), 'default');
+      assert.strictEqual(myMap.has('mykey'), true);
     });
 
   });

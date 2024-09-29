@@ -23,7 +23,7 @@
 
 'use strict';
 
-const {MochaQuery: $, assert, assertEqual} = unittest;
+const {MochaQuery: $, assert} = unittest;
 
 describe('lib/mime.js', function () {
 
@@ -33,37 +33,37 @@ describe('lib/mime.js', function () {
 
     it('no data', function () {
       Mime.extend('MY/MIME1');
-      assertEqual(Mime.db['MY/MIME1'], {extensions: []});
+      assert.deepEqual(Mime.db['MY/MIME1'], {extensions: []});
     });
 
     it('data with extensions', function () {
       // add extensions
       Mime.extend('MY/MIME2', {extensions: ['.myext1', '.myext2']});
-      assertEqual(Mime.db['MY/MIME2'], {extensions: ['.myext1', '.myext2']});
+      assert.deepEqual(Mime.db['MY/MIME2'], {extensions: ['.myext1', '.myext2']});
 
       // add extensions at last
       Mime.extend('MY/MIME2', {extensions: ['.myext3', '.myext4']});
-      assertEqual(Mime.db['MY/MIME2'], {extensions: ['.myext1', '.myext2', '.myext3', '.myext4']});
+      assert.deepEqual(Mime.db['MY/MIME2'], {extensions: ['.myext1', '.myext2', '.myext3', '.myext4']});
     });
 
     it('data with extensions (important = true)', function () {
       // add extensions
       Mime.extend('MY/MIME3', {extensions: ['.myext1', '.myext2']});
-      assertEqual(Mime.db['MY/MIME3'], {extensions: ['.myext1', '.myext2']});
+      assert.deepEqual(Mime.db['MY/MIME3'], {extensions: ['.myext1', '.myext2']});
 
       // add extensions at first
       Mime.extend('MY/MIME3', {extensions: ['.myext3', '.myext4']}, {important: true});
-      assertEqual(Mime.db['MY/MIME3'], {extensions: ['.myext3', '.myext4', '.myext1', '.myext2']});
+      assert.deepEqual(Mime.db['MY/MIME3'], {extensions: ['.myext3', '.myext4', '.myext1', '.myext2']});
     });
 
     it('data with properties', function () {
       // add properties
       Mime.extend('MY/MIME4', {source: 'foo', charset: 'ASCII', compressible: true});
-      assertEqual(Mime.db['MY/MIME4'], {extensions: [], source: 'foo', charset: 'ASCII', compressible: true});
+      assert.deepEqual(Mime.db['MY/MIME4'], {extensions: [], source: 'foo', charset: 'ASCII', compressible: true});
 
       // update properties
       Mime.extend('MY/MIME4', {source: 'bar', charset: 'UTF-8', compressible: false, newprop: 'newvalue'});
-      assertEqual(Mime.db['MY/MIME4'], {extensions: [], source: 'bar', charset: 'UTF-8', compressible: false, newprop: 'newvalue'});
+      assert.deepEqual(Mime.db['MY/MIME4'], {extensions: [], source: 'bar', charset: 'UTF-8', compressible: false, newprop: 'newvalue'});
     });
 
   });
@@ -71,55 +71,55 @@ describe('lib/mime.js', function () {
   describe('Mime.lookup', function () {
 
     it('pure extension', function () {
-      assertEqual(Mime.lookup('txt'), 'text/plain');
+      assert.strictEqual(Mime.lookup('txt'), 'text/plain');
     });
 
     it('extension with dot', function () {
-      assertEqual(Mime.lookup('.txt'), 'text/plain');
+      assert.strictEqual(Mime.lookup('.txt'), 'text/plain');
     });
 
     it('filename', function () {
-      assertEqual(Mime.lookup('myfile.txt'), 'text/plain');
+      assert.strictEqual(Mime.lookup('myfile.txt'), 'text/plain');
     });
 
     it('multi-dot filename (check last segment)', function () {
-      assertEqual(Mime.lookup('myfile.1.2.ext.txt'), 'text/plain');
+      assert.strictEqual(Mime.lookup('myfile.1.2.ext.txt'), 'text/plain');
     });
 
     it('POSIX path', function () {
-      assertEqual(Mime.lookup('/home/myuser/myfile.txt'), 'text/plain');
+      assert.strictEqual(Mime.lookup('/home/myuser/myfile.txt'), 'text/plain');
     });
 
     it('Windows path', function () {
-      assertEqual(Mime.lookup('C:\\Users\\MyUser\\myfile.txt'), 'text/plain');
+      assert.strictEqual(Mime.lookup('C:\\Users\\MyUser\\myfile.txt'), 'text/plain');
     });
 
     it('URL', function () {
-      assertEqual(Mime.lookup('http://example.com/myfile.txt'), 'text/plain');
+      assert.strictEqual(Mime.lookup('http://example.com/myfile.txt'), 'text/plain');
     });
 
     it('common types', function () {
-      assertEqual(Mime.lookup('htm'), 'text/html');
-      assertEqual(Mime.lookup('html'), 'text/html');
-      assertEqual(Mime.lookup('xht'), 'application/xhtml+xml');
-      assertEqual(Mime.lookup('xhtml'), 'application/xhtml+xml');
-      assertEqual(Mime.lookup('xml'), 'text/xml');
-      assertEqual(Mime.lookup('css'), 'text/css');
-      assertEqual(Mime.lookup('js'), 'text/javascript');
-      assertEqual(Mime.lookup('mjs'), 'text/javascript');
-      assertEqual(Mime.lookup('jpg'), 'image/jpeg');
-      assertEqual(Mime.lookup('gif'), 'image/gif');
-      assertEqual(Mime.lookup('png'), 'image/png');
-      assertEqual(Mime.lookup('svg'), 'image/svg+xml');
-      assertEqual(Mime.lookup('ogg'), 'audio/ogg');
-      assertEqual(Mime.lookup('oga'), 'audio/ogg');
-      assertEqual(Mime.lookup('ogv'), 'video/ogg');
-      assertEqual(Mime.lookup('ogx'), 'application/ogg');
+      assert.strictEqual(Mime.lookup('htm'), 'text/html');
+      assert.strictEqual(Mime.lookup('html'), 'text/html');
+      assert.strictEqual(Mime.lookup('xht'), 'application/xhtml+xml');
+      assert.strictEqual(Mime.lookup('xhtml'), 'application/xhtml+xml');
+      assert.strictEqual(Mime.lookup('xml'), 'text/xml');
+      assert.strictEqual(Mime.lookup('css'), 'text/css');
+      assert.strictEqual(Mime.lookup('js'), 'text/javascript');
+      assert.strictEqual(Mime.lookup('mjs'), 'text/javascript');
+      assert.strictEqual(Mime.lookup('jpg'), 'image/jpeg');
+      assert.strictEqual(Mime.lookup('gif'), 'image/gif');
+      assert.strictEqual(Mime.lookup('png'), 'image/png');
+      assert.strictEqual(Mime.lookup('svg'), 'image/svg+xml');
+      assert.strictEqual(Mime.lookup('ogg'), 'audio/ogg');
+      assert.strictEqual(Mime.lookup('oga'), 'audio/ogg');
+      assert.strictEqual(Mime.lookup('ogv'), 'video/ogg');
+      assert.strictEqual(Mime.lookup('ogx'), 'application/ogg');
     });
 
     it('extended types', function () {
-      assertEqual(Mime.lookup('htz'), 'application/html+zip');
-      assertEqual(Mime.lookup('maff'), 'application/x-maff');
+      assert.strictEqual(Mime.lookup('htz'), 'application/html+zip');
+      assert.strictEqual(Mime.lookup('maff'), 'application/x-maff');
     });
 
   });
@@ -127,7 +127,7 @@ describe('lib/mime.js', function () {
   describe('Mime.extension', function () {
 
     it('basic', function () {
-      assertEqual(Mime.extension('text/plain'), 'txt');
+      assert.strictEqual(Mime.extension('text/plain'), 'txt');
     });
 
   });
