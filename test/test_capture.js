@@ -155,6 +155,13 @@ function assertNoRecord(rootNode, {deep = true, filter = 'any'} = {}) {
 
 describe('Capture tests', function () {
 
+before(async function () {
+  await Promise.all([
+    checkTestServer(),
+    checkExtension(),
+  ]);
+});
+
 /**
  * Check html saving structure in various formats
  * Check if saveAs option works

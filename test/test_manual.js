@@ -18,6 +18,10 @@
 
 describe('Manual tests', function () {
 
+before(async function () {
+  await checkTestServer();
+});
+
 describe('Test viewer', function () {
 
 it('test_viewer_validate', async function () {

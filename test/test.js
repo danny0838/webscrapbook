@@ -57,8 +57,12 @@ class TestSuite {
     })();
 
     const config = this.config = Object.assign({}, config1, config2);
-    const localhost = this.localhost = `http://localhost${config["server_port"] === 80 ? "" : ":" + config["server_port"]}`;
-    const localhost2 = this.localhost2 = `http://localhost${config["server_port2"] === 80 ? "" : ":" + config["server_port2"]}`;
+    this.localhost = `http://localhost${config["server_port"] === 80 ? "" : ":" + config["server_port"]}`;
+    this.localhost2 = `http://localhost${config["server_port2"] === 80 ? "" : ":" + config["server_port2"]}`;
+  }
+
+  async checkTestServer() {
+    const {localhost, localhost2} = this;
 
     try {
       await fetch(localhost);
@@ -73,14 +77,17 @@ class TestSuite {
       console.error(ex);
       throw new Error(`Unable to connect to local server "${localhost2}". Make sure the server has been started and the port is not occupied by another application.`);
     }
+  }
 
+  async checkExtension() {
+    const id = this.config["wsb_extension_id"];
     try {
-      if (!await browser.runtime.sendMessage(config["wsb_extension_id"], {cmd: "ping"})) {
+      if (!await browser.runtime.sendMessage(id, {cmd: "ping"})) {
         throw new Error('ping failure');
       }
     } catch (ex) {
       console.error(ex);
-      throw new Error(`Unable to connect to the WebScrapBook extension with ID "${config["wsb_extension_id"]}". Make sure the extension is installed and its ID is correctly configured.`);
+      throw new Error(`Unable to connect to the WebScrapBook extension with ID "${id}". Make sure the extension is installed and its ID is correctly configured.`);
     }
   }
 
@@ -247,22 +254,8 @@ class TestSuite {
 // Top-level await is available only in Chromium >=89 and Firefox >= 89
 (async () => {
   const suite = new TestSuite();
-  try {
-    await suite.init();
-  } catch (ex) {
-    /* fail out with a dummy mocha */
-    mocha.setup('bdd');
 
-    // prevent options be overwritten by URL params
-    mocha.options = new Proxy(mocha.options, {
-      set() { return true; },
-    });
-
-    before(() => { throw ex; });
-    it('root');  // require a test for before to be run
-    mocha.run();
-    return;
-  }
+  await suite.init();
 
   // initialize mocha and expose global methods such as describe(), it()
   mocha.setup({
@@ -288,6 +281,8 @@ class TestSuite {
   Object.assign(global, {
     localhost: suite.localhost,
     localhost2: suite.localhost2,
+    checkTestServer: suite.checkTestServer.bind(suite),
+    checkExtension: suite.checkExtension.bind(suite),
     capture: suite.capture.bind(suite),
     captureHeadless: suite.captureHeadless.bind(suite),
     openTestTab: suite.openTestTab.bind(suite),
