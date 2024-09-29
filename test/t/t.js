@@ -14,33 +14,35 @@ chrome.runtime.onConnect.addListener((port) => {
   });
 });
 
+function onRadioInput(event) {
+  const elem = event.currentTarget;
+  if (elem.checked) {
+    const value = Boolean(elem.value);
+    messagePort.postMessage({cmd: 'result', args: {value}});
+  }
+}
+
 document.addEventListener("DOMContentLoaded", async function () {
-  const form = document.createElement('form');
+  const form = document.body.appendChild(document.createElement('form'));
+
   const label = form.appendChild(document.createElement('label'));
   label.textContent = `Does it work?`;
-  const input1 = form.appendChild(document.createElement('input'));
+
+  const label1 = form.appendChild(document.createElement('label'));
+  const input1 = label1.appendChild(document.createElement('input'));
   input1.type = 'radio';
   input1.name = 'work';
-  const label1 = form.appendChild(document.createElement('label'));
-  label1.textContent = 'yes';
-  const input2 = form.appendChild(document.createElement('input'));
+  input1.value = 'true';
+  input1.addEventListener('change', onRadioInput);
+  label1.append('YES');
+
+  const label2 = form.appendChild(document.createElement('label'));
+  const input2 = label2.appendChild(document.createElement('input'));
   input2.type = 'radio';
   input2.name = 'work';
-  const label2 = form.appendChild(document.createElement('label'));
-  label2.textContent = 'no';
-  document.body.appendChild(form);
-
-  input1.addEventListener('change', (event) => {
-    if (event.currentTarget.checked) {
-      messagePort.postMessage({cmd: 'result', args: {value: true}});
-    }
-  });
-
-  input2.addEventListener('change', (event) => {
-    if (event.currentTarget.checked) {
-      messagePort.postMessage({cmd: 'result', args: {value: false}});
-    }
-  });
+  input2.value = '';
+  input2.addEventListener('change', onRadioInput);
+  label2.append('NO');
 });
 
 function loadEnv(message, port) {

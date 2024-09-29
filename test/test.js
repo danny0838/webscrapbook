@@ -156,7 +156,7 @@ class TestSuite {
         handler(message, port, resolve);
       };
       const onDisconnect = (port) => {
-        reject(new Error('Port disconnected.'));
+        reject(new Error('Port disconnected'));
       };
       port.onMessage.addListener(onMessage);
       port.onDisconnect.addListener(onDisconnect);
