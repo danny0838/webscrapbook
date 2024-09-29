@@ -28,42 +28,77 @@ const {MochaQuery: $, assert} = unittest;
 describe('lib/mime.js', function () {
 
   describe('Mime.extend', function () {
-    // Test with invalid MIME types (should be all lower case) and extensions
-    // (should not contain the starting ".") to prevent a potential conflict.
+    let _db;
+    let _types;
+
+    before(function () {
+      _db = JSON.parse(JSON.stringify(Mime.db));
+      _types = JSON.parse(JSON.stringify(Mime.types));
+    });
+
+    afterEach(function () {
+      Object.keys(Mime.db).forEach(key => delete Mime.db[key]);
+      Object.assign(Mime.db, _db);
+      Object.keys(Mime.types).forEach(key => delete Mime.types[key]);
+      Object.assign(Mime.types, _types);
+    });
 
     it('no data', function () {
-      Mime.extend('MY/MIME1');
-      assert.deepEqual(Mime.db['MY/MIME1'], {extensions: []});
+      Mime.extend('my/mime');
+      assert.deepEqual(Mime.db['my/mime'], {extensions: []});
     });
 
     it('data with extensions', function () {
       // add extensions
-      Mime.extend('MY/MIME2', {extensions: ['.myext1', '.myext2']});
-      assert.deepEqual(Mime.db['MY/MIME2'], {extensions: ['.myext1', '.myext2']});
+      Mime.extend('my/mime', {extensions: ['myext1', 'myext2']});
+      assert.deepEqual(Mime.db['my/mime'], {extensions: ['myext1', 'myext2']});
+      assert.strictEqual(Mime.types['myext1'], 'my/mime');
+      assert.strictEqual(Mime.types['myext2'], 'my/mime');
 
       // add extensions at last
-      Mime.extend('MY/MIME2', {extensions: ['.myext3', '.myext4']});
-      assert.deepEqual(Mime.db['MY/MIME2'], {extensions: ['.myext1', '.myext2', '.myext3', '.myext4']});
+      Mime.extend('my/mime', {extensions: ['myext3', 'myext4']});
+      assert.deepEqual(Mime.db['my/mime'], {extensions: ['myext1', 'myext2', 'myext3', 'myext4']});
+      assert.strictEqual(Mime.types['myext1'], 'my/mime');
+      assert.strictEqual(Mime.types['myext2'], 'my/mime');
+      assert.strictEqual(Mime.types['myext3'], 'my/mime');
+      assert.strictEqual(Mime.types['myext4'], 'my/mime');
     });
 
     it('data with extensions (important = true)', function () {
       // add extensions
-      Mime.extend('MY/MIME3', {extensions: ['.myext1', '.myext2']});
-      assert.deepEqual(Mime.db['MY/MIME3'], {extensions: ['.myext1', '.myext2']});
+      Mime.extend('my/mime', {extensions: ['myext1', 'myext2']});
+      assert.deepEqual(Mime.db['my/mime'], {extensions: ['myext1', 'myext2']});
+      assert.strictEqual(Mime.types['myext1'], 'my/mime');
+      assert.strictEqual(Mime.types['myext2'], 'my/mime');
 
       // add extensions at first
-      Mime.extend('MY/MIME3', {extensions: ['.myext3', '.myext4']}, {important: true});
-      assert.deepEqual(Mime.db['MY/MIME3'], {extensions: ['.myext3', '.myext4', '.myext1', '.myext2']});
+      Mime.extend('my/mime', {extensions: ['myext3', 'myext4']}, {important: true});
+      assert.deepEqual(Mime.db['my/mime'], {extensions: ['myext3', 'myext4', 'myext1', 'myext2']});
+      assert.strictEqual(Mime.types['myext1'], 'my/mime');
+      assert.strictEqual(Mime.types['myext2'], 'my/mime');
+      assert.strictEqual(Mime.types['myext3'], 'my/mime');
+      assert.strictEqual(Mime.types['myext4'], 'my/mime');
     });
 
     it('data with properties', function () {
       // add properties
-      Mime.extend('MY/MIME4', {source: 'foo', charset: 'ASCII', compressible: true});
-      assert.deepEqual(Mime.db['MY/MIME4'], {extensions: [], source: 'foo', charset: 'ASCII', compressible: true});
+      Mime.extend('my/mime', {source: 'foo', charset: 'ASCII', compressible: true});
+      assert.deepEqual(Mime.db['my/mime'], {
+        extensions: [],
+        source: 'foo',
+        charset: 'ASCII',
+        compressible: true,
+      });
 
       // update properties
-      Mime.extend('MY/MIME4', {source: 'bar', charset: 'UTF-8', compressible: false, newprop: 'newvalue'});
-      assert.deepEqual(Mime.db['MY/MIME4'], {extensions: [], source: 'bar', charset: 'UTF-8', compressible: false, newprop: 'newvalue'});
+      Mime.extend('my/mime', {source: 'bar', charset: 'UTF-8', compressible: false, newprop: 'newvalue'});
+      assert.deepEqual(Mime.db['my/mime'], {
+        extensions: [],
+        source: 'bar',
+        charset: 'UTF-8',
+        compressible: false,
+        newprop: 'newvalue',
+      });
     });
 
   });
