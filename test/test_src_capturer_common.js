@@ -1296,7 +1296,7 @@ class { }`);
             var refNode = doc.querySelector('#target');
             var result = capturer.CaptureHelperHandler.selectNodes(refNode, selector);
             assert.strictEqual(result.length, 1);
-            assert(result[0] === refNode);
+            assert.strictEqual(result[0], refNode);
           });
 
           it("root", function () {
@@ -1305,7 +1305,7 @@ class { }`);
             var refNode = doc.querySelector('#target');
             var result = capturer.CaptureHelperHandler.selectNodes(refNode, selector);
             assert.strictEqual(result.length, 1);
-            assert(result[0] === doc);
+            assert.strictEqual(result[0], doc);
           });
 
           it("parent", function () {
@@ -1314,7 +1314,7 @@ class { }`);
             var refNode = doc.querySelector('#target');
             var result = capturer.CaptureHelperHandler.selectNodes(refNode, selector);
             assert.strictEqual(result.length, 1);
-            assert(result[0] === refNode.parentNode);
+            assert.strictEqual(result[0], refNode.parentNode);
           });
 
           it("previousSibling", function () {
@@ -1323,7 +1323,7 @@ class { }`);
             var refNode = doc.querySelector('#target');
             var result = capturer.CaptureHelperHandler.selectNodes(refNode, selector);
             assert.strictEqual(result.length, 1);
-            assert(result[0] === refNode.previousSibling);
+            assert.strictEqual(result[0], refNode.previousSibling);
           });
 
           it("nextSibling", function () {
@@ -1332,7 +1332,7 @@ class { }`);
             var refNode = doc.querySelector('#target');
             var result = capturer.CaptureHelperHandler.selectNodes(refNode, selector);
             assert.strictEqual(result.length, 1);
-            assert(result[0] === refNode.nextSibling);
+            assert.strictEqual(result[0], refNode.nextSibling);
           });
 
           it("firstChild", function () {
@@ -1341,7 +1341,7 @@ class { }`);
             var refNode = doc.querySelector('#target');
             var result = capturer.CaptureHelperHandler.selectNodes(refNode, selector);
             assert.strictEqual(result.length, 1);
-            assert(result[0] === refNode.firstChild);
+            assert.strictEqual(result[0], refNode.firstChild);
           });
 
           it("lastChild", function () {
@@ -1350,7 +1350,7 @@ class { }`);
             var refNode = doc.querySelector('#target');
             var result = capturer.CaptureHelperHandler.selectNodes(refNode, selector);
             assert.strictEqual(result.length, 1);
-            assert(result[0] === refNode.lastChild);
+            assert.strictEqual(result[0], refNode.lastChild);
           });
 
           it("previousElementSibling", function () {
@@ -1359,7 +1359,7 @@ class { }`);
             var refNode = doc.querySelector('#target');
             var result = capturer.CaptureHelperHandler.selectNodes(refNode, selector);
             assert.strictEqual(result.length, 1);
-            assert(result[0] === refNode.previousElementSibling);
+            assert.strictEqual(result[0], refNode.previousElementSibling);
           });
 
           it("nextElementSibling", function () {
@@ -1368,7 +1368,7 @@ class { }`);
             var refNode = doc.querySelector('#target');
             var result = capturer.CaptureHelperHandler.selectNodes(refNode, selector);
             assert.strictEqual(result.length, 1);
-            assert(result[0] === refNode.nextElementSibling);
+            assert.strictEqual(result[0], refNode.nextElementSibling);
           });
 
           it("firstElementChild", function () {
@@ -1377,7 +1377,7 @@ class { }`);
             var refNode = doc.querySelector('#target');
             var result = capturer.CaptureHelperHandler.selectNodes(refNode, selector);
             assert.strictEqual(result.length, 1);
-            assert(result[0] === refNode.firstElementChild);
+            assert.strictEqual(result[0], refNode.firstElementChild);
           });
 
           it("lastElementChild", function () {
@@ -1386,7 +1386,7 @@ class { }`);
             var refNode = doc.querySelector('#target');
             var result = capturer.CaptureHelperHandler.selectNodes(refNode, selector);
             assert.strictEqual(result.length, 1);
-            assert(result[0] === refNode.lastElementChild);
+            assert.strictEqual(result[0], refNode.lastElementChild);
           });
 
           it('chaining', function () {
@@ -1395,7 +1395,7 @@ class { }`);
             var refNode = doc.querySelector('#target');
             var result = capturer.CaptureHelperHandler.selectNodes(refNode, selector);
             assert.strictEqual(result.length, 1);
-            assert(result[0] === refNode.firstChild.nextSibling.nextSibling.nextSibling);
+            assert.strictEqual(result[0], refNode.firstChild.nextSibling.nextSibling.nextSibling);
           });
 
           it('with selector', function () {
@@ -1424,14 +1424,14 @@ class { }`);
           var refNode = doc.querySelector('#target');
           var result = capturer.CaptureHelperHandler.selectNodes(refNode, selector);
           assert.strictEqual(result.length, 1);
-          assert(result[0] === refNode.parentNode);
+          assert.strictEqual(result[0], refNode.parentNode);
 
           var doc = makeTestDoc();
           var selector = "parent.firstChild.nextSibling";
           var refNode = doc.querySelector('#target');
           var result = capturer.CaptureHelperHandler.selectNodes(refNode, selector);
           assert.strictEqual(result.length, 1);
-          assert(result[0] === refNode.parentNode.firstChild.nextSibling);
+          assert.strictEqual(result[0], refNode.parentNode.firstChild.nextSibling);
         });
 
         it('non-valid base should be treated as {css: ...}', function () {
@@ -1456,7 +1456,7 @@ class { }`);
           var refNode = doc.querySelector('#target');
           var result = capturer.CaptureHelperHandler.selectNodes(refNode, selector);
           assert.strictEqual(result.length, 1);
-          assert(result[0] === refNode);
+          assert.strictEqual(result[0], refNode);
         });
 
         it("null", function () {
@@ -1465,7 +1465,7 @@ class { }`);
           var refNode = doc.querySelector('#target');
           var result = capturer.CaptureHelperHandler.selectNodes(refNode, selector);
           assert.strictEqual(result.length, 1);
-          assert(result[0] === refNode);
+          assert.strictEqual(result[0], refNode);
         });
 
         it("empty string", function () {
@@ -1474,7 +1474,7 @@ class { }`);
           var refNode = doc.querySelector('#target');
           var result = capturer.CaptureHelperHandler.selectNodes(refNode, selector);
           assert.strictEqual(result.length, 1);
-          assert(result[0] === refNode);
+          assert.strictEqual(result[0], refNode);
         });
 
       });
