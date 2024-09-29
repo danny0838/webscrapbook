@@ -17,6 +17,10 @@
 
 'use strict';
 
+/**
+ * Slightly different from WebScrapBook version as checking
+ * `browser_specific_settings` doesn't work for the test extension.
+ */
 var userAgent = (() => {
   const ua = navigator.userAgent;
   const soup = new Set();
@@ -65,93 +69,6 @@ var userAgent = (() => {
 
 async function delay(ms) {
   return new Promise(r => setTimeout(r, ms));
-}
-
-function readFileAsArrayBuffer(blob) {
-  return new Promise((resolve, reject) => {
-    let reader = new FileReader();
-    reader.onload = resolve;
-    reader.onerror = reject;
-    reader.readAsArrayBuffer(blob);
-  }).then((event) => {
-    return event.target.result;
-  });
-}
-
-async function readFileAsText(blob, charset = "UTF-8") {
-  return new Promise((resolve, reject) => {
-    let reader = new FileReader();
-    reader.onload = resolve;
-    reader.onerror = reject;
-    reader.readAsText(blob, charset);
-  }).then((event) => {
-    return event.target.result;
-  });
-}
-
-async function readFileAsDataURL(blob) {
-  return new Promise((resolve, reject) => {
-    let reader = new FileReader();
-    reader.onload = resolve;
-    reader.onerror = reject;
-    reader.readAsDataURL(blob);
-  }).then((event) => {
-    return event.target.result;
-  });
-}
-
-async function readFileAsDocument(blob) {
-  return xhr({
-    url: URL.createObjectURL(blob),
-    responseType: "document",
-  }).then((xhr) => {
-    return xhr.response;
-  });
-}
-
-async function xhr(params = {}) {
-  return new Promise((resolve, reject) => {
-    const xhr = new XMLHttpRequest();
-
-    if (params.onreadystatechange) {
-      xhr.onreadystatechange = function (event) {
-        params.onreadystatechange(xhr);
-      };
-    }
-
-    xhr.onload = function (event) {
-      if (xhr.status == 200 || xhr.status == 0) {
-        // we only care about real loading success
-        resolve(xhr);
-      } else {
-        // treat "404 Not found" or so as error
-        let statusText = xhr.statusText;
-        statusText = xhr.status + (statusText ? " " + statusText : "");
-        reject(new Error(statusText));
-      }
-    };
-
-    xhr.onabort = function (event) {
-      // resolve with no param
-      resolve();
-    };
-
-    xhr.onerror = function (event) {
-      // No additional useful information can be get from the event object.
-      reject(new Error("Network request failed."));
-    };
-
-    xhr.ontimeout = function (event) {
-      reject(new Error("Request timeout."));
-    };
-
-    xhr.responseType = params.responseType;
-    xhr.open("GET", params.url, true);
-
-    if (params.timeout) { xhr.timeout = params.timeout; }
-
-    xhr.send();
-  });
 }
 
 /**
@@ -203,11 +120,6 @@ function loadShadowDoms(root = document, {recursive = true, clear = true} = {}) 
 return {
   userAgent,
   delay,
-  readFileAsArrayBuffer,
-  readFileAsText,
-  readFileAsDataURL,
-  readFileAsDocument,
-  xhr,
   loadIdlProperties,
   loadShadowDoms,
 };

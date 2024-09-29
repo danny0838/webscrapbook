@@ -30,7 +30,7 @@
 'use strict';
 
 const {byteStringToArrayBuffer, escapeRegExp} = unittest;
-const {userAgent, delay, xhr, readFileAsDocument} = utils;
+const {userAgent, delay} = utils;
 
 
 /******************************************************************************
@@ -42,7 +42,7 @@ class TestSuite {
     const config1 = await (async () => {
       try {
         const url = browser.runtime.getURL('config.json');
-        return JSON.parse((await xhr({url, responseType: 'text'})).response);
+        return await fetch(url).then(r => r.json());
       } catch (ex) {
         // pass
       }
@@ -50,7 +50,7 @@ class TestSuite {
     const config2 = await (async () => {
       try {
         const url = browser.runtime.getURL('config.local.json');
-        return JSON.parse((await xhr({url, responseType: 'text'})).response);
+        return await fetch(url).then(r => r.json());
       } catch (ex) {
         // pass
       }
@@ -61,14 +61,14 @@ class TestSuite {
     const localhost2 = this.localhost2 = `http://localhost${config["server_port2"] === 80 ? "" : ":" + config["server_port2"]}`;
 
     try {
-      await xhr({url: localhost, responseType: 'text'});
+      await fetch(localhost);
     } catch (ex) {
       console.error(ex);
       throw new Error(`Unable to connect to local server "${localhost}". Make sure the server has been started and the port is not occupied by another application.`);
     }
 
     try {
-      await xhr({url: localhost2, responseType: 'text'});
+      await fetch(localhost2);
     } catch (ex) {
       console.error(ex);
       throw new Error(`Unable to connect to local server "${localhost2}". Make sure the server has been started and the port is not occupied by another application.`);

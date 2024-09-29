@@ -6,12 +6,13 @@
       global,
       require('./lib/unittest'),
       require('./t/common'),
+      require('./shared/core/common'),
       require('./shared/lib/jszip'),
     );
   } else if (typeof define === "function" && define.amd) {
     // AMD
     define(
-      ['./lib/unittest', './t/common', './shared/lib/jszip'],
+      ['./lib/unittest', './t/common', './shared/core/common', './shared/lib/jszip'],
       (...args) => {
         return factory(global, ...args);
       },
@@ -22,10 +23,11 @@
       global,
       global.unittest,
       global.utils,
+      global.scrapbook,
       global.JSZip,
     );
   }
-}(this, function (global, unittest, utils, JSZip) {
+}(this, function (global, unittest, utils, scrapbook, JSZip) {
 
 'use strict';
 
@@ -34,10 +36,11 @@ const {
   getRulesFromCssText, getToken, escapeRegExp, regex, rawRegex, cssRegex,
 } = unittest;
 const $it = $(it);
+const {userAgent, delay} = utils;
 const {
-  userAgent, delay, xhr,
+  xhr,
   readFileAsText, readFileAsArrayBuffer, readFileAsDataURL, readFileAsDocument,
-} = utils;
+} = scrapbook;
 
 const r = String.raw;;
 
