@@ -92,19 +92,19 @@ class TestSuite {
   }
 
   async waitTabLoading(tab) {
+    let _resolve, _reject;
+    const promise = new Promise((resolve, reject) => {
+      _resolve = resolve;
+      _reject = reject;
+    });
     const listener = (tabId, changeInfo, t) => {
       if (!(tabId === tab.id && changeInfo.status === 'complete')) { return; }
-      resolver(t);
+      _resolve(t);
     };
     const listener2 = (tabId, removeInfo) => {
       if (!(tabId === tab.id)) { return; }
-      rejecter(new Error('Tab removed before loading complete.'));
+      _reject(new Error('Tab removed before loading complete.'));
     };
-    let resolver, rejecter;
-    const promise = new Promise((resolve, reject) => {
-      resolver = resolve;
-      rejecter = reject;
-    });
     try {
       browser.tabs.onUpdated.addListener(listener);
       browser.tabs.onRemoved.addListener(listener2);
