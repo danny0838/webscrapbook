@@ -183,36 +183,36 @@ it('test_capture_html', async function () {
   assert.strictEqual(blob.type, "application/html+zip");
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip);
+  assert.exists(zip);
 
   var indexFile = zip.file('index.html');
-  assert(indexFile);
+  assert.exists(indexFile);
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
-  assert(doc);
+  assert.exists(doc);
   assert.strictEqual(doc.contentType, "text/html");
   assert.strictEqual(doc.characterSet, "UTF-8");
   assert.strictEqual(doc.doctype.name, "html");
   assert.strictEqual(doc.doctype.publicId, "");
   assert.strictEqual(doc.doctype.systemId, "");
 
-  assert(doc.querySelector('meta[charset="UTF-8"]'));
+  assert.exists(doc.querySelector('meta[charset="UTF-8"]'));
   assert.strictEqual(doc.title, 'ABC 中文 𠀀 にほんご');
   assert.strictEqual(doc.querySelector('p').textContent, 'ABC 中文 𠀀 にほんご');
 
   var imgElem = doc.querySelectorAll('img')[0];
-  assert(imgElem);
+  assert.exists(imgElem);
   assert.strictEqual(imgElem.getAttribute('src'), 'red.bmp');
   var imgFile = zip.file('red.bmp');
-  assert(imgFile);
+  assert.exists(imgFile);
   var imgData = await imgFile.async('base64');
   assert.strictEqual(imgData, 'Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAAD/AAAA');
 
   var imgElem = doc.querySelectorAll('img')[1];
-  assert(imgElem);
+  assert.exists(imgElem);
   assert.strictEqual(imgElem.getAttribute('src'), 'blue.bmp');
   var imgFile = zip.file('blue.bmp');
-  assert(imgFile);
+  assert.exists(imgFile);
   var imgData = await imgFile.async('base64');
   assert.strictEqual(imgData, 'Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAA/wAAAAAA');
 
@@ -228,16 +228,16 @@ it('test_capture_html', async function () {
   assert.strictEqual(blob.type, "application/x-maff");
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip);
+  assert.exists(zip);
   var topdir = Object.keys(zip.files)[0];
-  assert(zip.files[topdir].dir);
+  assert.isTrue(zip.files[topdir].dir);
   assert(topdir.match(regex`^\d{17}/$`));
 
   var rdfFile = zip.file(topdir + 'index.rdf');
-  assert(rdfFile);
+  assert.exists(rdfFile);
   var rdfBlob = new Blob([await rdfFile.async('blob')], {type: "application/rdf+xml"});
   var doc = await readFileAsDocument(rdfBlob);
-  assert(doc);
+  assert.exists(doc);
   var elem = doc.getElementsByTagNameNS(MAF, "title")[0];
   assert.strictEqual(elem.getAttributeNS(RDF, "resource"), 'ABC 中文 𠀀 にほんご');
   var elem = doc.getElementsByTagNameNS(MAF, "indexfilename")[0];
@@ -246,33 +246,33 @@ it('test_capture_html', async function () {
   assert.strictEqual(elem.getAttributeNS(RDF, "resource"), 'UTF-8');
 
   var indexFile = zip.file(topdir + 'index.html');
-  assert(indexFile);
+  assert.exists(indexFile);
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
-  assert(doc);
+  assert.exists(doc);
   assert.strictEqual(doc.contentType, "text/html");
   assert.strictEqual(doc.characterSet, "UTF-8");
   assert.strictEqual(doc.doctype.name, "html");
   assert.strictEqual(doc.doctype.publicId, "");
   assert.strictEqual(doc.doctype.systemId, "");
 
-  assert(doc.querySelector('meta[charset="UTF-8"]'));
+  assert.exists(doc.querySelector('meta[charset="UTF-8"]'));
   assert.strictEqual(doc.title, 'ABC 中文 𠀀 にほんご');
   assert.strictEqual(doc.querySelector('p').textContent, 'ABC 中文 𠀀 にほんご');
 
   var imgElem = doc.querySelectorAll('img')[0];
-  assert(imgElem);
+  assert.exists(imgElem);
   assert.strictEqual(imgElem.getAttribute('src'), 'red.bmp');
   var imgFile = zip.file(topdir + 'red.bmp');
-  assert(imgFile);
+  assert.exists(imgFile);
   var imgData = await imgFile.async('base64');
   assert.strictEqual(imgData, 'Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAAD/AAAA');
 
   var imgElem = doc.querySelectorAll('img')[1];
-  assert(imgElem);
+  assert.exists(imgElem);
   assert.strictEqual(imgElem.getAttribute('src'), 'blue.bmp');
   var imgFile = zip.file(topdir + 'blue.bmp');
-  assert(imgFile);
+  assert.exists(imgFile);
   var imgData = await imgFile.async('base64');
   assert.strictEqual(imgData, 'Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAA/wAAAAAA');
 
@@ -288,23 +288,23 @@ it('test_capture_html', async function () {
   assert(blob.type.match(rawRegex`${'^'}text/html${'(?:;|$)'}`));
 
   var doc = await readFileAsDocument(blob);
-  assert(doc);
+  assert.exists(doc);
   assert.strictEqual(doc.contentType, "text/html");
   assert.strictEqual(doc.characterSet, "UTF-8");
   assert.strictEqual(doc.doctype.name, "html");
   assert.strictEqual(doc.doctype.publicId, "");
   assert.strictEqual(doc.doctype.systemId, "");
 
-  assert(doc.querySelector('meta[charset="UTF-8"]'));
+  assert.exists(doc.querySelector('meta[charset="UTF-8"]'));
   assert.strictEqual(doc.title, 'ABC 中文 𠀀 にほんご');
   assert.strictEqual(doc.querySelector('p').textContent, 'ABC 中文 𠀀 にほんご');
 
   var imgElem = doc.querySelectorAll('img')[0];
-  assert(imgElem);
+  assert.exists(imgElem);
   assert.strictEqual(imgElem.getAttribute('src'), 'data:image/bmp;filename=red.bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAAD/AAAA');
 
   var imgElem = doc.querySelectorAll('img')[1];
-  assert(imgElem);
+  assert.exists(imgElem);
   assert.strictEqual(imgElem.getAttribute('src'), 'data:image/bmp;filename=blue.bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAA/wAAAAAA');
 });
 
@@ -329,44 +329,44 @@ it('test_capture_xhtml', async function () {
   assert.strictEqual(blob.type, "application/html+zip");
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip);
+  assert.exists(zip);
 
   var indexFile = zip.file('index.html');
-  assert(indexFile);
+  assert.exists(indexFile);
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
-  assert(doc);
+  assert.exists(doc);
   var metaRefreshElem = doc.querySelector('meta[http-equiv="refresh"][content="0; url=index.xhtml"]');
-  assert(metaRefreshElem);
+  assert.exists(metaRefreshElem);
 
   var indexFile = zip.file('index.xhtml');
-  assert(indexFile);
+  assert.exists(indexFile);
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "application/xhtml+xml"});
   var doc = await readFileAsDocument(indexBlob);
-  assert(doc);
+  assert.exists(doc);
   assert.strictEqual(doc.contentType, "application/xhtml+xml");
   assert.strictEqual(doc.characterSet, "UTF-8");
   assert.strictEqual(doc.doctype.name, "html");
   assert.strictEqual(doc.doctype.publicId, "-//W3C//DTD XHTML 1.1//EN");
   assert.strictEqual(doc.doctype.systemId, "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd");
 
-  assert(doc.querySelector('meta[charset="UTF-8"]'));
+  assert.exists(doc.querySelector('meta[charset="UTF-8"]'));
   assert.strictEqual(doc.title, 'ABC 中文 𠀀 にほんご');
   assert.strictEqual(doc.querySelector('p').textContent, 'ABC 中文 𠀀 にほんご');
 
   var imgElem = doc.querySelectorAll('img')[0];
-  assert(imgElem);
+  assert.exists(imgElem);
   assert.strictEqual(imgElem.getAttribute('src'), 'red.bmp');
   var imgFile = zip.file('red.bmp');
-  assert(imgFile);
+  assert.exists(imgFile);
   var imgData = await imgFile.async('base64');
   assert.strictEqual(imgData, 'Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAAD/AAAA');
 
   var imgElem = doc.querySelectorAll('img')[1];
-  assert(imgElem);
+  assert.exists(imgElem);
   assert.strictEqual(imgElem.getAttribute('src'), 'blue.bmp');
   var imgFile = zip.file('blue.bmp');
-  assert(imgFile);
+  assert.exists(imgFile);
   var imgData = await imgFile.async('base64');
   assert.strictEqual(imgData, 'Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAA/wAAAAAA');
 
@@ -380,15 +380,15 @@ it('test_capture_xhtml', async function () {
   });
   assert.strictEqual(blob.type, "application/x-maff");
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip);
+  assert.exists(zip);
   var topdir = Object.keys(zip.files)[0];
-  assert(zip.files[topdir].dir);
+  assert.isTrue(zip.files[topdir].dir);
 
   var rdfFile = zip.file(topdir + 'index.rdf');
-  assert(rdfFile);
+  assert.exists(rdfFile);
   var rdfBlob = new Blob([await rdfFile.async('blob')], {type: "application/rdf+xml"});
   var doc = await readFileAsDocument(rdfBlob);
-  assert(doc);
+  assert.exists(doc);
   var elem = doc.getElementsByTagNameNS(MAF, "title")[0];
   assert.strictEqual(elem.getAttributeNS(RDF, "resource"), 'ABC 中文 𠀀 にほんご');
   var elem = doc.getElementsByTagNameNS(MAF, "indexfilename")[0];
@@ -397,41 +397,41 @@ it('test_capture_xhtml', async function () {
   assert.strictEqual(elem.getAttributeNS(RDF, "resource"), 'UTF-8');
 
   var indexFile = zip.file(topdir + 'index.html');
-  assert(indexFile);
+  assert.exists(indexFile);
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
-  assert(doc);
+  assert.exists(doc);
   var metaRefreshElem = doc.querySelector('meta[http-equiv="refresh"][content="0; url=index.xhtml"]');
-  assert(metaRefreshElem);
+  assert.exists(metaRefreshElem);
 
   var indexFile = zip.file(topdir + 'index.xhtml');
-  assert(indexFile);
+  assert.exists(indexFile);
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "application/xhtml+xml"});
   var doc = await readFileAsDocument(indexBlob);
-  assert(doc);
+  assert.exists(doc);
   assert.strictEqual(doc.contentType, "application/xhtml+xml");
   assert.strictEqual(doc.characterSet, "UTF-8");
   assert.strictEqual(doc.doctype.name, "html");
   assert.strictEqual(doc.doctype.publicId, "-//W3C//DTD XHTML 1.1//EN");
   assert.strictEqual(doc.doctype.systemId, "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd");
 
-  assert(doc.querySelector('meta[charset="UTF-8"]'));
+  assert.exists(doc.querySelector('meta[charset="UTF-8"]'));
   assert.strictEqual(doc.title, 'ABC 中文 𠀀 にほんご');
   assert.strictEqual(doc.querySelector('p').textContent, 'ABC 中文 𠀀 にほんご');
 
   var imgElem = doc.querySelectorAll('img')[0];
-  assert(imgElem);
+  assert.exists(imgElem);
   assert.strictEqual(imgElem.getAttribute('src'), 'red.bmp');
   var imgFile = zip.file(topdir + 'red.bmp');
-  assert(imgFile);
+  assert.exists(imgFile);
   var imgData = await imgFile.async('base64');
   assert.strictEqual(imgData, 'Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAAD/AAAA');
 
   var imgElem = doc.querySelectorAll('img')[1];
-  assert(imgElem);
+  assert.exists(imgElem);
   assert.strictEqual(imgElem.getAttribute('src'), 'blue.bmp');
   var imgFile = zip.file(topdir + 'blue.bmp');
-  assert(imgFile);
+  assert.exists(imgFile);
   var imgData = await imgFile.async('base64');
   assert.strictEqual(imgData, 'Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAA/wAAAAAA');
 
@@ -446,23 +446,23 @@ it('test_capture_xhtml', async function () {
   assert(blob.type.match(rawRegex`${'^'}application/xhtml+xml${'(?:;|$)'}`));
 
   var doc = await readFileAsDocument(blob);
-  assert(doc);
+  assert.exists(doc);
   assert.strictEqual(doc.contentType, "application/xhtml+xml");
   assert.strictEqual(doc.characterSet, "UTF-8");
   assert.strictEqual(doc.doctype.name, "html");
   assert.strictEqual(doc.doctype.publicId, "-//W3C//DTD XHTML 1.1//EN");
   assert.strictEqual(doc.doctype.systemId, "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd");
 
-  assert(doc.querySelector('meta[charset="UTF-8"]'));
+  assert.exists(doc.querySelector('meta[charset="UTF-8"]'));
   assert.strictEqual(doc.title, 'ABC 中文 𠀀 にほんご');
   assert.strictEqual(doc.querySelector('p').textContent, 'ABC 中文 𠀀 にほんご');
 
   var imgElem = doc.querySelectorAll('img')[0];
-  assert(imgElem);
+  assert.exists(imgElem);
   assert.strictEqual(imgElem.getAttribute('src'), 'data:image/bmp;filename=red.bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAAD/AAAA');
 
   var imgElem = doc.querySelectorAll('img')[1];
-  assert(imgElem);
+  assert.exists(imgElem);
   assert.strictEqual(imgElem.getAttribute('src'), 'data:image/bmp;filename=blue.bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAA/wAAAAAA');
 });
 
@@ -487,17 +487,17 @@ it('test_capture_file', async function () {
   var zip = await new JSZip().loadAsync(blob);
 
   var indexFile = zip.file('index.html');
-  assert(indexFile);
+  assert.exists(indexFile);
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
-  assert(doc);
+  assert.exists(doc);
   assert.strictEqual(doc.documentElement.getAttribute('data-scrapbook-type'), 'file');
-  assert(doc.querySelector('meta[http-equiv="refresh"][content="0; url=file.bmp"]'));
-  assert(doc.querySelector('a[href="file.bmp"]'));
-  assert(!doc.querySelector('img'));
+  assert.exists(doc.querySelector('meta[http-equiv="refresh"][content="0; url=file.bmp"]'));
+  assert.exists(doc.querySelector('a[href="file.bmp"]'));
+  assert.notExists(doc.querySelector('img'));
 
   var savedFile = zip.file('file.bmp');
-  assert(savedFile);
+  assert.exists(savedFile);
   var b64 = (await readFileAsDataURL(await savedFile.async('blob'))).replace(/^.*,/, "");
   assert.strictEqual(b64, "Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAAD/AAAA");
 
@@ -518,24 +518,24 @@ it('test_capture_file', async function () {
   var rdfFile = zip.file(topdir + 'index.rdf');
   var rdfBlob = new Blob([await rdfFile.async('blob')], {type: "application/rdf+xml"});
   var doc = await readFileAsDocument(rdfBlob);
-  assert(doc);
+  assert.exists(doc);
   var elem = doc.getElementsByTagNameNS(MAF, "indexfilename")[0];
   assert.strictEqual(elem.getAttributeNS(RDF, "resource"), 'index.html');
   var elem = doc.getElementsByTagNameNS(MAF, "charset")[0];
   assert.strictEqual(elem.getAttributeNS(RDF, "resource"), 'UTF-8'); // for index.html
 
   var indexFile = zip.file(topdir + 'index.html');
-  assert(indexFile);
+  assert.exists(indexFile);
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
-  assert(doc);
+  assert.exists(doc);
   assert.strictEqual(doc.documentElement.getAttribute('data-scrapbook-type'), 'file');
-  assert(doc.querySelector('meta[http-equiv="refresh"][content="0; url=file.bmp"]'));
-  assert(doc.querySelector('a[href="file.bmp"]'));
-  assert(!doc.querySelector('img'));
+  assert.exists(doc.querySelector('meta[http-equiv="refresh"][content="0; url=file.bmp"]'));
+  assert.exists(doc.querySelector('a[href="file.bmp"]'));
+  assert.notExists(doc.querySelector('img'));
 
   var savedFile = zip.file(topdir + 'file.bmp');
-  assert(savedFile);
+  assert.exists(savedFile);
   var b64 = (await readFileAsDataURL(await savedFile.async('blob'))).replace(/^.*,/, "");
   assert.strictEqual(b64, "Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAAD/AAAA");
 
@@ -551,14 +551,14 @@ it('test_capture_file', async function () {
   });
 
   var doc = await readFileAsDocument(blob);
-  assert(doc);
+  assert.exists(doc);
   assert.strictEqual(doc.documentElement.getAttribute('data-scrapbook-type'), 'file');
   var metaRefreshElem = doc.querySelector('meta[http-equiv="refresh"][content]');
-  assert(metaRefreshElem);
+  assert.exists(metaRefreshElem);
   assert.strictEqual(metaRefreshElem.getAttribute('content'),
     "0; url=data:image/bmp;filename=file.bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAAD/AAAA");
-  assert(!doc.querySelector('a[href="file.bmp"]')); // do NOT generate anchor to avoid long content
-  assert(!doc.querySelector('img'));
+  assert.notExists(doc.querySelector('a[href="file.bmp"]')); // do NOT generate anchor to avoid long content
+  assert.notExists(doc.querySelector('img'));
 });
 
 /**
@@ -591,10 +591,10 @@ it('test_capture_file_charset', async function () {
   var indexFile = zip.file(topdir + 'index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
-  assert(doc.querySelector('meta[charset="UTF-8"]'));
+  assert.exists(doc.querySelector('meta[charset="UTF-8"]'));
   assert.strictEqual(doc.documentElement.getAttribute('data-scrapbook-type'), 'file');
   assert.strictEqual(doc.documentElement.getAttribute('data-scrapbook-charset'), 'Big5');
-  assert(doc.querySelector('meta[http-equiv="refresh"][content="0; url=big5.py"]'));
+  assert.exists(doc.querySelector('meta[http-equiv="refresh"][content="0; url=big5.py"]'));
 
   var savedFile = zip.file(topdir + 'big5.py');
   var text = (await readFileAsText(await savedFile.async('blob'), "Big5")).trim();
@@ -620,10 +620,10 @@ it('test_capture_file_charset', async function () {
   var indexFile = zip.file(topdir + 'index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
-  assert(doc.querySelector('meta[charset="UTF-8"]'));
+  assert.exists(doc.querySelector('meta[charset="UTF-8"]'));
   assert.strictEqual(doc.documentElement.getAttribute('data-scrapbook-type'), 'file');
   assert.strictEqual(doc.documentElement.getAttribute('data-scrapbook-charset'), 'UTF-8');
-  assert(doc.querySelector('meta[http-equiv="refresh"][content="0; url=utf8.txt"]'));
+  assert.exists(doc.querySelector('meta[http-equiv="refresh"][content="0; url=utf8.txt"]'));
 
   var savedFile = zip.file(topdir + 'utf8.txt');
   var text = (await readFileAsText(await savedFile.async('blob'))).trim();
@@ -664,9 +664,9 @@ it('test_capture_rename_normalize', async function () {
 
   var zip = await new JSZip().loadAsync(blob);
   assert.strictEqual(Object.keys(zip.files).length, 3);
-  assert(zip.file("index.html"));
-  assert(zip.file("abc.bmp"));
-  assert(zip.file("123ABCabc中文 !#$%&'()+,-;=@[]^_`{}_.bmp"));
+  assert.exists(zip.file("index.html"));
+  assert.exists(zip.file("abc.bmp"));
+  assert.exists(zip.file("123ABCabc中文 !#$%&'()+,-;=@[]^_`{}_.bmp"));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -697,37 +697,37 @@ it('test_capture_header', async function () {
 
   // filename
   var savedFile = zip.file('file.bmp');
-  assert(savedFile);
+  assert.exists(savedFile);
   var b64 = (await readFileAsDataURL(await savedFile.async('blob'))).replace(/^.*,/, "");
   assert.strictEqual(b64, "Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAAD/AAAA");
 
   // FILENAME
   var savedFile = zip.file('file2.bmp');
-  assert(savedFile);
+  assert.exists(savedFile);
   var b64 = (await readFileAsDataURL(await savedFile.async('blob'))).replace(/^.*,/, "");
   assert.strictEqual(b64, "Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAAD/AAAA");
 
   // filename = "..."
   var savedFile = zip.file('file _X_.bmp');
-  assert(savedFile);
+  assert.exists(savedFile);
   var b64 = (await readFileAsDataURL(await savedFile.async('blob'))).replace(/^.*,/, "");
   assert.strictEqual(b64, "Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAAD/AAAA");
 
   // filename=...; filename*=iso-8859-1'en'...
   var savedFile = zip.file('£ rates.bmp');
-  assert(savedFile);
+  assert.exists(savedFile);
   var b64 = (await readFileAsDataURL(await savedFile.async('blob'))).replace(/^.*,/, "");
   assert.strictEqual(b64, "Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAAD/AAAA");
 
   // filename*=UTF-8''...; filename=...
   var savedFile = zip.file('中文𠀀.bmp');
-  assert(savedFile);
+  assert.exists(savedFile);
   var b64 = (await readFileAsDataURL(await savedFile.async('blob'))).replace(/^.*,/, "");
   assert.strictEqual(b64, "Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAAD/AAAA");
 
   // content-type; no file extension (should generate one)
   var savedFile = zip.file('noext.bmp');
-  assert(savedFile);
+  assert.exists(savedFile);
   var b64 = (await readFileAsDataURL(await savedFile.async('blob'))).replace(/^.*,/, "");
   assert.strictEqual(b64, "Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAAD/AAAA");
 });
@@ -750,30 +750,30 @@ it('test_capture_header_mime', async function () {
   var doc = await readFileAsDocument(indexBlob);
 
   assert.strictEqual(doc.querySelectorAll('img')[0].getAttribute("src"), "image_bmp.py.bmp")
-  assert(zip.file("image_bmp.py.bmp"));
+  assert.exists(zip.file("image_bmp.py.bmp"));
   assert.strictEqual(doc.querySelectorAll('img')[1].getAttribute("src"), "image_svg.py.svg")
-  assert(zip.file("image_svg.py.svg"));
+  assert.exists(zip.file("image_svg.py.svg"));
 
   // extension validation should be case-insensitive
   assert.strictEqual(doc.querySelectorAll('img')[2].getAttribute("src"), "image.SVG")
-  assert(zip.file("image.SVG"));
+  assert.exists(zip.file("image.SVG"));
 
   // a well-known MIME may have a new-age extension not known yet, don't overfix
   assert.strictEqual(doc.querySelectorAll('img')[3].getAttribute("src"), "newext.mp1")
-  assert(zip.file("newext.mp1"));
+  assert.exists(zip.file("newext.mp1"));
 
   // always attempt to fix for a file without extension
   assert.strictEqual(doc.querySelectorAll('img')[4].getAttribute("src"), "noext.doc")
-  assert(zip.file("noext.doc"));
+  assert.exists(zip.file("noext.doc"));
 
   // allow empty extension for universal MIME types, e.g. application/octet-stream
   assert.strictEqual(doc.querySelectorAll('img')[5].getAttribute("src"), "noextoctet")
-  assert(zip.file("noextoctet"));
+  assert.exists(zip.file("noextoctet"));
 
   assert.strictEqual(doc.querySelectorAll('link')[0].getAttribute("href"), "stylesheet.py.css")
-  assert(zip.file("stylesheet.py.css"));
+  assert.exists(zip.file("stylesheet.py.css"));
   assert.strictEqual(doc.querySelectorAll('script')[0].getAttribute("src"), "script.py.js")
-  assert(zip.file("script.py.js"));
+  assert.exists(zip.file("script.py.js"));
 });
 
 /**
@@ -822,7 +822,7 @@ it('test_capture_filename', async function () {
 
   var zip = await new JSZip().loadAsync(blob);
   for (const fn of EXPECTED_FILENAMES) {
-    assert(zip.file(fn));
+    assert.exists(zip.file(fn));
   }
 
   var indexFile = zip.file('index.html');
@@ -849,10 +849,10 @@ it('test_capture_filename_forbidden', async function () {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.file("index-1.json"));
-  assert(zip.file("index-1.dat"));
-  assert(zip.file("index-1.rdf"));
-  assert(zip.file("^metadata^-1"));
+  assert.exists(zip.file("index-1.json"));
+  assert.exists(zip.file("index-1.dat"));
+  assert.exists(zip.file("index-1.rdf"));
+  assert.exists(zip.file("^metadata^-1"));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -938,11 +938,11 @@ it('test_capture_saveAsciiFilename', async function () {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.file('123ABCabc_中文_𠀀.bmp'));
-  assert(zip.file('123ABCabc_中文_𠀀-2.bmp'));
-  assert(zip.file('123ABCabc_中文_𠀀.css'));
-  assert(zip.file('123ABCabc_中文_𠀀.woff'));
-  assert(zip.file('123%.dat'));
+  assert.exists(zip.file('123ABCabc_中文_𠀀.bmp'));
+  assert.exists(zip.file('123ABCabc_中文_𠀀-2.bmp'));
+  assert.exists(zip.file('123ABCabc_中文_𠀀.css'));
+  assert.exists(zip.file('123ABCabc_中文_𠀀.woff'));
+  assert.exists(zip.file('123%.dat'));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -966,11 +966,11 @@ p { background-image: url("123ABCabc_中文_𠀀.bmp"); }`);
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.file('123ABCabc_%E4%B8%AD%E6%96%87_%F0%A0%80%80.bmp'));
-  assert(zip.file('123ABCabc_%E4%B8%AD%E6%96%87_%F0%A0%80%80-2.bmp'));
-  assert(zip.file('123ABCabc_%E4%B8%AD%E6%96%87_%F0%A0%80%80.css'));
-  assert(zip.file('123ABCabc_%E4%B8%AD%E6%96%87_%F0%A0%80%80.woff'));
-  assert(zip.file('123%.dat'));
+  assert.exists(zip.file('123ABCabc_%E4%B8%AD%E6%96%87_%F0%A0%80%80.bmp'));
+  assert.exists(zip.file('123ABCabc_%E4%B8%AD%E6%96%87_%F0%A0%80%80-2.bmp'));
+  assert.exists(zip.file('123ABCabc_%E4%B8%AD%E6%96%87_%F0%A0%80%80.css'));
+  assert.exists(zip.file('123ABCabc_%E4%B8%AD%E6%96%87_%F0%A0%80%80.woff'));
+  assert.exists(zip.file('123%.dat'));
 
   // URLs in the page need to be encoded to represent a percent char,
   // and thus the output looks like %25xx%25xx...
@@ -1008,9 +1008,9 @@ it('test_capture_saveFileAsHtml', async function () {
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
-  assert(doc.documentElement.getAttribute('data-scrapbook-type') !== 'file');
-  assert(!doc.querySelector('meta[http-equiv="refresh"]'));
-  assert(doc.body.querySelector('img'));
+  assert.notStrictEqual(doc.documentElement.getAttribute('data-scrapbook-type'), 'file');
+  assert.notExists(doc.querySelector('meta[http-equiv="refresh"]'));
+  assert.exists(doc.body.querySelector('img'));
 
   /* txt (Big5) */
   var blob = await capture({
@@ -1025,8 +1025,8 @@ it('test_capture_saveFileAsHtml', async function () {
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
   assert.strictEqual(doc.characterSet, "UTF-8");
-  assert(doc.documentElement.getAttribute('data-scrapbook-type') !== 'file');
-  assert(!doc.querySelector('meta[http-equiv="refresh"]'));
+  assert.notStrictEqual(doc.documentElement.getAttribute('data-scrapbook-type'), 'file');
+  assert.notExists(doc.querySelector('meta[http-equiv="refresh"]'));
   var preElem = doc.body.querySelector('pre');
   assert.strictEqual(preElem.textContent.trim(), "Big5 中文內容");
 
@@ -1042,8 +1042,8 @@ it('test_capture_saveFileAsHtml', async function () {
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
-  assert(doc.documentElement.getAttribute('data-scrapbook-type') !== 'file');
-  assert(!doc.querySelector('meta[http-equiv="refresh"]'));
+  assert.notStrictEqual(doc.documentElement.getAttribute('data-scrapbook-type'), 'file');
+  assert.notExists(doc.querySelector('meta[http-equiv="refresh"]'));
   var preElem = doc.body.querySelector('pre');
   assert.strictEqual(preElem.textContent.trim(), "Lorem ipsum dolor sit amet. 旡羖甾惤怤齶覅煋朸汊狦芎沝抾邞塯乇泹銧裧。");
 });
@@ -1088,10 +1088,10 @@ p { background-image: url("data:image/bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAE
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.file('2206b4fb7241bdce17a71015c888e3de66c2b5c9.css'));
-  assert(zip.file('da39a3ee5e6b4b0d3255bfef95601890afd80709.woff'));
-  assert(zip.file('ecb6e0b0acec8b20d5f0360a52fe336a7a7cb475.bmp'));
-  assert(zip.file('4c46aef7be4ed4dda8cb2e887ae3ca7a8702fa16.bmp'));
+  assert.exists(zip.file('2206b4fb7241bdce17a71015c888e3de66c2b5c9.css'));
+  assert.exists(zip.file('da39a3ee5e6b4b0d3255bfef95601890afd80709.woff'));
+  assert.exists(zip.file('ecb6e0b0acec8b20d5f0360a52fe336a7a7cb475.bmp'));
+  assert.exists(zip.file('4c46aef7be4ed4dda8cb2e887ae3ca7a8702fa16.bmp'));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -1219,9 +1219,9 @@ p { background-image: url("data:image/bmp;filename=red.bmp;base64,Qk08AAAAAAAAAD
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.file('null.css'));
-  assert(zip.file('null.woff'));
-  assert(zip.file('red.bmp'));
+  assert.exists(zip.file('null.css'));
+  assert.exists(zip.file('null.woff'));
+  assert.exists(zip.file('red.bmp'));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -1271,29 +1271,29 @@ it('test_capture_dataUri_frame', async function () {
   var frameSrc = doc.querySelector('iframe').getAttribute('src');
   var frameDoc = (await xhr({url: frameSrc, responseType: "document"})).response;
 
-  assert(frameDoc.querySelector('html[data-scrapbook-source="data:"]'));
-  assert(frameDoc.querySelector('meta[property="og:image"][content="null.bmp"]'));
-  assert(frameDoc.querySelector('link[rel~="icon"][href="null.bmp"]'));
-  assert(frameDoc.querySelector('link[rel="stylesheet"][href="null.css"]'));
-  assert(frameDoc.querySelector('script[src="null.js"]'));
-  assert(frameDoc.querySelector('img[src="null.bmp"]'));
-  assert(frameDoc.querySelector('img[srcset="null.bmp 1x, null.bmp 2x"]'));
-  assert(frameDoc.querySelector('picture source[srcset="null.bmp"]'));
-  assert(frameDoc.querySelector('input[type="image"][src="null.bmp"]'));
+  assert.exists(frameDoc.querySelector('html[data-scrapbook-source="data:"]'));
+  assert.exists(frameDoc.querySelector('meta[property="og:image"][content="null.bmp"]'));
+  assert.exists(frameDoc.querySelector('link[rel~="icon"][href="null.bmp"]'));
+  assert.exists(frameDoc.querySelector('link[rel="stylesheet"][href="null.css"]'));
+  assert.exists(frameDoc.querySelector('script[src="null.js"]'));
+  assert.exists(frameDoc.querySelector('img[src="null.bmp"]'));
+  assert.exists(frameDoc.querySelector('img[srcset="null.bmp 1x, null.bmp 2x"]'));
+  assert.exists(frameDoc.querySelector('picture source[srcset="null.bmp"]'));
+  assert.exists(frameDoc.querySelector('input[type="image"][src="null.bmp"]'));
   assert.strictEqual(frameDoc.querySelector('div').getAttribute('style'), `background: url("null.bmp");`);
-  assert(frameDoc.querySelector('table[background="null.bmp"]'));
-  assert(frameDoc.querySelector('tr[background="null.bmp"]'));
-  assert(frameDoc.querySelector('th[background="null.bmp"]'));
-  assert(frameDoc.querySelector('td[background="null.bmp"]'));
-  assert(frameDoc.querySelector('audio[src="null.mp3"]'));
-  assert(frameDoc.querySelector('audio source[src="null.ogg"]'));
-  assert(frameDoc.querySelector('video[src="null.mp4"][poster="null.bmp"]'));
-  assert(frameDoc.querySelector('video source[src="null.webm"]'));
-  assert(frameDoc.querySelector('embed[src="null.swf"]'));
-  assert(frameDoc.querySelector('object[data="null.swf"]'));
-  assert(frameDoc.querySelector('applet[code="null.class"][archive="null.jar"]'));
-  assert(frameDoc.querySelector('a[href="null.txt"]'));
-  assert(frameDoc.querySelector('a[href="null.html"]'));
+  assert.exists(frameDoc.querySelector('table[background="null.bmp"]'));
+  assert.exists(frameDoc.querySelector('tr[background="null.bmp"]'));
+  assert.exists(frameDoc.querySelector('th[background="null.bmp"]'));
+  assert.exists(frameDoc.querySelector('td[background="null.bmp"]'));
+  assert.exists(frameDoc.querySelector('audio[src="null.mp3"]'));
+  assert.exists(frameDoc.querySelector('audio source[src="null.ogg"]'));
+  assert.exists(frameDoc.querySelector('video[src="null.mp4"][poster="null.bmp"]'));
+  assert.exists(frameDoc.querySelector('video source[src="null.webm"]'));
+  assert.exists(frameDoc.querySelector('embed[src="null.swf"]'));
+  assert.exists(frameDoc.querySelector('object[data="null.swf"]'));
+  assert.exists(frameDoc.querySelector('applet[code="null.class"][archive="null.jar"]'));
+  assert.exists(frameDoc.querySelector('a[href="null.txt"]'));
+  assert.exists(frameDoc.querySelector('a[href="null.html"]'));
 
   /* -saveDataUriAsFile; +saveDataUriAsSrcdoc; relative link in data URL iframe */
   // relative link => can't resolve and error (output original URL)
@@ -1315,29 +1315,29 @@ it('test_capture_dataUri_frame', async function () {
   var frameSrc = `data:text/html;charset=UTF-8,${encodeURIComponent(doc.querySelector('iframe').getAttribute('srcdoc'))}`;
   var frameDoc = (await xhr({url: frameSrc, responseType: "document"})).response;
 
-  assert(frameDoc.querySelector('html[data-scrapbook-source="data:"]'));
-  assert(frameDoc.querySelector('meta[property="og:image"][content="null.bmp"]'));
-  assert(frameDoc.querySelector('link[rel~="icon"][href="null.bmp"]'));
-  assert(frameDoc.querySelector('link[rel="stylesheet"][href="null.css"]'));
-  assert(frameDoc.querySelector('script[src="null.js"]'));
-  assert(frameDoc.querySelector('img[src="null.bmp"]'));
-  assert(frameDoc.querySelector('img[srcset="null.bmp 1x, null.bmp 2x"]'));
-  assert(frameDoc.querySelector('picture source[srcset="null.bmp"]'));
-  assert(frameDoc.querySelector('input[type="image"][src="null.bmp"]'));
+  assert.exists(frameDoc.querySelector('html[data-scrapbook-source="data:"]'));
+  assert.exists(frameDoc.querySelector('meta[property="og:image"][content="null.bmp"]'));
+  assert.exists(frameDoc.querySelector('link[rel~="icon"][href="null.bmp"]'));
+  assert.exists(frameDoc.querySelector('link[rel="stylesheet"][href="null.css"]'));
+  assert.exists(frameDoc.querySelector('script[src="null.js"]'));
+  assert.exists(frameDoc.querySelector('img[src="null.bmp"]'));
+  assert.exists(frameDoc.querySelector('img[srcset="null.bmp 1x, null.bmp 2x"]'));
+  assert.exists(frameDoc.querySelector('picture source[srcset="null.bmp"]'));
+  assert.exists(frameDoc.querySelector('input[type="image"][src="null.bmp"]'));
   assert.strictEqual(frameDoc.querySelector('div').getAttribute('style'), `background: url("null.bmp");`);
-  assert(frameDoc.querySelector('table[background="null.bmp"]'));
-  assert(frameDoc.querySelector('tr[background="null.bmp"]'));
-  assert(frameDoc.querySelector('th[background="null.bmp"]'));
-  assert(frameDoc.querySelector('td[background="null.bmp"]'));
-  assert(frameDoc.querySelector('audio[src="null.mp3"]'));
-  assert(frameDoc.querySelector('audio source[src="null.ogg"]'));
-  assert(frameDoc.querySelector('video[src="null.mp4"][poster="null.bmp"]'));
-  assert(frameDoc.querySelector('video source[src="null.webm"]'));
-  assert(frameDoc.querySelector('embed[src="null.swf"]'));
-  assert(frameDoc.querySelector('object[data="null.swf"]'));
-  assert(frameDoc.querySelector('applet[code="null.class"][archive="null.jar"]'));
-  assert(frameDoc.querySelector('a[href="null.txt"]'));
-  assert(frameDoc.querySelector('a[href="null.html"]'));
+  assert.exists(frameDoc.querySelector('table[background="null.bmp"]'));
+  assert.exists(frameDoc.querySelector('tr[background="null.bmp"]'));
+  assert.exists(frameDoc.querySelector('th[background="null.bmp"]'));
+  assert.exists(frameDoc.querySelector('td[background="null.bmp"]'));
+  assert.exists(frameDoc.querySelector('audio[src="null.mp3"]'));
+  assert.exists(frameDoc.querySelector('audio source[src="null.ogg"]'));
+  assert.exists(frameDoc.querySelector('video[src="null.mp4"][poster="null.bmp"]'));
+  assert.exists(frameDoc.querySelector('video source[src="null.webm"]'));
+  assert.exists(frameDoc.querySelector('embed[src="null.swf"]'));
+  assert.exists(frameDoc.querySelector('object[data="null.swf"]'));
+  assert.exists(frameDoc.querySelector('applet[code="null.class"][archive="null.jar"]'));
+  assert.exists(frameDoc.querySelector('a[href="null.txt"]'));
+  assert.exists(frameDoc.querySelector('a[href="null.html"]'));
 
   /* +saveDataUriAsFile; relative link in data URL iframe */
   // relative link => can't resolve and error (output original URL)
@@ -1360,29 +1360,29 @@ it('test_capture_dataUri_frame', async function () {
   var frameBlob = new Blob([await frameFile.async('blob')], {type: "text/html"});
   var frameDoc = await readFileAsDocument(frameBlob);
 
-  assert(frameDoc.querySelector('html[data-scrapbook-source="data:"]'));
-  assert(frameDoc.querySelector('meta[property="og:image"][content="null.bmp"]'));
-  assert(frameDoc.querySelector('link[rel~="icon"][href="null.bmp"]'));
-  assert(frameDoc.querySelector('link[rel="stylesheet"][href="null.css"]'));
-  assert(frameDoc.querySelector('script[src="null.js"]'));
-  assert(frameDoc.querySelector('img[src="null.bmp"]'));
-  assert(frameDoc.querySelector('img[srcset="null.bmp 1x, null.bmp 2x"]'));
-  assert(frameDoc.querySelector('picture source[srcset="null.bmp"]'));
-  assert(frameDoc.querySelector('input[type="image"][src="null.bmp"]'));
+  assert.exists(frameDoc.querySelector('html[data-scrapbook-source="data:"]'));
+  assert.exists(frameDoc.querySelector('meta[property="og:image"][content="null.bmp"]'));
+  assert.exists(frameDoc.querySelector('link[rel~="icon"][href="null.bmp"]'));
+  assert.exists(frameDoc.querySelector('link[rel="stylesheet"][href="null.css"]'));
+  assert.exists(frameDoc.querySelector('script[src="null.js"]'));
+  assert.exists(frameDoc.querySelector('img[src="null.bmp"]'));
+  assert.exists(frameDoc.querySelector('img[srcset="null.bmp 1x, null.bmp 2x"]'));
+  assert.exists(frameDoc.querySelector('picture source[srcset="null.bmp"]'));
+  assert.exists(frameDoc.querySelector('input[type="image"][src="null.bmp"]'));
   assert.strictEqual(frameDoc.querySelector('div').getAttribute('style'), `background: url("null.bmp");`);
-  assert(frameDoc.querySelector('table[background="null.bmp"]'));
-  assert(frameDoc.querySelector('tr[background="null.bmp"]'));
-  assert(frameDoc.querySelector('th[background="null.bmp"]'));
-  assert(frameDoc.querySelector('td[background="null.bmp"]'));
-  assert(frameDoc.querySelector('audio[src="null.mp3"]'));
-  assert(frameDoc.querySelector('audio source[src="null.ogg"]'));
-  assert(frameDoc.querySelector('video[src="null.mp4"][poster="null.bmp"]'));
-  assert(frameDoc.querySelector('video source[src="null.webm"]'));
-  assert(frameDoc.querySelector('embed[src="null.swf"]'));
-  assert(frameDoc.querySelector('object[data="null.swf"]'));
-  assert(frameDoc.querySelector('applet[code="null.class"][archive="null.jar"]'));
-  assert(frameDoc.querySelector('a[href="null.txt"]'));
-  assert(frameDoc.querySelector('a[href="null.html"]'));
+  assert.exists(frameDoc.querySelector('table[background="null.bmp"]'));
+  assert.exists(frameDoc.querySelector('tr[background="null.bmp"]'));
+  assert.exists(frameDoc.querySelector('th[background="null.bmp"]'));
+  assert.exists(frameDoc.querySelector('td[background="null.bmp"]'));
+  assert.exists(frameDoc.querySelector('audio[src="null.mp3"]'));
+  assert.exists(frameDoc.querySelector('audio source[src="null.ogg"]'));
+  assert.exists(frameDoc.querySelector('video[src="null.mp4"][poster="null.bmp"]'));
+  assert.exists(frameDoc.querySelector('video source[src="null.webm"]'));
+  assert.exists(frameDoc.querySelector('embed[src="null.swf"]'));
+  assert.exists(frameDoc.querySelector('object[data="null.swf"]'));
+  assert.exists(frameDoc.querySelector('applet[code="null.class"][archive="null.jar"]'));
+  assert.exists(frameDoc.querySelector('a[href="null.txt"]'));
+  assert.exists(frameDoc.querySelector('a[href="null.html"]'));
 
   /* -saveDataUriAsFile; -saveDataUriAsSrcdoc; absolute link in data URL iframe */
   // absolute link => force saved as a data URL (relative link won't work if saved as file)
@@ -1405,7 +1405,7 @@ it('test_capture_dataUri_frame', async function () {
   var frameSrc = doc.querySelector('iframe').getAttribute('src');
   var frameDoc = (await xhr({url: frameSrc, responseType: "document"})).response;
 
-  assert(frameDoc.querySelector('html[data-scrapbook-source="data:"]'));
+  assert.exists(frameDoc.querySelector('html[data-scrapbook-source="data:"]'));
   assert.strictEqual(frameDoc.querySelector('img').getAttribute('src'), `data:image/bmp;filename=red.bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAAD/AAAA`);
   assert.strictEqual(frameDoc.querySelectorAll('a')[0].getAttribute('href'), `data:text/plain;filename=file.txt,Linked%20file.`);
   assert.strictEqual(frameDoc.querySelectorAll('a')[1].getAttribute('href'), `${localhost}/capture_dataUri_frame/page.html`);
@@ -1421,9 +1421,9 @@ it('test_capture_dataUri_frame', async function () {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.file("red.bmp"));
-  assert(zip.file("file.txt"));
-  assert(zip.file("page.html"));
+  assert.exists(zip.file("red.bmp"));
+  assert.exists(zip.file("file.txt"));
+  assert.exists(zip.file("page.html"));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -1432,10 +1432,10 @@ it('test_capture_dataUri_frame', async function () {
   var frameSrc = `data:text/html;charset=UTF-8,${encodeURIComponent(doc.querySelector('iframe').getAttribute('srcdoc'))}`;
   var frameDoc = (await xhr({url: frameSrc, responseType: "document"})).response;
 
-  assert(frameDoc.querySelector('html[data-scrapbook-source="data:"]'));
-  assert(frameDoc.querySelector('img[src="red.bmp"]'));
-  assert(frameDoc.querySelector('a[href="file.txt"]'));
-  assert(frameDoc.querySelector('a[href="page.html"]'));
+  assert.exists(frameDoc.querySelector('html[data-scrapbook-source="data:"]'));
+  assert.exists(frameDoc.querySelector('img[src="red.bmp"]'));
+  assert.exists(frameDoc.querySelector('a[href="file.txt"]'));
+  assert.exists(frameDoc.querySelector('a[href="page.html"]'));
 
   /* +saveDataUriAsFile; absolute link in data URL iframe */
   // absolute link => save as file
@@ -1448,9 +1448,9 @@ it('test_capture_dataUri_frame', async function () {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.file("red.bmp"));
-  assert(zip.file("file.txt"));
-  assert(zip.file("page.html"));
+  assert.exists(zip.file("red.bmp"));
+  assert.exists(zip.file("file.txt"));
+  assert.exists(zip.file("page.html"));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -1461,10 +1461,10 @@ it('test_capture_dataUri_frame', async function () {
   var frameBlob = new Blob([await frameFile.async('blob')], {type: "text/html"});
   var frameDoc = await readFileAsDocument(frameBlob);
 
-  assert(frameDoc.querySelector('html[data-scrapbook-source="data:"]'));
-  assert(frameDoc.querySelector('img[src="red.bmp"]'));
-  assert(frameDoc.querySelector('a[href="file.txt"]'));
-  assert(frameDoc.querySelector('a[href="page.html"]'));
+  assert.exists(frameDoc.querySelector('html[data-scrapbook-source="data:"]'));
+  assert.exists(frameDoc.querySelector('img[src="red.bmp"]'));
+  assert.exists(frameDoc.querySelector('a[href="file.txt"]'));
+  assert.exists(frameDoc.querySelector('a[href="page.html"]'));
 });
 
 /**
@@ -1500,26 +1500,26 @@ it('test_capture_dataUri_params', async function () {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.file("index.rdf.css"));
-  assert(zip.file("index.dat.css"));
-  assert(zip.file("^metadata^.css"));
+  assert.exists(zip.file("index.rdf.css"));
+  assert.exists(zip.file("index.dat.css"));
+  assert.exists(zip.file("^metadata^.css"));
 
-  assert(zip.file("abc.html"));
-  assert(zip.file("abc.xml"));
-  assert(zip.file("abc.bmp"));
-  assert(zip.file("abc.jpeg"));
-  assert(zip.file("abc.gif"));
-  assert(zip.file("abc.png"));
-  assert(zip.file("abc.svg"));
-  assert(zip.file("abc.wav"));
-  assert(zip.file("abcd.wav"));
-  assert(zip.file("abc.mp3"));
-  assert(zip.file("abc.oga"));
-  assert(zip.file("abc.ogx"));
-  assert(zip.file("abc.mpga"));
-  assert(zip.file("abc.mp4"));
-  assert(zip.file("abc.webm"));
-  assert(zip.file("abc.ogv"));
+  assert.exists(zip.file("abc.html"));
+  assert.exists(zip.file("abc.xml"));
+  assert.exists(zip.file("abc.bmp"));
+  assert.exists(zip.file("abc.jpeg"));
+  assert.exists(zip.file("abc.gif"));
+  assert.exists(zip.file("abc.png"));
+  assert.exists(zip.file("abc.svg"));
+  assert.exists(zip.file("abc.wav"));
+  assert.exists(zip.file("abcd.wav"));
+  assert.exists(zip.file("abc.mp3"));
+  assert.exists(zip.file("abc.oga"));
+  assert.exists(zip.file("abc.ogx"));
+  assert.exists(zip.file("abc.mpga"));
+  assert.exists(zip.file("abc.mp4"));
+  assert.exists(zip.file("abc.webm"));
+  assert.exists(zip.file("abc.ogv"));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -1634,19 +1634,19 @@ it('test_capture_singleHtml_mergeCss', async function () {
     responseType: 'text',
   })).response.trim();
   var cssText2 = cssText.replace(/var\(--sb\d+-\d+\)/g, x => map[x] || x);
-  assert(cssText !== cssText2);
+  assert.notStrictEqual(cssText, cssText2);
   assert.strictEqual(cssText2, `#link { background: url("data:image/bmp;filename=yellow.bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAP//AAAA"); }`);
 
   // internal
   var cssText = styles[2].textContent.trim();
   var cssText2 = cssText.replace(/var\(--sb\d+-\d+\)/g, x => map[x] || x);
-  assert(cssText !== cssText2);
+  assert.notStrictEqual(cssText, cssText2);
   assert.strictEqual(cssText2, `#internal { background: url("data:image/bmp;filename=yellow.bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAP//AAAA"); }`);
 
   // internal keyframe
   var cssText = styles[3].textContent.trim();
   var cssText2 = cssText.replace(/var\(--sb\d+-\d+\)/g, x => map[x] || x);
-  assert(cssText !== cssText2);
+  assert.notStrictEqual(cssText, cssText2);
   assert.strictEqual(cssText2, `\
 @keyframes spin {
   from { transform: rotate(0turn); background-image: url("data:image/bmp;filename=yellow.bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAP//AAAA"); }
@@ -1669,7 +1669,7 @@ it('test_capture_singleHtml_mergeCss', async function () {
   var doc = await readFileAsDocument(blob);
   var styles = doc.querySelectorAll('style');
 
-  assert(!doc.querySelector('style[data-scrapbook-elem="css-resource-map"]'));
+  assert.notExists(doc.querySelector('style[data-scrapbook-elem="css-resource-map"]'));
 
   // @import cannot use CSS variable
   var cssText = styles[0].textContent.trim();
@@ -1870,10 +1870,10 @@ it('test_capture_selection', async function () {
 
   // selected elements and resources
   var selectedParentElem = doc.querySelector('#selection');
-  assert(selectedParentElem);
-  assert(doc.querySelector('#selected'));
-  assert(doc.querySelector('img[src="green.bmp"]'));
-  assert(zip.file("green.bmp"));
+  assert.exists(selectedParentElem);
+  assert.exists(doc.querySelector('#selected'));
+  assert.exists(doc.querySelector('img[src="green.bmp"]'));
+  assert.exists(zip.file("green.bmp"));
 
   assert.strictEqual(selectedParentElem.firstChild.nodeType, 8);
   assert.strictEqual(selectedParentElem.firstChild.nodeValue, 'scrapbook-capture-selected');
@@ -1881,13 +1881,13 @@ it('test_capture_selection', async function () {
   assert.strictEqual(selectedParentElem.lastChild.nodeValue, '/scrapbook-capture-selected');
 
   // non-selected elements and resources
-  assert(!doc.querySelector('#previous'));
-  assert(!doc.querySelector('img[src="red.bmp"]'));
-  assert(!zip.file("red.bmp"));
+  assert.notExists(doc.querySelector('#previous'));
+  assert.notExists(doc.querySelector('img[src="red.bmp"]'));
+  assert.notExists(zip.file("red.bmp"));
 
-  assert(!doc.querySelector('#next'));
-  assert(!doc.querySelector('img[src="blue.bmp"]'));
-  assert(!zip.file("blue.bmp"));
+  assert.notExists(doc.querySelector('#next'));
+  assert.notExists(doc.querySelector('img[src="blue.bmp"]'));
+  assert.notExists(zip.file("blue.bmp"));
 });
 
 /**
@@ -1909,10 +1909,10 @@ it('test_capture_selection_element', async function () {
 
   // selected elements and resources
   var selectedElem = doc.querySelector('#selection');
-  assert(selectedElem);
-  assert(doc.querySelector('#selected'));
-  assert(doc.querySelector('img[src="green.bmp"]'));
-  assert(zip.file("green.bmp"));
+  assert.exists(selectedElem);
+  assert.exists(doc.querySelector('#selected'));
+  assert.exists(doc.querySelector('img[src="green.bmp"]'));
+  assert.exists(zip.file("green.bmp"));
 
   assert.strictEqual(selectedElem.previousSibling.nodeType, 8);
   assert.strictEqual(selectedElem.previousSibling.nodeValue, 'scrapbook-capture-selected');
@@ -1920,13 +1920,13 @@ it('test_capture_selection_element', async function () {
   assert.strictEqual(selectedElem.nextSibling.nodeValue, '/scrapbook-capture-selected');
 
   // non-selected elements and resources
-  assert(!doc.querySelector('#previous'));
-  assert(!doc.querySelector('img[src="red.bmp"]'));
-  assert(!zip.file("red.bmp"));
+  assert.notExists(doc.querySelector('#previous'));
+  assert.notExists(doc.querySelector('img[src="red.bmp"]'));
+  assert.notExists(zip.file("red.bmp"));
 
-  assert(!doc.querySelector('#next'));
-  assert(!doc.querySelector('img[src="blue.bmp"]'));
-  assert(!zip.file("blue.bmp"));
+  assert.notExists(doc.querySelector('#next'));
+  assert.notExists(doc.querySelector('img[src="blue.bmp"]'));
+  assert.notExists(zip.file("blue.bmp"));
 });
 
 /**
@@ -1947,8 +1947,8 @@ it('test_capture_selection_text', async function () {
   var doc = await readFileAsDocument(indexBlob);
 
   // selected elements and resources
-  assert(doc.querySelector('#selection'));
-  assert(doc.querySelector('#selected'));
+  assert.exists(doc.querySelector('#selection'));
+  assert.exists(doc.querySelector('#selected'));
   assert.strictEqual(doc.querySelector('#selected').textContent, 'elect');
   assert.strictEqual(doc.querySelector('#selected').firstChild.nodeType, 8);
   assert.strictEqual(doc.querySelector('#selected').firstChild.nodeValue, 'scrapbook-capture-selected');
@@ -1956,16 +1956,16 @@ it('test_capture_selection_text', async function () {
   assert.strictEqual(doc.querySelector('#selected').lastChild.nodeValue, '/scrapbook-capture-selected');
 
   // non-selected elements and resources
-  assert(!doc.querySelector('img[src="green.bmp"]'));
-  assert(!zip.file("green.bmp"));
+  assert.notExists(doc.querySelector('img[src="green.bmp"]'));
+  assert.notExists(zip.file("green.bmp"));
 
-  assert(!doc.querySelector('#previous'));
-  assert(!doc.querySelector('img[src="red.bmp"]'));
-  assert(!zip.file("red.bmp"));
+  assert.notExists(doc.querySelector('#previous'));
+  assert.notExists(doc.querySelector('img[src="red.bmp"]'));
+  assert.notExists(zip.file("red.bmp"));
 
-  assert(!doc.querySelector('#next'));
-  assert(!doc.querySelector('img[src="blue.bmp"]'));
-  assert(!zip.file("blue.bmp"));
+  assert.notExists(doc.querySelector('#next'));
+  assert.notExists(doc.querySelector('img[src="blue.bmp"]'));
+  assert.notExists(zip.file("blue.bmp"));
 });
 
 /**
@@ -1986,8 +1986,8 @@ it('test_capture_selection_comment', async function () {
   var doc = await readFileAsDocument(indexBlob);
 
   // selected elements and resources
-  assert(doc.querySelector('#selection'));
-  assert(doc.querySelector('#selected'));
+  assert.exists(doc.querySelector('#selection'));
+  assert.exists(doc.querySelector('#selected'));
   assert.strictEqual(doc.querySelector('#selected').childNodes[1].nodeType, 8);
   assert.strictEqual(doc.querySelector('#selected').childNodes[1].nodeValue, 'men');
   assert.strictEqual(doc.querySelector('#selected').firstChild.nodeType, 8);
@@ -1996,16 +1996,16 @@ it('test_capture_selection_comment', async function () {
   assert.strictEqual(doc.querySelector('#selected').lastChild.nodeValue, '/scrapbook-capture-selected');
 
   // non-selected elements and resources
-  assert(!doc.querySelector('img[src="green.bmp"]'));
-  assert(!zip.file("green.bmp"));
+  assert.notExists(doc.querySelector('img[src="green.bmp"]'));
+  assert.notExists(zip.file("green.bmp"));
 
-  assert(!doc.querySelector('#previous'));
-  assert(!doc.querySelector('img[src="red.bmp"]'));
-  assert(!zip.file("red.bmp"));
+  assert.notExists(doc.querySelector('#previous'));
+  assert.notExists(doc.querySelector('img[src="red.bmp"]'));
+  assert.notExists(zip.file("red.bmp"));
 
-  assert(!doc.querySelector('#next'));
-  assert(!doc.querySelector('img[src="blue.bmp"]'));
-  assert(!zip.file("blue.bmp"));
+  assert.notExists(doc.querySelector('#next'));
+  assert.notExists(doc.querySelector('img[src="blue.bmp"]'));
+  assert.notExists(zip.file("blue.bmp"));
 });
 
 /**
@@ -2026,8 +2026,8 @@ it('test_capture_selection_cdata', async function () {
   var doc = await readFileAsDocument(indexBlob);
 
   // selected elements and resources
-  assert(doc.querySelector('#selection'));
-  assert(doc.querySelector('#selected'));
+  assert.exists(doc.querySelector('#selection'));
+  assert.exists(doc.querySelector('#selected'));
   assert.strictEqual(doc.querySelector('#selected').childNodes[1].nodeType, 4);
   assert.strictEqual(doc.querySelector('#selected').childNodes[1].nodeValue, '< y >');
   assert.strictEqual(doc.querySelector('#selected').firstChild.nodeType, 8);
@@ -2036,16 +2036,16 @@ it('test_capture_selection_cdata', async function () {
   assert.strictEqual(doc.querySelector('#selected').lastChild.nodeValue, '/scrapbook-capture-selected');
 
   // non-selected elements and resources
-  assert(!doc.querySelector('img[src="green.bmp"]'));
-  assert(!zip.file("green.bmp"));
+  assert.notExists(doc.querySelector('img[src="green.bmp"]'));
+  assert.notExists(zip.file("green.bmp"));
 
-  assert(!doc.querySelector('#previous'));
-  assert(!doc.querySelector('img[src="red.bmp"]'));
-  assert(!zip.file("red.bmp"));
+  assert.notExists(doc.querySelector('#previous'));
+  assert.notExists(doc.querySelector('img[src="red.bmp"]'));
+  assert.notExists(zip.file("red.bmp"));
 
-  assert(!doc.querySelector('#next'));
-  assert(!doc.querySelector('img[src="blue.bmp"]'));
-  assert(!zip.file("blue.bmp"));
+  assert.notExists(doc.querySelector('#next'));
+  assert.notExists(doc.querySelector('img[src="blue.bmp"]'));
+  assert.notExists(zip.file("blue.bmp"));
 });
 
 /**
@@ -2066,26 +2066,26 @@ $it.skipIf($.noMultipleSelection)('test_capture_selection_multiple', async funct
   var doc = await readFileAsDocument(indexBlob);
 
   // selected elements and resources
-  assert(doc.querySelector('#selection'));
-  assert(doc.querySelector('#selected'));
-  assert(doc.querySelector('img[src="green.bmp"]'));
-  assert(zip.file("green.bmp"));
+  assert.exists(doc.querySelector('#selection'));
+  assert.exists(doc.querySelector('#selected'));
+  assert.exists(doc.querySelector('img[src="green.bmp"]'));
+  assert.exists(zip.file("green.bmp"));
 
-  assert(doc.querySelector('#selection2'));
-  assert(doc.querySelector('#selected2'));
-  assert(doc.querySelector('img[src="yellow.bmp"]'));
-  assert(zip.file("yellow.bmp"));
+  assert.exists(doc.querySelector('#selection2'));
+  assert.exists(doc.querySelector('#selected2'));
+  assert.exists(doc.querySelector('img[src="yellow.bmp"]'));
+  assert.exists(zip.file("yellow.bmp"));
 
   // non-selected elements and resources
-  assert(!doc.querySelector('#previous'));
-  assert(!doc.querySelector('img[src="red.bmp"]'));
-  assert(!zip.file("red.bmp"));
+  assert.notExists(doc.querySelector('#previous'));
+  assert.notExists(doc.querySelector('img[src="red.bmp"]'));
+  assert.notExists(zip.file("red.bmp"));
 
-  assert(!doc.querySelector('#middle'));
+  assert.notExists(doc.querySelector('#middle'));
 
-  assert(!doc.querySelector('#next'));
-  assert(!doc.querySelector('img[src="blue.bmp"]'));
-  assert(!zip.file("blue.bmp"));
+  assert.notExists(doc.querySelector('#next'));
+  assert.notExists(doc.querySelector('img[src="blue.bmp"]'));
+  assert.notExists(zip.file("blue.bmp"));
 });
 
 /**
@@ -2106,8 +2106,8 @@ $it.skipIf($.noMultipleSelection)('test_capture_selection_multiple_text', async 
   var doc = await readFileAsDocument(indexBlob);
 
   // selected elements and resources
-  assert(doc.querySelector('#selection'));
-  assert(doc.querySelector('#selected'));
+  assert.exists(doc.querySelector('#selection'));
+  assert.exists(doc.querySelector('#selected'));
 
   assert.strictEqual(doc.querySelector('#selected').childNodes[0].nodeType, 8);
   assert.strictEqual(doc.querySelector('#selected').childNodes[0].nodeValue, 'scrapbook-capture-selected');
@@ -2128,8 +2128,8 @@ $it.skipIf($.noMultipleSelection)('test_capture_selection_multiple_text', async 
   assert.strictEqual(doc.querySelector('#selected').childNodes[8].nodeType, 8);
   assert.strictEqual(doc.querySelector('#selected').childNodes[8].nodeValue, '/scrapbook-capture-selected');
 
-  assert(doc.querySelector('#selection2'));
-  assert(doc.querySelector('#selected2'));
+  assert.exists(doc.querySelector('#selection2'));
+  assert.exists(doc.querySelector('#selected2'));
 
   assert.strictEqual(doc.querySelector('#selected2').childNodes[0].nodeType, 8);
   assert.strictEqual(doc.querySelector('#selected2').childNodes[0].nodeValue, 'scrapbook-capture-selected');
@@ -2170,16 +2170,16 @@ $it.skipIf($.noMultipleSelection)('test_capture_selection_multiple_text', async 
   assert.strictEqual(doc.querySelector('#selected2').childNodes[17].nodeValue, '/scrapbook-capture-selected');
 
   // non-selected elements and resources
-  assert(!doc.querySelector('img[src="green.bmp"]'));
-  assert(!zip.file("green.bmp"));
+  assert.notExists(doc.querySelector('img[src="green.bmp"]'));
+  assert.notExists(zip.file("green.bmp"));
 
-  assert(!doc.querySelector('#previous'));
-  assert(!doc.querySelector('img[src="red.bmp"]'));
-  assert(!zip.file("red.bmp"));
+  assert.notExists(doc.querySelector('#previous'));
+  assert.notExists(doc.querySelector('img[src="red.bmp"]'));
+  assert.notExists(zip.file("red.bmp"));
 
-  assert(!doc.querySelector('#next'));
-  assert(!doc.querySelector('img[src="blue.bmp"]'));
-  assert(!zip.file("blue.bmp"));
+  assert.notExists(doc.querySelector('#next'));
+  assert.notExists(doc.querySelector('img[src="blue.bmp"]'));
+  assert.notExists(zip.file("blue.bmp"));
 });
 
 /**
@@ -2203,9 +2203,9 @@ it('test_capture_headless', async function () {
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
 
-  assert(!doc.querySelector(`title`));
-  assert(!doc.querySelector(`link[rel~="icon"]`));
-  assert(!zip.file("red.bmp"));
+  assert.notExists(doc.querySelector(`title`));
+  assert.notExists(doc.querySelector(`link[rel~="icon"]`));
+  assert.notExists(zip.file("red.bmp"));
 
   /* from tab; bookmark */
   var blob = await capture({
@@ -2215,8 +2215,8 @@ it('test_capture_headless', async function () {
   }, {delay: 100});
 
   var doc = await readFileAsDocument(blob);
-  assert(!doc.querySelector(`title`));
-  assert(!doc.querySelector(`link[rel~="icon"]`));
+  assert.notExists(doc.querySelector(`title`));
+  assert.notExists(doc.querySelector(`link[rel~="icon"]`));
 
   /* from tab frame 0; source */
   var blob = await capture({
@@ -2232,9 +2232,9 @@ it('test_capture_headless', async function () {
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
 
-  assert(!doc.querySelector(`title`));
-  assert(!doc.querySelector(`link[rel~="icon"]`));
-  assert(!zip.file("red.bmp"));
+  assert.notExists(doc.querySelector(`title`));
+  assert.notExists(doc.querySelector(`link[rel~="icon"]`));
+  assert.notExists(zip.file("red.bmp"));
 
   /* from tab frame 0; bookmark */
   var blob = await capture({
@@ -2245,8 +2245,8 @@ it('test_capture_headless', async function () {
   }, {delay: 100});
 
   var doc = await readFileAsDocument(blob);
-  assert(!doc.querySelector(`title`));
-  assert(!doc.querySelector(`link[rel~="icon"]`));
+  assert.notExists(doc.querySelector(`title`));
+  assert.notExists(doc.querySelector(`link[rel~="icon"]`));
 
   /* from URL; source */
   var blob = await captureHeadless({
@@ -2260,9 +2260,9 @@ it('test_capture_headless', async function () {
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
 
-  assert(!doc.querySelector(`title`));
-  assert(!doc.querySelector(`link[rel~="icon"]`));
-  assert(!zip.file("red.bmp"));
+  assert.notExists(doc.querySelector(`title`));
+  assert.notExists(doc.querySelector(`link[rel~="icon"]`));
+  assert.notExists(zip.file("red.bmp"));
 
   /* from URL; bookmark */
   var blob = await captureHeadless({
@@ -2272,8 +2272,8 @@ it('test_capture_headless', async function () {
   });
 
   var doc = await readFileAsDocument(blob);
-  assert(!doc.querySelector(`title`));
-  assert(!doc.querySelector(`link[rel~="icon"]`));
+  assert.notExists(doc.querySelector(`title`));
+  assert.notExists(doc.querySelector(`link[rel~="icon"]`));
 });
 
 /**
@@ -2288,18 +2288,18 @@ it('test_capture_headless_attachment', async function () {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(!zip.file("red.bmp"));
+  assert.notExists(zip.file("red.bmp"));
 
   var indexFile = zip.file('index.html');
-  assert(indexFile);
+  assert.exists(indexFile);
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
-  assert(doc.querySelector('meta[http-equiv="refresh"][content="0; url=attachment.html"]'));
+  assert.exists(doc.querySelector('meta[http-equiv="refresh"][content="0; url=attachment.html"]'));
 
   var indexFile = zip.file('attachment.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
-  assert(doc.querySelector('img[src="./red.bmp"]'));
+  assert.exists(doc.querySelector('img[src="./red.bmp"]'));
 
   var blob = await captureHeadless({
     url: `${localhost}/capture_headless_attachment/refresh.html`,
@@ -2307,18 +2307,18 @@ it('test_capture_headless_attachment', async function () {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(!zip.file("red.bmp"));
+  assert.notExists(zip.file("red.bmp"));
 
   var indexFile = zip.file('index.html');
-  assert(indexFile);
+  assert.exists(indexFile);
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
-  assert(doc.querySelector('meta[http-equiv="refresh"][content="0; url=attachment.html"]'));
+  assert.exists(doc.querySelector('meta[http-equiv="refresh"][content="0; url=attachment.html"]'));
 
   var indexFile = zip.file('attachment.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
-  assert(doc.querySelector('img[src="./red.bmp"]'));
+  assert.exists(doc.querySelector('img[src="./red.bmp"]'));
 });
 
 /**
@@ -2346,7 +2346,7 @@ it('test_capture_headless_metaRefresh', async function () {
     url: `${localhost}/capture_headless_metaRefresh/time-0-self.html`,
     options: baseOptions,
   });
-  assert(result.error);
+  assert.exists(result.error);
 
   /* valid, time > 0 */
   // rewrite element, capture the original page.
@@ -2392,9 +2392,9 @@ it('test_capture_bookmark', async function () {
   assert(html.getAttribute('data-scrapbook-create').match(regex`^\d{17}$`));
   assert.strictEqual(html.getAttribute('data-scrapbook-type'), 'bookmark');
 
-  assert(doc.querySelector(`meta[http-equiv="refresh"][content="0; url=${localhost}/capture_bookmark/index.html"]`));
-  assert(doc.querySelector(`a[href="${localhost}/capture_bookmark/index.html"]`));
-  assert(doc.querySelector(`link[rel="shortcut icon"][href="data:image/bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAAD/AAAA"]`));
+  assert.exists(doc.querySelector(`meta[http-equiv="refresh"][content="0; url=${localhost}/capture_bookmark/index.html"]`));
+  assert.exists(doc.querySelector(`a[href="${localhost}/capture_bookmark/index.html"]`));
+  assert.exists(doc.querySelector(`link[rel="shortcut icon"][href="data:image/bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAAD/AAAA"]`));
 });
 
 /**
@@ -2484,7 +2484,7 @@ it('test_capture_meta_charset', async function () {
   var doc = await readFileAsDocument(indexBlob);
 
   assert.strictEqual(doc.title, 'ABC 中文');
-  assert(doc.querySelector('meta[charset="UTF-8"]'));
+  assert.exists(doc.querySelector('meta[charset="UTF-8"]'));
 
   var imgElem = doc.querySelectorAll('img')[0];
   assert.strictEqual(imgElem.getAttribute('src'), `圖片.bmp`);
@@ -2594,7 +2594,7 @@ it('test_capture_meta_refresh_base', async function () {
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
-  assert(doc.querySelector(`html[data-scrapbook-source="${localhost}/capture_meta_refresh_base/subdir/target.html?id=123#456"]`));
+  assert.exists(doc.querySelector(`html[data-scrapbook-source="${localhost}/capture_meta_refresh_base/subdir/target.html?id=123#456"]`));
 
   // time = 1 (capture the meta refresh page)
   var blob = await captureHeadless({
@@ -2744,7 +2744,7 @@ it('test_capture_meta_csp', async function () {
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
 
-  assert(!doc.querySelector('meta[http-equiv]'));
+  assert.notExists(doc.querySelector('meta[http-equiv]'));
   assert(!doc.querySelector('link').hasAttribute('nonce'));
   assert(!doc.querySelector('style').hasAttribute('nonce'));
   assert(!doc.querySelector('script[src]').hasAttribute('nonce'));
@@ -2768,7 +2768,7 @@ it('test_capture_meta_shadow', async function () {
   var doc = await readFileAsDocument(indexBlob);
 
   // a default meta[charset] should be generated
-  assert(doc.querySelector('meta[charset="UTF-8"]:not([http-equiv]):not([content])'));
+  assert.exists(doc.querySelector('meta[charset="UTF-8"]:not([http-equiv]):not([content])'));
 
   var host = doc.querySelector('[data-scrapbook-shadowdom]');
   assert.strictEqual(host.getAttribute("data-scrapbook-shadowdom").trim(), `\
@@ -2857,8 +2857,8 @@ it('test_capture_base_rewrite', async function () {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.file("green.bmp"));
-  assert(zip.file("yellow.bmp"));
+  assert.exists(zip.file("green.bmp"));
+  assert.exists(zip.file("yellow.bmp"));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -2886,8 +2886,8 @@ it('test_capture_base_rewrite_special', async function () {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.file("index-1.html"));
-  assert(zip.file("index-2.html"));
+  assert.exists(zip.file("index-1.html"));
+  assert.exists(zip.file("index-2.html"));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -3333,7 +3333,7 @@ $it.xfail()('test_capture_base_dynamic_scripted', async function () {
   var zip = await new JSZip().loadAsync(blob);
 
   var imgFile = zip.file('img.bmp');
-  assert(imgFile);
+  assert.exists(imgFile);
   var imgData = await imgFile.async('base64');
   assert.strictEqual(imgData, 'Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAP8AAAAA');  // green
 
@@ -3351,7 +3351,7 @@ $it.xfail()('test_capture_base_dynamic_scripted', async function () {
   var zip = await new JSZip().loadAsync(blob);
 
   var imgFile = zip.file('img.bmp');
-  assert(imgFile);
+  assert.exists(imgFile);
   var imgData = await imgFile.async('base64');
   assert.strictEqual(imgData, 'Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAP8AAAAA');  // green
 
@@ -3377,7 +3377,7 @@ it('test_capture_favicon', async function () {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.file('red.bmp'));
+  assert.exists(zip.file('red.bmp'));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -3441,7 +3441,7 @@ it('test_capture_favicon', async function () {
   var doc = await readFileAsDocument(indexBlob);
 
   var iconElem = doc.querySelector('link[rel~="icon"]');
-  assert(!iconElem);
+  assert.notExists(iconElem);
 });
 
 it('test_capture_favicon_bookmark', async function () {
@@ -3472,7 +3472,7 @@ it('test_capture_favicon_bookmark', async function () {
   });
 
   var doc = await readFileAsDocument(blob);
-  assert(!doc.querySelector('link[rel~="icon"]'));
+  assert.notExists(doc.querySelector('link[rel~="icon"]'));
 
   /* capture.favicon = blank */
   var options = {
@@ -3485,7 +3485,7 @@ it('test_capture_favicon_bookmark', async function () {
   });
 
   var doc = await readFileAsDocument(blob);
-  assert(!doc.querySelector('link[rel~="icon"]'));
+  assert.notExists(doc.querySelector('link[rel~="icon"]'));
 
   /* capture.favicon = remove */
   var options = {
@@ -3498,7 +3498,7 @@ it('test_capture_favicon_bookmark', async function () {
   });
 
   var doc = await readFileAsDocument(blob);
-  assert(!doc.querySelector('link[rel~="icon"]'));
+  assert.notExists(doc.querySelector('link[rel~="icon"]'));
 });
 
 /**
@@ -3518,9 +3518,9 @@ it('test_capture_faviconAttrs', async function () {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.file('red.bmp'));
-  assert(zip.file('yellow.bmp'));
-  assert(zip.file('green.bmp'));
+  assert.exists(zip.file('red.bmp'));
+  assert.exists(zip.file('yellow.bmp'));
+  assert.exists(zip.file('green.bmp'));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -3542,9 +3542,9 @@ it('test_capture_faviconAttrs', async function () {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.file('red.bmp'));
-  assert(zip.file('yellow.bmp'));
-  assert(!zip.file('green.bmp'));
+  assert.exists(zip.file('red.bmp'));
+  assert.exists(zip.file('yellow.bmp'));
+  assert.notExists(zip.file('green.bmp'));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -3566,9 +3566,9 @@ it('test_capture_faviconAttrs', async function () {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.file('red.bmp'));
-  assert(!zip.file('yellow.bmp'));
-  assert(!zip.file('green.bmp'));
+  assert.exists(zip.file('red.bmp'));
+  assert.notExists(zip.file('yellow.bmp'));
+  assert.notExists(zip.file('green.bmp'));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -3597,7 +3597,7 @@ it('test_capture_css_style', async function () {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.file("external.css"));
+  assert.exists(zip.file("external.css"));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -3664,8 +3664,8 @@ it('test_capture_css_style', async function () {
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
 
-  assert(!doc.querySelector('style'));
-  assert(!doc.querySelector('link'));
+  assert.notExists(doc.querySelector('style'));
+  assert.notExists(doc.querySelector('link'));
 });
 
 /**
@@ -3688,9 +3688,9 @@ it('test_capture_css_styleInline', async function () {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.file("green.bmp"));
-  assert(!zip.file("font.woff"));
-  assert(!zip.file("import.css"));
+  assert.exists(zip.file("green.bmp"));
+  assert.notExists(zip.file("font.woff"));
+  assert.notExists(zip.file("import.css"));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -3767,11 +3767,11 @@ it('test_capture_css_disabled_default', async function () {
   assert(!styleElem.matches('[data-scrapbook-css-disabled]'));
   assert.strictEqual(styleElem.textContent.trim(), `#internal { background: yellow; }`);
 
-  assert(zip.file("persistent.css"));
-  assert(zip.file("default.css"));
-  assert(zip.file("default2.css"));
-  assert(zip.file("alternative.css"));
-  assert(zip.file("alternative2.css"));
+  assert.exists(zip.file("persistent.css"));
+  assert.exists(zip.file("default.css"));
+  assert.exists(zip.file("default2.css"));
+  assert.exists(zip.file("alternative.css"));
+  assert.exists(zip.file("alternative2.css"));
 });
 
 /**
@@ -3803,11 +3803,11 @@ $it.xfailIf(
   assert(!styleElem.matches('[data-scrapbook-css-disabled]'));
   assert.strictEqual(styleElem.textContent.trim(), `#internal { background: yellow; }`);
 
-  assert(zip.file("persistent.css"));
-  assert(zip.file("default.css"));
-  assert(zip.file("default2.css"));
-  assert(zip.file("alternative.css"));
-  assert(zip.file("alternative2.css"));
+  assert.exists(zip.file("persistent.css"));
+  assert.exists(zip.file("default.css"));
+  assert.exists(zip.file("default2.css"));
+  assert.exists(zip.file("alternative.css"));
+  assert.exists(zip.file("alternative2.css"));
 });
 
 /**
@@ -3845,11 +3845,11 @@ $it.skipIf(
   assert(!styleElem.matches('[data-scrapbook-css-disabled]'));
   assert.strictEqual(styleElem.textContent.trim(), `#internal { background: yellow; }`);
 
-  assert(zip.file("persistent.css"));
-  assert(!zip.file("default.css"));
-  assert(!zip.file("default2.css"));
-  assert(zip.file("alternative.css"));
-  assert(zip.file("alternative2.css"));
+  assert.exists(zip.file("persistent.css"));
+  assert.notExists(zip.file("default.css"));
+  assert.notExists(zip.file("default2.css"));
+  assert.exists(zip.file("alternative.css"));
+  assert.exists(zip.file("alternative2.css"));
 });
 
 /**
@@ -3881,11 +3881,11 @@ $it.xfailIf(
   assert(!styleElem.matches('[data-scrapbook-css-disabled]'));
   assert.strictEqual(styleElem.textContent.trim(), `#internal { background: yellow; }`);
 
-  assert(zip.file("persistent.css"));
-  assert(zip.file("default.css"));
-  assert(!zip.file("default2.css"));
-  assert(zip.file("alternative.css"));
-  assert(!zip.file("alternative2.css"));
+  assert.exists(zip.file("persistent.css"));
+  assert.exists(zip.file("default.css"));
+  assert.notExists(zip.file("default2.css"));
+  assert.exists(zip.file("alternative.css"));
+  assert.notExists(zip.file("alternative2.css"));
 
   var blob = await capture({
     url: `${localhost}/capture_css_disabled/scripted2.html`,
@@ -3901,7 +3901,7 @@ $it.xfailIf(
   assert(styleElem.matches('[data-scrapbook-css-disabled]'));
   assert.strictEqual(styleElem.textContent.trim(), ``);
 
-  assert(!zip.file("persistent.css"));
+  assert.notExists(zip.file("persistent.css"));
 });
 
 /**
@@ -3934,11 +3934,11 @@ $it.skipIf(
   assert(!styleElem.matches('[data-scrapbook-css-disabled]'));
   assert.strictEqual(styleElem.textContent.trim(), `#internal { background: yellow; }`);
 
-  assert(zip.file("persistent.css"));
-  assert(zip.file("default.css"));
-  assert(!zip.file("default2.css"));
-  assert(zip.file("alternative.css"));
-  assert(zip.file("alternative2.css"));
+  assert.exists(zip.file("persistent.css"));
+  assert.exists(zip.file("default.css"));
+  assert.notExists(zip.file("default2.css"));
+  assert.exists(zip.file("alternative.css"));
+  assert.exists(zip.file("alternative2.css"));
 
   var blob = await capture({
     url: `${localhost}/capture_css_disabled/scripted2.html`,
@@ -3954,7 +3954,7 @@ $it.skipIf(
   assert(styleElem.matches('[data-scrapbook-css-disabled]'));
   assert.strictEqual(styleElem.textContent.trim(), ``);
 
-  assert(!zip.file("persistent.css"));
+  assert.notExists(zip.file("persistent.css"));
 });
 
 /**
@@ -3975,13 +3975,13 @@ it('test_capture_css_rewriteCss', async function () {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.file("imported.css"));
-  assert(zip.file("sansation_light.woff"));
-  assert(zip.file("green.bmp"));
-  assert(zip.file("unsupported-1.bmp"));
-  assert(zip.file("unsupported-2.bmp"));
-  assert(zip.file("unsupported-3.bmp"));
-  assert(zip.file("unsupported-4.bmp"));
+  assert.exists(zip.file("imported.css"));
+  assert.exists(zip.file("sansation_light.woff"));
+  assert.exists(zip.file("green.bmp"));
+  assert.exists(zip.file("unsupported-1.bmp"));
+  assert.exists(zip.file("unsupported-2.bmp"));
+  assert.exists(zip.file("unsupported-3.bmp"));
+  assert.exists(zip.file("unsupported-4.bmp"));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -4045,13 +4045,13 @@ background: blue; background: url("green.bmp");`);
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.file("imported.css"));
-  assert(zip.file("sansation_light.woff"));
-  assert(zip.file("green.bmp"));
-  assert(!zip.file("unsupported-1.bmp"));
-  assert(!zip.file("unsupported-2.bmp"));
-  assert(!zip.file("unsupported-3.bmp"));
-  assert(!zip.file("unsupported-4.bmp"));
+  assert.exists(zip.file("imported.css"));
+  assert.exists(zip.file("sansation_light.woff"));
+  assert.exists(zip.file("green.bmp"));
+  assert.notExists(zip.file("unsupported-1.bmp"));
+  assert.notExists(zip.file("unsupported-2.bmp"));
+  assert.notExists(zip.file("unsupported-3.bmp"));
+  assert.notExists(zip.file("unsupported-4.bmp"));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -4102,13 +4102,13 @@ svg|a text, text svg|a { fill: blue; text-decoration: underline; }`;
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.file("imported.css"));
-  assert(zip.file("sansation_light.woff"));
-  assert(zip.file("green.bmp"));
-  assert(!zip.file("unsupported-1.bmp"));
-  assert(!zip.file("unsupported-2.bmp"));
-  assert(!zip.file("unsupported-3.bmp"));
-  assert(!zip.file("unsupported-4.bmp"));
+  assert.exists(zip.file("imported.css"));
+  assert.exists(zip.file("sansation_light.woff"));
+  assert.exists(zip.file("green.bmp"));
+  assert.notExists(zip.file("unsupported-1.bmp"));
+  assert.notExists(zip.file("unsupported-2.bmp"));
+  assert.notExists(zip.file("unsupported-3.bmp"));
+  assert.notExists(zip.file("unsupported-4.bmp"));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -4592,11 +4592,11 @@ it('test_capture_css_rewriteCss_match', async function () {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(!zip.file("green.bmp"));
-  assert(!zip.file("unsupported-1.bmp"));
-  assert(!zip.file("unsupported-2.bmp"));
-  assert(!zip.file("unsupported-3.bmp"));
-  assert(!zip.file("unsupported-4.bmp"));
+  assert.notExists(zip.file("green.bmp"));
+  assert.notExists(zip.file("unsupported-1.bmp"));
+  assert.notExists(zip.file("unsupported-2.bmp"));
+  assert.notExists(zip.file("unsupported-3.bmp"));
+  assert.notExists(zip.file("unsupported-4.bmp"));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -4982,15 +4982,15 @@ $it.skipIf($.noNestingCss)('test_capture_css_rewriteCss_nesting', async function
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.file('case1.bmp'));
-  assert(zip.file('case1-1.bmp'));
-  assert(zip.file('case1-1-1.bmp'));
-  assert(zip.file('case1-1-2.bmp'));
-  assert(zip.file('case1-2.bmp'));
-  assert(zip.file('case1-2-1.bmp'));
-  assert(zip.file('case1-2-2.bmp'));
-  assert(zip.file('case2-1.bmp'));
-  assert(zip.file('dummy.bmp'));
+  assert.exists(zip.file('case1.bmp'));
+  assert.exists(zip.file('case1-1.bmp'));
+  assert.exists(zip.file('case1-1-1.bmp'));
+  assert.exists(zip.file('case1-1-2.bmp'));
+  assert.exists(zip.file('case1-2.bmp'));
+  assert.exists(zip.file('case1-2-1.bmp'));
+  assert.exists(zip.file('case1-2-2.bmp'));
+  assert.exists(zip.file('case2-1.bmp'));
+  assert.exists(zip.file('dummy.bmp'));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -5037,15 +5037,15 @@ $it.skipIf($.noNestingCss)('test_capture_css_rewriteCss_nesting', async function
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.file('case1.bmp'));
-  assert(zip.file('case1-1.bmp'));
-  assert(zip.file('case1-1-1.bmp'));
-  assert(zip.file('case1-1-2.bmp'));
-  assert(zip.file('case1-2.bmp'));
-  assert(zip.file('case1-2-1.bmp'));
-  assert(zip.file('case1-2-2.bmp'));
-  assert(zip.file('case2-1.bmp'));
-  assert(zip.file('dummy.bmp'));
+  assert.exists(zip.file('case1.bmp'));
+  assert.exists(zip.file('case1-1.bmp'));
+  assert.exists(zip.file('case1-1-1.bmp'));
+  assert.exists(zip.file('case1-1-2.bmp'));
+  assert.exists(zip.file('case1-2.bmp'));
+  assert.exists(zip.file('case1-2-1.bmp'));
+  assert.exists(zip.file('case1-2-2.bmp'));
+  assert.exists(zip.file('case2-1.bmp'));
+  assert.exists(zip.file('dummy.bmp'));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -5108,15 +5108,15 @@ $it.skipIf($.noNestingCss)('test_capture_css_rewriteCss_nesting', async function
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.file('case1.bmp'));
-  assert(zip.file('case1-1.bmp'));
-  assert(zip.file('case1-1-1.bmp'));
-  assert(zip.file('case1-1-2.bmp'));
-  assert(zip.file('case1-2.bmp'));
-  assert(zip.file('case1-2-1.bmp'));
-  assert(zip.file('case1-2-2.bmp'));
-  assert(zip.file('case2-1.bmp'));
-  assert(!zip.file('dummy.bmp'));
+  assert.exists(zip.file('case1.bmp'));
+  assert.exists(zip.file('case1-1.bmp'));
+  assert.exists(zip.file('case1-1-1.bmp'));
+  assert.exists(zip.file('case1-1-2.bmp'));
+  assert.exists(zip.file('case1-2.bmp'));
+  assert.exists(zip.file('case1-2-1.bmp'));
+  assert.exists(zip.file('case1-2-2.bmp'));
+  assert.exists(zip.file('case2-1.bmp'));
+  assert.notExists(zip.file('dummy.bmp'));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -5175,15 +5175,15 @@ $it.skipIf($.noNestingCss)('test_capture_css_rewriteCss_nesting', async function
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(!zip.file('case1.bmp'));
-  assert(!zip.file('case1-1.bmp'));
-  assert(!zip.file('case1-1-1.bmp'));
-  assert(!zip.file('case1-1-2.bmp'));
-  assert(!zip.file('case1-2.bmp'));
-  assert(!zip.file('case1-2-1.bmp'));
-  assert(!zip.file('case1-2-2.bmp'));
-  assert(!zip.file('case2-1.bmp'));
-  assert(!zip.file('dummy.bmp'));
+  assert.notExists(zip.file('case1.bmp'));
+  assert.notExists(zip.file('case1-1.bmp'));
+  assert.notExists(zip.file('case1-1-1.bmp'));
+  assert.notExists(zip.file('case1-1-2.bmp'));
+  assert.notExists(zip.file('case1-2.bmp'));
+  assert.notExists(zip.file('case1-2-1.bmp'));
+  assert.notExists(zip.file('case1-2-2.bmp'));
+  assert.notExists(zip.file('case2-1.bmp'));
+  assert.notExists(zip.file('dummy.bmp'));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -5630,7 +5630,7 @@ it('test_capture_css_charset_link_charset', async function () {
   var file = zip.file('link-1.css');
   var blob = new Blob([await file.async('blob')], {type: "text/css"});
   var text = (await readFileAsText(blob)).trim();
-  assert(text !== `\
+  assert.notStrictEqual(text, `\
 @import "link_import.css";
 #link::after { content: "中文"; }`);
   assert(!await hasBomUtf8(blob));
@@ -5795,7 +5795,7 @@ it('test_capture_css_rewrite_bad', async function () {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.file("index-1.html"));
+  assert.exists(zip.file("index-1.html"));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -5858,13 +5858,13 @@ it('test_capture_css_circular', async function () {
   var url = doc.querySelector('link').getAttribute('href');
   var text = (await xhr({url, responseType: "text"})).response;
   var match = text.match(rawRegex`${'^'}@import "${'('}data:text/css;charset=UTF-8;filename=style2.css,${'[^"#]*)(?:#[^"]*)?'}";`);
-  assert(match);
+  assert.exists(match);
 
   // style2.css
   var url = match[1];
   var text = (await xhr({url, responseType: "text"})).response;
   var match = text.match(rawRegex`${'^'}@import "${'('}data:text/css;charset=UTF-8;filename=style3.css,${'[^"#]*)(?:#[^"]*)?'}";`);
-  assert(match);
+  assert.exists(match);
 
   // style3.css
   var url = match[1];
@@ -5913,10 +5913,10 @@ it('test_capture_css_cross_origin', async function () {
     options: Object.assign({}, baseOptions, options),
   });
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.file('bg1.bmp'));
-  assert(zip.file('font1.woff'));
-  assert(zip.file('bg2.bmp'));
-  assert(zip.file('font2.woff'));
+  assert.exists(zip.file('bg1.bmp'));
+  assert.exists(zip.file('font1.woff'));
+  assert.exists(zip.file('bg2.bmp'));
+  assert.exists(zip.file('font2.woff'));
 
   // same origin
   var cssFile = zip.file('style.css');
@@ -5953,14 +5953,14 @@ it('test_capture_css_dynamic', async function () {
     options: Object.assign({}, baseOptions, options),
   });
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.file('link.css'));
-  assert(zip.file('import.css'));
-  assert(!zip.file('internal-deleted.bmp'));
-  assert(zip.file('internal-inserted.bmp'));
-  assert(!zip.file('link-deleted.bmp'));
-  assert(zip.file('link-inserted.bmp'));
-  assert(!zip.file('import-deleted.bmp'));
-  assert(zip.file('import-inserted.bmp'));
+  assert.exists(zip.file('link.css'));
+  assert.exists(zip.file('import.css'));
+  assert.notExists(zip.file('internal-deleted.bmp'));
+  assert.exists(zip.file('internal-inserted.bmp'));
+  assert.notExists(zip.file('link-deleted.bmp'));
+  assert.exists(zip.file('link-inserted.bmp'));
+  assert.notExists(zip.file('import-deleted.bmp'));
+  assert.exists(zip.file('import-inserted.bmp'));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -5987,14 +5987,14 @@ it('test_capture_css_dynamic', async function () {
     options: Object.assign({}, baseOptions, options),
   });
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.file('link.css'));
-  assert(zip.file('import.css'));
-  assert(!zip.file('internal-deleted.bmp'));
-  assert(zip.file('internal-inserted.bmp'));
-  assert(!zip.file('link-deleted.bmp'));
-  assert(zip.file('link-inserted.bmp'));
-  assert(!zip.file('import-deleted.bmp'));
-  assert(zip.file('import-inserted.bmp'));
+  assert.exists(zip.file('link.css'));
+  assert.exists(zip.file('import.css'));
+  assert.notExists(zip.file('internal-deleted.bmp'));
+  assert.exists(zip.file('internal-inserted.bmp'));
+  assert.notExists(zip.file('link-deleted.bmp'));
+  assert.exists(zip.file('link-inserted.bmp'));
+  assert.notExists(zip.file('import-deleted.bmp'));
+  assert.exists(zip.file('import-inserted.bmp'));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -6027,16 +6027,16 @@ it('test_capture_css_dynamic_rename', async function () {
     options: Object.assign({}, baseOptions, options),
   });
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.file('link.css'));
-  assert(zip.file('link-1.css'));
-  assert(zip.file('link-2.css'));
-  assert(zip.file('link-deleted.bmp'));
-  assert(zip.file('link-inserted.bmp'));
-  assert(zip.file('import.css'));
-  assert(zip.file('import-1.css'));
-  assert(zip.file('import-2.css'));
-  assert(zip.file('import-deleted.bmp'));
-  assert(zip.file('import-inserted.bmp'));
+  assert.exists(zip.file('link.css'));
+  assert.exists(zip.file('link-1.css'));
+  assert.exists(zip.file('link-2.css'));
+  assert.exists(zip.file('link-deleted.bmp'));
+  assert.exists(zip.file('link-inserted.bmp'));
+  assert.exists(zip.file('import.css'));
+  assert.exists(zip.file('import-1.css'));
+  assert.exists(zip.file('import-2.css'));
+  assert.exists(zip.file('import-deleted.bmp'));
+  assert.exists(zip.file('import-inserted.bmp'));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -6048,9 +6048,9 @@ it('test_capture_css_dynamic_rename', async function () {
   });
 
   assert.strictEqual(linkNames[0][0], linkNames[1][0]);
-  assert(linkNames[0][0] !== linkNames[2][0]);
-  assert(linkNames[0][0] !== linkNames[3][0]);
-  assert(linkNames[2][0] !== linkNames[3][0]);
+  assert.notStrictEqual(linkNames[0][0], linkNames[2][0]);
+  assert.notStrictEqual(linkNames[0][0], linkNames[3][0]);
+  assert.notStrictEqual(linkNames[2][0], linkNames[3][0]);
 
   assert.strictEqual(linkNames[0][1], undefined);
   assert.strictEqual(linkNames[1][1], '123');
@@ -6062,9 +6062,9 @@ it('test_capture_css_dynamic_rename', async function () {
   });
 
   assert.strictEqual(importNames[0][0], importNames[1][0]);
-  assert(importNames[0][0] !== importNames[2][0]);
-  assert(importNames[0][0] !== importNames[3][0]);
-  assert(importNames[2][0] !== importNames[3][0]);
+  assert.notStrictEqual(importNames[0][0], importNames[2][0]);
+  assert.notStrictEqual(importNames[0][0], importNames[3][0]);
+  assert.notStrictEqual(importNames[2][0], importNames[3][0]);
 
   assert.strictEqual(importNames[0][1], undefined);
   assert.strictEqual(importNames[1][1], '123');
@@ -6091,13 +6091,13 @@ $it.skipIf($.noAdoptedStylesheet)('test_capture_css_adopted', async function () 
     options: Object.assign({}, baseOptions, options),
   });
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.file('green.bmp'));
-  assert(zip.file('nonexist.bmp'));
+  assert.exists(zip.file('green.bmp'));
+  assert.exists(zip.file('nonexist.bmp'));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
-  assert(doc.querySelector('script[data-scrapbook-elem="basic-loader"]'));
+  assert.exists(doc.querySelector('script[data-scrapbook-elem="basic-loader"]'));
 
   var docElem = doc.documentElement;
   assert.strictEqual(
@@ -6133,13 +6133,13 @@ $it.skipIf($.noAdoptedStylesheet)('test_capture_css_adopted', async function () 
     options: Object.assign({}, baseOptions, options),
   });
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.file('green.bmp'));
-  assert(zip.file('nonexist.bmp'));
+  assert.exists(zip.file('green.bmp'));
+  assert.exists(zip.file('nonexist.bmp'));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
-  assert(doc.querySelector('script[data-scrapbook-elem="basic-loader"]'));
+  assert.exists(doc.querySelector('script[data-scrapbook-elem="basic-loader"]'));
 
   var docElem = doc.documentElement;
   assert.strictEqual(
@@ -6175,13 +6175,13 @@ $it.skipIf($.noAdoptedStylesheet)('test_capture_css_adopted', async function () 
     options: Object.assign({}, baseOptions, options),
   });
   var zip = await new JSZip().loadAsync(blob);
-  assert(!zip.file('green.bmp'));
-  assert(!zip.file('nonexist.bmp'));
+  assert.notExists(zip.file('green.bmp'));
+  assert.notExists(zip.file('nonexist.bmp'));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
-  assert(!doc.querySelector('script[data-scrapbook-elem="basic-loader"]'));
+  assert.notExists(doc.querySelector('script[data-scrapbook-elem="basic-loader"]'));
 
   var docElem = doc.documentElement;
   assert(!docElem.hasAttribute('data-scrapbook-adoptedstylesheets'));
@@ -6198,13 +6198,13 @@ $it.skipIf($.noAdoptedStylesheet)('test_capture_css_adopted', async function () 
     options: Object.assign({}, baseOptions, options),
   });
   var zip = await new JSZip().loadAsync(blob);
-  assert(!zip.file('green.bmp'));
-  assert(!zip.file('nonexist.bmp'));
+  assert.notExists(zip.file('green.bmp'));
+  assert.notExists(zip.file('nonexist.bmp'));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
-  assert(!doc.querySelector('script[data-scrapbook-elem="basic-loader"]'));
+  assert.notExists(doc.querySelector('script[data-scrapbook-elem="basic-loader"]'));
 
   var docElem = doc.documentElement;
   assert(!docElem.hasAttribute('data-scrapbook-adoptedstylesheets'));
@@ -6221,13 +6221,13 @@ $it.skipIf($.noAdoptedStylesheet)('test_capture_css_adopted', async function () 
     options: Object.assign({}, baseOptions, options),
   });
   var zip = await new JSZip().loadAsync(blob);
-  assert(!zip.file('green.bmp'));
-  assert(!zip.file('nonexist.bmp'));
+  assert.notExists(zip.file('green.bmp'));
+  assert.notExists(zip.file('nonexist.bmp'));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
-  assert(!doc.querySelector('script[data-scrapbook-elem="basic-loader"]'));
+  assert.notExists(doc.querySelector('script[data-scrapbook-elem="basic-loader"]'));
 
   var docElem = doc.documentElement;
   assert(!docElem.hasAttribute('data-scrapbook-adoptedstylesheets'));
@@ -6257,23 +6257,23 @@ $it.skipIf($.noAdoptedStylesheet)('test_capture_css_adopted_shadow', async funct
     options: Object.assign({}, baseOptions, options),
   });
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.file('image1-1.bmp'));
-  assert(zip.file('image1-2.bmp'));
-  assert(zip.file('image1-3.bmp'));
-  assert(!zip.file('image1-4.bmp'));
-  assert(zip.file('image2-1.bmp'));
-  assert(zip.file('image2-2.bmp'));
-  assert(zip.file('image2-3.bmp'));
-  assert(!zip.file('image2-4.bmp'));
-  assert(zip.file('font1-1.woff'));
-  assert(zip.file('font1-2.woff'));
-  assert(zip.file('font1-3.woff'));
-  assert(!zip.file('font1-4.woff'));
+  assert.exists(zip.file('image1-1.bmp'));
+  assert.exists(zip.file('image1-2.bmp'));
+  assert.exists(zip.file('image1-3.bmp'));
+  assert.notExists(zip.file('image1-4.bmp'));
+  assert.exists(zip.file('image2-1.bmp'));
+  assert.exists(zip.file('image2-2.bmp'));
+  assert.exists(zip.file('image2-3.bmp'));
+  assert.notExists(zip.file('image2-4.bmp'));
+  assert.exists(zip.file('font1-1.woff'));
+  assert.exists(zip.file('font1-2.woff'));
+  assert.exists(zip.file('font1-3.woff'));
+  assert.notExists(zip.file('font1-4.woff'));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
-  assert(doc.querySelector('script[data-scrapbook-elem="basic-loader"]'));
+  assert.exists(doc.querySelector('script[data-scrapbook-elem="basic-loader"]'));
 
   var docElem = doc.documentElement;
   assert.strictEqual(
@@ -6334,23 +6334,23 @@ $it.skipIf($.noAdoptedStylesheet)('test_capture_css_adopted_shadow', async funct
     options: Object.assign({}, baseOptions, options),
   });
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.file('image1-1.bmp'));
-  assert(zip.file('image1-2.bmp'));
-  assert(zip.file('image1-3.bmp'));
-  assert(!zip.file('image1-4.bmp'));
-  assert(zip.file('image2-1.bmp'));
-  assert(zip.file('image2-2.bmp'));
-  assert(zip.file('image2-3.bmp'));
-  assert(!zip.file('image2-4.bmp'));
-  assert(zip.file('font1-1.woff'));
-  assert(zip.file('font1-2.woff'));
-  assert(zip.file('font1-3.woff'));
-  assert(!zip.file('font1-4.woff'));
+  assert.exists(zip.file('image1-1.bmp'));
+  assert.exists(zip.file('image1-2.bmp'));
+  assert.exists(zip.file('image1-3.bmp'));
+  assert.notExists(zip.file('image1-4.bmp'));
+  assert.exists(zip.file('image2-1.bmp'));
+  assert.exists(zip.file('image2-2.bmp'));
+  assert.exists(zip.file('image2-3.bmp'));
+  assert.notExists(zip.file('image2-4.bmp'));
+  assert.exists(zip.file('font1-1.woff'));
+  assert.exists(zip.file('font1-2.woff'));
+  assert.exists(zip.file('font1-3.woff'));
+  assert.notExists(zip.file('font1-4.woff'));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
-  assert(doc.querySelector('script[data-scrapbook-elem="basic-loader"]'));
+  assert.exists(doc.querySelector('script[data-scrapbook-elem="basic-loader"]'));
 
   var docElem = doc.documentElement;
   assert.strictEqual(
@@ -6414,23 +6414,23 @@ $it.skipIf($.noAdoptedStylesheet)('test_capture_css_adopted_shadow', async funct
     options: Object.assign({}, baseOptions, options),
   });
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.file('image1-1.bmp'));
-  assert(zip.file('image1-2.bmp'));
-  assert(zip.file('image1-3.bmp'));
-  assert(!zip.file('image1-4.bmp'));
-  assert(zip.file('image2-1.bmp'));
-  assert(zip.file('image2-2.bmp'));
-  assert(zip.file('image2-3.bmp'));
-  assert(!zip.file('image2-4.bmp'));
-  assert(zip.file('font1-1.woff'));
-  assert(zip.file('font1-2.woff'));
-  assert(zip.file('font1-3.woff'));
-  assert(!zip.file('font1-4.woff'));
+  assert.exists(zip.file('image1-1.bmp'));
+  assert.exists(zip.file('image1-2.bmp'));
+  assert.exists(zip.file('image1-3.bmp'));
+  assert.notExists(zip.file('image1-4.bmp'));
+  assert.exists(zip.file('image2-1.bmp'));
+  assert.exists(zip.file('image2-2.bmp'));
+  assert.exists(zip.file('image2-3.bmp'));
+  assert.notExists(zip.file('image2-4.bmp'));
+  assert.exists(zip.file('font1-1.woff'));
+  assert.exists(zip.file('font1-2.woff'));
+  assert.exists(zip.file('font1-3.woff'));
+  assert.notExists(zip.file('font1-4.woff'));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
-  assert(doc.querySelector('script[data-scrapbook-elem="basic-loader"]'));
+  assert.exists(doc.querySelector('script[data-scrapbook-elem="basic-loader"]'));
 
   var docElem = doc.documentElement;
   assert.strictEqual(
@@ -6494,23 +6494,23 @@ $it.skipIf($.noAdoptedStylesheet)('test_capture_css_adopted_shadow', async funct
     options: Object.assign({}, baseOptions, options),
   });
   var zip = await new JSZip().loadAsync(blob);
-  assert(!zip.file('image1-1.bmp'));
-  assert(!zip.file('image1-2.bmp'));
-  assert(!zip.file('image1-3.bmp'));
-  assert(!zip.file('image1-4.bmp'));
-  assert(!zip.file('image2-1.bmp'));
-  assert(!zip.file('image2-2.bmp'));
-  assert(!zip.file('image2-3.bmp'));
-  assert(!zip.file('image2-4.bmp'));
-  assert(!zip.file('font1-1.woff'));
-  assert(!zip.file('font1-2.woff'));
-  assert(!zip.file('font1-3.woff'));
-  assert(!zip.file('font1-4.woff'));
+  assert.notExists(zip.file('image1-1.bmp'));
+  assert.notExists(zip.file('image1-2.bmp'));
+  assert.notExists(zip.file('image1-3.bmp'));
+  assert.notExists(zip.file('image1-4.bmp'));
+  assert.notExists(zip.file('image2-1.bmp'));
+  assert.notExists(zip.file('image2-2.bmp'));
+  assert.notExists(zip.file('image2-3.bmp'));
+  assert.notExists(zip.file('image2-4.bmp'));
+  assert.notExists(zip.file('font1-1.woff'));
+  assert.notExists(zip.file('font1-2.woff'));
+  assert.notExists(zip.file('font1-3.woff'));
+  assert.notExists(zip.file('font1-4.woff'));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
-  assert(doc.querySelector('script[data-scrapbook-elem="basic-loader"]'));
+  assert.exists(doc.querySelector('script[data-scrapbook-elem="basic-loader"]'));
 
   var docElem = doc.documentElement;
   assert.strictEqual(
@@ -6574,23 +6574,23 @@ $it.skipIf($.noAdoptedStylesheet)('test_capture_css_adopted_shadow', async funct
     options: Object.assign({}, baseOptions, options),
   });
   var zip = await new JSZip().loadAsync(blob);
-  assert(!zip.file('image1-1.bmp'));
-  assert(!zip.file('image1-2.bmp'));
-  assert(!zip.file('image1-3.bmp'));
-  assert(!zip.file('image1-4.bmp'));
-  assert(!zip.file('image2-1.bmp'));
-  assert(!zip.file('image2-2.bmp'));
-  assert(!zip.file('image2-3.bmp'));
-  assert(!zip.file('image2-4.bmp'));
-  assert(!zip.file('font1-1.woff'));
-  assert(!zip.file('font1-2.woff'));
-  assert(!zip.file('font1-3.woff'));
-  assert(!zip.file('font1-4.woff'));
+  assert.notExists(zip.file('image1-1.bmp'));
+  assert.notExists(zip.file('image1-2.bmp'));
+  assert.notExists(zip.file('image1-3.bmp'));
+  assert.notExists(zip.file('image1-4.bmp'));
+  assert.notExists(zip.file('image2-1.bmp'));
+  assert.notExists(zip.file('image2-2.bmp'));
+  assert.notExists(zip.file('image2-3.bmp'));
+  assert.notExists(zip.file('image2-4.bmp'));
+  assert.notExists(zip.file('font1-1.woff'));
+  assert.notExists(zip.file('font1-2.woff'));
+  assert.notExists(zip.file('font1-3.woff'));
+  assert.notExists(zip.file('font1-4.woff'));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
-  assert(doc.querySelector('script[data-scrapbook-elem="basic-loader"]'));
+  assert.exists(doc.querySelector('script[data-scrapbook-elem="basic-loader"]'));
 
   var docElem = doc.documentElement;
   assert(!docElem.hasAttribute('data-scrapbook-adoptedstylesheets'));
@@ -6622,12 +6622,12 @@ it('test_capture_imageBackground', async function () {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.file('link.css'));
-  assert(zip.file('import.css'));
-  assert(zip.file('red.bmp'));
-  assert(zip.file('green.bmp'));
-  assert(zip.file('blue.bmp'));
-  assert(zip.file('yellow.bmp'));
+  assert.exists(zip.file('link.css'));
+  assert.exists(zip.file('import.css'));
+  assert.exists(zip.file('red.bmp'));
+  assert.exists(zip.file('green.bmp'));
+  assert.exists(zip.file('blue.bmp'));
+  assert.exists(zip.file('yellow.bmp'));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -6671,12 +6671,12 @@ it('test_capture_imageBackground', async function () {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.file('link.css'));
-  assert(zip.file('import.css'));
-  assert(zip.file('red.bmp'));
-  assert(zip.file('green.bmp'));
-  assert(zip.file('blue.bmp'));
-  assert(zip.file('yellow.bmp'));
+  assert.exists(zip.file('link.css'));
+  assert.exists(zip.file('import.css'));
+  assert.exists(zip.file('red.bmp'));
+  assert.exists(zip.file('green.bmp'));
+  assert.exists(zip.file('blue.bmp'));
+  assert.exists(zip.file('yellow.bmp'));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -6816,21 +6816,21 @@ it('test_capture_imageBackground_used', async function () {
     options: Object.assign({}, baseOptions, options),
   });
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.file('internal.bmp'));
-  assert(!zip.file('internal-unused.bmp'));
-  assert(!zip.file('internal-noncaptured.bmp'));
-  assert(zip.file('link.bmp'));
-  assert(!zip.file('link-unused.bmp'));
-  assert(!zip.file('link-noncaptured.bmp'));
-  assert(zip.file('import.bmp'));
-  assert(!zip.file('import-unused.bmp'));
-  assert(!zip.file('import-noncaptured.bmp'));
-  assert(zip.file('pseudo-hover.bmp'));
-  assert(zip.file('pseudo-active.bmp'));
-  assert(zip.file('pseudo-before.bmp'));
-  assert(zip.file('pseudo-after.bmp'));
-  assert(zip.file('pseudo-first-letter.bmp'));
-  assert(zip.file('pseudo-first-line.bmp'));
+  assert.exists(zip.file('internal.bmp'));
+  assert.notExists(zip.file('internal-unused.bmp'));
+  assert.notExists(zip.file('internal-noncaptured.bmp'));
+  assert.exists(zip.file('link.bmp'));
+  assert.notExists(zip.file('link-unused.bmp'));
+  assert.notExists(zip.file('link-noncaptured.bmp'));
+  assert.exists(zip.file('import.bmp'));
+  assert.notExists(zip.file('import-unused.bmp'));
+  assert.notExists(zip.file('import-noncaptured.bmp'));
+  assert.exists(zip.file('pseudo-hover.bmp'));
+  assert.exists(zip.file('pseudo-active.bmp'));
+  assert.exists(zip.file('pseudo-before.bmp'));
+  assert.exists(zip.file('pseudo-after.bmp'));
+  assert.exists(zip.file('pseudo-first-letter.bmp'));
+  assert.exists(zip.file('pseudo-first-line.bmp'));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -6874,21 +6874,21 @@ it('test_capture_imageBackground_used', async function () {
     options: Object.assign({}, baseOptions, options),
   });
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.file('internal.bmp'));
-  assert(zip.file('internal-unused.bmp'));
-  assert(zip.file('internal-noncaptured.bmp'));
-  assert(zip.file('link.bmp'));
-  assert(zip.file('link-unused.bmp'));
-  assert(zip.file('link-noncaptured.bmp'));
-  assert(zip.file('import.bmp'));
-  assert(zip.file('import-unused.bmp'));
-  assert(zip.file('import-noncaptured.bmp'));
-  assert(zip.file('pseudo-hover.bmp'));
-  assert(zip.file('pseudo-active.bmp'));
-  assert(zip.file('pseudo-before.bmp'));
-  assert(zip.file('pseudo-after.bmp'));
-  assert(zip.file('pseudo-first-letter.bmp'));
-  assert(zip.file('pseudo-first-line.bmp'));
+  assert.exists(zip.file('internal.bmp'));
+  assert.exists(zip.file('internal-unused.bmp'));
+  assert.exists(zip.file('internal-noncaptured.bmp'));
+  assert.exists(zip.file('link.bmp'));
+  assert.exists(zip.file('link-unused.bmp'));
+  assert.exists(zip.file('link-noncaptured.bmp'));
+  assert.exists(zip.file('import.bmp'));
+  assert.exists(zip.file('import-unused.bmp'));
+  assert.exists(zip.file('import-noncaptured.bmp'));
+  assert.exists(zip.file('pseudo-hover.bmp'));
+  assert.exists(zip.file('pseudo-active.bmp'));
+  assert.exists(zip.file('pseudo-before.bmp'));
+  assert.exists(zip.file('pseudo-after.bmp'));
+  assert.exists(zip.file('pseudo-first-letter.bmp'));
+  assert.exists(zip.file('pseudo-first-line.bmp'));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -6939,7 +6939,7 @@ it('test_capture_imageBackground_used_root', async function () {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.file('green.bmp'));
+  assert.exists(zip.file('green.bmp'));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -6966,9 +6966,9 @@ it('test_capture_imageBackground_used_shadow', async function () {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.file('green.bmp'));
-  assert(zip.file('yellow.bmp'));
-  assert(zip.file('blue.bmp'));
+  assert.exists(zip.file('green.bmp'));
+  assert.exists(zip.file('yellow.bmp'));
+  assert.exists(zip.file('blue.bmp'));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -7003,38 +7003,38 @@ it('test_capture_imageBackground_used_keyframes', async function () {
     options: Object.assign({}, baseOptions, options),
   });
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.file('internal-inline.bmp'));
-  assert(zip.file('internal-internal.bmp'));
-  assert(zip.file('internal-link.bmp'));
-  assert(zip.file('internal-import.bmp'));
-  assert(zip.file('link-inline.bmp'));
-  assert(zip.file('link-internal.bmp'));
-  assert(zip.file('link-link.bmp'));
-  assert(zip.file('link-import.bmp'));
-  assert(zip.file('import-inline.bmp'));
-  assert(zip.file('import-internal.bmp'));
-  assert(zip.file('import-link.bmp'));
-  assert(zip.file('import-import.bmp'));
-  assert(!zip.file('internal-inline-unused.bmp'));
-  assert(!zip.file('internal-internal-unused.bmp'));
-  assert(!zip.file('internal-link-unused.bmp'));
-  assert(!zip.file('internal-import-unused.bmp'));
-  assert(!zip.file('link-inline-unused.bmp'));
-  assert(!zip.file('link-internal-unused.bmp'));
-  assert(!zip.file('link-link-unused.bmp'));
-  assert(!zip.file('link-import-unused.bmp'));
-  assert(!zip.file('import-inline-unused.bmp'));
-  assert(!zip.file('import-internal-unused.bmp'));
-  assert(!zip.file('import-link-unused.bmp'));
-  assert(!zip.file('import-import-unused.bmp'));
-  assert(zip.file('ref-from.bmp'));
-  assert(zip.file('ref-to.bmp'));
-  assert(!zip.file('ref-from-noncaptured.bmp'));
-  assert(!zip.file('ref-to-noncaptured.bmp'));
-  assert(zip.file('ref-0.bmp'));
-  assert(zip.file('ref-35.bmp'));
-  assert(zip.file('ref-70.bmp'));
-  assert(zip.file('ref-100.bmp'));
+  assert.exists(zip.file('internal-inline.bmp'));
+  assert.exists(zip.file('internal-internal.bmp'));
+  assert.exists(zip.file('internal-link.bmp'));
+  assert.exists(zip.file('internal-import.bmp'));
+  assert.exists(zip.file('link-inline.bmp'));
+  assert.exists(zip.file('link-internal.bmp'));
+  assert.exists(zip.file('link-link.bmp'));
+  assert.exists(zip.file('link-import.bmp'));
+  assert.exists(zip.file('import-inline.bmp'));
+  assert.exists(zip.file('import-internal.bmp'));
+  assert.exists(zip.file('import-link.bmp'));
+  assert.exists(zip.file('import-import.bmp'));
+  assert.notExists(zip.file('internal-inline-unused.bmp'));
+  assert.notExists(zip.file('internal-internal-unused.bmp'));
+  assert.notExists(zip.file('internal-link-unused.bmp'));
+  assert.notExists(zip.file('internal-import-unused.bmp'));
+  assert.notExists(zip.file('link-inline-unused.bmp'));
+  assert.notExists(zip.file('link-internal-unused.bmp'));
+  assert.notExists(zip.file('link-link-unused.bmp'));
+  assert.notExists(zip.file('link-import-unused.bmp'));
+  assert.notExists(zip.file('import-inline-unused.bmp'));
+  assert.notExists(zip.file('import-internal-unused.bmp'));
+  assert.notExists(zip.file('import-link-unused.bmp'));
+  assert.notExists(zip.file('import-import-unused.bmp'));
+  assert.exists(zip.file('ref-from.bmp'));
+  assert.exists(zip.file('ref-to.bmp'));
+  assert.notExists(zip.file('ref-from-noncaptured.bmp'));
+  assert.notExists(zip.file('ref-to-noncaptured.bmp'));
+  assert.exists(zip.file('ref-0.bmp'));
+  assert.exists(zip.file('ref-35.bmp'));
+  assert.exists(zip.file('ref-70.bmp'));
+  assert.exists(zip.file('ref-100.bmp'));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -7177,38 +7177,38 @@ it('test_capture_imageBackground_used_keyframes', async function () {
     options: Object.assign({}, baseOptions, options),
   });
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.file('internal-inline.bmp'));
-  assert(zip.file('internal-internal.bmp'));
-  assert(zip.file('internal-link.bmp'));
-  assert(zip.file('internal-import.bmp'));
-  assert(zip.file('link-inline.bmp'));
-  assert(zip.file('link-internal.bmp'));
-  assert(zip.file('link-link.bmp'));
-  assert(zip.file('link-import.bmp'));
-  assert(zip.file('import-inline.bmp'));
-  assert(zip.file('import-internal.bmp'));
-  assert(zip.file('import-link.bmp'));
-  assert(zip.file('import-import.bmp'));
-  assert(zip.file('internal-inline-unused.bmp'));
-  assert(zip.file('internal-internal-unused.bmp'));
-  assert(zip.file('internal-link-unused.bmp'));
-  assert(zip.file('internal-import-unused.bmp'));
-  assert(zip.file('link-inline-unused.bmp'));
-  assert(zip.file('link-internal-unused.bmp'));
-  assert(zip.file('link-link-unused.bmp'));
-  assert(zip.file('link-import-unused.bmp'));
-  assert(zip.file('import-inline-unused.bmp'));
-  assert(zip.file('import-internal-unused.bmp'));
-  assert(zip.file('import-link-unused.bmp'));
-  assert(zip.file('import-import-unused.bmp'));
-  assert(zip.file('ref-from.bmp'));
-  assert(zip.file('ref-to.bmp'));
-  assert(zip.file('ref-from-noncaptured.bmp'));
-  assert(zip.file('ref-to-noncaptured.bmp'));
-  assert(zip.file('ref-0.bmp'));
-  assert(zip.file('ref-35.bmp'));
-  assert(zip.file('ref-70.bmp'));
-  assert(zip.file('ref-100.bmp'));
+  assert.exists(zip.file('internal-inline.bmp'));
+  assert.exists(zip.file('internal-internal.bmp'));
+  assert.exists(zip.file('internal-link.bmp'));
+  assert.exists(zip.file('internal-import.bmp'));
+  assert.exists(zip.file('link-inline.bmp'));
+  assert.exists(zip.file('link-internal.bmp'));
+  assert.exists(zip.file('link-link.bmp'));
+  assert.exists(zip.file('link-import.bmp'));
+  assert.exists(zip.file('import-inline.bmp'));
+  assert.exists(zip.file('import-internal.bmp'));
+  assert.exists(zip.file('import-link.bmp'));
+  assert.exists(zip.file('import-import.bmp'));
+  assert.exists(zip.file('internal-inline-unused.bmp'));
+  assert.exists(zip.file('internal-internal-unused.bmp'));
+  assert.exists(zip.file('internal-link-unused.bmp'));
+  assert.exists(zip.file('internal-import-unused.bmp'));
+  assert.exists(zip.file('link-inline-unused.bmp'));
+  assert.exists(zip.file('link-internal-unused.bmp'));
+  assert.exists(zip.file('link-link-unused.bmp'));
+  assert.exists(zip.file('link-import-unused.bmp'));
+  assert.exists(zip.file('import-inline-unused.bmp'));
+  assert.exists(zip.file('import-internal-unused.bmp'));
+  assert.exists(zip.file('import-link-unused.bmp'));
+  assert.exists(zip.file('import-import-unused.bmp'));
+  assert.exists(zip.file('ref-from.bmp'));
+  assert.exists(zip.file('ref-to.bmp'));
+  assert.exists(zip.file('ref-from-noncaptured.bmp'));
+  assert.exists(zip.file('ref-to-noncaptured.bmp'));
+  assert.exists(zip.file('ref-0.bmp'));
+  assert.exists(zip.file('ref-35.bmp'));
+  assert.exists(zip.file('ref-70.bmp'));
+  assert.exists(zip.file('ref-100.bmp'));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -7357,13 +7357,13 @@ it('test_capture_imageBackground_used_keyframes_syntax', async function () {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.file('keyframes-1.bmp'));
-  assert(zip.file('keyframes-2.bmp'));
-  assert(zip.file('keyframes-complex-1.bmp'));
-  assert(zip.file('keyframes-multi-1.bmp'));
-  assert(zip.file('keyframes-multi-2.bmp'));
-  assert(zip.file('keyframes-multi-3.bmp'));
-  assert(zip.file('keyframes-after.bmp'));
+  assert.exists(zip.file('keyframes-1.bmp'));
+  assert.exists(zip.file('keyframes-2.bmp'));
+  assert.exists(zip.file('keyframes-complex-1.bmp'));
+  assert.exists(zip.file('keyframes-multi-1.bmp'));
+  assert.exists(zip.file('keyframes-multi-2.bmp'));
+  assert.exists(zip.file('keyframes-multi-3.bmp'));
+  assert.exists(zip.file('keyframes-after.bmp'));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -7410,23 +7410,23 @@ it('test_capture_imageBackground_used_keyframes_scope', async function () {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.file('internal1.bmp'));
-  assert(zip.file('internal2.bmp'));
-  assert(zip.file('internal3.bmp'));
-  assert(!zip.file('internal4.bmp'));
-  assert(zip.file('internal5.bmp'));
-  assert(zip.file('internal6.bmp'));
-  assert(zip.file('internal7.bmp'));
-  assert(!zip.file('internal8.bmp'));
+  assert.exists(zip.file('internal1.bmp'));
+  assert.exists(zip.file('internal2.bmp'));
+  assert.exists(zip.file('internal3.bmp'));
+  assert.notExists(zip.file('internal4.bmp'));
+  assert.exists(zip.file('internal5.bmp'));
+  assert.exists(zip.file('internal6.bmp'));
+  assert.exists(zip.file('internal7.bmp'));
+  assert.notExists(zip.file('internal8.bmp'));
 
-  assert(zip.file('shadow1.bmp'));
-  assert(zip.file('shadow2.bmp'));
-  assert(!zip.file('shadow3.bmp'));
-  assert(!zip.file('shadow4.bmp'));
-  assert(zip.file('shadow5.bmp'));
-  assert(zip.file('shadow6.bmp'));
-  assert(!zip.file('shadow7.bmp'));
-  assert(!zip.file('shadow8.bmp'));
+  assert.exists(zip.file('shadow1.bmp'));
+  assert.exists(zip.file('shadow2.bmp'));
+  assert.notExists(zip.file('shadow3.bmp'));
+  assert.notExists(zip.file('shadow4.bmp'));
+  assert.exists(zip.file('shadow5.bmp'));
+  assert.exists(zip.file('shadow6.bmp'));
+  assert.notExists(zip.file('shadow7.bmp'));
+  assert.notExists(zip.file('shadow8.bmp'));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -7531,7 +7531,7 @@ $it.skipIf($.noPartPseudo)('test_capture_imageBackground_used_keyframes_scope_pa
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.file('internal.bmp'));
+  assert.exists(zip.file('internal.bmp'));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -7560,8 +7560,8 @@ it('test_capture_imageBackground_used_keyframes_scope_conditional', async functi
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.file('internal.bmp'));
-  assert(zip.file('shadow.bmp'));
+  assert.exists(zip.file('internal.bmp'));
+  assert.exists(zip.file('shadow.bmp'));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -7603,8 +7603,8 @@ $it.skipIf($.noAtLayer)('test_capture_imageBackground_used_at', async function (
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.file('base.bmp'));
-  assert(zip.file('special.bmp'));
+  assert.exists(zip.file('base.bmp'));
+  assert.exists(zip.file('special.bmp'));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -7636,7 +7636,7 @@ it('test_capture_imageBackground_used_inline', async function () {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.file('green.bmp'));
+  assert.exists(zip.file('green.bmp'));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -7670,8 +7670,8 @@ $it.skipIf($.noAdoptedStylesheet)('test_capture_imageBackground_used_adopted', a
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.file('doc.bmp'));
-  assert(zip.file('shadow.bmp'));
+  assert.exists(zip.file('doc.bmp'));
+  assert.exists(zip.file('shadow.bmp'));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -7715,12 +7715,12 @@ $it.xfail()('test_capture_imageBackground_used_var', async function () {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.file('var1.bmp'));
-  assert(zip.file('var2.bmp'));  // @FIXME
-  assert(zip.file('var3.bmp'));  // @FIXME
-  assert(zip.file('var4.bmp'));  // @FIXME
-  assert(zip.file('var5.bmp'));
-  assert(zip.file('var6.bmp'));
+  assert.exists(zip.file('var1.bmp'));
+  assert.exists(zip.file('var2.bmp'));  // @FIXME
+  assert.exists(zip.file('var3.bmp'));  // @FIXME
+  assert.exists(zip.file('var4.bmp'));  // @FIXME
+  assert.exists(zip.file('var5.bmp'));
+  assert.exists(zip.file('var6.bmp'));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -7796,13 +7796,13 @@ $it.skipIf($.noNestingCss)('test_capture_imageBackground_used_nesting', async fu
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.file('case1.bmp'));
-  assert(zip.file('case1-1.bmp'));
-  assert(zip.file('case1-1-1.bmp'));
-  assert(zip.file('case1-1-2.bmp'));
-  assert(!zip.file('case1-2.bmp'));
-  assert(!zip.file('case1-2-1.bmp'));
-  assert(!zip.file('case1-2-2.bmp'));
+  assert.exists(zip.file('case1.bmp'));
+  assert.exists(zip.file('case1-1.bmp'));
+  assert.exists(zip.file('case1-1-1.bmp'));
+  assert.exists(zip.file('case1-1-2.bmp'));
+  assert.notExists(zip.file('case1-2.bmp'));
+  assert.notExists(zip.file('case1-2-1.bmp'));
+  assert.notExists(zip.file('case1-2-2.bmp'));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -7847,7 +7847,7 @@ it('test_capture_font', async function () {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.file('sansation_light.woff'));
+  assert.exists(zip.file('sansation_light.woff'));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -7866,7 +7866,7 @@ it('test_capture_font', async function () {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.file('sansation_light.woff'));
+  assert.exists(zip.file('sansation_light.woff'));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -7932,13 +7932,13 @@ it('test_capture_font_used', async function () {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.file('internal.woff'));
-  assert(zip.file('link.woff'));
-  assert(zip.file('import.woff'));
-  assert(zip.file('pseudo1.woff'));
-  assert(zip.file('internal-keyframes.woff'));
-  assert(!zip.file('neverused.woff'));
-  assert(!zip.file('removed.woff'));
+  assert.exists(zip.file('internal.woff'));
+  assert.exists(zip.file('link.woff'));
+  assert.exists(zip.file('import.woff'));
+  assert.exists(zip.file('pseudo1.woff'));
+  assert.exists(zip.file('internal-keyframes.woff'));
+  assert.notExists(zip.file('neverused.woff'));
+  assert.notExists(zip.file('removed.woff'));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -7976,13 +7976,13 @@ it('test_capture_font_used', async function () {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.file('internal.woff'));
-  assert(zip.file('link.woff'));
-  assert(zip.file('import.woff'));
-  assert(zip.file('pseudo1.woff'));
-  assert(zip.file('internal-keyframes.woff'));
-  assert(zip.file('neverused.woff'));
-  assert(zip.file('removed.woff'));
+  assert.exists(zip.file('internal.woff'));
+  assert.exists(zip.file('link.woff'));
+  assert.exists(zip.file('import.woff'));
+  assert.exists(zip.file('pseudo1.woff'));
+  assert.exists(zip.file('internal-keyframes.woff'));
+  assert.exists(zip.file('neverused.woff'));
+  assert.exists(zip.file('removed.woff'));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -8025,19 +8025,19 @@ it('test_capture_font_used_syntax', async function () {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.file('identifier-1.woff'));
-  assert(zip.file('identifier-2.woff'));
-  assert(zip.file('string-1.woff'));
-  assert(zip.file('string-2.woff'));
-  assert(zip.file('string-3.woff'));
-  assert(zip.file('string-4.woff'));
-  assert(zip.file('complex-name-1.woff'));
-  assert(zip.file('complex-name-2.woff'));
-  assert(zip.file('multiple-value-1.woff'));
-  assert(zip.file('multiple-value-2.woff'));
-  assert(zip.file('keyframes-1.woff'));
-  assert(zip.file('keyframes-2.woff'));
-  assert(zip.file('keyframes-3.woff'));
+  assert.exists(zip.file('identifier-1.woff'));
+  assert.exists(zip.file('identifier-2.woff'));
+  assert.exists(zip.file('string-1.woff'));
+  assert.exists(zip.file('string-2.woff'));
+  assert.exists(zip.file('string-3.woff'));
+  assert.exists(zip.file('string-4.woff'));
+  assert.exists(zip.file('complex-name-1.woff'));
+  assert.exists(zip.file('complex-name-2.woff'));
+  assert.exists(zip.file('multiple-value-1.woff'));
+  assert.exists(zip.file('multiple-value-2.woff'));
+  assert.exists(zip.file('keyframes-1.woff'));
+  assert.exists(zip.file('keyframes-2.woff'));
+  assert.exists(zip.file('keyframes-3.woff'));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -8082,17 +8082,17 @@ it('test_capture_font_used_unloaded', async function () {
     options: Object.assign({}, baseOptions, options),
   });
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.file('alternative-1.woff'));
-  assert(zip.file('alternative-2.woff'));
-  assert(zip.file('alternative-3.woff'));
-  assert(zip.file('unicode-range-1.woff'));
-  assert(zip.file('unicode-range-2.woff'));
-  assert(zip.file('unicode-range-3.woff'));
-  assert(zip.file('unicode-range-4.woff'));
-  assert(zip.file('unicode-range-5.woff'));
-  assert(zip.file('unicode-range-6.woff'));
-  assert(zip.file('unicode-range-7.woff'));
-  assert(zip.file('unicode-range-8.woff'));
+  assert.exists(zip.file('alternative-1.woff'));
+  assert.exists(zip.file('alternative-2.woff'));
+  assert.exists(zip.file('alternative-3.woff'));
+  assert.exists(zip.file('unicode-range-1.woff'));
+  assert.exists(zip.file('unicode-range-2.woff'));
+  assert.exists(zip.file('unicode-range-3.woff'));
+  assert.exists(zip.file('unicode-range-4.woff'));
+  assert.exists(zip.file('unicode-range-5.woff'));
+  assert.exists(zip.file('unicode-range-6.woff'));
+  assert.exists(zip.file('unicode-range-7.woff'));
+  assert.exists(zip.file('unicode-range-8.woff'));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -8132,22 +8132,22 @@ it('test_capture_font_used_scope', async function () {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.file('internal1.woff'));
-  assert(zip.file('internal2.woff'));
-  assert(zip.file('internal3.woff'));
-  assert(!zip.file('internal4.woff'));
-  assert(zip.file('internal5.woff'));
-  assert(zip.file('internal6.woff'));
-  assert(zip.file('internal7.woff'));
-  assert(!zip.file('internal8.woff'));
-  assert(zip.file('shadow1.woff'));
-  assert(zip.file('shadow2.woff'));
-  assert(!zip.file('shadow3.woff'));
-  assert(!zip.file('shadow4.woff'));
-  assert(zip.file('shadow5.woff'));
-  assert(zip.file('shadow6.woff'));
-  assert(!zip.file('shadow7.woff'));
-  assert(!zip.file('shadow8.woff'));
+  assert.exists(zip.file('internal1.woff'));
+  assert.exists(zip.file('internal2.woff'));
+  assert.exists(zip.file('internal3.woff'));
+  assert.notExists(zip.file('internal4.woff'));
+  assert.exists(zip.file('internal5.woff'));
+  assert.exists(zip.file('internal6.woff'));
+  assert.exists(zip.file('internal7.woff'));
+  assert.notExists(zip.file('internal8.woff'));
+  assert.exists(zip.file('shadow1.woff'));
+  assert.exists(zip.file('shadow2.woff'));
+  assert.notExists(zip.file('shadow3.woff'));
+  assert.notExists(zip.file('shadow4.woff'));
+  assert.exists(zip.file('shadow5.woff'));
+  assert.exists(zip.file('shadow6.woff'));
+  assert.notExists(zip.file('shadow7.woff'));
+  assert.notExists(zip.file('shadow8.woff'));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -8189,7 +8189,7 @@ $it.skipIf($.noPartPseudo)('test_capture_font_used_scope_part', async function (
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.file('internal.woff'));
+  assert.exists(zip.file('internal.woff'));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -8211,8 +8211,8 @@ it('test_capture_font_used_scope_conditional', async function () {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.file('internal.woff'));
-  assert(zip.file('shadow.woff'));
+  assert.exists(zip.file('internal.woff'));
+  assert.exists(zip.file('shadow.woff'));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -8247,11 +8247,11 @@ $it.xfail()('test_capture_font_used_var', async function () {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.file('var1.woff'));  // @FIXME
-  assert(zip.file('var2.woff'));  // @FIXME
-  assert(zip.file('var3.woff'));  // @FIXME
-  assert(zip.file('var4.woff'));  // @FIXME
-  assert(zip.file('var5.woff'));  // @FIXME
+  assert.exists(zip.file('var1.woff'));  // @FIXME
+  assert.exists(zip.file('var2.woff'));  // @FIXME
+  assert.exists(zip.file('var3.woff'));  // @FIXME
+  assert.exists(zip.file('var4.woff'));  // @FIXME
+  assert.exists(zip.file('var5.woff'));  // @FIXME
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -8313,13 +8313,13 @@ $it.skipIf($.noNestingCss)('test_capture_font_used_nesting', async function () {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.file('file1.woff'));
-  assert(zip.file('file1-1.woff'));
-  assert(zip.file('file1-1-1.woff'));
-  assert(zip.file('file1-1-2.woff'));
-  assert(!zip.file('file1-2.woff'));
-  assert(!zip.file('file1-2-1.woff'));
-  assert(!zip.file('file1-2-2.woff'));
+  assert.exists(zip.file('file1.woff'));
+  assert.exists(zip.file('file1-1.woff'));
+  assert.exists(zip.file('file1-1-1.woff'));
+  assert.exists(zip.file('file1-1-2.woff'));
+  assert.notExists(zip.file('file1-2.woff'));
+  assert.notExists(zip.file('file1-2-1.woff'));
+  assert.notExists(zip.file('file1-2-2.woff'));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -8371,8 +8371,8 @@ $it.xfail()('test_capture_font_used_scripted', async function () {
     options: Object.assign({}, baseOptions, options),
   }, {delay: 300});
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.file('scripted.woff'));
-  assert(!zip.file('removed.woff'));
+  assert.exists(zip.file('scripted.woff'));
+  assert.notExists(zip.file('removed.woff'));
 });
 
 /**
@@ -8391,8 +8391,8 @@ it('test_capture_script', async function () {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.file('script1.js'));
-  assert(zip.file('script2.js'));
+  assert.exists(zip.file('script1.js'));
+  assert.exists(zip.file('script2.js'));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -8541,7 +8541,7 @@ it('test_capture_noscript', async function () {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.file('red.bmp'));
+  assert.exists(zip.file('red.bmp'));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -8601,7 +8601,7 @@ it('test_capture_noscript_headless', async function () {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.file('red.bmp'));
+  assert.exists(zip.file('red.bmp'));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -8646,7 +8646,7 @@ it('test_capture_frame', async function () {
   assert.strictEqual(frameDoc.querySelector('img').getAttribute('src'), 'red.bmp');
 
   var imgFile = zip.file('red.bmp');
-  assert(imgFile);
+  assert.exists(imgFile);
   var imgData = await imgFile.async('base64');
   assert.strictEqual(imgData, 'Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAAD/AAAA');
 
@@ -8770,7 +8770,7 @@ it('test_capture_frame_cross_origin', async function () {
   assert.strictEqual(frameDoc.querySelector('img').getAttribute('src'), 'red.bmp');
 
   var imgFile = zip.file('red.bmp');
-  assert(imgFile);
+  assert.exists(imgFile);
   var imgData = await imgFile.async('base64');
   assert.strictEqual(imgData, 'Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAAD/AAAA');
 
@@ -8836,7 +8836,7 @@ $it.xfailIf(
   assert.strictEqual(doc.querySelector('img').getAttribute('src'), 'red.bmp');
 
   var imgFile = zip.file('red.bmp');
-  assert(imgFile);
+  assert.exists(imgFile);
   var imgData = await imgFile.async('base64');
   assert.strictEqual(imgData, 'Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAAD/AAAA');
 });
@@ -8863,7 +8863,7 @@ $it.skipIf(
   assert.strictEqual(doc.querySelector('img').getAttribute('src'), 'red.bmp');
 
   var imgFile = zip.file('red.bmp');
-  assert(imgFile);
+  assert.exists(imgFile);
   var imgData = await imgFile.async('base64');
   assert.strictEqual(imgData, 'Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAAD/AAAA');
 });
@@ -8900,12 +8900,12 @@ it('test_capture_frame_srcdoc', async function () {
   var frameFile = zip.file(frame.getAttribute('src'));
   var frameBlob = new Blob([await frameFile.async('blob')], {type: "text/html"});
   var frameDoc = await readFileAsDocument(frameBlob);
-  assert(frameDoc.querySelector('html[data-scrapbook-source="about:srcdoc"]'));
+  assert.exists(frameDoc.querySelector('html[data-scrapbook-source="about:srcdoc"]'));
   assert.strictEqual(frameDoc.querySelector('p').textContent.trim(), `srcdoc content modified`);
   assert.strictEqual(frameDoc.querySelector('img').getAttribute('src'), 'red.bmp');
 
   var imgFile = zip.file('red.bmp');
-  assert(imgFile);
+  assert.exists(imgFile);
   var imgData = await imgFile.async('base64');
   assert.strictEqual(imgData, 'Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAAD/AAAA');
 
@@ -8961,7 +8961,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
   assert(srcdoc.querySelector('html[data-scrapbook-source="about:srcdoc"]'));
   assert.strictEqual(srcdoc.querySelector('p').textContent.trim(), `srcdoc content modified`);
   assert.strictEqual(srcdoc.querySelector('img').getAttribute('src'), 'data:image/bmp;filename=red.bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAAD/AAAA');
-  assert(!zip.file('red.bmp'));
+  assert.notExists(zip.file('red.bmp'));
 
   // frame[srcdoc] should be ignored (left unchanged) and its src should be used
   var blob = await capture({
@@ -9159,7 +9159,7 @@ it('test_capture_frame_headless', async function () {
   assert.strictEqual(frameDoc.querySelector('img').getAttribute('src'), 'red.bmp');
 
   var imgFile = zip.file('red.bmp');
-  assert(imgFile);
+  assert.exists(imgFile);
   var imgData = await imgFile.async('base64');
   assert.strictEqual(imgData, 'Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAAD/AAAA');
 
@@ -9216,12 +9216,12 @@ it('test_capture_frame_headless_srcdoc', async function () {
   var frameFile = zip.file(frame.getAttribute('src'));
   var frameBlob = new Blob([await frameFile.async('blob')], {type: "text/html"});
   var frameDoc = await readFileAsDocument(frameBlob);
-  assert(frameDoc.querySelector('html[data-scrapbook-source="about:srcdoc"]'));
+  assert.exists(frameDoc.querySelector('html[data-scrapbook-source="about:srcdoc"]'));
   assert.strictEqual(frameDoc.querySelector('p').textContent.trim(), `srcdoc content`);
   assert.strictEqual(frameDoc.querySelector('img').getAttribute('src'), 'red.bmp');
 
   var imgFile = zip.file('red.bmp');
-  assert(imgFile);
+  assert.exists(imgFile);
   var imgData = await imgFile.async('base64');
   assert.strictEqual(imgData, 'Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAAD/AAAA');
 
@@ -9232,7 +9232,7 @@ it('test_capture_frame_headless_srcdoc', async function () {
   var frameFile = zip.file(frame.getAttribute('src'));
   var frameBlob = new Blob([await frameFile.async('blob')], {type: "text/html"});
   var frameDoc = await readFileAsDocument(frameBlob);
-  assert(frameDoc.querySelector('html[data-scrapbook-source="about:srcdoc"]'));
+  assert.exists(frameDoc.querySelector('html[data-scrapbook-source="about:srcdoc"]'));
   var mrs = frameDoc.querySelectorAll('meta[http-equiv="refresh"]');
   assert.strictEqual(mrs[0].getAttribute('content'), `0; url=${localhost}/capture_frame/frames/frame1.html`);
 
@@ -9283,7 +9283,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
   assert(srcdoc.querySelector('html[data-scrapbook-source="about:srcdoc"]'));
   assert.strictEqual(srcdoc.querySelector('p').textContent.trim(), `srcdoc content`);
   assert.strictEqual(srcdoc.querySelector('img').getAttribute('src'), 'data:image/bmp;filename=red.bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAAD/AAAA');
-  assert(!zip.file('red.bmp'));
+  assert.notExists(zip.file('red.bmp'));
 
   // meta refresh in the srcdoc should be resolved according to the base URL of the main document
   var frame = doc.querySelectorAll('iframe')[1];
@@ -9824,10 +9824,10 @@ it('test_capture_frameRename_header', async function () {
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
 
-  assert(zip.file("frame1.html"));
-  assert(zip.file("frame2.html"));
-  assert(zip.file("frame3.py.html"));
-  assert(zip.file("a中b#c.php.html"));
+  assert.exists(zip.file("frame1.html"));
+  assert.exists(zip.file("frame2.html"));
+  assert.exists(zip.file("frame3.py.html"));
+  assert.exists(zip.file("a中b#c.php.html"));
 
   assert.strictEqual(doc.querySelectorAll('iframe')[0].getAttribute('src'), `frame1.html`);
   assert.strictEqual(doc.querySelectorAll('iframe')[1].getAttribute('src'), `frame2.html`);
@@ -9850,10 +9850,10 @@ it('test_capture_frameRename_header', async function () {
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
 
-  assert(zip.file("frame1.html"));
-  assert(zip.file("frame2.html"));
-  assert(zip.file("frame3.py.html"));
-  assert(zip.file("a中b#c.php.html"));
+  assert.exists(zip.file("frame1.html"));
+  assert.exists(zip.file("frame2.html"));
+  assert.exists(zip.file("frame3.py.html"));
+  assert.exists(zip.file("a中b#c.php.html"));
 
   assert.strictEqual(doc.querySelectorAll('iframe')[0].getAttribute('src'), `frame1.html`);
   assert.strictEqual(doc.querySelectorAll('iframe')[1].getAttribute('src'), `frame2.html`);
@@ -10194,10 +10194,10 @@ it('test_capture_image', async function () {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.file('red.bmp'));
-  assert(zip.file('green.bmp'));
-  assert(zip.file('blue.bmp'));
-  assert(zip.file('yellow.bmp'));
+  assert.exists(zip.file('red.bmp'));
+  assert.exists(zip.file('green.bmp'));
+  assert.exists(zip.file('blue.bmp'));
+  assert.exists(zip.file('yellow.bmp'));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -10260,10 +10260,10 @@ it('test_capture_image', async function () {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.file('red.bmp'));
-  assert(zip.file('green.bmp'));
-  assert(zip.file('blue.bmp'));
-  assert(zip.file('yellow.bmp'));
+  assert.exists(zip.file('red.bmp'));
+  assert.exists(zip.file('green.bmp'));
+  assert.exists(zip.file('blue.bmp'));
+  assert.exists(zip.file('yellow.bmp'));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -10384,10 +10384,10 @@ it('test_capture_audio', async function () {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.file('horse.ogg'));
-  assert(zip.file('horse.mp3'));
-  assert(zip.file('horse_en.vtt'));
-  assert(zip.file('horse_zh.vtt'));
+  assert.exists(zip.file('horse.ogg'));
+  assert.exists(zip.file('horse.mp3'));
+  assert.exists(zip.file('horse_en.vtt'));
+  assert.exists(zip.file('horse_zh.vtt'));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -10413,8 +10413,8 @@ it('test_capture_audio', async function () {
 
   var zip = await new JSZip().loadAsync(blob);
   assert(Object.keys(zip.files).length > 1);
-  assert(zip.file('horse_en.vtt'));
-  assert(zip.file('horse_zh.vtt'));
+  assert.exists(zip.file('horse_en.vtt'));
+  assert.exists(zip.file('horse_zh.vtt'));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -10441,10 +10441,10 @@ it('test_capture_audio', async function () {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.file('horse.ogg'));
-  assert(zip.file('horse.mp3'));
-  assert(zip.file('horse_en.vtt'));
-  assert(zip.file('horse_zh.vtt'));
+  assert.exists(zip.file('horse.ogg'));
+  assert.exists(zip.file('horse.mp3'));
+  assert.exists(zip.file('horse_en.vtt'));
+  assert.exists(zip.file('horse_zh.vtt'));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -10551,10 +10551,10 @@ it('test_capture_video', async function () {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.file('small.mp4'));
-  assert(zip.file('small.webm'));
-  assert(zip.file('small_en.vtt'));
-  assert(zip.file('small_zh.vtt'));
+  assert.exists(zip.file('small.mp4'));
+  assert.exists(zip.file('small.webm'));
+  assert.exists(zip.file('small_en.vtt'));
+  assert.exists(zip.file('small_zh.vtt'));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -10581,8 +10581,8 @@ it('test_capture_video', async function () {
 
   var zip = await new JSZip().loadAsync(blob);
   assert(Object.keys(zip.files).length > 1);
-  assert(zip.file('small_en.vtt'));
-  assert(zip.file('small_zh.vtt'));
+  assert.exists(zip.file('small_en.vtt'));
+  assert.exists(zip.file('small_zh.vtt'));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -10609,10 +10609,10 @@ it('test_capture_video', async function () {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.file('small.mp4'));
-  assert(zip.file('small.webm'));
-  assert(zip.file('small_en.vtt'));
-  assert(zip.file('small_zh.vtt'));
+  assert.exists(zip.file('small.mp4'));
+  assert.exists(zip.file('small.webm'));
+  assert.exists(zip.file('small_en.vtt'));
+  assert.exists(zip.file('small_zh.vtt'));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -10770,7 +10770,7 @@ it('test_capture_canvas', async function () {
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
 
-  assert(!doc.querySelector('script[data-scrapbook-elem="basic-loader"]'));
+  assert.notExists(doc.querySelector('script[data-scrapbook-elem="basic-loader"]'));
   assert(!doc.querySelector('#c1').hasAttribute("data-scrapbook-canvas"));
   assert(!doc.querySelector('#c2').hasAttribute("data-scrapbook-canvas"));
 
@@ -10808,9 +10808,9 @@ it('test_capture_canvas', async function () {
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
 
-  assert(!doc.querySelector('script[data-scrapbook-elem="basic-loader"]'));
-  assert(!doc.querySelector('#c1'));
-  assert(!doc.querySelector('#c2'));
+  assert.notExists(doc.querySelector('script[data-scrapbook-elem="basic-loader"]'));
+  assert.notExists(doc.querySelector('#c1'));
+  assert.notExists(doc.querySelector('#c2'));
 
   // canvas in the shadow DOM
   var blob = await capture({
@@ -10872,7 +10872,7 @@ it('test_capture_embed', async function () {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.file('helloworld.swf'));
+  assert.exists(zip.file('helloworld.swf'));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -10932,7 +10932,7 @@ it('test_capture_embed', async function () {
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
   var embed = doc.querySelector('embed');
-  assert(!embed);
+  assert.notExists(embed);
 });
 
 /**
@@ -10968,7 +10968,7 @@ it('test_capture_embed_frame', async function () {
   assert.strictEqual(frameDoc.querySelector('img').getAttribute('src'), 'red.bmp');
 
   var imgFile = zip.file('red.bmp');
-  assert(imgFile);
+  assert.exists(imgFile);
   var imgData = await imgFile.async('base64');
   assert.strictEqual(imgData, 'Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAAD/AAAA');
 
@@ -11120,11 +11120,11 @@ it('test_capture_object', async function () {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.file('demo.svg'));
-  assert(zip.file('green.bmp'));
-  assert(zip.file('demo2.svg'));
-  assert(zip.file('green2.bmp'));
-  assert(zip.file('demo-1.svg'));
+  assert.exists(zip.file('demo.svg'));
+  assert.exists(zip.file('green.bmp'));
+  assert.exists(zip.file('demo2.svg'));
+  assert.exists(zip.file('green2.bmp'));
+  assert.exists(zip.file('demo-1.svg'));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -11195,7 +11195,7 @@ it('test_capture_object', async function () {
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
-  assert(!doc.querySelector('object'));
+  assert.notExists(doc.querySelector('object'));
 });
 
 /**
@@ -11231,7 +11231,7 @@ it('test_capture_object_frame', async function () {
   assert.strictEqual(frameDoc.querySelector('img').getAttribute('src'), 'red.bmp');
 
   var imgFile = zip.file('red.bmp');
-  assert(imgFile);
+  assert.exists(imgFile);
   var imgData = await imgFile.async('base64');
   assert.strictEqual(imgData, 'Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAAD/AAAA');
 
@@ -11380,10 +11380,10 @@ it('test_capture_applet', async function () {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.file('applet.class'));
-  assert(zip.file('applet.jar'));
-  assert(zip.file('applet2.class'));
-  assert(zip.file('applet2.jar'));
+  assert.exists(zip.file('applet.class'));
+  assert.exists(zip.file('applet.jar'));
+  assert.exists(zip.file('applet2.class'));
+  assert.exists(zip.file('applet2.jar'));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -11454,7 +11454,7 @@ it('test_capture_applet', async function () {
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
-  assert(!doc.querySelector('applet'));
+  assert.notExists(doc.querySelector('applet'));
 });
 
 /**
@@ -11877,11 +11877,11 @@ it('test_capture_svg', async function () {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.file("index.html"));
-  assert(zip.file("green.bmp"));
-  assert(zip.file("blue.bmp"));
-  assert(zip.file("script.js"));
-  assert(zip.file("script2.js"));
+  assert.exists(zip.file("index.html"));
+  assert.exists(zip.file("green.bmp"));
+  assert.exists(zip.file("blue.bmp"));
+  assert.exists(zip.file("script.js"));
+  assert.exists(zip.file("script2.js"));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -11907,9 +11907,9 @@ it('test_capture_svg', async function () {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.file("index.html"));
-  assert(zip.file("index.svg"));
-  assert(zip.file("green.bmp"));
+  assert.exists(zip.file("index.html"));
+  assert.exists(zip.file("index.svg"));
+  assert.exists(zip.file("green.bmp"));
 
   var indexFile = zip.file('index.svg');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -11941,7 +11941,7 @@ it('test_capture_mathml', async function () {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.file("index.html"));
+  assert.exists(zip.file("index.html"));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -12023,17 +12023,17 @@ it('test_capture_recursive', async function () {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.file("index.html"));
-  assert(!zip.file("red.bmp"));
-  assert(!zip.file("blue.bmp"));
+  assert.exists(zip.file("index.html"));
+  assert.notExists(zip.file("red.bmp"));
+  assert.notExists(zip.file("blue.bmp"));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
 
-  assert(!doc.querySelector('picture'));
-  assert(!doc.querySelector('img'));
-  assert(!doc.querySelector('script'));
+  assert.notExists(doc.querySelector('picture'));
+  assert.notExists(doc.querySelector('img'));
+  assert.notExists(doc.querySelector('script'));
 });
 
 /**
@@ -12053,27 +12053,27 @@ it('test_capture_removeHidden', async function () {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.file("index.html"));
-  assert(!zip.file("red.bmp"));
+  assert.exists(zip.file("index.html"));
+  assert.notExists(zip.file("red.bmp"));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
 
-  assert(!doc.querySelector('p'));
-  assert(!doc.querySelector('blockquote'));
-  assert(!doc.querySelector('img'));
+  assert.notExists(doc.querySelector('p'));
+  assert.notExists(doc.querySelector('blockquote'));
+  assert.notExists(doc.querySelector('img'));
 
   // these elements should not be altered anyway
-  assert(doc.querySelector('html'));
-  assert(doc.querySelector('head'));
-  assert(doc.querySelector('meta'));
-  assert(doc.querySelector('title'));
-  assert(doc.querySelector('style'));
-  assert(doc.querySelector('link[rel="stylesheet"]'));
-  assert(doc.querySelector('body'));
-  assert(doc.querySelector('noscript'));
-  assert(doc.querySelector('template'));
+  assert.exists(doc.querySelector('html'));
+  assert.exists(doc.querySelector('head'));
+  assert.exists(doc.querySelector('meta'));
+  assert.exists(doc.querySelector('title'));
+  assert.exists(doc.querySelector('style'));
+  assert.exists(doc.querySelector('link[rel="stylesheet"]'));
+  assert.exists(doc.querySelector('body'));
+  assert.exists(doc.querySelector('noscript'));
+  assert.exists(doc.querySelector('template'));
 
   /* capture.removeHidden = none */
   var options = {
@@ -12086,26 +12086,26 @@ it('test_capture_removeHidden', async function () {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.file("index.html"));
-  assert(zip.file("red.bmp"));
+  assert.exists(zip.file("index.html"));
+  assert.exists(zip.file("red.bmp"));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
 
-  assert(doc.querySelector('p'));
-  assert(doc.querySelector('blockquote'));
+  assert.exists(doc.querySelector('p'));
+  assert.exists(doc.querySelector('blockquote'));
 
-  assert(doc.querySelector('img'));
-  assert(doc.querySelector('html'));
-  assert(doc.querySelector('head'));
-  assert(doc.querySelector('meta'));
-  assert(doc.querySelector('title'));
-  assert(doc.querySelector('style'));
-  assert(doc.querySelector('link[rel="stylesheet"]'));
-  assert(doc.querySelector('body'));
-  assert(doc.querySelector('noscript'));
-  assert(doc.querySelector('template'));
+  assert.exists(doc.querySelector('img'));
+  assert.exists(doc.querySelector('html'));
+  assert.exists(doc.querySelector('head'));
+  assert.exists(doc.querySelector('meta'));
+  assert.exists(doc.querySelector('title'));
+  assert.exists(doc.querySelector('style'));
+  assert.exists(doc.querySelector('link[rel="stylesheet"]'));
+  assert.exists(doc.querySelector('body'));
+  assert.exists(doc.querySelector('noscript'));
+  assert.exists(doc.querySelector('template'));
 });
 
 /**
@@ -12174,10 +12174,10 @@ it('test_capture_preload', async function () {
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
-  assert(!doc.querySelector('link[rel="preload"]'));
-  assert(!doc.querySelector('link[rel="modulepreload"]'));
-  assert(!doc.querySelector('link[rel="dns-prefetch"]'));
-  assert(!doc.querySelector('link[rel="preconnect"]'));
+  assert.notExists(doc.querySelector('link[rel="preload"]'));
+  assert.notExists(doc.querySelector('link[rel="modulepreload"]'));
+  assert.notExists(doc.querySelector('link[rel="dns-prefetch"]'));
+  assert.notExists(doc.querySelector('link[rel="preconnect"]'));
 });
 
 /**
@@ -12220,8 +12220,8 @@ it('test_capture_prefetch', async function () {
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
-  assert(!doc.querySelector('link[rel="prefetch"]'));
-  assert(!doc.querySelector('link[rel="prerender"]'));
+  assert.notExists(doc.querySelector('link[rel="prefetch"]'));
+  assert.notExists(doc.querySelector('link[rel="prerender"]'));
 });
 
 /**
@@ -13086,9 +13086,9 @@ it('test_capture_shadowRoot', async function () {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.file("index.html"));
-  assert(zip.file("green.bmp"));
-  assert(zip.file("blue.bmp"));
+  assert.exists(zip.file("index.html"));
+  assert.exists(zip.file("green.bmp"));
+  assert.exists(zip.file("blue.bmp"));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -13126,16 +13126,16 @@ it('test_capture_shadowRoot', async function () {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.file("index.html"));
-  assert(!zip.file("green.bmp"));
-  assert(!zip.file("blue.bmp"));
+  assert.exists(zip.file("index.html"));
+  assert.notExists(zip.file("green.bmp"));
+  assert.notExists(zip.file("blue.bmp"));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
 
-  assert(!doc.querySelector('[data-scrapbook-shadowroot]'));
-  assert(!doc.querySelector('script[data-scrapbook-elem="basic-loader"]'));
+  assert.notExists(doc.querySelector('[data-scrapbook-shadowroot]'));
+  assert.notExists(doc.querySelector('script[data-scrapbook-elem="basic-loader"]'));
 
   // check records
   var host1 = doc.querySelector('div');
@@ -13164,9 +13164,9 @@ $it.skipIf(
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.file("index.html"));
-  assert(zip.file("green.bmp"));
-  assert(zip.file("blue.bmp"));
+  assert.exists(zip.file("index.html"));
+  assert.exists(zip.file("green.bmp"));
+  assert.exists(zip.file("blue.bmp"));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -13213,9 +13213,9 @@ $it.skipIf($.noShadowRootClonable)('test_capture_shadowRoot_clonable', async fun
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.file("index.html"));
-  assert(zip.file("green.bmp"));
-  assert(zip.file("blue.bmp"));
+  assert.exists(zip.file("index.html"));
+  assert.exists(zip.file("green.bmp"));
+  assert.exists(zip.file("blue.bmp"));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -13255,16 +13255,16 @@ $it.skipIf($.noShadowRootClonable)('test_capture_shadowRoot_clonable', async fun
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.file("index.html"));
-  assert(!zip.file("green.bmp"));
-  assert(!zip.file("blue.bmp"));
+  assert.exists(zip.file("index.html"));
+  assert.notExists(zip.file("green.bmp"));
+  assert.notExists(zip.file("blue.bmp"));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
 
-  assert(!doc.querySelector('[data-scrapbook-shadowroot]'));
-  assert(!doc.querySelector('script[data-scrapbook-elem="basic-loader"]'));
+  assert.notExists(doc.querySelector('[data-scrapbook-shadowroot]'));
+  assert.notExists(doc.querySelector('script[data-scrapbook-elem="basic-loader"]'));
 
   // check records
   var host1 = doc.querySelector('div');
@@ -13290,7 +13290,7 @@ $it.skipIf($.noShadowRootDelegatesFocus)
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.file("index.html"));
+  assert.exists(zip.file("index.html"));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -13433,8 +13433,8 @@ it('test_capture_shadowRoot_custom', async function () {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.file("index.html"));
-  assert(zip.file("green.bmp"));
+  assert.exists(zip.file("index.html"));
+  assert.exists(zip.file("green.bmp"));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -13466,8 +13466,8 @@ $it.skipIf(
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.file("index.html"));
-  assert(zip.file("green.bmp"));
+  assert.exists(zip.file("index.html"));
+  assert.exists(zip.file("green.bmp"));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -13503,7 +13503,7 @@ it('test_capture_custom_elements', async function () {
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
-  assert(!doc.querySelector(`script[data-scrapbook-elem="custom-elements-loader"]`));
+  assert.notExists(doc.querySelector(`script[data-scrapbook-elem="custom-elements-loader"]`));
 
 	/* capture.script = link */
   var options = {
@@ -13518,7 +13518,7 @@ it('test_capture_custom_elements', async function () {
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
-  assert(!doc.querySelector(`script[data-scrapbook-elem="custom-elements-loader"]`));
+  assert.notExists(doc.querySelector(`script[data-scrapbook-elem="custom-elements-loader"]`));
 
 	/* capture.script = blank */
   var options = {
@@ -13567,7 +13567,7 @@ it('test_capture_custom_elements_bad', async function () {
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
-  assert(!doc.querySelector(`script[data-scrapbook-elem="custom-elements-loader"]`));
+  assert.notExists(doc.querySelector(`script[data-scrapbook-elem="custom-elements-loader"]`));
 });
 
 /**
@@ -13589,15 +13589,15 @@ it('test_capture_downLink_file', async function () {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.file("file.bmp"));
-  assert(zip.file("file.css"));
-  assert(zip.file("page.html"));
-  assert(zip.file("file.txt"));
-  assert(zip.file("file2.txt"));
-  assert(!zip.file("unknown.bin"));
-  assert(zip.file("file3.txt"));
-  assert(!zip.file("nofilename.py"));
-  assert(zip.file("redirect.txt"));
+  assert.exists(zip.file("file.bmp"));
+  assert.exists(zip.file("file.css"));
+  assert.exists(zip.file("page.html"));
+  assert.exists(zip.file("file.txt"));
+  assert.exists(zip.file("file2.txt"));
+  assert.notExists(zip.file("unknown.bin"));
+  assert.exists(zip.file("file3.txt"));
+  assert.notExists(zip.file("nofilename.py"));
+  assert.exists(zip.file("redirect.txt"));
   assert.strictEqual(Object.keys(zip.files).length, 8);
 
   var indexFile = zip.file('index.html');
@@ -13643,15 +13643,15 @@ it('test_capture_downLink_file', async function () {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.file("file.bmp"));
-  assert(zip.file("file.css"));
-  assert(zip.file("page.html"));
-  assert(zip.file("file.txt"));
-  assert(!zip.file("file2.txt"));
-  assert(!zip.file("unknown.bin"));
-  assert(!zip.file("file3.txt"));
-  assert(!zip.file("nofilename.py"));
-  assert(!zip.file("file4.txt"));
+  assert.exists(zip.file("file.bmp"));
+  assert.exists(zip.file("file.css"));
+  assert.exists(zip.file("page.html"));
+  assert.exists(zip.file("file.txt"));
+  assert.notExists(zip.file("file2.txt"));
+  assert.notExists(zip.file("unknown.bin"));
+  assert.notExists(zip.file("file3.txt"));
+  assert.notExists(zip.file("nofilename.py"));
+  assert.notExists(zip.file("file4.txt"));
   assert.strictEqual(Object.keys(zip.files).length, 5);
 
   var indexFile = zip.file('index.html');
@@ -13697,15 +13697,15 @@ it('test_capture_downLink_file', async function () {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(!zip.file("file.bmp"));
-  assert(!zip.file("file.css"));
-  assert(!zip.file("page.html"));
-  assert(!zip.file("file.txt"));
-  assert(!zip.file("file2.txt"));
-  assert(!zip.file("unknown.bin"));
-  assert(!zip.file("file3.txt"));
-  assert(!zip.file("nofilename.py"));
-  assert(!zip.file("redirect.txt"));
+  assert.notExists(zip.file("file.bmp"));
+  assert.notExists(zip.file("file.css"));
+  assert.notExists(zip.file("page.html"));
+  assert.notExists(zip.file("file.txt"));
+  assert.notExists(zip.file("file2.txt"));
+  assert.notExists(zip.file("unknown.bin"));
+  assert.notExists(zip.file("file3.txt"));
+  assert.notExists(zip.file("nofilename.py"));
+  assert.notExists(zip.file("redirect.txt"));
   assert.strictEqual(Object.keys(zip.files).length, 1);
 
   var indexFile = zip.file('index.html');
@@ -13743,15 +13743,15 @@ it('test_capture_downLink_file_extFilter', async function () {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.file("file.bmp"));
-  assert(zip.file("file.css"));
-  assert(!zip.file("page.html"));
-  assert(zip.file("file.txt"));
-  assert(zip.file("file2.txt"));
-  assert(zip.file("unknown.bin"));
-  assert(zip.file("file3.txt"));
-  assert(zip.file("nofilename.py"));
-  assert(!zip.file("file4.txt"));
+  assert.exists(zip.file("file.bmp"));
+  assert.exists(zip.file("file.css"));
+  assert.notExists(zip.file("page.html"));
+  assert.exists(zip.file("file.txt"));
+  assert.exists(zip.file("file2.txt"));
+  assert.exists(zip.file("unknown.bin"));
+  assert.exists(zip.file("file3.txt"));
+  assert.exists(zip.file("nofilename.py"));
+  assert.notExists(zip.file("file4.txt"));
   assert.strictEqual(Object.keys(zip.files).length, 8);
 
   // space separator
@@ -13766,15 +13766,15 @@ it('test_capture_downLink_file_extFilter', async function () {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.file("file.bmp"));
-  assert(zip.file("file.css"));
-  assert(!zip.file("page.html"));
-  assert(zip.file("file.txt"));
-  assert(!zip.file("file2.txt"));
-  assert(!zip.file("unknown.bin"));
-  assert(!zip.file("file3.txt"));
-  assert(!zip.file("nofilename.py"));
-  assert(!zip.file("file4.txt"));
+  assert.exists(zip.file("file.bmp"));
+  assert.exists(zip.file("file.css"));
+  assert.notExists(zip.file("page.html"));
+  assert.exists(zip.file("file.txt"));
+  assert.notExists(zip.file("file2.txt"));
+  assert.notExists(zip.file("unknown.bin"));
+  assert.notExists(zip.file("file3.txt"));
+  assert.notExists(zip.file("nofilename.py"));
+  assert.notExists(zip.file("file4.txt"));
   assert.strictEqual(Object.keys(zip.files).length, 4);
 
   // comma separator
@@ -13789,15 +13789,15 @@ it('test_capture_downLink_file_extFilter', async function () {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.file("file.bmp"));
-  assert(zip.file("file.css"));
-  assert(!zip.file("page.html"));
-  assert(zip.file("file.txt"));
-  assert(!zip.file("file2.txt"));
-  assert(!zip.file("unknown.bin"));
-  assert(!zip.file("file3.txt"));
-  assert(!zip.file("nofilename.py"));
-  assert(!zip.file("file4.txt"));
+  assert.exists(zip.file("file.bmp"));
+  assert.exists(zip.file("file.css"));
+  assert.notExists(zip.file("page.html"));
+  assert.exists(zip.file("file.txt"));
+  assert.notExists(zip.file("file2.txt"));
+  assert.notExists(zip.file("unknown.bin"));
+  assert.notExists(zip.file("file3.txt"));
+  assert.notExists(zip.file("nofilename.py"));
+  assert.notExists(zip.file("file4.txt"));
   assert.strictEqual(Object.keys(zip.files).length, 4);
 
   // semicolon separator
@@ -13812,15 +13812,15 @@ it('test_capture_downLink_file_extFilter', async function () {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.file("file.bmp"));
-  assert(zip.file("file.css"));
-  assert(!zip.file("page.html"));
-  assert(zip.file("file.txt"));
-  assert(!zip.file("file2.txt"));
-  assert(!zip.file("unknown.bin"));
-  assert(!zip.file("file3.txt"));
-  assert(!zip.file("nofilename.py"));
-  assert(!zip.file("file4.txt"));
+  assert.exists(zip.file("file.bmp"));
+  assert.exists(zip.file("file.css"));
+  assert.notExists(zip.file("page.html"));
+  assert.exists(zip.file("file.txt"));
+  assert.notExists(zip.file("file2.txt"));
+  assert.notExists(zip.file("unknown.bin"));
+  assert.notExists(zip.file("file3.txt"));
+  assert.notExists(zip.file("nofilename.py"));
+  assert.notExists(zip.file("file4.txt"));
   assert.strictEqual(Object.keys(zip.files).length, 4);
 
   // combined separator
@@ -13835,15 +13835,15 @@ it('test_capture_downLink_file_extFilter', async function () {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.file("file.bmp"));
-  assert(zip.file("file.css"));
-  assert(!zip.file("page.html"));
-  assert(zip.file("file.txt"));
-  assert(!zip.file("file2.txt"));
-  assert(!zip.file("unknown.bin"));
-  assert(!zip.file("file3.txt"));
-  assert(!zip.file("nofilename.py"));
-  assert(!zip.file("file4.txt"));
+  assert.exists(zip.file("file.bmp"));
+  assert.exists(zip.file("file.css"));
+  assert.notExists(zip.file("page.html"));
+  assert.exists(zip.file("file.txt"));
+  assert.notExists(zip.file("file2.txt"));
+  assert.notExists(zip.file("unknown.bin"));
+  assert.notExists(zip.file("file3.txt"));
+  assert.notExists(zip.file("nofilename.py"));
+  assert.notExists(zip.file("file4.txt"));
   assert.strictEqual(Object.keys(zip.files).length, 4);
 
   // match full extension
@@ -13858,15 +13858,15 @@ it('test_capture_downLink_file_extFilter', async function () {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(!zip.file("file.bmp"));
-  assert(!zip.file("file.css"));
-  assert(!zip.file("page.html"));
-  assert(!zip.file("file.txt"));
-  assert(!zip.file("file2.txt"));
-  assert(!zip.file("unknown.bin"));
-  assert(!zip.file("file3.txt"));
-  assert(!zip.file("nofilename.py"));
-  assert(!zip.file("redirect.txt"));
+  assert.notExists(zip.file("file.bmp"));
+  assert.notExists(zip.file("file.css"));
+  assert.notExists(zip.file("page.html"));
+  assert.notExists(zip.file("file.txt"));
+  assert.notExists(zip.file("file2.txt"));
+  assert.notExists(zip.file("unknown.bin"));
+  assert.notExists(zip.file("file3.txt"));
+  assert.notExists(zip.file("nofilename.py"));
+  assert.notExists(zip.file("redirect.txt"));
   assert.strictEqual(Object.keys(zip.files).length, 1);
 
   // RegExp rule with flag
@@ -13881,15 +13881,15 @@ it('test_capture_downLink_file_extFilter', async function () {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.file("file.bmp"));
-  assert(zip.file("file.css"));
-  assert(!zip.file("page.html"));
-  assert(zip.file("file.txt"));
-  assert(!zip.file("file2.txt"));
-  assert(!zip.file("unknown.bin"));
-  assert(!zip.file("file3.txt"));
-  assert(!zip.file("nofilename.py"));
-  assert(!zip.file("file4.txt"));
+  assert.exists(zip.file("file.bmp"));
+  assert.exists(zip.file("file.css"));
+  assert.notExists(zip.file("page.html"));
+  assert.exists(zip.file("file.txt"));
+  assert.notExists(zip.file("file2.txt"));
+  assert.notExists(zip.file("unknown.bin"));
+  assert.notExists(zip.file("file3.txt"));
+  assert.notExists(zip.file("nofilename.py"));
+  assert.notExists(zip.file("file4.txt"));
   assert.strictEqual(Object.keys(zip.files).length, 4);
 
   // RegExp rule with no flag
@@ -13904,15 +13904,15 @@ it('test_capture_downLink_file_extFilter', async function () {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(!zip.file("file.bmp"));
-  assert(!zip.file("file.css"));
-  assert(!zip.file("page.html"));
-  assert(!zip.file("file.txt"));
-  assert(!zip.file("file2.txt"));
-  assert(!zip.file("unknown.bin"));
-  assert(!zip.file("file3.txt"));
-  assert(!zip.file("nofilename.py"));
-  assert(!zip.file("redirect.txt"));
+  assert.notExists(zip.file("file.bmp"));
+  assert.notExists(zip.file("file.css"));
+  assert.notExists(zip.file("page.html"));
+  assert.notExists(zip.file("file.txt"));
+  assert.notExists(zip.file("file2.txt"));
+  assert.notExists(zip.file("unknown.bin"));
+  assert.notExists(zip.file("file3.txt"));
+  assert.notExists(zip.file("nofilename.py"));
+  assert.notExists(zip.file("redirect.txt"));
   assert.strictEqual(Object.keys(zip.files).length, 1);
 
   // RegExp rule
@@ -13927,15 +13927,15 @@ it('test_capture_downLink_file_extFilter', async function () {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.file("file.bmp"));
-  assert(zip.file("file.css"));
-  assert(zip.file("page.html"));
-  assert(zip.file("file.txt"));
-  assert(!zip.file("file2.txt"));
-  assert(!zip.file("unknown.bin"));
-  assert(!zip.file("file3.txt"));
-  assert(!zip.file("nofilename.py"));
-  assert(!zip.file("file4.txt"));
+  assert.exists(zip.file("file.bmp"));
+  assert.exists(zip.file("file.css"));
+  assert.exists(zip.file("page.html"));
+  assert.exists(zip.file("file.txt"));
+  assert.notExists(zip.file("file2.txt"));
+  assert.notExists(zip.file("unknown.bin"));
+  assert.notExists(zip.file("file3.txt"));
+  assert.notExists(zip.file("nofilename.py"));
+  assert.notExists(zip.file("file4.txt"));
   assert.strictEqual(Object.keys(zip.files).length, 5);
 
   // match full extension
@@ -13950,15 +13950,15 @@ it('test_capture_downLink_file_extFilter', async function () {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(!zip.file("file.bmp"));
-  assert(!zip.file("file.css"));
-  assert(!zip.file("page.html"));
-  assert(!zip.file("file.txt"));
-  assert(!zip.file("file2.txt"));
-  assert(!zip.file("unknown.bin"));
-  assert(!zip.file("file3.txt"));
-  assert(!zip.file("nofilename.py"));
-  assert(!zip.file("redirect.txt"));
+  assert.notExists(zip.file("file.bmp"));
+  assert.notExists(zip.file("file.css"));
+  assert.notExists(zip.file("page.html"));
+  assert.notExists(zip.file("file.txt"));
+  assert.notExists(zip.file("file2.txt"));
+  assert.notExists(zip.file("unknown.bin"));
+  assert.notExists(zip.file("file3.txt"));
+  assert.notExists(zip.file("nofilename.py"));
+  assert.notExists(zip.file("redirect.txt"));
   assert.strictEqual(Object.keys(zip.files).length, 1);
 
   // unknown MIME should not match any extension
@@ -13973,15 +13973,15 @@ it('test_capture_downLink_file_extFilter', async function () {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.file("file.bmp"));
-  assert(zip.file("file.css"));
-  assert(zip.file("page.html"));
-  assert(zip.file("file.txt"));
-  assert(zip.file("file2.txt"));
-  assert(!zip.file("unknown.bin"));
-  assert(zip.file("file3.txt"));
-  assert(zip.file("nofilename.py"));
-  assert(zip.file("redirect.txt"));
+  assert.exists(zip.file("file.bmp"));
+  assert.exists(zip.file("file.css"));
+  assert.exists(zip.file("page.html"));
+  assert.exists(zip.file("file.txt"));
+  assert.exists(zip.file("file2.txt"));
+  assert.notExists(zip.file("unknown.bin"));
+  assert.exists(zip.file("file3.txt"));
+  assert.exists(zip.file("nofilename.py"));
+  assert.exists(zip.file("redirect.txt"));
   assert.strictEqual(Object.keys(zip.files).length, 9);
 
   // take URL filename if Content-Disposition without filename
@@ -13996,15 +13996,15 @@ it('test_capture_downLink_file_extFilter', async function () {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(!zip.file("file.bmp"));
-  assert(!zip.file("file.css"));
-  assert(!zip.file("page.html"));
-  assert(!zip.file("file.txt"));
-  assert(!zip.file("file2.txt"));
-  assert(!zip.file("unknown.bin"));
-  assert(!zip.file("file3.txt"));
-  assert(!zip.file("nofilename.py"));
-  assert(!zip.file("redirect.txt"));
+  assert.notExists(zip.file("file.bmp"));
+  assert.notExists(zip.file("file.css"));
+  assert.notExists(zip.file("page.html"));
+  assert.notExists(zip.file("file.txt"));
+  assert.notExists(zip.file("file2.txt"));
+  assert.notExists(zip.file("unknown.bin"));
+  assert.notExists(zip.file("file3.txt"));
+  assert.notExists(zip.file("nofilename.py"));
+  assert.notExists(zip.file("redirect.txt"));
   assert.strictEqual(Object.keys(zip.files).length, 1);
 
   // mime: filter
@@ -14022,15 +14022,15 @@ mime:application/wsb.unknown`,
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.file("file.bmp"));
-  assert(!zip.file("file.css"));
-  assert(!zip.file("page.html"));
-  assert(zip.file("file.txt"));
-  assert(zip.file("file2.txt"));
-  assert(zip.file("unknown.bin"));
-  assert(!zip.file("file3.txt"));
-  assert(!zip.file("nofilename.py"));
-  assert(zip.file("redirect.txt"));
+  assert.exists(zip.file("file.bmp"));
+  assert.notExists(zip.file("file.css"));
+  assert.notExists(zip.file("page.html"));
+  assert.exists(zip.file("file.txt"));
+  assert.exists(zip.file("file2.txt"));
+  assert.exists(zip.file("unknown.bin"));
+  assert.notExists(zip.file("file3.txt"));
+  assert.notExists(zip.file("nofilename.py"));
+  assert.exists(zip.file("redirect.txt"));
   assert.strictEqual(Object.keys(zip.files).length, 6);
 
   // mime: filter with regex
@@ -14046,15 +14046,15 @@ mime:/text/.+/i`,
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(!zip.file("file.bmp"));
-  assert(zip.file("file.css"));
-  assert(zip.file("page.html"));
-  assert(zip.file("file.txt"));
-  assert(zip.file("file2.txt"));
-  assert(!zip.file("unknown.bin"));
-  assert(!zip.file("file3.txt"));
-  assert(!zip.file("nofilename.py"));
-  assert(zip.file("redirect.txt"));
+  assert.notExists(zip.file("file.bmp"));
+  assert.exists(zip.file("file.css"));
+  assert.exists(zip.file("page.html"));
+  assert.exists(zip.file("file.txt"));
+  assert.exists(zip.file("file2.txt"));
+  assert.notExists(zip.file("unknown.bin"));
+  assert.notExists(zip.file("file3.txt"));
+  assert.notExists(zip.file("nofilename.py"));
+  assert.exists(zip.file("redirect.txt"));
   assert.strictEqual(Object.keys(zip.files).length, 6);
 
   // mime: filter should not hit if no Content-Type header
@@ -14070,15 +14070,15 @@ mime:/.*/i`,
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.file("file.bmp"));
-  assert(zip.file("file.css"));
-  assert(zip.file("page.html"));
-  assert(zip.file("file.txt"));
-  assert(zip.file("file2.txt"));
-  assert(zip.file("unknown.bin"));
-  assert(!zip.file("file3.txt"));
-  assert(!zip.file("nofilename.py"));
-  assert(zip.file("redirect.txt"));
+  assert.exists(zip.file("file.bmp"));
+  assert.exists(zip.file("file.css"));
+  assert.exists(zip.file("page.html"));
+  assert.exists(zip.file("file.txt"));
+  assert.exists(zip.file("file2.txt"));
+  assert.exists(zip.file("unknown.bin"));
+  assert.notExists(zip.file("file3.txt"));
+  assert.notExists(zip.file("nofilename.py"));
+  assert.exists(zip.file("redirect.txt"));
   assert.strictEqual(Object.keys(zip.files).length, 8);
 
   // mime: filter should not hit for url mode
@@ -14094,15 +14094,15 @@ mime:/.*/i`,
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(!zip.file("file.bmp"));
-  assert(!zip.file("file.css"));
-  assert(!zip.file("page.html"));
-  assert(!zip.file("file.txt"));
-  assert(!zip.file("file2.txt"));
-  assert(!zip.file("unknown.bin"));
-  assert(!zip.file("file3.txt"));
-  assert(!zip.file("nofilename.py"));
-  assert(!zip.file("redirect.txt"));
+  assert.notExists(zip.file("file.bmp"));
+  assert.notExists(zip.file("file.css"));
+  assert.notExists(zip.file("page.html"));
+  assert.notExists(zip.file("file.txt"));
+  assert.notExists(zip.file("file2.txt"));
+  assert.notExists(zip.file("unknown.bin"));
+  assert.notExists(zip.file("file3.txt"));
+  assert.notExists(zip.file("nofilename.py"));
+  assert.notExists(zip.file("redirect.txt"));
   assert.strictEqual(Object.keys(zip.files).length, 1);
 });
 
@@ -14136,15 +14136,15 @@ ${localhost}/capture_downLink_file/redirect.pyr#bar`,
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(!zip.file("file.bmp"));
-  assert(!zip.file("file.css"));
-  assert(!zip.file("page.html"));
-  assert(zip.file("file.txt"));
-  assert(!zip.file("file2.txt"));
-  assert(!zip.file("unknown.bin"));
-  assert(zip.file("file3.txt"));
-  assert(!zip.file("nofilename.py"));
-  assert(!zip.file("redirect.txt"));
+  assert.notExists(zip.file("file.bmp"));
+  assert.notExists(zip.file("file.css"));
+  assert.notExists(zip.file("page.html"));
+  assert.exists(zip.file("file.txt"));
+  assert.notExists(zip.file("file2.txt"));
+  assert.notExists(zip.file("unknown.bin"));
+  assert.exists(zip.file("file3.txt"));
+  assert.notExists(zip.file("nofilename.py"));
+  assert.notExists(zip.file("redirect.txt"));
   assert.strictEqual(Object.keys(zip.files).length, 3);
 
   // plain text rule must match full URL
@@ -14164,15 +14164,15 @@ ${localhost}/capture_downLink_file/file.css`,
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.file("file.bmp"));
-  assert(!zip.file("file.css"));
-  assert(!zip.file("page.html"));
-  assert(zip.file("file.txt"));
-  assert(zip.file("file2.txt"));
-  assert(!zip.file("unknown.bin"));
-  assert(zip.file("file3.txt"));
-  assert(!zip.file("nofilename.py"));
-  assert(zip.file("redirect.txt"));
+  assert.exists(zip.file("file.bmp"));
+  assert.notExists(zip.file("file.css"));
+  assert.notExists(zip.file("page.html"));
+  assert.exists(zip.file("file.txt"));
+  assert.exists(zip.file("file2.txt"));
+  assert.notExists(zip.file("unknown.bin"));
+  assert.exists(zip.file("file3.txt"));
+  assert.notExists(zip.file("nofilename.py"));
+  assert.exists(zip.file("redirect.txt"));
   assert.strictEqual(Object.keys(zip.files).length, 6);
 
   // chars after spaces should be stripped for a plain text rule
@@ -14192,15 +14192,15 @@ ${localhost}/capture_downLink_file/file.css\tbar`,
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.file("file.bmp"));
-  assert(!zip.file("file.css"));
-  assert(!zip.file("page.html"));
-  assert(zip.file("file.txt"));
-  assert(zip.file("file2.txt"));
-  assert(!zip.file("unknown.bin"));
-  assert(zip.file("file3.txt"));
-  assert(!zip.file("nofilename.py"));
-  assert(zip.file("redirect.txt"));
+  assert.exists(zip.file("file.bmp"));
+  assert.notExists(zip.file("file.css"));
+  assert.notExists(zip.file("page.html"));
+  assert.exists(zip.file("file.txt"));
+  assert.exists(zip.file("file2.txt"));
+  assert.notExists(zip.file("unknown.bin"));
+  assert.exists(zip.file("file3.txt"));
+  assert.notExists(zip.file("nofilename.py"));
+  assert.exists(zip.file("redirect.txt"));
   assert.strictEqual(Object.keys(zip.files).length, 6);
 
   // RegExp rule
@@ -14223,15 +14223,15 @@ ${localhost}/capture_downLink_file/file.css\tbar`,
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.file("file.bmp"));
-  assert(zip.file("file.css"));
-  assert(!zip.file("page.html"));
-  assert(zip.file("file.txt"));
-  assert(!zip.file("file2.txt"));
-  assert(!zip.file("unknown.bin"));
-  assert(!zip.file("file3.txt"));
-  assert(!zip.file("nofilename.py"));
-  assert(zip.file("redirect.txt"));
+  assert.exists(zip.file("file.bmp"));
+  assert.exists(zip.file("file.css"));
+  assert.notExists(zip.file("page.html"));
+  assert.exists(zip.file("file.txt"));
+  assert.notExists(zip.file("file2.txt"));
+  assert.notExists(zip.file("unknown.bin"));
+  assert.notExists(zip.file("file3.txt"));
+  assert.notExists(zip.file("nofilename.py"));
+  assert.exists(zip.file("redirect.txt"));
   assert.strictEqual(Object.keys(zip.files).length, 5);
 });
 
@@ -14265,7 +14265,7 @@ it('test_capture_downLink_indepth', async function () {
   assert.strictEqual(doc.querySelectorAll('a')[4].getAttribute('href'), `${localhost}/capture_downLink_indepth/linked1-4.html#444`);
   assert.strictEqual(doc.querySelectorAll('a')[5].getAttribute('href'), `${localhost}/capture_downLink_indepth/linked1-5.html#`);
 
-  assert(!zip.file('index.json'));
+  assert.notExists(zip.file('index.json'));
 
   /* depth = 0 */
   var options = {
@@ -14357,7 +14357,7 @@ it('test_capture_downLink_indepth', async function () {
   var indexFile = zip.file('linked1-1.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
-  assert(doc);
+  assert.exists(doc);
 
   var indexFile = zip.file('linked1-2.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -14379,11 +14379,11 @@ it('test_capture_downLink_indepth', async function () {
   var indexFile = zip.file('linked1-5.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
-  assert(doc);
+  assert.exists(doc);
 
-  assert(!zip.file('linked2-1.html'));
+  assert.notExists(zip.file('linked2-1.html'));
 
-  assert(!zip.file('linked2-2.html'));
+  assert.notExists(zip.file('linked2-2.html'));
 
   var sitemapBlob = await zip.file('index.json').async('blob');
   var expectedData = {
@@ -14481,7 +14481,7 @@ it('test_capture_downLink_indepth', async function () {
   var indexFile = zip.file('linked1-1.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
-  assert(doc);
+  assert.exists(doc);
 
   var indexFile = zip.file('linked1-2.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -14503,12 +14503,12 @@ it('test_capture_downLink_indepth', async function () {
   var indexFile = zip.file('linked1-5.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
-  assert(doc);
+  assert.exists(doc);
 
   var indexFile = zip.file('linked2-1.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
-  assert(doc);
+  assert.exists(doc);
 
   var indexFile = zip.file('linked2-2.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -14681,7 +14681,7 @@ it('test_capture_downLink_indepth_skip_file', async function () {
   var indexFile = zip.file('linked1-1.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
-  assert(doc);
+  assert.exists(doc);
 
   // downloaded as file (not rewritten)
   var indexFile = zip.file('linked1-2.html');
@@ -14707,11 +14707,11 @@ it('test_capture_downLink_indepth_skip_file', async function () {
   var indexFile = zip.file('linked1-5.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
-  assert(doc);
+  assert.exists(doc);
 
   // not accessed
-  assert(!zip.file('linked2-1.html'));
-  assert(!zip.file('linked2-2.html'));
+  assert.notExists(zip.file('linked2-1.html'));
+  assert.notExists(zip.file('linked2-2.html'));
 
   /* depth = 0 */
   options["capture.downLink.doc.depth"] = 0;
@@ -14734,13 +14734,13 @@ it('test_capture_downLink_indepth_skip_file', async function () {
   assert.strictEqual(doc.querySelectorAll('a')[5].getAttribute('href'), `${localhost}/capture_downLink_indepth/linked1-5.html#`);
 
   // skip downLinkFile even if depth exceeds
-  assert(!zip.file('linked1-1.html'));
-  assert(!zip.file('linked1-2.html'));
-  assert(!zip.file('linked1-3.html'));
-  assert(!zip.file('linked1-4.html'));
-  assert(!zip.file('linked1-5.html'));
-  assert(!zip.file('linked2-1.html'));
-  assert(!zip.file('linked2-2.html'));
+  assert.notExists(zip.file('linked1-1.html'));
+  assert.notExists(zip.file('linked1-2.html'));
+  assert.notExists(zip.file('linked1-3.html'));
+  assert.notExists(zip.file('linked1-4.html'));
+  assert.notExists(zip.file('linked1-5.html'));
+  assert.notExists(zip.file('linked2-1.html'));
+  assert.notExists(zip.file('linked2-2.html'));
 
   /* depth = 1 */
   options["capture.downLink.doc.depth"] = 1;
@@ -14766,7 +14766,7 @@ it('test_capture_downLink_indepth_skip_file', async function () {
   var indexFile = zip.file('linked1-1.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
-  assert(doc);
+  assert.exists(doc);
 
   // captured as page (rewritten)
   var indexFile = zip.file('linked1-2.html');
@@ -14792,11 +14792,11 @@ it('test_capture_downLink_indepth_skip_file', async function () {
   var indexFile = zip.file('linked1-5.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
-  assert(doc);
+  assert.exists(doc);
 
   // skip downLinkFile even if depth exceeds
-  assert(!zip.file('linked2-1.html'));
-  assert(!zip.file('linked2-2.html'));
+  assert.notExists(zip.file('linked2-1.html'));
+  assert.notExists(zip.file('linked2-2.html'));
 });
 
 /**
@@ -14831,7 +14831,7 @@ ${localhost}/capture_downLink_indepth/linked2-1.html`,
   assert.strictEqual(doc.querySelectorAll('a')[4].getAttribute('href'), `${localhost}/capture_downLink_indepth/linked1-4.html#444`);
   assert.strictEqual(doc.querySelectorAll('a')[5].getAttribute('href'), `${localhost}/capture_downLink_indepth/linked1-5.html#`);
 
-  assert(!zip.file('linked1-1.html'));
+  assert.notExists(zip.file('linked1-1.html'));
 
   var indexFile = zip.file('linked1-2.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -14839,18 +14839,18 @@ ${localhost}/capture_downLink_indepth/linked2-1.html`,
   assert.strictEqual(doc.querySelectorAll('a')[0].getAttribute('href'), `linked2-1.html#1-2`);
   assert.strictEqual(doc.querySelectorAll('a')[1].getAttribute('href'), `${localhost}/capture_downLink_indepth/linked2-2.html#1-2`);
 
-  assert(!zip.file('linked1-3.html'));
+  assert.notExists(zip.file('linked1-3.html'));
 
-  assert(!zip.file('linked1-4.html'));
+  assert.notExists(zip.file('linked1-4.html'));
 
-  assert(!zip.file('linked1-5.html'));
+  assert.notExists(zip.file('linked1-5.html'));
 
   var indexFile = zip.file('linked2-1.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
-  assert(doc);
+  assert.exists(doc);
 
-  assert(!zip.file('linked2-2.html'));
+  assert.notExists(zip.file('linked2-2.html'));
 
   /* RegExp URLs */
   var options = {
@@ -14878,7 +14878,7 @@ ${localhost}/capture_downLink_indepth/linked2-1.html`,
   var indexFile = zip.file('linked1-1.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
-  assert(doc);
+  assert.exists(doc);
 
   var indexFile = zip.file('linked1-2.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -14886,15 +14886,15 @@ ${localhost}/capture_downLink_indepth/linked2-1.html`,
   assert.strictEqual(doc.querySelectorAll('a')[0].getAttribute('href'), `${localhost}/capture_downLink_indepth/linked2-1.html#1-2`);
   assert.strictEqual(doc.querySelectorAll('a')[1].getAttribute('href'), `${localhost}/capture_downLink_indepth/linked2-2.html#1-2`);
 
-  assert(!zip.file('linked1-3.html'));
+  assert.notExists(zip.file('linked1-3.html'));
 
-  assert(!zip.file('linked1-4.html'));
+  assert.notExists(zip.file('linked1-4.html'));
 
-  assert(!zip.file('linked1-5.html'));
+  assert.notExists(zip.file('linked1-5.html'));
 
-  assert(!zip.file('linked2-1.html'));
+  assert.notExists(zip.file('linked2-1.html'));
 
-  assert(!zip.file('linked2-2.html'));
+  assert.notExists(zip.file('linked2-2.html'));
 });
 
 /**
@@ -14965,7 +14965,7 @@ it('test_capture_downLink_indepth_frame', async function () {
   var indexFile = zip.file('linked1.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
-  assert(doc);
+  assert.exists(doc);
 });
 
 /**
@@ -15091,11 +15091,11 @@ it('test_capture_downLink_indepth_metaRefresh', async function () {
   var doc = await readFileAsDocument(indexBlob);
   assert.strictEqual(doc.querySelectorAll('meta[http-equiv="refresh"]')[0].getAttribute('content'), `0; url=${localhost}/capture_downLink_indepth_metaRefresh/linked2-2.html`);
 
-  assert(!zip.file('linked2-1.html'));
+  assert.notExists(zip.file('linked2-1.html'));
 
-  assert(!zip.file('linked2-1.html'));
+  assert.notExists(zip.file('linked2-1.html'));
 
-  assert(!zip.file('refreshed.html'));
+  assert.notExists(zip.file('refreshed.html'));
 
   /* depth = 3 */
   var options = {
@@ -15135,7 +15135,7 @@ it('test_capture_downLink_indepth_metaRefresh', async function () {
   var doc = await readFileAsDocument(indexBlob);
   assert.strictEqual(doc.querySelectorAll('meta[http-equiv="refresh"]')[0].getAttribute('content'), `0; url=linked1-2.html`);
 
-  assert(zip.file('refreshed.html'));
+  assert.exists(zip.file('refreshed.html'));
 });
 
 /**
@@ -15264,7 +15264,7 @@ it('test_capture_downLink_indepth_blob', async function () {
   var imgFn1 =imgElems[1].getAttribute('src');
   var imgFn2 =imgElems[2].getAttribute('src');
   assert.strictEqual(imgFn, imgFn1);
-  assert(imgFn !== imgFn2);
+  assert.notStrictEqual(imgFn, imgFn2);
 
   var sitemapBlob = await zip.file('index.json').async('blob');
   var expectedData = {
@@ -15475,7 +15475,7 @@ it('test_capture_downLink_indepth_attachment', async function () {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(!zip.file('red.bmp'));
+  assert.notExists(zip.file('red.bmp'));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -15492,19 +15492,19 @@ it('test_capture_downLink_indepth_attachment', async function () {
   var indexFile = zip.file('attachment1.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
-  assert(doc.querySelector('img[src="./red.bmp"]'));
+  assert.exists(doc.querySelector('img[src="./red.bmp"]'));
 
   // downloaded as file (not rewritten)
   var indexFile = zip.file('attachment2.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
-  assert(doc.querySelector('img[src="./red.bmp"]'));
+  assert.exists(doc.querySelector('img[src="./red.bmp"]'));
 
   // downloaded as file (not rewritten)
   var indexFile = zip.file('attachment2-2.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
-  assert(doc.querySelector('img[src="./red.bmp"]'));
+  assert.exists(doc.querySelector('img[src="./red.bmp"]'));
 
   /* inDepth */
   var options = {
@@ -15518,9 +15518,9 @@ it('test_capture_downLink_indepth_attachment', async function () {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(!zip.file('attachment2.py'));
-  assert(!zip.file('attachment2-2.py'));
-  assert(zip.file('red.bmp'));
+  assert.notExists(zip.file('attachment2.py'));
+  assert.notExists(zip.file('attachment2-2.py'));
+  assert.exists(zip.file('red.bmp'));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -15537,25 +15537,25 @@ it('test_capture_downLink_indepth_attachment', async function () {
   var indexFile = zip.file('attachment1.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
-  assert(doc.querySelector('img[src="red.bmp"]'));
+  assert.exists(doc.querySelector('img[src="red.bmp"]'));
 
   // captured as page (rewritten)
   var indexFile = zip.file('attachment3.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
-  assert(doc.querySelector('img[src="red.bmp"]'));
+  assert.exists(doc.querySelector('img[src="red.bmp"]'));
 
   // captured as page (rewritten)
   var indexFile = zip.file('attachment4.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
-  assert(doc.querySelector('img[src="red.bmp"]'));
+  assert.exists(doc.querySelector('img[src="red.bmp"]'));
 
   // captured as page (rewritten)
   var indexFile = zip.file('attachment5.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
-  assert(doc.querySelector('img[src="red.bmp"]'));
+  assert.exists(doc.querySelector('img[src="red.bmp"]'));
 
   /* downLink & inDepth */
   var options = {
@@ -15570,7 +15570,7 @@ it('test_capture_downLink_indepth_attachment', async function () {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.file('red.bmp'));
+  assert.exists(zip.file('red.bmp'));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -15587,43 +15587,43 @@ it('test_capture_downLink_indepth_attachment', async function () {
   var indexFile = zip.file('attachment1-1.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
-  assert(doc.querySelector('img[src="red.bmp"]'));
+  assert.exists(doc.querySelector('img[src="red.bmp"]'));
 
   // downloaded as file (not rewritten)
   var indexFile = zip.file('attachment1.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
-  assert(doc.querySelector('img[src="./red.bmp"]'));
+  assert.exists(doc.querySelector('img[src="./red.bmp"]'));
 
   // downloaded as file (not rewritten)
   var indexFile = zip.file('attachment2.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
-  assert(doc.querySelector('img[src="./red.bmp"]'));
+  assert.exists(doc.querySelector('img[src="./red.bmp"]'));
 
   // downloaded as file (not rewritten)
   var indexFile = zip.file('attachment2-2.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
-  assert(doc.querySelector('img[src="./red.bmp"]'));
+  assert.exists(doc.querySelector('img[src="./red.bmp"]'));
 
   // captured as page (rewritten)
   var indexFile = zip.file('attachment3.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
-  assert(doc.querySelector('img[src="red.bmp"]'));
+  assert.exists(doc.querySelector('img[src="red.bmp"]'));
 
   // captured as page (rewritten)
   var indexFile = zip.file('attachment4.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
-  assert(doc.querySelector('img[src="red.bmp"]'));
+  assert.exists(doc.querySelector('img[src="red.bmp"]'));
 
   // captured as page (rewritten)
   var indexFile = zip.file('attachment5.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
-  assert(doc.querySelector('img[src="red.bmp"]'));
+  assert.exists(doc.querySelector('img[src="red.bmp"]'));
 });
 
 /**
@@ -15654,13 +15654,13 @@ ${localhost}/capture_downLink_indepth_urlExtra/1-3.txt`,
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.file('index.html'));
-  assert(!zip.file('index.json'));
-  assert(!zip.file('1-1.html'));
-  assert(!zip.file('1-1.bmp'));
-  assert(!zip.file('1-2.html'));
-  assert(!zip.file('1-2.bmp'));
-  assert(!zip.file('1-3.txt'));
+  assert.exists(zip.file('index.html'));
+  assert.notExists(zip.file('index.json'));
+  assert.notExists(zip.file('1-1.html'));
+  assert.notExists(zip.file('1-1.bmp'));
+  assert.notExists(zip.file('1-2.html'));
+  assert.notExists(zip.file('1-2.bmp'));
+  assert.notExists(zip.file('1-3.txt'));
 
   /* +downLink -inDepth */
   options["capture.downLink.file.mode"] = "url";
@@ -15672,23 +15672,23 @@ ${localhost}/capture_downLink_indepth_urlExtra/1-3.txt`,
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.file('index.html'));
-  assert(!zip.file('index.json'));
-  assert(!zip.file('1-1.bmp'));
-  assert(!zip.file('1-2.bmp'));
-  assert(zip.file('1-3.txt'));
+  assert.exists(zip.file('index.html'));
+  assert.notExists(zip.file('index.json'));
+  assert.notExists(zip.file('1-1.bmp'));
+  assert.notExists(zip.file('1-2.bmp'));
+  assert.exists(zip.file('1-3.txt'));
 
   // downloaded as file (not rewritten)
   var indexFile = zip.file('1-1.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
-  assert(doc.querySelector('img[src="./1-1.bmp"]'));
+  assert.exists(doc.querySelector('img[src="./1-1.bmp"]'));
 
   // downloaded as file (not rewritten)
   var indexFile = zip.file('1-2.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
-  assert(doc.querySelector('img[src="./1-2.bmp"]'));
+  assert.exists(doc.querySelector('img[src="./1-2.bmp"]'));
 
   /* -downLink +inDepth */
   options["capture.downLink.file.mode"] = "none";
@@ -15700,17 +15700,17 @@ ${localhost}/capture_downLink_indepth_urlExtra/1-3.txt`,
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.file('index.html'));
-  assert(zip.file('1-1.bmp'));
-  assert(!zip.file('1-2.html'));
-  assert(!zip.file('1-2.bmp'));
-  assert(!zip.file('1-3.txt'));
+  assert.exists(zip.file('index.html'));
+  assert.exists(zip.file('1-1.bmp'));
+  assert.notExists(zip.file('1-2.html'));
+  assert.notExists(zip.file('1-2.bmp'));
+  assert.notExists(zip.file('1-3.txt'));
 
   // captured as page (rewritten)
   var indexFile = zip.file('1-1.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
-  assert(doc.querySelector('img[src="1-1.bmp"]'));
+  assert.exists(doc.querySelector('img[src="1-1.bmp"]'));
 
   var sitemapBlob = await zip.file('index.json').async('blob');
   var expectedData = {
@@ -15775,22 +15775,22 @@ ${localhost}/capture_downLink_indepth_urlExtra/1-3.txt`,
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.file('index.html'));
-  assert(zip.file('1-1.bmp'));
-  assert(!zip.file('1-2.bmp'));
-  assert(zip.file('1-3.txt'));
+  assert.exists(zip.file('index.html'));
+  assert.exists(zip.file('1-1.bmp'));
+  assert.notExists(zip.file('1-2.bmp'));
+  assert.exists(zip.file('1-3.txt'));
 
   // captured as page (rewritten)
   var indexFile = zip.file('1-1.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
-  assert(doc.querySelector('img[src="1-1.bmp"]'));
+  assert.exists(doc.querySelector('img[src="1-1.bmp"]'));
 
   // downloaded as file (not rewritten)
   var indexFile = zip.file('1-2.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
-  assert(doc.querySelector('img[src="./1-2.bmp"]'));
+  assert.exists(doc.querySelector('img[src="./1-2.bmp"]'));
 
   var sitemapBlob = await zip.file('index.json').async('blob');
   var expectedData = {
@@ -15968,7 +15968,7 @@ it('test_capture_downLink_blob', async function () {
 
   var imgFn = doc.querySelector('#file1 a').getAttribute('href');
   assert(imgFn.match(regex`^${uuid}\.bmp$`));
-  assert(zip.file(imgFn));
+  assert.exists(zip.file(imgFn));
 
   var page1Fn = doc.querySelector('#page1 a').getAttribute('href');
   assert(page1Fn.match(regex`^${uuid}\.html$`));
@@ -16010,7 +16010,7 @@ $it.xfailIf(
 
   var imgFn = doc.querySelector('#file1 a').getAttribute('href');
   assert(imgFn.match(regex`^${uuid}\.bmp$`));
-  assert(zip.file(imgFn));
+  assert.exists(zip.file(imgFn));
 
   var page1Fn = doc.querySelector('#page1 a').getAttribute('href');
   assert(page1Fn.match(regex`^${uuid}\.html$`));
@@ -16022,7 +16022,7 @@ $it.xfailIf(
   var imgFn1 = doc.querySelector('img').getAttribute('src');
   assert.strictEqual(imgFn1, imgFn);
   var imgFn2 = doc.querySelectorAll('img')[1].getAttribute('src');
-  assert(zip.file(imgFn2));
+  assert.exists(zip.file(imgFn2));
 
   var page11Fn = doc.querySelector('a').getAttribute('href');
   assert(page11Fn.match(regex`^${uuid}\.html$`));
@@ -16494,8 +16494,8 @@ it('test_capture_record_nodes_added', async function () {
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
   var timeId = doc.documentElement.getAttribute('data-scrapbook-create');
-  assert(doc.querySelector(`head:not([data-scrapbook-orig-null-node-${timeId}])`));
-  assert(doc.querySelector(`meta[charset="UTF-8"][data-scrapbook-orig-null-node-${timeId}]`));
+  assert.exists(doc.querySelector(`head:not([data-scrapbook-orig-null-node-${timeId}])`));
+  assert.exists(doc.querySelector(`meta[charset="UTF-8"][data-scrapbook-orig-null-node-${timeId}]`));
 
   var blob = await capture({
     url: `${localhost}/capture_record/nodes4.html`,
@@ -16506,8 +16506,8 @@ it('test_capture_record_nodes_added', async function () {
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
   var timeId = doc.documentElement.getAttribute('data-scrapbook-create');
-  assert(doc.querySelector(`head[data-scrapbook-orig-null-node-${timeId}]`));
-  assert(doc.querySelector(`meta[charset="UTF-8"][data-scrapbook-orig-null-node-${timeId}]`));
+  assert.exists(doc.querySelector(`head[data-scrapbook-orig-null-node-${timeId}]`));
+  assert.exists(doc.querySelector(`meta[charset="UTF-8"][data-scrapbook-orig-null-node-${timeId}]`));
 
   /* -capture.recordRewrites */
   options["capture.recordRewrites"] = false;
@@ -17325,7 +17325,7 @@ it('test_capture_insertInfoBar', async function () {
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
 
-  assert(doc.querySelector('script[data-scrapbook-elem="infobar-loader"]'));
+  assert.exists(doc.querySelector('script[data-scrapbook-elem="infobar-loader"]'));
 
   /* -capture.insertInfoBar */
   options["capture.insertInfoBar"] = false;
@@ -17339,7 +17339,7 @@ it('test_capture_insertInfoBar', async function () {
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
 
-  assert(!doc.querySelector('script[data-scrapbook-elem="infobar-loader"]'));
+  assert.notExists(doc.querySelector('script[data-scrapbook-elem="infobar-loader"]'));
 });
 
 /**
@@ -17367,14 +17367,14 @@ it('test_capture_sizeLimit', async function () {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.file('link.css'));
-  assert(zip.file('link2.css'));
-  assert(zip.file('img.bmp'));
-  assert(zip.file('img2.bmp'));
-  assert(zip.file('linked.txt'));
-  assert(zip.file('linked2.txt'));
-  assert(zip.file('linked.html'));
-  assert(zip.file('linked2.html'));
+  assert.exists(zip.file('link.css'));
+  assert.exists(zip.file('link2.css'));
+  assert.exists(zip.file('img.bmp'));
+  assert.exists(zip.file('img2.bmp'));
+  assert.exists(zip.file('linked.txt'));
+  assert.exists(zip.file('linked2.txt'));
+  assert.exists(zip.file('linked.html'));
+  assert.exists(zip.file('linked2.html'));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -17399,14 +17399,14 @@ it('test_capture_sizeLimit', async function () {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.file('link.css'));
-  assert(!zip.file('link2.css'));
-  assert(zip.file('img.bmp'));
-  assert(!zip.file('img2.bmp'));
-  assert(zip.file('linked.txt'));
-  assert(!zip.file('linked2.txt'));
-  assert(zip.file('linked.html'));
-  assert(!zip.file('linked2.html'));
+  assert.exists(zip.file('link.css'));
+  assert.notExists(zip.file('link2.css'));
+  assert.exists(zip.file('img.bmp'));
+  assert.notExists(zip.file('img2.bmp'));
+  assert.exists(zip.file('linked.txt'));
+  assert.notExists(zip.file('linked2.txt'));
+  assert.exists(zip.file('linked.html'));
+  assert.notExists(zip.file('linked2.html'));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -17431,14 +17431,14 @@ it('test_capture_sizeLimit', async function () {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.file('link.css'));
-  assert(!zip.file('link2.css'));
-  assert(zip.file('img.bmp'));
-  assert(!zip.file('img2.bmp'));
-  assert(zip.file('linked.txt'));
-  assert(!zip.file('linked2.txt'));
-  assert(zip.file('linked.html'));
-  assert(!zip.file('linked2.html'));
+  assert.exists(zip.file('link.css'));
+  assert.notExists(zip.file('link2.css'));
+  assert.exists(zip.file('img.bmp'));
+  assert.notExists(zip.file('img2.bmp'));
+  assert.exists(zip.file('linked.txt'));
+  assert.notExists(zip.file('linked2.txt'));
+  assert.exists(zip.file('linked.html'));
+  assert.notExists(zip.file('linked2.html'));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -17475,8 +17475,8 @@ it('test_capture_sizeLimit_frame', async function () {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.file('index_1.html'));
-  assert(zip.file('index_2.html'));
+  assert.exists(zip.file('index_1.html'));
+  assert.exists(zip.file('index_2.html'));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -17495,8 +17495,8 @@ it('test_capture_sizeLimit_frame', async function () {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.file('index_1.html'));
-  assert(zip.file('index_2.html'));
+  assert.exists(zip.file('index_1.html'));
+  assert.exists(zip.file('index_2.html'));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -17515,8 +17515,8 @@ it('test_capture_sizeLimit_frame', async function () {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.file('index_1.html'));
-  assert(zip.file('index_2.html'));
+  assert.exists(zip.file('index_1.html'));
+  assert.exists(zip.file('index_2.html'));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -17534,8 +17534,8 @@ it('test_capture_sizeLimit_frame', async function () {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.file('index_1.html'));
-  assert(zip.file('index_2.html'));
+  assert.exists(zip.file('index_1.html'));
+  assert.exists(zip.file('index_2.html'));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -17554,8 +17554,8 @@ it('test_capture_sizeLimit_frame', async function () {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.file('index_1.html'));
-  assert(!zip.file('index_2.html'));
+  assert.exists(zip.file('index_1.html'));
+  assert.notExists(zip.file('index_2.html'));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -17574,8 +17574,8 @@ it('test_capture_sizeLimit_frame', async function () {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.file('index_1.html'));
-  assert(!zip.file('index_2.html'));
+  assert.exists(zip.file('index_1.html'));
+  assert.notExists(zip.file('index_2.html'));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -17761,18 +17761,18 @@ it('test_capture_helpers_basic', async function () {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.file("index.html"));
-  assert(!zip.file("red.bmp"));
-  assert(!zip.file("green.bmp"));
+  assert.exists(zip.file("index.html"));
+  assert.notExists(zip.file("red.bmp"));
+  assert.notExists(zip.file("green.bmp"));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
 
-  assert(!doc.querySelector('style'));
-  assert(!doc.querySelector('#exclude'));
-  assert(!doc.querySelector('.exclude'));
-  assert(!doc.querySelector('img'));
+  assert.notExists(doc.querySelector('style'));
+  assert.notExists(doc.querySelector('#exclude'));
+  assert.notExists(doc.querySelector('.exclude'));
+  assert.notExists(doc.querySelector('img'));
 
   /* capture.helpers set and enabled (debug = true, debugging commands) */
   var options = {
@@ -17795,18 +17795,18 @@ it('test_capture_helpers_basic', async function () {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.file("index.html"));
-  assert(!zip.file("red.bmp"));
-  assert(!zip.file("green.bmp"));
+  assert.exists(zip.file("index.html"));
+  assert.notExists(zip.file("red.bmp"));
+  assert.notExists(zip.file("green.bmp"));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
 
-  assert(!doc.querySelector('style'));
-  assert(!doc.querySelector('#exclude'));
-  assert(!doc.querySelector('.exclude'));
-  assert(!doc.querySelector('img'));
+  assert.notExists(doc.querySelector('style'));
+  assert.notExists(doc.querySelector('#exclude'));
+  assert.notExists(doc.querySelector('.exclude'));
+  assert.notExists(doc.querySelector('img'));
 
   /* capture.helpers set and enabled (debug = false, debugging commands) */
   var options = {
@@ -17829,18 +17829,18 @@ it('test_capture_helpers_basic', async function () {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.file("index.html"));
-  assert(!zip.file("red.bmp"));
-  assert(!zip.file("green.bmp"));
+  assert.exists(zip.file("index.html"));
+  assert.notExists(zip.file("red.bmp"));
+  assert.notExists(zip.file("green.bmp"));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
 
-  assert(!doc.querySelector('style'));
-  assert(!doc.querySelector('#exclude'));
-  assert(!doc.querySelector('.exclude'));
-  assert(!doc.querySelector('img'));
+  assert.notExists(doc.querySelector('style'));
+  assert.notExists(doc.querySelector('#exclude'));
+  assert.notExists(doc.querySelector('.exclude'));
+  assert.notExists(doc.querySelector('img'));
 
   /* capture.helpers set and not enabled */
   var options = {
@@ -17862,18 +17862,18 @@ it('test_capture_helpers_basic', async function () {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.file("index.html"));
-  assert(zip.file("red.bmp"));
-  assert(zip.file("green.bmp"));
+  assert.exists(zip.file("index.html"));
+  assert.exists(zip.file("red.bmp"));
+  assert.exists(zip.file("green.bmp"));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
 
-  assert(doc.querySelector('style'));
-  assert(doc.querySelector('#exclude'));
-  assert(doc.querySelector('.exclude'));
-  assert(doc.querySelector('img'));
+  assert.exists(doc.querySelector('style'));
+  assert.exists(doc.querySelector('#exclude'));
+  assert.exists(doc.querySelector('.exclude'));
+  assert.exists(doc.querySelector('img'));
 
   /* capture.helpers not set */
   var options = {
@@ -17887,18 +17887,18 @@ it('test_capture_helpers_basic', async function () {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.file("index.html"));
-  assert(zip.file("red.bmp"));
-  assert(zip.file("green.bmp"));
+  assert.exists(zip.file("index.html"));
+  assert.exists(zip.file("red.bmp"));
+  assert.exists(zip.file("green.bmp"));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
 
-  assert(doc.querySelector('style'));
-  assert(doc.querySelector('#exclude'));
-  assert(doc.querySelector('.exclude'));
-  assert(doc.querySelector('img'));
+  assert.exists(doc.querySelector('style'));
+  assert.exists(doc.querySelector('#exclude'));
+  assert.exists(doc.querySelector('.exclude'));
+  assert.exists(doc.querySelector('img'));
 
   /* capture.helpers invalid (regard as not set) */
   var options = {
@@ -17912,18 +17912,18 @@ it('test_capture_helpers_basic', async function () {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.file("index.html"));
-  assert(zip.file("red.bmp"));
-  assert(zip.file("green.bmp"));
+  assert.exists(zip.file("index.html"));
+  assert.exists(zip.file("red.bmp"));
+  assert.exists(zip.file("green.bmp"));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
 
-  assert(doc.querySelector('style'));
-  assert(doc.querySelector('#exclude'));
-  assert(doc.querySelector('.exclude'));
-  assert(doc.querySelector('img'));
+  assert.exists(doc.querySelector('style'));
+  assert.exists(doc.querySelector('#exclude'));
+  assert.exists(doc.querySelector('.exclude'));
+  assert.exists(doc.querySelector('img'));
 });
 
 /**
@@ -17951,15 +17951,15 @@ it('test_capture_helpers_nesting', async function () {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.file("index.html"));
-  assert(zip.file("green.bmp"));
-  assert(!zip.file("red.bmp"));
+  assert.exists(zip.file("index.html"));
+  assert.exists(zip.file("green.bmp"));
+  assert.notExists(zip.file("red.bmp"));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
 
-  assert(doc.querySelector('img[src="green.bmp"]'));
+  assert.exists(doc.querySelector('img[src="green.bmp"]'));
 });
 
 });  // Capture tests

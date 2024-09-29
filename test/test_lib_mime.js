@@ -136,51 +136,51 @@ describe('lib/mime.js', function () {
 
     it('common extensions', function () {
       var exts = Mime.allExtensions('text/html');
-      assert(['html', 'htm'].every(ext => exts.includes(ext)));
+      assert.includeMembers(exts, ['html', 'htm']);
 
       var exts = Mime.allExtensions('application/xhtml+xml');
-      assert(['xhtml', 'xht'].every(ext => exts.includes(ext)));
+      assert.includeMembers(exts, ['xhtml', 'xht']);
 
       var exts = Mime.allExtensions('text/xml');
-      assert(['xml'].every(ext => exts.includes(ext)));
+      assert.includeMembers(exts, ['xml']);
 
       var exts = Mime.allExtensions('text/css');
-      assert(['css'].every(ext => exts.includes(ext)));
+      assert.includeMembers(exts, ['css']);
 
       var exts = Mime.allExtensions('text/javascript');
-      assert(['js', 'mjs'].every(ext => exts.includes(ext)));
+      assert.includeMembers(exts, ['js', 'mjs']);
 
       var exts = Mime.allExtensions('application/javascript');
-      assert(['js'].every(ext => exts.includes(ext)));
+      assert.includeMembers(exts, ['js']);
 
       var exts = Mime.allExtensions('image/jpeg');
-      assert(['jpg', 'jpeg'].every(ext => exts.includes(ext)));
+      assert.includeMembers(exts, ['jpg', 'jpeg']);
 
       var exts = Mime.allExtensions('image/gif');
-      assert(['gif'].every(ext => exts.includes(ext)));
+      assert.includeMembers(exts, ['gif']);
 
       var exts = Mime.allExtensions('image/png');
-      assert(['png'].every(ext => exts.includes(ext)));
+      assert.includeMembers(exts, ['png']);
 
       var exts = Mime.allExtensions('image/svg+xml');
-      assert(['svg'].every(ext => exts.includes(ext)));
+      assert.includeMembers(exts, ['svg']);
 
       var exts = Mime.allExtensions('audio/ogg');
-      assert(['oga', 'ogg'].every(ext => exts.includes(ext)));
+      assert.includeMembers(exts, ['oga', 'ogg']);
 
       var exts = Mime.allExtensions('video/ogg');
-      assert(['ogv'].every(ext => exts.includes(ext)));
+      assert.includeMembers(exts, ['ogv']);
 
       var exts = Mime.allExtensions('application/ogg');
-      assert(['ogx'].every(ext => exts.includes(ext)));
+      assert.includeMembers(exts, ['ogx']);
     });
 
     it('extended extensions', function () {
       var exts = Mime.allExtensions('application/html+zip');
-      assert(['htz'].every(ext => exts.includes(ext)));
+      assert.includeMembers(exts, ['htz']);
 
       var exts = Mime.allExtensions('application/x-maff');
-      assert(['maff'].every(ext => exts.includes(ext)));
+      assert.includeMembers(exts, ['maff']);
     });
 
   });

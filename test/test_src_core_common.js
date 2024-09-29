@@ -248,7 +248,7 @@ describe('core/common.js', function () {
       // create an ID from now if no Date object is provided
       var idNow = scrapbook.dateToId(new Date());
       var id = scrapbook.dateToId();
-      assert(parseInt(id, 10) - parseInt(idNow, 10) < 1000);
+      assert.closeTo(Number(id), Number(idNow), 1000);
     });
 
     it('round to nearest if date is too large or too small', function () {
@@ -313,7 +313,7 @@ describe('core/common.js', function () {
       // create an ID from now if no Date object is provided
       var idNow = scrapbook.dateToIdOld(new Date());
       var id = scrapbook.dateToIdOld();
-      assert(parseInt(id, 10) - parseInt(idNow, 10) < 1000);
+      assert.closeTo(Number(id), Number(idNow), 1000);
     });
 
     it('round to nearest if date is too large or too small', function () {
@@ -923,17 +923,12 @@ describe('core/common.js', function () {
     });
 
     it('throw if base is root-relative and input is not', function () {
-      var error = (() => {
-        try {
-          scrapbook.getRelativeUrl(
-            `page`,
-            `/ref`,
-          );
-        } catch (ex) {
-          return ex;
-        }
-      })();
-      assert(error);
+      assert.throws(() => {
+        scrapbook.getRelativeUrl(
+          `page`,
+          `/ref`,
+        );
+      });
     });
 
     it('relative URLs (since path)', function () {
@@ -2521,7 +2516,7 @@ body { image-background: var(${/(--sb(\d+)-1)/}); }
 div { image-background: var(${/(--sb(\d+)-2)/}); }`;
       var result = scrapbook.rewriteCssText(input, options);
       var match = result.match(regex);
-      assert(match);
+      assert.isArray(match);
       assert.strictEqual(match[2], match[4]);
       assert.deepEqual(map, {
         "http://image.example.com/image.jpg": match[1],

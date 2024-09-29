@@ -951,11 +951,11 @@ ul {
   }
 }`);
 
-        assert(rules[0] instanceof CSSMediaRule);
+        assert.instanceOf(rules[0], CSSMediaRule);
         assert.strictEqual(rules[0].media[0], 'screen and (min-width: 300px)');
         assert.strictEqual(rules[0].media[1], 'print');
 
-        assert(rules[0].cssRules[0] instanceof CSSStyleRule);
+        assert.instanceOf(rules[0].cssRules[0], CSSStyleRule);
         assert.strictEqual(rules[0].cssRules[0].selectorText, 'body');
         assert.strictEqual(rules[0].cssRules[0].style.getPropertyValue('font-size'), '1.5em');
         assert.strictEqual(rules[0].cssRules[0].style.getPropertyValue('line-height'), '2em');

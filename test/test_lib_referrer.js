@@ -312,18 +312,15 @@ describe('lib/referrer.js', function () {
   describe('Referrer.trustworthyProtocols', function () {
 
     it('basic', function () {
-      assert(Referrer.trustworthyProtocols.includes('https:'));
-      assert(Referrer.trustworthyProtocols.includes('wss:'));
-      assert(Referrer.trustworthyProtocols.includes('data:'));
-      assert(Referrer.trustworthyProtocols.includes('file:'));
+      assert.includeMembers(Referrer.trustworthyProtocols, ['https:', 'wss:', 'data:', 'file:']);
     });
 
     $it.skipIf(
       typeof browser === 'undefined',
       'globalThis.browser does not exist',
     )('browser extension protocol (globalThis.browser)', function () {
-      const protocol = new URL(chrome.runtime.getURL('')).protocol;
-      assert(Referrer.trustworthyProtocols.includes(protocol));
+      const protocol = new URL(browser.runtime.getURL('')).protocol;
+      assert.includeMembers(Referrer.trustworthyProtocols, [protocol]);
     });
 
     $it.skipIf(
@@ -331,7 +328,7 @@ describe('lib/referrer.js', function () {
       'globalThis.chrome does not exist',
     )('browser extension protocol (globalThis.chrome)', function () {
       const protocol = new URL(chrome.runtime.getURL('')).protocol;
-      assert(Referrer.trustworthyProtocols.includes(protocol));
+      assert.includeMembers(Referrer.trustworthyProtocols, [protocol]);
     });
 
   });

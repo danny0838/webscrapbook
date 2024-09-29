@@ -55,7 +55,7 @@ describe('lib/strftime.js', function () {
       var formatter = new Strftime();
       var formatted = formatter.format('%Y-%m-%dT%H:%M:%S%z');
       var date = new Date(formatted);
-      assert(Math.abs(date - dateNow) < 3000);
+      assert.closeTo(date.valueOf(), dateNow.valueOf(), 3000);
     });
 
   });
@@ -66,7 +66,7 @@ describe('lib/strftime.js', function () {
       var dateNow = new Date();
       var formatted = Strftime.format('%Y-%m-%dT%H:%M:%S%z');
       var date = new Date(formatted);
-      assert(Math.abs(date - dateNow) < 3000);
+      assert.closeTo(date.valueOf(), dateNow.valueOf(), 3000);
     });
 
     it('isUtc = true', function () {
