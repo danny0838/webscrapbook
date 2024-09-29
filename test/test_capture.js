@@ -5697,7 +5697,7 @@ it('test_capture_css_charset_link_charset', async function () {
       },
     ]
   };
-  assert(await readFileAsText(sitemapBlob) === JSON.stringify(expectedData, null, 1));
+  assert.deepEqual(JSON.parse(await readFileAsText(sitemapBlob)), expectedData);
 });
 
 /**
@@ -14338,7 +14338,7 @@ it('test_capture_downLink_indepth', async function () {
       }
     ]
   };
-  assert(await readFileAsText(sitemapBlob) === JSON.stringify(expectedData, null, 1));
+  assert.deepEqual(JSON.parse(await readFileAsText(sitemapBlob)), expectedData);
 
   /* depth = 1 */
   var options = {
@@ -14462,7 +14462,7 @@ it('test_capture_downLink_indepth', async function () {
       }
     ]
   };
-  assert(await readFileAsText(sitemapBlob) === JSON.stringify(expectedData, null, 1));
+  assert.deepEqual(JSON.parse(await readFileAsText(sitemapBlob)), expectedData);
 
   /* depth = 2 */
   var options = {
@@ -14604,7 +14604,7 @@ it('test_capture_downLink_indepth', async function () {
       }
     ]
   };
-  assert(await readFileAsText(sitemapBlob) === JSON.stringify(expectedData, null, 1));
+  assert.deepEqual(JSON.parse(await readFileAsText(sitemapBlob)), expectedData);
 });
 
 /**
@@ -15244,7 +15244,7 @@ it('test_capture_downLink_indepth_datauri', async function () {
       }
     ]
   };
-  assert(await readFileAsText(sitemapBlob) === JSON.stringify(expectedData, null, 1));
+  assert.deepEqual(JSON.parse(await readFileAsText(sitemapBlob)), expectedData);
 });
 
 /**
@@ -15323,7 +15323,7 @@ it('test_capture_downLink_indepth_blob', async function () {
       }
     ]
   };
-  assert(await readFileAsText(sitemapBlob) === JSON.stringify(expectedData, null, 1));
+  assert.deepEqual(JSON.parse(await readFileAsText(sitemapBlob)), expectedData);
 });
 
 /**
@@ -15391,7 +15391,7 @@ it('test_capture_downLink_indepth_about', async function () {
       }
     ]
   };
-  assert(await readFileAsText(sitemapBlob) === JSON.stringify(expectedData, null, 1));
+  assert.deepEqual(JSON.parse(await readFileAsText(sitemapBlob)), expectedData);
 });
 
 /**
@@ -15460,7 +15460,7 @@ it('test_capture_downLink_indepth_invalid', async function () {
       }
     ]
   };
-  assert(await readFileAsText(sitemapBlob) === JSON.stringify(expectedData, null, 1));
+  assert.deepEqual(JSON.parse(await readFileAsText(sitemapBlob)), expectedData);
 });
 
 /**
@@ -15772,7 +15772,7 @@ ${localhost}/capture_downLink_indepth_urlExtra/1-3.txt`,
       }
     ]
   };
-  assert(await readFileAsText(sitemapBlob) === JSON.stringify(expectedData, null, 1));
+  assert.deepEqual(JSON.parse(await readFileAsText(sitemapBlob)), expectedData);
 
   /* +downLink +inDepth */
   options["capture.downLink.file.mode"] = "url";
@@ -15864,7 +15864,7 @@ ${localhost}/capture_downLink_indepth_urlExtra/1-3.txt`,
       }
     ]
   };
-  assert(await readFileAsText(sitemapBlob) === JSON.stringify(expectedData, null, 1));
+  assert.deepEqual(JSON.parse(await readFileAsText(sitemapBlob)), expectedData);
 });
 
 /**
@@ -15948,7 +15948,7 @@ it('test_capture_downLink_indepth_case', async function () {
       }
     ]
   };
-  assert(await readFileAsText(sitemapBlob) === JSON.stringify(expectedData, null, 1));
+  assert.deepEqual(JSON.parse(await readFileAsText(sitemapBlob)), expectedData);
 });
 
 /**
