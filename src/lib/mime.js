@@ -8581,8 +8581,9 @@
    * @param {string[]} [data.extensions] - extensions to add
    * @param {Object} [options]
    * @param {boolean} [options.important] - insert the extensions at first
+   * @param {boolean} [options.minor] - don't add the extension to types
    */
-  function extend(mime, {extensions = [], ...kwargs} = {}, {important} = {}) {
+  function extend(mime, {extensions = [], ...kwargs} = {}, {important, minor} = {}) {
     let target = db[mime];
     if (!target) {
       target = db[mime] = {};
@@ -8595,8 +8596,10 @@
     const method = important ? Array.prototype.unshift : Array.prototype.push;
     method.apply(target.extensions, extensions);
 
-    for (const ext of extensions) {
-      types[ext] = mime;
+    if (!minor) {
+      for (const ext of extensions) {
+        types[ext] = mime;
+      }
     }
 
     Object.assign(target, {...kwargs});

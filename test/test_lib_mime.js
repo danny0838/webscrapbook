@@ -80,6 +80,13 @@ describe('lib/mime.js', function () {
       assert.strictEqual(Mime.types['myext4'], 'my/mime');
     });
 
+    it('data with extensions (minor = true)', function () {
+      Mime.extend('my/mime', {extensions: ['myext1', 'myext2']}, {minor: true});
+      assert.deepEqual(Mime.db['my/mime'], {extensions: ['myext1', 'myext2']});
+      assert.notStrictEqual(Mime.types['myext1'], 'my/mime');
+      assert.notStrictEqual(Mime.types['myext2'], 'my/mime');
+    });
+
     it('data with properties', function () {
       // add properties
       Mime.extend('my/mime', {source: 'foo', charset: 'ASCII', compressible: true});
