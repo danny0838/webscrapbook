@@ -8574,6 +8574,9 @@
   // https://www.rfc-editor.org/rfc/rfc9239.html
   extend("text/javascript", {extensions: ["js", "mjs"]}, {important: true});
 
+  // RFC 3534 defined .ogg, which may be expected by some implementations.
+  extend("application/ogg", {extensions: ["ogg"]}, {minor: true});
+
   /**
    * Extend the database.
    * @param {string} mime - the MIME type to extend

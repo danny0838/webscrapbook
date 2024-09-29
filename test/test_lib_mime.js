@@ -214,7 +214,7 @@ describe('lib/mime.js', function () {
       assert.includeMembers(exts, ['ogv']);
 
       var exts = Mime.allExtensions('application/ogg');
-      assert.includeMembers(exts, ['ogx']);
+      assert.includeMembers(exts, ['ogx', 'ogg']);
     });
 
     it('extended extensions', function () {
