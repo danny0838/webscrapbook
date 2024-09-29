@@ -476,19 +476,27 @@ describe('core/common.js', function () {
     it('basic', function () {
       // "一天" in Big5
       var buffer = scrapbook.byteStringToArrayBuffer('\xA4\x40\xA4\xD1');
-      assertEqual(Array.from(new Uint8Array(buffer)), [0xA4, 0x40, 0xA4, 0xD1]);
+      assertEqual([...new Uint8Array(buffer)], [0xA4, 0x40, 0xA4, 0xD1]);
 
       // "𠀀" in UTF-8 with BOM
       var buffer = scrapbook.byteStringToArrayBuffer('\xEF\xBB\xBF\xF0\xA0\x80\x80');
-      assertEqual(Array.from(new Uint8Array(buffer)), [0xEF, 0xBB, 0xBF, 0xF0, 0xA0, 0x80, 0x80]);
+      assertEqual([...new Uint8Array(buffer)], [0xEF, 0xBB, 0xBF, 0xF0, 0xA0, 0x80, 0x80]);
 
       // "𠀀" in UTF-16BE with BOM
       var buffer = scrapbook.byteStringToArrayBuffer('\xFE\xFF\xD8\x40\xDC\x00');
-      assertEqual(Array.from(new Uint8Array(buffer)), [0xFE, 0xFF, 0xD8, 0x40, 0xDC, 0x00]);
+      assertEqual([...new Uint8Array(buffer)], [0xFE, 0xFF, 0xD8, 0x40, 0xDC, 0x00]);
 
       // "𠀀" in UTF-16LE with BOM
       var buffer = scrapbook.byteStringToArrayBuffer('\xFF\xFE\x40\xD8\x00\xDC');
-      assertEqual(Array.from(new Uint8Array(buffer)), [0xFF, 0xFE, 0x40, 0xD8, 0x00, 0xDC]);
+      assertEqual([...new Uint8Array(buffer)], [0xFF, 0xFE, 0x40, 0xD8, 0x00, 0xDC]);
+
+      // blob of green bmp
+      var bstr = atob('Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAP8AAAAA');
+      var buffer = scrapbook.byteStringToArrayBuffer(bstr);
+      assertEqual(
+        [...new Uint8Array(buffer)],
+        [66,77,60,0,0,0,0,0,0,0,54,0,0,0,40,0,0,0,1,0,0,0,1,0,0,0,1,0,32,0,0,0,0,0,6,0,0,0,18,11,0,0,18,11,0,0,0,0,0,0,0,0,0,0,0,255,0,0,0,0],
+      );
     });
 
   });
@@ -511,6 +519,13 @@ describe('core/common.js', function () {
       // "𠀀" in UTF-16LE with BOM
       var buffer = new Uint8Array([0xFF, 0xFE, 0x40, 0xD8, 0x00, 0xDC]);
       assertEqual(scrapbook.arrayBufferToByteString(buffer), '\xFF\xFE\x40\xD8\x00\xDC');
+
+      // blob of green bmp
+      var buffer = new Uint8Array([66,77,60,0,0,0,0,0,0,0,54,0,0,0,40,0,0,0,1,0,0,0,1,0,0,0,1,0,32,0,0,0,0,0,6,0,0,0,18,11,0,0,18,11,0,0,0,0,0,0,0,0,0,0,0,255,0,0,0,0]);
+      assertEqual(
+        btoa(scrapbook.arrayBufferToByteString(buffer)),
+        "Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAP8AAAAA",
+      );
     });
 
   });
@@ -1392,6 +1407,108 @@ describe('core/common.js', function () {
       assertEqual(scrapbook.parseHeaderRefresh(`1 , URL = referred.html`), {time: 1, url: `referred.html`});
 
       assertEqual(scrapbook.parseHeaderRefresh(`1; uRl=referred.html`), {time: 1, url: `referred.html`});
+    });
+
+  });
+
+  $describe.skipIf($.noBrowser)('scrapbook.readFileAsArrayBuffer', function () {
+
+    it('basic', async function () {
+      var blob = new Blob(["ABC123 中文 𠀀"], {type: "text/plain"});
+      var ab = await scrapbook.readFileAsArrayBuffer(blob);
+      assertEqual([...new Uint8Array(ab)], [65,66,67,49,50,51,32,228,184,173,230,150,135,32,240,160,128,128]);
+    });
+
+  });
+
+  $describe.skipIf($.noBrowser)('scrapbook.readFileAsDataURL', function () {
+
+    it('basic', async function () {
+      var greenBmp = atob('Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAP8AAAAA');
+      var ab = scrapbook.byteStringToArrayBuffer(greenBmp);
+      var blob = new Blob([ab], {type: "image/bmp"});
+      var datauri = await scrapbook.readFileAsDataURL(blob);
+      assertEqual(datauri, "data:image/bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAP8AAAAA");
+    });
+
+  });
+
+  $describe.skipIf($.noBrowser)('scrapbook.readFileAsText', function () {
+
+    it('return string in specified charset', async function () {
+      var blob = new Blob(["ABC123 中文 𠀀"], {type: "text/plain"});
+      var str = await await scrapbook.readFileAsText(blob, 'UTF-8');
+      assertEqual(str, "ABC123 中文 𠀀");
+    });
+
+    it('return string in UTF-8 if charset not specified', async function () {
+      var blob = new Blob(["ABC123 中文 𠀀"], {type: "text/plain"});
+      var str = await await scrapbook.readFileAsText(blob);
+      assertEqual(str, "ABC123 中文 𠀀");
+    });
+
+    it('return byte string if charset is falsy', async function () {
+      var blob = new Blob(["ABC123 中文 𠀀"], {type: "text/plain"});
+      var str = await await scrapbook.readFileAsText(blob, false);
+      assertEqual(scrapbook.utf8ToUnicode(str), "ABC123 中文 𠀀");
+    });
+
+  });
+
+  $describe.skipIf($.noBrowser)('scrapbook.readFileAsDocument', function () {
+
+    it('basic', async function () {
+      var html = `<a href="http://example.com">ABC123 中文 𠀀</a>`;
+      var blob = new Blob([html], {type: "text/html"});
+      var doc = await scrapbook.readFileAsDocument(blob);
+      assertEqual(doc.querySelector('a').textContent, 'ABC123 中文 𠀀');
+      assertEqual(doc.querySelector('a').getAttribute('href'), 'http://example.com');
+    });
+
+  });
+
+  $describe.skipIf($.noBrowser)('scrapbook.dataUriToFile', function () {
+
+    it('take filename when useFilename not specified', async function () {
+      var datauri = `data:image/bmp;filename=${encodeURIComponent('ABC123中文𠀀')};base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAP8AAAAA`;
+      var file = await scrapbook.dataUriToFile(datauri);
+      assertEqual(file.name, "ABC123中文𠀀");
+      assertEqual(file.type, "image/bmp;filename=abc123%e4%b8%ad%e6%96%87%f0%a0%80%80");
+      assertEqual(file.size, 60);
+
+      var datauri = `data:image/bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAP8AAAAA`;
+      var file = await scrapbook.dataUriToFile(datauri);
+      assertEqual(file.name, "dbc82be549e49d6db9a5719086722a4f1c5079cd.bmp");
+      assertEqual(file.type, "image/bmp");
+      assertEqual(file.size, 60);
+    });
+
+    it('take filename when useFilename is truthy', async function () {
+      var datauri = `data:image/bmp;filename=${encodeURIComponent('ABC123中文𠀀')};base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAP8AAAAA`;
+      var file = await scrapbook.dataUriToFile(datauri, true);
+      assertEqual(file.name, "ABC123中文𠀀");
+      assertEqual(file.type, "image/bmp;filename=abc123%e4%b8%ad%e6%96%87%f0%a0%80%80");
+      assertEqual(file.size, 60);
+
+      var datauri = `data:image/bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAP8AAAAA`;
+      var file = await scrapbook.dataUriToFile(datauri, true);
+      assertEqual(file.name, "dbc82be549e49d6db9a5719086722a4f1c5079cd.bmp");
+      assertEqual(file.type, "image/bmp");
+      assertEqual(file.size, 60);
+    });
+
+    it('do not take filename when useFilename is falsy', async function () {
+      var datauri = `data:image/bmp;filename=${encodeURIComponent('ABC123中文𠀀')};base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAP8AAAAA`;
+      var file = await scrapbook.dataUriToFile(datauri, false);
+      assertEqual(file.name, "dbc82be549e49d6db9a5719086722a4f1c5079cd.bmp");
+      assertEqual(file.type, "image/bmp;filename=abc123%e4%b8%ad%e6%96%87%f0%a0%80%80");
+      assertEqual(file.size, 60);
+
+      var datauri = `data:image/bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAP8AAAAA`;
+      var file = await scrapbook.dataUriToFile(datauri, false);
+      assertEqual(file.name, "dbc82be549e49d6db9a5719086722a4f1c5079cd.bmp");
+      assertEqual(file.type, "image/bmp");
+      assertEqual(file.size, 60);
     });
 
   });
