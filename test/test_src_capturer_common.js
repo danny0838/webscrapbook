@@ -1214,6 +1214,151 @@ class { }`);
       return new DOMParser().parseFromString(html, 'text/html');
     }
 
+    describe("capturer.CaptureHelperHandler.getOverridingOptions", function () {
+
+      it("do not include capture helper related options", function () {
+        var options = capturer.CaptureHelperHandler.getOverridingOptions(
+          [
+            {
+              options: {
+                "capture.saveTo": "server",
+                "capture.saveAs": "folder",
+                "capture.helpersEnabled": false,
+                "capture.helpers": "[]",
+              },
+            },
+          ],
+          "http://example.com",
+        );
+        assert.deepEqual(options, {
+          "capture.saveTo": "server",
+          "capture.saveAs": "folder",
+        });
+      });
+
+      it("merge options in last-win manner", function () {
+        var options = capturer.CaptureHelperHandler.getOverridingOptions(
+          [
+            {
+              options: {
+                "capture.saveTo": "server",
+                "capture.saveAs": "folder",
+              },
+            },
+            {
+              options: {
+                "capture.saveTo": "folder",
+                "capture.audio": "remove",
+              },
+            },
+          ],
+          "http://example.com",
+        );
+        assert.deepEqual(options, {
+          "capture.saveTo": "folder",
+          "capture.saveAs": "folder",
+          "capture.audio": "remove",
+        });
+      });
+
+      it("skip disabled helpers", function () {
+        var options = capturer.CaptureHelperHandler.getOverridingOptions(
+          [
+            {
+              options: {
+                "capture.saveTo": "server",
+                "capture.saveAs": "folder",
+              },
+            },
+            {
+              disabled: true,
+              options: {
+                "capture.saveTo": "folder",
+                "capture.audio": "remove",
+              },
+            },
+          ],
+          "http://example.com",
+        );
+        assert.deepEqual(options, {
+          "capture.saveTo": "server",
+          "capture.saveAs": "folder",
+        });
+      });
+
+      it("skip helpers with disabled property", function () {
+        var options = capturer.CaptureHelperHandler.getOverridingOptions(
+          [
+            {
+              options: {
+                "capture.saveTo": "server",
+                "capture.saveAs": "folder",
+              },
+            },
+            {
+              disabled: true,
+              options: {
+                "capture.saveTo": "folder",
+                "capture.audio": "remove",
+              },
+            },
+          ],
+          "http://example.com",
+        );
+        assert.deepEqual(options, {
+          "capture.saveTo": "server",
+          "capture.saveAs": "folder",
+        });
+      });
+
+      it("skip helpers whose pattern does not match document URL", function () {
+        var options = capturer.CaptureHelperHandler.getOverridingOptions(
+          [
+            {
+              pattern: /unknown\.site/,
+              options: {
+                "capture.saveTo": "server",
+                "capture.saveAs": "folder",
+              },
+            },
+            {
+              pattern: /example\.com/,
+              options: {
+                "capture.saveTo": "folder",
+                "capture.audio": "remove",
+              },
+            },
+          ],
+          "http://example.com",
+        );
+        assert.deepEqual(options, {
+          "capture.saveTo": "folder",
+          "capture.audio": "remove",
+        });
+      });
+
+      it("return empty object if docUrl is falsy", function () {
+        var options = capturer.CaptureHelperHandler.getOverridingOptions(
+          [
+            {
+              options: {
+                "capture.saveTo": "server",
+              },
+            },
+            {
+              pattern: /(?:)/,
+              options: {
+                "capture.saveAs": "folder",
+              },
+            },
+          ],
+          "",
+        );
+        assert.deepEqual(options, {});
+      });
+
+    });
+
     describe("capturer.CaptureHelperHandler.parseRegexStr", function () {
 
       it("basic", function () {
@@ -2936,114 +3081,6 @@ insertedText`);
           }];
           assert.strictEqual(helper.runCommand(command, doc), undefined);
           assert.strictEqual(doc.body.innerHTML.trim(), `<div><b id="myid" class="myclass">first<a href="mylink">myvalue</a>last</b></div>`);
-        });
-
-      });
-
-      describe("cmd_options", function () {
-
-        it("name, value", function () {
-          var doc = makeTestDoc();
-
-          var helper = new capturer.CaptureHelperHandler();
-          var command = ["options", "capture.rewriteCss", "match"];
-          assert.strictEqual(helper.runCommand(command, doc), undefined);
-          assert.deepEqual(helper.options, {
-            "capture.rewriteCss": "match",
-          });
-        });
-
-        it("name, value (resolve parameter commands)", function () {
-          var doc = makeTestDoc();
-
-          var helper = new capturer.CaptureHelperHandler();
-          var command = ["options", ["concat", "capture.rewriteCss"], ["concat", "match"]];
-          assert.strictEqual(helper.runCommand(command, doc), undefined);
-          assert.deepEqual(helper.options, {
-            "capture.rewriteCss": "match",
-          });
-        });
-
-        it("Object", function () {
-          var doc = makeTestDoc();
-
-          var helper = new capturer.CaptureHelperHandler();
-          var command = ["options", {
-            "capture.style": "save",
-            "capture.rewriteCss": "match",
-          }];
-          assert.strictEqual(helper.runCommand(command, doc), undefined);
-          assert.deepEqual(helper.options, {
-            "capture.style": "save",
-            "capture.rewriteCss": "match",
-          });
-        });
-
-        it("Object (resolve parameter commands)", function () {
-          var doc = makeTestDoc();
-
-          var helper = new capturer.CaptureHelperHandler();
-          var command = ["options", ["if", true, {
-            "capture.style": "save",
-            "capture.rewriteCss": "match",
-          }]];
-          assert.strictEqual(helper.runCommand(command, doc), undefined);
-          assert.deepEqual(helper.options, {
-            "capture.style": "save",
-            "capture.rewriteCss": "match",
-          });
-
-          var helper = new capturer.CaptureHelperHandler();
-          var command = ["options", {
-            "capture.style": ["concat", "save"],
-            "capture.rewriteCss": ["concat", "match"],
-          }];
-          assert.strictEqual(helper.runCommand(command, doc), undefined);
-          assert.deepEqual(helper.options, {
-            "capture.style": "save",
-            "capture.rewriteCss": "match",
-          });
-        });
-
-        it("Array", function () {
-          var doc = makeTestDoc();
-
-          var helper = new capturer.CaptureHelperHandler();
-          var command = ["options", [
-            ["capture.style", "save"],
-            ["capture.rewriteCss", "match"],
-          ]];
-          assert.strictEqual(helper.runCommand(command, doc), undefined);
-          assert.deepEqual(helper.options, {
-            "capture.style": "save",
-            "capture.rewriteCss": "match",
-          });
-        });
-
-        it("Array (resolve parameter commands)", function () {
-          var doc = makeTestDoc();
-
-          var helper = new capturer.CaptureHelperHandler();
-          var command = ["options", ["if", true, [
-            ["capture.style", "save"],
-            ["capture.rewriteCss", "match"],
-          ]]];
-          assert.strictEqual(helper.runCommand(command, doc), undefined);
-          assert.deepEqual(helper.options, {
-            "capture.style": "save",
-            "capture.rewriteCss": "match",
-          });
-
-          var helper = new capturer.CaptureHelperHandler();
-          var command = ["options", [
-            [["concat", "capture.style"], ["concat", "save"]],
-            [["concat", "capture.rewriteCss"], ["concat", "match"]],
-          ]];
-          assert.strictEqual(helper.runCommand(command, doc), undefined);
-          assert.deepEqual(helper.options, {
-            "capture.style": "save",
-            "capture.rewriteCss": "match",
-          });
         });
 
       });

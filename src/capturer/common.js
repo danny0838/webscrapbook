@@ -3157,12 +3157,6 @@
       });
       const result = parser.run();
 
-      // overwrite options
-      // @TODO: rewriting some options doesn't work or results in a
-      //        conflicting status as they are already processed before this
-      //        point.
-      Object.assign(options, result.options);
-
       if (result.errors.length) {
         (async () => {
           for (const error of result.errors) {
@@ -6035,7 +6029,6 @@
       this.rootNode = rootNode;
       this.docUrl = docUrl;
       this.origNodeMap = origNodeMap;
-      this.options = {};
       this.commandId = 0;
       this.debugging = false;
     }
@@ -6097,9 +6090,37 @@
       }
 
       return {
-        options: this.options,
         errors,
       };
+    }
+
+    static getOverridingOptions(helpers, docUrl) {
+      const rv = {};
+      if (docUrl) {
+        for (let i = 0, I = helpers.length; i < I; ++i) {
+          const helper = helpers[i];
+
+          if (helper.disabled) {
+            continue;
+          }
+
+          if (helper.pattern) {
+            helper.pattern.lastIndex = 0;
+            if (!helper.pattern.test(docUrl)) {
+              continue;
+            }
+          }
+
+          if (typeof helper.options === 'object') {
+            Object.assign(rv, helper.options);
+          }
+        }
+
+        // forbid overwriting capture helper related options
+        delete rv["capture.helpersEnabled"];
+        delete rv["capture.helpers"];
+      }
+      return rv;
     }
 
     static parseRegexStr(str) {
@@ -6739,41 +6760,6 @@
             break;
           }
         }
-      }
-    }
-
-    cmd_options(rootNode, options, optionValue) {
-      options = this.resolve(options, rootNode);
-
-      if (!options) {
-        return;
-      }
-
-      // key, value
-      if (typeof options === 'string') {
-        const key = options;
-        const value = this.resolve(optionValue, rootNode);
-        this.options[key] = value;
-        return;
-      }
-
-      // [[key1, value1], ...]
-      if (Array.isArray(options)) {
-        for (let [key, value] of options) {
-          key = this.resolve(key, rootNode);
-          value = this.resolve(value, rootNode);
-          this.options[key] = value;
-        }
-        return;
-      }
-
-      // {key1: value1, ...}
-      if (typeof options === 'object') {
-        for (const key in options) {
-          const value = this.resolve(options[key], rootNode);
-          this.options[key] = value;
-        }
-        return;
       }
     }
   };

@@ -1132,7 +1132,25 @@
     if (options["capture.helpersEnabled"]) {
       if (options["capture.helpers"]) {
         try {
-          scrapbook.parseOption("capture.helpers", options["capture.helpers"]);
+          const helpers = scrapbook.parseOption("capture.helpers", options["capture.helpers"]);
+
+          // apply overriding options
+          const docUrl = await (async () => {
+            if (Number.isInteger(tabId)) {
+              return (await browser.webNavigation.getFrame({
+                tabId,
+                frameId: Number.isInteger(frameId) ? frameId : 0,
+              })).url;
+            } else if (typeof url === 'string') {
+              // @TODO: consider server redirect?
+              return url;
+            } else {
+              return "";
+            }
+          })();
+
+          const overridingOptions = capturer.CaptureHelperHandler.getOverridingOptions(helpers, docUrl);
+          Object.assign(options, overridingOptions);
         } catch (ex) {
           options["capture.helpersEnabled"] = false;
           options["capture.helpers"] = "";

@@ -18233,8 +18233,7 @@ it('test_capture_helpers_basic', async function () {
 [
   {
     "commands": [
-      ["remove", "#exclude, .exclude, img"],
-      ["options", {"capture.style": "remove"}]
+      ["remove", "#exclude, .exclude, img"]
     ]
   }
 ]`,
@@ -18254,7 +18253,6 @@ it('test_capture_helpers_basic', async function () {
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
 
-  assert.notExists(doc.querySelector('style'));
   assert.notExists(doc.querySelector('#exclude'));
   assert.notExists(doc.querySelector('.exclude'));
   assert.notExists(doc.querySelector('img'));
@@ -18267,8 +18265,7 @@ it('test_capture_helpers_basic', async function () {
   {
     "debug": true,
     "commands": [
-      ["*remove", "#exclude, .exclude, img"],
-      ["*options", {"capture.style": "remove"}]
+      ["*remove", "#exclude, .exclude, img"]
     ]
   }
 ]`,
@@ -18288,7 +18285,6 @@ it('test_capture_helpers_basic', async function () {
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
 
-  assert.notExists(doc.querySelector('style'));
   assert.notExists(doc.querySelector('#exclude'));
   assert.notExists(doc.querySelector('.exclude'));
   assert.notExists(doc.querySelector('img'));
@@ -18301,8 +18297,7 @@ it('test_capture_helpers_basic', async function () {
   {
     "debug": false,
     "commands": [
-      ["*remove", "#exclude, .exclude, img"],
-      ["*options", {"capture.style": "remove"}]
+      ["*remove", "#exclude, .exclude, img"]
     ]
   }
 ]`,
@@ -18322,7 +18317,6 @@ it('test_capture_helpers_basic', async function () {
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
 
-  assert.notExists(doc.querySelector('style'));
   assert.notExists(doc.querySelector('#exclude'));
   assert.notExists(doc.querySelector('.exclude'));
   assert.notExists(doc.querySelector('img'));
@@ -18334,8 +18328,7 @@ it('test_capture_helpers_basic', async function () {
 [
   {
     "commands": [
-      ["remove", "#exclude, .exclude, img"],
-      ["options", {"capture.style": "remove"}]
+      ["remove", "#exclude, .exclude, img"]
     ]
   }
 ]`,
@@ -18355,7 +18348,6 @@ it('test_capture_helpers_basic', async function () {
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
 
-  assert.exists(doc.querySelector('style'));
   assert.exists(doc.querySelector('#exclude'));
   assert.exists(doc.querySelector('.exclude'));
   assert.exists(doc.querySelector('img'));
@@ -18380,7 +18372,6 @@ it('test_capture_helpers_basic', async function () {
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
 
-  assert.exists(doc.querySelector('style'));
   assert.exists(doc.querySelector('#exclude'));
   assert.exists(doc.querySelector('.exclude'));
   assert.exists(doc.querySelector('img'));
@@ -18405,7 +18396,6 @@ it('test_capture_helpers_basic', async function () {
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
 
-  assert.exists(doc.querySelector('style'));
   assert.exists(doc.querySelector('#exclude'));
   assert.exists(doc.querySelector('.exclude'));
   assert.exists(doc.querySelector('img'));
@@ -18445,6 +18435,290 @@ it('test_capture_helpers_nesting', async function () {
   var doc = await readFileAsDocument(indexBlob);
 
   assert.exists(doc.querySelector('img[src="green.bmp"]'));
+});
+
+/**
+ * Check if overriding options of capture helper works correctly.
+ *
+ * capturer.helpersEnabled
+ * capture.helpers
+ */
+it('test_capture_helpers_options', async function () {
+  /* capture.helpers set and enabled */
+  var options = {
+    "capture.helpersEnabled": true,
+    "capture.helpers": `\
+[
+  {
+    "options": {
+      "capture.image": "remove"
+    }
+  }
+]`,
+  };
+
+  var blob = await capture({
+    url: `${localhost}/capture_helpers/basic/index.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+  assert.exists(zip.file("index.html"));
+  assert.exists(zip.file("red.bmp"));
+  assert.notExists(zip.file("green.bmp"));
+
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assert.notExists(doc.querySelector('img'));
+
+  /* capture.helpers set and not enabled */
+  var options = {
+    "capture.helpersEnabled": false,
+    "capture.helpers": `\
+[
+  {
+    "options": {
+      "capture.image": "remove"
+    }
+  }
+]`,
+  };
+
+  var blob = await capture({
+    url: `${localhost}/capture_helpers/basic/index.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+  assert.exists(zip.file("index.html"));
+  assert.exists(zip.file("red.bmp"));
+  assert.exists(zip.file("green.bmp"));
+
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assert.exists(doc.querySelector('img'));
+
+  /* capture.helpers with matching URL (tab) */
+  var options = {
+    "capture.helpersEnabled": true,
+    "capture.helpers": `\
+[
+  {
+    "pattern": "//capture_helpers//",
+    "options": {
+      "capture.image": "remove"
+    }
+  }
+]`,
+  };
+
+  var blob = await capture({
+    url: `${localhost}/capture_helpers/basic/index.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+  assert.exists(zip.file("index.html"));
+  assert.exists(zip.file("red.bmp"));
+  assert.notExists(zip.file("green.bmp"));
+
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assert.notExists(doc.querySelector('img'));
+
+  /* capture.helpers with non-matching URL (tab) */
+  var options = {
+    "capture.helpersEnabled": true,
+    "capture.helpers": `\
+[
+  {
+    "pattern": "/(?!)/",
+    "options": {
+      "capture.image": "remove"
+    }
+  }
+]`,
+  };
+
+  var blob = await capture({
+    url: `${localhost}/capture_helpers/basic/index.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+  assert.exists(zip.file("index.html"));
+  assert.exists(zip.file("red.bmp"));
+  assert.exists(zip.file("green.bmp"));
+
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assert.exists(doc.querySelector('img'));
+
+  /* capture.helpers with matching URL (source) */
+  var options = {
+    "capture.helpersEnabled": true,
+    "capture.helpers": `\
+[
+  {
+    "pattern": "//capture_helpers//",
+    "options": {
+      "capture.image": "remove"
+    }
+  }
+]`,
+  };
+
+  var blob = await captureHeadless({
+    url: `${localhost}/capture_helpers/basic/index.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+  assert.exists(zip.file("index.html"));
+  assert.exists(zip.file("red.bmp"));
+  assert.notExists(zip.file("green.bmp"));
+
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assert.notExists(doc.querySelector('img'));
+
+  /* capture.helpers with non-matching URL (source) */
+  var options = {
+    "capture.helpersEnabled": true,
+    "capture.helpers": `\
+[
+  {
+    "pattern": "/(?!)/",
+    "options": {
+      "capture.image": "remove"
+    }
+  }
+]`,
+  };
+
+  var blob = await captureHeadless({
+    url: `${localhost}/capture_helpers/basic/index.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+  assert.exists(zip.file("index.html"));
+  assert.exists(zip.file("red.bmp"));
+  assert.exists(zip.file("green.bmp"));
+
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assert.exists(doc.querySelector('img'));
+});
+
+$it.xfail()('test_capture_helpers_options_redirect', async function () {
+  /* capture.helpers with matching URL (source) */
+  var options = {
+    "capture.helpersEnabled": true,
+    "capture.helpers": `\
+[
+  {
+    "pattern": "/redirected\.html/",
+    "options": {
+      "capture.style": "remove"
+    }
+  }
+]`,
+  };
+
+  var blob = await captureHeadless({
+    url: `${localhost}/capture_helpers/redirect/redirect.pyr`,
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assert.notExists(doc.querySelector('style'));
+
+  /* capture.helpers with non-matching URL (source) */
+  var options = {
+    "capture.helpersEnabled": true,
+    "capture.helpers": `\
+[
+  {
+    "pattern": "/redirect\.pyr/",
+    "options": {
+      "capture.style": "remove"
+    }
+  }
+]`,
+  };
+
+  var blob = await captureHeadless({
+    url: `${localhost}/capture_helpers/redirect/redirect.pyr`,
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assert.exists(doc.querySelector('style'));
+});
+
+$it.xfail()('test_capture_helpers_options_refresh', async function () {
+  /* capture.helpers with matching URL (source) */
+  var options = {
+    "capture.helpersEnabled": true,
+    "capture.helpers": `\
+[
+  {
+    "pattern": "/redirected\.html/",
+    "options": {
+      "capture.style": "remove"
+    }
+  }
+]`,
+  };
+
+  var blob = await captureHeadless({
+    url: `${localhost}/capture_helpers/redirect/refresh.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assert.notExists(doc.querySelector('style'));
+
+  /* capture.helpers with non-matching URL (source) */
+  var options = {
+    "capture.helpersEnabled": true,
+    "capture.helpers": `\
+[
+  {
+    "pattern": "/refresh\.html/",
+    "options": {
+      "capture.style": "remove"
+    }
+  }
+]`,
+  };
+
+  var blob = await captureHeadless({
+    url: `${localhost}/capture_helpers/redirect/refresh.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assert.exists(doc.querySelector('style'));
 });
 
 it('test_recapture', async function () {
