@@ -1315,10 +1315,18 @@
   capturer.captureUrl = async function (params) {
     isDebug && console.debug("call: captureUrl", params);
 
-    const {downLink = false, downLinkExtra = false, downLinkPage = false, settings, options} = params;
-    let {timeId, depth} = settings;
-    let {url: sourceUrl, refUrl, refPolicy, overrideBlob, isAttachment} = params;
-    let [sourceUrlMain, sourceUrlHash] = scrapbook.splitUrlByAnchor(sourceUrl);
+    const {
+      url: sourceUrl,
+      refPolicy,
+      downLink = false,
+      downLinkExtra = false,
+      downLinkPage = false,
+      settings,
+      options,
+    } = params;
+    let {refUrl, overrideBlob, isAttachment} = params;
+    const {timeId, depth} = settings;
+    const [sourceUrlMain, sourceUrlHash] = scrapbook.splitUrlByAnchor(sourceUrl);
 
     let downLinkDoc = downLink && parseInt(options["capture.downLink.doc.depth"], 10) >= 0 && options["capture.saveAs"] !== "singleHtml";
     let downLinkFile = downLink && ["header", "url"].includes(options["capture.downLink.file.mode"]);
@@ -1358,13 +1366,12 @@
       }
     }
 
+    // resolve meta refresh
+    let [url, urlMain, urlHash] = [sourceUrl, sourceUrlMain, sourceUrlHash];
     let fetchResponse;
     let doc;
-
-    // resolve meta refresh
     const metaRefreshChain = [];
     try {
-      let urlMain = sourceUrlMain;
       while (true) {
         fetchResponse = await capturer.fetch({
           url: urlMain,
@@ -1413,9 +1420,10 @@
 
         metaRefreshChain.push(fetchResponse.url);
         refUrl = fetchResponse.url;
+        overrideBlob = null;
 
         // meta refresh will replace the original hash
-        [urlMain, sourceUrlHash] = scrapbook.splitUrlByAnchor(metaRefreshTarget);
+        [urlMain, urlHash] = scrapbook.splitUrlByAnchor(metaRefreshTarget);
       }
     } catch (ex) {
       // URL not accessible, or meta refresh not resolvable
@@ -1475,7 +1483,7 @@
         })
         .then(response => {
           return Object.assign({}, response, {
-            url: capturer.getRedirectedUrl(response.url, sourceUrlHash),
+            url: capturer.getRedirectedUrl(response.url, urlHash),
           });
         });
       }
@@ -1490,7 +1498,7 @@
     if (doc) {
       if (downLinkPage && options["capture.downLink.doc.mode"] === "tab") {
         const response = await capturer.captureRemoteTab({
-          url: capturer.getRedirectedUrl(fetchResponse.url, sourceUrlHash),
+          url: capturer.getRedirectedUrl(fetchResponse.url, urlHash),
           refUrl,
           settings,
           options,
@@ -1511,7 +1519,7 @@
         return response;
       }
 
-      const docUrl = capturer.getRedirectedUrl(fetchResponse.url, sourceUrlHash);
+      const docUrl = capturer.getRedirectedUrl(fetchResponse.url, urlHash);
       return await capturer.captureDocumentOrFile({
         doc,
         metaDocUrl: docUrl,
@@ -1524,7 +1532,7 @@
     }
 
     return await capturer.captureFile({
-      url: capturer.getRedirectedUrl(fetchResponse.url, sourceUrlHash),
+      url: capturer.getRedirectedUrl(fetchResponse.url, urlHash),
       refUrl,
       refPolicy,
       charset: fetchResponse.headers.charset,
@@ -1548,13 +1556,13 @@
   capturer.captureBookmark = async function (params) {
     isDebug && console.debug("call: captureBookmark", params);
 
-    const {settings, options} = params;
-    let {url: sourceUrl, refUrl, refPolicy} = params;
+    const {refPolicy, settings, options} = params;
+    let {url: sourceUrl, refUrl} = params;
     let [sourceUrlMain, sourceUrlHash] = scrapbook.splitUrlByAnchor(sourceUrl);
-    let fetchResponse;
-    let doc;
 
     // resolve meta refresh
+    let fetchResponse;
+    let doc;
     const metaRefreshChain = [];
     while (true) {
       fetchResponse = await capturer.fetch({
