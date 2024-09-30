@@ -157,9 +157,17 @@ class TestSuite {
   /**
    * Open a tab with connection for test.
    *
-   * @param {openTestTabHandler} handler
+   * @param {openTestTabHandler} [handler]
    */
   async openTestTab(createProperties, handler) {
+    if (typeof handler === 'undefined') {
+      handler = (message, port, resolve) => {
+        if (message.cmd == 'result') {
+          resolve(message.args.value);
+        }
+      };
+    }
+
     const tab = await this.openTab(createProperties);
     const port = browser.tabs.connect(tab.id, {name: 'test'});
     const result = await new Promise((resolve, reject) => {
