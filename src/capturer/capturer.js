@@ -1775,8 +1775,6 @@
       }
     }
 
-    capturer.log(`Saving data...`);
-
     const html = (() => {
       const url = sourceUrl.startsWith("data:") ? "data:" : sourceUrl;
       const meta = params.options["capture.recordDocumentMeta"] ? 
@@ -1800,7 +1798,6 @@ Bookmark for <a href="${scrapbook.escapeHtml(sourceUrl)}">${scrapbook.escapeHtml
 </html>`;
     })();
     const blob = new Blob([html], {type: "text/html"});
-    const ext = ".htm";
 
     settings.type = settings.type || 'bookmark';
     settings.indexFilename = settings.indexFilename || await capturer.formatIndexFilename({
@@ -1811,71 +1808,36 @@ Bookmark for <a href="${scrapbook.escapeHtml(sourceUrl)}">${scrapbook.escapeHtml
       options,
     });
 
-    let targetDir;
-    let filename = settings.indexFilename + ext;
+    const registry = await capturer.invoke("registerDocument", {
+      docUrl: sourceUrl,
+      mime: "text/html",
+      role: "document",
+      settings,
+      options,
+    });
 
-    title = title || scrapbook.urlToFilename(sourceUrl);
-    switch (options["capture.saveTo"]) {
-      case 'memory': {
-        // special handling (for unit test)
-        return await capturer.saveBlobCache(blob, Infinity);
-      }
-      case 'file': {
-        const downloadItem = await capturer.saveBlobNaturally({
-          timeId,
-          blob,
-          filename,
-          sourceUrl,
-        });
-        capturer.log(`Saved to "${downloadItem.filename}"`);
-        filename = scrapbook.filepathParts(downloadItem.filename)[1];
-        break;
-      }
-      case 'server': {
-        // we get here only if the book is no_tree
-        [targetDir, filename] = scrapbook.filepathParts(filename);
-        filename = await capturer.saveBlobToServer({
-          timeId,
-          blob,
-          directory: targetDir,
-          filename,
-          settings,
-          options,
-        });
-        capturer.log(`Saved to "${(targetDir ? targetDir + '/' : '') + filename}"`);
-        break;
-      }
-      case 'folder':
-      default: {
-        [targetDir, filename] = scrapbook.filepathParts(options["capture.saveFolder"] + "/" + filename);
-        const downloadItem = await capturer.saveBlob({
-          timeId,
-          blob,
-          directory: targetDir,
-          filename,
-          sourceUrl,
-          autoErase: false,
-          savePrompt: false,
-          conflictAction: options["capture.saveOverwrite"] ? "overwrite" : "uniquify",
-          settings,
-          options,
-        });
-        capturer.log(`Saved to "${downloadItem.filename}"`);
-        filename = scrapbook.filepathParts(downloadItem.filename)[1];
-        break;
-      }
+    const documentFileName = registry.filename;
+
+    const response = await capturer.saveDocument({
+      sourceUrl,
+      documentFileName,
+      settings,
+      options,
+      data: {
+        blob,
+        title,
+        favIconUrl,
+      },
+    });
+
+    // special handling for blob response
+    if (!('url' in response)) {
+      return response;
     }
 
-    return {
-      timeId,
-      title,
-      type: settings.type,
-      sourceUrl,
-      targetDir,
-      filename,
-      url: scrapbook.escapeFilename(filename) + sourceUrlHash,
-      favIconUrl,
-    };
+    return Object.assign({}, response, {
+      url: capturer.getRedirectedUrl(response.url, sourceUrlHash),
+    });
   };
 
   /**
@@ -3456,10 +3418,18 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
     // save captured data to files
     capturer.log(`Saving data...`);
     const title = data.title || scrapbook.urlToFilename(sourceUrl);
+    let saveAs = options["capture.saveAs"];
     let targetDir;
     let filename;
     let [basename, ext] = scrapbook.filenameParts(documentFileName);
-    switch (options["capture.saveAs"]) {
+
+    // special handling for bookmark (as a special case of singleHtml)
+    if (itemType === 'bookmark') {
+      saveAs = 'singleHtml';
+      ext = 'htm';
+    }
+
+    switch (saveAs) {
       case "singleHtml": {
         let {blob} = data;
         blob = await capturer.loadBlobCache(blob);
