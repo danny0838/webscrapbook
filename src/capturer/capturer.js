@@ -1693,8 +1693,7 @@
 
     capturer.log(`Saving data...`);
 
-    let html;
-    {
+    const html = (() => {
       const url = sourceUrl.startsWith("data:") ? "data:" : sourceUrl;
       const meta = params.options["capture.recordDocumentMeta"] ? 
           ' data-scrapbook-source="' + scrapbook.escapeHtml(scrapbook.normalizeUrl(url)) + '"' + 
@@ -1705,7 +1704,7 @@
       const favIconElem = (favIconUrl && !["blank", "remove", "link"].includes(options["capture.favicon"])) ?
           `<link rel="shortcut icon" href="${scrapbook.escapeHtml(favIconUrl)}">\n` :
           "";
-      html = `<!DOCTYPE html>
+      return `<!DOCTYPE html>
 <html${meta}>
 <head>
 <meta charset="UTF-8">
@@ -1715,8 +1714,7 @@ ${titleElem}${favIconElem}</head>
 Bookmark for <a href="${scrapbook.escapeHtml(sourceUrl)}">${scrapbook.escapeHtml(sourceUrl, false)}</a>
 </body>
 </html>`;
-    }
-
+    })();
     const blob = new Blob([html], {type: "text/html"});
     const ext = ".htm";
 
@@ -1829,25 +1827,28 @@ Bookmark for <a href="${scrapbook.escapeHtml(sourceUrl)}">${scrapbook.escapeHtml
     }
 
     // for the main frame, create a index.html that redirects to the file
-    const url = sourceUrl.startsWith("data:") ? "data:" : sourceUrl;
-    const meta = params.options["capture.recordDocumentMeta"] ? 
-        ' data-scrapbook-source="' + scrapbook.escapeHtml(scrapbook.normalizeUrl(url)) + '"' + 
-        ' data-scrapbook-create="' + scrapbook.escapeHtml(timeId) + '"' + 
-        ' data-scrapbook-type="file"' + 
-        (charset ? ' data-scrapbook-charset="' + charset + '"' : "") : 
-        "";
-
-    const content =`<!DOCTYPE html>
+    const html = (() => {
+      const url = sourceUrl.startsWith("data:") ? "data:" : sourceUrl;
+      const meta = params.options["capture.recordDocumentMeta"] ? 
+          ' data-scrapbook-source="' + scrapbook.escapeHtml(scrapbook.normalizeUrl(url)) + '"' + 
+          ' data-scrapbook-create="' + scrapbook.escapeHtml(timeId) + '"' + 
+          ' data-scrapbook-type="file"' + 
+          (charset ? ' data-scrapbook-charset="' + charset + '"' : "") : 
+          "";
+      const titleElem = title ? `<title>${scrapbook.escapeHtml(title, false)}</title>\n` : "";
+      return `\
+<!DOCTYPE html>
 <html${meta}>
 <head>
 <meta charset="UTF-8">
 <meta http-equiv="refresh" content="0; url=${scrapbook.escapeHtml(response.url)}">
-${title ? '<title>' + scrapbook.escapeHtml(title, false) + '</title>\n' : ''}</head>
+${titleElem}</head>
 <body>
 Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.escapeHtml(response.filename, false)}</a>
 </body>
 </html>`;
-    let blob = new Blob([content], {type: "text/html;charset=UTF-8"});
+    })();
+    let blob = new Blob([html], {type: "text/html;charset=UTF-8"});
     blob = await capturer.saveBlobCache(blob);
 
     settings.indexFilename = await capturer.formatIndexFilename({
