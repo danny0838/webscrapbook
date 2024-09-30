@@ -143,36 +143,37 @@ class TestSuite {
   }
 
   /**
+   * @callback openTestTabHandlerResolver
+   * @param {boolean} pass - whether the test passes
+   */
+
+  /**
+   * @callback openTestTabHandler
+   * @param {Object} message
+   * @param {Port} port
+   * @param {openTestTabHandlerResolver} resolve
+   */
+
+  /**
    * Open a tab with connection for test.
    *
-   * @param {func} handler - Return a boolean indicating the test pass or not.
+   * @param {openTestTabHandler} handler
    */
   async openTestTab(createProperties, handler) {
-    const {config, localhost} = this;
     const tab = await this.openTab(createProperties);
     const port = browser.tabs.connect(tab.id, {name: 'test'});
     const result = await new Promise((resolve, reject) => {
-      const onMessage = (message, port) => {
+      port.onMessage.addListener((message, port) => {
         handler(message, port, resolve);
-      };
-      const onDisconnect = (port) => {
-        reject(new Error('Port disconnected'));
-      };
-      port.onMessage.addListener(onMessage);
-      port.onDisconnect.addListener(onDisconnect);
-      port.postMessage({
-        cmd: 'loadEnv',
-        args: {
-          config,
-          localhost,
-        },
+      });
+      port.onDisconnect.addListener((port) => {
+        reject(new Error('Page disconnected'));
       });
     });
     await browser.tabs.remove(tab.id);
     if (!result) {
       throw new Error('Manual test failed');
     }
-    return true;
   }
 
   /**

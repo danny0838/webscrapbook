@@ -21,6 +21,18 @@
     ]
   },
 
+  "content_scripts": [
+    {
+      "matches": [
+        "http://localhost/viewer_*"
+      ],
+      "js": [
+        "content.js"
+      ],
+      "run_at": "document_start"
+    }
+  ],
+
   "browser_action": {
     "default_title": "WebScrapBook Test Suite"
   },
