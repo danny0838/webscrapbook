@@ -1127,6 +1127,22 @@
     bookId = null, parentId, index,
     captureOnly = false,
   }) {
+    // validate capture helpers
+    // force disabled if invalid or undefined
+    if (options["capture.helpersEnabled"]) {
+      if (options["capture.helpers"]) {
+        try {
+          scrapbook.parseOption("capture.helpers", options["capture.helpers"]);
+        } catch (ex) {
+          options["capture.helpersEnabled"] = false;
+          options["capture.helpers"] = "";
+          capturer.warn(`Ignored invalid capture.helpers: ${ex.message}`);
+        }
+      } else {
+        options["capture.helpersEnabled"] = false;
+      }
+    }
+
     // determine bookId at the start of a capture
     if (options["capture.saveTo"] === 'server') {
       if (bookId === null) {

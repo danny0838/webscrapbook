@@ -3143,39 +3143,32 @@
     }
 
     // preprocess with helpers
-    if (options["capture.helpersEnabled"] && options["capture.helpers"]) {
-      const helpers = (() => {
-        try {
-          return scrapbook.parseOption("capture.helpers", options["capture.helpers"]);
-        } catch (ex) {
-          // skip invalid helpers
-          warn(`Ignored invalid capture.helpers: ${ex.message}`);
-        }
-      })();
+    // Expect options["capture.helpers"] to be parsable when
+    // options["capture.helpersEnabled"] is trthy, as validated in
+    // `capturer.captureGeneral`.
+    if (options["capture.helpersEnabled"]) {
+      const helpers = scrapbook.parseOption("capture.helpers", options["capture.helpers"]);
+      const parser = new CaptureHelperHandler({
+        helpers,
+        rootNode,
+        docUrl,
+        origNodeMap,
+        options,
+      });
+      const result = parser.run();
 
-      if (helpers) {
-        const parser = new CaptureHelperHandler({
-          helpers,
-          rootNode,
-          docUrl,
-          origNodeMap,
-          options,
-        });
-        const result = parser.run();
+      // overwrite options
+      // @TODO: rewriting some options doesn't work or results in a
+      //        conflicting status as they are already processed before this
+      //        point.
+      Object.assign(options, result.options);
 
-        // overwrite options
-        // @TODO: rewriting some options doesn't work or results in a
-        //        conflicting status as they are already processed before this
-        //        point.
-        Object.assign(options, result.options);
-
-        if (result.errors.length) {
-          (async () => {
-            for (const error of result.errors) {
-              await warn(error);
-            }
-          })();
-        }
+      if (result.errors.length) {
+        (async () => {
+          for (const error of result.errors) {
+            await warn(error);
+          }
+        })();
       }
     }
 
