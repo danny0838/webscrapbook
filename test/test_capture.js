@@ -3646,6 +3646,61 @@ it('test_capture_favicon_bookmark', async function () {
   assert.notExists(doc.querySelector('link[rel~="icon"]'));
 });
 
+it('test_capture_favicon_site', async function () {
+  await fetch(`${localhost}/favicon.py?a=create`);
+  try {
+    /* mode = "" */
+    var options = {
+      "capture.favicon": "save",
+    };
+    var blob = await capture({
+      url: `${localhost}/capture_favicon_site/favicon.html`,
+      options: Object.assign({}, baseOptions, options),
+    });
+
+    var zip = await new JSZip().loadAsync(blob);
+    assert.exists(zip.file('favicon.ico'));
+
+    var indexFile = zip.file('index.html');
+    var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+    var doc = await readFileAsDocument(indexBlob);
+
+    var iconElem = doc.querySelector('link[rel~="icon"]');
+    assert.strictEqual(iconElem.getAttribute('href'), `favicon.ico`);
+
+    /* mode = bookmark; document */
+    var options = {
+      "capture.favicon": "save",
+    };
+    var blob = await captureHeadless({
+      url: `${localhost}/capture_favicon_site/favicon.html`,
+      mode: "bookmark",
+      options: Object.assign({}, baseOptions, options),
+    });
+
+    var doc = await readFileAsDocument(blob);
+    assert.strictEqual(
+      doc.querySelector('link[rel="shortcut icon"]').getAttribute('href'),
+      'data:image/x-icon;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAP8AAAAA'
+    );
+
+    /* mode = bookmark; attachment */
+    var options = {
+      "capture.favicon": "save",
+    };
+    var blob = await captureHeadless({
+      url: `${localhost}/capture_favicon_site/favicon.py`,
+      mode: "bookmark",
+      options: Object.assign({}, baseOptions, options),
+    });
+
+    var doc = await readFileAsDocument(blob);
+    assert.notExists(doc.querySelector('link[rel="shortcut icon"]'));
+  } finally {
+    await fetch(`${localhost}/favicon.py?a=delete`);
+  }
+});
+
 /**
  * Check if option works
  *

@@ -1640,43 +1640,45 @@
     const {timeId} = settings;
     let {title, favIconUrl} = settings;
 
-    // attempt to retrieve title and favicon from source page
-    if (doc && (!title || !favIconUrl)) {
-      try {
-        // use the document title if not provided
-        if (!title) {
-          title = doc.title;
-        }
-
-        // use the document favIcon if not provided
-        if (!favIconUrl) {
-          // "rel" is matched case-insensitively
-          // The "~=" selector checks for "icon" separated by space,
-          // not including "-icon" or "_icon".
-          let elem = doc.querySelector('link[rel~="icon"][href]');
-          if (elem) {
-            favIconUrl = new URL(elem.getAttribute('href'), sourceUrl).href;
+    if (doc) {
+      // attempt to retrieve title and favicon from source page
+      if (!title || !favIconUrl) {
+        try {
+          // use the document title if not provided
+          if (!title) {
+            title = doc.title;
           }
-        }
-      } catch (ex) {
-        console.error(ex);
-      }
-    }
 
-    // attempt to take site favicon
-    if (!favIconUrl) {
-      const u = new URL(sourceUrlMain);
-      if (['http:', 'https:'].includes(u.protocol)) {
-        const url = u.origin + '/' + 'favicon.ico';
-        const fetchResponse = await capturer.fetch({
-          url,
-          refUrl: sourceUrl,
-          refPolicy,
-          settings,
-          options,
-        });
-        if (!fetchResponse.error) {
-          favIconUrl = url;
+          // use the document favIcon if not provided
+          if (!favIconUrl) {
+            // "rel" is matched case-insensitively
+            // The "~=" selector checks for "icon" separated by space,
+            // not including "-icon" or "_icon".
+            let elem = doc.querySelector('link[rel~="icon"][href]');
+            if (elem) {
+              favIconUrl = new URL(elem.getAttribute('href'), sourceUrl).href;
+            }
+          }
+        } catch (ex) {
+          console.error(ex);
+        }
+      }
+
+      // attempt to take site favicon
+      if (!favIconUrl) {
+        const u = new URL(sourceUrlMain);
+        if (['http:', 'https:'].includes(u.protocol)) {
+          const url = u.origin + '/' + 'favicon.ico';
+          const fetchResponse = await capturer.fetch({
+            url,
+            refUrl: sourceUrl,
+            refPolicy,
+            settings,
+            options,
+          });
+          if (!fetchResponse.error) {
+            favIconUrl = url;
+          }
         }
       }
     }
