@@ -14697,6 +14697,140 @@ it('test_capture_downLink_indepth', async function () {
 });
 
 /**
+ * Check in-depth capture with tab mode
+ *
+ * capture.downLink.doc.depth
+ * capture.downLink.doc.mode
+ */
+it('test_capture_downLink_indepth_mode_tab', async function () {
+  /* depth = 1 */
+  var options = {
+    "capture.downLink.doc.depth": 1,
+    "capture.downLink.doc.mode": "tab",
+  };
+
+  var blob = await capture({
+    url: `${localhost}/capture_downLink_indepth/in-depth.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assert.strictEqual(doc.documentElement.getAttribute('data-scrapbook-type'), 'site');
+  assert.strictEqual(doc.querySelectorAll('a')[0].getAttribute('href'), `${localhost}/capture_downLink_indepth/file.bmp`);
+  assert.strictEqual(doc.querySelectorAll('a')[1].getAttribute('href'), `linked1-1.html#111`);
+  assert.strictEqual(doc.querySelectorAll('a')[2].getAttribute('href'), `linked1-2.html#222`);
+  assert.strictEqual(doc.querySelectorAll('a')[3].getAttribute('href'), `linked1-3.html#333`);
+  assert.strictEqual(doc.querySelectorAll('a')[4].getAttribute('href'), `linked1-4.html#444`);
+  assert.strictEqual(doc.querySelectorAll('a')[5].getAttribute('href'), `linked1-5.html#`);
+
+  var indexFile = zip.file('linked1-1.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assert.exists(doc);
+
+  var indexFile = zip.file('linked1-2.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assert.strictEqual(doc.querySelectorAll('a')[0].getAttribute('href'), `${localhost}/capture_downLink_indepth/linked2-1.html#1-2`);
+  assert.strictEqual(doc.querySelectorAll('a')[1].getAttribute('href'), `${localhost}/capture_downLink_indepth/linked2-2.html#1-2`);
+
+  var indexFile = zip.file('linked1-3.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assert.strictEqual(doc.querySelectorAll('a')[0].getAttribute('href'), `linked1-1.html#1-3`);
+  assert.strictEqual(doc.querySelectorAll('a')[1].getAttribute('href'), `linked1-5.html#1-3`);
+
+  var indexFile = zip.file('linked1-4.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assert.strictEqual(doc.querySelectorAll('a')[0].getAttribute('href'), `index.html#1-4`);
+
+  var indexFile = zip.file('linked1-5.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assert.exists(doc);
+
+  assert.notExists(zip.file('linked2-1.html'));
+
+  assert.notExists(zip.file('linked2-2.html'));
+
+  var sitemapBlob = await zip.file('index.json').async('blob');
+  var expectedData = {
+    "version": 3,
+    "indexPages": [
+      "index.html"
+    ],
+    "redirects": [],
+    "files": [
+      {
+        "path": "index.json"
+      },
+      {
+        "path": "index.dat"
+      },
+      {
+        "path": "index.rdf"
+      },
+      {
+        "path": "history.rdf"
+      },
+      {
+        "path": "^metadata^"
+      },
+      {
+        "path": "index.html",
+        "url": `${localhost}/capture_downLink_indepth/in-depth.html`,
+        "role": "document",
+        "token": getToken(`${localhost}/capture_downLink_indepth/in-depth.html`, "document")
+      },
+      {
+        "path": "index.xhtml",
+        "role": "document"
+      },
+      {
+        "path": "index.svg",
+        "role": "document"
+      },
+      {
+        "path": "linked1-1.html",
+        "url": `${localhost}/capture_downLink_indepth/linked1-1.html`,
+        "role": "document",
+        "token": getToken(`${localhost}/capture_downLink_indepth/linked1-1.html`, "document")
+      },
+      {
+        "path": "linked1-2.html",
+        "url": `${localhost}/capture_downLink_indepth/linked1-2.html`,
+        "role": "document",
+        "token": getToken(`${localhost}/capture_downLink_indepth/linked1-2.html`, "document")
+      },
+      {
+        "path": "linked1-3.html",
+        "url": `${localhost}/capture_downLink_indepth/linked1-3.html`,
+        "role": "document",
+        "token": getToken(`${localhost}/capture_downLink_indepth/linked1-3.html`, "document")
+      },
+      {
+        "path": "linked1-4.html",
+        "url": `${localhost}/capture_downLink_indepth/linked1-4.html`,
+        "role": "document",
+        "token": getToken(`${localhost}/capture_downLink_indepth/linked1-4.html`, "document")
+      },
+      {
+        "path": "linked1-5.html",
+        "url": `${localhost}/capture_downLink_indepth/linked1-5.html`,
+        "role": "document",
+        "token": getToken(`${localhost}/capture_downLink_indepth/linked1-5.html`, "document")
+      }
+    ]
+  };
+  assert.deepEqual(JSON.parse(await readFileAsText(sitemapBlob)), expectedData);
+});
+
+/**
  * Check no in-depth for singleHtml
  *
  * capture.downLink.doc.depth
