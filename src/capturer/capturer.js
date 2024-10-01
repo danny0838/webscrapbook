@@ -1597,6 +1597,8 @@
       sourceUrl = metaRefreshTarget;
       [sourceUrlMain, sourceUrlHash] = scrapbook.splitUrlByAnchor(sourceUrl);
     }
+    sourceUrl = capturer.getRedirectedUrl(fetchResponse.url, sourceUrlHash);
+    [sourceUrlMain, sourceUrlHash] = scrapbook.splitUrlByAnchor(sourceUrl);
 
     const {timeId} = settings;
     let {title, favIconUrl} = settings;
@@ -1616,7 +1618,7 @@
           // not including "-icon" or "_icon".
           let elem = doc.querySelector('link[rel~="icon"][href]');
           if (elem) {
-            favIconUrl = new URL(elem.getAttribute('href'), fetchResponse.url).href;
+            favIconUrl = new URL(elem.getAttribute('href'), sourceUrl).href;
           }
         }
       } catch (ex) {
