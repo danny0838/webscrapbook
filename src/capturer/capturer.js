@@ -800,6 +800,111 @@
   };
 
   /**
+   * @typedef {Object} resolveRedirectsResponse
+   * @property {string} url
+   * @property {string} refUrl
+   * @property {fetchResponse} fetchResponse
+   * @property {?Document} doc
+   * @property {boolean} [isAttachment]
+   * @property {Error} [error] - Target cannot be fetched or circular meta refresh.
+   */
+
+  /**
+   * Resolve redirect and meta refresh.
+   *
+   * @param {Object} params
+   * @param {string} params.url - may include hash
+   * @param {string} [params.refUrl]
+   * @param {string} [params.refPolicy] - the referrer policy
+   * @param {Blob} [params.overrideBlob]
+   * @param {boolean} [params.isAttachment] - the resource is known to be an attachment
+   * @param {boolean} [params.checkMetaRefresh=true]
+   * @param {captureSettings} params.settings
+   * @param {captureOptions} params.options
+   * @return {resolveRedirectsResponse}
+   */
+  capturer.resolveRedirects = async function (params) {
+    isDebug && console.debug("call: resolveRedirects", params);
+
+    const {refPolicy, checkMetaRefresh = true, settings, options} = params;
+    let {url: sourceUrl, refUrl, overrideBlob, isAttachment} = params;
+    let [sourceUrlMain, sourceUrlHash] = scrapbook.splitUrlByAnchor(sourceUrl);
+
+    const ignoreSizeLimit = settings.isMainPage && settings.isMainFrame;
+    const metaRefreshChain = [];
+    let fetchResponse;
+    let doc;
+    let error;
+    try {
+      while (true) {
+        fetchResponse = await capturer.fetch({
+          url: sourceUrlMain,
+          refUrl,
+          refPolicy,
+          overrideBlob,
+          ignoreSizeLimit,
+          settings,
+          options,
+        });
+
+        if (fetchResponse.error) {
+          throw new Error(fetchResponse.error.message);
+        }
+
+        if (!isAttachment && fetchResponse.headers.isAttachment) {
+          isAttachment = true;
+        }
+
+        // treat as non-document if it's an attachment
+        if (isAttachment) {
+          doc = null;
+          break;
+        }
+
+        doc = await scrapbook.readFileAsDocument(fetchResponse.blob);
+
+        if (!doc) {
+          break;
+        }
+
+        if (!checkMetaRefresh) {
+          break;
+        }
+
+        const metaRefreshTarget = scrapbook.getMetaRefreshTarget(doc, fetchResponse.url);
+
+        if (!metaRefreshTarget) {
+          break;
+        }
+
+        if (metaRefreshChain.includes(metaRefreshTarget)) {
+          throw new Error(`Circular meta refresh.`);
+        }
+
+        metaRefreshChain.push(fetchResponse.url);
+        refUrl = fetchResponse.url;
+        overrideBlob = null;
+
+        // meta refresh will replace the original hash
+        [sourceUrlMain, sourceUrlHash] = scrapbook.splitUrlByAnchor(metaRefreshTarget);
+      }
+      sourceUrl = capturer.getRedirectedUrl(fetchResponse.url, sourceUrlHash);
+      [sourceUrlMain, sourceUrlHash] = scrapbook.splitUrlByAnchor(sourceUrl);
+    } catch (ex) {
+      error = ex;
+    }
+
+    return {
+      url: sourceUrl,
+      refUrl,
+      fetchResponse,
+      doc,
+      ...(isAttachment && {isAttachment}),
+      ...(error && {error}),
+    };
+  };
+
+  /**
    * @type invokable
    * @param {Object} params
    * @param {Object} params.item
@@ -1366,75 +1471,30 @@
       }
     }
 
-    // resolve meta refresh
-    let [url, urlMain, urlHash] = [sourceUrl, sourceUrlMain, sourceUrlHash];
-    let fetchResponse;
-    let doc;
-    const metaRefreshChain = [];
-    try {
-      while (true) {
-        fetchResponse = await capturer.fetch({
-          url: urlMain,
-          refUrl,
-          refPolicy,
-          overrideBlob,
-          ignoreSizeLimit: settings.isMainPage && settings.isMainFrame,
-          settings,
-          options,
-        });
+    const redirectInfo = await capturer.resolveRedirects({
+      url: sourceUrl,
+      refUrl,
+      refPolicy,
+      overrideBlob,
+      isAttachment,
 
-        if (fetchResponse.error) {
-          throw new Error(fetchResponse.error.message);
-        }
+      // don't check meta refresh for downLink
+      checkMetaRefresh: !(downLink || downLinkPage),
 
-        if (!isAttachment && fetchResponse.headers.isAttachment) {
-          isAttachment = true;
-        }
-
-        // treat as non-document if it's an attachment
-        if (isAttachment) {
-          doc = null;
-          break;
-        }
-
-        doc = await scrapbook.readFileAsDocument(fetchResponse.blob);
-
-        if (!doc) {
-          break;
-        }
-
-        // don't check meta refresh for downLink
-        if (downLink || downLinkPage) {
-          break;
-        }
-
-        const metaRefreshTarget = scrapbook.getMetaRefreshTarget(doc, fetchResponse.url);
-
-        if (!metaRefreshTarget) {
-          break;
-        }
-
-        if (metaRefreshChain.includes(metaRefreshTarget)) {
-          throw new Error(`Circular meta refresh.`);
-        }
-
-        metaRefreshChain.push(fetchResponse.url);
-        refUrl = fetchResponse.url;
-        overrideBlob = null;
-
-        // meta refresh will replace the original hash
-        [urlMain, urlHash] = scrapbook.splitUrlByAnchor(metaRefreshTarget);
-      }
-    } catch (ex) {
+      settings,
+      options,
+    });
+    if (redirectInfo.error) {
       // URL not accessible, or meta refresh not resolvable
       if (!downLink) {
-        throw ex;
+        throw redirectInfo.error;
       }
 
-      doc = null;
+      redirectInfo.doc = null;
     }
-    url = capturer.getRedirectedUrl(fetchResponse.url, urlHash);
-    [urlMain, urlHash] = scrapbook.splitUrlByAnchor(url);
+    ({refUrl, isAttachment} = redirectInfo);
+    const {fetchResponse, url, doc} = redirectInfo;
+    const [urlMain, urlHash] = scrapbook.splitUrlByAnchor(url);
 
     if (downLink) {
       if (downLinkDoc && doc) {
@@ -1559,45 +1619,18 @@
     let {url: sourceUrl, refUrl} = params;
     let [sourceUrlMain, sourceUrlHash] = scrapbook.splitUrlByAnchor(sourceUrl);
 
-    // resolve meta refresh
-    let fetchResponse;
-    let doc;
-    const metaRefreshChain = [];
-    while (true) {
-      fetchResponse = await capturer.fetch({
-        url: sourceUrlMain,
-        refUrl,
-        refPolicy,
-        settings,
-        options,
-      });
-
-      if (fetchResponse.error) {
-        throw new Error(fetchResponse.error.message);
-      }
-
-      doc = await scrapbook.readFileAsDocument(fetchResponse.blob);
-
-      if (!doc) {
-        break;
-      }
-
-      const metaRefreshTarget = scrapbook.getMetaRefreshTarget(doc, fetchResponse.url);
-
-      if (!metaRefreshTarget) {
-        break;
-      }
-
-      if (metaRefreshChain.includes(metaRefreshTarget)) {
-        throw new Error(`Circular meta refresh.`);
-      }
-
-      metaRefreshChain.push(fetchResponse.url);
-      refUrl = fetchResponse.url;
-      sourceUrl = metaRefreshTarget;
-      [sourceUrlMain, sourceUrlHash] = scrapbook.splitUrlByAnchor(sourceUrl);
+    const redirectInfo = await capturer.resolveRedirects({
+      url: sourceUrl,
+      refUrl,
+      refPolicy,
+      settings,
+      options,
+    });
+    if (redirectInfo.error) {
+      throw redirectInfo.error;
     }
-    sourceUrl = capturer.getRedirectedUrl(fetchResponse.url, sourceUrlHash);
+    const {doc} = redirectInfo;
+    ({url: sourceUrl, refUrl} = redirectInfo);
     [sourceUrlMain, sourceUrlHash] = scrapbook.splitUrlByAnchor(sourceUrl);
 
     const {timeId} = settings;

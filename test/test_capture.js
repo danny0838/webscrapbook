@@ -2380,22 +2380,65 @@ it('test_capture_headless_metaRefresh', async function () {
  * capturer.captureBookmark
  */
 it('test_capture_bookmark', async function () {
+  /* document */
   var blob = await capture({
-    url: `${localhost}/capture_bookmark/index.html`,
+    url: `${localhost}/capture_bookmark/basic.html`,
     mode: "bookmark",
     options: baseOptions,
   });
 
   var doc = await readFileAsDocument(blob);
-
   var html = doc.documentElement;
-  assert.strictEqual(html.getAttribute('data-scrapbook-source'), `${localhost}/capture_bookmark/index.html`);
+  assert.strictEqual(html.getAttribute('data-scrapbook-source'), `${localhost}/capture_bookmark/basic.html`);
   assert(html.getAttribute('data-scrapbook-create').match(regex`^\d{17}$`));
   assert.strictEqual(html.getAttribute('data-scrapbook-type'), 'bookmark');
 
-  assert.exists(doc.querySelector(`meta[http-equiv="refresh"][content="0; url=${localhost}/capture_bookmark/index.html"]`));
-  assert.exists(doc.querySelector(`a[href="${localhost}/capture_bookmark/index.html"]`));
-  assert.exists(doc.querySelector(`link[rel="shortcut icon"][href="data:image/bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAAD/AAAA"]`));
+  assert.strictEqual(doc.querySelector('title').textContent, 'ABC 中文 𠀀 にほんご');
+  assert.strictEqual(doc.querySelector(`meta[http-equiv="refresh"]`).getAttribute('content'), `0; url=${localhost}/capture_bookmark/basic.html`);
+  assert.strictEqual(doc.querySelector('a').getAttribute('href'), `${localhost}/capture_bookmark/basic.html`);
+  assert.strictEqual(
+    doc.querySelector('link[rel="shortcut icon"]').getAttribute('href'),
+    `data:image/bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAAD/AAAA`
+  );
+
+  /* document (headless) */
+  var blob = await captureHeadless({
+    url: `${localhost}/capture_bookmark/basic.html`,
+    mode: "bookmark",
+    options: baseOptions,
+  });
+
+  var doc = await readFileAsDocument(blob);
+  var html = doc.documentElement;
+  assert.strictEqual(html.getAttribute('data-scrapbook-source'), `${localhost}/capture_bookmark/basic.html`);
+  assert(html.getAttribute('data-scrapbook-create').match(regex`^\d{17}$`));
+  assert.strictEqual(html.getAttribute('data-scrapbook-type'), 'bookmark');
+
+  assert.strictEqual(doc.querySelector('title').textContent, 'ABC 中文 𠀀 にほんご');
+  assert.strictEqual(doc.querySelector(`meta[http-equiv="refresh"]`).getAttribute('content'), `0; url=${localhost}/capture_bookmark/basic.html`);
+  assert.strictEqual(doc.querySelector('a').getAttribute('href'), `${localhost}/capture_bookmark/basic.html`);
+  assert.strictEqual(
+    doc.querySelector('link[rel="shortcut icon"]').getAttribute('href'),
+    `data:image/bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAAD/AAAA`
+  );
+
+  /* attachment */
+  var blob = await captureHeadless({
+    url: `${localhost}/capture_bookmark/basic.py`,
+    mode: "bookmark",
+    options: baseOptions,
+  });
+
+  var doc = await readFileAsDocument(blob);
+  var html = doc.documentElement;
+  assert.strictEqual(html.getAttribute('data-scrapbook-source'), `${localhost}/capture_bookmark/basic.py`);
+  assert(html.getAttribute('data-scrapbook-create').match(regex`^\d{17}$`));
+  assert.strictEqual(html.getAttribute('data-scrapbook-type'), 'bookmark');
+
+  assert.notExists(doc.querySelector('title'));
+  assert.strictEqual(doc.querySelector(`meta[http-equiv="refresh"]`).getAttribute('content'), `0; url=${localhost}/capture_bookmark/basic.py`);
+  assert.strictEqual(doc.querySelector('a').getAttribute('href'), `${localhost}/capture_bookmark/basic.py`);
+  assert.notExists(doc.querySelector('link[rel="shortcut icon"]'));
 });
 
 /**
@@ -2409,8 +2452,9 @@ it('test_capture_bookmark_backend', async function () {
     "capture.saveAs": "folder",
   });
 
+  /* document */
   var response = await capture({
-    url: `${localhost}/capture_bookmark/index.html`,
+    url: `${localhost}/capture_bookmark/basic.html`,
     mode: "bookmark",
     options,
   }, {rawResponse: true});
@@ -2434,9 +2478,68 @@ it('test_capture_bookmark_backend', async function () {
     title: "ABC 中文 𠀀 にほんご",
     type: "bookmark",
     create: itemId,
-    source: `${localhost}/capture_bookmark/index.html`,
+    source: `${localhost}/capture_bookmark/basic.html`,
     icon: "../tree/favicon/ecb6e0b0acec8b20d5f0360a52fe336a7a7cb475.bmp",
   });
+
+  /* document (headless) */
+  var response = await captureHeadless({
+    url: `${localhost}/capture_bookmark/basic.html`,
+    mode: "bookmark",
+    options,
+  }, {rawResponse: true});
+  var {timeId: itemId} = response;
+
+  var {data: [response]} = await backendRequest({
+    body: {
+      a: 'query',
+      f: 'json',
+      q: JSON.stringify({
+        book: '',
+        cmd: 'get_item',
+        args: [itemId],
+      }),
+      details: 1,
+    },
+    csrfToken: true,
+  }).then(r => r.json());
+  assert.deepInclude(response.meta, {
+    index: "",
+    title: "ABC 中文 𠀀 にほんご",
+    type: "bookmark",
+    create: itemId,
+    source: `${localhost}/capture_bookmark/basic.html`,
+    icon: "../tree/favicon/ecb6e0b0acec8b20d5f0360a52fe336a7a7cb475.bmp",
+  });
+
+  /* attachment */
+  var response = await captureHeadless({
+    url: `${localhost}/capture_bookmark/basic.py`,
+    mode: "bookmark",
+    options,
+  }, {rawResponse: true});
+  var {timeId: itemId} = response;
+
+  var {data: [response]} = await backendRequest({
+    body: {
+      a: 'query',
+      f: 'json',
+      q: JSON.stringify({
+        book: '',
+        cmd: 'get_item',
+        args: [itemId],
+      }),
+      details: 1,
+    },
+    csrfToken: true,
+  }).then(r => r.json());
+  assert.deepInclude(response.meta, {
+    index: "",
+    type: "bookmark",
+    create: itemId,
+    source: `${localhost}/capture_bookmark/basic.py`,
+  });
+  assert.doesNotHaveAnyKeys(response.meta, ['title', 'icon']);
 });
 
 /**
