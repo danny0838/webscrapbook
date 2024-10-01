@@ -18617,7 +18617,7 @@ it('test_capture_helpers_options', async function () {
   assert.exists(doc.querySelector('img'));
 });
 
-$it.xfail()('test_capture_helpers_options_redirect', async function () {
+it('test_capture_helpers_options_redirect', async function () {
   /* capture.helpers with matching URL (source) */
   var options = {
     "capture.helpersEnabled": true,
@@ -18667,9 +18667,27 @@ $it.xfail()('test_capture_helpers_options_redirect', async function () {
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
   assert.exists(doc.querySelector('style'));
+
+  // capture.resourceSizeLimit should not apply for the initial fetch
+  var options = {
+    "capture.helpersEnabled": true,
+    "capture.helpers": `[]`,
+    "capture.resourceSizeLimit": 0,
+  };
+
+  var blob = await captureHeadless({
+    url: `${localhost}/capture_helpers/redirect/redirect.pyr`,
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assert.exists(doc);
 });
 
-$it.xfail()('test_capture_helpers_options_refresh', async function () {
+it('test_capture_helpers_options_refresh', async function () {
   /* capture.helpers with matching URL (source) */
   var options = {
     "capture.helpersEnabled": true,

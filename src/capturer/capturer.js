@@ -1142,8 +1142,24 @@
                 frameId: Number.isInteger(frameId) ? frameId : 0,
               })).url;
             } else if (typeof url === 'string') {
-              // @TODO: consider server redirect?
-              return url;
+              // check possible redirect
+              // First fetch with overriding options for the initial URL
+              // (which may include request related options).
+              const overridingOptions = capturer.CaptureHelperHandler.getOverridingOptions(helpers, url);
+              const redirectInfo = await capturer.resolveRedirects({
+                url,
+                refUrl,
+                settings: {
+                  missionId: capturer.missionId,
+                  timeId,
+
+                  // prevent sizeLimit
+                  isMainPage: true,
+                  isMainFrame: true,
+                },
+                options: Object.assign({}, options, overridingOptions),
+              });
+              return redirectInfo.url;
             } else {
               return "";
             }
