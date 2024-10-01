@@ -3,16 +3,20 @@
 <head>
 <meta charset="UTF-8">
 <title>Test download linked files</title>
+<style>a::after { content: attr(href); }</style>
 </head>
 <body>
-<a href="file.bmp">file.bmp</a>
-<a href="file.css#123">file.css</a>
-<a href="page.html">page.html</a>
-<a href="file.txt">file.txt</a>
-<a href="mime.py">mime.py (header filename "file2", mime "text/plain")</a>
-<a href="unknown.py">unknown.py (header filename "unknown.bin", mime "application/wsb.unknown")</a>
-<a href="filename.py">filename.py (header filename "file3.txt")</a>
-<a href="nofilename.py">nofilename.py (header no filename)</a>
-<a href="redirect.pyr">redirect.pyr (redirect to "redirect.txt")</a>
+<p><a href="file.bmp"></a></p>
+<p><a href="file.css#123"></a></p>
+<p><a href="page.html"></a></p>
+<p><a href="file.txt"></a></p>
+<p><a href="mime.py"></a> (header filename "file2", mime "text/plain")</p>
+<p><a href="unknown.py"></a> (header filename "unknown.bin", mime "application/wsb.unknown")</p>
+<p><a href="filename.py"></a> (header filename "file3.txt")</p>
+<p><a href="nofilename.py"></a> (header no filename)</p>
+<p><a href="redirect.pyr"></a></p>
+<p><a href="nonexist"></a></p>
+<p><a href="nonexist.txt"></a></p>
+<p><a href="nonexist.html"></a></p>
 </body>
 </html>

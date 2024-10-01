@@ -14205,7 +14205,7 @@ it('test_capture_downLink_file_extFilter', async function () {
   assert.notExists(zip.file("redirect.txt"));
   assert.strictEqual(Object.keys(zip.files).length, 1);
 
-  // mime: filter
+  // mime: filter with full MIME
   var options = {
     "capture.downLink.file.mode": "header",
     "capture.downLink.file.extFilter": `\
@@ -14234,8 +14234,7 @@ mime:application/wsb.unknown`,
   // mime: filter with regex
   var options = {
     "capture.downLink.file.mode": "header",
-    "capture.downLink.file.extFilter": `\
-mime:/text/.+/i`,
+    "capture.downLink.file.extFilter": `mime:/text/.+/i`,
   };
 
   var blob = await captureHeadless({
@@ -14258,8 +14257,7 @@ mime:/text/.+/i`,
   // mime: filter should not hit if no Content-Type header
   var options = {
     "capture.downLink.file.mode": "header",
-    "capture.downLink.file.extFilter": `\
-mime:/.*/i`,
+    "capture.downLink.file.extFilter": `mime:/.*/i`,
   };
 
   var blob = await captureHeadless({
@@ -14282,8 +14280,7 @@ mime:/.*/i`,
   // mime: filter should not hit for url mode
   var options = {
     "capture.downLink.file.mode": "url",
-    "capture.downLink.file.extFilter": `\
-mime:/.*/i`,
+    "capture.downLink.file.extFilter": `mime:/.*/i`,
   };
 
   var blob = await captureHeadless({
@@ -14302,6 +14299,48 @@ mime:/.*/i`,
   assert.notExists(zip.file("nofilename.py"));
   assert.notExists(zip.file("redirect.txt"));
   assert.strictEqual(Object.keys(zip.files).length, 1);
+});
+
+it('test_capture_downLink_file_extFilter_nonexist', async function () {
+  // url mode: filter nonexist URL as usual but download with error
+  var options = {
+    "capture.downLink.file.mode": "url",
+    "capture.downLink.file.extFilter": `/|txt/`,
+  };
+
+  var blob = await captureHeadless({
+    url: `${localhost}/capture_downLink_file/basic.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  var anchors = doc.querySelectorAll('a');
+  assert.strictEqual(anchors[9].getAttribute('href'), `urn:scrapbook:download:error:${localhost}/capture_downLink_file/nonexist`);
+  assert.strictEqual(anchors[10].getAttribute('href'), `urn:scrapbook:download:error:${localhost}/capture_downLink_file/nonexist.txt`);
+  assert.strictEqual(anchors[11].getAttribute('href'), `${localhost}/capture_downLink_file/nonexist.html`);
+
+  // header mode: don't match any filter
+  var options = {
+    "capture.downLink.file.mode": "header",
+    "capture.downLink.file.extFilter": `/.*/\nmime:/.*/`,
+  };
+
+  var blob = await captureHeadless({
+    url: `${localhost}/capture_downLink_file/basic.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  var anchors = doc.querySelectorAll('a');
+  assert.strictEqual(anchors[9].getAttribute('href'), `${localhost}/capture_downLink_file/nonexist`);
+  assert.strictEqual(anchors[10].getAttribute('href'), `${localhost}/capture_downLink_file/nonexist.txt`);
+  assert.strictEqual(anchors[11].getAttribute('href'), `${localhost}/capture_downLink_file/nonexist.html`);
 });
 
 /**
@@ -17427,10 +17466,7 @@ it('test_capture_linkUnsavedUri_downLink', async function () {
   var doc = await readFileAsDocument(indexBlob);
   var timeId = doc.documentElement.getAttribute('data-scrapbook-create');
 
-  // text/html => no downLink, no error
   assert.strictEqual(doc.querySelectorAll('a')[0].getAttribute('href'), `${localhost}/capture_linkUnsavedUri/nonexist.txt`);
-
-  // no downLink, no error
   assert.strictEqual(doc.querySelectorAll('a')[1].getAttribute('href'), `${localhost}/capture_linkUnsavedUri/nonexist.css`);
 
   /* +capture.linkUnsavedUri */

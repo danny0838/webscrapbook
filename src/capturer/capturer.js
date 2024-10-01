@@ -1490,10 +1490,11 @@
         throw redirectInfo.error;
       }
 
+      redirectInfo.fetchResponse = {headers: {}};
       redirectInfo.doc = null;
     }
     ({refUrl, isAttachment} = redirectInfo);
-    const {fetchResponse, url, doc} = redirectInfo;
+    const {fetchResponse: {headers}, url, doc} = redirectInfo;
     const [urlMain, urlHash] = scrapbook.splitUrlByAnchor(url);
 
     if (downLink) {
@@ -1515,22 +1516,25 @@
         return null;
       }
 
-      // check for downLink header filter
+      // apply downLink header filter
       if (!downLinkExtra && downLinkFileValid && options["capture.downLink.file.mode"] === "header") {
-        // determine extension
-        const headers = fetchResponse.headers;
-        const mime = headers.contentType;
-        let ext;
-        if (mime) {
-          ext = Mime.extension(mime);
-        } else if (headers.filename) {
-          [, ext] = scrapbook.filenameParts(headers.filename);
-        } else {
-          const filename = scrapbook.urlToFilename(urlMain);
-          [, ext] = scrapbook.filenameParts(filename);
-        }
+        if (!redirectInfo.error) {
+          // determine extension
+          const mime = headers.contentType;
+          let ext;
+          if (mime) {
+            ext = Mime.extension(mime);
+          } else if (headers.filename) {
+            [, ext] = scrapbook.filenameParts(headers.filename);
+          } else {
+            const filename = scrapbook.urlToFilename(urlMain);
+            [, ext] = scrapbook.filenameParts(filename);
+          }
 
-        if (!(capturer.downLinkFileMimeFilter(mime, options) || capturer.downLinkFileExtFilter(ext, options))) {
+          if (!(capturer.downLinkFileMimeFilter(mime, options) || capturer.downLinkFileExtFilter(ext, options))) {
+            downLinkFileValid = false;
+          }
+        } else {
           downLinkFileValid = false;
         }
       }
@@ -1594,7 +1598,7 @@
       url,
       refUrl,
       refPolicy,
-      charset: fetchResponse.headers.charset,
+      charset: headers.charset,
       settings,
       options,
     });
