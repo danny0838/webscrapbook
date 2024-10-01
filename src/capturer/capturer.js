@@ -1433,6 +1433,8 @@
 
       doc = null;
     }
+    url = capturer.getRedirectedUrl(fetchResponse.url, urlHash);
+    [urlMain, urlHash] = scrapbook.splitUrlByAnchor(url);
 
     if (downLink) {
       if (downLinkDoc && doc) {
@@ -1441,7 +1443,7 @@
           const {linkedPages} = capturer.captureInfo.get(timeId);
           if (!linkedPages.has(sourceUrlMain)) {
             linkedPages.set(sourceUrlMain, {
-              url: fetchResponse.url,
+              url: urlMain,
               refUrl,
               depth,
             });
@@ -1464,7 +1466,7 @@
         } else if (headers.filename) {
           [, ext] = scrapbook.filenameParts(headers.filename);
         } else {
-          const filename = scrapbook.urlToFilename(fetchResponse.url);
+          const filename = scrapbook.urlToFilename(urlMain);
           [, ext] = scrapbook.filenameParts(filename);
         }
 
@@ -1474,17 +1476,15 @@
       }
 
       if (downLinkFileValid || (downLinkFile && downLinkExtra)) {
-        return await capturer.downloadFile({
-          url: fetchResponse.url,
+        const response = await capturer.downloadFile({
+          url: urlMain,
           refUrl,
           refPolicy,
           settings,
           options,
-        })
-        .then(response => {
-          return Object.assign({}, response, {
-            url: capturer.getRedirectedUrl(response.url, urlHash),
-          });
+        });
+        return Object.assign({}, response, {
+          url: capturer.getRedirectedUrl(response.url, urlHash),
         });
       }
 
@@ -1498,7 +1498,7 @@
     if (doc) {
       if (downLinkPage && options["capture.downLink.doc.mode"] === "tab") {
         const response = await capturer.captureRemoteTab({
-          url: capturer.getRedirectedUrl(fetchResponse.url, urlHash),
+          url,
           refUrl,
           settings,
           options,
@@ -1519,11 +1519,10 @@
         return response;
       }
 
-      const docUrl = capturer.getRedirectedUrl(fetchResponse.url, urlHash);
       return await capturer.captureDocumentOrFile({
         doc,
-        metaDocUrl: docUrl,
-        docUrl,
+        metaDocUrl: url,
+        docUrl: url,
         refUrl,
         refPolicy,
         settings,
@@ -1532,7 +1531,7 @@
     }
 
     return await capturer.captureFile({
-      url: capturer.getRedirectedUrl(fetchResponse.url, urlHash),
+      url,
       refUrl,
       refPolicy,
       charset: fetchResponse.headers.charset,
