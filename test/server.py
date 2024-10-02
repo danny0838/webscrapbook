@@ -128,8 +128,9 @@ def main():
         os.link(fsrc, fdst)
 
     # start server
-    os.chdir(os.path.join(root, 't'))
-
+    site_root = os.path.join(root, 't')
+    os.chdir(site_root)
+    os.environ['PYTHONPATH'] = site_root
     os.environ['wsb.config'] = json.dumps(config, ensure_ascii=False)
 
     thread = Thread(target=http.server.test, kwargs={

@@ -1,8 +1,5 @@
 #!/usr/bin/env python3
-"""Common utils for CGI scripts.
-
-This script file is be run using exec() and in the global context.
-"""
+"""Common utils for CGI scripts."""
 import io
 import os
 import sys
@@ -41,18 +38,15 @@ ARCHIVE_TYPES_MAP = {
 }
 
 
-def send_archive(type='htz', dispos='inline', base_file=None, **kwargs):
+def send_archive(base_file, type='htz', dispos='inline', **kwargs):
     """Send a directory as an archive on the fly.
 
     Args:
+        base_file: the directory to pack is base_file minus the extension
         type: 'htz' or 'maff'
         dispos: 'inline' or 'attachment'
-        base_file: the directory to pack is base_file minus the extension
         **kwargs: arguments to pass to zip_folder
     """
-    if base_file is None:
-        base_file = __file__
-
     dir, file = os.path.split(base_file)
     basename, _ = os.path.splitext(file)
     blob = zip_folder(os.path.join(dir, basename), **kwargs)

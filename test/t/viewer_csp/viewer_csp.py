@@ -3,13 +3,13 @@ import json
 import os
 import re
 
-with open(os.path.join(__file__, '..', '..', 'utils.py')) as fh:
-    exec(fh.read())
+import utils
 
 port = json.loads(os.environ['wsb.config'])['server_port2']
 port = '' if port == 80 else f':{port}'
 
-send_archive(
+utils.send_archive(
+    __file__,
     'htz',
     filter=re.compile(r'index\.html'),
     formatter={
