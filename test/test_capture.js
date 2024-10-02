@@ -5051,9 +5051,10 @@ $it.skipIf($.noNestingCss)('test_capture_css_rewriteCss_nesting', async function
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
 
-  // the parsed CSS is automatically prepended "& " in some newer browsers
   var css = doc.querySelector('style').textContent.trim();
-  var cssRegex1 = cssRegex`.case1, #nonexist {
+  var cssRegexes = [
+    cssRegex`
+.case1, #nonexist {
   background: url("case1.bmp");
   padding: 0px;
   .case1-1 {
@@ -5073,8 +5074,11 @@ $it.skipIf($.noNestingCss)('test_capture_css_rewriteCss_nesting', async function
   .case2-1 & {
     background: url("case2-1.bmp");
   }
-}`;
-  var cssRegex2 = cssRegex`.case1, #nonexist {
+}`,
+    // the parsed CSS is automatically prepended "& " in some newer browsers
+    // e.g. Firefox >= 128, Chromium >= 125
+    cssRegex`
+.case1, #nonexist {
   background: url("case1.bmp");
   padding: 0px;
   & .case1-1 {
@@ -5094,8 +5098,32 @@ $it.skipIf($.noNestingCss)('test_capture_css_rewriteCss_nesting', async function
   .case2-1 & {
     background: url("case2-1.bmp");
   }
-}`;
-  assert(css.match(cssRegex1) || css.match(cssRegex2));
+}`,
+    // Firefox >= 132
+    cssRegex`
+.case1, #nonexist {
+  background: url("case1.bmp");
+  padding: 0px;
+  & .case1-1 {
+    & .case1-1-1 { background: url("case1-1-1.bmp"); }
+    &.case1-1-2 { background: url("case1-1-2.bmp"); }
+    background: url("case1-1.bmp");
+  }
+  &.case1-2 {
+    & .case1-2-1 { background: url("case1-2-1.bmp"); }
+    background: url("case1-2.bmp");
+    &.case1-2-2 { background: url("case1-2-2.bmp"); }
+  }
+  & .dummy { background: url("dummy.bmp"); }
+  &.dummy { background: url("dummy.bmp"); }
+}
+& .case2 {
+  .case2-1 & {
+    background: url("case2-1.bmp");
+  }
+}`,
+  ];
+  assert(cssRegexes.some(regex => css.match(regex)));
 
   /* capture.rewriteCss = match */
   var options = {
@@ -5122,9 +5150,10 @@ $it.skipIf($.noNestingCss)('test_capture_css_rewriteCss_nesting', async function
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
 
-  // the parsed CSS is automatically prepended "& " in some newer browsers
   var css = doc.querySelector('style').textContent.trim();
-  var cssRegex1 = cssRegex`.case1, #nonexist {
+  var cssRegexes = [
+    cssRegex`
+.case1, #nonexist {
   background: url("case1.bmp");
   padding: 0px;
   .case1-1 {
@@ -5142,8 +5171,11 @@ $it.skipIf($.noNestingCss)('test_capture_css_rewriteCss_nesting', async function
   .case2-1 & {
     background: url("case2-1.bmp");
   }
-}`;
-  var cssRegex2 = cssRegex`.case1, #nonexist {
+}`,
+    // the parsed CSS is automatically prepended "& " in some newer browsers
+    // e.g. Firefox >= 128, Chromium >= 125
+    cssRegex`
+.case1, #nonexist {
   background: url("case1.bmp");
   padding: 0px;
   & .case1-1 {
@@ -5161,8 +5193,28 @@ $it.skipIf($.noNestingCss)('test_capture_css_rewriteCss_nesting', async function
   .case2-1 & {
     background: url("case2-1.bmp");
   }
-}`;
-  assert(css.match(cssRegex1) || css.match(cssRegex2));
+}`,
+    // Firefox >= 132
+    cssRegex`
+.case1, #nonexist {
+  background: url("case1.bmp");
+  padding: 0px;
+  & .case1-1 {
+    & .case1-1-1 { background: url("case1-1-1.bmp"); }
+    &.case1-1-2 { background: url("case1-1-2.bmp"); }
+    background: url("case1-1.bmp");
+  }
+  &.case1-2 {
+    & .case1-2-1 { background: url("case1-2-1.bmp"); }
+    background: url("case1-2.bmp");
+    &.case1-2-2 { background: url("case1-2-2.bmp"); }
+  }
+}
+& .case2 {
+  .case2-1 & { background: url("case2-1.bmp"); }
+}`,
+  ];
+  assert(cssRegexes.some(regex => css.match(regex)));
 
   /* capture.rewriteCss = none */
   var options = {
