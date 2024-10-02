@@ -1,71 +1,210 @@
 #!/usr/bin/env python3
-import http.server
+import html
 import json
+import mimetypes
 import os
+import sys
 import tempfile
 import time
+from socketserver import ThreadingMixIn
 from threading import Thread
+from urllib.parse import quote
+from urllib.request import url2pathname
+from wsgiref.simple_server import WSGIServer, make_server
 
 
-class HTTPRequestHandler(http.server.CGIHTTPRequestHandler):
-    extensions_map = {
-        **http.server.SimpleHTTPRequestHandler.extensions_map,
-        '.md': 'text/markdown',
+def patch_mimetypes():
+    mimetypes.add_type('text/markdown', '.md')
 
-        # On Linux it's default to 'image/x-ms-bmp'
-        # see also: https://bugs.python.org/issue37529
-        '.bmp': 'image/bmp',
+    # On Linux it's default to 'image/x-ms-bmp'
+    # see also: https://bugs.python.org/issue37529
+    mimetypes.add_type('image/bmp', '.bmp')
 
-        '.woff': 'font/woff',
-    }
-    index_pages = ()
+    mimetypes.add_type('font/woff', '.woff')
 
-    def end_headers(self):
-        """Modified default BaseHTTPRequestHandler:
 
-        - Add cache control.
-        """
-        self.send_header('Cache-Control', 'no-store')
-        super().end_headers()
+class TestServer(ThreadingMixIn, WSGIServer):
+    daemon_threads = True
+    allow_reuse_address = True
 
-    def send_head(self):
-        """Modified default CGIHTTPRequestHandler:
 
-        - Output .pyr file as HTTP redirection.
-        """
-        if self.is_cgi():
-            return self.run_cgi()
+class TestApp:
+    def __init__(self, root, config):
+        self.root = root
+        self.config = config
+        self.env = {
+            'PYTHONPATH': root,
+            'PYTHONUTF8': '1',
+            'wsb.config': json.dumps(config, ensure_ascii=False),
+        }
 
-        path = self.translate_path(self.path)
-        if os.path.isfile(path):
-            head, tail = os.path.splitext(path)
-            if tail.lower() in ('.pyr',):
-                port = json.loads(os.environ['wsb.config'])['server_port2']
+    def __call__(self, environ, start_response, exc_info=None):
+        path = environ.get('PATH_INFO', '/').encode('ISO-8859-1').decode('UTF-8')
+        localpath = os.path.join(self.root, url2pathname(path.lstrip('/')))
+
+        response = self.handle_response(path, localpath, environ, start_response, exc_info)
+        if environ['REQUEST_METHOD'] == 'HEAD':
+            response = ()
+        return response
+
+    def handle_response(self, path, localpath, environ, start_response, exc_info):
+        method = environ['REQUEST_METHOD']
+        if method not in ('GET', 'HEAD'):
+            start_response('405 Method Not Allowed', [
+                ('Content-type', 'text/html; charset=utf-8'),
+                ('Cache-Control', 'no-store'),
+            ])
+            return (f'Request method {method!r} is not supported.'.encode('utf-8'),)
+
+        if os.path.isfile(localpath):
+            _, ext = os.path.splitext(localpath)
+            if ext.lower() == '.py':
+                status = '200 OK'
+                headers = []
+
+                body, _headers = self.run_script(localpath, environ)
+                for key, value in _headers:
+                    if key.lower() == 'status':
+                        status = value
+                    else:
+                        headers.append((key, value))
+
+                start_response(status, headers)
+                return body
+
+            elif ext.lower() == '.pyr':
+                port = self.config['server_port2']
                 port = '' if port == 80 else ':' + str(port)
-                with open(path) as fh:
+                with open(localpath) as fh:
                     new_url = fh.read().format(port=port)
+                start_response('302 Found', [
+                    ('Location', new_url),
+                ])
+                return ()
 
-                self.send_response(302, 'Found')
-                self.send_header('Location', new_url)
-                self.end_headers()
-                return
+            else:
+                mimetype, encoding = mimetypes.guess_type(localpath)
+                mimetype = mimetype or 'application/octet-stream'
+                size = os.path.getsize(localpath)
+                start_response('200 OK', [
+                    ('Content-type', mimetype),
+                    ('Content-Length', str(size)),
+                ])
+                return environ['wsgi.file_wrapper'](open(localpath, 'rb'))
 
-        return http.server.SimpleHTTPRequestHandler.send_head(self)
+        elif os.path.isdir(localpath):
+            if not path.endswith('/'):
+                start_response('301 Moved Permanently', [
+                    ('Location', path + '/'),
+                ])
+                return ()
 
-    def is_cgi(self):
-        """Modified default CGIHTTPRequestHandler:
+            start_response('200 OK', [
+                ('Content-type', 'text/html; charset=utf-8'),
+                ('Cache-Control', 'no-store'),
+            ])
+            return self.list_directory(path, localpath)
 
-        - Any .py or .pyw file in any subdirectory is a CGI script.
-        - Any non-CGI script path is handled by SimpleHTTPRequestHandler.
-        """
-        path = self.translate_path(self.path)
-        if os.path.isfile(path) and self.is_python(path):
-            collapsed_path = http.server._url_collapse_path(self.path)
-            dir_sep = collapsed_path.find('/', 1)
-            head, tail = collapsed_path[:dir_sep], collapsed_path[dir_sep + 1:]
-            self.cgi_info = head, tail
-            return True
-        return False
+        else:
+            start_response('404 Not Found', [
+                ('Content-type', 'text/plain; charset=utf-8'),
+                ('Cache-Control', 'no-store'),
+            ])
+            return ('File not found.'.encode('utf-8'),)
+
+    def list_directory(self, path, localpath):
+        for chunk in self._list_directory(path, localpath):
+            yield chunk.encode('utf-8')
+
+    def _list_directory(self, path, localpath):
+        # ref: http.server.SimpleHTTPRequestHandler.list_directory
+        yield f"""\
+<!DOCTYPE html>
+<head>
+<meta charset="utf-8">
+<title>Directory listing for {path}</title>
+</head>
+<body>
+<h1>Directory listing for {path}</h1>
+<hr>
+<ul>
+"""
+
+        with os.scandir(localpath) as it:
+            for entry in it:
+                displayname = linkname = entry.name
+                if entry.is_file():
+                    pass
+                elif entry.is_dir():
+                    displayname += '/'
+                    linkname += '/'
+                else:
+                    continue
+
+                if entry.is_symlink():
+                    displayname = entry.name + '@'
+
+                yield f'<li><a href="{quote(linkname)}">{html.escape(displayname, quote=False)}</a></li>\n'
+
+        yield """\
+</ul>
+<hr>
+</body>
+</html>
+"""
+
+    def run_script(self, localpath, environ):
+        import subprocess
+        cmdline = [sys.executable, '-u', localpath]
+
+        env = {k: v for k, v in environ.items() if isinstance(v, str)}
+        env.update(self.env)
+
+        try:
+            p = subprocess.run(cmdline, env=env, capture_output=True, check=True)
+        except subprocess.CalledProcessError as exc:
+            logger = environ.get('wsgi.errors')
+            if logger:
+                try:
+                    err = exc.stderr.decode('utf-8')
+                except UnicodeDecodeError:
+                    err = str(exc.stderr) + '\n'
+                logger.write(f'Command {exc.cmd!r} exit code {exc.returncode}:\n{err}')
+                logger.flush()
+
+            return (
+                (b'A server error occurred.',),
+                [('Status:', '500 Internal Server Error')],
+            )
+
+        head, sep, body = p.stdout.partition(b'\n\n')
+
+        headers = []
+        if not sep:
+            # script didn't output headers
+            body = head
+        else:
+            for line in head.splitlines():
+                if not line.strip():
+                    continue
+
+                key, sep, value = line.partition(b':')
+                if not sep:
+                    continue
+
+                key = key.strip().decode('ascii')
+                value = value.strip().decode('ascii')
+                headers.append((key, value))
+
+        return (body,), headers
+
+
+def test_server(host, port, root, config):
+    app = TestApp(root, config)
+    httpd = make_server(host, port, app, server_class=TestServer)
+    host, port = httpd.socket.getsockname()
+    print(f'Serving HTTP on {host} port {port}...')
+    httpd.serve_forever()
 
 
 def backend(port):
@@ -129,24 +268,27 @@ def main():
         with fh as fh:
             config.update(json.load(fh))
 
+    # fix mimetypes
+    patch_mimetypes()
+
     # start server
     site_root = os.path.join(root, 't')
     os.chdir(site_root)
-    os.environ['PYTHONPATH'] = site_root
-    os.environ['wsb.config'] = json.dumps(config, ensure_ascii=False)
 
-    thread = Thread(target=http.server.test, kwargs={
-        'HandlerClass': HTTPRequestHandler,
+    thread = Thread(target=test_server, kwargs={
+        'host': '127.0.0.1',
         'port': int(config['server_port']),
-        'bind': '127.0.0.1',
+        'root': site_root,
+        'config': config,
     })
     thread.daemon = True
     thread.start()
 
-    thread = Thread(target=http.server.test, kwargs={
-        'HandlerClass': HTTPRequestHandler,
+    thread = Thread(target=test_server, kwargs={
+        'host': '127.0.0.1',
         'port': int(config['server_port2']),
-        'bind': '127.0.0.1',
+        'root': site_root,
+        'config': config,
     })
     thread.daemon = True
     thread.start()
