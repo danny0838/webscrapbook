@@ -1828,7 +1828,7 @@ it('test_capture_blob_frame', async function () {
  * capturer.captureDocument
  * capturer.DocumentCssHandler.rewriteCssText
  */
-async function test_capture_about() {
+it('test_capture_about', async function () {
   var blob = await capture({
     url: `${localhost}/capture_about/basic.html`,
     options: baseOptions,
@@ -1849,7 +1849,7 @@ p { background-image: url("about:blank"); }`);
   var cssFile = zip.file('blank');
   var text = (await readFileAsText(await cssFile.async('blob'))).trim();
   assert.strictEqual(text, '');
-}
+});
 
 /**
  * Check if capture selection works
