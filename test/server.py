@@ -18,6 +18,7 @@ class HTTPRequestHandler(http.server.CGIHTTPRequestHandler):
 
         '.woff': 'font/woff',
     }
+    index_pages = ()
 
     def send_head(self):
         """Modified default CGIHTTPRequestHandler:
