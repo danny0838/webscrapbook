@@ -20,6 +20,14 @@ class HTTPRequestHandler(http.server.CGIHTTPRequestHandler):
     }
     index_pages = ()
 
+    def end_headers(self):
+        """Modified default BaseHTTPRequestHandler:
+
+        - Add cache control.
+        """
+        self.send_header('Cache-Control', 'no-store')
+        super().end_headers()
+
     def send_head(self):
         """Modified default CGIHTTPRequestHandler:
 
