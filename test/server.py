@@ -6,8 +6,10 @@ import shutil
 import time
 from threading import Thread
 
-http.server.SimpleHTTPRequestHandler.extensions_map.update(
-    {
+
+class HTTPRequestHandler(http.server.CGIHTTPRequestHandler):
+    extensions_map = {
+        **http.server.SimpleHTTPRequestHandler.extensions_map,
         '.md': 'text/markdown',
 
         # On Linux it's default to 'image/x-ms-bmp'
@@ -16,10 +18,7 @@ http.server.SimpleHTTPRequestHandler.extensions_map.update(
 
         '.woff': 'font/woff',
     }
-)
 
-
-class HTTPRequestHandler(http.server.CGIHTTPRequestHandler):
     def send_head(self):
         """Modified default CGIHTTPRequestHandler:
 
