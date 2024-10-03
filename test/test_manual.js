@@ -18,84 +18,91 @@
 
 describe('Manual tests', function () {
 
-before(async function () {
-  await checkTestServer();
-});
-
-describe('Test viewer', function () {
-
-it('test_viewer_validate', async function () {
-  return await openTestTab({
-    url: `${localhost}/viewer_validate/index.html`,
-    active: true,
+  before(async function () {
+    await checkTestServer();
   });
-});
 
-it('test_viewer_encoding', async function () {
-  return await openTestTab({
-    url: `${localhost}/viewer_encoding/index.html`,
-    active: true,
+  describe('Test viewer', function () {
+
+    it('should view HTZ/MAFF that conforms to the spec', async function () {
+      return await openTestTab({
+        url: `${localhost}/viewer_validate_good/index.html`,
+        active: true,
+      });
+    });
+
+    it('should error out when HTZ/MAFF does not conform to the spec', async function () {
+      return await openTestTab({
+        url: `${localhost}/viewer_validate_bad/index.html`,
+        active: true,
+      });
+    });
+
+    it('should handle document charset correctly', async function () {
+      return await openTestTab({
+        url: `${localhost}/viewer_encoding/index.html`,
+        active: true,
+      });
+    });
+
+    it('should view attachment HTZ/MAFF only when `opt_viewer.viewAttachments`', async function () {
+      return await openTestTab({
+        url: `${localhost}/viewer_attachment/index.html`,
+        active: true,
+      });
+    });
+
+    it('should ensure links and back/forward button work', async function () {
+      return await openTestTab({
+        url: `${localhost}/viewer_interlink/index.html`,
+        active: true,
+      });
+    });
+
+    it('should target the correct frame for links', async function () {
+      return await openTestTab({
+        url: `${localhost}/viewer_interlink_frame/index.html`,
+        active: true,
+      });
+    });
+
+    it('should block form submission', async function () {
+      return await openTestTab({
+        url: `${localhost}/viewer_interlink_frame_form/index.html`,
+        active: true,
+      });
+    });
+
+    it('should apply CSS rules correctly', async function () {
+      return await openTestTab({
+        url: `${localhost}/viewer_css_rules/index.html`,
+        active: true,
+      });
+    });
+
+    it('should handle meta refresh (blocked in newer browsers)', async function () {
+      return await openTestTab({
+        url: `${localhost}/viewer_metaRefresh/index.html`,
+        active: true,
+      });
+    });
+
+    it('should view HTZ/MAFF in frames', async function () {
+      return await openTestTab({
+        url: `${localhost}/viewer_archive_in_frame/index.html`,
+        active: true,
+      });
+    });
+
+    it('should block scripts', async function () {
+      return await openTestTab({
+        url: `${localhost}/viewer_csp/index.html`,
+        active: true,
+      });
+    });
+
   });
+
 });
-
-it('test_viewer_attachment', async function () {
-  return await openTestTab({
-    url: `${localhost}/viewer_attachment/index.html`,
-    active: true,
-  });
-});
-
-it('test_viewer_interlink', async function () {
-  return await openTestTab({
-    url: `${localhost}/viewer_interlink/index.html`,
-    active: true,
-  });
-});
-
-it('test_viewer_interlink_frame', async function () {
-  return await openTestTab({
-    url: `${localhost}/viewer_interlink_frame/index.html`,
-    active: true,
-  });
-});
-
-it('test_viewer_interlink_frame_form', async function () {
-  return await openTestTab({
-    url: `${localhost}/viewer_interlink_frame_form/index.html`,
-    active: true,
-  });
-});
-
-it('test_viewer_css_rules', async function () {
-  return await openTestTab({
-    url: `${localhost}/viewer_css_rules/index.html`,
-    active: true,
-  });
-});
-
-it('test_viewer_metaRefresh', async function () {
-  return await openTestTab({
-    url: `${localhost}/viewer_metaRefresh/index.html`,
-    active: true,
-  });
-});
-
-it('test_viewer_archive_in_frame', async function () {
-  return await openTestTab({
-    url: `${localhost}/viewer_archive_in_frame/index.html`,
-    active: true,
-  });
-});
-
-it('test_viewer_csp', async function () {
-  return await openTestTab({
-    url: `${localhost}/viewer_csp/index.html`,
-    active: true,
-  });
-});
-
-});  // Test viewer
-
-});  // Manual tests
 
 }));
