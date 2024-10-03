@@ -364,14 +364,23 @@ class TestSuite {
   await suite.init();
 
   // initialize mocha and expose global methods such as describe(), it()
+  const query = new URL(location.href).searchParams;
+  const grep = query.get('grep');
+  const fgrep = query.get('fgrep');
+  const dryRun = Boolean(query.get('dryrun')) && !(grep || fgrep);
+  if (dryRun) {
+    document.title = `(DRY-RUN) ${document.title}`;
+  }
   mocha.setup({
     ui: 'bdd',
     checkLeaks: true,
     timeout: 0,
     slow: 10000,
     grep: (() => {
-      const query = new URL(location.href).searchParams;
-      if (!query.get('grep') && !query.get('fgrep')) {
+      if (dryRun) {
+        return '(?:)';
+      }
+      if (!(grep || fgrep)) {
         const tests = suite.config["tests"];
         if (Array.isArray(tests)) {
           return tests.map(t => escapeRegExp(t)).join('|');
@@ -380,6 +389,7 @@ class TestSuite {
       }
       return void(0);
     })(),
+    ...(dryRun && {dryRun}),
     noHighlighting: true,
   });
 

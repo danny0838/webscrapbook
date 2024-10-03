@@ -40,3 +40,12 @@ chrome.contextMenus.create({
     chrome.tabs.create({url});
   }
 });
+
+chrome.contextMenus.create({
+  title: 'List all tests to run manually',
+  contexts: ["browser_action"],
+  onclick: (info, tab) => {
+    const url = chrome.runtime.getURL("test.html?dryrun=1");
+    chrome.tabs.create({url});
+  }
+});
