@@ -18673,189 +18673,213 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
 
   describe('recapture', function () {
 
-    it('basic: replace data files, index, icon, and mtime', async function () {
-      var options = Object.assign({}, baseOptions, {
-        "capture.saveTo": "server",
-        "capture.saveAs": "folder",
+    describe('basic', function () {
+      var itemId;
+      var itemId2;
+
+      before('perform recapture', async function () {
+        var options = Object.assign({}, baseOptions, {
+          "capture.saveTo": "server",
+          "capture.saveAs": "folder",
+        });
+
+        var response = await capture({
+          url: `${localhost}/capture_recapture/page1/index.html`,
+          options,
+        }, {rawResponse: true});
+        ({timeId: itemId} = response);
+
+        var response = await captureHeadless({
+          url: `${localhost}/capture_recapture/page2/index.html`,
+          options,
+          recaptureInfo: {bookId: "", itemId},
+        }, {rawResponse: true});
+        ({timeId: itemId2} = response);
       });
 
-      var response = await capture({
-        url: `${localhost}/capture_recapture/page1/index.html`,
-        options,
-      }, {rawResponse: true});
-      var {timeId: itemId} = response;
-
-      var response = await captureHeadless({
-        url: `${localhost}/capture_recapture/page2/index.html`,
-        options,
-        recaptureInfo: {bookId: "", itemId},
-      }, {rawResponse: true});
-      var {timeId: itemId2} = response;
-
-      var doc = (await xhr({
-        url: `${backend}/data/${itemId2}/index.html`,
-        responseType: "document",
-      })).response;
-      assert.strictEqual(doc.querySelector('p').textContent, `Page content 2`);
-      assert.strictEqual(doc.querySelector('img').getAttribute('src'), `yellow.bmp`);
-
-      var {data: response} = await backendRequest({
-        url: `${backend}/data/${itemId2}`,
-        body: {f: 'json', a: 'list'},
-      }).then(r => r.json());
-      assert.sameMembers(response.map(r => r.name), [
-        "index.html",
-        "fav2.bmp",
-        "yellow.bmp",
-      ]);
-
-      var {data: [response]} = await backendRequest({
-        body: {
-          a: 'query',
-          f: 'json',
-          q: JSON.stringify({
-            book: '',
-            cmd: 'get_items',
-            args: [[itemId, itemId2]],
-          }),
-          details: 1,
-        },
-        csrfToken: true,
-      }).then(r => r.json());
-      assert.hasAllKeys(response, [itemId]);
-      assert.deepInclude(response[itemId].meta, {
-        index: `${itemId2}/index.html`,
-        title: "Page1",
-        type: "",
-        create: itemId,
-        source: `${localhost}/capture_recapture/page2/index.html`,
-        icon: "fav2.bmp",
+      it('remove original files', async function () {
+        var {data: response} = await backendRequest({
+          url: `${backend}/data/${itemId}`,
+          body: {f: 'json', a: 'info'},
+        }).then(r => r.json());
+        assert.isNull(response.type);
       });
+
+      it('save recaptured files to the new ID path', async function () {
+        var doc = (await xhr({
+          url: `${backend}/data/${itemId2}/index.html`,
+          responseType: "document",
+        })).response;
+        assert.strictEqual(doc.querySelector('p').textContent, `Page content 2`);
+        assert.strictEqual(doc.querySelector('img').getAttribute('src'), `yellow.bmp`);
+
+        var {data: response} = await backendRequest({
+          url: `${backend}/data/${itemId2}`,
+          body: {f: 'json', a: 'list'},
+        }).then(r => r.json());
+        assert.sameMembers(response.map(r => r.name), [
+          "index.html",
+          "fav2.bmp",
+          "yellow.bmp",
+        ]);
+      });
+
+      it('update index, icon, and mtime of the item', async function () {
+        var {data: [response]} = await backendRequest({
+          body: {
+            a: 'query',
+            f: 'json',
+            q: JSON.stringify({
+              book: '',
+              cmd: 'get_items',
+              args: [[itemId, itemId2]],
+            }),
+            details: 1,
+          },
+          csrfToken: true,
+        }).then(r => r.json());
+        assert.hasAllKeys(response, [itemId]);  // no itemId2
+        assert.deepInclude(response[itemId].meta, {
+          index: `${itemId2}/index.html`,
+          title: "Page1",
+          type: "",
+          create: itemId,
+          source: `${localhost}/capture_recapture/page2/index.html`,
+          icon: "fav2.bmp",
+        });
+        assert(response[itemId].meta.modify > itemId);
+        assert(response[itemId].meta.modify > itemId2);
+      });
+
     });
 
-    it('migrate annotations (linemarker)', async function () {
-      var options = Object.assign({}, baseOptions, {
-        "capture.saveTo": "server",
-        "capture.saveAs": "folder",
-      });
+    describe('migrate annotations', function () {
 
-      var response = await capture({
-        url: `${localhost}/capture_recapture_migrate/page1/index.html`,
-        options,
-      }, {rawResponse: true});
-      var {timeId: itemId} = response;
+      it('linemarker', async function () {
+        var options = Object.assign({}, baseOptions, {
+          "capture.saveTo": "server",
+          "capture.saveAs": "folder",
+        });
 
-      var html = await backendRequest({
-        url: `${backend}/data/${itemId}/index.html`,
-      }).then(r => r.text());
-      var body = `\
+        var response = await capture({
+          url: `${localhost}/capture_recapture_migrate/page1/index.html`,
+          options,
+        }, {rawResponse: true});
+        var {timeId: itemId} = response;
+
+        var html = await backendRequest({
+          url: `${backend}/data/${itemId}/index.html`,
+        }).then(r => r.text());
+        var body = `\
 <p>Lorem ipsum dolor sit amet, <scrapbook-linemarker data-scrapbook-id="20240928140450705" data-scrapbook-elem="linemarker" style="background-color: yellow;" class="first last">consectetur adipiscing elit</scrapbook-linemarker>. Maecenas suscipit maximus. Sed urna nisl, rhoncus vel finibus eget, elementum sed massa. Interdum et malesuada fames ac ante ipsum primis in faucibus.</p>
 <p>Integer placerat viverra augue quis fermentum. <scrapbook-linemarker data-scrapbook-id="20240928140505409" data-scrapbook-elem="linemarker" style="background-color: yellow;" class="first last">Quisque at felis interdum, finibus sapien eu, feugiat ipsum.</scrapbook-linemarker> Etiam sed massa at felis maximus semper. Quisque eu orci fringilla odio lobortis elementum.</p>
 `;
-      html = html.replace(regex`<body>([\s\S]*?)</body>`, `<body>${body}</body>`);
+        html = html.replace(regex`<body>([\s\S]*?)</body>`, `<body>${body}</body>`);
 
-      /* recapture same document */
-      var response = await backendRequest({
-        url: `${backend}/data/${itemId}/index.html`,
-        body: {
-          a: 'save',
-          f: 'json',
-          upload: new File([html], `index.json`, {type: "text/javascript"}),
-        },
-        csrfToken: true,
-      }).then(r => r.json());
+        /* recapture same document */
+        var response = await backendRequest({
+          url: `${backend}/data/${itemId}/index.html`,
+          body: {
+            a: 'save',
+            f: 'json',
+            upload: new File([html], `index.json`, {type: "text/javascript"}),
+          },
+          csrfToken: true,
+        }).then(r => r.json());
 
-      var response = await captureHeadless({
-        url: `${localhost}/capture_recapture_migrate/page1/index.html`,
-        options,
-        recaptureInfo: {bookId: "", itemId},
-      }, {rawResponse: true});
-      var {timeId: itemId2} = response;
+        var response = await captureHeadless({
+          url: `${localhost}/capture_recapture_migrate/page1/index.html`,
+          options,
+          recaptureInfo: {bookId: "", itemId},
+        }, {rawResponse: true});
+        var {timeId: itemId2} = response;
 
-      var doc = (await xhr({
-        url: `${backend}/data/${itemId2}/index.html`,
-        responseType: "document",
-      })).response;
-      assert.exists(doc.querySelector('scrapbook-linemarker[data-scrapbook-id="20240928140450705"]'));
-      assert.exists(doc.querySelector('scrapbook-linemarker[data-scrapbook-id="20240928140505409"]'));
+        var doc = (await xhr({
+          url: `${backend}/data/${itemId2}/index.html`,
+          responseType: "document",
+        })).response;
+        assert.exists(doc.querySelector('scrapbook-linemarker[data-scrapbook-id="20240928140450705"]'));
+        assert.exists(doc.querySelector('scrapbook-linemarker[data-scrapbook-id="20240928140505409"]'));
 
-      /* recapture slightly modified document */
-      var response = await captureHeadless({
-        url: `${localhost}/capture_recapture_migrate/page2/index.html`,
-        options,
-        recaptureInfo: {bookId: "", itemId},
-      }, {rawResponse: true});
-      var {timeId: itemId3} = response;
+        /* recapture slightly modified document */
+        var response = await captureHeadless({
+          url: `${localhost}/capture_recapture_migrate/page2/index.html`,
+          options,
+          recaptureInfo: {bookId: "", itemId},
+        }, {rawResponse: true});
+        var {timeId: itemId3} = response;
 
-      var doc = (await xhr({
-        url: `${backend}/data/${itemId3}/index.html`,
-        responseType: "document",
-      })).response;
-      var pElems = doc.querySelectorAll('p');
-      assert.strictEqual(pElems[0].innerHTML, `Lorem ipsum dolor sit amet, <scrapbook-linemarker data-scrapbook-id="20240928140450705" data-scrapbook-elem="linemarker" style="background-color: yellow;" class="first last">consectetur adipiscing elit</scrapbook-linemarker>. Maecenas tincidunt suscipit maximus. Interdum et malesuada faucibus.`);
-      assert.strictEqual(pElems[1].innerHTML, `Integer placerat viverra augue quis fermentum. Quisque at felis interdum, feugiat ipsum. Etiam sed massa at felis maximus semper. Quisque eu orci fringilla odio lobortis elementum.`);
-    });
-
-    it('migrate annotations (sticky)', async function () {
-      var options = Object.assign({}, baseOptions, {
-        "capture.saveTo": "server",
-        "capture.saveAs": "folder",
+        var doc = (await xhr({
+          url: `${backend}/data/${itemId3}/index.html`,
+          responseType: "document",
+        })).response;
+        var pElems = doc.querySelectorAll('p');
+        assert.strictEqual(pElems[0].innerHTML, `Lorem ipsum dolor sit amet, <scrapbook-linemarker data-scrapbook-id="20240928140450705" data-scrapbook-elem="linemarker" style="background-color: yellow;" class="first last">consectetur adipiscing elit</scrapbook-linemarker>. Maecenas tincidunt suscipit maximus. Interdum et malesuada faucibus.`);
+        assert.strictEqual(pElems[1].innerHTML, `Integer placerat viverra augue quis fermentum. Quisque at felis interdum, feugiat ipsum. Etiam sed massa at felis maximus semper. Quisque eu orci fringilla odio lobortis elementum.`);
       });
 
-      var response = await capture({
-        url: `${localhost}/capture_recapture_migrate/page1/index.html`,
-        options,
-      }, {rawResponse: true});
-      var {timeId: itemId} = response;
+      it('sticky', async function () {
+        var options = Object.assign({}, baseOptions, {
+          "capture.saveTo": "server",
+          "capture.saveAs": "folder",
+        });
 
-      var html = await backendRequest({
-        url: `${backend}/data/${itemId}/index.html`,
-      }).then(r => r.text());
-      var body = `\
+        var response = await capture({
+          url: `${localhost}/capture_recapture_migrate/page1/index.html`,
+          options,
+        }, {rawResponse: true});
+        var {timeId: itemId} = response;
+
+        var html = await backendRequest({
+          url: `${backend}/data/${itemId}/index.html`,
+        }).then(r => r.text());
+        var body = `\
 <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas suscipit maximus. Sed urna nisl, rhoncus vel finibus eget, elementum sed massa. Interdum et malesuada fames ac ante ipsum primis in faucibus.</p><scrapbook-sticky data-scrapbook-id="20240928140529186" data-scrapbook-elem="sticky" class="styled plaintext relative">relative note</scrapbook-sticky>
 <p>Integer placerat viverra augue quis fermentum. Quisque at felis interdum, finibus sapien eu, feugiat ipsum. Etiam sed massa at felis maximus semper. Quisque eu orci fringilla odio lobortis elementum.</p>
 <scrapbook-sticky data-scrapbook-id="20240928140509146" data-scrapbook-elem="sticky" class="styled plaintext" style="left: 265px; top: 169px; width: 250px; height: 100px;">absolute note</scrapbook-sticky><style data-scrapbook-elem="annotation-css">[data-scrapbook-elem="linemarker"][title] { cursor: help; } [data-scrapbook-elem="sticky"] { display: block; overflow: auto; } [data-scrapbook-elem="sticky"].styled { position: absolute; z-index: 2147483647; opacity: .95; box-sizing: border-box; margin: 0; border: 1px solid #CCCCCC; border-top-width: 1.25em; border-radius: .25em; padding: .25em; min-width: 6em; min-height: 4em; background: #FAFFFA; box-shadow: .15em .15em .3em black; font: .875em/1.2 sans-serif; color: black; overflow-wrap: break-word; cursor: help; } [data-scrapbook-elem="sticky"].styled.relative { position: relative; margin: 16px auto; } [data-scrapbook-elem="sticky"].styled.plaintext { white-space: pre-wrap; } [data-scrapbook-elem="sticky"].dragging { opacity: .75; } </style><script data-scrapbook-elem="annotation-loader">(function () { var w = window, d = document, r = d.documentElement, e; d.addEventListener('click', function (E) { if (r.hasAttribute('data-scrapbook-toolbar-active')) { return; } if (!w.getSelection().isCollapsed) { return; } e = E.target; if (e.matches('[data-scrapbook-elem="linemarker"]')) { if (e.title) { if (!confirm(e.title)) { E.preventDefault(); E.stopPropagation(); } } } else if (e.matches('[data-scrapbook-elem="sticky"]')) { if (confirm('刪除這個批註嗎？')) { e.parentNode.removeChild(e); E.preventDefault(); E.stopPropagation(); } } }, true); })()</script>`;
-      html = html.replace(regex`<body>([\s\S]*?)</body>`, `<body>${body}</body>`);
+        html = html.replace(regex`<body>([\s\S]*?)</body>`, `<body>${body}</body>`);
 
-      /* recapture same document */
-      var response = await backendRequest({
-        url: `${backend}/data/${itemId}/index.html`,
-        body: {
-          a: 'save',
-          f: 'json',
-          upload: new File([html], `index.json`, {type: "text/javascript"}),
-        },
-        csrfToken: true,
-      }).then(r => r.json());
+        /* recapture same document */
+        var response = await backendRequest({
+          url: `${backend}/data/${itemId}/index.html`,
+          body: {
+            a: 'save',
+            f: 'json',
+            upload: new File([html], `index.json`, {type: "text/javascript"}),
+          },
+          csrfToken: true,
+        }).then(r => r.json());
 
-      var response = await captureHeadless({
-        url: `${localhost}/capture_recapture_migrate/page1/index.html`,
-        options,
-        recaptureInfo: {bookId: "", itemId},
-      }, {rawResponse: true});
-      var {timeId: itemId2} = response;
+        var response = await captureHeadless({
+          url: `${localhost}/capture_recapture_migrate/page1/index.html`,
+          options,
+          recaptureInfo: {bookId: "", itemId},
+        }, {rawResponse: true});
+        var {timeId: itemId2} = response;
 
-      var doc = (await xhr({
-        url: `${backend}/data/${itemId2}/index.html`,
-        responseType: "document",
-      })).response;
-      assert.exists(doc.querySelector('scrapbook-sticky[data-scrapbook-id="20240928140529186"]'));
-      assert.exists(doc.querySelector('scrapbook-sticky[data-scrapbook-id="20240928140509146"]'));
+        var doc = (await xhr({
+          url: `${backend}/data/${itemId2}/index.html`,
+          responseType: "document",
+        })).response;
+        assert.exists(doc.querySelector('scrapbook-sticky[data-scrapbook-id="20240928140529186"]'));
+        assert.exists(doc.querySelector('scrapbook-sticky[data-scrapbook-id="20240928140509146"]'));
 
-      /* recapture slightly modified document */
-      var response = await captureHeadless({
-        url: `${localhost}/capture_recapture_migrate/page2/index.html`,
-        options,
-        recaptureInfo: {bookId: "", itemId},
-      }, {rawResponse: true});
-      var {timeId: itemId3} = response;
+        /* recapture slightly modified document */
+        var response = await captureHeadless({
+          url: `${localhost}/capture_recapture_migrate/page2/index.html`,
+          options,
+          recaptureInfo: {bookId: "", itemId},
+        }, {rawResponse: true});
+        var {timeId: itemId3} = response;
 
-      var doc = (await xhr({
-        url: `${backend}/data/${itemId3}/index.html`,
-        responseType: "document",
-      })).response;
-      assert.exists(doc.querySelector('scrapbook-sticky[data-scrapbook-id="20240928140529186"]'));
-      assert.exists(doc.querySelector('scrapbook-sticky[data-scrapbook-id="20240928140509146"]'));
+        var doc = (await xhr({
+          url: `${backend}/data/${itemId3}/index.html`,
+          responseType: "document",
+        })).response;
+        assert.exists(doc.querySelector('scrapbook-sticky[data-scrapbook-id="20240928140529186"]'));
+        assert.exists(doc.querySelector('scrapbook-sticky[data-scrapbook-id="20240928140509146"]'));
+      });
+
     });
 
   });
