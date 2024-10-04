@@ -4344,7 +4344,8 @@
         reject(new Error("Request timeout."));
       };
 
-      xhr.responseType = params.responseType;
+      if (params.responseType) { xhr.responseType = params.responseType; }
+
       xhr.open(params.method || "GET", params.url, true, params.user, params.password);
 
       if (params.timeout) { xhr.timeout = params.timeout; }
