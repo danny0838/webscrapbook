@@ -3665,6 +3665,41 @@ p { background-image: url("about:blank"); }`);
         assert.notExists(doc.querySelector('link[rel="shortcut icon"]'));
       });
 
+      it('should ignore site favicon if page favicon exists (mode = tab)', async function () {
+        var blob = await capture({
+          url: `${localhost}/capture_favicon/favicon.html`,
+          options,
+        });
+
+        var zip = await new JSZip().loadAsync(blob);
+        assert.exists(zip.file('red.bmp'));
+        assert.notExists(zip.file('favicon.ico'));
+
+        var indexFile = zip.file('index.html');
+        var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+        var doc = await readFileAsDocument(indexBlob);
+
+        var iconElem = doc.querySelector('link[rel~="icon"]');
+        assert.strictEqual(iconElem.getAttribute('href'), `red.bmp`);
+      });
+
+      it('should ignore site favicon if page favicon exists (mode = bookmark)', async function () {
+        var options = Object.assign({}, baseOptions, {
+          "capture.favicon": "save",
+        });
+        var blob = await capture({
+          url: `${localhost}/capture_favicon/favicon.html`,
+          mode: "bookmark",
+          options,
+        });
+
+        var doc = await readFileAsDocument(blob);
+        assert.strictEqual(
+          doc.querySelector('link[rel="shortcut icon"]').getAttribute('href'),
+          'data:image/bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAAD/AAAA'
+        );
+      });
+
     });
 
     describe('should rewrite additional `link`s according to capture.faviconAttrs', function () {
