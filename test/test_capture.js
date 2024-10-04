@@ -18886,228 +18886,321 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
 
   describe('merge capture', function () {
 
-    it('basic: add files and update index.json and mtime', async function () {
-      var options = Object.assign({}, baseOptions, {
-        "capture.saveTo": "server",
-        "capture.saveAs": "folder",
-        "capture.downLink.doc.depth": 0,
+    describe('basic', function () {
+      var itemId;
+
+      before('perform merge capture', async function () {
+        var options = Object.assign({}, baseOptions, {
+          "capture.saveTo": "server",
+          "capture.saveAs": "folder",
+          "capture.downLink.doc.depth": 0,
+        });
+
+        var response = await capture({
+          url: `${localhost}/capture_mergeCapture/main.html`,
+          options,
+        }, {rawResponse: true});
+
+        ({timeId: itemId} = response);
+        var mergeCaptureInfo = {bookId: "", itemId};
+
+        var response = await capture({
+          url: `${localhost}/capture_mergeCapture/linked1-1.html`,
+          options,
+          mergeCaptureInfo,
+        }, {rawResponse: true});
+
+        var response = await capture({
+          url: `${localhost}/capture_mergeCapture/linked1-2.xhtml`,
+          options,
+          mergeCaptureInfo,
+        }, {rawResponse: true});
+
+        var response = await capture({
+          url: `${localhost}/capture_mergeCapture/linked1-3.svg`,
+          options,
+          mergeCaptureInfo,
+        }, {rawResponse: true});
+
+        var response = await capture({
+          url: `${localhost}/capture_mergeCapture/linked1-4.txt`,
+          options,
+          mergeCaptureInfo,
+        }, {rawResponse: true});
       });
 
-      var response = await capture({
-        url: `${localhost}/capture_mergeCapture/main.html`,
-        options,
-      }, {rawResponse: true});
+      it('should add captured resources', async function () {
+        var doc = (await xhr({
+          url: `${backend}/data/${itemId}/index.html`,
+          responseType: "document",
+        })).response;
+        var anchors = doc.querySelectorAll('a[href]');
+        assert.strictEqual(anchors[0].getAttribute('href'), `linked1-1.html#111`);
+        assert.strictEqual(anchors[1].getAttribute('href'), `linked1-2.xhtml#222`);
+        assert.strictEqual(anchors[2].getAttribute('href'), `linked1-3.svg#333`);
+        assert.strictEqual(anchors[3].getAttribute('href'), `linked1-4.txt.html#444`);
 
-      var {timeId: itemId} = response;
-      var mergeCaptureInfo = {bookId: "", itemId};
+        var doc = (await xhr({
+          url: `${backend}/data/${itemId}/linked1-1.html`,
+          responseType: "document",
+        })).response;
+        assert.strictEqual(doc.querySelector('p').textContent, `Linked page 1-1.`);
 
-      var response = await capture({
-        url: `${localhost}/capture_mergeCapture/linked1-1.html`,
-        options,
-        mergeCaptureInfo,
-      }, {rawResponse: true});
+        var doc = (await xhr({
+          url: `${backend}/data/${itemId}/linked1-2.xhtml`,
+          responseType: "document",
+        })).response;
+        assert.strictEqual(doc.querySelector('p').textContent, `Linked page 1-2.`);
 
-      var response = await capture({
-        url: `${localhost}/capture_mergeCapture/linked1-2.xhtml`,
-        options,
-        mergeCaptureInfo,
-      }, {rawResponse: true});
+        var doc = (await xhr({
+          url: `${backend}/data/${itemId}/linked1-3.svg`,
+          responseType: "document",
+        })).response;
+        assert.exists(doc.querySelector('rect'));
 
-      var response = await capture({
-        url: `${localhost}/capture_mergeCapture/linked1-3.svg`,
-        options,
-        mergeCaptureInfo,
-      }, {rawResponse: true});
+        var text = (await xhr({
+          url: `${backend}/data/${itemId}/linked1-4.txt`,
+        })).response;
+        assert.strictEqual(text, 'Linked file 1-4.');
+      });
 
-      var response = await capture({
-        url: `${localhost}/capture_mergeCapture/linked1-4.txt`,
-        options,
-        mergeCaptureInfo,
-      }, {rawResponse: true});
+      it('should add each main page of the merge capture to `indexPages` in `index.json`', async function () {
+        var sitemap = await backendRequest({
+          url: `${backend}/data/${itemId}/index.json`,
+        }).then(r => r.json());
+        var expectedData = {
+          "version": 3,
+          "indexPages": [
+            "index.html",
+            "linked1-1.html",
+            "linked1-2.xhtml",
+            "linked1-3.svg",
+            "linked1-4.txt.html"
+          ],
+          "redirects": [],
+          "files": [
+            {
+              "path": "index.json"
+            },
+            {
+              "path": "index.dat"
+            },
+            {
+              "path": "index.rdf"
+            },
+            {
+              "path": "history.rdf"
+            },
+            {
+              "path": "^metadata^"
+            },
+            {
+              "path": "index.html",
+              "url": `${localhost}/capture_mergeCapture/main.html`,
+              "role": "document",
+              "token": getToken(`${localhost}/capture_mergeCapture/main.html`, "document")
+            },
+            {
+              "path": "index.xhtml",
+              "role": "document"
+            },
+            {
+              "path": "index.svg",
+              "role": "document"
+            },
+            {
+              "path": "linked1-1.html",
+              "url": `${localhost}/capture_mergeCapture/linked1-1.html`,
+              "role": "document",
+              "token": getToken(`${localhost}/capture_mergeCapture/linked1-1.html`, "document")
+            },
+            {
+              "path": "linked1-2.xhtml",
+              "url": `${localhost}/capture_mergeCapture/linked1-2.xhtml`,
+              "role": "document",
+              "token": getToken(`${localhost}/capture_mergeCapture/linked1-2.xhtml`, "document")
+            },
+            {
+              "path": "linked1-3.svg",
+              "url": `${localhost}/capture_mergeCapture/linked1-3.svg`,
+              "role": "document",
+              "token": getToken(`${localhost}/capture_mergeCapture/linked1-3.svg`, "document")
+            },
+            {
+              "path": "linked1-4.txt",
+              "url": `${localhost}/capture_mergeCapture/linked1-4.txt`,
+              "role": "resource",
+              "token": getToken(`${localhost}/capture_mergeCapture/linked1-4.txt`, "resource")
+            },
+            {
+              "path": "linked1-4.txt.html",
+              "url": `${localhost}/capture_mergeCapture/linked1-4.txt`,
+              "role": "document",
+              "token": getToken(`${localhost}/capture_mergeCapture/linked1-4.txt`, "document")
+            }
+          ]
+        };
+        assert.deepEqual(sitemap, expectedData);
+      });
 
-      var doc = (await xhr({
-        url: `${backend}/data/${itemId}/index.html`,
-        responseType: "document",
-      })).response;
-      var anchors = doc.querySelectorAll('a[href]');
-      assert.strictEqual(anchors[0].getAttribute('href'), `linked1-1.html#111`);
-      assert.strictEqual(anchors[1].getAttribute('href'), `linked1-2.xhtml#222`);
-      assert.strictEqual(anchors[2].getAttribute('href'), `linked1-3.svg#333`);
-      assert.strictEqual(anchors[3].getAttribute('href'), `linked1-4.txt.html#444`);
+      it('should update mtime of the item', async function () {
+        var {data: [response]} = await backendRequest({
+          body: {
+            a: 'query',
+            f: 'json',
+            q: JSON.stringify({
+              book: '',
+              cmd: 'get_items',
+              args: [[itemId]],
+            }),
+            details: 1,
+          },
+          csrfToken: true,
+        }).then(r => r.json());
+        assert.deepInclude(response[itemId].meta, {
+          index: `${itemId}/index.html`,
+          title: "main.html",
+          type: "site",
+          create: itemId,
+          source: `${localhost}/capture_mergeCapture/main.html`,
+        });
+        assert(response[itemId].meta.modify > itemId);
+      });
 
-      var doc = (await xhr({
-        url: `${backend}/data/${itemId}/linked1-1.html`,
-        responseType: "document",
-      })).response;
-      assert.strictEqual(doc.querySelector('p').textContent, `Linked page 1-1.`);
-
-      var doc = (await xhr({
-        url: `${backend}/data/${itemId}/linked1-2.xhtml`,
-        responseType: "document",
-      })).response;
-      assert.strictEqual(doc.querySelector('p').textContent, `Linked page 1-2.`);
-
-      var doc = (await xhr({
-        url: `${backend}/data/${itemId}/linked1-3.svg`,
-        responseType: "document",
-      })).response;
-      assert.exists(doc.querySelector('rect'));
-
-      var text = (await xhr({
-        url: `${backend}/data/${itemId}/linked1-4.txt`,
-      })).response;
-      assert.strictEqual(text, 'Linked file 1-4.');
-
-      var sitemap = await backendRequest({
-        url: `${backend}/data/${itemId}/index.json`,
-      }).then(r => r.json());
-      var expectedData = {
-        "version": 3,
-        "indexPages": [
-          "index.html",
-          "linked1-1.html",
-          "linked1-2.xhtml",
-          "linked1-3.svg",
-          "linked1-4.txt.html"
-        ],
-        "redirects": [],
-        "files": [
-          {
-            "path": "index.json"
-          },
-          {
-            "path": "index.dat"
-          },
-          {
-            "path": "index.rdf"
-          },
-          {
-            "path": "history.rdf"
-          },
-          {
-            "path": "^metadata^"
-          },
-          {
-            "path": "index.html",
-            "url": `${localhost}/capture_mergeCapture/main.html`,
-            "role": "document",
-            "token": getToken(`${localhost}/capture_mergeCapture/main.html`, "document")
-          },
-          {
-            "path": "index.xhtml",
-            "role": "document"
-          },
-          {
-            "path": "index.svg",
-            "role": "document"
-          },
-          {
-            "path": "linked1-1.html",
-            "url": `${localhost}/capture_mergeCapture/linked1-1.html`,
-            "role": "document",
-            "token": getToken(`${localhost}/capture_mergeCapture/linked1-1.html`, "document")
-          },
-          {
-            "path": "linked1-2.xhtml",
-            "url": `${localhost}/capture_mergeCapture/linked1-2.xhtml`,
-            "role": "document",
-            "token": getToken(`${localhost}/capture_mergeCapture/linked1-2.xhtml`, "document")
-          },
-          {
-            "path": "linked1-3.svg",
-            "url": `${localhost}/capture_mergeCapture/linked1-3.svg`,
-            "role": "document",
-            "token": getToken(`${localhost}/capture_mergeCapture/linked1-3.svg`, "document")
-          },
-          {
-            "path": "linked1-4.txt",
-            "url": `${localhost}/capture_mergeCapture/linked1-4.txt`,
-            "role": "resource",
-            "token": getToken(`${localhost}/capture_mergeCapture/linked1-4.txt`, "resource")
-          },
-          {
-            "path": "linked1-4.txt.html",
-            "url": `${localhost}/capture_mergeCapture/linked1-4.txt`,
-            "role": "document",
-            "token": getToken(`${localhost}/capture_mergeCapture/linked1-4.txt`, "document")
-          }
-        ]
-      };
-      assert.deepEqual(sitemap, expectedData);
     });
 
-    it('honor redirects in `index.json` when rebuilding links', async function () {
-      var options = Object.assign({}, baseOptions, {
-        "capture.saveTo": "server",
-        "capture.saveAs": "folder",
-        "capture.downLink.doc.depth": 0,
+    describe('redirect', function () {
+
+      it('should rewrite every link to a URL that redirects to a resource with an existing captured version in an added page', async function () {
+        var options = Object.assign({}, baseOptions, {
+          "capture.saveTo": "server",
+          "capture.saveAs": "folder",
+          "capture.downLink.doc.depth": 1,
+        });
+
+        var response = await capture({
+          url: `${localhost}/capture_mergeCapture_redirect/main.html`,
+          options,
+        }, {rawResponse: true});
+
+        var bookId = "";
+        var {timeId: itemId} = response;
+
+        var options = baseOptions;
+        var response = await capture({
+          url: `${localhost}/capture_mergeCapture_redirect/other.html`,
+          options,
+          mergeCaptureInfo: {bookId, itemId},
+        }, {rawResponse: true});
+
+        var doc = (await xhr({
+          url: `${backend}/data/${itemId}/index.html`,
+          responseType: "document",
+        })).response;
+        var anchors = doc.querySelectorAll('a[href]');
+        assert.strictEqual(anchors[0].getAttribute('href'), `redirected1-1.html#111`);
+        assert.strictEqual(anchors[1].getAttribute('href'), `redirected1-2.xhtml#222`);
+
+        var doc = (await xhr({
+          url: `${backend}/data/${itemId}/other.html`,
+          responseType: "document",
+        })).response;
+        var anchors = doc.querySelectorAll('a[href]');
+        assert.strictEqual(anchors[0].getAttribute('href'), `redirected1-1.html#x111`);
+        assert.strictEqual(anchors[1].getAttribute('href'), `redirected1-2.xhtml#x222`);
+
+        var sitemap = await backendRequest({
+          url: `${backend}/data/${itemId}/index.json`,
+        }).then(r => r.json());
+        var expectedData = {
+          "version": 3,
+          "indexPages": [
+            "index.html",
+            "other.html"
+          ],
+          "redirects": [
+            [
+              `${localhost}/capture_mergeCapture_redirect/linked1-1.pyr`,
+              `${localhost}/capture_mergeCapture_redirect/redirected1-1.html`,
+            ],
+            [
+              `${localhost}/capture_mergeCapture_redirect/linked1-2.pyr`,
+              `${localhost}/capture_mergeCapture_redirect/redirected1-2.xhtml`,
+            ],
+          ],
+          "files": [
+            {
+              "path": "index.json"
+            },
+            {
+              "path": "index.dat"
+            },
+            {
+              "path": "index.rdf"
+            },
+            {
+              "path": "history.rdf"
+            },
+            {
+              "path": "^metadata^"
+            },
+            {
+              "path": "index.html",
+              "url": `${localhost}/capture_mergeCapture_redirect/main.html`,
+              "role": "document",
+              "token": getToken(`${localhost}/capture_mergeCapture_redirect/main.html`, "document")
+            },
+            {
+              "path": "index.xhtml",
+              "role": "document"
+            },
+            {
+              "path": "index.svg",
+              "role": "document"
+            },
+            {
+              "path": "redirected1-1.html",
+              "url": `${localhost}/capture_mergeCapture_redirect/redirected1-1.html`,
+              "role": "document",
+              "token": getToken(`${localhost}/capture_mergeCapture_redirect/redirected1-1.html`, "document")
+            },
+            {
+              "path": "redirected1-2.xhtml",
+              "url": `${localhost}/capture_mergeCapture_redirect/redirected1-2.xhtml`,
+              "role": "document",
+              "token": getToken(`${localhost}/capture_mergeCapture_redirect/redirected1-2.xhtml`, "document")
+            },
+            {
+              "path": "other.html",
+              "url": `${localhost}/capture_mergeCapture_redirect/other.html`,
+              "role": "document",
+              "token": getToken(`${localhost}/capture_mergeCapture_redirect/other.html`, "document")
+            }
+          ]
+        };
+        assert.deepEqual(sitemap, expectedData);
       });
 
-      var response = await capture({
-        url: `${localhost}/capture_mergeCapture_redirect/main.html`,
-        options,
-      }, {rawResponse: true});
+      it('should honor `redirects` in `index.json` when rebuilding links', async function () {
+        var options = Object.assign({}, baseOptions, {
+          "capture.saveTo": "server",
+          "capture.saveAs": "folder",
+          "capture.downLink.doc.depth": 0,
+        });
 
-      var bookId = "";
-      var {timeId: itemId} = response;
+        var response = await capture({
+          url: `${localhost}/capture_mergeCapture_redirect/main.html`,
+          options,
+        }, {rawResponse: true});
 
-      var sitemap = await backendRequest({
-        url: `${backend}/data/${itemId}/index.json`,
-      }).then(r => r.json());
+        var bookId = "";
+        var {timeId: itemId} = response;
 
-      sitemap.redirects = [
-        [
-          `${localhost}/capture_mergeCapture_redirect/linked1-1.pyr`,
-          `${localhost}/capture_mergeCapture_redirect/redirected1-1.html`,
-        ],
-        [
-          `${localhost}/capture_mergeCapture_redirect/linked1-2.pyr`,
-          `${localhost}/capture_mergeCapture_redirect/redirected1-2.xhtml`,
-        ],
-      ];
+        var sitemap = await backendRequest({
+          url: `${backend}/data/${itemId}/index.json`,
+        }).then(r => r.json());
 
-      var response = await backendRequest({
-        url: `${backend}/data/${itemId}/index.json`,
-        body: {
-          a: 'save',
-          f: 'json',
-          upload: new File([JSON.stringify(sitemap, null, 1)], `index.json`, {type: "text/javascript"}),
-        },
-        csrfToken: true,
-      }).then(r => r.json());
-
-      var response = await capture({
-        url: `${localhost}/capture_mergeCapture_redirect/redirected1-1.html`,
-        options,
-        mergeCaptureInfo: {bookId, itemId},
-      }, {rawResponse: true});
-
-      var response = await capture({
-        url: `${localhost}/capture_mergeCapture_redirect/redirected1-2.xhtml`,
-        options,
-        mergeCaptureInfo: {bookId, itemId},
-      }, {rawResponse: true});
-
-      var doc = (await xhr({
-        url: `${backend}/data/${itemId}/index.html`,
-        responseType: "document",
-      })).response;
-
-      var anchors = doc.querySelectorAll('a[href]');
-      assert.strictEqual(anchors[0].getAttribute('href'), `redirected1-1.html#111`);
-      assert.strictEqual(anchors[1].getAttribute('href'), `redirected1-2.xhtml#222`);
-
-      var sitemap = await backendRequest({
-        url: `${backend}/data/${itemId}/index.json`,
-      }).then(r => r.json());
-      var expectedData = {
-        "version": 3,
-        "indexPages": [
-          "index.html",
-          "redirected1-1.html",
-          "redirected1-2.xhtml"
-        ],
-        "redirects": [
+        sitemap.redirects = [
           [
             `${localhost}/capture_mergeCapture_redirect/linked1-1.pyr`,
             `${localhost}/capture_mergeCapture_redirect/redirected1-1.html`,
@@ -19116,52 +19209,106 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
             `${localhost}/capture_mergeCapture_redirect/linked1-2.pyr`,
             `${localhost}/capture_mergeCapture_redirect/redirected1-2.xhtml`,
           ],
-        ],
-        "files": [
-          {
-            "path": "index.json"
+        ];
+
+        var response = await backendRequest({
+          url: `${backend}/data/${itemId}/index.json`,
+          body: {
+            a: 'save',
+            f: 'json',
+            upload: new File([JSON.stringify(sitemap, null, 1)], `index.json`, {type: "text/javascript"}),
           },
-          {
-            "path": "index.dat"
-          },
-          {
-            "path": "index.rdf"
-          },
-          {
-            "path": "history.rdf"
-          },
-          {
-            "path": "^metadata^"
-          },
-          {
-            "path": "index.html",
-            "url": `${localhost}/capture_mergeCapture_redirect/main.html`,
-            "role": "document",
-            "token": getToken(`${localhost}/capture_mergeCapture_redirect/main.html`, "document")
-          },
-          {
-            "path": "index.xhtml",
-            "role": "document"
-          },
-          {
-            "path": "index.svg",
-            "role": "document"
-          },
-          {
-            "path": "redirected1-1.html",
-            "url": `${localhost}/capture_mergeCapture_redirect/redirected1-1.html`,
-            "role": "document",
-            "token": getToken(`${localhost}/capture_mergeCapture_redirect/redirected1-1.html`, "document")
-          },
-          {
-            "path": "redirected1-2.xhtml",
-            "url": `${localhost}/capture_mergeCapture_redirect/redirected1-2.xhtml`,
-            "role": "document",
-            "token": getToken(`${localhost}/capture_mergeCapture_redirect/redirected1-2.xhtml`, "document")
-          }
-        ]
-      };
-      assert.deepEqual(sitemap, expectedData);
+          csrfToken: true,
+        }).then(r => r.json());
+
+        var response = await capture({
+          url: `${localhost}/capture_mergeCapture_redirect/redirected1-1.html`,
+          options,
+          mergeCaptureInfo: {bookId, itemId},
+        }, {rawResponse: true});
+
+        var response = await capture({
+          url: `${localhost}/capture_mergeCapture_redirect/redirected1-2.xhtml`,
+          options,
+          mergeCaptureInfo: {bookId, itemId},
+        }, {rawResponse: true});
+
+        var doc = (await xhr({
+          url: `${backend}/data/${itemId}/index.html`,
+          responseType: "document",
+        })).response;
+
+        var anchors = doc.querySelectorAll('a[href]');
+        assert.strictEqual(anchors[0].getAttribute('href'), `redirected1-1.html#111`);
+        assert.strictEqual(anchors[1].getAttribute('href'), `redirected1-2.xhtml#222`);
+
+        var sitemap = await backendRequest({
+          url: `${backend}/data/${itemId}/index.json`,
+        }).then(r => r.json());
+        var expectedData = {
+          "version": 3,
+          "indexPages": [
+            "index.html",
+            "redirected1-1.html",
+            "redirected1-2.xhtml"
+          ],
+          "redirects": [
+            [
+              `${localhost}/capture_mergeCapture_redirect/linked1-1.pyr`,
+              `${localhost}/capture_mergeCapture_redirect/redirected1-1.html`,
+            ],
+            [
+              `${localhost}/capture_mergeCapture_redirect/linked1-2.pyr`,
+              `${localhost}/capture_mergeCapture_redirect/redirected1-2.xhtml`,
+            ],
+          ],
+          "files": [
+            {
+              "path": "index.json"
+            },
+            {
+              "path": "index.dat"
+            },
+            {
+              "path": "index.rdf"
+            },
+            {
+              "path": "history.rdf"
+            },
+            {
+              "path": "^metadata^"
+            },
+            {
+              "path": "index.html",
+              "url": `${localhost}/capture_mergeCapture_redirect/main.html`,
+              "role": "document",
+              "token": getToken(`${localhost}/capture_mergeCapture_redirect/main.html`, "document")
+            },
+            {
+              "path": "index.xhtml",
+              "role": "document"
+            },
+            {
+              "path": "index.svg",
+              "role": "document"
+            },
+            {
+              "path": "redirected1-1.html",
+              "url": `${localhost}/capture_mergeCapture_redirect/redirected1-1.html`,
+              "role": "document",
+              "token": getToken(`${localhost}/capture_mergeCapture_redirect/redirected1-1.html`, "document")
+            },
+            {
+              "path": "redirected1-2.xhtml",
+              "url": `${localhost}/capture_mergeCapture_redirect/redirected1-2.xhtml`,
+              "role": "document",
+              "token": getToken(`${localhost}/capture_mergeCapture_redirect/redirected1-2.xhtml`, "document")
+            }
+          ]
+        };
+        assert.deepEqual(sitemap, expectedData);
+      });
+
     });
 
   });
