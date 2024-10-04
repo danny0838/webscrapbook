@@ -231,7 +231,13 @@ class TestSuite {
 
     const args = {
       taskInfo: {
-        tasks: [!headless ? Object.assign({tabId: pageTab.id}, params) : params],
+        tasks: [
+          headless ? params : Object.assign({
+            tabId: pageTab.id,
+            title: pageTab.title,
+            url: pageTab.url,
+          }, params),
+        ],
       },
       windowCreateData,
       waitForResponse: true,

@@ -171,7 +171,7 @@
     taskInfo,
     dialog = null,
     uniquify,
-    ignoreTitle,
+    ignoreTitle = true,
     windowCreateData,
     tabCreateData,
     waitForResponse = true,

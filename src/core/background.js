@@ -61,6 +61,8 @@
         return await scrapbook.invokeCapture(
           (await scrapbook.getHighlightedTabs()).map(tab => ({
             tabId: tab.id,
+            url: tab.url,
+            title: tab.title,
           }))
         );
       },
@@ -69,6 +71,8 @@
         return await scrapbook.invokeCapture(
           (await scrapbook.getHighlightedTabs()).map(tab => ({
             tabId: tab.id,
+            url: tab.url,
+            title: tab.title,
             mode: "source",
           }))
         );
@@ -78,6 +82,8 @@
         return await scrapbook.invokeCapture(
           (await scrapbook.getHighlightedTabs()).map(tab => ({
             tabId: tab.id,
+            url: tab.url,
+            title: tab.title,
             mode: "bookmark",
           }))
         );
