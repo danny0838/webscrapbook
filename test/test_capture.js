@@ -2269,6 +2269,7 @@ p { background-image: url("about:blank"); }`);
         assert.exists(indexFile);
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
         var doc = await readFileAsDocument(indexBlob);
+        assert.strictEqual(doc.documentElement.getAttribute('data-scrapbook-type'), "file");
         assert.exists(doc.querySelector('meta[http-equiv="refresh"][content="0; url=attachment.html"]'));
 
         var indexFile = zip.file('attachment.html');
@@ -2290,6 +2291,7 @@ p { background-image: url("about:blank"); }`);
         assert.exists(indexFile);
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
         var doc = await readFileAsDocument(indexBlob);
+        assert.strictEqual(doc.documentElement.getAttribute('data-scrapbook-type'), "file");
         assert.exists(doc.querySelector('meta[http-equiv="refresh"][content="0; url=attachment.html"]'));
 
         var indexFile = zip.file('attachment.html');
@@ -2775,6 +2777,7 @@ p { background-image: url("about:blank"); }`);
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
         var doc = await readFileAsDocument(indexBlob);
 
+        assert.strictEqual(doc.documentElement.getAttribute('data-scrapbook-type'), "file");
         assert.strictEqual(doc.documentElement.getAttribute('data-scrapbook-source'), `${localhost}/capture_meta_refresh_mode_file/target.txt#abc`);
       });
 
