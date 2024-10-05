@@ -173,13 +173,13 @@ describe('Capture tests', function () {
     describe('HTML', function () {
 
       it('capture.saveAs = htz', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.saveAs": "zip",
-        };
+        });
 
         var blob = await capture({
           url: `${localhost}/capture_html/index.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
         assert.strictEqual(blob.type, "application/html+zip");
 
@@ -219,13 +219,13 @@ describe('Capture tests', function () {
       });
 
       it('capture.saveAs = maff', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.saveAs": "maff",
-        };
+        });
 
         var blob = await capture({
           url: `${localhost}/capture_html/index.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
         assert.strictEqual(blob.type, "application/x-maff");
 
@@ -280,13 +280,13 @@ describe('Capture tests', function () {
       });
 
       it('capture.saveAs = singleHtml', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.saveAs": "singleHtml",
-        };
+        });
 
         var blob = await capture({
           url: `${localhost}/capture_html/index.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
         assert(blob.type.match(rawRegex`${'^'}text/html${'(?:;|$)'}`));
 
@@ -320,13 +320,13 @@ describe('Capture tests', function () {
     describe('XHTML', function () {
 
       it('capture.saveAs = htz', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.saveAs": "zip",
-        };
+        });
 
         var blob = await capture({
           url: `${localhost}/capture_xhtml/index.xhtml`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
         assert.strictEqual(blob.type, "application/html+zip");
 
@@ -374,12 +374,12 @@ describe('Capture tests', function () {
       });
 
       it('capture.saveAs = maff', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.saveAs": "maff",
-        };
+        });
         var blob = await capture({
           url: `${localhost}/capture_xhtml/index.xhtml`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
         assert.strictEqual(blob.type, "application/x-maff");
         var zip = await new JSZip().loadAsync(blob);
@@ -440,12 +440,12 @@ describe('Capture tests', function () {
       });
 
       it('capture.saveAs = singleHtml', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.saveAs": "singleHtml",
-        };
+        });
         var blob = await capture({
           url: `${localhost}/capture_xhtml/index.xhtml`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
         assert(blob.type.match(rawRegex`${'^'}application/xhtml+xml${'(?:;|$)'}`));
 
@@ -478,14 +478,14 @@ describe('Capture tests', function () {
     describe('file (capture.saveFileAsHtml = false)', function () {
 
       it('capture.saveAs = htz', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.saveAs": "zip",
           "capture.saveFileAsHtml": false,
-        };
+        });
 
         var blob = await capture({
           url: `${localhost}/capture_file/file.bmp`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -507,14 +507,14 @@ describe('Capture tests', function () {
       });
 
       it('capture.saveAs = maff', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.saveAs": "maff",
           "capture.saveFileAsHtml": false,
-        };
+        });
 
         var blob = await capture({
           url: `${localhost}/capture_file/file.bmp`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -546,14 +546,14 @@ describe('Capture tests', function () {
       });
 
       it('capture.saveAs = singleHtml', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.saveAs": "singleHtml",
           "capture.saveFileAsHtml": false,
-        };
+        });
 
         var blob = await capture({
           url: `${localhost}/capture_file/file.bmp`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var doc = await readFileAsDocument(blob);
@@ -568,14 +568,14 @@ describe('Capture tests', function () {
       });
 
       it('record charset for text files (Big5)', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.saveAs": "maff",
           "capture.saveFileAsHtml": false,
-        };
+        });
 
         var blob = await capture({
           url: `${localhost}/capture_file/big5.py`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -603,14 +603,14 @@ describe('Capture tests', function () {
       });
 
       it('record charset for text files (UTF-8 BOM)', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.saveAs": "maff",
           "capture.saveFileAsHtml": false,
-        };
+        });
 
         var blob = await capture({
           url: `${localhost}/capture_file/utf8.txt`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -641,14 +641,14 @@ describe('Capture tests', function () {
     });
 
     describe('file (capture.saveFileAsHtml = true)', function () {
-      var options = {
+      var options = Object.assign({}, baseOptions, {
         "capture.saveFileAsHtml": true,
-      };
+      });
 
       it('bmp: save as a web page containing the image', async function () {
         var blob = await capture({
           url: `${localhost}/capture_file/file.bmp`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -664,7 +664,7 @@ describe('Capture tests', function () {
       it('txt: save as a web page with UTF-8 encoding (Big5)', async function () {
         var blob = await capture({
           url: `${localhost}/capture_file/big5.py`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -683,7 +683,7 @@ describe('Capture tests', function () {
       it('txt: save as a web page with UTF-8 encoding (UTF-8 BOM)', async function () {
         var blob = await capture({
           url: `${localhost}/capture_file/utf8.txt`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -796,12 +796,12 @@ describe('Capture tests', function () {
     describe('capture.saveAsciiFilename', function () {
 
       it('capture.saveAsciiFilename = false', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.saveAsciiFilename": false,
-        };
+        });
         var blob = await capture({
           url: `${localhost}/capture_saveAsciiFilename/index.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -826,12 +826,12 @@ p { background-image: url("123ABCabc_中文_𠀀.bmp"); }`);
       });
 
       it('capture.saveAsciiFilename = true', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.saveAsciiFilename": true,
-        };
+        });
         var blob = await capture({
           url: `${localhost}/capture_saveAsciiFilename/index.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -1014,13 +1014,13 @@ p { background-image: url("123ABCabc_%25E4%25B8%25AD%25E6%2596%2587_%25F0%25A0%2
        * capturer.captureDocument
        */
       it('should use filename from the redirected URL and hash from source', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.frameRename": false,
-        };
+        });
 
         var blob = await captureHeadless({
           url: `${localhost}/capture_redirect/index.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -1041,13 +1041,13 @@ p { background-image: url("123ABCabc_%25E4%25B8%25AD%25E6%2596%2587_%25F0%25A0%2
        * fetch API doesn't contain hash, we use the source URL hash currently.
        */
       it('should ignore hash in the `Location` header', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.frameRename": false,
-        };
+        });
 
         var blob = await captureHeadless({
           url: `${localhost}/capture_redirect_hash/index.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -1069,12 +1069,12 @@ p { background-image: url("123ABCabc_%25E4%25B8%25AD%25E6%2596%2587_%25F0%25A0%2
     describe('basic', function () {
 
       it('capture.saveDataUriAsFile = false', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.saveDataUriAsFile": false,
-        };
+        });
         var blob = await capture({
           url: `${localhost}/capture_dataUri/basic.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -1094,12 +1094,12 @@ p { background-image: url("data:image/bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAE
       });
 
       it('capture.saveDataUriAsFile = true', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.saveDataUriAsFile": true,
-        };
+        });
         var blob = await capture({
           url: `${localhost}/capture_dataUri/basic.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -1122,13 +1122,13 @@ p { background-image: url("ecb6e0b0acec8b20d5f0360a52fe336a7a7cb475.bmp"); }`);
       });
 
       it('should ignore capture.saveDataUriAsFile if capture.saveAs = singleHtml', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.saveAs": "singleHtml",
           "capture.saveDataUriAsFile": true,
-        };
+        });
         var blob = await capture({
           url: `${localhost}/capture_dataUri/basic.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var doc = await readFileAsDocument(blob);
@@ -1142,12 +1142,12 @@ p { background-image: url("data:image/bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAE
       });
 
       it('should take parameters in data URL if capture.saveDataUriAsFile = true', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.saveDataUriAsFile": true,
-        };
+        });
         var blob = await capture({
           url: `${localhost}/capture_dataUri_params/index.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -1207,18 +1207,18 @@ p { background-image: url("data:image/bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAE
      * capturer.DocumentCssHandler
      */
     describe('CSS with data URL source', function () {
-      var options = {
+      var options = Object.assign({}, baseOptions, {
         "capture.style": "save",
         "capture.font": "save",
         "capture.imageBackground": "save",
-      };
+      });
 
       it('relative (unresolvable): should output original URL (capture.saveDataUriAsFile = false)', async function () {
         options["capture.saveDataUriAsFile"] = false;
 
         var blob = await capture({
           url: `${localhost}/capture_dataUri_css/resolve_css_1.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -1241,7 +1241,7 @@ p { background-image: url("data:image/bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAE
 
         var blob = await capture({
           url: `${localhost}/capture_dataUri_css/resolve_css_1.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -1264,7 +1264,7 @@ p { background-image: url("data:image/bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAE
 
         var blob = await capture({
           url: `${localhost}/capture_dataUri_css/resolve_css_2.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -1287,7 +1287,7 @@ p { background-image: url("data:image/bmp;filename=red.bmp;base64,Qk08AAAAAAAAAD
 
         var blob = await capture({
           url: `${localhost}/capture_dataUri_css/resolve_css_2.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -1315,13 +1315,13 @@ p { background-image: url("red.bmp"); }`);
     describe('frame with data URL source: basic', function () {
 
       $it.xfail()('should capture the current content of a data URL frame', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.frame": "save",
           "capture.saveDataUriAsFile": true,
-        };
+        });
         var blob = await capture({
           url: `${localhost}/capture_dataUri_frame_dynamic/index.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
         var zip = await new JSZip().loadAsync(blob);
         var indexFile = zip.file('index_1.html');
@@ -1333,13 +1333,13 @@ p { background-image: url("red.bmp"); }`);
     });
 
     describe('frame with data URL source: URL resolution', function () {
-      var options = {
+      var options = Object.assign({}, baseOptions, {
         "capture.frame": "save",
         "capture.downLink.file.mode": "url",
         "capture.downLink.file.extFilter": "txt",
         "capture.downLink.doc.depth": 1,
         "capture.downLink.urlFilter": "",
-      };
+      });
 
       it('relative (unresolvable): should output original URL (capture.saveDataUriAsFile = false, capture.saveDataUriAsSrcdoc = false)', async function () {
         options["capture.saveDataUriAsFile"] = false;
@@ -1347,7 +1347,7 @@ p { background-image: url("red.bmp"); }`);
 
         var blob = await capture({
           url: `${localhost}/capture_dataUri_frame/resolve_frame_1.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -1391,7 +1391,7 @@ p { background-image: url("red.bmp"); }`);
 
         var blob = await capture({
           url: `${localhost}/capture_dataUri_frame/resolve_frame_1.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -1435,7 +1435,7 @@ p { background-image: url("red.bmp"); }`);
 
         var blob = await capture({
           url: `${localhost}/capture_dataUri_frame/resolve_frame_1.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -1481,7 +1481,7 @@ p { background-image: url("red.bmp"); }`);
 
         var blob = await capture({
           url: `${localhost}/capture_dataUri_frame/resolve_frame_2.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -1506,7 +1506,7 @@ p { background-image: url("red.bmp"); }`);
 
         var blob = await capture({
           url: `${localhost}/capture_dataUri_frame/resolve_frame_2.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -1533,7 +1533,7 @@ p { background-image: url("red.bmp"); }`);
 
         var blob = await capture({
           url: `${localhost}/capture_dataUri_frame/resolve_frame_2.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -1567,17 +1567,17 @@ p { background-image: url("red.bmp"); }`);
      * capturer.downloadBlob
      */
     it('should use UTF-8 encoding for CSS and base64 for binary files', async function () {
-      var options = {
+      var options = Object.assign({}, baseOptions, {
         "capture.saveAs": "singleHtml",
         "capture.mergeCssResources": false,
         "capture.image": "save",
         "capture.frame": "save",
         "capture.imageBackground": "save",
-      };
+      });
 
       var blob = await capture({
         url: `${localhost}/capture_singleHtml_encoding/index.html`,
-        options: Object.assign({}, baseOptions, options),
+        options,
       });
 
       var doc = await readFileAsDocument(blob);
@@ -1601,13 +1601,13 @@ assert.strictEqual(srcdoc.querySelector('img').getAttribute('src'), `data:image/
     });
 
     it('should use non-uniquified filename for generated data URLs', async function () {
-      var options = {
+      var options = Object.assign({}, baseOptions, {
         "capture.saveAs": "singleHtml",
-      };
+      });
 
       var blob = await capture({
         url: `${localhost}/capture_singleHtml_filename/index.html`,
-        options: Object.assign({}, baseOptions, options),
+        options,
       });
 
       var doc = await readFileAsDocument(blob);
@@ -1619,16 +1619,16 @@ assert.strictEqual(srcdoc.querySelector('img').getAttribute('src'), `data:image/
     });
 
     it('should generate resource map when capture.mergeCssResources = true', async function () {
-      var options = {
+      var options = Object.assign({}, baseOptions, {
         "capture.mergeCssResources": true,
         "capture.saveAs": "singleHtml",
         "capture.imageBackground": "save",
         "capture.font": "save",
-      };
+      });
 
       var blob = await capture({
         url: `${localhost}/capture_singleHtml_mergeCss/index.html`,
-        options: Object.assign({}, baseOptions, options),
+        options,
       });
 
       var doc = await readFileAsDocument(blob);
@@ -1675,16 +1675,16 @@ assert.strictEqual(srcdoc.querySelector('img').getAttribute('src'), `data:image/
     });
 
     it('should not generate resource map when capture.mergeCssResources = false', async function () {
-      var options = {
+      var options = Object.assign({}, baseOptions, {
         "capture.mergeCssResources": false,
         "capture.saveAs": "singleHtml",
         "capture.imageBackground": "save",
         "capture.font": "save",
-      };
+      });
 
       var blob = await capture({
         url: `${localhost}/capture_singleHtml_mergeCss/index.html`,
-        options: Object.assign({}, baseOptions, options),
+        options,
       });
 
       var doc = await readFileAsDocument(blob);
@@ -2822,12 +2822,12 @@ p { background-image: url("about:blank"); }`);
     describe('CSP', function () {
 
       it('should keep meta CSP and nonce attribute if capture.contentSecurityPolicy = save', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.contentSecurityPolicy": "save",
-        };
+        });
         var blob = await capture({
           url: `${localhost}/capture_meta_csp/csp.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
         var zip = await new JSZip().loadAsync(blob);
         var indexFile = zip.file('index.html');
@@ -2842,12 +2842,12 @@ p { background-image: url("about:blank"); }`);
       });
 
       it('should remove meta CSP and nonce attribute if capture.contentSecurityPolicy = remove', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.contentSecurityPolicy": "remove",
-        };
+        });
         var blob = await capture({
           url: `${localhost}/capture_meta_csp/csp.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
         var zip = await new JSZip().loadAsync(blob);
         var indexFile = zip.file('index.html');
@@ -2896,12 +2896,12 @@ p { background-image: url("about:blank"); }`);
     describe('should handle base elements according to capture.base', function () {
 
       it('should rewrite href attribute if capture.base = save', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.base": "save",
-        };
+        });
         var blob = await capture({
           url: `${localhost}/capture_base/base.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -2916,12 +2916,12 @@ p { background-image: url("about:blank"); }`);
       });
 
       it('should remove href attribute if capture.base = blank', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.base": "blank",
-        };
+        });
         var blob = await capture({
           url: `${localhost}/capture_base/base.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -2936,12 +2936,12 @@ p { background-image: url("about:blank"); }`);
       });
 
       it('should remove base element if capture.base = remove', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.base": "remove",
-        };
+        });
         var blob = await capture({
           url: `${localhost}/capture_base/base.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -2987,13 +2987,13 @@ p { background-image: url("about:blank"); }`);
       });
 
       it('special: "", hash, search, and URL pointing to main html page (bad practice)', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.saveResourcesSequentially": true,
-        };
+        });
 
         var blob = await capture({
           url: `${localhost}/capture_base_rewrite_special/index.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -3017,12 +3017,12 @@ p { background-image: url("about:blank"); }`);
 
       for (const base of ["save", "blank", "remove"]) {
         it(`basic (capture.base = ${base})`, async function () {
-          var options = {
+          var options = Object.assign({}, baseOptions, {
             "capture.base": base,
-          };
+          });
           var blob = await capture({
             url: `${localhost}/capture_base_dynamic/basic.html`,
-            options: Object.assign({}, baseOptions, options),
+            options,
           });
 
           var zip = await new JSZip().loadAsync(blob);
@@ -3071,14 +3071,14 @@ p { background-image: url("about:blank"); }`);
             userAgent.is('chromium') && userAgent.major < 96,
             'referrer for an imported CSS is erroneously set to document base in Chromium < 96',
           )(`CSS (capture.rewriteCss = ${rewriteCss}, capture.{imageBackground,font} = ${styleRes})`, async function () {
-            var options = {
+            var options = Object.assign({}, baseOptions, {
               "capture.rewriteCss": rewriteCss,
               "capture.imageBackground": styleRes,
               "capture.font": styleRes,
-            };
+            });
             var blob = await capture({
               url: `${localhost}/capture_base_dynamic_css/basic.html`,
-              options: Object.assign({}, baseOptions, options),
+              options,
             });
             var zip = await new JSZip().loadAsync(blob);
 
@@ -3133,13 +3133,13 @@ p { background-image: url("about:blank"); }`);
 
       for (const func of ["capture", "captureHeadless"]) {
         it(`frame (capture.frame = save) (${func})`, async function () {
-          var options = {
+          var options = Object.assign({}, baseOptions, {
             "capture.base": "blank",
             "capture.frame": "save",
-          };
+          });
           var blob = await global[func]({
             url: `${localhost}/capture_base_dynamic_frame/srcdoc_basic.html`,
-            options: Object.assign({}, baseOptions, options),
+            options,
           });
 
           var zip = await new JSZip().loadAsync(blob);
@@ -3178,13 +3178,13 @@ p { background-image: url("about:blank"); }`);
         });
 
         it(`frame (capture.frame = link) (${func})`, async function () {
-          var options = {
+          var options = Object.assign({}, baseOptions, {
             "capture.base": "blank",
             "capture.frame": "link",
-          };
+          });
           var blob = await global[func]({
             url: `${localhost}/capture_base_dynamic_frame/srcdoc_basic.html`,
-            options: Object.assign({}, baseOptions, options),
+            options,
           });
 
           var zip = await new JSZip().loadAsync(blob);
@@ -3220,12 +3220,12 @@ p { background-image: url("about:blank"); }`);
 
       for (const base of ["save", "blank", "remove"]) {
         it(`basic (capture.base = ${base})`, async function () {
-          var options = {
+          var options = Object.assign({}, baseOptions, {
             "capture.base": base,
-          };
+          });
           var blob = await capture({
             url: `${localhost}/capture_base_dynamic/bad.html`,
-            options: Object.assign({}, baseOptions, options),
+            options,
           });
 
           var zip = await new JSZip().loadAsync(blob);
@@ -3271,14 +3271,14 @@ p { background-image: url("about:blank"); }`);
             userAgent.is('chromium') && userAgent.major < 96,
             'referrer for an imported CSS is erroneously set to document base in Chromium < 96',
           )(`CSS (capture.rewriteCss = ${rewriteCss}, capture.{imageBackground,font} = ${styleRes})`, async function () {
-            var options = {
+            var options = Object.assign({}, baseOptions, {
               "capture.rewriteCss": rewriteCss,
               "capture.imageBackground": styleRes,
               "capture.font": styleRes,
-            };
+            });
             var blob = await capture({
               url: `${localhost}/capture_base_dynamic_css/bad.html`,
-              options: Object.assign({}, baseOptions, options),
+              options,
             });
             var zip = await new JSZip().loadAsync(blob);
 
@@ -3333,13 +3333,13 @@ p { background-image: url("about:blank"); }`);
 
       for (const func of ["capture", "captureHeadless"]) {
         it(`frame (capture.frame = save) (${func})`, async function () {
-          var options = {
+          var options = Object.assign({}, baseOptions, {
             "capture.base": "blank",
             "capture.frame": "save",
-          };
+          });
           var blob = await global[func]({
             url: `${localhost}/capture_base_dynamic_frame/srcdoc_bad.html`,
-            options: Object.assign({}, baseOptions, options),
+            options,
           });
 
           var zip = await new JSZip().loadAsync(blob);
@@ -3366,13 +3366,13 @@ p { background-image: url("about:blank"); }`);
         });
 
         it(`frame (capture.frame = link) (${func})`, async function () {
-          var options = {
+          var options = Object.assign({}, baseOptions, {
             "capture.base": "blank",
             "capture.frame": "link",
-          };
+          });
           var blob = await global[func]({
             url: `${localhost}/capture_base_dynamic_frame/srcdoc_bad.html`,
-            options: Object.assign({}, baseOptions, options),
+            options,
           });
 
           var zip = await new JSZip().loadAsync(blob);
@@ -3411,13 +3411,13 @@ p { background-image: url("about:blank"); }`);
     describe('base change after resources loaded', function () {
 
       it('capture (source): should resolve URLs using base (not changed since no scripts are run)', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.base": "blank",
-        };
+        });
         var blob = await capture({
           url: `${localhost}/capture_base_dynamic_scripted/base.html`,
           mode: "source",
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -3434,12 +3434,12 @@ p { background-image: url("about:blank"); }`);
       });
 
       $it.xfail()('capture (tab): should resolve URLs using the pre-changed base', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.base": "blank",
-        };
+        });
         var blob = await capture({
           url: `${localhost}/capture_base_dynamic_scripted/base.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -3464,12 +3464,12 @@ p { background-image: url("about:blank"); }`);
     describe('should handle favicon according to capture.favicon', function () {
 
       it('capture.favicon = save', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.favicon": "save",
-        };
+        });
         var blob = await capture({
           url: `${localhost}/capture_favicon/favicon.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -3484,12 +3484,12 @@ p { background-image: url("about:blank"); }`);
       });
 
       it('capture.favicon = link', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.favicon": "link",
-        };
+        });
         var blob = await capture({
           url: `${localhost}/capture_favicon/favicon.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -3504,12 +3504,12 @@ p { background-image: url("about:blank"); }`);
       });
 
       it('capture.favicon = blank', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.favicon": "blank",
-        };
+        });
         var blob = await capture({
           url: `${localhost}/capture_favicon/favicon.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -3524,12 +3524,12 @@ p { background-image: url("about:blank"); }`);
       });
 
       it('capture.favicon = remove', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.favicon": "remove",
-        };
+        });
         var blob = await capture({
           url: `${localhost}/capture_favicon/favicon.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -3544,13 +3544,13 @@ p { background-image: url("about:blank"); }`);
       });
 
       it('capture.favicon = save (bookmark)', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.favicon": "save",
-        };
+        });
         var blob = await capture({
           url: `${localhost}/capture_favicon/favicon.html`,
           mode: "bookmark",
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var doc = await readFileAsDocument(blob);
@@ -3561,13 +3561,13 @@ p { background-image: url("about:blank"); }`);
       });
 
       it('capture.favicon = link (bookmark)', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.favicon": "link",
-        };
+        });
         var blob = await capture({
           url: `${localhost}/capture_favicon/favicon.html`,
           mode: "bookmark",
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var doc = await readFileAsDocument(blob);
@@ -3575,13 +3575,13 @@ p { background-image: url("about:blank"); }`);
       });
 
       it('capture.favicon = blank (bookmark)', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.favicon": "blank",
-        };
+        });
         var blob = await capture({
           url: `${localhost}/capture_favicon/favicon.html`,
           mode: "bookmark",
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var doc = await readFileAsDocument(blob);
@@ -3589,13 +3589,13 @@ p { background-image: url("about:blank"); }`);
       });
 
       it('capture.favicon = remove (bookmark)', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.favicon": "remove",
-        };
+        });
         var blob = await capture({
           url: `${localhost}/capture_favicon/favicon.html`,
           mode: "bookmark",
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var doc = await readFileAsDocument(blob);
@@ -3667,13 +3667,13 @@ p { background-image: url("about:blank"); }`);
     describe('should rewrite additional `link`s according to capture.faviconAttrs', function () {
 
       it('capture.faviconAttrs = "apple-touch-icon apple-touch-icon-precomposed"', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.favicon": "save",
           "capture.faviconAttrs": "apple-touch-icon apple-touch-icon-precomposed",
-        };
+        });
         var blob = await capture({
           url: `${localhost}/capture_faviconAttrs/favicon.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -3692,13 +3692,13 @@ p { background-image: url("about:blank"); }`);
       });
 
       it('capture.faviconAttrs = "apple-touch-icon"', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.favicon": "save",
           "capture.faviconAttrs": "apple-touch-icon",
-        };
+        });
         var blob = await capture({
           url: `${localhost}/capture_faviconAttrs/favicon.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -3717,13 +3717,13 @@ p { background-image: url("about:blank"); }`);
       });
 
       it('capture.faviconAttrs = ""', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.favicon": "save",
           "capture.faviconAttrs": "",
-        };
+        });
         var blob = await capture({
           url: `${localhost}/capture_faviconAttrs/favicon.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -3753,12 +3753,12 @@ p { background-image: url("about:blank"); }`);
     describe('should handle internal, external, and imported CSS according to capture.style', function () {
 
       it('capture.style = save', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.style": "save",
-        };
+        });
         var blob = await capture({
           url: `${localhost}/capture_css_style/style.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -3777,12 +3777,12 @@ p { background-image: url("about:blank"); }`);
       });
 
       it('capture.style = link', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.style": "link",
-        };
+        });
         var blob = await capture({
           url: `${localhost}/capture_css_style/style.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -3797,12 +3797,12 @@ p { background-image: url("about:blank"); }`);
       });
 
       it('capture.style = blank', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.style": "blank",
-        };
+        });
         var blob = await capture({
           url: `${localhost}/capture_css_style/style.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -3817,12 +3817,12 @@ p { background-image: url("about:blank"); }`);
       });
 
       it('capture.style = remove', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.style": "remove",
-        };
+        });
         var blob = await capture({
           url: `${localhost}/capture_css_style/style.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -3842,16 +3842,16 @@ p { background-image: url("about:blank"); }`);
      * capturer.captureDocument
      */
     describe('should handle inline CSS according to capture.styleInline', function () {
-      var options = {
+      var options = Object.assign({}, baseOptions, {
         "capture.style": "remove",
-      };
+      });
 
       it('capture.styleInline = save', async function () {
         options["capture.styleInline"] = "save";
 
         var blob = await capture({
           url: `${localhost}/capture_css_styleInline/styleInline.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -3874,7 +3874,7 @@ p { background-image: url("about:blank"); }`);
 
         var blob = await capture({
           url: `${localhost}/capture_css_styleInline/styleInline.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -3895,7 +3895,7 @@ p { background-image: url("about:blank"); }`);
 
         var blob = await capture({
           url: `${localhost}/capture_css_styleInline/styleInline.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -4123,13 +4123,13 @@ p { background-image: url("about:blank"); }`);
       describe('basic', function () {
 
         it('capture.rewriteCss = url', async function () {
-          var options = {
+          var options = Object.assign({}, baseOptions, {
             "capture.rewriteCss": "url",
-          };
+          });
 
           var blob = await capture({
             url: `${localhost}/capture_css_rewriteCss/rewrite.html`,
-            options: Object.assign({}, baseOptions, options),
+            options,
           });
 
           var zip = await new JSZip().loadAsync(blob);
@@ -4194,13 +4194,13 @@ background: blue; background: url("green.bmp");`);
         });
 
         it('capture.rewriteCss = tidy', async function () {
-          var options = {
+          var options = Object.assign({}, baseOptions, {
             "capture.rewriteCss": "tidy",
-          };
+          });
 
           var blob = await capture({
             url: `${localhost}/capture_css_rewriteCss/rewrite.html`,
-            options: Object.assign({}, baseOptions, options),
+            options,
           });
 
           var zip = await new JSZip().loadAsync(blob);
@@ -4252,13 +4252,13 @@ svg|a text, text svg|a { fill: blue; text-decoration: underline; }`;
         });
 
         it('capture.rewriteCss = match', async function () {
-          var options = {
+          var options = Object.assign({}, baseOptions, {
             "capture.rewriteCss": "match",
-          };
+          });
 
           var blob = await capture({
             url: `${localhost}/capture_css_rewriteCss/rewrite.html`,
-            options: Object.assign({}, baseOptions, options),
+            options,
           });
 
           var zip = await new JSZip().loadAsync(blob);
@@ -4310,13 +4310,13 @@ svg|a text, text svg|a { fill: blue; text-decoration: underline; }`;
         });
 
         it('capture.rewriteCss = none', async function () {
-          var options = {
+          var options = Object.assign({}, baseOptions, {
             "capture.rewriteCss": "none",
-          };
+          });
 
           var blob = await capture({
             url: `${localhost}/capture_css_rewriteCss/rewrite.html`,
-            options: Object.assign({}, baseOptions, options),
+            options,
           });
 
           var zip = await new JSZip().loadAsync(blob);
@@ -4379,13 +4379,13 @@ background: blue; background: url(rewrite/green.bmp);`);
       describe('namespace', function () {
 
         it('namsepaced element selector', async function () {
-          var options = {
+          var options = Object.assign({}, baseOptions, {
             "capture.rewriteCss": "match",
-          };
+          });
 
           var blob = await capture({
             url: `${localhost}/capture_css_rewriteCss_namespace/element.xhtml`,
-            options: Object.assign({}, baseOptions, options),
+            options,
           });
           var zip = await new JSZip().loadAsync(blob);
           var indexFile = zip.file('index.xhtml');
@@ -4417,13 +4417,13 @@ elem-4 { background-color: lime; }`);
         });
 
         it('namsepaced attribute selector', async function () {
-          var options = {
+          var options = Object.assign({}, baseOptions, {
             "capture.rewriteCss": "match",
-          };
+          });
 
           var blob = await capture({
             url: `${localhost}/capture_css_rewriteCss_namespace/attribute.xhtml`,
-            options: Object.assign({}, baseOptions, options),
+            options,
           });
           var zip = await new JSZip().loadAsync(blob);
           var indexFile = zip.file('index.xhtml');
@@ -4459,13 +4459,13 @@ elem-4 { background-color: lime; }`);
       describe('@supports', function () {
 
         it('capture.rewriteCss = url', async function () {
-          var options = {
+          var options = Object.assign({}, baseOptions, {
             "capture.rewriteCss": "url",
-          };
+          });
 
           var blob = await capture({
             url: `${localhost}/capture_css_rewriteCss_at_supports/rewrite.html`,
-            options: Object.assign({}, baseOptions, options),
+            options,
           });
 
           var zip = await new JSZip().loadAsync(blob);
@@ -4493,13 +4493,13 @@ elem-4 { background-color: lime; }`);
         });
 
         it('capture.rewriteCss = tidy', async function () {
-          var options = {
+          var options = Object.assign({}, baseOptions, {
             "capture.rewriteCss": "tidy",
-          };
+          });
 
           var blob = await capture({
             url: `${localhost}/capture_css_rewriteCss_at_supports/rewrite.html`,
-            options: Object.assign({}, baseOptions, options),
+            options,
           });
 
           var zip = await new JSZip().loadAsync(blob);
@@ -4523,13 +4523,13 @@ elem-4 { background-color: lime; }`);
         });
 
         it('capture.rewriteCss = match', async function () {
-          var options = {
+          var options = Object.assign({}, baseOptions, {
             "capture.rewriteCss": "match",
-          };
+          });
 
           var blob = await capture({
             url: `${localhost}/capture_css_rewriteCss_at_supports/rewrite.html`,
-            options: Object.assign({}, baseOptions, options),
+            options,
           });
 
           var zip = await new JSZip().loadAsync(blob);
@@ -4553,13 +4553,13 @@ elem-4 { background-color: lime; }`);
         });
 
         it('capture.rewriteCss = none', async function () {
-          var options = {
+          var options = Object.assign({}, baseOptions, {
             "capture.rewriteCss": "none",
-          };
+          });
 
           var blob = await capture({
             url: `${localhost}/capture_css_rewriteCss_at_supports/rewrite.html`,
-            options: Object.assign({}, baseOptions, options),
+            options,
           });
 
           var zip = await new JSZip().loadAsync(blob);
@@ -4591,13 +4591,13 @@ elem-4 { background-color: lime; }`);
       $describe.skipIf($.noAtCounterStyle)('@counter-style', function () {
 
         it('capture.rewriteCss = url', async function () {
-          var options = {
+          var options = Object.assign({}, baseOptions, {
             "capture.rewriteCss": "url",
-          };
+          });
 
           var blob = await capture({
             url: `${localhost}/capture_css_rewriteCss_at_counter_style/rewrite.html`,
-            options: Object.assign({}, baseOptions, options),
+            options,
           });
 
           var zip = await new JSZip().loadAsync(blob);
@@ -4616,13 +4616,13 @@ elem-4 { background-color: lime; }`);
         });
 
         it('capture.rewriteCss = tidy', async function () {
-          var options = {
+          var options = Object.assign({}, baseOptions, {
             "capture.rewriteCss": "tidy",
-          };
+          });
 
           var blob = await capture({
             url: `${localhost}/capture_css_rewriteCss_at_counter_style/rewrite.html`,
-            options: Object.assign({}, baseOptions, options),
+            options,
           });
 
           var zip = await new JSZip().loadAsync(blob);
@@ -4640,13 +4640,13 @@ elem-4 { background-color: lime; }`);
         });
 
         it('capture.rewriteCss = match', async function () {
-          var options = {
+          var options = Object.assign({}, baseOptions, {
             "capture.rewriteCss": "match",
-          };
+          });
 
           var blob = await capture({
             url: `${localhost}/capture_css_rewriteCss_at_counter_style/rewrite.html`,
-            options: Object.assign({}, baseOptions, options),
+            options,
           });
 
           var zip = await new JSZip().loadAsync(blob);
@@ -4664,13 +4664,13 @@ elem-4 { background-color: lime; }`);
         });
 
         it('capture.rewriteCss = none', async function () {
-          var options = {
+          var options = Object.assign({}, baseOptions, {
             "capture.rewriteCss": "none",
-          };
+          });
 
           var blob = await capture({
             url: `${localhost}/capture_css_rewriteCss_at_counter_style/rewrite.html`,
-            options: Object.assign({}, baseOptions, options),
+            options,
           });
 
           var zip = await new JSZip().loadAsync(blob);
@@ -4693,13 +4693,13 @@ elem-4 { background-color: lime; }`);
       $describe.skipIf($.noAtLayer)('@layer', function () {
 
         it('capture.rewriteCss = match', async function () {
-          var options = {
+          var options = Object.assign({}, baseOptions, {
             "capture.rewriteCss": "match",
-          };
+          });
 
           var blob = await capture({
             url: `${localhost}/capture_css_rewriteCss_at_layer/rewrite.html`,
-            options: Object.assign({}, baseOptions, options),
+            options,
           });
 
           var zip = await new JSZip().loadAsync(blob);
@@ -4734,13 +4734,13 @@ elem-4 { background-color: lime; }`);
       describe('DOM matching for capture.rewriteCss = match', function () {
 
         it('basic', async function () {
-          var options = {
+          var options = Object.assign({}, baseOptions, {
             "capture.rewriteCss": "match",
-          };
+          });
 
           var blob = await capture({
             url: `${localhost}/capture_css_rewriteCss_match/rewrite.html`,
-            options: Object.assign({}, baseOptions, options),
+            options,
           });
 
           var zip = await new JSZip().loadAsync(blob);
@@ -4778,13 +4778,13 @@ elem-4 { background-color: lime; }`);
         });
 
         it('pseudo', async function () {
-          var options = {
+          var options = Object.assign({}, baseOptions, {
             "capture.rewriteCss": "match",
-          };
+          });
 
           var blob = await capture({
             url: `${localhost}/capture_css_rewriteCss_match_pseudo/rewrite.html`,
-            options: Object.assign({}, baseOptions, options),
+            options,
           });
 
           var zip = await new JSZip().loadAsync(blob);
@@ -4821,13 +4821,13 @@ elem-4 { background-color: lime; }`);
         });
 
         $it.skipIf($.noIsPseudo)('pseudo :is', async function () {
-          var options = {
+          var options = Object.assign({}, baseOptions, {
             "capture.rewriteCss": "match",
-          };
+          });
 
           var blob = await capture({
             url: `${localhost}/capture_css_rewriteCss_match_pseudo/rewrite_is.html`,
-            options: Object.assign({}, baseOptions, options),
+            options,
           });
 
           var zip = await new JSZip().loadAsync(blob);
@@ -4850,13 +4850,13 @@ elem-4 { background-color: lime; }`);
         });
 
         it('pseudo :host in shadow DOM', async function () {
-          var options = {
+          var options = Object.assign({}, baseOptions, {
             "capture.rewriteCss": "match",
-          };
+          });
 
           var blob = await capture({
             url: `${localhost}/capture_css_rewriteCss_match_shadow/rewrite_host.html`,
-            options: Object.assign({}, baseOptions, options),
+            options,
           });
           var zip = await new JSZip().loadAsync(blob);
           var indexFile = zip.file('index.html');
@@ -4898,13 +4898,13 @@ elem-4 { background-color: lime; }`);
         });
 
         $it.skipIf($.noHostContextPseudo)('pseudo :host-context in shadow DOM', async function () {
-          var options = {
+          var options = Object.assign({}, baseOptions, {
             "capture.rewriteCss": "match",
-          };
+          });
 
           var blob = await capture({
             url: `${localhost}/capture_css_rewriteCss_match_shadow/rewrite_host_context.html`,
-            options: Object.assign({}, baseOptions, options),
+            options,
           });
           var zip = await new JSZip().loadAsync(blob);
           var indexFile = zip.file('index.html');
@@ -4935,13 +4935,13 @@ elem-4 { background-color: lime; }`);
         });
 
         it('pseudo ::slotted in shadow DOM', async function () {
-          var options = {
+          var options = Object.assign({}, baseOptions, {
             "capture.rewriteCss": "match",
-          };
+          });
 
           var blob = await capture({
             url: `${localhost}/capture_css_rewriteCss_match_shadow/rewrite_slotted.html`,
-            options: Object.assign({}, baseOptions, options),
+            options,
           });
           var zip = await new JSZip().loadAsync(blob);
           var indexFile = zip.file('index.html');
@@ -4977,13 +4977,13 @@ div > ::slotted(*) { font-size: 1.2em; }`);
         });
 
         $it.skipIf($.noPartPseudo)('pseudo ::part', async function () {
-          var options = {
+          var options = Object.assign({}, baseOptions, {
             "capture.rewriteCss": "match",
-          };
+          });
 
           var blob = await capture({
             url: `${localhost}/capture_css_rewriteCss_match_shadow/rewrite_part.html`,
-            options: Object.assign({}, baseOptions, options),
+            options,
           });
           var zip = await new JSZip().loadAsync(blob);
           var indexFile = zip.file('index.html');
@@ -5000,13 +5000,13 @@ div > ::slotted(*) { font-size: 1.2em; }`);
       describe('cross-origin CSS', function () {
 
         it('capture.rewriteCss = tidy', async function () {
-          var options = {
+          var options = Object.assign({}, baseOptions, {
             "capture.rewriteCss": "tidy",
-          };
+          });
 
           var blob = await capture({
             url: `${localhost}/capture_css_rewriteCss_cross_origin/rewrite.py`,
-            options: Object.assign({}, baseOptions, options),
+            options,
           });
 
           var zip = await new JSZip().loadAsync(blob);
@@ -5029,13 +5029,13 @@ div > ::slotted(*) { font-size: 1.2em; }`);
         });
 
         it('capture.rewriteCss = tidy (headless)', async function () {
-          var options = {
+          var options = Object.assign({}, baseOptions, {
             "capture.rewriteCss": "tidy",
-          };
+          });
 
           var blob = await captureHeadless({
             url: `${localhost}/capture_css_rewriteCss_cross_origin/rewrite.py`,
-            options: Object.assign({}, baseOptions, options),
+            options,
           });
 
           var zip = await new JSZip().loadAsync(blob);
@@ -5058,13 +5058,13 @@ div > ::slotted(*) { font-size: 1.2em; }`);
         });
 
         it('capture.rewriteCss = match', async function () {
-          var options = {
+          var options = Object.assign({}, baseOptions, {
             "capture.rewriteCss": "match",
-          };
+          });
 
           var blob = await capture({
             url: `${localhost}/capture_css_rewriteCss_cross_origin/rewrite.py`,
-            options: Object.assign({}, baseOptions, options),
+            options,
           });
 
           var zip = await new JSZip().loadAsync(blob);
@@ -5085,13 +5085,13 @@ div > ::slotted(*) { font-size: 1.2em; }`);
         });
 
         it('capture.rewriteCss = match (headless)', async function () {
-          var options = {
+          var options = Object.assign({}, baseOptions, {
             "capture.rewriteCss": "match",
-          };
+          });
 
           var blob = await captureHeadless({
             url: `${localhost}/capture_css_rewriteCss_cross_origin/rewrite.py`,
-            options: Object.assign({}, baseOptions, options),
+            options,
           });
 
           var zip = await new JSZip().loadAsync(blob);
@@ -5116,13 +5116,13 @@ div > ::slotted(*) { font-size: 1.2em; }`);
       $describe.skipIf($.noNestingCss)('nesting CSS', function () {
 
         it('capture.rewriteCss = url', async function () {
-          var options = {
+          var options = Object.assign({}, baseOptions, {
             "capture.rewriteCss": "url",
-          };
+          });
 
           var blob = await capture({
             url: `${localhost}/capture_css_rewriteCss_nesting/rewrite.html`,
-            options: Object.assign({}, baseOptions, options),
+            options,
           });
 
           var zip = await new JSZip().loadAsync(blob);
@@ -5172,13 +5172,13 @@ div > ::slotted(*) { font-size: 1.2em; }`);
         });
 
         it('capture.rewriteCss = tidy', async function () {
-          var options = {
+          var options = Object.assign({}, baseOptions, {
             "capture.rewriteCss": "tidy",
-          };
+          });
 
           var blob = await capture({
             url: `${localhost}/capture_css_rewriteCss_nesting/rewrite.html`,
-            options: Object.assign({}, baseOptions, options),
+            options,
           });
 
           var zip = await new JSZip().loadAsync(blob);
@@ -5272,13 +5272,13 @@ div > ::slotted(*) { font-size: 1.2em; }`);
         });
 
         it('capture.rewriteCss = match', async function () {
-          var options = {
+          var options = Object.assign({}, baseOptions, {
             "capture.rewriteCss": "match",
-          };
+          });
 
           var blob = await capture({
             url: `${localhost}/capture_css_rewriteCss_nesting/rewrite.html`,
-            options: Object.assign({}, baseOptions, options),
+            options,
           });
 
           var zip = await new JSZip().loadAsync(blob);
@@ -5364,13 +5364,13 @@ div > ::slotted(*) { font-size: 1.2em; }`);
         });
 
         it('capture.rewriteCss = none', async function () {
-          var options = {
+          var options = Object.assign({}, baseOptions, {
             "capture.rewriteCss": "none",
-          };
+          });
 
           var blob = await capture({
             url: `${localhost}/capture_css_rewriteCss_nesting/rewrite.html`,
-            options: Object.assign({}, baseOptions, options),
+            options,
           });
 
           var zip = await new JSZip().loadAsync(blob);
@@ -5429,14 +5429,14 @@ div > ::slotted(*) { font-size: 1.2em; }`);
     describe('CSS syntax parsing', function () {
 
       it('background', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.style": "save",
           "capture.font": "blank",
           "capture.imageBackground": "link",
-        };
+        });
         var blob = await capture({
           url: `${localhost}/capture_css_syntax/background.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -5469,14 +5469,14 @@ div > ::slotted(*) { font-size: 1.2em; }`);
       });
 
       it('font', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.style": "save",
           "capture.font": "link",
           "capture.imageBackground": "blank",
-        };
+        });
         var blob = await capture({
           url: `${localhost}/capture_css_syntax/font.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -5509,14 +5509,14 @@ div > ::slotted(*) { font-size: 1.2em; }`);
       });
 
       it('import', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.style": "link",
           "capture.font": "blank",
           "capture.imageBackground": "blank",
-        };
+        });
         var blob = await capture({
           url: `${localhost}/capture_css_syntax/import.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -5560,12 +5560,12 @@ div > ::slotted(*) { font-size: 1.2em; }`);
         for (const func of ["capture", "captureHeadless"]) {
           // captureHeadless doen't use dynamic CSS
           it(`should use UTF-8 encoding and add BOM before \`@charset\` rule (${func})`, async function () {
-            var options = {
+            var options = Object.assign({}, baseOptions, {
               "capture.style": "save",
-            };
+            });
             var blob = await global[func]({
               url: `${localhost}/capture_css_charset/basic/index.html`,
-              options: Object.assign({}, baseOptions, options),
+              options,
             });
 
             var zip = await new JSZip().loadAsync(blob);
@@ -5622,12 +5622,12 @@ div > ::slotted(*) { font-size: 1.2em; }`);
       describe('document charset', function () {
 
         it('mode = tab: should use dynamic CSS (determined by browser parsing)', async function () {
-          var options = {
+          var options = Object.assign({}, baseOptions, {
             "capture.style": "save",
-          };
+          });
           var blob = await capture({
             url: `${localhost}/capture_css_charset/doc_charset/index.html`,
-            options: Object.assign({}, baseOptions, options),
+            options,
           });
 
           var zip = await new JSZip().loadAsync(blob);
@@ -5660,12 +5660,12 @@ div > ::slotted(*) { font-size: 1.2em; }`);
         });
 
         it('infer document charset: mode = source', async function () {
-          var options = {
+          var options = Object.assign({}, baseOptions, {
             "capture.style": "save",
-          };
+          });
           var blob = await captureHeadless({
             url: `${localhost}/capture_css_charset/doc_charset/index.html`,
-            options: Object.assign({}, baseOptions, options),
+            options,
           });
 
           var zip = await new JSZip().loadAsync(blob);
@@ -5720,12 +5720,12 @@ div > ::slotted(*) { font-size: 1.2em; }`);
       describe('link[charset] (obsolete)', function () {
 
         it('mode = tab: should use dynamic CSS (determined by browser parsing)', async function () {
-          var options = {
+          var options = Object.assign({}, baseOptions, {
             "capture.style": "save",
-          };
+          });
           var blob = await capture({
             url: `${localhost}/capture_css_charset/link_charset/index.html`,
-            options: Object.assign({}, baseOptions, options),
+            options,
           });
 
           var zip = await new JSZip().loadAsync(blob);
@@ -5751,12 +5751,12 @@ div > ::slotted(*) { font-size: 1.2em; }`);
         });
 
         it('mode = source', async function () {
-          var options = {
+          var options = Object.assign({}, baseOptions, {
             "capture.style": "save",
-          };
+          });
           var blob = await captureHeadless({
             url: `${localhost}/capture_css_charset/link_charset/index.html`,
-            options: Object.assign({}, baseOptions, options),
+            options,
           });
 
           var zip = await new JSZip().loadAsync(blob);
@@ -5782,12 +5782,12 @@ div > ::slotted(*) { font-size: 1.2em; }`);
         });
 
         it('should keep `link[charset]` if capture.style = link', async function () {
-          var options = {
+          var options = Object.assign({}, baseOptions, {
             "capture.style": "link",
-          };
+          });
           var blob = await capture({
             url: `${localhost}/capture_css_charset/link_charset/index.html`,
-            options: Object.assign({}, baseOptions, options),
+            options,
           });
 
           var zip = await new JSZip().loadAsync(blob);
@@ -5799,14 +5799,14 @@ div > ::slotted(*) { font-size: 1.2em; }`);
         });
 
         it('should save a file referenced by `link`s with different `charset` attributes separately', async function () {
-          var options = {
+          var options = Object.assign({}, baseOptions, {
             "capture.style": "save",
             "capture.saveResourcesSequentially": true,
             "capture.downLink.doc.depth": 0,
-          };
+          });
           var blob = await captureHeadless({
             url: `${localhost}/capture_css_charset/link_charset/bad.html`,
-            options: Object.assign({}, baseOptions, options),
+            options,
           });
 
           var zip = await new JSZip().loadAsync(blob);
@@ -5906,13 +5906,13 @@ div > ::slotted(*) { font-size: 1.2em; }`);
     describe('CSS rewrite path handling', function () {
 
       it('should rewrite external and imported CSS based on the CSS file (rather than the web page)', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.imageBackground": "link",
-        };
+        });
 
         var blob = await capture({
           url: `${localhost}/capture_css_rewrite/index.py`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -5936,13 +5936,13 @@ div > ::slotted(*) { font-size: 1.2em; }`);
       });
 
       it('should honor base[href] when rewriting URL', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.imageBackground": "link",
-        };
+        });
 
         var blob = await capture({
           url: `${localhost}/capture_css_rewrite_base/index.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -5997,14 +5997,14 @@ div > ::slotted(*) { font-size: 1.2em; }`);
     describe('circular import', function () {
 
       it('htz: should keep original interlinking between saved files', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.saveAs": "zip",
           "capture.style": "save",
-        };
+        });
 
         var blob = await capture({
           url: `${localhost}/capture_css_circular/index.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -6029,14 +6029,14 @@ div > ::slotted(*) { font-size: 1.2em; }`);
       });
 
       it('singleHtml: should rewrite with urn:scrapbook:download:circular:url:...', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.saveAs": "singleHtml",
           "capture.style": "save",
-        };
+        });
 
         var blob = await capture({
           url: `${localhost}/capture_css_circular/index.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var doc = await readFileAsDocument(blob);
@@ -6061,14 +6061,14 @@ body { color: blue; }`);
       });
 
       it('singleHtml: should rewrite self-importing', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.saveAs": "singleHtml",
           "capture.style": "save",
-        };
+        });
 
         var blob = await capture({
           url: `${localhost}/capture_css_circular_self/index.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var doc = await readFileAsDocument(blob);
@@ -6089,13 +6089,13 @@ body { color: red; }`);
        * the script cannot read its CSS rules directly and a workaround is required.
        */
       it('should save only used bg images and fonts', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.imageBackground": "save-used",
           "capture.font": "save-used",
-        };
+        });
         var blob = await capture({
           url: `${localhost}/capture_css_cross_origin/cross_origin.py`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
         var zip = await new JSZip().loadAsync(blob);
         assert.exists(zip.file('bg1.bmp'));
@@ -6132,13 +6132,13 @@ body { color: red; }`);
       describe('should handle script-modified CSS correctly', function () {
 
         it('capture.{imageBackground, font} = save', async function () {
-          var options = {
+          var options = Object.assign({}, baseOptions, {
             "capture.imageBackground": "save",
             "capture.font": "save",
-          };
+          });
           var blob = await capture({
             url: `${localhost}/capture_css_dynamic/dynamic.html`,
-            options: Object.assign({}, baseOptions, options),
+            options,
           });
           var zip = await new JSZip().loadAsync(blob);
           assert.exists(zip.file('link.css'));
@@ -6167,13 +6167,13 @@ body { color: red; }`);
         });
 
         it('capture.{imageBackground, font} = save-used', async function () {
-          var options = {
+          var options = Object.assign({}, baseOptions, {
             "capture.imageBackground": "save-used",
             "capture.font": "save-used",
-          };
+          });
           var blob = await capture({
             url: `${localhost}/capture_css_dynamic/dynamic.html`,
-            options: Object.assign({}, baseOptions, options),
+            options,
           });
           var zip = await new JSZip().loadAsync(blob);
           assert.exists(zip.file('link.css'));
@@ -6206,13 +6206,13 @@ body { color: red; }`);
       describe('should save script-modified CSS as an individual file', function () {
 
         it('basic', async function () {
-          var options = {
+          var options = Object.assign({}, baseOptions, {
             "capture.imageBackground": "save",
             "capture.font": "save",
-          };
+          });
           var blob = await capture({
             url: `${localhost}/capture_css_dynamic_rename/dynamic.html`,
-            options: Object.assign({}, baseOptions, options),
+            options,
           });
           var zip = await new JSZip().loadAsync(blob);
           assert.exists(zip.file('link.css'));
@@ -6272,14 +6272,14 @@ body { color: red; }`);
       describe('should save constructed stylesheets according to capture.{adoptedStyleSheet, style}', function () {
 
         it('capture.adoptedStyleSheet = save, capture.style = save', async function () {
-          var options = {
+          var options = Object.assign({}, baseOptions, {
             "capture.style": "save",
             "capture.adoptedStyleSheet": "save",
             "capture.recordRewrites": true,
-          };
+          });
           var blob = await capture({
             url: `${localhost}/capture_css_adopted/basic.html`,
-            options: Object.assign({}, baseOptions, options),
+            options,
           });
           var zip = await new JSZip().loadAsync(blob);
           assert.exists(zip.file('green.bmp'));
@@ -6315,14 +6315,14 @@ body { color: red; }`);
         });
 
         it('capture.adoptedStyleSheet = save, capture.style = link', async function () {
-          var options = {
+          var options = Object.assign({}, baseOptions, {
             "capture.style": "link",
             "capture.adoptedStyleSheet": "save",
             "capture.recordRewrites": true,
-          };
+          });
           var blob = await capture({
             url: `${localhost}/capture_css_adopted/basic.html`,
-            options: Object.assign({}, baseOptions, options),
+            options,
           });
           var zip = await new JSZip().loadAsync(blob);
           assert.exists(zip.file('green.bmp'));
@@ -6358,14 +6358,14 @@ body { color: red; }`);
         });
 
         it('capture.adoptedStyleSheet = save, capture.style = blank', async function () {
-          var options = {
+          var options = Object.assign({}, baseOptions, {
             "capture.style": "blank",
             "capture.adoptedStyleSheet": "save",
             "capture.recordRewrites": true,
-          };
+          });
           var blob = await capture({
             url: `${localhost}/capture_css_adopted/basic.html`,
-            options: Object.assign({}, baseOptions, options),
+            options,
           });
           var zip = await new JSZip().loadAsync(blob);
           assert.notExists(zip.file('green.bmp'));
@@ -6382,14 +6382,14 @@ body { color: red; }`);
         });
 
         it('capture.adoptedStyleSheet = save, capture.style = remove', async function () {
-          var options = {
+          var options = Object.assign({}, baseOptions, {
             "capture.style": "remove",
             "capture.adoptedStyleSheet": "save",
             "capture.recordRewrites": true,
-          };
+          });
           var blob = await capture({
             url: `${localhost}/capture_css_adopted/basic.html`,
-            options: Object.assign({}, baseOptions, options),
+            options,
           });
           var zip = await new JSZip().loadAsync(blob);
           assert.notExists(zip.file('green.bmp'));
@@ -6406,14 +6406,14 @@ body { color: red; }`);
         });
 
         it('capture.adoptedStyleSheet = remove', async function () {
-          var options = {
+          var options = Object.assign({}, baseOptions, {
             "capture.style": "save",
             "capture.adoptedStyleSheet": "remove",
             "capture.recordRewrites": true,
-          };
+          });
           var blob = await capture({
             url: `${localhost}/capture_css_adopted/basic.html`,
-            options: Object.assign({}, baseOptions, options),
+            options,
           });
           var zip = await new JSZip().loadAsync(blob);
           assert.notExists(zip.file('green.bmp'));
@@ -6432,10 +6432,10 @@ body { color: red; }`);
       });
 
       describe('should save shared constructed stylesheets as same entry', function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.imageBackground": "save-used",
           "capture.font": "save-used",
-        };
+        });
 
         it('capture.adoptedStyleSheet = save, capture.rewriteCss = match', async function () {
           Object.assign(options, {
@@ -6444,7 +6444,7 @@ body { color: red; }`);
           });
           var blob = await capture({
             url: `${localhost}/capture_css_adopted/shadow.html`,
-            options: Object.assign({}, baseOptions, options),
+            options,
           });
           var zip = await new JSZip().loadAsync(blob);
           assert.exists(zip.file('image1-1.bmp'));
@@ -6522,7 +6522,7 @@ body { color: red; }`);
           });
           var blob = await capture({
             url: `${localhost}/capture_css_adopted/shadow.html`,
-            options: Object.assign({}, baseOptions, options),
+            options,
           });
           var zip = await new JSZip().loadAsync(blob);
           assert.exists(zip.file('image1-1.bmp'));
@@ -6603,7 +6603,7 @@ body { color: red; }`);
           });
           var blob = await capture({
             url: `${localhost}/capture_css_adopted/shadow.html`,
-            options: Object.assign({}, baseOptions, options),
+            options,
           });
           var zip = await new JSZip().loadAsync(blob);
           assert.exists(zip.file('image1-1.bmp'));
@@ -6684,7 +6684,7 @@ body { color: red; }`);
           });
           var blob = await capture({
             url: `${localhost}/capture_css_adopted/shadow.html`,
-            options: Object.assign({}, baseOptions, options),
+            options,
           });
           var zip = await new JSZip().loadAsync(blob);
           assert.notExists(zip.file('image1-1.bmp'));
@@ -6765,7 +6765,7 @@ body { color: red; }`);
           });
           var blob = await capture({
             url: `${localhost}/capture_css_adopted/shadow.html`,
-            options: Object.assign({}, baseOptions, options),
+            options,
           });
           var zip = await new JSZip().loadAsync(blob);
           assert.notExists(zip.file('image1-1.bmp'));
@@ -6811,12 +6811,12 @@ body { color: red; }`);
     describe('should handle background images according to capture.imageBackground', function () {
 
       it('capture.imageBackground = save', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.imageBackground": "save",
-        };
+        });
         var blob = await capture({
           url: `${localhost}/capture_imageBackground/index.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -6861,12 +6861,12 @@ body { color: red; }`);
       });
 
       it('capture.imageBackground = save-used', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.imageBackground": "save-used",
-        };
+        });
         var blob = await capture({
           url: `${localhost}/capture_imageBackground/index.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -6911,12 +6911,12 @@ body { color: red; }`);
       });
 
       it('capture.imageBackground = link', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.imageBackground": "link",
-        };
+        });
         var blob = await capture({
           url: `${localhost}/capture_imageBackground/index.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -6956,12 +6956,12 @@ body { color: red; }`);
       });
 
       it('capture.imageBackground = blank', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.imageBackground": "blank",
-        };
+        });
         var blob = await capture({
           url: `${localhost}/capture_imageBackground/index.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -7007,14 +7007,14 @@ body { color: red; }`);
       describe('basic mapping', function () {
 
         it('normal capture', async function () {
-          var options = {
+          var options = Object.assign({}, baseOptions, {
             "capture.rewriteCss": "url",
             "capture.video": "remove",
             "capture.imageBackground": "save-used",
-          };
+          });
           var blob = await capture({
             url: `${localhost}/capture_imageBackground_used/basic/index.html`,
-            options: Object.assign({}, baseOptions, options),
+            options,
           });
           var zip = await new JSZip().loadAsync(blob);
           assert.exists(zip.file('internal.bmp'));
@@ -7066,14 +7066,14 @@ body { color: red; }`);
 
         it('headless capture', async function () {
           // the result is same as save
-          var options = {
+          var options = Object.assign({}, baseOptions, {
             "capture.rewriteCss": "url",
             "capture.video": "remove",
             "capture.imageBackground": "save-used",
-          };
+          });
           var blob = await captureHeadless({
             url: `${localhost}/capture_imageBackground_used/basic/index.html`,
-            options: Object.assign({}, baseOptions, options),
+            options,
           });
           var zip = await new JSZip().loadAsync(blob);
           assert.exists(zip.file('internal.bmp'));
@@ -7128,13 +7128,13 @@ body { color: red; }`);
       describe('should check against a selector for the root element', function () {
 
         it('basic', async function () {
-          var options = {
+          var options = Object.assign({}, baseOptions, {
             "capture.imageBackground": "save-used",
             "capture.rewriteCss": "url",
-          };
+          });
           var blob = await capture({
             url: `${localhost}/capture_imageBackground_used/root/index.html`,
-            options: Object.assign({}, baseOptions, options),
+            options,
           });
 
           var zip = await new JSZip().loadAsync(blob);
@@ -7152,14 +7152,14 @@ body { color: red; }`);
       describe('in shadow DOM', function () {
 
         it('basic', async function () {
-          var options = {
+          var options = Object.assign({}, baseOptions, {
             "capture.imageBackground": "save-used",
             "capture.rewriteCss": "url",
             "capture.shadowDom": "save",
-          };
+          });
           var blob = await capture({
             url: `${localhost}/capture_imageBackground_used/shadow/index.html`,
-            options: Object.assign({}, baseOptions, options),
+            options,
           });
 
           var zip = await new JSZip().loadAsync(blob);
@@ -7188,14 +7188,14 @@ body { color: red; }`);
       describe('in @keyframes', function () {
 
         it('normal capture', async function () {
-          var options = {
+          var options = Object.assign({}, baseOptions, {
             "capture.rewriteCss": "url",
             "capture.video": "remove",
             "capture.imageBackground": "save-used",
-          };
+          });
           var blob = await capture({
             url: `${localhost}/capture_imageBackground_used/keyframes/index.html`,
-            options: Object.assign({}, baseOptions, options),
+            options,
           });
           var zip = await new JSZip().loadAsync(blob);
           assert.exists(zip.file('internal-inline.bmp'));
@@ -7363,14 +7363,14 @@ body { color: red; }`);
 
         it('headless capture', async function () {
           // the result is same as save
-          var options = {
+          var options = Object.assign({}, baseOptions, {
             "capture.rewriteCss": "url",
             "capture.video": "remove",
             "capture.imageBackground": "save-used",
-          };
+          });
           var blob = await captureHeadless({
             url: `${localhost}/capture_imageBackground_used/keyframes/index.html`,
-            options: Object.assign({}, baseOptions, options),
+            options,
           });
           var zip = await new JSZip().loadAsync(blob);
           assert.exists(zip.file('internal-inline.bmp'));
@@ -7541,13 +7541,13 @@ body { color: red; }`);
       describe('syntax for @keyframes', function () {
 
         it('basic', async function () {
-          var options = {
+          var options = Object.assign({}, baseOptions, {
             "capture.imageBackground": "save-used",
             "capture.rewriteCss": "url",
-          };
+          });
           var blob = await capture({
             url: `${localhost}/capture_imageBackground_used/keyframes_syntax/index.html`,
-            options: Object.assign({}, baseOptions, options),
+            options,
           });
 
           var zip = await new JSZip().loadAsync(blob);
@@ -7591,14 +7591,14 @@ body { color: red; }`);
       describe('in scoped @keyframe', function () {
 
         it('basic', async function () {
-          var options = {
+          var options = Object.assign({}, baseOptions, {
             "capture.imageBackground": "save-used",
             "capture.rewriteCss": "url",
             "capture.shadowDom": "save",
-          };
+          });
           var blob = await capture({
             url: `${localhost}/capture_imageBackground_used/keyframes_scope/index.html`,
-            options: Object.assign({}, baseOptions, options),
+            options,
           });
 
           var zip = await new JSZip().loadAsync(blob);
@@ -7711,14 +7711,14 @@ body { color: red; }`);
         });
 
         $it.skipIf($.noPartPseudo)('::part', async function () {
-          var options = {
+          var options = Object.assign({}, baseOptions, {
             "capture.imageBackground": "save-used",
             "capture.rewriteCss": "url",
             "capture.shadowDom": "save",
-          };
+          });
           var blob = await capture({
             url: `${localhost}/capture_imageBackground_used/keyframes_scope_part/index.html`,
-            options: Object.assign({}, baseOptions, options),
+            options,
           });
 
           var zip = await new JSZip().loadAsync(blob);
@@ -7739,14 +7739,14 @@ body { color: red; }`);
         });
 
         it('conditional', async function () {
-          var options = {
+          var options = Object.assign({}, baseOptions, {
             "capture.imageBackground": "save-used",
             "capture.rewriteCss": "url",
             "capture.shadowDom": "save",
-          };
+          });
           var blob = await capture({
             url: `${localhost}/capture_imageBackground_used/keyframes_scope_conditional/index.html`,
-            options: Object.assign({}, baseOptions, options),
+            options,
           });
 
           var zip = await new JSZip().loadAsync(blob);
@@ -7780,13 +7780,13 @@ body { color: red; }`);
       describe('advanced at-rule', function () {
 
         $it.skipIf($.noAtLayer)('@layer', async function () {
-          var options = {
+          var options = Object.assign({}, baseOptions, {
             "capture.imageBackground": "save-used",
             "capture.rewriteCss": "url",
-          };
+          });
           var blob = await capture({
             url: `${localhost}/capture_imageBackground_used/at/index.html`,
-            options: Object.assign({}, baseOptions, options),
+            options,
           });
 
           var zip = await new JSZip().loadAsync(blob);
@@ -7811,14 +7811,14 @@ body { color: red; }`);
       describe('should ignore images referenced only by inline stylesheets', function () {
 
         it('basic', async function () {
-          var options = {
+          var options = Object.assign({}, baseOptions, {
             "capture.imageBackground": "save-used",
             "capture.rewriteCss": "url",
             "capture.styleInline": "save",
-          };
+          });
           var blob = await capture({
             url: `${localhost}/capture_imageBackground_used/inline/index.html`,
-            options: Object.assign({}, baseOptions, options),
+            options,
           });
 
           var zip = await new JSZip().loadAsync(blob);
@@ -7843,14 +7843,14 @@ body { color: red; }`);
       $describe.skipIf($.noAdoptedStylesheet)('in constructed stylesheet', function () {
 
         it('basic', async function () {
-          var options = {
+          var options = Object.assign({}, baseOptions, {
             "capture.imageBackground": "save-used",
             "capture.rewriteCss": "url",
             "capture.shadowDom": "save",
-          };
+          });
           var blob = await capture({
             url: `${localhost}/capture_imageBackground_used/adopted/index.html`,
-            options: Object.assign({}, baseOptions, options),
+            options,
           });
 
           var zip = await new JSZip().loadAsync(blob);
@@ -7887,13 +7887,13 @@ body { color: red; }`);
       describe('CSS variable', function () {
 
         $it.xfail()('basic', async function () {
-          var options = {
+          var options = Object.assign({}, baseOptions, {
             "capture.imageBackground": "save-used",
             "capture.rewriteCss": "url",
-          };
+          });
           var blob = await capture({
             url: `${localhost}/capture_imageBackground_used/var/index.html`,
-            options: Object.assign({}, baseOptions, options),
+            options,
           });
 
           var zip = await new JSZip().loadAsync(blob);
@@ -7966,13 +7966,13 @@ body { color: red; }`);
       $describe.skipIf($.noNestingCss)('nesting CSS', function () {
 
         it('basic', async function () {
-          var options = {
+          var options = Object.assign({}, baseOptions, {
             "capture.imageBackground": "save-used",
             "capture.rewriteCss": "url",
-          };
+          });
           var blob = await capture({
             url: `${localhost}/capture_imageBackground_used/nesting/index.html`,
-            options: Object.assign({}, baseOptions, options),
+            options,
           });
 
           var zip = await new JSZip().loadAsync(blob);
@@ -8022,12 +8022,12 @@ body { color: red; }`);
     describe('should handle fonts according to capture.font', function () {
 
       it('capture.font = save', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.font": "save",
-        };
+        });
         var blob = await capture({
           url: `${localhost}/capture_font/index.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -8042,12 +8042,12 @@ body { color: red; }`);
       });
 
       it('capture.font = save-used', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.font": "save-used",
-        };
+        });
         var blob = await capture({
           url: `${localhost}/capture_font/index.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -8062,12 +8062,12 @@ body { color: red; }`);
       });
 
       it('capture.font = link', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.font": "link",
-        };
+        });
         var blob = await capture({
           url: `${localhost}/capture_font/index.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -8082,12 +8082,12 @@ body { color: red; }`);
       });
 
       it('capture.font = blank', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.font": "blank",
-        };
+        });
         var blob = await capture({
           url: `${localhost}/capture_font/index.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -8108,14 +8108,14 @@ body { color: red; }`);
       describe('basic mapping', function () {
 
         it('normal capture', async function () {
-          var options = {
+          var options = Object.assign({}, baseOptions, {
             "capture.rewriteCss": "url",
             "capture.video": "remove",
             "capture.font": "save-used",
-          };
+          });
           var blob = await capture({
             url: `${localhost}/capture_font_used/basic/index.html`,
-            options: Object.assign({}, baseOptions, options),
+            options,
           });
 
           var zip = await new JSZip().loadAsync(blob);
@@ -8153,14 +8153,14 @@ body { color: red; }`);
 
         it('headless capture', async function () {
           // the result is same as save
-          var options = {
+          var options = Object.assign({}, baseOptions, {
             "capture.rewriteCss": "url",
             "capture.video": "remove",
             "capture.font": "save-used",
-          };
+          });
           var blob = await captureHeadless({
             url: `${localhost}/capture_font_used/basic/index.html`,
-            options: Object.assign({}, baseOptions, options),
+            options,
           });
 
           var zip = await new JSZip().loadAsync(blob);
@@ -8201,13 +8201,13 @@ body { color: red; }`);
       describe('syntax for @font-face', function () {
 
         it('basic', async function () {
-          var options = {
+          var options = Object.assign({}, baseOptions, {
             "capture.rewriteCss": "url",
             "capture.font": "save-used",
-          };
+          });
           var blob = await capture({
             url: `${localhost}/capture_font_used/syntax/index.html`,
-            options: Object.assign({}, baseOptions, options),
+            options,
           });
 
           var zip = await new JSZip().loadAsync(blob);
@@ -8257,13 +8257,13 @@ body { color: red; }`);
       describe('non-loaded font files', function () {
 
         it('save all linked fonts despite non-loaded', async function () {
-          var options = {
+          var options = Object.assign({}, baseOptions, {
             "capture.rewriteCss": "url",
             "capture.font": "save-used",
-          };
+          });
           var blob = await capture({
             url: `${localhost}/capture_font_used/unloaded/index.html`,
-            options: Object.assign({}, baseOptions, options),
+            options,
           });
           var zip = await new JSZip().loadAsync(blob);
           assert.exists(zip.file('alternative-1.woff'));
@@ -8304,13 +8304,13 @@ body { color: red; }`);
       describe('scoped @font-face', function () {
 
         it('basic', async function () {
-          var options = {
+          var options = Object.assign({}, baseOptions, {
             "capture.rewriteCss": "url",
             "capture.font": "save-used",
-          };
+          });
           var blob = await capture({
             url: `${localhost}/capture_font_used/scope/index.html`,
-            options: Object.assign({}, baseOptions, options),
+            options,
           });
 
           var zip = await new JSZip().loadAsync(blob);
@@ -8360,13 +8360,13 @@ body { color: red; }`);
         });
 
         $it.skipIf($.noPartPseudo)('::part', async function () {
-          var options = {
+          var options = Object.assign({}, baseOptions, {
             "capture.rewriteCss": "url",
             "capture.font": "save-used",
-          };
+          });
           var blob = await capture({
             url: `${localhost}/capture_font_used/scope_part/index.html`,
-            options: Object.assign({}, baseOptions, options),
+            options,
           });
 
           var zip = await new JSZip().loadAsync(blob);
@@ -8381,13 +8381,13 @@ body { color: red; }`);
         });
 
         it('conditional', async function () {
-          var options = {
+          var options = Object.assign({}, baseOptions, {
             "capture.rewriteCss": "url",
             "capture.font": "save-used",
-          };
+          });
           var blob = await capture({
             url: `${localhost}/capture_font_used/scope_conditional/index.html`,
-            options: Object.assign({}, baseOptions, options),
+            options,
           });
 
           var zip = await new JSZip().loadAsync(blob);
@@ -8414,14 +8414,14 @@ body { color: red; }`);
       describe('CSS variable', function () {
 
         $it.xfail()('basic', async function () {
-          var options = {
+          var options = Object.assign({}, baseOptions, {
             "capture.rewriteCss": "url",
             "capture.video": "remove",
             "capture.font": "save-used",
-          };
+          });
           var blob = await capture({
             url: `${localhost}/capture_font_used/var/index.html`,
-            options: Object.assign({}, baseOptions, options),
+            options,
           });
 
           var zip = await new JSZip().loadAsync(blob);
@@ -8479,13 +8479,13 @@ body { color: red; }`);
       $describe.skipIf($.noNestingCss)('nesting CSS', function () {
 
         it('basic', async function () {
-          var options = {
+          var options = Object.assign({}, baseOptions, {
             "capture.font": "save-used",
             "capture.rewriteCss": "url",
-          };
+          });
           var blob = await capture({
             url: `${localhost}/capture_font_used/nesting/index.html`,
-            options: Object.assign({}, baseOptions, options),
+            options,
           });
 
           var zip = await new JSZip().loadAsync(blob);
@@ -8536,13 +8536,13 @@ body { color: red; }`);
       describe('script loaded', function () {
 
         $it.xfail()('basic', async function () {
-          var options = {
+          var options = Object.assign({}, baseOptions, {
             "capture.rewriteCss": "url",
             "capture.font": "save-used",
-          };
+          });
           var blob = await capture({
             url: `${localhost}/capture_font_used/scripted/index.html`,
-            options: Object.assign({}, baseOptions, options),
+            options,
           }, {delay: 300});
           var zip = await new JSZip().loadAsync(blob);
           assert.exists(zip.file('scripted.woff'));
@@ -8560,12 +8560,12 @@ body { color: red; }`);
     describe('basic', function () {
 
       it('capture.script = save', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.script": "save",
-        };
+        });
         var blob = await capture({
           url: `${localhost}/capture_script/script.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -8599,12 +8599,12 @@ body { color: red; }`);
       });
 
       it('capture.script = link', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.script": "link",
-        };
+        });
         var blob = await capture({
           url: `${localhost}/capture_script/script.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -8637,12 +8637,12 @@ body { color: red; }`);
       });
 
       it('capture.script = blank', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.script": "blank",
-        };
+        });
         var blob = await capture({
           url: `${localhost}/capture_script/script.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -8675,12 +8675,12 @@ body { color: red; }`);
       });
 
       it('capture.script = remove', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.script": "remove",
-        };
+        });
         var blob = await capture({
           url: `${localhost}/capture_script/script.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -8715,12 +8715,12 @@ body { color: red; }`);
     describe('basic', function () {
 
       it('capture.noscript = save', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.noscript": "save",
-        };
+        });
         var blob = await capture({
           url: `${localhost}/capture_script/noscript.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -8735,12 +8735,12 @@ body { color: red; }`);
       });
 
       it('capture.noscript = save (headless)', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.noscript": "save",
-        };
+        });
         var blob = await captureHeadless({
           url: `${localhost}/capture_script/noscript.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -8755,12 +8755,12 @@ body { color: red; }`);
       });
 
       it('capture.noscript = blank', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.noscript": "blank",
-        };
+        });
         var blob = await capture({
           url: `${localhost}/capture_script/noscript.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -8774,12 +8774,12 @@ body { color: red; }`);
       });
 
       it('capture.noscript = remove', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.noscript": "remove",
-        };
+        });
         var blob = await capture({
           url: `${localhost}/capture_script/noscript.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -8798,16 +8798,16 @@ body { color: red; }`);
   describe('frame element', function () {
 
     describe('basic', function () {
-      var options = {
+      var options = Object.assign({}, baseOptions, {
         "capture.saveResourcesSequentially": true,
-      };
+      });
 
       it('capture.frame = save', async function () {
         options["capture.frame"]  = "save";
 
         var blob = await capture({
           url: `${localhost}/capture_frame/same_origin.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -8863,7 +8863,7 @@ body { color: red; }`);
 
         var blob = await capture({
           url: `${localhost}/capture_frame/cross_origin.py`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -8917,7 +8917,7 @@ body { color: red; }`);
 
         var blob = await capture({
           url: `${localhost}/capture_frame/same_origin.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -8939,7 +8939,7 @@ body { color: red; }`);
 
         var blob = await capture({
           url: `${localhost}/capture_frame/same_origin.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -8961,7 +8961,7 @@ body { color: red; }`);
 
         var blob = await capture({
           url: `${localhost}/capture_frame/same_origin.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -8981,13 +8981,13 @@ body { color: red; }`);
         userAgent.is('firefox') && userAgent.major < 128,
         'content script cannot be injected into a sandboxed iframe in Firefox < 128',
       )('basic', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.frame": "save",
           "capture.saveResourcesSequentially": true,
-        };
+        });
         var blob = await capture({
           url: `${localhost}/capture_frame/sandboxed.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
         var zip = await new JSZip().loadAsync(blob);
 
@@ -9007,13 +9007,13 @@ body { color: red; }`);
       $it.skipIf(
         !(userAgent.is('firefox') && userAgent.major < 128),
       )('basic (Firefox <= 128)', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.frame": "save",
           "capture.saveResourcesSequentially": true,
-        };
+        });
         var blob = await capture({
           url: `${localhost}/capture_frame/sandboxed.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
         var zip = await new JSZip().loadAsync(blob);
 
@@ -9033,9 +9033,9 @@ body { color: red; }`);
     });
 
     describe('srcdoc frame', function () {
-      var options = {
+      var options = Object.assign({}, baseOptions, {
         "capture.saveResourcesSequentially": true,
-      };
+      });
 
       it('capture.frame = save', async function () {
         // srcdoc should be removed
@@ -9044,7 +9044,7 @@ body { color: red; }`);
 
         var blob = await capture({
           url: `${localhost}/capture_frame/srcdoc.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -9075,7 +9075,7 @@ body { color: red; }`);
         // detail to prevent inconsistent results.
         var blob = await capture({
           url: `${localhost}/capture_frame/srcdoc_frame.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -9103,7 +9103,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
 
         var blob = await capture({
           url: `${localhost}/capture_frame/srcdoc.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -9126,7 +9126,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
         // frame[srcdoc] should be ignored (left unchanged) and its src should be used
         var blob = await capture({
           url: `${localhost}/capture_frame/srcdoc_frame.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -9153,7 +9153,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
 
         var blob = await capture({
           url: `${localhost}/capture_frame/srcdoc.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -9170,7 +9170,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
         // frame[srcdoc] should be ignored (left unchanged)
         var blob = await capture({
           url: `${localhost}/capture_frame/srcdoc_frame.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -9196,14 +9196,14 @@ document.querySelector("p").textContent = "srcdoc content modified";
     describe('about: frame', function () {
 
       it('save the current content for about: frames', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.frame": "save",
           "capture.saveResourcesSequentially": true,
-        };
+        });
 
         var blob = await capture({
           url: `${localhost}/capture_frame/about.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         }, {delay: 300});
 
         var zip = await new JSZip().loadAsync(blob);
@@ -9234,16 +9234,16 @@ document.querySelector("p").textContent = "srcdoc content modified";
     });
 
     describe('duplication handling', function () {
-      var options = {
+      var options = Object.assign({}, baseOptions, {
         "capture.saveResourcesSequentially": true,
-      };
+      });
 
       it('capture.frame = save', async function () {
         options["capture.frame"]  = "save";
 
         var blob = await capture({
           url: `${localhost}/capture_frame/duplicate.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -9264,7 +9264,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
 
         var blob = await capture({
           url: `${localhost}/capture_frame/duplicate.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -9283,9 +9283,9 @@ document.querySelector("p").textContent = "srcdoc content modified";
     });
 
     describe('headless', function () {
-      var options = {
+      var options = Object.assign({}, baseOptions, {
         "capture.saveResourcesSequentially": true,
-      };
+      });
 
       it('capture.frame = save', async function () {
         // frame contents are source (not modified by scripts) due to headless capture
@@ -9293,7 +9293,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
 
         var blob = await captureHeadless({
           url: `${localhost}/capture_frame/same_origin.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -9340,9 +9340,9 @@ document.querySelector("p").textContent = "srcdoc content modified";
     });
 
     describe('headless srcdoc frame', function () {
-      var options = {
+      var options = Object.assign({}, baseOptions, {
         "capture.saveResourcesSequentially": true,
-      };
+      });
 
       it('capture.frame = save', async function () {
         // srcdoc content should be rewritten
@@ -9350,7 +9350,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
 
         var blob = await captureHeadless({
           url: `${localhost}/capture_frame/srcdoc.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -9388,7 +9388,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
         // frame[srcdoc] should be ignored (left unchanged) and its src should be used
         var blob = await captureHeadless({
           url: `${localhost}/capture_frame/srcdoc_frame.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -9416,7 +9416,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
 
         var blob = await captureHeadless({
           url: `${localhost}/capture_frame/srcdoc.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -9447,7 +9447,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
         // frame[srcdoc] should be ignored (left unchanged) and its src should be used
         var blob = await captureHeadless({
           url: `${localhost}/capture_frame/srcdoc_frame.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -9473,14 +9473,14 @@ document.querySelector("p").textContent = "srcdoc content modified";
     describe('headless about: frame', function () {
 
       it('should keep original URL for about: frames', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.frame": "save",
           "capture.saveResourcesSequentially": true,
-        };
+        });
 
         var blob = await captureHeadless({
           url: `${localhost}/capture_frame/about.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -9504,13 +9504,13 @@ document.querySelector("p").textContent = "srcdoc content modified";
     describe('headless self-pointing frame', function () {
 
       it('should rewrite self-pointing URLs without saving an extra page', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.frame": "save",
-        };
+        });
 
         var blob = await captureHeadless({
           url: `${localhost}/capture_frame/self.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -9531,13 +9531,13 @@ document.querySelector("p").textContent = "srcdoc content modified";
     describe('headless duplication handling', function () {
 
       it('capture.frame = save', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.frame": "save",
-        };
+        });
 
         var blob = await captureHeadless({
           url: `${localhost}/capture_frame/duplicate.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -9566,15 +9566,15 @@ document.querySelector("p").textContent = "srcdoc content modified";
 
         it('capture.saveDataUriAsSrcdoc = true', async function () {
           // data URI charset should be UTF-8
-          var options = {
+          var options = Object.assign({}, baseOptions, {
             "capture.saveAs": "singleHtml",
             "capture.frame": "save",
             "capture.saveDataUriAsSrcdoc": true,
-          };
+          });
 
           var blob = await capture({
             url: `${localhost}/capture_frame/same_origin.html`,
-            options: Object.assign({}, baseOptions, options),
+            options,
           });
 
           var doc = await readFileAsDocument(blob);
@@ -9602,7 +9602,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
           // <frame> does not support srcdoc and should use data URL
           var blob = await capture({
             url: `${localhost}/capture_frame/frameset.html`,
-            options: Object.assign({}, baseOptions, options),
+            options,
           });
 
           var doc = await readFileAsDocument(blob);
@@ -9621,15 +9621,15 @@ document.querySelector("p").textContent = "srcdoc content modified";
 
         it('capture.saveDataUriAsSrcdoc = false', async function () {
           // data URI charset should be UTF-8
-          var options = {
+          var options = Object.assign({}, baseOptions, {
             "capture.saveAs": "singleHtml",
             "capture.frame": "save",
             "capture.saveDataUriAsSrcdoc": false,
-          };
+          });
 
           var blob = await capture({
             url: `${localhost}/capture_frame/same_origin.html`,
-            options: Object.assign({}, baseOptions, options),
+            options,
           });
 
           var doc = await readFileAsDocument(blob);
@@ -9658,7 +9658,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
           // <frame> does not support srcdoc and should use data URL
           var blob = await capture({
             url: `${localhost}/capture_frame/frameset.html`,
-            options: Object.assign({}, baseOptions, options),
+            options,
           });
 
           var doc = await readFileAsDocument(blob);
@@ -9686,15 +9686,15 @@ document.querySelector("p").textContent = "srcdoc content modified";
       describe('duplication handling', function () {
 
         it('capture.saveDataUriAsSrcdoc = true', async function () {
-          var options = {
+          var options = Object.assign({}, baseOptions, {
             "capture.saveAs": "singleHtml",
             "capture.frame": "save",
             "capture.saveDataUriAsSrcdoc": true,
-          };
+          });
 
           var blob = await captureHeadless({
             url: `${localhost}/capture_frame/duplicate.html`,
-            options: Object.assign({}, baseOptions, options),
+            options,
           });
 
           var doc = await readFileAsDocument(blob);
@@ -9706,15 +9706,15 @@ document.querySelector("p").textContent = "srcdoc content modified";
         });
 
         it('capture.saveDataUriAsSrcdoc = false', async function () {
-          var options = {
+          var options = Object.assign({}, baseOptions, {
             "capture.saveAs": "singleHtml",
             "capture.frame": "save",
             "capture.saveDataUriAsSrcdoc": false,
-          };
+          });
 
           var blob = await captureHeadless({
             url: `${localhost}/capture_frame/duplicate.html`,
-            options: Object.assign({}, baseOptions, options),
+            options,
           });
 
           var doc = await readFileAsDocument(blob);
@@ -9733,14 +9733,14 @@ document.querySelector("p").textContent = "srcdoc content modified";
 
       it('capture.saveAs = zip', async function () {
         // link to corresponding downloaded frame file
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.frame": "save",
           "capture.saveAs": "zip",
-        };
+        });
 
         var blob = await captureHeadless({
           url: `${localhost}/capture_frame_circular/index.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -9773,15 +9773,15 @@ document.querySelector("p").textContent = "srcdoc content modified";
 
       it('capture.saveAs = singleHtml; capture.saveDataUriAsSrcdoc = true', async function () {
         // rewrite a circular referencing with urn:scrapbook:download:circular:url:...
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.frame": "save",
           "capture.saveAs": "singleHtml",
           "capture.saveDataUriAsSrcdoc": true,
-        };
+        });
 
         var blob = await captureHeadless({
           url: `${localhost}/capture_frame_circular/index.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var doc = await readFileAsDocument(blob);
@@ -9804,15 +9804,15 @@ document.querySelector("p").textContent = "srcdoc content modified";
 
       it('capture.saveAs = singleHtml; capture.saveDataUriAsSrcdoc = false', async function () {
         // rewrite a circular referencing with urn:scrapbook:download:circular:url:...
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.frame": "save",
           "capture.saveAs": "singleHtml",
           "capture.saveDataUriAsSrcdoc": false,
-        };
+        });
 
         var blob = await captureHeadless({
           url: `${localhost}/capture_frame_circular/index.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var doc = await readFileAsDocument(blob);
@@ -9839,13 +9839,13 @@ document.querySelector("p").textContent = "srcdoc content modified";
 
       it('capture.frame = save', async function () {
         // link to corresponding downloaded frame file
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.frame": "save",
-        };
+        });
 
         var blob = await captureHeadless({
           url: `${localhost}/capture_frame_circular_self/index.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -9861,15 +9861,15 @@ document.querySelector("p").textContent = "srcdoc content modified";
 
       it('capture.saveAs = singleHtml; capture.saveDataUriAsSrcdoc = true', async function () {
         // rewrite a circular referencing with urn:scrapbook:download:circular:url:...
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.frame": "save",
           "capture.saveAs": "singleHtml",
           "capture.saveDataUriAsSrcdoc": true,
-        };
+        });
 
         var blob = await captureHeadless({
           url: `${localhost}/capture_frame_circular_self/index.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var doc = await readFileAsDocument(blob);
@@ -9881,15 +9881,15 @@ document.querySelector("p").textContent = "srcdoc content modified";
 
       it('capture.saveAs = singleHtml; capture.saveDataUriAsSrcdoc = false', async function () {
         // rewrite a circular referencing with urn:scrapbook:download:circular:url:...
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.frame": "save",
           "capture.saveAs": "singleHtml",
           "capture.saveDataUriAsSrcdoc": false,
-        };
+        });
 
         var blob = await captureHeadless({
           url: `${localhost}/capture_frame_circular_self/index.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var doc = await readFileAsDocument(blob);
@@ -9902,9 +9902,9 @@ document.querySelector("p").textContent = "srcdoc content modified";
     });
 
     describe('should name frames according to capture.frameRename', function () {
-      var options = {
+      var options = Object.assign({}, baseOptions, {
         "capture.saveResourcesSequentially": true,
-      };
+      });
 
       it('capture.frameRename = true', async function () {
         Object.assign(options, {
@@ -9914,7 +9914,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
 
         var blob = await capture({
           url: `${localhost}/capture_frameRename/index.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -9937,7 +9937,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
 
         var blob = await capture({
           url: `${localhost}/capture_frameRename/index.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -9957,14 +9957,14 @@ document.querySelector("p").textContent = "srcdoc content modified";
     describe('should take header filename', function () {
 
       it('capture.frameRename = false', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.frame": "save",
           "capture.frameRename": false,
-        };
+        });
 
         var blob = await capture({
           url: `${localhost}/capture_frameRename_header/index.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -9984,14 +9984,14 @@ document.querySelector("p").textContent = "srcdoc content modified";
       });
 
       it('capture.frameRename = false (headless)', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.frame": "save",
           "capture.frameRename": false,
-        };
+        });
 
         var blob = await captureHeadless({
           url: `${localhost}/capture_frameRename_header/index.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -10011,15 +10011,15 @@ document.querySelector("p").textContent = "srcdoc content modified";
       });
 
       it('capture.saveAs = singleHtml; srcdoc = false', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.frame": "save",
           "capture.saveAs": "singleHtml",
           "capture.saveDataUriAsSrcdoc": false,
-        };
+        });
 
         var blob = await capture({
           url: `${localhost}/capture_frameRename_header/index.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var doc = await readFileAsDocument(blob);
@@ -10038,15 +10038,15 @@ document.querySelector("p").textContent = "srcdoc content modified";
       });
 
       it('capture.saveAs = singleHtml; srcdoc = false (headless)', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.frame": "save",
           "capture.saveAs": "singleHtml",
           "capture.saveDataUriAsSrcdoc": false,
-        };
+        });
 
         var blob = await captureHeadless({
           url: `${localhost}/capture_frameRename_header/index.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var doc = await readFileAsDocument(blob);
@@ -10191,12 +10191,12 @@ document.querySelector("p").textContent = "srcdoc content modified";
         // Links to the original page should be rewritten to the captured one,
         // but it's over-complicated to do so for a non-indepth capture.
         // Link to the original URL instead.
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.downLink.doc.depth": null,
-        };
+        });
         var blob = await capture({
           url: `${localhost}/capture_anchor/srcdoc/srcdoc.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
         var zip = await new JSZip().loadAsync(blob);
 
@@ -10227,12 +10227,12 @@ document.querySelector("p").textContent = "srcdoc content modified";
 
       it('depth = 0', async function () {
         // links to the original page should be rewritten to be the captured one
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.downLink.doc.depth": 0,
-        };
+        });
         var blob = await capture({
           url: `${localhost}/capture_anchor/srcdoc/srcdoc.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
         var zip = await new JSZip().loadAsync(blob);
 
@@ -10294,12 +10294,12 @@ document.querySelector("p").textContent = "srcdoc content modified";
     describe('ping attribute', function () {
 
       it('capture.ping = link', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.ping": "link",
-        };
+        });
         var blob = await capture({
           url: `${localhost}/capture_anchor/ping/ping.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
         var zip = await new JSZip().loadAsync(blob);
         var indexFile = zip.file('index.html');
@@ -10311,12 +10311,12 @@ document.querySelector("p").textContent = "srcdoc content modified";
       });
 
       it('capture.ping = blank', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.ping": "blank",
-        };
+        });
         var blob = await capture({
           url: `${localhost}/capture_anchor/ping/ping.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
         var zip = await new JSZip().loadAsync(blob);
         var indexFile = zip.file('index.html');
@@ -10336,12 +10336,12 @@ document.querySelector("p").textContent = "srcdoc content modified";
     describe('basic', function () {
 
       it('capture.image = save', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.image": "save",
-        };
+        });
         var blob = await capture({
           url: `${localhost}/capture_image/image.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -10371,12 +10371,12 @@ document.querySelector("p").textContent = "srcdoc content modified";
       });
 
       it('capture.image = save-current', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.image": "save-current",
-        };
+        });
         var blob = await capture({
           url: `${localhost}/capture_image/image.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -10404,12 +10404,12 @@ document.querySelector("p").textContent = "srcdoc content modified";
 
       it('capture.image = save-current (headless)', async function () {
         // the result is same as save
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.image": "save-current",
-        };
+        });
         var blob = await captureHeadless({
           url: `${localhost}/capture_image/image.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -10439,12 +10439,12 @@ document.querySelector("p").textContent = "srcdoc content modified";
       });
 
       it('capture.image = link', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.image": "link",
-        };
+        });
         var blob = await capture({
           url: `${localhost}/capture_image/image.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -10471,12 +10471,12 @@ document.querySelector("p").textContent = "srcdoc content modified";
       });
 
       it('capture.image = blank', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.image": "blank",
-        };
+        });
         var blob = await capture({
           url: `${localhost}/capture_image/image.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -10503,12 +10503,12 @@ document.querySelector("p").textContent = "srcdoc content modified";
       });
 
       it('capture.image = remove', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.image": "remove",
-        };
+        });
         var blob = await capture({
           url: `${localhost}/capture_image/image.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -10532,12 +10532,12 @@ document.querySelector("p").textContent = "srcdoc content modified";
       // Use headless for most test cases since loading audio in the browser is slow.
 
       it('capture.audio = save (headless)', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.audio": "save",
-        };
+        });
         var blob = await captureHeadless({
           url: `${localhost}/capture_audio/audio.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -10561,12 +10561,12 @@ document.querySelector("p").textContent = "srcdoc content modified";
       });
 
       it('capture.audio = save-current', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.audio": "save-current",
-        };
+        });
         var blob = await capture({
           url: `${localhost}/capture_audio/audio.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -10591,12 +10591,12 @@ document.querySelector("p").textContent = "srcdoc content modified";
 
       it('capture.audio = save-current (headless)', async function () {
         // the result is same as save
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.audio": "save-current",
-        };
+        });
         var blob = await captureHeadless({
           url: `${localhost}/capture_audio/audio.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -10620,12 +10620,12 @@ document.querySelector("p").textContent = "srcdoc content modified";
       });
 
       it('capture.audio = link (headless)', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.audio": "link",
-        };
+        });
         var blob = await captureHeadless({
           url: `${localhost}/capture_audio/audio.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -10646,12 +10646,12 @@ document.querySelector("p").textContent = "srcdoc content modified";
       });
 
       it('capture.audio = blank (headless)', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.audio": "blank",
-        };
+        });
         var blob = await captureHeadless({
           url: `${localhost}/capture_audio/audio.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -10672,12 +10672,12 @@ document.querySelector("p").textContent = "srcdoc content modified";
       });
 
       it('capture.audio = remove (headless)', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.audio": "remove",
-        };
+        });
         var blob = await captureHeadless({
           url: `${localhost}/capture_audio/audio.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -10705,12 +10705,12 @@ document.querySelector("p").textContent = "srcdoc content modified";
       // Use headless for most test cases since loading video in the browser is slow.
 
       it('capture.video = save (headless)', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.video": "save",
-        };
+        });
         var blob = await captureHeadless({
           url: `${localhost}/capture_video/video.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -10735,12 +10735,12 @@ document.querySelector("p").textContent = "srcdoc content modified";
       });
 
       it('capture.video = save-current', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.video": "save-current",
-        };
+        });
         var blob = await capture({
           url: `${localhost}/capture_video/video.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -10765,12 +10765,12 @@ document.querySelector("p").textContent = "srcdoc content modified";
 
       it('capture.video = save-current (headless)', async function () {
         // the result is same as save
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.video": "save-current",
-        };
+        });
         var blob = await captureHeadless({
           url: `${localhost}/capture_video/video.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -10795,12 +10795,12 @@ document.querySelector("p").textContent = "srcdoc content modified";
       });
 
       it('capture.video = link (headless)', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.video": "link",
-        };
+        });
         var blob = await captureHeadless({
           url: `${localhost}/capture_video/video.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -10822,12 +10822,12 @@ document.querySelector("p").textContent = "srcdoc content modified";
       });
 
       it('capture.video = blank (headless)', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.video": "blank",
-        };
+        });
         var blob = await captureHeadless({
           url: `${localhost}/capture_video/video.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -10849,12 +10849,12 @@ document.querySelector("p").textContent = "srcdoc content modified";
       });
 
       it('capture.video = remove (headless)', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.video": "remove",
-        };
+        });
         var blob = await captureHeadless({
           url: `${localhost}/capture_video/video.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -10879,16 +10879,16 @@ document.querySelector("p").textContent = "srcdoc content modified";
   describe('canvas element', function () {
 
     describe('basic', function () {
-      var options = {
+      var options = Object.assign({}, baseOptions, {
         "capture.script": "remove",
         "capture.recordRewrites": true,
-      };
+      });
 
       it('capture.canvas = save', async function () {
         options["capture.canvas"] = "save";
         var blob = await capture({
           url: `${localhost}/capture_canvas/canvas.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -10907,7 +10907,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
         // canvas in the shadow DOM
         var blob = await capture({
           url: `${localhost}/capture_canvas/canvas_shadow.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -10931,7 +10931,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
         options["capture.canvas"] = "blank";
         var blob = await capture({
           url: `${localhost}/capture_canvas/canvas.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -10947,7 +10947,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
         // canvas in the shadow DOM
         var blob = await capture({
           url: `${localhost}/capture_canvas/canvas_shadow.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -10970,7 +10970,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
         options["capture.canvas"] = "remove";
         var blob = await capture({
           url: `${localhost}/capture_canvas/canvas.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -10986,7 +10986,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
         // canvas in the shadow DOM
         var blob = await capture({
           url: `${localhost}/capture_canvas/canvas_shadow.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -11010,13 +11010,13 @@ document.querySelector("p").textContent = "srcdoc content modified";
     describe('webgl', function () {
 
       it('should save the content of a webgl canvas with `preserveDrawingBuffer` = true', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.canvas": "save",
           "capture.script": "remove",
-        };
+        });
         var blob = await capture({
           url: `${localhost}/capture_canvas/canvas_webgl.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -11040,12 +11040,12 @@ document.querySelector("p").textContent = "srcdoc content modified";
     describe('basic', function () {
 
       it('capture.embed = save', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.embed": "save",
-        };
+        });
         var blob = await capture({
           url: `${localhost}/capture_embed/embed.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -11059,12 +11059,12 @@ document.querySelector("p").textContent = "srcdoc content modified";
       });
 
       it('capture.embed = link', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.embed": "link",
-        };
+        });
         var blob = await capture({
           url: `${localhost}/capture_embed/embed.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -11078,12 +11078,12 @@ document.querySelector("p").textContent = "srcdoc content modified";
       });
 
       it('capture.embed = blank', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.embed": "blank",
-        };
+        });
         var blob = await capture({
           url: `${localhost}/capture_embed/embed.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -11097,12 +11097,12 @@ document.querySelector("p").textContent = "srcdoc content modified";
       });
 
       it('capture.embed = remove', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.embed": "remove",
-        };
+        });
         var blob = await capture({
           url: `${localhost}/capture_embed/embed.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -11120,14 +11120,14 @@ document.querySelector("p").textContent = "srcdoc content modified";
     describe('page', function () {
 
       it('should capture headlessly like a frame', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.saveResourcesSequentially": true,
           "capture.embed": "save",
-        };
+        });
 
         var blob = await capture({
           url: `${localhost}/capture_embed_frame/cross_origin.py`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -11184,14 +11184,14 @@ document.querySelector("p").textContent = "srcdoc content modified";
     describe('about: page', function () {
 
       it('should keep as-is', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.saveResourcesSequentially": true,
           "capture.embed": "save",
-        };
+        });
 
         var blob = await capture({
           url: `${localhost}/capture_embed_frame/about.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
         var zip = await new JSZip().loadAsync(blob);
 
@@ -11211,14 +11211,14 @@ document.querySelector("p").textContent = "srcdoc content modified";
 
       it('capture.saveAs = zip', async function () {
         // link to corresponding downloaded frame file
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.embed": "save",
           "capture.saveAs": "zip",
-        };
+        });
 
         var blob = await captureHeadless({
           url: `${localhost}/capture_embed_circular/index.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -11251,14 +11251,14 @@ document.querySelector("p").textContent = "srcdoc content modified";
 
       it('capture.saveAs = singleHtml', async function () {
         // rewrite a circular referencing with urn:scrapbook:download:circular:url:...
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.embed": "save",
           "capture.saveAs": "singleHtml",
-        };
+        });
 
         var blob = await captureHeadless({
           url: `${localhost}/capture_embed_circular/index.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var doc = await readFileAsDocument(blob);
@@ -11285,16 +11285,16 @@ document.querySelector("p").textContent = "srcdoc content modified";
   describe('object element', function () {
 
     describe('basic', function () {
-      var options = {
+      var options = Object.assign({}, baseOptions, {
         "capture.frameRename": false,
         "capture.saveResourcesSequentially": true,
-      };
+      });
 
       it('capture.object = save', async function () {
         options["capture.object"] = "save";
         var blob = await capture({
           url: `${localhost}/capture_object/object.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -11321,7 +11321,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
         options["capture.object"] = "link";
         var blob = await capture({
           url: `${localhost}/capture_object/object.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -11344,7 +11344,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
         options["capture.object"] = "blank";
         var blob = await capture({
           url: `${localhost}/capture_object/object.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -11367,7 +11367,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
         options["capture.object"] = "remove";
         var blob = await capture({
           url: `${localhost}/capture_object/object.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -11384,14 +11384,14 @@ document.querySelector("p").textContent = "srcdoc content modified";
     describe('page', function () {
 
       it('should capture headlessly like a frame', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.saveResourcesSequentially": true,
           "capture.object": "save",
-        };
+        });
 
         var blob = await capture({
           url: `${localhost}/capture_object_frame/cross_origin.py`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -11448,14 +11448,14 @@ document.querySelector("p").textContent = "srcdoc content modified";
     describe('about: page', function () {
 
       it('should keep as-is', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.saveResourcesSequentially": true,
           "capture.object": "save",
-        };
+        });
 
         var blob = await capture({
           url: `${localhost}/capture_object_frame/about.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
         var zip = await new JSZip().loadAsync(blob);
 
@@ -11475,14 +11475,14 @@ document.querySelector("p").textContent = "srcdoc content modified";
 
       it('capture.saveAs = zip', async function () {
         // link to corresponding downloaded frame file
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.object": "save",
           "capture.saveAs": "zip",
-        };
+        });
 
         var blob = await captureHeadless({
           url: `${localhost}/capture_object_circular/index.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -11515,14 +11515,14 @@ document.querySelector("p").textContent = "srcdoc content modified";
 
       it('capture.saveAs = singleHtml', async function () {
         // rewrite a circular referencing with urn:scrapbook:download:circular:url:...
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.object": "save",
           "capture.saveAs": "singleHtml",
-        };
+        });
 
         var blob = await captureHeadless({
           url: `${localhost}/capture_object_circular/index.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var doc = await readFileAsDocument(blob);
@@ -11551,12 +11551,12 @@ document.querySelector("p").textContent = "srcdoc content modified";
     describe('basic', function () {
 
       it('capture.applet = save', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.applet": "save",
-        };
+        });
         var blob = await capture({
           url: `${localhost}/capture_applet/applet.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -11577,12 +11577,12 @@ document.querySelector("p").textContent = "srcdoc content modified";
       });
 
       it('capture.applet = link', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.applet": "link",
-        };
+        });
         var blob = await capture({
           url: `${localhost}/capture_applet/applet.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -11600,12 +11600,12 @@ document.querySelector("p").textContent = "srcdoc content modified";
       });
 
       it('capture.applet = blank', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.applet": "blank",
-        };
+        });
         var blob = await capture({
           url: `${localhost}/capture_applet/applet.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -11623,12 +11623,12 @@ document.querySelector("p").textContent = "srcdoc content modified";
       });
 
       it('capture.applet = remove', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.applet": "remove",
-        };
+        });
         var blob = await capture({
           url: `${localhost}/capture_applet/applet.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -11694,15 +11694,15 @@ document.querySelector("p").textContent = "srcdoc content modified";
   describe('form status handling', function () {
 
     describe('basic', function () {
-      var options = {
+      var options = Object.assign({}, baseOptions, {
         "capture.recordRewrites": true,
-      };
+      });
 
       it('capture.formStatus = save-all', async function () {
         options["capture.formStatus"] = "save-all";
         var blob = await capture({
           url: `${localhost}/capture_form/form-status.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
         var zip = await new JSZip().loadAsync(blob);
         var indexFile = zip.file('index.html');
@@ -11756,7 +11756,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
         options["capture.formStatus"] = "save";
         var blob = await capture({
           url: `${localhost}/capture_form/form-status.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
         var zip = await new JSZip().loadAsync(blob);
         var indexFile = zip.file('index.html');
@@ -11810,7 +11810,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
         options["capture.formStatus"] = "keep-all";
         var blob = await capture({
           url: `${localhost}/capture_form/form-status.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
         var zip = await new JSZip().loadAsync(blob);
         var indexFile = zip.file('index.html');
@@ -11864,7 +11864,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
         options["capture.formStatus"] = "keep";
         var blob = await capture({
           url: `${localhost}/capture_form/form-status.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
         var zip = await new JSZip().loadAsync(blob);
         var indexFile = zip.file('index.html');
@@ -11918,7 +11918,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
         options["capture.formStatus"] = "html-all";
         var blob = await capture({
           url: `${localhost}/capture_form/form-status.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
         var zip = await new JSZip().loadAsync(blob);
         var indexFile = zip.file('index.html');
@@ -11972,7 +11972,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
         options["capture.formStatus"] = "html";
         var blob = await capture({
           url: `${localhost}/capture_form/form-status.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
         var zip = await new JSZip().loadAsync(blob);
         var indexFile = zip.file('index.html');
@@ -12026,7 +12026,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
         options["capture.formStatus"] = "reset";
         var blob = await capture({
           url: `${localhost}/capture_form/form-status.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
         var zip = await new JSZip().loadAsync(blob);
         var indexFile = zip.file('index.html');
@@ -12064,13 +12064,13 @@ document.querySelector("p").textContent = "srcdoc content modified";
     describe('basic', function () {
 
       it('embed.html', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.image": "save",
           "capture.script": "save",
-        };
+        });
         var blob = await capture({
           url: `${localhost}/capture_svg/embed.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -12095,13 +12095,13 @@ document.querySelector("p").textContent = "srcdoc content modified";
       });
 
       it('external.svg', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.image": "save",
           "capture.script": "save",
-        };
+        });
         var blob = await capture({
           url: `${localhost}/capture_svg/external.svg`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -12132,12 +12132,12 @@ document.querySelector("p").textContent = "srcdoc content modified";
     describe('basic', function () {
 
       it('embed.html', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.image": "save",
-        };
+        });
         var blob = await capture({
           url: `${localhost}/capture_mathml/embed.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -12187,14 +12187,14 @@ document.querySelector("p").textContent = "srcdoc content modified";
   describe('invalid tags', function () {
 
     it('should escape bad tag content for security', async function () {
-      var options = {
+      var options = Object.assign({}, baseOptions, {
         "capture.style": "save",
         "capture.script": "save",
-      };
+      });
 
       var blob = await capture({
         url: `${localhost}/capture_invalid_tags/index.html`,
-        options: Object.assign({}, baseOptions, options),
+        options,
       });
 
       var zip = await new JSZip().loadAsync(blob);
@@ -12215,13 +12215,13 @@ document.querySelector("p").textContent = "srcdoc content modified";
   describe('recursive', function () {
 
     it('should work correctly when parent is to be removed and child is to be captured', async function () {
-      var options = {
+      var options = Object.assign({}, baseOptions, {
         "capture.image": "remove",
         "capture.script": "save",
-      };
+      });
       var blob = await capture({
         url: `${localhost}/capture_recursive/index.html`,
-        options: Object.assign({}, baseOptions, options),
+        options,
       });
 
       var zip = await new JSZip().loadAsync(blob);
@@ -12243,13 +12243,13 @@ document.querySelector("p").textContent = "srcdoc content modified";
   describe('removeHidden', function () {
 
     it('capture.removeHidden = undisplayed', async function () {
-      var options = {
+      var options = Object.assign({}, baseOptions, {
         "capture.removeHidden": "undisplayed",
-      };
+      });
 
       var blob = await capture({
         url: `${localhost}/capture_removeHidden/index.html`,
-        options: Object.assign({}, baseOptions, options),
+        options,
       });
 
       var zip = await new JSZip().loadAsync(blob);
@@ -12277,13 +12277,13 @@ document.querySelector("p").textContent = "srcdoc content modified";
     });
 
     it('capture.removeHidden = none', async function () {
-      var options = {
+      var options = Object.assign({}, baseOptions, {
         "capture.removeHidden": "none",
-      };
+      });
 
       var blob = await capture({
         url: `${localhost}/capture_removeHidden/index.html`,
-        options: Object.assign({}, baseOptions, options),
+        options,
       });
 
       var zip = await new JSZip().loadAsync(blob);
@@ -12334,12 +12334,12 @@ document.querySelector("p").textContent = "srcdoc content modified";
   describe('preload', function () {
 
     it('capture.preload = blank', async function () {
-      var options = {
+      var options = Object.assign({}, baseOptions, {
         "capture.preload": "blank",
-      };
+      });
       var blob = await capture({
         url: `${localhost}/capture_preload/preload.html`,
-        options: Object.assign({}, baseOptions, options),
+        options,
       });
 
       var zip = await new JSZip().loadAsync(blob);
@@ -12361,12 +12361,12 @@ document.querySelector("p").textContent = "srcdoc content modified";
     });
 
     it('capture.preload = remove', async function () {
-      var options = {
+      var options = Object.assign({}, baseOptions, {
         "capture.preload": "remove",
-      };
+      });
       var blob = await capture({
         url: `${localhost}/capture_preload/preload.html`,
-        options: Object.assign({}, baseOptions, options),
+        options,
       });
 
       var zip = await new JSZip().loadAsync(blob);
@@ -12384,12 +12384,12 @@ document.querySelector("p").textContent = "srcdoc content modified";
   describe('prefetch', function () {
 
     it('capture.prefetch = blank', async function () {
-      var options = {
+      var options = Object.assign({}, baseOptions, {
         "capture.prefetch": "blank",
-      };
+      });
       var blob = await capture({
         url: `${localhost}/capture_prefetch/prefetch.html`,
-        options: Object.assign({}, baseOptions, options),
+        options,
       });
 
       var zip = await new JSZip().loadAsync(blob);
@@ -12406,12 +12406,12 @@ document.querySelector("p").textContent = "srcdoc content modified";
     });
 
     it('capture.prefetch = remove', async function () {
-      var options = {
+      var options = Object.assign({}, baseOptions, {
         "capture.prefetch": "remove",
-      };
+      });
       var blob = await capture({
         url: `${localhost}/capture_prefetch/prefetch.html`,
-        options: Object.assign({}, baseOptions, options),
+        options,
       });
 
       var zip = await new JSZip().loadAsync(blob);
@@ -12427,7 +12427,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
   describe('crossorigin attribute', function () {
 
     it('save', async function () {
-      var options = {
+      var options = Object.assign({}, baseOptions, {
         "capture.image": "save",
         "capture.favicon": "save",
         "capture.audio": "save",
@@ -12435,11 +12435,11 @@ document.querySelector("p").textContent = "srcdoc content modified";
         "capture.style": "save",
         "capture.rewriteCss": "url",
         "capture.script": "save",
-      };
+      });
 
       var blob = await capture({
         url: `${localhost}/capture_crossorigin/crossorigin.py`,
-        options: Object.assign({}, baseOptions, options),
+        options,
       });
       var zip = await new JSZip().loadAsync(blob);
       var indexFile = zip.file('index.html');
@@ -12455,18 +12455,18 @@ document.querySelector("p").textContent = "srcdoc content modified";
     });
 
     it('link', async function () {
-      var options = {
+      var options = Object.assign({}, baseOptions, {
         "capture.image": "link",
         "capture.favicon": "link",
         "capture.audio": "link",
         "capture.video": "link",
         "capture.style": "link",
         "capture.script": "link",
-      };
+      });
 
       var blob = await capture({
         url: `${localhost}/capture_crossorigin/crossorigin.py`,
-        options: Object.assign({}, baseOptions, options),
+        options,
       });
       var zip = await new JSZip().loadAsync(blob);
       var indexFile = zip.file('index.html');
@@ -12482,18 +12482,18 @@ document.querySelector("p").textContent = "srcdoc content modified";
     });
 
     it('blank', async function () {
-      var options = {
+      var options = Object.assign({}, baseOptions, {
         "capture.image": "blank",
         "capture.favicon": "blank",
         "capture.audio": "blank",
         "capture.video": "blank",
         "capture.style": "blank",
         "capture.script": "blank",
-      };
+      });
 
       var blob = await capture({
         url: `${localhost}/capture_crossorigin/crossorigin.py`,
-        options: Object.assign({}, baseOptions, options),
+        options,
       });
       var zip = await new JSZip().loadAsync(blob);
       var indexFile = zip.file('index.html');
@@ -12513,15 +12513,15 @@ document.querySelector("p").textContent = "srcdoc content modified";
   describe('integrity attribute', function () {
 
     it('save', async function () {
-      var options = {
+      var options = Object.assign({}, baseOptions, {
         "capture.style": "save",
         "capture.script": "save",
         "capture.rewriteCss": "url",
-      };
+      });
 
       var blob = await capture({
         url: `${localhost}/capture_integrity/integrity.html`,
-        options: Object.assign({}, baseOptions, options),
+        options,
       });
       var zip = await new JSZip().loadAsync(blob);
       var indexFile = zip.file('index.html');
@@ -12533,13 +12533,13 @@ document.querySelector("p").textContent = "srcdoc content modified";
     });
 
     it('link', async function () {
-      var options = {
+      var options = Object.assign({}, baseOptions, {
         "capture.style": "link",
         "capture.script": "link",
-      };
+      });
       var blob = await capture({
         url: `${localhost}/capture_integrity/integrity.html`,
-        options: Object.assign({}, baseOptions, options),
+        options,
       });
       var zip = await new JSZip().loadAsync(blob);
       var indexFile = zip.file('index.html');
@@ -12551,13 +12551,13 @@ document.querySelector("p").textContent = "srcdoc content modified";
     });
 
     it('blank', async function () {
-      var options = {
+      var options = Object.assign({}, baseOptions, {
         "capture.style": "blank",
         "capture.script": "blank",
-      };
+      });
       var blob = await capture({
         url: `${localhost}/capture_integrity/integrity.html`,
-        options: Object.assign({}, baseOptions, options),
+        options,
       });
       var zip = await new JSZip().loadAsync(blob);
       var indexFile = zip.file('index.html');
@@ -12575,12 +12575,12 @@ document.querySelector("p").textContent = "srcdoc content modified";
     describe('capture.referrerPolicy', function () {
 
       it('capture.referrerPolicy = no-referrer', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.referrerPolicy": "no-referrer",
-        };
+        });
         var blob = await captureHeadless({
           url: `${localhost}/capture_referrer/index.py`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
         var zip = await new JSZip().loadAsync(blob);
         var file = zip.file('referrer.py');
@@ -12592,12 +12592,12 @@ document.querySelector("p").textContent = "srcdoc content modified";
       });
 
       it('capture.referrerPolicy = origin', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.referrerPolicy": "origin",
-        };
+        });
         var blob = await captureHeadless({
           url: `${localhost}/capture_referrer/index.py`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
         var zip = await new JSZip().loadAsync(blob);
         var file = zip.file('referrer.py');
@@ -12609,12 +12609,12 @@ document.querySelector("p").textContent = "srcdoc content modified";
       });
 
       it('capture.referrerPolicy = unsafe-url', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.referrerPolicy": "unsafe-url",
-        };
+        });
         var blob = await captureHeadless({
           url: `${localhost}/capture_referrer/index.py`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
         var zip = await new JSZip().loadAsync(blob);
         var file = zip.file('referrer.py');
@@ -12626,12 +12626,12 @@ document.querySelector("p").textContent = "srcdoc content modified";
       });
 
       it('capture.referrerPolicy = origin-when-cross-origin', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.referrerPolicy": "origin-when-cross-origin",
-        };
+        });
         var blob = await captureHeadless({
           url: `${localhost}/capture_referrer/index.py`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
         var zip = await new JSZip().loadAsync(blob);
         var file = zip.file('referrer.py');
@@ -12643,12 +12643,12 @@ document.querySelector("p").textContent = "srcdoc content modified";
       });
 
       it('capture.referrerPolicy = same-origin', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.referrerPolicy": "same-origin",
-        };
+        });
         var blob = await captureHeadless({
           url: `${localhost}/capture_referrer/index.py`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
         var zip = await new JSZip().loadAsync(blob);
         var file = zip.file('referrer.py');
@@ -12660,12 +12660,12 @@ document.querySelector("p").textContent = "srcdoc content modified";
       });
 
       it('capture.referrerPolicy = no-referrer-when-downgrade', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.referrerPolicy": "no-referrer-when-downgrade",
-        };
+        });
         var blob = await captureHeadless({
           url: `${localhost}/capture_referrer/index.py`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
         var zip = await new JSZip().loadAsync(blob);
         var file = zip.file('referrer.py');
@@ -12677,12 +12677,12 @@ document.querySelector("p").textContent = "srcdoc content modified";
       });
 
       it('capture.referrerPolicy = strict-origin', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.referrerPolicy": "strict-origin",
-        };
+        });
         var blob = await captureHeadless({
           url: `${localhost}/capture_referrer/index.py`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
         var zip = await new JSZip().loadAsync(blob);
         var file = zip.file('referrer.py');
@@ -12694,12 +12694,12 @@ document.querySelector("p").textContent = "srcdoc content modified";
       });
 
       it('capture.referrerPolicy = strict-origin-when-cross-origin', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.referrerPolicy": "strict-origin-when-cross-origin",
-        };
+        });
         var blob = await captureHeadless({
           url: `${localhost}/capture_referrer/index.py`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
         var zip = await new JSZip().loadAsync(blob);
         var file = zip.file('referrer.py');
@@ -12715,13 +12715,13 @@ document.querySelector("p").textContent = "srcdoc content modified";
     describe('capture.referrerSpoofSource', function () {
 
       it('should send the usual referrer if referrerSpoofSource = false', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.referrerPolicy": "unsafe-url",
           "capture.referrerSpoofSource": false,
-        };
+        });
         var blob = await captureHeadless({
           url: `${localhost}/capture_referrer/index.py`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
         var zip = await new JSZip().loadAsync(blob);
         var file = zip.file('referrer.py');
@@ -12733,13 +12733,13 @@ document.querySelector("p").textContent = "srcdoc content modified";
       });
 
       it('should send spoofed referrer if referrerSpoofSource = true', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.referrerPolicy": "unsafe-url",
           "capture.referrerSpoofSource": true,
-        };
+        });
         var blob = await captureHeadless({
           url: `${localhost}/capture_referrer/index.py`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
         var zip = await new JSZip().loadAsync(blob);
         var file = zip.file('referrer.py');
@@ -12751,13 +12751,13 @@ document.querySelector("p").textContent = "srcdoc content modified";
       });
 
       it('should send spoofed referrer if referrerSpoofSource = true (modified by referrerPolicy)', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.referrerPolicy": "origin",
           "capture.referrerSpoofSource": true,
-        };
+        });
         var blob = await captureHeadless({
           url: `${localhost}/capture_referrer/index.py`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
         var zip = await new JSZip().loadAsync(blob);
         var file = zip.file('referrer.py');
@@ -12773,14 +12773,14 @@ document.querySelector("p").textContent = "srcdoc content modified";
     describe('referrer related attributes', function () {
 
       it('should prioritize `referrerpolicy` and `rel=noreferrer` attributes', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.referrerPolicy": "unsafe-url",
           "capture.downLink.file.mode": "url",
           "capture.downLink.file.extFilter": "py",
-        };
+        });
         var blob = await captureHeadless({
           url: `${localhost}/capture_referrer_attr/index.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
         var zip = await new JSZip().loadAsync(blob);
 
@@ -12834,14 +12834,14 @@ document.querySelector("p").textContent = "srcdoc content modified";
       });
 
       it('should prioritize capture.referrerPolicy with "+"-prefix the highest', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.referrerPolicy": "+unsafe-url",
           "capture.downLink.file.mode": "url",
           "capture.downLink.file.extFilter": "py",
-        };
+        });
         var blob = await captureHeadless({
           url: `${localhost}/capture_referrer_attr/index.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
         var zip = await new JSZip().loadAsync(blob);
 
@@ -12899,14 +12899,14 @@ document.querySelector("p").textContent = "srcdoc content modified";
     describe('document referrer', function () {
 
       it('should prioritize `meta[name="referrer"]`', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.referrerPolicy": "unsafe-url",
           "capture.downLink.file.mode": "url",
           "capture.downLink.file.extFilter": "py",
-        };
+        });
         var blob = await captureHeadless({
           url: `${localhost}/capture_referrer_doc/index.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
         var zip = await new JSZip().loadAsync(blob);
 
@@ -13059,14 +13059,14 @@ document.querySelector("p").textContent = "srcdoc content modified";
       });
 
       it('should prioritize capture.referrerPolicy with "+"-prefix the highest', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.referrerPolicy": "+unsafe-url",
           "capture.downLink.file.mode": "url",
           "capture.downLink.file.extFilter": "py",
-        };
+        });
         var blob = await captureHeadless({
           url: `${localhost}/capture_referrer_doc/index.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
         var zip = await new JSZip().loadAsync(blob);
 
@@ -13144,14 +13144,14 @@ document.querySelector("p").textContent = "srcdoc content modified";
       });
 
       it('should honor the last `meta[name="referrer"]` before the rewritten URL', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.referrerPolicy": "unsafe-url",
           "capture.downLink.file.mode": "url",
           "capture.downLink.file.extFilter": "py",
-        };
+        });
         var blob = await captureHeadless({
           url: `${localhost}/capture_referrer_dynamic/index.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
         var zip = await new JSZip().loadAsync(blob);
 
@@ -13169,14 +13169,14 @@ document.querySelector("p").textContent = "srcdoc content modified";
       });
 
       it('should ignore `meta[name="referrer"]` in a shadow root', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.referrerPolicy": "unsafe-url",
           "capture.downLink.file.mode": "url",
           "capture.downLink.file.extFilter": "py",
-        };
+        });
         var blob = await capture({
           url: `${localhost}/capture_referrer_dynamic_shadow/index.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
         var zip = await new JSZip().loadAsync(blob);
         var indexFile = zip.file('index.html');
@@ -13202,13 +13202,13 @@ document.querySelector("p").textContent = "srcdoc content modified";
 
       for (const rewriteCss of ["url", "tidy", "match"]) {
         it(`should apply referrer policy for cross-origin CSS (capture.rewriteCss = ${rewriteCss})`, async function () {
-          var options = {
+          var options = Object.assign({}, baseOptions, {
             "capture.rewriteCss": rewriteCss,
             "capture.referrerPolicy": "",
-          };
+          });
           var blob = await captureHeadless({
             url: `${localhost}/capture_referrer_cross_origin/index.py`,
-            options: Object.assign({}, baseOptions, options),
+            options,
           });
           var zip = await new JSZip().loadAsync(blob);
 
@@ -13255,15 +13255,15 @@ document.querySelector("p").textContent = "srcdoc content modified";
     describe('should handle shadow DOMs according to capture.shadowDom', function () {
 
       it('capture.shadowDom = save', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.shadowDom": "save",
           "capture.image": "save",
           "capture.script": "remove",
           "capture.recordRewrites": true,
-        };
+        });
         var blob = await capture({
           url: `${localhost}/capture_shadowRoot/open.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -13296,15 +13296,15 @@ document.querySelector("p").textContent = "srcdoc content modified";
       });
 
       it('capture.shadowDom = remove', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.shadowDom": "remove",
           "capture.image": "save",
           "capture.script": "remove",
           "capture.recordRewrites": true,
-        };
+        });
         var blob = await capture({
           url: `${localhost}/capture_shadowRoot/open.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -13332,15 +13332,15 @@ document.querySelector("p").textContent = "srcdoc content modified";
     )('should handle closed shadow DOMs', function () {
 
       it('capture.shadowDom = save', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.shadowDom": "save",
           "capture.image": "save",
           "capture.script": "remove",
           "capture.recordRewrites": true,
-        };
+        });
         var blob = await capture({
           url: `${localhost}/capture_shadowRoot/closed.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -13379,15 +13379,15 @@ document.querySelector("p").textContent = "srcdoc content modified";
     $describe.skipIf($.noShadowRootClonable)('should handle clonable shadow DOMs', function () {
 
       it('capture.shadowDom = save', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.shadowDom": "save",
           "capture.image": "save",
           "capture.script": "remove",
           "capture.recordRewrites": true,
-        };
+        });
         var blob = await capture({
           url: `${localhost}/capture_shadowRoot/clonable.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -13422,15 +13422,15 @@ document.querySelector("p").textContent = "srcdoc content modified";
       });
 
       it('capture.shadowDom = remove', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.shadowDom": "remove",
           "capture.image": "save",
           "capture.script": "remove",
           "capture.recordRewrites": true,
-        };
+        });
         var blob = await capture({
           url: `${localhost}/capture_shadowRoot/clonable.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -13457,13 +13457,13 @@ document.querySelector("p").textContent = "srcdoc content modified";
         .skipIf($.noShadowRootSlotAssignment)('should handle further shadow DOM properties', function () {
 
       it('capture.shadowDom = save', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.shadowDom": "save",
           "capture.recordRewrites": true,
-        };
+        });
         var blob = await capture({
           url: `${localhost}/capture_shadowRoot/options.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -13488,15 +13488,15 @@ document.querySelector("p").textContent = "srcdoc content modified";
     });
 
     $describe.skipIf($.noShadowRootSlotAssignment)('should handle slots', function () {
-      var options = {
+      var options = Object.assign({}, baseOptions, {
         "capture.shadowDom": "save",
         "capture.recordRewrites": true,
-      };
+      });
 
       it('slotAssignment = manual', async function () {
         var blob = await capture({
           url: `${localhost}/capture_shadowRoot/slot-manual.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -13554,7 +13554,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
       it('slotAssignment = named', async function () {
         var blob = await capture({
           url: `${localhost}/capture_shadowRoot/slot-named.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -13595,15 +13595,15 @@ document.querySelector("p").textContent = "srcdoc content modified";
     describe('should handle shadow DOMs auto-generated by custom elements', function () {
 
       it('basic', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.shadowDom": "save",
           "capture.image": "save",
           "capture.script": "remove",
-        };
+        });
 
         var blob = await capture({
           url: `${localhost}/capture_shadowRoot_custom/open.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -13632,15 +13632,15 @@ document.querySelector("p").textContent = "srcdoc content modified";
     )('should be able to save closed shadow DOMs auto-generated by custom elements', function () {
 
       it('basic', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.shadowDom": "save",
           "capture.image": "save",
           "capture.script": "remove",
-        };
+        });
 
         var blob = await capture({
           url: `${localhost}/capture_shadowRoot_custom/closed.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -13667,12 +13667,12 @@ document.querySelector("p").textContent = "srcdoc content modified";
     describe('should generate registry for valid custom elements', function () {
 
       it('capture.script = save', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.script": "save",
-        };
+        });
         var blob = await capture({
           url: `${localhost}/capture_custom_elements/index.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -13683,12 +13683,12 @@ document.querySelector("p").textContent = "srcdoc content modified";
       });
 
       it('capture.script = link', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.script": "link",
-        };
+        });
         var blob = await capture({
           url: `${localhost}/capture_custom_elements/index.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -13699,12 +13699,12 @@ document.querySelector("p").textContent = "srcdoc content modified";
       });
 
       it('capture.script = blank', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.script": "blank",
-        };
+        });
         var blob = await capture({
           url: `${localhost}/capture_custom_elements/index.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -13716,12 +13716,12 @@ document.querySelector("p").textContent = "srcdoc content modified";
       });
 
       it('capture.script = remove', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.script": "remove",
-        };
+        });
         var blob = await capture({
           url: `${localhost}/capture_custom_elements/index.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -13737,12 +13737,12 @@ document.querySelector("p").textContent = "srcdoc content modified";
     describe('should not generate registry for invalid custom elements', function () {
 
       it('capture.script = remove', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.script": "remove",
-        };
+        });
         var blob = await capture({
           url: `${localhost}/capture_custom_elements/bad.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -13761,14 +13761,14 @@ document.querySelector("p").textContent = "srcdoc content modified";
     describe('should handle linked files according to capture.downLink.file.mode', function () {
 
       it('capture.downLink.file.mode = header', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.downLink.file.mode": "header",
           "capture.downLink.file.extFilter": `txt, bmp, css, html`,
-        };
+        });
 
         var blob = await capture({
           url: `${localhost}/capture_downLink_file/basic.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -13816,14 +13816,14 @@ document.querySelector("p").textContent = "srcdoc content modified";
       });
 
       it('capture.downLink.file.mode = url', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.downLink.file.mode": "url",
           "capture.downLink.file.extFilter": `txt, bmp, css, html`,
-        };
+        });
 
         var blob = await capture({
           url: `${localhost}/capture_downLink_file/basic.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -13871,14 +13871,14 @@ document.querySelector("p").textContent = "srcdoc content modified";
       });
 
       it('capture.downLink.file.mode = none', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.downLink.file.mode": "none",
           "capture.downLink.file.extFilter": `txt, bmp, css, html`,
-        };
+        });
 
         var blob = await capture({
           url: `${localhost}/capture_downLink_file/basic.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -13915,14 +13915,14 @@ document.querySelector("p").textContent = "srcdoc content modified";
 
       it('one rule per line', async function () {
         // match URL (*.py) but download using resolved filename using header (*.txt)
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.downLink.file.mode": "url",
           "capture.downLink.file.extFilter": `txt\nbmp\ncss\npy`,
-        };
+        });
 
         var blob = await captureHeadless({
           url: `${localhost}/capture_downLink_file/basic.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -13939,14 +13939,14 @@ document.querySelector("p").textContent = "srcdoc content modified";
       });
 
       it('plain: space separator', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.downLink.file.mode": "url",
           "capture.downLink.file.extFilter": `txt bmp css`,
-        };
+        });
 
         var blob = await captureHeadless({
           url: `${localhost}/capture_downLink_file/basic.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -13963,14 +13963,14 @@ document.querySelector("p").textContent = "srcdoc content modified";
       });
 
       it('plain: comma separator', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.downLink.file.mode": "url",
           "capture.downLink.file.extFilter": `txt,bmp,css`,
-        };
+        });
 
         var blob = await captureHeadless({
           url: `${localhost}/capture_downLink_file/basic.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -13987,14 +13987,14 @@ document.querySelector("p").textContent = "srcdoc content modified";
       });
 
       it('plain: semicolon separator', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.downLink.file.mode": "url",
           "capture.downLink.file.extFilter": `txt;bmp;css`,
-        };
+        });
 
         var blob = await captureHeadless({
           url: `${localhost}/capture_downLink_file/basic.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -14011,14 +14011,14 @@ document.querySelector("p").textContent = "srcdoc content modified";
       });
 
       it('plain: mixed separators', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.downLink.file.mode": "url",
           "capture.downLink.file.extFilter": `txt; bmp ,; css`,
-        };
+        });
 
         var blob = await captureHeadless({
           url: `${localhost}/capture_downLink_file/basic.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -14035,14 +14035,14 @@ document.querySelector("p").textContent = "srcdoc content modified";
       });
 
       it('plain: match full extension', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.downLink.file.mode": "url",
           "capture.downLink.file.extFilter": `tx, mp, s`,
-        };
+        });
 
         var blob = await captureHeadless({
           url: `${localhost}/capture_downLink_file/basic.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -14059,14 +14059,14 @@ document.querySelector("p").textContent = "srcdoc content modified";
       });
 
       it('regex: with flag', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.downLink.file.mode": "url",
           "capture.downLink.file.extFilter": `/(TXT|BMP|CSS)/i`,
-        };
+        });
 
         var blob = await captureHeadless({
           url: `${localhost}/capture_downLink_file/basic.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -14083,14 +14083,14 @@ document.querySelector("p").textContent = "srcdoc content modified";
       });
 
       it('regex: without flag', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.downLink.file.mode": "url",
           "capture.downLink.file.extFilter": `/(TXT|BMP|CSS)/`,
-        };
+        });
 
         var blob = await captureHeadless({
           url: `${localhost}/capture_downLink_file/basic.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -14107,14 +14107,14 @@ document.querySelector("p").textContent = "srcdoc content modified";
       });
 
       it('regex: wildcards', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.downLink.file.mode": "url",
           "capture.downLink.file.extFilter": `/(?!py).+/`,
-        };
+        });
 
         var blob = await captureHeadless({
           url: `${localhost}/capture_downLink_file/basic.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -14131,14 +14131,14 @@ document.querySelector("p").textContent = "srcdoc content modified";
       });
 
       it('regex: match full extension', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.downLink.file.mode": "url",
           "capture.downLink.file.extFilter": `/tx/`,
-        };
+        });
 
         var blob = await captureHeadless({
           url: `${localhost}/capture_downLink_file/basic.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -14155,14 +14155,14 @@ document.querySelector("p").textContent = "srcdoc content modified";
       });
 
       it('regex: unknown MIME should not match any extension', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.downLink.file.mode": "header",
           "capture.downLink.file.extFilter": `/.*/`,
-        };
+        });
 
         var blob = await captureHeadless({
           url: `${localhost}/capture_downLink_file/basic.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -14179,14 +14179,14 @@ document.querySelector("p").textContent = "srcdoc content modified";
       });
 
       it('regex: take URL filename if no Content-Disposition filename', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.downLink.file.mode": "header",
           "capture.downLink.file.extFilter": `//`,
-        };
+        });
 
         var blob = await captureHeadless({
           url: `${localhost}/capture_downLink_file/basic.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -14203,17 +14203,17 @@ document.querySelector("p").textContent = "srcdoc content modified";
       });
 
       it('mime: filter with full MIME', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.downLink.file.mode": "header",
           "capture.downLink.file.extFilter": `\
 mime:text/plain
 mime:image/bmp
 mime:application/wsb.unknown`,
-        };
+        });
 
         var blob = await captureHeadless({
           url: `${localhost}/capture_downLink_file/basic.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -14230,14 +14230,14 @@ mime:application/wsb.unknown`,
       });
 
       it('mime: filter with regex', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.downLink.file.mode": "header",
           "capture.downLink.file.extFilter": `mime:/text/.+/i`,
-        };
+        });
 
         var blob = await captureHeadless({
           url: `${localhost}/capture_downLink_file/basic.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -14254,14 +14254,14 @@ mime:application/wsb.unknown`,
       });
 
       it('mime: filter should not hit if no Content-Type', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.downLink.file.mode": "header",
           "capture.downLink.file.extFilter": `mime:/.*/i`,
-        };
+        });
 
         var blob = await captureHeadless({
           url: `${localhost}/capture_downLink_file/basic.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -14278,14 +14278,14 @@ mime:application/wsb.unknown`,
       });
 
       it('mime: filter should not hit for url mode', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.downLink.file.mode": "url",
           "capture.downLink.file.extFilter": `mime:/.*/i`,
-        };
+        });
 
         var blob = await captureHeadless({
           url: `${localhost}/capture_downLink_file/basic.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -14305,14 +14305,14 @@ mime:application/wsb.unknown`,
     describe('should handle nonexistent linked files', function () {
 
       it('url mode: should download matched URL with error', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.downLink.file.mode": "url",
           "capture.downLink.file.extFilter": `/|txt/`,
-        };
+        });
 
         var blob = await captureHeadless({
           url: `${localhost}/capture_downLink_file/basic.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -14326,14 +14326,14 @@ mime:application/wsb.unknown`,
       });
 
       it('header mode: should not match any filter', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.downLink.file.mode": "header",
           "capture.downLink.file.extFilter": `/.*/\nmime:/.*/`,
-        };
+        });
 
         var blob = await captureHeadless({
           url: `${localhost}/capture_downLink_file/basic.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -14355,7 +14355,7 @@ mime:application/wsb.unknown`,
         // plain text rule
         // match original URL
         // rule and URL have hash stripped before comparison
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.downLink.file.mode": "header",
           "capture.downLink.file.extFilter": `txt, bmp, css`,
           // 1. should match
@@ -14367,11 +14367,11 @@ ${localhost}/capture_downLink_file/file.bmp
 ${localhost}/capture_downLink_file/file.css#whatever
 ${localhost}/capture_downLink_file/mime.py#foo
 ${localhost}/capture_downLink_file/redirect.pyr#bar`,
-        };
+        });
 
         var blob = await captureHeadless({
           url: `${localhost}/capture_downLink_file/basic.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -14388,7 +14388,7 @@ ${localhost}/capture_downLink_file/redirect.pyr#bar`,
       });
 
       it('plain: match full URL', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.downLink.file.mode": "header",
           "capture.downLink.file.extFilter": `txt, bmp, css`,
           // 1. should not match
@@ -14396,11 +14396,11 @@ ${localhost}/capture_downLink_file/redirect.pyr#bar`,
           "capture.downLink.urlFilter": `\
 capture_downLink_file/mime.py
 ${localhost}/capture_downLink_file/file.css`,
-        };
+        });
 
         var blob = await captureHeadless({
           url: `${localhost}/capture_downLink_file/basic.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -14417,7 +14417,7 @@ ${localhost}/capture_downLink_file/file.css`,
       });
 
       it('plain: strip chars after spaces', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.downLink.file.mode": "header",
           "capture.downLink.file.extFilter": `txt, bmp, css`,
           // 1. should not match
@@ -14425,11 +14425,11 @@ ${localhost}/capture_downLink_file/file.css`,
           "capture.downLink.urlFilter": `\
 capture_downLink_file/mime.py  foo
 ${localhost}/capture_downLink_file/file.css\tbar`,
-        };
+        });
 
         var blob = await captureHeadless({
           url: `${localhost}/capture_downLink_file/basic.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -14450,7 +14450,7 @@ ${localhost}/capture_downLink_file/file.css\tbar`,
         // match original URL
         // match partial URL
         // URL has hash stripped before comparison but rule is not
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.downLink.file.mode": "header",
           "capture.downLink.file.extFilter": `txt, bmp, css`,
           // 1. should match
@@ -14458,11 +14458,11 @@ ${localhost}/capture_downLink_file/file.css\tbar`,
           "capture.downLink.urlFilter": `\
 /[/][^/]+[.]PY$/i
 /#.+$/i`,
-        };
+        });
 
         var blob = await captureHeadless({
           url: `${localhost}/capture_downLink_file/basic.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -14483,13 +14483,13 @@ ${localhost}/capture_downLink_file/file.css\tbar`,
     describe('should handle in-depth capture according to capture.downLink.doc.depth', function () {
 
       it('depth = null', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.downLink.doc.depth": null,
-        };
+        });
 
         var blob = await captureHeadless({
           url: `${localhost}/capture_downLink_indepth/in-depth.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -14510,13 +14510,13 @@ ${localhost}/capture_downLink_file/file.css\tbar`,
       });
 
       it('depth = 0', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.downLink.doc.depth": 0,
-        };
+        });
 
         var blob = await captureHeadless({
           url: `${localhost}/capture_downLink_indepth/in-depth.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -14576,13 +14576,13 @@ ${localhost}/capture_downLink_file/file.css\tbar`,
       });
 
       it('depth = 1', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.downLink.doc.depth": 1,
-        };
+        });
 
         var blob = await captureHeadless({
           url: `${localhost}/capture_downLink_indepth/in-depth.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -14702,13 +14702,13 @@ ${localhost}/capture_downLink_file/file.css\tbar`,
       });
 
       it('depth = 2', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.downLink.doc.depth": 2,
-        };
+        });
 
         var blob = await captureHeadless({
           url: `${localhost}/capture_downLink_indepth/in-depth.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -14850,14 +14850,14 @@ ${localhost}/capture_downLink_file/file.css\tbar`,
     describe('in-depth capture with tab mode', function () {
 
       it('depth = 1', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.downLink.doc.depth": 1,
           "capture.downLink.doc.mode": "tab",
-        };
+        });
 
         var blob = await capture({
           url: `${localhost}/capture_downLink_indepth/in-depth.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -14981,14 +14981,14 @@ ${localhost}/capture_downLink_file/file.css\tbar`,
     describe('should ignore in-depth capture for singleHtml', function () {
 
       it('depth = 0', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.downLink.doc.depth": 0,
           "capture.saveAs": "singleHtml",
-        };
+        });
 
         var blob = await captureHeadless({
           url: `${localhost}/capture_downLink_indepth/in-depth.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var doc = await readFileAsDocument(blob);
@@ -15001,14 +15001,14 @@ ${localhost}/capture_downLink_file/file.css\tbar`,
       });
 
       it('depth = 1', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.downLink.doc.depth": 1,
           "capture.saveAs": "singleHtml",
-        };
+        });
 
         var blob = await captureHeadless({
           url: `${localhost}/capture_downLink_indepth/in-depth.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var doc = await readFileAsDocument(blob);
@@ -15023,17 +15023,17 @@ ${localhost}/capture_downLink_file/file.css\tbar`,
     });
 
     describe('should ignore downLink.file for doc when downLink.doc.depth is set', function () {
-      var options = {
+      var options = Object.assign({}, baseOptions, {
         "capture.downLink.file.mode": "url",
         "capture.downLink.file.extFilter": `bmp, html`,
-      };
+      });
 
       it('depth = null', async function () {
         options["capture.downLink.doc.depth"] = null;
 
         var blob = await captureHeadless({
           url: `${localhost}/capture_downLink_indepth/in-depth.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -15090,7 +15090,7 @@ ${localhost}/capture_downLink_file/file.css\tbar`,
 
         var blob = await captureHeadless({
           url: `${localhost}/capture_downLink_indepth/in-depth.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -15120,7 +15120,7 @@ ${localhost}/capture_downLink_file/file.css\tbar`,
 
         var blob = await captureHeadless({
           url: `${localhost}/capture_downLink_indepth/in-depth.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -15177,16 +15177,16 @@ ${localhost}/capture_downLink_file/file.css\tbar`,
     describe('syntax of capture.downLink.doc.urlFilter', function () {
 
       it('plain: match full URL', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.downLink.doc.depth": 2,
           "capture.downLink.doc.urlFilter": `\
 ${localhost}/capture_downLink_indepth/linked1-2.html
 ${localhost}/capture_downLink_indepth/linked2-1.html`,
-        };
+        });
 
         var blob = await captureHeadless({
           url: `${localhost}/capture_downLink_indepth/in-depth.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -15224,14 +15224,14 @@ ${localhost}/capture_downLink_indepth/linked2-1.html`,
       });
 
       it('regex', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.downLink.doc.depth": 2,
           "capture.downLink.doc.urlFilter": `/linked1-[12]\.HTML$/i`,
-        };
+        });
 
         var blob = await captureHeadless({
           url: `${localhost}/capture_downLink_indepth/in-depth.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -15273,13 +15273,13 @@ ${localhost}/capture_downLink_indepth/linked2-1.html`,
     describe('should rebuild links for XHTML/SVG pages', function () {
 
       it('depth = 1', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.downLink.doc.depth": 1,
-        };
+        });
 
         var blob = await captureHeadless({
           url: `${localhost}/capture_downLink_indepth_nonHtml/in-depth.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -15310,13 +15310,13 @@ ${localhost}/capture_downLink_indepth/linked2-1.html`,
     describe('should have the same depth for pages linked from a frame as from the frame parent', function () {
 
       it('depth = 1', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.downLink.doc.depth": 1,
-        };
+        });
 
         var blob = await captureHeadless({
           url: `${localhost}/capture_downLink_indepth_frame/in-depth.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -15340,17 +15340,17 @@ ${localhost}/capture_downLink_indepth/linked2-1.html`,
     });
 
     describe('frame renaming for deep pages', function () {
-      var options = {
+      var options = Object.assign({}, baseOptions, {
         "capture.saveResourcesSequentially": true,
         "capture.downLink.doc.depth": 1,
-      };
+      });
 
       it('capture.frameRename = true', async function () {
         options["capture.frameRename"] = true;
 
         var blob = await captureHeadless({
           url: `${localhost}/capture_downLink_indepth_renaming/in-depth.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -15372,7 +15372,7 @@ ${localhost}/capture_downLink_indepth/linked2-1.html`,
 
         var blob = await captureHeadless({
           url: `${localhost}/capture_downLink_indepth_renaming/in-depth.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -15394,13 +15394,13 @@ ${localhost}/capture_downLink_indepth/linked2-1.html`,
     describe('should rebuild links in shadow DOMs', function () {
 
       it('depth = 1', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.downLink.doc.depth": 1,
-        };
+        });
 
         var blob = await capture({
           url: `${localhost}/capture_downLink_indepth_shadow/in-depth.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -15427,13 +15427,13 @@ ${localhost}/capture_downLink_indepth/linked2-1.html`,
     describe('links handling for meta refresh', function () {
 
       it('depth = 1', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.downLink.doc.depth": 1,
-        };
+        });
 
         var blob = await capture({
           url: `${localhost}/capture_downLink_indepth_metaRefresh/in-depth.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -15462,13 +15462,13 @@ ${localhost}/capture_downLink_indepth/linked2-1.html`,
       });
 
       it('depth = 3', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.downLink.doc.depth": 3,
-        };
+        });
 
         var blob = await capture({
           url: `${localhost}/capture_downLink_indepth_metaRefresh/in-depth.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -15507,13 +15507,13 @@ ${localhost}/capture_downLink_indepth/linked2-1.html`,
     describe('links handling for redirect', function () {
 
       it('depth = 1', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.downLink.doc.depth": 1,
-        };
+        });
 
         var blob = await capture({
           url: `${localhost}/capture_downLink_indepth_redirect/in-depth.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -15582,15 +15582,15 @@ ${localhost}/capture_downLink_indepth/linked2-1.html`,
     describe('should not record URL for data URLs in `index.json`', function () {
 
       it('basic', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.saveResourcesSequentially": true,
           "capture.downLink.doc.depth": 0,
           "capture.saveDataUriAsFile": true,
-        };
+        });
 
         var blob = await capture({
           url: `${localhost}/capture_downLink_indepth_datauri/in-depth.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -15658,14 +15658,14 @@ ${localhost}/capture_downLink_indepth/linked2-1.html`,
     describe('should not record URL for blob: URLs in `index.json`', function () {
 
       it('depth = 0', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.saveResourcesSequentially": true,
           "capture.downLink.doc.depth": 0,
-        };
+        });
 
         var blob = await capture({
           url: `${localhost}/capture_downLink_indepth_blob/in-depth.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         }, {delay: 500});
 
         var zip = await new JSZip().loadAsync(blob);
@@ -15737,13 +15737,13 @@ ${localhost}/capture_downLink_indepth/linked2-1.html`,
     describe('should keep as-is for about: URLs', function () {
 
       it('depth = 1', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.downLink.doc.depth": 1,
-        };
+        });
 
         var blob = await capture({
           url: `${localhost}/capture_downLink_indepth_about/in-depth.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -15805,13 +15805,13 @@ ${localhost}/capture_downLink_indepth/linked2-1.html`,
     describe('should safely ignore invalid URLs when rebuilding links', function () {
 
       it('depth = 1', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.downLink.doc.depth": 1,
-        };
+        });
 
         var blob = await capture({
           url: `${localhost}/capture_downLink_indepth_invalid/in-depth.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -15878,15 +15878,15 @@ ${localhost}/capture_downLink_indepth/linked2-1.html`,
     describe('should not capture attachment pages', function () {
 
       it('downLink', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.downLink.file.mode": "header",
           "capture.downLink.file.extFilter": "html",
           "capture.downLink.doc.depth": 0,
-        };
+        });
 
         var blob = await capture({
           url: `${localhost}/capture_downLink_indepth_attachment/in-depth.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -15923,14 +15923,14 @@ ${localhost}/capture_downLink_indepth/linked2-1.html`,
       });
 
       it('inDepth', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.downLink.file.mode": "none",
           "capture.downLink.doc.depth": 1,
-        };
+        });
 
         var blob = await capture({
           url: `${localhost}/capture_downLink_indepth_attachment/in-depth.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -15975,15 +15975,15 @@ ${localhost}/capture_downLink_indepth/linked2-1.html`,
       });
 
       it('downLink & inDepth', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.downLink.file.mode": "header",
           "capture.downLink.file.extFilter": "html",
           "capture.downLink.doc.depth": 1,
-        };
+        });
 
         var blob = await capture({
           url: `${localhost}/capture_downLink_indepth_attachment/in-depth.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -16046,7 +16046,7 @@ ${localhost}/capture_downLink_indepth/linked2-1.html`,
     });
 
     describe('should add file/page according to capture.downLink.urlExtra', function () {
-      var options = {
+      var options = Object.assign({}, baseOptions, {
         "capture.downLink.file.extFilter": "jpg",
         "capture.downLink.doc.urlFilter": "/(?!)/",
         "capture.downLink.urlFilter": "//",
@@ -16054,7 +16054,7 @@ ${localhost}/capture_downLink_indepth/linked2-1.html`,
 ${localhost}/capture_downLink_indepth_urlExtra/1-1.html
 ${localhost}/capture_downLink_indepth_urlExtra/1-2.py
 ${localhost}/capture_downLink_indepth_urlExtra/1-3.txt`,
-      };
+      });
 
       it('-downLink -inDepth', async function () {
         options["capture.downLink.file.mode"] = "none";
@@ -16062,7 +16062,7 @@ ${localhost}/capture_downLink_indepth_urlExtra/1-3.txt`,
 
         var blob = await capture({
           url: `${localhost}/capture_downLink_indepth_urlExtra/main.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -16081,7 +16081,7 @@ ${localhost}/capture_downLink_indepth_urlExtra/1-3.txt`,
 
         var blob = await capture({
           url: `${localhost}/capture_downLink_indepth_urlExtra/main.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -16110,7 +16110,7 @@ ${localhost}/capture_downLink_indepth_urlExtra/1-3.txt`,
 
         var blob = await capture({
           url: `${localhost}/capture_downLink_indepth_urlExtra/main.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -16187,7 +16187,7 @@ ${localhost}/capture_downLink_indepth_urlExtra/1-3.txt`,
 
         var blob = await capture({
           url: `${localhost}/capture_downLink_indepth_urlExtra/main.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -16280,15 +16280,15 @@ ${localhost}/capture_downLink_indepth_urlExtra/1-3.txt`,
     describe('should preserve case for `path` in `index.json`', function () {
 
       it('basic', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.downLink.doc.depth": 1,
           "capture.downLink.file.mode": "url",
           "capture.downLink.file.extFilter": `bmp`,
-        };
+        });
 
         var blob = await captureHeadless({
           url: `${localhost}/capture_downLink_indepth_case/index.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -16364,15 +16364,15 @@ ${localhost}/capture_downLink_indepth_urlExtra/1-3.txt`,
     describe('should save linked blob URL file/page', function () {
 
       it('basic', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.downLink.file.mode": "header",
           "capture.downLink.file.extFilter": `bmp`,
           "capture.downLink.doc.depth": 1,
-        };
+        });
 
         var blob = await capture({
           url: `${localhost}/capture_downLink_blob/basic.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         }, {delay: 500});
         var uuid = r`[\da-f]{8}-(?:[\da-f]{4}-){3}[\da-f]{12}`;
 
@@ -16404,15 +16404,15 @@ ${localhost}/capture_downLink_indepth_urlExtra/1-3.txt`,
         userAgent.is('firefox'),
         'unable to fetch an upper-scope blob URL from the content script in Firefox',
       )('basic', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.downLink.file.mode": "header",
           "capture.downLink.file.extFilter": `bmp`,
           "capture.downLink.doc.depth": 2,
-        };
+        });
 
         var blob = await capture({
           url: `${localhost}/capture_downLink_blob/basic.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         }, {delay: 500});
         var uuid = r`[\da-f]{8}-(?:[\da-f]{4}-){3}[\da-f]{12}`;
 
@@ -16463,15 +16463,15 @@ ${localhost}/capture_downLink_indepth_urlExtra/1-3.txt`,
      * Should NOT record the original value of "data-scrapbook-" attributes.
      */
     describe('should record item meta in root element according to capture.recordDocumentMeta', function () {
-      var options = {
+      var options = Object.assign({}, baseOptions, {
         "capture.recordRewrites": true,
-      };
+      });
 
       it('html; +capture.recordDocumentMeta', async function () {
         options["capture.recordDocumentMeta"] = true;
         var blob = await capture({
           url: `${localhost}/capture_record/meta.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
         var zip = await new JSZip().loadAsync(blob);
         var indexFile = zip.file('index.html');
@@ -16488,7 +16488,7 @@ ${localhost}/capture_downLink_indepth_urlExtra/1-3.txt`,
         options["capture.recordDocumentMeta"] = false;
         var blob = await capture({
           url: `${localhost}/capture_record/meta.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
         var zip = await new JSZip().loadAsync(blob);
         var indexFile = zip.file('index.html');
@@ -16504,7 +16504,7 @@ ${localhost}/capture_downLink_indepth_urlExtra/1-3.txt`,
         options["capture.recordDocumentMeta"] = true;
         var blob = await capture({
           url: `${localhost}/capture_record/text.py`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
         var zip = await new JSZip().loadAsync(blob);
         var indexFile = zip.file('index.html');
@@ -16523,7 +16523,7 @@ ${localhost}/capture_downLink_indepth_urlExtra/1-3.txt`,
         options["capture.recordDocumentMeta"] = false;
         var blob = await capture({
           url: `${localhost}/capture_record/text.py`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
         var zip = await new JSZip().loadAsync(blob);
         var indexFile = zip.file('index.html');
@@ -16538,7 +16538,7 @@ ${localhost}/capture_downLink_indepth_urlExtra/1-3.txt`,
         var blob = await capture({
           url: `${localhost}/capture_record/meta.html`,
           mode: "bookmark",
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
         var doc = await readFileAsDocument(blob);
         var html = doc.documentElement;
@@ -16554,7 +16554,7 @@ ${localhost}/capture_downLink_indepth_urlExtra/1-3.txt`,
         var blob = await capture({
           url: `${localhost}/capture_record/meta.html`,
           mode: "bookmark",
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
         var doc = await readFileAsDocument(blob);
 
@@ -16566,12 +16566,12 @@ ${localhost}/capture_downLink_indepth_urlExtra/1-3.txt`,
     describe('should record hash in main document and NOT in frames', function () {
 
       it('html', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.recordDocumentMeta": true,
-        };
+        });
         var blob = await capture({
           url: `${localhost}/capture_record/frame.html#abc`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
         var zip = await new JSZip().loadAsync(blob);
         var indexFile = zip.file('index.html');
@@ -16586,12 +16586,12 @@ ${localhost}/capture_downLink_indepth_urlExtra/1-3.txt`,
       });
 
       it('html; headless', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.recordDocumentMeta": true,
-        };
+        });
         var blob = await captureHeadless({
           url: `${localhost}/capture_record/frame.html#abc`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
         var zip = await new JSZip().loadAsync(blob);
         var indexFile = zip.file('index.html');
@@ -16606,12 +16606,12 @@ ${localhost}/capture_downLink_indepth_urlExtra/1-3.txt`,
       });
 
       it('file', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.recordDocumentMeta": true,
-        };
+        });
         var blob = await capture({
           url: `${localhost}/capture_record/text.py#abc`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
         var zip = await new JSZip().loadAsync(blob);
         var indexFile = zip.file('index.html');
@@ -16621,12 +16621,12 @@ ${localhost}/capture_downLink_indepth_urlExtra/1-3.txt`,
       });
 
       it('file; headless', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.recordDocumentMeta": true,
-        };
+        });
         var blob = await captureHeadless({
           url: `${localhost}/capture_record/text.py#abc`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
         var zip = await new JSZip().loadAsync(blob);
         var indexFile = zip.file('index.html');
@@ -16636,13 +16636,13 @@ ${localhost}/capture_downLink_indepth_urlExtra/1-3.txt`,
       });
 
       it('bookmark', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.recordDocumentMeta": true,
-        };
+        });
         var blob = await capture({
           url: `${localhost}/capture_record/meta.html#abc`,
           mode: "bookmark",
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
         var doc = await readFileAsDocument(blob);
         assert.strictEqual(doc.documentElement.getAttribute('data-scrapbook-source'), `${localhost}/capture_record/meta.html#abc`);
@@ -16653,12 +16653,12 @@ ${localhost}/capture_downLink_indepth_urlExtra/1-3.txt`,
     describe('should record the redirected URL', function () {
 
       it('html; +capture.recordDocumentMeta', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.recordDocumentMeta": true,
-        };
+        });
         var blob = await captureHeadless({
           url: `${localhost}/capture_record/meta.pyr#abc`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
         var zip = await new JSZip().loadAsync(blob);
         var indexFile = zip.file('index.html');
@@ -16674,13 +16674,13 @@ ${localhost}/capture_downLink_indepth_urlExtra/1-3.txt`,
     describe('should record meta in `index.html` rather than in `*.xhtml` (except for source)', function () {
 
       it('html; +capture.recordDocumentMeta', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.recordDocumentMeta": true,
           "capture.downLink.doc.depth": 0,
-        };
+        });
         var blob = await captureHeadless({
           url: `${localhost}/capture_record/meta.xhtml#abc`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
         var zip = await new JSZip().loadAsync(blob);
 
@@ -16703,7 +16703,7 @@ ${localhost}/capture_downLink_indepth_urlExtra/1-3.txt`,
     });
 
     describe('should record removed nodes according to capture.recordRewrites', function () {
-      var options = {
+      var options = Object.assign({}, baseOptions, {
         "capture.image": "remove",
         "capture.favicon": "remove",
         "capture.canvas": "remove",
@@ -16719,14 +16719,14 @@ ${localhost}/capture_downLink_indepth_urlExtra/1-3.txt`,
         "capture.preload": "remove",
         "capture.prefetch": "remove",
         "capture.base": "remove",
-      };
+      });
 
       it('+capture.recordRewrites', async function () {
         options["capture.recordRewrites"] = true;
 
         var blob = await captureHeadless({
           url: `${localhost}/capture_record/nodes1.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
         var zip = await new JSZip().loadAsync(blob);
         var indexFile = zip.file('index.html');
@@ -16818,7 +16818,7 @@ ${localhost}/capture_downLink_indepth_urlExtra/1-3.txt`,
 
         var blob = await captureHeadless({
           url: `${localhost}/capture_record/nodes1.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
         var zip = await new JSZip().loadAsync(blob);
         var indexFile = zip.file('index.html');
@@ -16831,18 +16831,18 @@ ${localhost}/capture_downLink_indepth_urlExtra/1-3.txt`,
     });
 
     describe('should record removed source nodes in picture, audio, and video', function () {
-      var options = {
+      var options = Object.assign({}, baseOptions, {
         "capture.image": "save-current",
         "capture.audio": "save-current",
         "capture.video": "save-current",
-      };
+      });
 
       it('+capture.recordRewrites', async function () {
         options["capture.recordRewrites"] = true;
 
         var blob = await capture({
           url: `${localhost}/capture_record/nodes2.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
         var zip = await new JSZip().loadAsync(blob);
         var indexFile = zip.file('index.html');
@@ -16868,7 +16868,7 @@ ${localhost}/capture_downLink_indepth_urlExtra/1-3.txt`,
 
         var blob = await capture({
           url: `${localhost}/capture_record/nodes2.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
         var zip = await new JSZip().loadAsync(blob);
         var indexFile = zip.file('index.html');
@@ -16881,18 +16881,18 @@ ${localhost}/capture_downLink_indepth_urlExtra/1-3.txt`,
     });
 
     describe('should record added nodes according to capture.recordRewrites', function () {
-      var options = {
+      var options = Object.assign({}, baseOptions, {
         "capture.image": "save-current",
         "capture.audio": "save-current",
         "capture.video": "save-current",
-      };
+      });
 
       it('+capture.recordRewrites', async function () {
         options["capture.recordRewrites"] = true;
 
         var blob = await capture({
           url: `${localhost}/capture_record/nodes3.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
         var zip = await new JSZip().loadAsync(blob);
         var indexFile = zip.file('index.html');
@@ -16904,7 +16904,7 @@ ${localhost}/capture_downLink_indepth_urlExtra/1-3.txt`,
 
         var blob = await capture({
           url: `${localhost}/capture_record/nodes4.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
         var zip = await new JSZip().loadAsync(blob);
         var indexFile = zip.file('index.html');
@@ -16920,7 +16920,7 @@ ${localhost}/capture_downLink_indepth_urlExtra/1-3.txt`,
 
         var blob = await capture({
           url: `${localhost}/capture_record/nodes3.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
         var zip = await new JSZip().loadAsync(blob);
         var indexFile = zip.file('index.html');
@@ -16930,7 +16930,7 @@ ${localhost}/capture_downLink_indepth_urlExtra/1-3.txt`,
 
         var blob = await capture({
           url: `${localhost}/capture_record/nodes4.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
         var zip = await new JSZip().loadAsync(blob);
         var indexFile = zip.file('index.html');
@@ -16950,20 +16950,20 @@ ${localhost}/capture_downLink_indepth_urlExtra/1-3.txt`,
      * `captureRewriteAttr()`.
      */
     describe('should record changed attributes according to capture.recordRewrites', function () {
-      var options = {
+      var options = Object.assign({}, baseOptions, {
         "capture.frame": "save",
         "capture.styleInline": "blank",
         "capture.rewriteCss": "url",
         "capture.script": "blank",
         "capture.formStatus": "keep",
-      };
+      });
 
       it('+capture.recordRewrites', async function () {
         options["capture.recordRewrites"] = true;
 
         var blob = await capture({
           url: `${localhost}/capture_record/attrs1.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
         var zip = await new JSZip().loadAsync(blob);
         var indexFile = zip.file('index.html');
@@ -16987,7 +16987,7 @@ ${localhost}/capture_downLink_indepth_urlExtra/1-3.txt`,
 
         var blob = await capture({
           url: `${localhost}/capture_record/attrs1.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
         var zip = await new JSZip().loadAsync(blob);
         var indexFile = zip.file('index.html');
@@ -17000,7 +17000,7 @@ ${localhost}/capture_downLink_indepth_urlExtra/1-3.txt`,
     });
 
     describe('record changed attributes: save', function () {
-      var options = {
+      var options = Object.assign({}, baseOptions, {
         "capture.image": "save",
         "capture.imageBackground": "save",
         "capture.favicon": "save",
@@ -17022,14 +17022,14 @@ ${localhost}/capture_downLink_indepth_urlExtra/1-3.txt`,
         "capture.downLink.file.extFilter": "txt",
         "capture.downLink.urlFilter": "",
         "capture.contentSecurityPolicy": "remove",
-      };
+      });
 
       it('+capture.recordRewrites', async function () {
         options["capture.recordRewrites"] = true;
 
         var blob = await capture({
           url: `${localhost}/capture_record/attrs2.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
         var zip = await new JSZip().loadAsync(blob);
         var indexFile = zip.file('index.html');
@@ -17104,7 +17104,7 @@ p { background-image: /*scrapbook-orig-url="./null.bmp"*/url("null.bmp"); }`);
 
         var blob = await capture({
           url: `${localhost}/capture_record/attrs2.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
         var zip = await new JSZip().loadAsync(blob);
         var indexFile = zip.file('index.html');
@@ -17127,7 +17127,7 @@ p { background-image: url("null.bmp"); }`);
      * save styles to save CSS and check image background and font
      */
     describe('record changed attributes: blank', function () {
-      var options = {
+      var options = Object.assign({}, baseOptions, {
         "capture.image": "blank",
         "capture.imageBackground": "blank",
         "capture.favicon": "blank",
@@ -17143,14 +17143,14 @@ p { background-image: url("null.bmp"); }`);
         "capture.rewriteCss": "url",
         "capture.script": "blank",
         "capture.contentSecurityPolicy": "remove",
-      };
+      });
 
       it('+capture.recordRewrites', async function () {
         options["capture.recordRewrites"] = true;
 
         var blob = await capture({
           url: `${localhost}/capture_record/attrs2.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
         var zip = await new JSZip().loadAsync(blob);
         var indexFile = zip.file('index.html');
@@ -17196,7 +17196,7 @@ p { background-image: /*scrapbook-orig-url="./null.bmp"*/url(""); }`);
 
         var blob = await capture({
           url: `${localhost}/capture_record/attrs2.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
         var zip = await new JSZip().loadAsync(blob);
         var indexFile = zip.file('index.html');
@@ -17216,19 +17216,19 @@ p { background-image: url(""); }`);
     });
 
     describe('record changed attributes: save-current', function () {
-      var options = {
+      var options = Object.assign({}, baseOptions, {
         "capture.image": "save-current",
         "capture.audio": "save-current",
         "capture.video": "save-current",
         "capture.style": "blank",
-      };
+      });
 
       it('+capture.recordRewrites', async function () {
         options["capture.recordRewrites"] = true;
 
         var blob = await capture({
           url: `${localhost}/capture_record/attrs2.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
         var zip = await new JSZip().loadAsync(blob);
         var indexFile = zip.file('index.html');
@@ -17256,7 +17256,7 @@ p { background-image: url(""); }`);
 
         var blob = await capture({
           url: `${localhost}/capture_record/attrs2.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
         var zip = await new JSZip().loadAsync(blob);
         var indexFile = zip.file('index.html');
@@ -17270,16 +17270,16 @@ p { background-image: url(""); }`);
     });
 
     describe('record changed attributes: base elements', function () {
-      var options = {
+      var options = Object.assign({}, baseOptions, {
         "capture.recordRewrites": true,
-      };
+      });
 
       it('capture.base = save', async function () {
         options["capture.base"] = "save";
 
         var blob = await capture({
           url: `${localhost}/capture_record/attrs3.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
         var zip = await new JSZip().loadAsync(blob);
         var indexFile = zip.file('index.html');
@@ -17295,7 +17295,7 @@ p { background-image: url(""); }`);
 
         var blob = await capture({
           url: `${localhost}/capture_record/attrs3.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
         var zip = await new JSZip().loadAsync(blob);
         var indexFile = zip.file('index.html');
@@ -17319,7 +17319,7 @@ p { background-image: url(""); }`);
   describe('linkUnsavedUri', function () {
 
     describe('basic', function () {
-      var options = {
+      var options = Object.assign({}, baseOptions, {
         "capture.image": "save",
         "capture.imageBackground": "save",
         "capture.favicon": "save",
@@ -17331,14 +17331,14 @@ p { background-image: url(""); }`);
         "capture.downLink.file.mode": "url",
         "capture.downLink.file.extFilter": "txt",
         "capture.downLink.urlFilter": "",
-      };
+      });
 
       it('-capture.linkUnsavedUri', async function () {
         options["capture.linkUnsavedUri"] = false;
 
         var blob = await captureHeadless({
           url: `${localhost}/capture_linkUnsavedUri/error1.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
         var zip = await new JSZip().loadAsync(blob);
         var indexFile = zip.file('index.html');
@@ -17362,7 +17362,7 @@ p { background-image: url("urn:scrapbook:download:error:${localhost}/capture_lin
 
         var blob = await captureHeadless({
           url: `${localhost}/capture_linkUnsavedUri/error1.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
         var zip = await new JSZip().loadAsync(blob);
         var indexFile = zip.file('index.html');
@@ -17384,10 +17384,10 @@ p { background-image: url("${localhost}/capture_linkUnsavedUri/nonexist.bmp"); }
     });
 
     describe('downLink', function () {
-      var options = {
+      var options = Object.assign({}, baseOptions, {
         "capture.downLink.file.extFilter": "txt",
         "capture.downLink.urlFilter": "",
-      };
+      });
 
       it('-capture.linkUnsavedUri; mode = url', async function () {
         options["capture.downLink.file.mode"] = "url";
@@ -17395,7 +17395,7 @@ p { background-image: url("${localhost}/capture_linkUnsavedUri/nonexist.bmp"); }
 
         var blob = await captureHeadless({
           url: `${localhost}/capture_linkUnsavedUri/error2.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
         var zip = await new JSZip().loadAsync(blob);
         var indexFile = zip.file('index.html');
@@ -17416,7 +17416,7 @@ p { background-image: url("${localhost}/capture_linkUnsavedUri/nonexist.bmp"); }
 
         var blob = await captureHeadless({
           url: `${localhost}/capture_linkUnsavedUri/error2.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
         var zip = await new JSZip().loadAsync(blob);
         var indexFile = zip.file('index.html');
@@ -17434,7 +17434,7 @@ p { background-image: url("${localhost}/capture_linkUnsavedUri/nonexist.bmp"); }
 
         var blob = await captureHeadless({
           url: `${localhost}/capture_linkUnsavedUri/error2.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
         var zip = await new JSZip().loadAsync(blob);
         var indexFile = zip.file('index.html');
@@ -17452,7 +17452,7 @@ p { background-image: url("${localhost}/capture_linkUnsavedUri/nonexist.bmp"); }
      * Should NOT generate error URL for non-absolute URLs.
      */
     describe('empty URL', function () {
-      var options = {
+      var options = Object.assign({}, baseOptions, {
         "capture.image": "save",
         "capture.imageBackground": "save",
         "capture.favicon": "save",
@@ -17464,14 +17464,14 @@ p { background-image: url("${localhost}/capture_linkUnsavedUri/nonexist.bmp"); }
         "capture.downLink.file.mode": "url",
         "capture.downLink.file.extFilter": "txt",
         "capture.downLink.urlFilter": "",
-      };
+      });
 
       it('-capture.linkUnsavedUri', async function () {
         options["capture.linkUnsavedUri"] = false;
 
         var blob = await captureHeadless({
           url: `${localhost}/capture_linkUnsavedUri/error3.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
         var zip = await new JSZip().loadAsync(blob);
         var indexFile = zip.file('index.html');
@@ -17497,7 +17497,7 @@ p { background-image: url(""); }`);
      * Should NOT generate error URL for non-absolute URLs.
      */
     describe('hash URL', function () {
-      var options = {
+      var options = Object.assign({}, baseOptions, {
         "capture.image": "save",
         "capture.imageBackground": "save",
         "capture.favicon": "save",
@@ -17509,14 +17509,14 @@ p { background-image: url(""); }`);
         "capture.downLink.file.mode": "url",
         "capture.downLink.file.extFilter": "txt",
         "capture.downLink.urlFilter": "",
-      };
+      });
 
       it('-capture.linkUnsavedUri', async function () {
         options["capture.linkUnsavedUri"] = false;
 
         var blob = await captureHeadless({
           url: `${localhost}/capture_linkUnsavedUri/error4.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
         var zip = await new JSZip().loadAsync(blob);
         var indexFile = zip.file('index.html');
@@ -17542,7 +17542,7 @@ p { background-image: url("#123"); }`);
      * Should NOT generate error URL for non-absolute URLs.
      */
     describe('non-resolvable URL', function () {
-      var options = {
+      var options = Object.assign({}, baseOptions, {
         "capture.image": "save",
         "capture.imageBackground": "save",
         "capture.favicon": "save",
@@ -17554,14 +17554,14 @@ p { background-image: url("#123"); }`);
         "capture.downLink.file.mode": "url",
         "capture.downLink.file.extFilter": "txt",
         "capture.downLink.urlFilter": "",
-      };
+      });
 
       it('-capture.linkUnsavedUri', async function () {
         options["capture.linkUnsavedUri"] = false;
 
         var blob = await captureHeadless({
           url: `${localhost}/capture_linkUnsavedUri/error5.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
         var zip = await new JSZip().loadAsync(blob);
         var indexFile = zip.file('index.html');
@@ -17592,7 +17592,7 @@ p { background-image: url("nonexist.bmp"); }`);
      * Should NOT generate error URL if the protocol is not http, https, file, or about.
      */
     describe('other protocol URL', function () {
-      var options = {
+      var options = Object.assign({}, baseOptions, {
         "capture.image": "save",
         "capture.imageBackground": "save",
         "capture.favicon": "save",
@@ -17604,14 +17604,14 @@ p { background-image: url("nonexist.bmp"); }`);
         "capture.downLink.file.mode": "url",
         "capture.downLink.file.extFilter": "txt",
         "capture.downLink.urlFilter": "",
-      };
+      });
 
       it('-capture.linkUnsavedUri', async function () {
         options["capture.linkUnsavedUri"] = false;
 
         var blob = await captureHeadless({
           url: `${localhost}/capture_linkUnsavedUri/error6.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
         var zip = await new JSZip().loadAsync(blob);
         var indexFile = zip.file('index.html');
@@ -17638,7 +17638,7 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
      * Should record briefly for data and blob URL.
      */
     describe('blob URL', function () {
-      var options = {
+      var options = Object.assign({}, baseOptions, {
         "capture.image": "save",
         "capture.imageBackground": "save",
         "capture.favicon": "save",
@@ -17650,14 +17650,14 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
         "capture.downLink.file.mode": "url",
         "capture.downLink.file.extFilter": "txt",
         "capture.downLink.urlFilter": "",
-      };
+      });
 
       it('-capture.linkUnsavedUri', async function () {
         options["capture.linkUnsavedUri"] = false;
 
         var blob = await capture({
           url: `${localhost}/capture_linkUnsavedUri/error7.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
         var zip = await new JSZip().loadAsync(blob);
         var indexFile = zip.file('index.html');
@@ -17674,14 +17674,14 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
   });
 
   describe('insertInfoBar', function () {
-    var options = {};
+    var options = Object.assign({}, baseOptions, {});
 
     it('capture.insertInfoBar = true', async function () {
       options["capture.insertInfoBar"] = true;
 
       var blob = await capture({
         url: `${localhost}/capture_insertInfoBar/index.html`,
-        options: Object.assign({}, baseOptions, options),
+        options,
       });
       var zip = await new JSZip().loadAsync(blob);
       var indexFile = zip.file('index.html');
@@ -17696,7 +17696,7 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
 
       var blob = await capture({
         url: `${localhost}/capture_insertInfoBar/index.html`,
-        options: Object.assign({}, baseOptions, options),
+        options,
       });
       var zip = await new JSZip().loadAsync(blob);
       var indexFile = zip.file('index.html');
@@ -17711,21 +17711,21 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
   describe('sizeLimit', function () {
 
     describe('should apply to normal resource and CSS', function () {
-      var options = {
+      var options = Object.assign({}, baseOptions, {
         "capture.style": "save",
         "capture.image": "save",
         "capture.downLink.file.mode": "url",
         "capture.downLink.file.extFilter": "txt",
         "capture.downLink.doc.depth": 1,
         "capture.downLink.urlFilter": "",
-      };
+      });
 
       it('sizeLimit = null', async function () {
         options["capture.resourceSizeLimit"] = null;
 
         var blob = await capture({
           url: `${localhost}/capture_sizeLimit/index.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -17758,7 +17758,7 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
 
         var blob = await capture({
           url: `${localhost}/capture_sizeLimit/index.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -17791,7 +17791,7 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
 
         var blob = await capture({
           url: `${localhost}/capture_sizeLimit/index.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -17821,17 +17821,17 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
     });
 
     describe('should apply to headless frames', function () {
-      var options = {
+      var options = Object.assign({}, baseOptions, {
         "capture.saveResourcesSequentially": true,
         "capture.frame": "save",
-      };
+      });
 
       it('sizeLimit = null', async function () {
         options["capture.resourceSizeLimit"] = null;
 
         var blob = await capture({
           url: `${localhost}/capture_sizeLimit_frame/index.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -17852,7 +17852,7 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
 
         var blob = await capture({
           url: `${localhost}/capture_sizeLimit_frame/index.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -17873,7 +17873,7 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
 
         var blob = await capture({
           url: `${localhost}/capture_sizeLimit_frame/index.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -17893,7 +17893,7 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
 
         var blob = await captureHeadless({
           url: `${localhost}/capture_sizeLimit_frame/index.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -17914,7 +17914,7 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
 
         var blob = await captureHeadless({
           url: `${localhost}/capture_sizeLimit_frame/index.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -17935,7 +17935,7 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
 
         var blob = await captureHeadless({
           url: `${localhost}/capture_sizeLimit_frame/index.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -17953,10 +17953,10 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
     });
 
     describe('should NOT apply to data URL', function () {
-      var options = {
+      var options = Object.assign({}, baseOptions, {
         "capture.style": "save",
         "capture.image": "save",
-      };
+      });
 
       it('sizeLimit = 1KB', async function () {
         options["capture.resourceSizeLimit"] = 1 / 1024;
@@ -17965,7 +17965,7 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
 
         var blob = await capture({
           url: `${localhost}/capture_sizeLimit_datauri/index.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -17986,7 +17986,7 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
 
         var blob = await captureHeadless({
           url: `${localhost}/capture_sizeLimit_datauri/index.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -18003,10 +18003,10 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
     });
 
     describe('should NOT apply to data URL (for frames)', function () {
-      var options = {
+      var options = Object.assign({}, baseOptions, {
         "capture.saveResourcesSequentially": true,
         "capture.frame": "save",
-      };
+      });
 
       it('sizeLimit = 1KB', async function () {
         options["capture.resourceSizeLimit"] = 1 / 1024;
@@ -18015,7 +18015,7 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
 
         var blob = await captureHeadless({
           url: `${localhost}/capture_sizeLimit_frame_datauri/index.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -18034,7 +18034,7 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
 
         var blob = await capture({
           url: `${localhost}/capture_sizeLimit_frame_datauri/index.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -18049,10 +18049,10 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
     });
 
     describe('should NOT apply to srcdoc', function () {
-      var options = {
+      var options = Object.assign({}, baseOptions, {
         "capture.saveResourcesSequentially": true,
         "capture.frame": "save",
-      };
+      });
 
       it('sizeLimit = 1KB', async function () {
         options["capture.resourceSizeLimit"] = 1 / 1024;
@@ -18060,7 +18060,7 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
 
         var blob = await capture({
           url: `${localhost}/capture_sizeLimit_frame_srcdoc/index.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -18078,7 +18078,7 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
 
         var blob = await captureHeadless({
           url: `${localhost}/capture_sizeLimit_frame_srcdoc/index.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -18099,7 +18099,7 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
     describe('basic', function () {
 
       it('capture.helpers set and enabled', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.helpersEnabled": true,
           "capture.helpers": `\
 [
@@ -18109,11 +18109,11 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
     ]
   }
 ]`,
-        };
+        });
 
         var blob = await capture({
           url: `${localhost}/capture_helpers/basic/index.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -18131,7 +18131,7 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
       });
 
       it('capture.helpers set and enabled (debug = true, debugging commands)', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.helpersEnabled": true,
           "capture.helpers": `\
 [
@@ -18142,11 +18142,11 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
     ]
   }
 ]`,
-        };
+        });
 
         var blob = await capture({
           url: `${localhost}/capture_helpers/basic/index.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -18164,7 +18164,7 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
       });
 
       it('capture.helpers set and enabled (debug = false, debugging commands)', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.helpersEnabled": true,
           "capture.helpers": `\
 [
@@ -18175,11 +18175,11 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
     ]
   }
 ]`,
-        };
+        });
 
         var blob = await capture({
           url: `${localhost}/capture_helpers/basic/index.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -18197,7 +18197,7 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
       });
 
       it('capture.helpers set and not enabled', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.helpersEnabled": false,
           "capture.helpers": `\
 [
@@ -18207,11 +18207,11 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
     ]
   }
 ]`,
-        };
+        });
 
         var blob = await capture({
           url: `${localhost}/capture_helpers/basic/index.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -18229,14 +18229,14 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
       });
 
       it('capture.helpers not set', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.helpersEnabled": true,
           "capture.helpers": "",
-        };
+        });
 
         var blob = await capture({
           url: `${localhost}/capture_helpers/basic/index.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -18254,14 +18254,14 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
       });
 
       it('capture.helpers invalid (regard as not set)', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.helpersEnabled": true,
           "capture.helpers": `[bad syntax]`,
-        };
+        });
 
         var blob = await capture({
           url: `${localhost}/capture_helpers/basic/index.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -18283,7 +18283,7 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
     describe('nested', function () {
 
       it('basic', async function () {
-        var options = {
+        var options = Object.assign({}, baseOptions, {
           "capture.helpersEnabled": true,
           "capture.helpers": `\
 [
@@ -18293,11 +18293,11 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
     ]
   }
 ]`,
-        };
+        });
 
         var blob = await capture({
           url: `${localhost}/capture_helpers/nesting/index.html`,
-          options: Object.assign({}, baseOptions, options),
+          options,
         });
 
         var zip = await new JSZip().loadAsync(blob);
@@ -18319,7 +18319,7 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
       describe('basic', function () {
 
         it('capture.helpers set and enabled', async function () {
-          var options = {
+          var options = Object.assign({}, baseOptions, {
             "capture.helpersEnabled": true,
             "capture.helpers": `\
 [
@@ -18329,11 +18329,11 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
     }
   }
 ]`,
-          };
+          });
 
           var blob = await capture({
             url: `${localhost}/capture_helpers/basic/index.html`,
-            options: Object.assign({}, baseOptions, options),
+            options,
           });
 
           var zip = await new JSZip().loadAsync(blob);
@@ -18348,7 +18348,7 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
         });
 
         it('capture.helpers set and not enabled', async function () {
-          var options = {
+          var options = Object.assign({}, baseOptions, {
             "capture.helpersEnabled": false,
             "capture.helpers": `\
 [
@@ -18358,11 +18358,11 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
     }
   }
 ]`,
-          };
+          });
 
           var blob = await capture({
             url: `${localhost}/capture_helpers/basic/index.html`,
-            options: Object.assign({}, baseOptions, options),
+            options,
           });
 
           var zip = await new JSZip().loadAsync(blob);
@@ -18377,7 +18377,7 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
         });
 
         it('capture.helpers with matching URL (tab)', async function () {
-          var options = {
+          var options = Object.assign({}, baseOptions, {
             "capture.helpersEnabled": true,
             "capture.helpers": `\
 [
@@ -18388,11 +18388,11 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
     }
   }
 ]`,
-          };
+          });
 
           var blob = await capture({
             url: `${localhost}/capture_helpers/basic/index.html`,
-            options: Object.assign({}, baseOptions, options),
+            options,
           });
 
           var zip = await new JSZip().loadAsync(blob);
@@ -18407,7 +18407,7 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
         });
 
         it('capture.helpers with non-matching URL (tab)', async function () {
-          var options = {
+          var options = Object.assign({}, baseOptions, {
             "capture.helpersEnabled": true,
             "capture.helpers": `\
 [
@@ -18418,11 +18418,11 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
     }
   }
 ]`,
-          };
+          });
 
           var blob = await capture({
             url: `${localhost}/capture_helpers/basic/index.html`,
-            options: Object.assign({}, baseOptions, options),
+            options,
           });
 
           var zip = await new JSZip().loadAsync(blob);
@@ -18437,7 +18437,7 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
         });
 
         it('capture.helpers with matching URL (source)', async function () {
-          var options = {
+          var options = Object.assign({}, baseOptions, {
             "capture.helpersEnabled": true,
             "capture.helpers": `\
 [
@@ -18448,11 +18448,11 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
     }
   }
 ]`,
-          };
+          });
 
           var blob = await captureHeadless({
             url: `${localhost}/capture_helpers/basic/index.html`,
-            options: Object.assign({}, baseOptions, options),
+            options,
           });
 
           var zip = await new JSZip().loadAsync(blob);
@@ -18467,7 +18467,7 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
         });
 
         it('capture.helpers with non-matching URL (source)', async function () {
-          var options = {
+          var options = Object.assign({}, baseOptions, {
             "capture.helpersEnabled": true,
             "capture.helpers": `\
 [
@@ -18478,11 +18478,11 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
     }
   }
 ]`,
-          };
+          });
 
           var blob = await captureHeadless({
             url: `${localhost}/capture_helpers/basic/index.html`,
-            options: Object.assign({}, baseOptions, options),
+            options,
           });
 
           var zip = await new JSZip().loadAsync(blob);
@@ -18501,7 +18501,7 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
       describe('redirect', function () {
 
         it('capture.helpers with matching URL (source)', async function () {
-          var options = {
+          var options = Object.assign({}, baseOptions, {
             "capture.helpersEnabled": true,
             "capture.helpers": `\
 [
@@ -18512,11 +18512,11 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
     }
   }
 ]`,
-          };
+          });
 
           var blob = await captureHeadless({
             url: `${localhost}/capture_helpers/redirect/redirect.pyr`,
-            options: Object.assign({}, baseOptions, options),
+            options,
           });
 
           var zip = await new JSZip().loadAsync(blob);
@@ -18527,7 +18527,7 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
         });
 
         it('capture.helpers with non-matching URL (source)', async function () {
-          var options = {
+          var options = Object.assign({}, baseOptions, {
             "capture.helpersEnabled": true,
             "capture.helpers": `\
 [
@@ -18538,11 +18538,11 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
     }
   }
 ]`,
-          };
+          });
 
           var blob = await captureHeadless({
             url: `${localhost}/capture_helpers/redirect/redirect.pyr`,
-            options: Object.assign({}, baseOptions, options),
+            options,
           });
 
           var zip = await new JSZip().loadAsync(blob);
@@ -18553,15 +18553,15 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
         });
 
         it('capture.resourceSizeLimit should not apply for the initial fetch', async function () {
-          var options = {
+          var options = Object.assign({}, baseOptions, {
             "capture.helpersEnabled": true,
             "capture.helpers": `[]`,
             "capture.resourceSizeLimit": 0,
-          };
+          });
 
           var blob = await captureHeadless({
             url: `${localhost}/capture_helpers/redirect/redirect.pyr`,
-            options: Object.assign({}, baseOptions, options),
+            options,
           });
 
           var zip = await new JSZip().loadAsync(blob);
@@ -18576,7 +18576,7 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
       describe('refresh', function () {
 
         it('capture.helpers with matching URL (source)', async function () {
-          var options = {
+          var options = Object.assign({}, baseOptions, {
             "capture.helpersEnabled": true,
             "capture.helpers": `\
 [
@@ -18587,11 +18587,11 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
     }
   }
 ]`,
-          };
+          });
 
           var blob = await captureHeadless({
             url: `${localhost}/capture_helpers/redirect/refresh.html`,
-            options: Object.assign({}, baseOptions, options),
+            options,
           });
 
           var zip = await new JSZip().loadAsync(blob);
@@ -18602,7 +18602,7 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
         });
 
         it('capture.helpers with non-matching URL (source)', async function () {
-          var options = {
+          var options = Object.assign({}, baseOptions, {
             "capture.helpersEnabled": true,
             "capture.helpers": `\
 [
@@ -18613,11 +18613,11 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
     }
   }
 ]`,
-          };
+          });
 
           var blob = await captureHeadless({
             url: `${localhost}/capture_helpers/redirect/refresh.html`,
-            options: Object.assign({}, baseOptions, options),
+            options,
           });
 
           var zip = await new JSZip().loadAsync(blob);
