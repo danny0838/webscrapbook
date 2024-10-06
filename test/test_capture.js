@@ -15060,6 +15060,32 @@ ${localhost}/capture_downLink_file/file.css\tbar`,
 
     });
 
+    describe('should ignore in-depth capture when capturing a file', function () {
+
+      it('depth = 1', async function () {
+        var options = Object.assign({}, baseOptions, {
+          "capture.saveAs": "zip",
+          "capture.saveFileAsHtml": false,
+          "capture.downLink.doc.depth": 1,
+        });
+
+        var blob = await capture({
+          url: `${localhost}/capture_file/file.bmp`,
+          options,
+        });
+
+        var zip = await new JSZip().loadAsync(blob);
+        assert.hasAllKeys(zip.files, ['index.html', 'file.bmp']);
+
+        var indexFile = zip.file('index.html');
+        var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+        var doc = await readFileAsDocument(indexBlob);
+        assert.strictEqual(doc.documentElement.getAttribute('data-scrapbook-type'), 'file');
+        assert.exists(doc.querySelector('meta[http-equiv="refresh"][content="0; url=file.bmp"]'));
+      });
+
+    });
+
     describe('should ignore downLink.file for doc when downLink.doc.depth is set', function () {
       var options = Object.assign({}, baseOptions, {
         "capture.downLink.file.mode": "url",

@@ -90,13 +90,14 @@
    * @property {string} missionId - missionId ID for the current capture tasks
    * @property {string} timeId - scrapbook ID for the current capture task
    * @property {?string} documentName - document name for registering
+   * @property {?string} indexFilename
    * @property {string[]} recurseChain
    * @property {number} depth
    * @property {boolean} isHeadless
-   * @property {?string} indexFilename
    * @property {boolean} isMainPage
    * @property {boolean} isMainFrame
    * @property {boolean} fullPage
+   * @property {string} type - item type
    * @property {string} title - item title
    * @property {string} favIconUrl - item favicon
    */
@@ -2893,6 +2894,11 @@
     let docRefPolicy = capturer.isAboutUrl(metaDocUrl) ? (params.refPolicy || "") : "";
 
     if (isMainPage && isMainFrame) {
+      if (!settings.type) {
+        settings.type = (parseInt(options["capture.downLink.doc.depth"], 10) >= 0 && options['capture.saveAs'] !== 'singleHtml') ?
+          'site' :
+          'document';
+      }
       settings.indexFilename = settings.indexFilename || await capturer.formatIndexFilename({
         title: settings.title || doc.title || scrapbook.filenameParts(scrapbook.urlToFilename(docUrl))[0] || "untitled",
         sourceUrl: docUrl,
@@ -3265,9 +3271,8 @@
           rootNode.setAttribute("data-scrapbook-icon", settings.favIconUrl);
         }
 
-        // mark type as "site" if depth is set
-        if (parseInt(options["capture.downLink.doc.depth"], 10) >= 0 && options['capture.saveAs'] !== 'singleHtml') {
-          rootNode.setAttribute("data-scrapbook-type", "site");
+        if (settings.type !== 'document') {
+          rootNode.setAttribute("data-scrapbook-type", settings.type);
         }
       }
     }

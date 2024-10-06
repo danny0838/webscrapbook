@@ -1119,6 +1119,7 @@
       documentName = 'index',
       indexFilename,
       fullPage,
+      type,
       title,
       favIconUrl,
     } = {},
@@ -1193,13 +1194,14 @@
       missionId: capturer.missionId,
       timeId,
       documentName,
+      indexFilename,
       recurseChain: [],
       depth: 0,
       isHeadless: false,
-      indexFilename,
       isMainPage: true,
       isMainFrame: true,
       fullPage,
+      type,
       title,
       favIconUrl,
     };
@@ -1800,6 +1802,7 @@ Bookmark for <a href="${scrapbook.escapeHtml(sourceUrl)}">${scrapbook.escapeHtml
     const blob = new Blob([html], {type: "text/html"});
     const ext = ".htm";
 
+    settings.type = settings.type || 'bookmark';
     settings.indexFilename = settings.indexFilename || await capturer.formatIndexFilename({
       title: title || scrapbook.filenameParts(scrapbook.urlToFilename(sourceUrl))[0] || "untitled",
       sourceUrl,
@@ -1866,7 +1869,7 @@ Bookmark for <a href="${scrapbook.escapeHtml(sourceUrl)}">${scrapbook.escapeHtml
     return {
       timeId,
       title,
-      type: "bookmark",
+      type: settings.type,
       sourceUrl,
       targetDir,
       filename,
@@ -1932,6 +1935,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
     })();
     const blob = new Blob([html], {type: "text/html;charset=UTF-8"});
 
+    settings.type = settings.type || 'file';
     settings.indexFilename = settings.indexFilename || await capturer.formatIndexFilename({
       title: title || scrapbook.urlToFilename(sourceUrl) || "untitled",
       sourceUrl,
@@ -1967,7 +1971,6 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
     }
 
     return Object.assign({}, response, {
-      type: "file",
       charset: charset || undefined,
       url: capturer.getRedirectedUrl(response.url, sourceUrlHash),
     });
@@ -2697,6 +2700,9 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
 
           // save to the same directory (strip "/index.html")
           indexFilename: item.index.slice(0, -11),
+
+          // force item type to always rebuild links and update index.json
+          type: item.type,
         };
         options = Object.assign({}, options, {
           // capture to server
@@ -2708,10 +2714,6 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
 
           // overwrite existing files (if mapped to same path)
           "capture.saveOverwrite": true,
-
-          // always rebuild links and update index.json
-          // also force depth 0 for NaN
-          "capture.downLink.doc.depth": depth > 0 ? depth : 0,
         });
 
         // enforce disk cache
@@ -3264,7 +3266,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
 
     const {data, sourceUrl, documentFileName, settings, options} = params;
     const [sourceUrlMain, sourceUrlHash] = scrapbook.splitUrlByAnchor(sourceUrl);
-    const {timeId} = settings;
+    const {timeId, type: itemType} = settings;
 
     const addIndexHtml = async (path, target, title) => {
       const meta = options["capture.recordDocumentMeta"] ? 
@@ -3433,12 +3435,15 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
       }
     };
 
+    // throw for unexpected item type
+    if (!itemType) {
+      throw new Error(`unexpected item type: ${JSON.stringify(itemType)}`);
+    }
+
     capturer.captureInfo.get(timeId).indexPages.add(documentFileName);
 
     // handle in-depth capture
-    let itemType = '';
-    if (parseInt(options["capture.downLink.doc.depth"], 10) >= 0 && options["capture.saveAs"] !== "singleHtml") {
-      itemType = 'site';
+    if (itemType === 'site') {
       const sitemapPath = options["capture.saveAs"] === 'maff' ? `${timeId}/index.json` : 'index.json';
 
       await capturer.captureLinkedPages({settings, options});
@@ -3556,7 +3561,7 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
     return {
       timeId,
       title,
-      type: itemType,
+      type: itemType === 'document' ? '' : itemType,
       sourceUrl,
       targetDir,
       filename,
