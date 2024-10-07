@@ -668,7 +668,7 @@ describe('Capture tests', function () {
         });
 
         var zip = await new JSZip().loadAsync(blob);
-        assert.strictEqual(Object.keys(zip.files).length, 1);
+        assert.lengthOf(Object.keys(zip.files), 1);
 
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -687,7 +687,7 @@ describe('Capture tests', function () {
         });
 
         var zip = await new JSZip().loadAsync(blob);
-        assert.strictEqual(Object.keys(zip.files).length, 1);
+        assert.lengthOf(Object.keys(zip.files), 1);
 
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -889,7 +889,7 @@ p { background-image: url("123ABCabc_%25E4%25B8%25AD%25E6%2596%2587_%25F0%25A0%2
         });
 
         var zip = await new JSZip().loadAsync(blob);
-        assert.strictEqual(Object.keys(zip.files).length, 3);
+        assert.lengthOf(Object.keys(zip.files), 3);
         assert.exists(zip.file("index.html"));
         assert.exists(zip.file("abc.bmp"));
         assert.exists(zip.file("123ABCabc中文 !#$%&'()+,-;=@[]^_`{}_.bmp"));
@@ -1078,7 +1078,7 @@ p { background-image: url("123ABCabc_%25E4%25B8%25AD%25E6%2596%2587_%25F0%25A0%2
         });
 
         var zip = await new JSZip().loadAsync(blob);
-        assert.strictEqual(Object.keys(zip.files).length, 1);
+        assert.lengthOf(Object.keys(zip.files), 1);
 
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -1222,7 +1222,7 @@ p { background-image: url("data:image/bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAE
         });
 
         var zip = await new JSZip().loadAsync(blob);
-        assert.strictEqual(Object.keys(zip.files).length, 1);
+        assert.lengthOf(Object.keys(zip.files), 1);
 
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -1245,7 +1245,7 @@ p { background-image: url("data:image/bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAE
         });
 
         var zip = await new JSZip().loadAsync(blob);
-        assert.strictEqual(Object.keys(zip.files).length, 2); // main + link css
+        assert.lengthOf(Object.keys(zip.files), 2); // main + link css
 
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -1268,7 +1268,7 @@ p { background-image: url("data:image/bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAE
         });
 
         var zip = await new JSZip().loadAsync(blob);
-        assert.strictEqual(Object.keys(zip.files).length, 1);
+        assert.lengthOf(Object.keys(zip.files), 1);
 
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -1351,7 +1351,7 @@ p { background-image: url("red.bmp"); }`);
         });
 
         var zip = await new JSZip().loadAsync(blob);
-        assert.strictEqual(Object.keys(zip.files).length, 2);  // index.html, index.json
+        assert.lengthOf(Object.keys(zip.files), 2);  // index.html, index.json
 
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -1395,7 +1395,7 @@ p { background-image: url("red.bmp"); }`);
         });
 
         var zip = await new JSZip().loadAsync(blob);
-        assert.strictEqual(Object.keys(zip.files).length, 2);  // index.html, index.json
+        assert.lengthOf(Object.keys(zip.files), 2);  // index.html, index.json
 
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -1485,7 +1485,7 @@ p { background-image: url("red.bmp"); }`);
         });
 
         var zip = await new JSZip().loadAsync(blob);
-        assert.strictEqual(Object.keys(zip.files).length, 2);  // index.html, index.json
+        assert.lengthOf(Object.keys(zip.files), 2);  // index.html, index.json
 
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -3493,7 +3493,7 @@ p { background-image: url("about:blank"); }`);
         });
 
         var zip = await new JSZip().loadAsync(blob);
-        assert.strictEqual(Object.keys(zip.files).length, 1);
+        assert.lengthOf(Object.keys(zip.files), 1);
 
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -3513,7 +3513,7 @@ p { background-image: url("about:blank"); }`);
         });
 
         var zip = await new JSZip().loadAsync(blob);
-        assert.strictEqual(Object.keys(zip.files).length, 1);
+        assert.lengthOf(Object.keys(zip.files), 1);
 
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -3533,7 +3533,7 @@ p { background-image: url("about:blank"); }`);
         });
 
         var zip = await new JSZip().loadAsync(blob);
-        assert.strictEqual(Object.keys(zip.files).length, 1);
+        assert.lengthOf(Object.keys(zip.files), 1);
 
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -3786,7 +3786,7 @@ p { background-image: url("about:blank"); }`);
         });
 
         var zip = await new JSZip().loadAsync(blob);
-        assert.strictEqual(Object.keys(zip.files).length, 1);
+        assert.lengthOf(Object.keys(zip.files), 1);
 
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -3806,7 +3806,7 @@ p { background-image: url("about:blank"); }`);
         });
 
         var zip = await new JSZip().loadAsync(blob);
-        assert.strictEqual(Object.keys(zip.files).length, 1);
+        assert.lengthOf(Object.keys(zip.files), 1);
 
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -3826,7 +3826,7 @@ p { background-image: url("about:blank"); }`);
         });
 
         var zip = await new JSZip().loadAsync(blob);
-        assert.strictEqual(Object.keys(zip.files).length, 1);
+        assert.lengthOf(Object.keys(zip.files), 1);
 
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -3878,7 +3878,7 @@ p { background-image: url("about:blank"); }`);
         });
 
         var zip = await new JSZip().loadAsync(blob);
-        assert.strictEqual(Object.keys(zip.files).length, 1);
+        assert.lengthOf(Object.keys(zip.files), 1);
 
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -3899,7 +3899,7 @@ p { background-image: url("about:blank"); }`);
         });
 
         var zip = await new JSZip().loadAsync(blob);
-        assert.strictEqual(Object.keys(zip.files).length, 1);
+        assert.lengthOf(Object.keys(zip.files), 1);
 
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -4320,7 +4320,7 @@ svg|a text, text svg|a { fill: blue; text-decoration: underline; }`;
           });
 
           var zip = await new JSZip().loadAsync(blob);
-          assert.strictEqual(Object.keys(zip.files).length, 1);
+          assert.lengthOf(Object.keys(zip.files), 1);
 
           var indexFile = zip.file('index.html');
           var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -5965,7 +5965,7 @@ div > ::slotted(*) { font-size: 1.2em; }`);
         });
 
         var zip = await new JSZip().loadAsync(blob);
-        assert.strictEqual(Object.keys(zip.files).length, 1);
+        assert.lengthOf(Object.keys(zip.files), 1);
 
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -6920,7 +6920,7 @@ body { color: red; }`);
         });
 
         var zip = await new JSZip().loadAsync(blob);
-        assert.strictEqual(Object.keys(zip.files).length, 3);
+        assert.lengthOf(Object.keys(zip.files), 3);
 
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -6965,7 +6965,7 @@ body { color: red; }`);
         });
 
         var zip = await new JSZip().loadAsync(blob);
-        assert.strictEqual(Object.keys(zip.files).length, 3);
+        assert.lengthOf(Object.keys(zip.files), 3);
 
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -8071,7 +8071,7 @@ body { color: red; }`);
         });
 
         var zip = await new JSZip().loadAsync(blob);
-        assert.strictEqual(Object.keys(zip.files).length, 1);
+        assert.lengthOf(Object.keys(zip.files), 1);
 
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -8091,7 +8091,7 @@ body { color: red; }`);
         });
 
         var zip = await new JSZip().loadAsync(blob);
-        assert.strictEqual(Object.keys(zip.files).length, 1);
+        assert.lengthOf(Object.keys(zip.files), 1);
 
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -8608,7 +8608,7 @@ body { color: red; }`);
         });
 
         var zip = await new JSZip().loadAsync(blob);
-        assert.strictEqual(Object.keys(zip.files).length, 1);
+        assert.lengthOf(Object.keys(zip.files), 1);
 
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -8646,7 +8646,7 @@ body { color: red; }`);
         });
 
         var zip = await new JSZip().loadAsync(blob);
-        assert.strictEqual(Object.keys(zip.files).length, 1);
+        assert.lengthOf(Object.keys(zip.files), 1);
 
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -8684,7 +8684,7 @@ body { color: red; }`);
         });
 
         var zip = await new JSZip().loadAsync(blob);
-        assert.strictEqual(Object.keys(zip.files).length, 1);
+        assert.lengthOf(Object.keys(zip.files), 1);
 
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -8921,7 +8921,7 @@ body { color: red; }`);
         });
 
         var zip = await new JSZip().loadAsync(blob);
-        assert.strictEqual(Object.keys(zip.files).length, 1);
+        assert.lengthOf(Object.keys(zip.files), 1);
 
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -8943,7 +8943,7 @@ body { color: red; }`);
         });
 
         var zip = await new JSZip().loadAsync(blob);
-        assert.strictEqual(Object.keys(zip.files).length, 1);
+        assert.lengthOf(Object.keys(zip.files), 1);
 
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -8965,7 +8965,7 @@ body { color: red; }`);
         });
 
         var zip = await new JSZip().loadAsync(blob);
-        assert.strictEqual(Object.keys(zip.files).length, 1);
+        assert.lengthOf(Object.keys(zip.files), 1);
 
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -9107,7 +9107,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
         });
 
         var zip = await new JSZip().loadAsync(blob);
-        assert.strictEqual(Object.keys(zip.files).length, 1);
+        assert.lengthOf(Object.keys(zip.files), 1);
 
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -9157,7 +9157,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
         });
 
         var zip = await new JSZip().loadAsync(blob);
-        assert.strictEqual(Object.keys(zip.files).length, 1);
+        assert.lengthOf(Object.keys(zip.files), 1);
 
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -10448,7 +10448,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
         });
 
         var zip = await new JSZip().loadAsync(blob);
-        assert.strictEqual(Object.keys(zip.files).length, 1);
+        assert.lengthOf(Object.keys(zip.files), 1);
 
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -10480,7 +10480,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
         });
 
         var zip = await new JSZip().loadAsync(blob);
-        assert.strictEqual(Object.keys(zip.files).length, 1);
+        assert.lengthOf(Object.keys(zip.files), 1);
 
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -10512,7 +10512,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
         });
 
         var zip = await new JSZip().loadAsync(blob);
-        assert.strictEqual(Object.keys(zip.files).length, 1);
+        assert.lengthOf(Object.keys(zip.files), 1);
 
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -10629,7 +10629,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
         });
 
         var zip = await new JSZip().loadAsync(blob);
-        assert.strictEqual(Object.keys(zip.files).length, 1);
+        assert.lengthOf(Object.keys(zip.files), 1);
 
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -10655,7 +10655,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
         });
 
         var zip = await new JSZip().loadAsync(blob);
-        assert.strictEqual(Object.keys(zip.files).length, 1);
+        assert.lengthOf(Object.keys(zip.files), 1);
 
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -10681,7 +10681,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
         });
 
         var zip = await new JSZip().loadAsync(blob);
-        assert.strictEqual(Object.keys(zip.files).length, 1);
+        assert.lengthOf(Object.keys(zip.files), 1);
 
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -10804,7 +10804,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
         });
 
         var zip = await new JSZip().loadAsync(blob);
-        assert.strictEqual(Object.keys(zip.files).length, 1);
+        assert.lengthOf(Object.keys(zip.files), 1);
 
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -10831,7 +10831,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
         });
 
         var zip = await new JSZip().loadAsync(blob);
-        assert.strictEqual(Object.keys(zip.files).length, 1);
+        assert.lengthOf(Object.keys(zip.files), 1);
 
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -10858,7 +10858,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
         });
 
         var zip = await new JSZip().loadAsync(blob);
-        assert.strictEqual(Object.keys(zip.files).length, 1);
+        assert.lengthOf(Object.keys(zip.files), 1);
 
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -11068,7 +11068,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
         });
 
         var zip = await new JSZip().loadAsync(blob);
-        assert.strictEqual(Object.keys(zip.files).length, 1);
+        assert.lengthOf(Object.keys(zip.files), 1);
 
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -11087,7 +11087,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
         });
 
         var zip = await new JSZip().loadAsync(blob);
-        assert.strictEqual(Object.keys(zip.files).length, 1);
+        assert.lengthOf(Object.keys(zip.files), 1);
 
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -11106,7 +11106,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
         });
 
         var zip = await new JSZip().loadAsync(blob);
-        assert.strictEqual(Object.keys(zip.files).length, 1);
+        assert.lengthOf(Object.keys(zip.files), 1);
 
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -11325,7 +11325,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
         });
 
         var zip = await new JSZip().loadAsync(blob);
-        assert.strictEqual(Object.keys(zip.files).length, 1);
+        assert.lengthOf(Object.keys(zip.files), 1);
 
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -11348,7 +11348,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
         });
 
         var zip = await new JSZip().loadAsync(blob);
-        assert.strictEqual(Object.keys(zip.files).length, 1);
+        assert.lengthOf(Object.keys(zip.files), 1);
 
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -11371,7 +11371,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
         });
 
         var zip = await new JSZip().loadAsync(blob);
-        assert.strictEqual(Object.keys(zip.files).length, 1);
+        assert.lengthOf(Object.keys(zip.files), 1);
 
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -11586,7 +11586,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
         });
 
         var zip = await new JSZip().loadAsync(blob);
-        assert.strictEqual(Object.keys(zip.files).length, 1);
+        assert.lengthOf(Object.keys(zip.files), 1);
 
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -11609,7 +11609,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
         });
 
         var zip = await new JSZip().loadAsync(blob);
-        assert.strictEqual(Object.keys(zip.files).length, 1);
+        assert.lengthOf(Object.keys(zip.files), 1);
 
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -11632,7 +11632,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
         });
 
         var zip = await new JSZip().loadAsync(blob);
-        assert.strictEqual(Object.keys(zip.files).length, 1);
+        assert.lengthOf(Object.keys(zip.files), 1);
 
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -13781,7 +13781,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
         assert.exists(zip.file("file3.txt"));
         assert.notExists(zip.file("nofilename.py"));
         assert.exists(zip.file("redirect.txt"));
-        assert.strictEqual(Object.keys(zip.files).length, 8);
+        assert.lengthOf(Object.keys(zip.files), 8);
 
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -13836,7 +13836,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
         assert.notExists(zip.file("file3.txt"));
         assert.notExists(zip.file("nofilename.py"));
         assert.notExists(zip.file("file4.txt"));
-        assert.strictEqual(Object.keys(zip.files).length, 5);
+        assert.lengthOf(Object.keys(zip.files), 5);
 
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -13891,7 +13891,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
         assert.notExists(zip.file("file3.txt"));
         assert.notExists(zip.file("nofilename.py"));
         assert.notExists(zip.file("redirect.txt"));
-        assert.strictEqual(Object.keys(zip.files).length, 1);
+        assert.lengthOf(Object.keys(zip.files), 1);
 
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -13935,7 +13935,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
         assert.exists(zip.file("file3.txt"));
         assert.exists(zip.file("nofilename.py"));
         assert.notExists(zip.file("file4.txt"));
-        assert.strictEqual(Object.keys(zip.files).length, 8);
+        assert.lengthOf(Object.keys(zip.files), 8);
       });
 
       it('plain: space separator', async function () {
@@ -13959,7 +13959,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
         assert.notExists(zip.file("file3.txt"));
         assert.notExists(zip.file("nofilename.py"));
         assert.notExists(zip.file("file4.txt"));
-        assert.strictEqual(Object.keys(zip.files).length, 4);
+        assert.lengthOf(Object.keys(zip.files), 4);
       });
 
       it('plain: comma separator', async function () {
@@ -13983,7 +13983,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
         assert.notExists(zip.file("file3.txt"));
         assert.notExists(zip.file("nofilename.py"));
         assert.notExists(zip.file("file4.txt"));
-        assert.strictEqual(Object.keys(zip.files).length, 4);
+        assert.lengthOf(Object.keys(zip.files), 4);
       });
 
       it('plain: semicolon separator', async function () {
@@ -14007,7 +14007,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
         assert.notExists(zip.file("file3.txt"));
         assert.notExists(zip.file("nofilename.py"));
         assert.notExists(zip.file("file4.txt"));
-        assert.strictEqual(Object.keys(zip.files).length, 4);
+        assert.lengthOf(Object.keys(zip.files), 4);
       });
 
       it('plain: mixed separators', async function () {
@@ -14031,7 +14031,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
         assert.notExists(zip.file("file3.txt"));
         assert.notExists(zip.file("nofilename.py"));
         assert.notExists(zip.file("file4.txt"));
-        assert.strictEqual(Object.keys(zip.files).length, 4);
+        assert.lengthOf(Object.keys(zip.files), 4);
       });
 
       it('plain: match full extension', async function () {
@@ -14055,7 +14055,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
         assert.notExists(zip.file("file3.txt"));
         assert.notExists(zip.file("nofilename.py"));
         assert.notExists(zip.file("redirect.txt"));
-        assert.strictEqual(Object.keys(zip.files).length, 1);
+        assert.lengthOf(Object.keys(zip.files), 1);
       });
 
       it('regex: with flag', async function () {
@@ -14079,7 +14079,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
         assert.notExists(zip.file("file3.txt"));
         assert.notExists(zip.file("nofilename.py"));
         assert.notExists(zip.file("file4.txt"));
-        assert.strictEqual(Object.keys(zip.files).length, 4);
+        assert.lengthOf(Object.keys(zip.files), 4);
       });
 
       it('regex: without flag', async function () {
@@ -14103,7 +14103,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
         assert.notExists(zip.file("file3.txt"));
         assert.notExists(zip.file("nofilename.py"));
         assert.notExists(zip.file("redirect.txt"));
-        assert.strictEqual(Object.keys(zip.files).length, 1);
+        assert.lengthOf(Object.keys(zip.files), 1);
       });
 
       it('regex: wildcards', async function () {
@@ -14127,7 +14127,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
         assert.notExists(zip.file("file3.txt"));
         assert.notExists(zip.file("nofilename.py"));
         assert.notExists(zip.file("file4.txt"));
-        assert.strictEqual(Object.keys(zip.files).length, 5);
+        assert.lengthOf(Object.keys(zip.files), 5);
       });
 
       it('regex: match full extension', async function () {
@@ -14151,7 +14151,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
         assert.notExists(zip.file("file3.txt"));
         assert.notExists(zip.file("nofilename.py"));
         assert.notExists(zip.file("redirect.txt"));
-        assert.strictEqual(Object.keys(zip.files).length, 1);
+        assert.lengthOf(Object.keys(zip.files), 1);
       });
 
       it('regex: unknown MIME should not match any extension', async function () {
@@ -14175,7 +14175,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
         assert.exists(zip.file("file3.txt"));
         assert.exists(zip.file("nofilename.py"));
         assert.exists(zip.file("redirect.txt"));
-        assert.strictEqual(Object.keys(zip.files).length, 9);
+        assert.lengthOf(Object.keys(zip.files), 9);
       });
 
       it('regex: take URL filename if no Content-Disposition filename', async function () {
@@ -14199,7 +14199,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
         assert.notExists(zip.file("file3.txt"));
         assert.notExists(zip.file("nofilename.py"));
         assert.notExists(zip.file("redirect.txt"));
-        assert.strictEqual(Object.keys(zip.files).length, 1);
+        assert.lengthOf(Object.keys(zip.files), 1);
       });
 
       it('mime: filter with full MIME', async function () {
@@ -14226,7 +14226,7 @@ mime:application/wsb.unknown`,
         assert.notExists(zip.file("file3.txt"));
         assert.notExists(zip.file("nofilename.py"));
         assert.exists(zip.file("redirect.txt"));
-        assert.strictEqual(Object.keys(zip.files).length, 6);
+        assert.lengthOf(Object.keys(zip.files), 6);
       });
 
       it('mime: filter with regex', async function () {
@@ -14250,7 +14250,7 @@ mime:application/wsb.unknown`,
         assert.notExists(zip.file("file3.txt"));
         assert.notExists(zip.file("nofilename.py"));
         assert.exists(zip.file("redirect.txt"));
-        assert.strictEqual(Object.keys(zip.files).length, 6);
+        assert.lengthOf(Object.keys(zip.files), 6);
       });
 
       it('mime: filter should not hit if no Content-Type', async function () {
@@ -14274,7 +14274,7 @@ mime:application/wsb.unknown`,
         assert.notExists(zip.file("file3.txt"));
         assert.notExists(zip.file("nofilename.py"));
         assert.exists(zip.file("redirect.txt"));
-        assert.strictEqual(Object.keys(zip.files).length, 8);
+        assert.lengthOf(Object.keys(zip.files), 8);
       });
 
       it('mime: filter should not hit for url mode', async function () {
@@ -14298,7 +14298,7 @@ mime:application/wsb.unknown`,
         assert.notExists(zip.file("file3.txt"));
         assert.notExists(zip.file("nofilename.py"));
         assert.notExists(zip.file("redirect.txt"));
-        assert.strictEqual(Object.keys(zip.files).length, 1);
+        assert.lengthOf(Object.keys(zip.files), 1);
       });
     });
 
@@ -14384,7 +14384,7 @@ ${localhost}/capture_downLink_file/redirect.pyr#bar`,
         assert.exists(zip.file("file3.txt"));
         assert.notExists(zip.file("nofilename.py"));
         assert.notExists(zip.file("redirect.txt"));
-        assert.strictEqual(Object.keys(zip.files).length, 3);
+        assert.lengthOf(Object.keys(zip.files), 3);
       });
 
       it('plain: match full URL', async function () {
@@ -14413,7 +14413,7 @@ ${localhost}/capture_downLink_file/file.css`,
         assert.exists(zip.file("file3.txt"));
         assert.notExists(zip.file("nofilename.py"));
         assert.exists(zip.file("redirect.txt"));
-        assert.strictEqual(Object.keys(zip.files).length, 6);
+        assert.lengthOf(Object.keys(zip.files), 6);
       });
 
       it('plain: strip chars after spaces', async function () {
@@ -14442,7 +14442,7 @@ ${localhost}/capture_downLink_file/file.css\tbar`,
         assert.exists(zip.file("file3.txt"));
         assert.notExists(zip.file("nofilename.py"));
         assert.exists(zip.file("redirect.txt"));
-        assert.strictEqual(Object.keys(zip.files).length, 6);
+        assert.lengthOf(Object.keys(zip.files), 6);
       });
 
       it('regex: basic', async function () {
@@ -14475,7 +14475,7 @@ ${localhost}/capture_downLink_file/file.css\tbar`,
         assert.notExists(zip.file("file3.txt"));
         assert.notExists(zip.file("nofilename.py"));
         assert.exists(zip.file("redirect.txt"));
-        assert.strictEqual(Object.keys(zip.files).length, 5);
+        assert.lengthOf(Object.keys(zip.files), 5);
       });
 
     });
@@ -14493,7 +14493,7 @@ ${localhost}/capture_downLink_file/file.css\tbar`,
         });
 
         var zip = await new JSZip().loadAsync(blob);
-        assert.strictEqual(Object.keys(zip.files).length, 1);
+        assert.lengthOf(Object.keys(zip.files), 1);
 
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -14520,7 +14520,7 @@ ${localhost}/capture_downLink_file/file.css\tbar`,
         });
 
         var zip = await new JSZip().loadAsync(blob);
-        assert.strictEqual(Object.keys(zip.files).length, 2);
+        assert.lengthOf(Object.keys(zip.files), 2);
 
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -16292,7 +16292,7 @@ ${localhost}/capture_downLink_indepth_urlExtra/1-3.txt`,
         });
 
         var zip = await new JSZip().loadAsync(blob);
-        assert.strictEqual(Object.keys(zip.files).length, 5);
+        assert.lengthOf(Object.keys(zip.files), 5);
 
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
