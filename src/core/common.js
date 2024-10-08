@@ -1020,9 +1020,7 @@
         // In Chromium, a Blob cannot be stored in browser.storage,
         // fallback to an object containing byte string data.
         delete this._serializeObjectNeeded;
-        return this._serializeObjectNeeded = 
-            (scrapbook.userAgent.major < 56 && scrapbook.userAgent.is('gecko')) || 
-            scrapbook.userAgent.is('chromium');
+        return this._serializeObjectNeeded = scrapbook.userAgent.is('chromium');
       },
 
       async _serializeObject(obj) {
