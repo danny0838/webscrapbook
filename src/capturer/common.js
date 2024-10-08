@@ -2920,8 +2920,9 @@
       options,
     });
 
-    // if a previous registry exists, return it
-    if (registry.isDuplicate) {
+    // if a previous registry exists, return it (except for the main document,
+    // which should only happen during a merge capture)
+    if (registry.isDuplicate && !(settings.isMainPage && settings.isMainFrame)) {
       return Object.assign({}, registry, {
         url: capturer.getRedirectedUrl(registry.url, docUrlHash),
         sourceUrl: docUrl,

@@ -19095,6 +19095,72 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
 
     });
 
+    describe('recapture', function () {
+
+      it('should capture same main document with updated content', async function () {
+        var options = Object.assign({}, baseOptions, {
+          "capture.saveTo": "server",
+          "capture.saveAs": "folder",
+          "capture.downLink.doc.depth": 0,
+        });
+
+        var response = await capture({
+          url: `${localhost}/capture_mergeCapture_again/main.html`,
+          options,
+        }, {rawResponse: true});
+        var {timeId: itemId} = response;
+
+        var {data} = await backendRequest({
+          url: `${backend}/data/${itemId}`,
+          body: {f: 'json', a: 'list'},
+        }).then(r => r.json());
+        assert.sameMembers(data.map(r => r.name), [
+          'index.html',
+          'index.json',
+          'red.bmp',
+        ]);
+
+        var doc = (await xhr({
+          url: `${backend}/data/${itemId}/index.html`,
+          responseType: "document",
+        })).response;
+        assert.strictEqual(doc.querySelector('img').getAttribute('src'), `red.bmp`);
+        assert.strictEqual(doc.querySelector('a').getAttribute('href'), `${localhost}/capture_mergeCapture_again/attachment.txt`);
+
+        // recapture
+        var options = Object.assign({}, options, {
+          "capture.downLink.file.mode": "url",
+          "capture.downLink.file.extFilter": "txt",
+        });
+
+        var response = await captureHeadless({
+          url: `${localhost}/capture_mergeCapture_again/main.html`,
+          options,
+          mergeCaptureInfo: {bookId: "", itemId},
+        }, {rawResponse: true});
+
+        var {data: response} = await backendRequest({
+          url: `${backend}/data/${itemId}`,
+          body: {f: 'json', a: 'list'},
+        }).then(r => r.json());
+        assert.sameMembers(response.map(r => r.name), [
+          'index.html',
+          'index.json',
+          'red.bmp',
+          'green.bmp',
+          'attachment.txt',
+        ]);
+
+        var doc = (await xhr({
+          url: `${backend}/data/${itemId}/index.html`,
+          responseType: "document",
+        })).response;
+        assert.strictEqual(doc.querySelector('img').getAttribute('src'), `green.bmp`);
+        assert.strictEqual(doc.querySelector('a').getAttribute('href'), `attachment.txt`);
+      });
+      
+    });
+
     describe('redirect', function () {
 
       it('should rewrite every link to a URL that redirects to a resource with an existing captured version in an added page', async function () {
