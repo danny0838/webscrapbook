@@ -18964,7 +18964,16 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
         assert.strictEqual(anchors[0].getAttribute('href'), `linked1-1.html#111`);
         assert.strictEqual(anchors[1].getAttribute('href'), `linked1-2.xhtml#222`);
         assert.strictEqual(anchors[2].getAttribute('href'), `linked1-3.svg#333`);
-        assert.strictEqual(anchors[3].getAttribute('href'), `linked1-4.txt.html#444`);
+
+        // Currently we don't rewrite links for resources, which introduces an
+        // issue where links to the same URL with a different role be
+        // incorrectly rewritten. (see `should not capture attachment pages`)
+        //
+        // To prevent such issue, linked files should initially be captured
+        // using the `downLink.file.*` options, or perform a merge capture for
+        // the main page with such options.
+        // (see `should capture same main document with updated content`)
+        assert.strictEqual(anchors[3].getAttribute('href'), `${localhost}/capture_mergeCapture/linked1-4.txt#444`);
 
         var doc = (await xhr({
           url: `${backend}/data/${itemId}/linked1-1.html`,
@@ -19001,7 +19010,7 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
             "linked1-1.html",
             "linked1-2.xhtml",
             "linked1-3.svg",
-            "linked1-4.txt.html"
+            "linked1-4.txt"
           ],
           "redirects": [],
           "files": [
@@ -19057,12 +19066,6 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
               "url": `${localhost}/capture_mergeCapture/linked1-4.txt`,
               "role": "resource",
               "token": getToken(`${localhost}/capture_mergeCapture/linked1-4.txt`, "resource")
-            },
-            {
-              "path": "linked1-4.txt.html",
-              "url": `${localhost}/capture_mergeCapture/linked1-4.txt`,
-              "role": "document",
-              "token": getToken(`${localhost}/capture_mergeCapture/linked1-4.txt`, "document")
             }
           ]
         };

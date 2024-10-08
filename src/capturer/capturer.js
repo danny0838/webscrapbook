@@ -1873,6 +1873,17 @@ Bookmark for <a href="${scrapbook.escapeHtml(sourceUrl)}">${scrapbook.escapeHtml
       });
     }
 
+    // This should only happen during a merge capture.
+    // Rebuild using the captured main file without generating a redirect page.
+    if (settings.type === 'site') {
+      return await capturer.saveMainDocument({
+        sourceUrl,
+        documentFileName: response.filename,
+        settings,
+        options,
+      });
+    }
+
     // for the main frame, create a index.html that redirects to the file
     const html = (() => {
       const url = sourceUrl.startsWith("data:") ? "data:" : sourceUrl;
@@ -3213,7 +3224,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
   /**
    * @type invokable
    * @param {Object} params
-   * @param {Object} params.data
+   * @param {Object} [params.data]
    * @param {transferableBlob} [params.data.blob]
    * @param {string} [params.data.title]
    * @param {string} [params.data.favIconUrl]
@@ -3226,7 +3237,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
   capturer.saveMainDocument = async function (params) {
     isDebug && console.debug("call: saveMainDocument", params);
 
-    const {data, sourceUrl, documentFileName, settings, options} = params;
+    const {data = {}, sourceUrl, documentFileName, settings, options} = params;
     const [sourceUrlMain, sourceUrlHash] = scrapbook.splitUrlByAnchor(sourceUrl);
     const {timeId, type: itemType} = settings;
 
@@ -3476,7 +3487,7 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
          xmlns:RDF="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
 <RDF:Description RDF:about="urn:root">
   <MAF:originalurl RDF:resource="${scrapbook.escapeHtml(sourceUrl)}"/>
-  <MAF:title RDF:resource="${scrapbook.escapeHtml(data.title)}"/>
+  <MAF:title RDF:resource="${scrapbook.escapeHtml(data.title || '')}"/>
   <MAF:archivetime RDF:resource="${scrapbook.escapeHtml(scrapbook.idToDate(timeId).toUTCString())}"/>
   <MAF:indexfilename RDF:resource="${documentFileName}"/>
   <MAF:charset RDF:resource="UTF-8"/>
