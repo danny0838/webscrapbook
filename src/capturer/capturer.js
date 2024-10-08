@@ -1930,8 +1930,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
 </body>
 </html>`;
     })();
-    let blob = new Blob([html], {type: "text/html;charset=UTF-8"});
-    blob = await capturer.saveBlobCache(blob);
+    const blob = new Blob([html], {type: "text/html;charset=UTF-8"});
 
     settings.indexFilename = settings.indexFilename || await capturer.formatIndexFilename({
       title: title || scrapbook.urlToFilename(sourceUrl) || "untitled",
@@ -3194,6 +3193,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
   };
 
   /**
+   * @override
    * @type invokable
    * @param {Object} params
    * @param {Object} params.data

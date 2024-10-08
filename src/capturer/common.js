@@ -240,6 +240,22 @@
   /**
    * @type invokable
    * @memberof capturer
+   * @variation 2
+   * @param {Object} params - See {@link capturer.saveDocument}.
+   * @return {Promise<saveMainDocumentResponse|downloadBlobResponse|transferableBlob>}
+   */
+  capturer.saveDocument = async function (params) {
+    isDebug && console.debug("call: saveDocument", params);
+
+    // pass blob data to the extention script through cache
+    params.data.blob = await capturer.saveBlobCache(params.data.blob);
+
+    return await capturer.invoke("saveDocument", params);
+  };
+
+  /**
+   * @type invokable
+   * @memberof capturer
    * @param {Object} params
    * @param {Document} [params.doc]
    * @param {string} [params.metaDocUrl] - an overriding meta document URL
@@ -3442,10 +3458,8 @@
 
     // save document
     const content = scrapbook.documentToString(newDoc, options["capture.prettyPrint"]);
-    let blob = new Blob([content], {type: `${mime};charset=UTF-8`});
-    blob = await capturer.saveBlobCache(blob);
-
-    const response = await capturer.invoke("saveDocument", {
+    const blob = new Blob([content], {type: `${mime};charset=UTF-8`});
+    const response = await capturer.saveDocument({
       sourceUrl: capturer.getRedirectedUrl(docUrl, docUrlHash),
       documentFileName,
       settings,
