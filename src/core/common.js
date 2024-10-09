@@ -1074,7 +1074,7 @@
 
     indexedDB: {
       async _connect() {
-        const p = new Promise((resolve, reject) => {
+        return await new Promise((resolve, reject) => {
           const request = indexedDB.open("scrapbook", 3);
           request.onupgradeneeded = (event) => {
             let db = event.target.result;
@@ -1095,33 +1095,35 @@
             reject(event.target.error);
           };
         });
-        this._connect = () => p;
-        return p;
       },
 
       async _transaction(callback, mode, options) {
         const db = await this._connect();
-        const transaction = db.transaction("cache", mode, options);
-        const objectStore = transaction.objectStore("cache");
-        return await new Promise((resolve, reject) => {
-          // transaction is available from objectStore.transaction
-          const result = callback.call(this, objectStore);
+        try {
+          const transaction = db.transaction("cache", mode, options);
+          const objectStore = transaction.objectStore("cache");
+          return await new Promise((resolve, reject) => {
+            // transaction is available from objectStore.transaction
+            const result = callback.call(this, objectStore);
 
-          transaction.oncomplete = (event) => {
-            resolve(result);
-          };
+            transaction.oncomplete = (event) => {
+              resolve(result);
+            };
 
-          transaction.onerror = (event) => {
-            // unhandled error for IDBRequest will bubble up to transaction error
-            reject(event.target.error);
-          };
+            transaction.onerror = (event) => {
+              // unhandled error for IDBRequest will bubble up to transaction error
+              reject(event.target.error);
+            };
 
-          // abort the transaction if there's an unexpected error
-          result.catch((ex) => {
-            transaction.abort();
-            reject(ex);
+            // abort the transaction if there's an unexpected error
+            result.catch((ex) => {
+              reject(ex);
+              transaction.abort();
+            });
           });
-        });
+        } finally {
+          db.close();
+        }
       },
 
       async get(key) {
