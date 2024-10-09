@@ -24,6 +24,7 @@
   "content_scripts": [
     {
       "matches": [
+        "http://localhost/capturex_*",
         "http://localhost/viewer_*"
       ],
       "js": [

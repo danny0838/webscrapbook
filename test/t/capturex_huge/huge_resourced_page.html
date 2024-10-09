@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<head>
+<meta charset="UTF-8">
+</head>
+<body>
+<script>
+/* generate a 221 MiB page (including image resources) */
+
+async function generateImage(width, height, color) {
+  const canvas = document.createElement('canvas');
+  const ctx = canvas.getContext('2d');
+
+  canvas.width = width;
+  canvas.height = height;
+
+  ctx.fillStyle = color;
+  ctx.fillRect(0, 0, width, height);
+
+  return await new Promise((resolve) => {
+    canvas.toBlob(resolve, 'image/png');
+  });
+}
+
+(async () => {
+  const blob = await generateImage(3840, 2160, 'green');  // 151 KiB
+  for (let i = 0, I = 1500; i < I; i++) {
+    const url = URL.createObjectURL(blob);
+    const img = document.body.appendChild(new Image());
+    img.src = url;
+    img.width = 256;
+  }
+})();
+</script>
+</body>

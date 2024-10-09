@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<head>
+<meta charset="UTF-8">
+</head>
+<body>
+<script>
+/* generate a 2 GiB file */
+var size = 2 * 1024 ** 3;
+var bstr = '123456789\n';
+var repeat_per_buffer = 1024;
+var num_buffers = Math.ceil(size / (bstr.length * repeat_per_buffer));
+var clen = num_buffers * bstr.length * repeat_per_buffer;
+var u8ar = new Uint8Array([].map.call(bstr.repeat(repeat_per_buffer), c => c.charCodeAt(0)));
+var blob = new Blob(new Array(num_buffers).fill(u8ar), {type: 'text/plain; charset=utf-8'});
+var url = URL.createObjectURL(blob);
+var a = document.body.appendChild(document.createElement('a'));
+a.href = url;
+a.textContent = a.download = 'file.txt';
+</script>
+</body>

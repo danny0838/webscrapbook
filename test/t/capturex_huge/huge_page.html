@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<head>
+<meta charset="UTF-8">
+</head>
+<body>
+<script>
+/* generate 200 MiB content */
+var size = 200 * 1024 ** 2;
+var str = 'This is huge content.\n'.repeat(200);
+var repeats = Math.ceil(size / str.length);
+var clen = repeats * str.length;
+for (let i = 0; i < repeats; i++) {
+  const p = document.body.appendChild(document.createElement('p'));
+  p.textContent = str;
+}
+</script>
+</body>

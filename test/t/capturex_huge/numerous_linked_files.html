@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<head>
+<meta charset="UTF-8">
+<style>body { white-space: pre-wrap; }</style>
+</head>
+<body>
+<script>
+/* generate 1 MiB file * 2000 */
+var blob = new Blob(['123456789\n'.repeat(Math.ceil(1024 ** 2 / 10))], {type: 'text/plain'});
+for (let i = 0, I = 2000; i < I; i++) {
+  const url = URL.createObjectURL(blob);
+  const a = document.body.appendChild(document.createElement('a'));
+  a.href = url;
+  a.textContent = a.download = 'file.txt';
+  document.body.appendChild(document.createElement('br'));
+}
+</script>
+</body>
