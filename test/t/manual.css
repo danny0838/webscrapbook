@@ -5,3 +5,9 @@ body {
 pre {
   white-space: pre-wrap;
 }
+
+code {
+  background-color: lightgray;
+  border-radius: 3px;
+  padding: 1px 2px;
+}
