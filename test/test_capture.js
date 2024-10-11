@@ -17747,14 +17747,13 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
       it('capture.helpers set and enabled', async function () {
         var options = Object.assign({}, baseOptions, {
           "capture.helpersEnabled": true,
-          "capture.helpers": `\
-[
-  {
-    "commands": [
-      ["remove", "#exclude, .exclude, img"]
-    ]
-  }
-]`,
+          "capture.helpers": JSON.stringify([
+            {
+              "commands": [
+                ["remove", "#exclude, .exclude, img"],
+              ],
+            },
+          ]),
         });
 
         var blob = await capture({
@@ -17779,15 +17778,14 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
       it('capture.helpers set and enabled (debug = true, debugging commands)', async function () {
         var options = Object.assign({}, baseOptions, {
           "capture.helpersEnabled": true,
-          "capture.helpers": `\
-[
-  {
-    "debug": true,
-    "commands": [
-      ["*remove", "#exclude, .exclude, img"]
-    ]
-  }
-]`,
+          "capture.helpers": JSON.stringify([
+            {
+              "debug": true,
+              "commands": [
+                ["*remove", "#exclude, .exclude, img"],
+              ],
+            },
+          ]),
         });
 
         var blob = await capture({
@@ -17812,15 +17810,14 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
       it('capture.helpers set and enabled (debug = false, debugging commands)', async function () {
         var options = Object.assign({}, baseOptions, {
           "capture.helpersEnabled": true,
-          "capture.helpers": `\
-[
-  {
-    "debug": false,
-    "commands": [
-      ["*remove", "#exclude, .exclude, img"]
-    ]
-  }
-]`,
+          "capture.helpers": JSON.stringify([
+            {
+              "debug": false,
+              "commands": [
+                ["*remove", "#exclude, .exclude, img"],
+              ],
+            },
+          ]),
         });
 
         var blob = await capture({
@@ -17845,14 +17842,13 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
       it('capture.helpers set and not enabled', async function () {
         var options = Object.assign({}, baseOptions, {
           "capture.helpersEnabled": false,
-          "capture.helpers": `\
-[
-  {
-    "commands": [
-      ["remove", "#exclude, .exclude, img"]
-    ]
-  }
-]`,
+          "capture.helpers": JSON.stringify([
+            {
+              "commands": [
+                ["remove", "#exclude, .exclude, img"],
+              ],
+            },
+          ]),
         });
 
         var blob = await capture({
@@ -17929,14 +17925,13 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
       it('basic', async function () {
         var options = Object.assign({}, baseOptions, {
           "capture.helpersEnabled": true,
-          "capture.helpers": `\
-[
-  {
-    "commands": [
-      ["attr", {"css": "img[data-src]"}, "src", ["get_attr", null, "data-src"]]
-    ]
-  }
-]`,
+          "capture.helpers": JSON.stringify([
+            {
+              "commands": [
+                ["attr", {"css": "img[data-src]"}, "src", ["get_attr", null, "data-src"]],
+              ],
+            },
+          ]),
         });
 
         var blob = await capture({
@@ -17962,14 +17957,13 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
         it('capture.helpers set and enabled', async function () {
           var options = Object.assign({}, baseOptions, {
             "capture.helpersEnabled": true,
-            "capture.helpers": `\
-[
-  {
-    "options": {
-      "capture.image": "remove"
-    }
-  }
-]`,
+            "capture.helpers": JSON.stringify([
+              {
+                "options": {
+                  "capture.image": "remove",
+                },
+              },
+            ]),
           });
 
           var blob = await capture({
@@ -17991,14 +17985,13 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
         it('capture.helpers set and not enabled', async function () {
           var options = Object.assign({}, baseOptions, {
             "capture.helpersEnabled": false,
-            "capture.helpers": `\
-[
-  {
-    "options": {
-      "capture.image": "remove"
-    }
-  }
-]`,
+            "capture.helpers": JSON.stringify([
+              {
+                "options": {
+                  "capture.image": "remove",
+                },
+              },
+            ]),
           });
 
           var blob = await capture({
@@ -18020,15 +18013,14 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
         it('capture.helpers with matching URL (tab)', async function () {
           var options = Object.assign({}, baseOptions, {
             "capture.helpersEnabled": true,
-            "capture.helpers": `\
-[
-  {
-    "pattern": "//capture_helpers//",
-    "options": {
-      "capture.image": "remove"
-    }
-  }
-]`,
+            "capture.helpers": JSON.stringify([
+              {
+                "pattern": "//capture_helpers//",
+                "options": {
+                  "capture.image": "remove",
+                },
+              },
+            ]),
           });
 
           var blob = await capture({
@@ -18050,15 +18042,14 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
         it('capture.helpers with non-matching URL (tab)', async function () {
           var options = Object.assign({}, baseOptions, {
             "capture.helpersEnabled": true,
-            "capture.helpers": `\
-[
-  {
-    "pattern": "/(?!)/",
-    "options": {
-      "capture.image": "remove"
-    }
-  }
-]`,
+            "capture.helpers": JSON.stringify([
+              {
+                "pattern": "/(?!)/",
+                "options": {
+                  "capture.image": "remove",
+                },
+              },
+            ]),
           });
 
           var blob = await capture({
@@ -18080,15 +18071,14 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
         it('capture.helpers with matching URL (source)', async function () {
           var options = Object.assign({}, baseOptions, {
             "capture.helpersEnabled": true,
-            "capture.helpers": `\
-[
-  {
-    "pattern": "//capture_helpers//",
-    "options": {
-      "capture.image": "remove"
-    }
-  }
-]`,
+            "capture.helpers": JSON.stringify([
+              {
+                "pattern": "//capture_helpers//",
+                "options": {
+                  "capture.image": "remove",
+                },
+              },
+            ]),
           });
 
           var blob = await captureHeadless({
@@ -18110,15 +18100,14 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
         it('capture.helpers with non-matching URL (source)', async function () {
           var options = Object.assign({}, baseOptions, {
             "capture.helpersEnabled": true,
-            "capture.helpers": `\
-[
-  {
-    "pattern": "/(?!)/",
-    "options": {
-      "capture.image": "remove"
-    }
-  }
-]`,
+            "capture.helpers": JSON.stringify([
+              {
+                "pattern": "/(?!)/",
+                "options": {
+                  "capture.image": "remove",
+                },
+              },
+            ]),
           });
 
           var blob = await captureHeadless({
@@ -18142,15 +18131,14 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
         it('capture.helpers with matching URL (source)', async function () {
           var options = Object.assign({}, baseOptions, {
             "capture.helpersEnabled": true,
-            "capture.helpers": `\
-[
-  {
-    "pattern": "/redirected\.html/",
-    "options": {
-      "capture.style": "remove"
-    }
-  }
-]`,
+            "capture.helpers": JSON.stringify([
+              {
+                "pattern": "/redirected\.html/",
+                "options": {
+                  "capture.style": "remove",
+                },
+              },
+            ]),
           });
 
           var blob = await captureHeadless({
@@ -18168,15 +18156,14 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
         it('capture.helpers with non-matching URL (source)', async function () {
           var options = Object.assign({}, baseOptions, {
             "capture.helpersEnabled": true,
-            "capture.helpers": `\
-[
-  {
-    "pattern": "/redirect\.pyr/",
-    "options": {
-      "capture.style": "remove"
-    }
-  }
-]`,
+            "capture.helpers": JSON.stringify([
+              {
+                "pattern": "/redirect\.pyr/",
+                "options": {
+                  "capture.style": "remove",
+                },
+              },
+            ]),
           });
 
           var blob = await captureHeadless({
@@ -18215,15 +18202,14 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
         it('capture.helpers with matching URL (source)', async function () {
           var options = Object.assign({}, baseOptions, {
             "capture.helpersEnabled": true,
-            "capture.helpers": `\
-[
-  {
-    "pattern": "/redirected\.html/",
-    "options": {
-      "capture.style": "remove"
-    }
-  }
-]`,
+            "capture.helpers": JSON.stringify([
+              {
+                "pattern": "/redirected\.html/",
+                "options": {
+                  "capture.style": "remove",
+                },
+              },
+            ]),
           });
 
           var blob = await captureHeadless({
@@ -18241,15 +18227,14 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
         it('capture.helpers with non-matching URL (source)', async function () {
           var options = Object.assign({}, baseOptions, {
             "capture.helpersEnabled": true,
-            "capture.helpers": `\
-[
-  {
-    "pattern": "/refresh\.html/",
-    "options": {
-      "capture.style": "remove"
-    }
-  }
-]`,
+            "capture.helpers": JSON.stringify([
+              {
+                "pattern": "/refresh\.html/",
+                "options": {
+                  "capture.style": "remove",
+                },
+              },
+            ]),
           });
 
           var blob = await captureHeadless({
