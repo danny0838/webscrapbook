@@ -1222,99 +1222,83 @@ class { }`);
           [
             {
               options: {
-                "capture.saveTo": "server",
-                "capture.saveAs": "folder",
+                "capture.image": "link",
+                "capture.imageBackground": "link",
+                "capture.favicon": "link",
               },
             },
             {
               options: {
-                "capture.saveTo": "folder",
-                "capture.audio": "remove",
+                "capture.imageBackground": "save",
+                "capture.font": "save",
               },
             },
           ],
           "http://example.com",
         );
         assert.deepEqual(options, {
-          "capture.saveTo": "folder",
-          "capture.saveAs": "folder",
-          "capture.audio": "remove",
+          "capture.image": "link",
+          "capture.imageBackground": "save",
+          "capture.favicon": "link",
+          "capture.font": "save",
         });
       });
 
-      it("skip disabled helpers", function () {
+      it("skip helpers with truthy disabled property", function () {
         var options = capturer.CaptureHelperHandler.getOverridingOptions(
           [
             {
               options: {
-                "capture.saveTo": "server",
-                "capture.saveAs": "folder",
+                "capture.image": "link",
+                "capture.imageBackground": "link",
+              },
+            },
+            {
+              disabled: false,
+              options: {
+                "capture.favicon": "link",
               },
             },
             {
               disabled: true,
               options: {
-                "capture.saveTo": "folder",
-                "capture.audio": "remove",
+                "capture.imageBackground": "save",
+                "capture.font": "save",
               },
             },
           ],
           "http://example.com",
         );
         assert.deepEqual(options, {
-          "capture.saveTo": "server",
-          "capture.saveAs": "folder",
+          "capture.image": "link",
+          "capture.imageBackground": "link",
+          "capture.favicon": "link",
         });
       });
 
-      it("skip helpers with disabled property", function () {
-        var options = capturer.CaptureHelperHandler.getOverridingOptions(
-          [
-            {
-              options: {
-                "capture.saveTo": "server",
-                "capture.saveAs": "folder",
-              },
-            },
-            {
-              disabled: true,
-              options: {
-                "capture.saveTo": "folder",
-                "capture.audio": "remove",
-              },
-            },
-          ],
-          "http://example.com",
-        );
-        assert.deepEqual(options, {
-          "capture.saveTo": "server",
-          "capture.saveAs": "folder",
-        });
-      });
-
-      it("skip helpers whose pattern does not match document URL", function () {
+      it("skip helpers whose pattern do not match document URL", function () {
         var options = capturer.CaptureHelperHandler.getOverridingOptions(
           [
             {
               pattern: /unknown\.site/,
               options: {
-                "capture.saveTo": "server",
-                "capture.saveAs": "folder",
+                "capture.image": "link",
+                "capture.imageBackground": "link",
               },
             },
             {
               pattern: /example\.com/,
               options: {
-                "capture.saveTo": "folder",
-                "capture.audio": "remove",
+                "capture.image": "remove",
+                "capture.imageBackground": "remove",
               },
             },
           ],
           "http://example.com",
         );
         assert.deepEqual(options, {
-          "capture.saveTo": "folder",
-          "capture.audio": "remove",
+          "capture.image": "remove",
+          "capture.imageBackground": "remove",
         });
       });
 
@@ -1323,13 +1307,13 @@ class { }`);
           [
             {
               options: {
-                "capture.saveTo": "server",
+                "capture.image": "link",
               },
             },
             {
               pattern: /(?:)/,
               options: {
-                "capture.saveAs": "folder",
+                "capture.imageBackground": "link",
               },
             },
           ],
