@@ -6,6 +6,7 @@
 ## [2.15.0] - 2024-10-10
 * Added `options` capture helper property, allowing for more reliable options overwriting, replacing the `options` command.
 * Allow setting comment and merge capture in the details dialog when performing a capture with multiple pages.
+* No longer download a linked file if the HTTP request fails when `capture.downLink.file.mode` is `header` for a capture.
 * No longer fetch title and favicon for an attachment file when capturing a bookmark.
 * The main document of a merge capture is now captured and updated even if a captured version already exists.
 * No longer generate a redirect page for a merge capture on a file.
