@@ -18269,6 +18269,18 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
         }, {rawResponse: true});
         ({timeId: itemId} = response);
 
+        // these overriding options should be safely ignored
+        var options = Object.assign(options, {
+          "capture.helpersEnabled": true,
+          "capture.helpers": JSON.stringify([
+            {
+              "options": {
+                "capture.saveTo": "folder",
+              },
+            },
+          ]),
+        });
+
         var response = await captureHeadless({
           url: `${localhost}/capture_recapture/page2/index.html`,
           options,
@@ -18478,6 +18490,20 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
 
         ({timeId: itemId} = response);
         var mergeCaptureInfo = {bookId: "", itemId};
+
+        // these overriding options should be safely ignored
+        var options = Object.assign(options, {
+          "capture.helpersEnabled": true,
+          "capture.helpers": JSON.stringify([
+            {
+              "options": {
+                "capture.saveTo": "folder",
+                "capture.saveAs": "zip",
+                "capture.saveOverwrite": false,
+              },
+            },
+          ]),
+        });
 
         var response = await capture({
           url: `${localhost}/capture_mergeCapture/linked1-1.html`,

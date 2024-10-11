@@ -1102,6 +1102,8 @@
    * @param {string} [params.mode] - "tab", "source", "bookmark"
    * @param {captureSettings} [params.settings] - overriding settings
    * @param {captureOptions} params.options - options for the capture
+   * @param {captureOptions} params.presets - preset options,
+   *     which are never overwritten by capture helpers, for the capture
    * @param {string} [params.comment] - comment for the captured item
    * @param {?string} [params.bookId] - bookId ID for the captured items
    * @param {string} [params.parentId] - parent item ID for the captured items
@@ -1124,6 +1126,7 @@
       favIconUrl,
     } = {},
     options,
+    presets,
     comment,
     bookId = null, parentId, index,
     captureOnly = false,
@@ -1177,6 +1180,8 @@
         options["capture.helpersEnabled"] = false;
       }
     }
+
+    Object.assign(options, presets);
 
     // determine bookId at the start of a capture
     if (options["capture.saveTo"] === 'server') {
@@ -2264,14 +2269,14 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
 
         // enforce capture to server
         const settings = {timeId, fullPage, title, favIconUrl};
-        options = Object.assign({}, options, {
-          "capture.saveTo": "server"
-        });
+        const presets = {
+          "capture.saveTo": "server",
+        };
 
         result = await capturer.captureGeneral({
           tabId, frameId,
           url: url || item.source, refUrl,
-          mode, settings, options,
+          mode, settings, options, presets,
           bookId,
           captureOnly: true,
         });
@@ -2677,7 +2682,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
           // force item type to always rebuild links and update index.json
           type: item.type,
         };
-        options = Object.assign({}, options, {
+        const presets = {
           // capture to server
           "capture.saveTo": "server",
 
@@ -2687,7 +2692,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
 
           // overwrite existing files (if mapped to same path)
           "capture.saveOverwrite": true,
-        });
+        };
 
         // enforce disk cache
         info.useDiskCache = true;
@@ -2695,7 +2700,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
         result = await capturer.captureGeneral({
           tabId, frameId,
           url, refUrl,
-          mode, settings, options,
+          mode, settings, options, presets,
           bookId,
           captureOnly: true,
         });
