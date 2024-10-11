@@ -19161,7 +19161,7 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
         assert.strictEqual(doc.querySelector('img').getAttribute('src'), `green.bmp`);
         assert.strictEqual(doc.querySelector('a').getAttribute('href'), `attachment.txt`);
       });
-      
+
     });
 
     describe('redirect', function () {
