@@ -1146,7 +1146,7 @@
               // check possible redirect
               // First fetch with overriding options for the initial URL
               // (which may include request related options).
-              const overridingOptions = capturer.CaptureHelperHandler.getOverridingOptions(helpers, url);
+              const _options = capturer.CaptureHelperHandler.getOverwritingOptions(helpers, url);
               const redirectInfo = await capturer.resolveRedirects({
                 url,
                 refUrl,
@@ -1158,7 +1158,7 @@
                   isMainPage: true,
                   isMainFrame: true,
                 },
-                options: Object.assign({}, options, overridingOptions),
+                options: Object.assign({}, options, _options),
               });
               return redirectInfo.url;
             } else {
@@ -1166,8 +1166,8 @@
             }
           })();
 
-          const overridingOptions = capturer.CaptureHelperHandler.getOverridingOptions(helpers, docUrl);
-          Object.assign(options, overridingOptions);
+          const _options = capturer.CaptureHelperHandler.getOverwritingOptions(helpers, docUrl);
+          Object.assign(options, _options);
         } catch (ex) {
           options["capture.helpersEnabled"] = false;
           options["capture.helpers"] = "";

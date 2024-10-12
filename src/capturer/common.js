@@ -6114,7 +6114,7 @@
       };
     }
 
-    static getOverridingOptions(helpers, docUrl) {
+    static getOverwritingOptions(helpers, docUrl) {
       const rv = {};
       if (docUrl) {
         for (let i = 0, I = helpers.length; i < I; ++i) {

@@ -1196,9 +1196,9 @@ class { }`);
       return new DOMParser().parseFromString(html, 'text/html');
     }
 
-    describe("capturer.CaptureHelperHandler.getOverridingOptions", function () {
+    describe("capturer.CaptureHelperHandler.getOverwritingOptions", function () {
       it("do not include capture helper related options", function () {
-        var options = capturer.CaptureHelperHandler.getOverridingOptions(
+        var options = capturer.CaptureHelperHandler.getOverwritingOptions(
           [
             {
               options: {
@@ -1218,7 +1218,7 @@ class { }`);
       });
 
       it("merge options in last-win manner", function () {
-        var options = capturer.CaptureHelperHandler.getOverridingOptions(
+        var options = capturer.CaptureHelperHandler.getOverwritingOptions(
           [
             {
               options: {
@@ -1245,7 +1245,7 @@ class { }`);
       });
 
       it("skip helpers with truthy disabled property", function () {
-        var options = capturer.CaptureHelperHandler.getOverridingOptions(
+        var options = capturer.CaptureHelperHandler.getOverwritingOptions(
           [
             {
               options: {
@@ -1277,7 +1277,7 @@ class { }`);
       });
 
       it("skip helpers whose pattern do not match document URL", function () {
-        var options = capturer.CaptureHelperHandler.getOverridingOptions(
+        var options = capturer.CaptureHelperHandler.getOverwritingOptions(
           [
             {
               pattern: /unknown\.site/,
@@ -1303,7 +1303,7 @@ class { }`);
       });
 
       it("return empty object if docUrl is falsy", function () {
-        var options = capturer.CaptureHelperHandler.getOverridingOptions(
+        var options = capturer.CaptureHelperHandler.getOverwritingOptions(
           [
             {
               options: {
