@@ -26,9 +26,7 @@
 const {MochaQuery: $, assert} = unittest;
 
 describe('lib/strftime.js', function () {
-
   describe('Strftime.format', function () {
-
     it('isUtc = true', function () {
       var date = new Date(Date.UTC(2020, 1, 1, 0, 0, 0));
       var formatter = new Strftime({date, isUtc: true});
@@ -57,11 +55,9 @@ describe('lib/strftime.js', function () {
       var date = new Date(formatted);
       assert.closeTo(date.valueOf(), dateNow.valueOf(), 3000);
     });
-
   });
 
   describe('Strftime.format (static)', function () {
-
     it('basic', function () {
       var dateNow = new Date();
       var formatted = Strftime.format('%Y-%m-%dT%H:%M:%S%z');
@@ -72,9 +68,7 @@ describe('lib/strftime.js', function () {
     it('isUtc = true', function () {
       assert.strictEqual(Strftime.format('%z', {isUtc: true}), '+0000');
     });
-
   });
-
 });
 
 }));

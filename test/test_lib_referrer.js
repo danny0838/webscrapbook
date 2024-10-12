@@ -27,9 +27,7 @@ const {MochaQuery: $, assert} = unittest;
 const $it = $(it);
 
 describe('lib/referrer.js', function () {
-
   describe('Referrer.toString', function () {
-
     it('basic', function () {
       // no-referrer
       assert.strictEqual(new Referrer(
@@ -206,11 +204,9 @@ describe('lib/referrer.js', function () {
         true,
       ).toString(), "https://example.com:8000/");
     });
-
   });
 
   describe('Referrer.isSameOrigin', function () {
-
     it('basic', function () {
       assert.strictEqual(new Referrer(
         "https://example.com/page",
@@ -237,11 +233,9 @@ describe('lib/referrer.js', function () {
         "data:text/plain,def456",
       ).isSameOrigin, false);
     });
-
   });
 
   describe('Referrer.isDownGrade', function () {
-
     it('HTTPS to ...', function () {
       assert.strictEqual(new Referrer(
         "https://example.com/page",
@@ -306,11 +300,9 @@ describe('lib/referrer.js', function () {
         "about:srcdoc",
       ).isDownGrade, false);
     });
-
   });
 
   describe('Referrer.trustworthyProtocols', function () {
-
     it('basic', function () {
       assert.includeMembers(Referrer.trustworthyProtocols, ['https:', 'wss:', 'data:', 'file:']);
     });
@@ -330,9 +322,7 @@ describe('lib/referrer.js', function () {
       const protocol = new URL(chrome.runtime.getURL('')).protocol;
       assert.includeMembers(Referrer.trustworthyProtocols, [protocol]);
     });
-
   });
-
 });
 
 }));

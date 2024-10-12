@@ -26,9 +26,7 @@
 const {MochaQuery: $, assert} = unittest;
 
 describe('lib/map-with-default.js', function () {
-
   describe('MapWithDefault', function () {
-
     it('factory function', function () {
       var myMap = new MapWithDefault(() => ({}));
       assert.strictEqual(myMap.has('key'), false);
@@ -51,9 +49,7 @@ describe('lib/map-with-default.js', function () {
       assert.strictEqual(myMap.get('mykey'), 'default');
       assert.strictEqual(myMap.has('mykey'), true);
     });
-
   });
-
 });
 
 }));

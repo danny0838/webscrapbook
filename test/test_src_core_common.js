@@ -33,9 +33,7 @@ const {userAgent} = utils;
 const r = String.raw;
 
 describe('core/common.js', function () {
-
   describe('scrapbook.escapeFilename', function () {
-
     it('basic', function () {
       // escape " ", "%", "?", "#"
       assert.strictEqual(
@@ -61,18 +59,15 @@ describe('core/common.js', function () {
         "!\"$&'()*+,-./:;<=>?@[]^_`{|}~",
       );
     });
-
   });
 
   describe('scrapbook.quote', function () {
-
     it('basic', function () {
       assert.strictEqual(
         scrapbook.quote('中文/路徑/文件.txt'),
         '%E4%B8%AD%E6%96%87/%E8%B7%AF%E5%BE%91/%E6%96%87%E4%BB%B6.txt',
       );
     });
-
   });
 
   describe('scrapbook.validateFilename', function () {
@@ -233,11 +228,9 @@ describe('core/common.js', function () {
         '%E4%B8%AD%E6%96%87%F0%A0%80%80',
       );
     });
-
   });
 
   describe('scrapbook.dateToId', function () {
-
     it('basic', function () {
       // create an ID from a Date object
       assert.strictEqual(
@@ -261,11 +254,9 @@ describe('core/common.js', function () {
         '00000101000000000',
       );
     });
-
   });
 
   describe('scrapbook.idToDate', function () {
-
     it('basic', function () {
       assert.deepEqual(
         scrapbook.idToDate('20200102030405067'),
@@ -298,11 +289,9 @@ describe('core/common.js', function () {
         new Date("0000-01-01T00:00:00.000Z"),
       );
     });
-
   });
 
   describe('scrapbook.dateToIdOld', function () {
-
     it('basic', function () {
       // create an ID from a Date object
       assert.strictEqual(
@@ -326,11 +315,9 @@ describe('core/common.js', function () {
         '00000101000000',
       );
     });
-
   });
 
   describe('scrapbook.idToDateOld', function () {
-
     it('basic', function () {
       assert.strictEqual(
         scrapbook.idToDateOld('20200102030405').valueOf(),
@@ -366,11 +353,9 @@ describe('core/common.js', function () {
         date.valueOf(),
       );
     });
-
   });
 
   describe('scrapbook.crop', function () {
-
     it('charLimit', function () {
       var string = 'foo bar 中文𠀀字';
 
@@ -442,11 +427,9 @@ describe('core/common.js', function () {
       assert.strictEqual(scrapbook.crop(string, 2, null, ''), 'fo');
       assert.strictEqual(scrapbook.crop(string, 1, null, ''), 'f');
     });
-
   });
 
   describe('scrapbook.unicodeToUtf8', function () {
-
     it('basic', function () {
       assert.strictEqual(scrapbook.unicodeToUtf8('\u0000'), '\x00');
       assert.strictEqual(scrapbook.unicodeToUtf8('\u0080'), '\xC2\x80');
@@ -455,11 +438,9 @@ describe('core/common.js', function () {
       assert.strictEqual(scrapbook.unicodeToUtf8('\u{20000}'), '\xF0\xA0\x80\x80');
       assert.strictEqual(scrapbook.unicodeToUtf8('\u{10FFFF}'), '\xF4\x8F\xBF\xBF');
     });
-
   });
 
   describe('scrapbook.utf8ToUnicode', function () {
-
     it('basic', function () {
       assert.strictEqual(scrapbook.utf8ToUnicode('\x00'), '\u0000');
       assert.strictEqual(scrapbook.utf8ToUnicode('\xC2\x80'), '\u0080');
@@ -468,11 +449,9 @@ describe('core/common.js', function () {
       assert.strictEqual(scrapbook.utf8ToUnicode('\xF0\xA0\x80\x80'), '\u{20000}');
       assert.strictEqual(scrapbook.utf8ToUnicode('\xF4\x8F\xBF\xBF'), '\u{10FFFF}');
     });
-
   });
 
   describe('scrapbook.byteStringToArrayBuffer', function () {
-
     it('basic', function () {
       // "一天" in Big5
       var buffer = scrapbook.byteStringToArrayBuffer('\xA4\x40\xA4\xD1');
@@ -498,11 +477,9 @@ describe('core/common.js', function () {
         [66,77,60,0,0,0,0,0,0,0,54,0,0,0,40,0,0,0,1,0,0,0,1,0,0,0,1,0,32,0,0,0,0,0,6,0,0,0,18,11,0,0,18,11,0,0,0,0,0,0,0,0,0,0,0,255,0,0,0,0],
       );
     });
-
   });
 
   describe('scrapbook.arrayBufferToByteString', function () {
-
     it('basic', function () {
       // "一天" in Big5
       var buffer = new Uint8Array([0xA4, 0x40, 0xA4, 0xD1]);
@@ -527,11 +504,9 @@ describe('core/common.js', function () {
         "Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAP8AAAAA",
       );
     });
-
   });
 
   describe('scrapbook.trim', function () {
-
     it('basic', function () {
       var strings = ['foo', 'bar', 'baz'];
 
@@ -555,11 +530,9 @@ describe('core/common.js', function () {
         assert.strictEqual(scrapbook.trim(s), s);
       }
     });
-
   });
 
   describe('scrapbook.split', function () {
-
     it('basic', function () {
       var strings = ['foo', 'bar', 'baz'];
 
@@ -584,11 +557,9 @@ describe('core/common.js', function () {
       // ending space
       assert.deepEqual(scrapbook.split('foo '), ['foo']);
     });
-
   });
 
   describe('scrapbook.normalizeUrl', function () {
-
     it('encode chars that requires percent encoding with all upper case', function () {
       assert.strictEqual(
         scrapbook.normalizeUrl(`http://example.com/中文`),
@@ -659,11 +630,9 @@ describe('core/common.js', function () {
         `http://example.com/`,
       );
     });
-
   });
 
   describe('scrapbook.isUrlAbsolute', function () {
-
     it('basic', function () {
       // absolute URL cases
       assert.strictEqual(scrapbook.isUrlAbsolute(`http://example.com:8000/foo?bar=baz#frag`), true);
@@ -682,11 +651,9 @@ describe('core/common.js', function () {
       assert.strictEqual(scrapbook.isUrlAbsolute(undefined), false);
       assert.strictEqual(scrapbook.isUrlAbsolute(null), false);
     });
-
   });
 
   describe('scrapbook.getRelativeUrl', function () {
-
     it('absolute URLs', function () {
       // different since protocol
       assert.strictEqual(
@@ -1110,11 +1077,9 @@ describe('core/common.js', function () {
         ``,
       );
     });
-
   });
 
   describe('scrapbook.parseHeaderContentType', function () {
-
     it('basic', function () {
       assert.deepEqual(
         scrapbook.parseHeaderContentType(`text/html`),
@@ -1218,7 +1183,6 @@ describe('core/common.js', function () {
   });
 
   describe('scrapbook.parseHeaderContentDisposition', function () {
-
     it('basic', function () {
       assert.deepEqual(
         scrapbook.parseHeaderContentDisposition(`attachment; filename=file.html`),
@@ -1333,11 +1297,9 @@ describe('core/common.js', function () {
         {type: "attachment", parameters: {filename: "file.html", size: "3"}},
       );
     });
-
   });
 
   describe('scrapbook.parseHeaderRefresh', function () {
-
     it('basic', function () {
       assert.deepEqual(scrapbook.parseHeaderRefresh(``), {time: undefined, url: undefined});
       assert.deepEqual(scrapbook.parseHeaderRefresh(` `), {time: undefined, url: undefined});
@@ -1403,21 +1365,17 @@ describe('core/common.js', function () {
 
       assert.deepEqual(scrapbook.parseHeaderRefresh(`1; uRl=referred.html`), {time: 1, url: `referred.html`});
     });
-
   });
 
   $describe.skipIf($.noBrowser)('scrapbook.readFileAsArrayBuffer', function () {
-
     it('basic', async function () {
       var blob = new Blob(["ABC123 中文 𠀀"], {type: "text/plain"});
       var ab = await scrapbook.readFileAsArrayBuffer(blob);
       assert.deepEqual([...new Uint8Array(ab)], [65,66,67,49,50,51,32,228,184,173,230,150,135,32,240,160,128,128]);
     });
-
   });
 
   $describe.skipIf($.noBrowser)('scrapbook.readFileAsDataURL', function () {
-
     it('basic', async function () {
       var greenBmp = atob('Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAP8AAAAA');
       var ab = scrapbook.byteStringToArrayBuffer(greenBmp);
@@ -1425,11 +1383,9 @@ describe('core/common.js', function () {
       var datauri = await scrapbook.readFileAsDataURL(blob);
       assert.strictEqual(datauri, "data:image/bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAP8AAAAA");
     });
-
   });
 
   $describe.skipIf($.noBrowser)('scrapbook.readFileAsText', function () {
-
     it('return string in specified charset', async function () {
       var blob = new Blob(["ABC123 中文 𠀀"], {type: "text/plain"});
       var str = await await scrapbook.readFileAsText(blob, 'UTF-8');
@@ -1447,11 +1403,9 @@ describe('core/common.js', function () {
       var str = await await scrapbook.readFileAsText(blob, false);
       assert.strictEqual(scrapbook.utf8ToUnicode(str), "ABC123 中文 𠀀");
     });
-
   });
 
   $describe.skipIf($.noBrowser)('scrapbook.readFileAsDocument', function () {
-
     it('basic', async function () {
       var html = `<a href="http://example.com">ABC123 中文 𠀀</a>`;
       var blob = new Blob([html], {type: "text/html"});
@@ -1459,11 +1413,9 @@ describe('core/common.js', function () {
       assert.strictEqual(doc.querySelector('a').textContent, 'ABC123 中文 𠀀');
       assert.strictEqual(doc.querySelector('a').getAttribute('href'), 'http://example.com');
     });
-
   });
 
   $describe.skipIf($.noBrowser)('scrapbook.dataUriToFile', function () {
-
     it('take filename when useFilename not specified', async function () {
       var datauri = `data:image/bmp;filename=${encodeURIComponent('ABC123中文𠀀')};base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAP8AAAAA`;
       var file = await scrapbook.dataUriToFile(datauri);
@@ -1505,11 +1457,9 @@ describe('core/common.js', function () {
       assert.strictEqual(file.type, "image/bmp");
       assert.strictEqual(file.size, 60);
     });
-
   });
 
   describe('scrapbook.mimeIsText', function () {
-
     it('basic', function () {
       // text/*
       assert.strictEqual(scrapbook.mimeIsText('text/plain'), true);
@@ -1552,11 +1502,9 @@ describe('core/common.js', function () {
       assert.strictEqual(scrapbook.mimeIsText('application/pdf'), false);
       assert.strictEqual(scrapbook.mimeIsText('application/octet-stream'), false);
     });
-
   });
 
   $describe.skipIf($.noBrowser)('scrapbook.parseCssFile', function () {
-
     it('priority: 1. BOM', async function () {
       // UTF-8
       var str = '@charset "Big5"; content: "abc中文𠀀"';
@@ -1761,11 +1709,9 @@ describe('core/common.js', function () {
         charset: null,
       });
     });
-
   });
 
   $describe.skipIf($.noBrowser)('scrapbook.rewriteCssFile', function () {
-
     it('force UTF-8 if charset is known', async function () {
       const rewriter = async css => `${css} /* rewritten */`;
 
@@ -1783,7 +1729,6 @@ describe('core/common.js', function () {
       assert.strictEqual(result.type.toLowerCase(), 'text/css');
       assert.strictEqual(await scrapbook.readFileAsText(result, 'UTF-8'), 'div::after { content: "中文"; } /* rewritten */');
     });
-
   });
 
   describe('scrapbook.rewriteCssText', function () {
@@ -2523,11 +2468,9 @@ div { image-background: var(${/(--sb(\d+)-2)/}); }`;
         "http://image.example.com/image2.jpg": match[3],
       });
     });
-
   });
 
   describe('scrapbook.rewriteSrcset', function () {
-
     it('sync', function () {
       const rewriter = url => `<${url}>`;
 
@@ -2659,11 +2602,9 @@ div { image-background: var(${/(--sb(\d+)-2)/}); }`;
         }
       }
     });
-
   });
 
   describe('scrapbook.rewriteUrls', function () {
-
     it('sync', function () {
       const rewriter = url => `<${url}>`;
 
@@ -2719,9 +2660,7 @@ div { image-background: var(${/(--sb(\d+)-2)/}); }`;
         assert.strictEqual(await scrapbook.rewriteUrls(input, rewriter), expected);
       }
     });
-
   });
-
 });
 
 }));

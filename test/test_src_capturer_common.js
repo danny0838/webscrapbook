@@ -33,9 +33,7 @@ const {userAgent} = utils;
 const r = String.raw;
 
 describe('capturer/common.js', function () {
-
   describe('capturer.getRedirectedUrl', function () {
-
     it("use the redirected URL hash if it exists", function () {
       assert.strictEqual(
         capturer.getRedirectedUrl("http://example.com/page#", ""),
@@ -116,11 +114,9 @@ describe('capturer/common.js', function () {
         "data:text/html,foo",
       );
     });
-
   });
 
   describe('capturer.resolveRelativeUrl', function () {
-
     it("resolve a relative URL using the base URL", function () {
       assert.strictEqual(
         capturer.resolveRelativeUrl("mypage.html", "http://example.com/"),
@@ -161,11 +157,9 @@ describe('capturer/common.js', function () {
         "#",
       );
     });
-
   });
 
   describe('capturer.isAboutUrl', function () {
-
     it("true for exactly about:srcdoc", function () {
       assert.strictEqual(
         capturer.isAboutUrl("about:srcdoc"),
@@ -254,7 +248,6 @@ describe('capturer/common.js', function () {
         false,
       );
     });
-
   });
 
   describe('capturer.getErrorUrl', function () {
@@ -345,11 +338,9 @@ describe('capturer/common.js', function () {
         "blob:https://example.com/58eead10-e54d-4b72-9ae4-150381dcb68c",
       );
     });
-
   });
 
   describe('capturer.CssSelectorTokenizer', function () {
-
     describe('capturer.CssSelectorTokenizer.run', function () {
       const tokenizer = new capturer.CssSelectorTokenizer();
 
@@ -639,7 +630,6 @@ describe('capturer/common.js', function () {
           {type: 'selector', value: '[*|attr="value"]', depth: 0},
         ]);
       });
-
     });
 
     describe('capturer.CssSelectorTokenizer.tokensToString', function () {
@@ -652,13 +642,10 @@ describe('capturer/common.js', function () {
           {type: 'name', value: 'span', depth: 0},
         ]), 'div span');
       });
-
     });
-
   });
 
   describe('capturer.DocumentCssHandler', function () {
-
     $describe.skipIf($.noBrowser)('capturer.DocumentCssHandler.getSelectorText', function () {
       const getSelectorText = (...args) => {
         return capturer.DocumentCssHandler.getSelectorText(...args);
@@ -780,7 +767,6 @@ ul {
         var rules = getRulesFromCssText(r`blockquote { [myattr="a & b"] {} }`);
         assert.strictEqual(getSelectorText(rules[0].cssRules[0]), r`:is(blockquote) [myattr="a & b"]`);
       });
-
     });
 
     describe('capturer.DocumentCssHandler.getSelectorVerifier', function () {
@@ -934,7 +920,6 @@ ul {
         testGetSelectorVerifier('col||td', 'col||td', false);
         testGetSelectorVerifier('col || td', 'col || td', false);
       });
-
     });
 
     $describe.skipIf($.noBrowser)('capturer.DocumentCssHandler.getRulesFromCssText', function () {
@@ -1203,19 +1188,15 @@ class { }`);
         var rules = getRulesFromCssText(`p { color: var(--myvar/* comment */); }`);
         assert.strictEqual(rules[0].cssText, `p { color: var(--myvar/* comment */); }`);
       });
-
     });
-
   });
 
   $describe.skipIf($.noBrowser)('capturer.CaptureHelperHandler', function () {
-
     function makeHtmlDocument(html) {
       return new DOMParser().parseFromString(html, 'text/html');
     }
 
     describe("capturer.CaptureHelperHandler.getOverridingOptions", function () {
-
       it("do not include capture helper related options", function () {
         var options = capturer.CaptureHelperHandler.getOverridingOptions(
           [
@@ -1356,11 +1337,9 @@ class { }`);
         );
         assert.deepEqual(options, {});
       });
-
     });
 
     describe("capturer.CaptureHelperHandler.parseRegexStr", function () {
-
       it("basic", function () {
         var {source, flags} = capturer.CaptureHelperHandler.parseRegexStr(`/abc/def/`);
         assert.deepEqual({source, flags}, {source: r`abc\/def`, flags: ``});
@@ -1372,11 +1351,9 @@ class { }`);
       it("return null for an invalid regex string", function () {
         assert.strictEqual(capturer.CaptureHelperHandler.parseRegexStr(`abc/def`), null);
       });
-
     });
 
     describe("capturer.CaptureHelperHandler.isCommand", function () {
-
       it("basic", function () {
         assert.strictEqual(capturer.CaptureHelperHandler.isCommand(["if", true, "yes", "no"]), true);
         assert.strictEqual(capturer.CaptureHelperHandler.isCommand(["if"]), true);
@@ -1390,7 +1367,6 @@ class { }`);
         assert.strictEqual(capturer.CaptureHelperHandler.isCommand([1, 2, 3]), false);
         assert.strictEqual(capturer.CaptureHelperHandler.isCommand({}), false);
       });
-
     });
 
     describe("capturer.CaptureHelperHandler.selectNodes", function () {
@@ -1418,7 +1394,6 @@ class { }`);
       }
 
       describe("Object", function () {
-
         it(".css", function () {
           var doc = makeTestDoc();
           var selector = {css: "div"};
@@ -1434,7 +1409,6 @@ class { }`);
         });
 
         describe(".base", function () {
-
           it("self", function () {
             var doc = makeTestDoc();
             var selector = "self";
@@ -1556,13 +1530,10 @@ class { }`);
 </div>
 <div id="parent-next"></div>`);
           });
-
         });
-
       });
 
       describe("string", function () {
-
         it('valid base should be treated as {base: ...}', function () {
           var doc = makeTestDoc();
           var selector = "parent";
@@ -1590,11 +1561,9 @@ class { }`);
           removeElems(capturer.CaptureHelperHandler.selectNodes(doc, selector));
           assert.strictEqual(doc.body.innerHTML.trim(), ``);
         });
-
       });
 
       describe("falsy", function () {
-
         it("undefined", function () {
           var doc = makeTestDoc();
           var selector;
@@ -1621,9 +1590,7 @@ class { }`);
           assert.strictEqual(result.length, 1);
           assert.strictEqual(result[0], refNode);
         });
-
       });
-
     });
 
     describe("capturer.CaptureHelperHandler.runCommand", function () {
@@ -1634,7 +1601,6 @@ class { }`);
       }
 
       describe("cmd_if", function () {
-
         it("basic", function () {
           var helper = new capturer.CaptureHelperHandler();
           var doc = makeTestDoc();
@@ -1677,11 +1643,9 @@ class { }`);
           var command = ["if", ["concat", ""], ["get_text", {css: "#target"}], ["get_text", {css: "#target2"}]];
           assert.strictEqual(helper.runCommand(command, doc), "target2");
         });
-
       });
 
       describe("cmd_equal", function () {
-
         it("equality", function () {
           var helper = new capturer.CaptureHelperHandler();
           var doc = makeTestDoc();
@@ -1717,11 +1681,9 @@ class { }`);
           var command = ["equal", ["concat", "100"], ["if", true, 100], ["if", true, true]];
           assert.strictEqual(helper.runCommand(command, doc), false);
         });
-
       });
 
       describe("cmd_and", function () {
-
         it("return first falsy or last value", function () {
           var helper = new capturer.CaptureHelperHandler();
           var doc = makeTestDoc();
@@ -1758,11 +1720,9 @@ class { }`);
           var command = ["and", ["get_text", {css: "#target"}], ["get_text", {css: "#target2"}]];
           assert.strictEqual(helper.runCommand(command, doc), "target2");
         });
-
       });
 
       describe("cmd_or", function () {
-
         it("return first truthy or last value", function () {
           var helper = new capturer.CaptureHelperHandler();
           var doc = makeTestDoc();
@@ -1799,11 +1759,9 @@ class { }`);
           var command = ["or", ["get_text", {css: "#target"}], ["get_text", {css: "#target2"}]];
           assert.strictEqual(helper.runCommand(command, doc), "target");
         });
-
       });
 
       describe("cmd_concat", function () {
-
         it("basic", function () {
           var helper = new capturer.CaptureHelperHandler();
           var doc = makeTestDoc();
@@ -1844,11 +1802,9 @@ class { }`);
           var command = ["concat", ["get_text", {css: "#target"}], ["get_text", {css: "#target2"}]];
           assert.strictEqual(helper.runCommand(command, doc), "targettarget2");
         });
-
       });
 
       describe("cmd_slice", function () {
-
         it("basic", function () {
           var helper = new capturer.CaptureHelperHandler();
           var doc = makeTestDoc();
@@ -1876,11 +1832,9 @@ class { }`);
           var command = ["slice", ["get_text", {css: "#target"}], ["if", true, 1], ["if", true, -1]];
           assert.strictEqual(helper.runCommand(command, doc), "arge");
         });
-
       });
 
       describe("cmd_upper", function () {
-
         it("basic", function () {
           var helper = new capturer.CaptureHelperHandler();
           var doc = makeTestDoc();
@@ -1896,11 +1850,9 @@ class { }`);
           var command = ["upper", ["get_text", {css: "#target"}]];
           assert.strictEqual(helper.runCommand(command, doc), "TARGET");
         });
-
       });
 
       describe("cmd_lower", function () {
-
         it("basic", function () {
           var helper = new capturer.CaptureHelperHandler();
           var doc = makeTestDoc();
@@ -1916,11 +1868,9 @@ class { }`);
           var command = ["lower", ["get_text", {css: "#target"}]];
           assert.strictEqual(helper.runCommand(command, doc), "target");
         });
-
       });
 
       describe("cmd_encode_uri", function () {
-
         it("basic", function () {
           var helper = new capturer.CaptureHelperHandler();
           var doc = makeTestDoc();
@@ -1939,11 +1889,9 @@ class { }`);
           var command = ["encode_uri", ["concat", " ;,/?#:@&=+$中"], ["concat", " ;,/?#:@&=+$"]];
           assert.strictEqual(helper.runCommand(command, doc), ' ;,/?#:@&=+$%E4%B8%AD');
         });
-
       });
 
       describe("cmd_decode_uri", function () {
-
         it("basic", function () {
           var helper = new capturer.CaptureHelperHandler();
           var doc = makeTestDoc();
@@ -1967,11 +1915,9 @@ class { }`);
           var command = ["decode_uri", ["concat", "%20%3B%2C%2F%3F%23%3A%40%26%3D%2B%24%E4%B8%AD"]];
           assert.strictEqual(helper.runCommand(command, doc), ' ;,/?#:@&=+$中');
         });
-
       });
 
       describe("cmd_add", function () {
-
         it("basic", function () {
           var helper = new capturer.CaptureHelperHandler();
           var doc = makeTestDoc();
@@ -1993,11 +1939,9 @@ class { }`);
           var command = ["add", ["if", true, 100], ["if", true, 10], ["if", true, 1]];
           assert.strictEqual(helper.runCommand(command, doc), 111);
         });
-
       });
 
       describe("cmd_subtract", function () {
-
         it("basic", function () {
           var helper = new capturer.CaptureHelperHandler();
           var doc = makeTestDoc();
@@ -2019,11 +1963,9 @@ class { }`);
           var command = ["subtract", ["if", true, 100], ["if", true, 10], ["if", true, 1]];
           assert.strictEqual(helper.runCommand(command, doc), 89);
         });
-
       });
 
       describe("cmd_multiply", function () {
-
         it("basic", function () {
           var helper = new capturer.CaptureHelperHandler();
           var doc = makeTestDoc();
@@ -2045,11 +1987,9 @@ class { }`);
           var command = ["multiply", ["if", true, 100], ["if", true, 10], ["if", true, 2]];
           assert.strictEqual(helper.runCommand(command, doc), 2000);
         });
-
       });
 
       describe("cmd_divide", function () {
-
         it("basic", function () {
           var helper = new capturer.CaptureHelperHandler();
           var doc = makeTestDoc();
@@ -2074,11 +2014,9 @@ class { }`);
           var command = ["divide", ["if", true, 100], ["if", true, 10], ["if", true, 2]];
           assert.strictEqual(helper.runCommand(command, doc), 5);
         });
-
       });
 
       describe("cmd_mod", function () {
-
         it("basic", function () {
           var helper = new capturer.CaptureHelperHandler();
           var doc = makeTestDoc();
@@ -2103,11 +2041,9 @@ class { }`);
           var command = ["mod", ["if", true, 12], ["if", true, 8], ["if", true, 3]];
           assert.strictEqual(helper.runCommand(command, doc), 1);
         });
-
       });
 
       describe("cmd_power", function () {
-
         it("basic", function () {
           var helper = new capturer.CaptureHelperHandler();
           var doc = makeTestDoc();
@@ -2129,11 +2065,9 @@ class { }`);
           var command = ["power", ["if", true, 2], ["if", true, 3], ["if", true, 2]];
           assert.strictEqual(helper.runCommand(command, doc), 64);
         });
-
       });
 
       describe("cmd_for", function () {
-
         it("basic", function () {
           var helper = new capturer.CaptureHelperHandler();
           var doc = makeTestDoc();
@@ -2147,11 +2081,9 @@ class { }`);
 <div class="target">target</div>
 <div class="target2">target2</div>`);
         });
-
       });
 
       describe("cmd_match", function () {
-
         it("boolean", function () {
           var helper = new capturer.CaptureHelperHandler();
           var doc = makeTestDoc();
@@ -2204,11 +2136,9 @@ class { }`);
           var command = ["match", ["concat", "text"], ["concat", "/text/"], ["if", true, 0]];
           assert.strictEqual(helper.runCommand(command, doc), "text");
         });
-
       });
 
       describe("cmd_replace", function () {
-
         it("basic", function () {
           var helper = new capturer.CaptureHelperHandler();
           var doc = makeTestDoc();
@@ -2232,11 +2162,9 @@ class { }`);
           var command = ["replace", ["concat", "text content"], ["concat", "/(text) (content)/"], ["concat", "modified: $2, $1"]];
           assert.strictEqual(helper.runCommand(command, doc), 'modified: content, text');
         });
-
       });
 
       describe("cmd_has_node", function () {
-
         it("basic", function () {
           var helper = new capturer.CaptureHelperHandler();
           var doc = makeTestDoc();
@@ -2255,11 +2183,9 @@ class { }`);
           var command = ["has_node", ["if", true, {css: "#target"}]];
           assert.strictEqual(helper.runCommand(command, doc), true);
         });
-
       });
 
       describe("cmd_has_attr", function () {
-
         it("basic", function () {
           var helper = new capturer.CaptureHelperHandler();
           var doc = makeTestDoc();
@@ -2278,7 +2204,6 @@ class { }`);
           var command = ["has_attr", ["if", true, {css: "#target"}], ["concat", "id"]];
           assert.strictEqual(helper.runCommand(command, doc), true);
         });
-
       });
 
       describe("cmd_get_html", function () {
@@ -2306,7 +2231,6 @@ class { }`);
           var command = ["get_html", ["if", true, {css: "div"}], ["if", true, true]];
           assert.strictEqual(helper.runCommand(command, doc), "<div><b>elem1</b></div>");
         });
-
       });
 
       describe("cmd_get_text", function () {
@@ -2331,7 +2255,6 @@ class { }`);
           var command = ["get_text", ["if", true, {css: "div"}]];
           assert.strictEqual(helper.runCommand(command, doc), "elem1-1elem1-2");
         });
-
       });
 
       describe("cmd_get_attr", function () {
@@ -2356,7 +2279,6 @@ class { }`);
           var command = ["get_attr", ["if", true, {css: "img"}], ["concat", "data-src"]];
           assert.strictEqual(helper.runCommand(command, doc), "image1.jpg");
         });
-
       });
 
       describe("cmd_get_css", function () {
@@ -2387,7 +2309,6 @@ class { }`);
           var command = ["get_css", ["if", true, {css: "div"}], ["concat", "color"], ["if", true, true]];
           assert.strictEqual(helper.runCommand(command, doc), "");
         });
-
       });
 
       describe("cmd_remove", function () {
@@ -2418,7 +2339,6 @@ class { }`);
 <div></div>
 <div></div>`);
         });
-
       });
 
       describe("cmd_unwrap", function () {
@@ -2449,7 +2369,6 @@ class { }`);
 <b>elem1</b>
 <b>elem2</b>`);
         });
-
       });
 
       describe("cmd_isolate", function () {
@@ -2512,7 +2431,6 @@ class { }`);
 </section>\
 </body>`);
         });
-
       });
 
       describe("cmd_html", function () {
@@ -2550,7 +2468,6 @@ class { }`);
 <div><b>elem1</b></div><em>text</em>
 <div><b>elem2</b></div><em>text</em>`);
         });
-
       });
 
       describe("cmd_text", function () {
@@ -2581,7 +2498,6 @@ class { }`);
           assert.strictEqual(elems[0].textContent, 'text1<em>text</em>');
           assert.strictEqual(elems[1].textContent, 'text2<em>text</em>');
         });
-
       });
 
       describe("cmd_attr", function () {
@@ -2712,7 +2628,6 @@ class { }`);
 <img src="image1.jpg" data-extra="extra-value">
 <img src="image2.jpg" data-extra="extra-value">`);
         });
-
       });
 
       describe("cmd_css", function () {
@@ -2850,7 +2765,6 @@ class { }`);
 <div style="background-color: green !important;"></div>
 <div style="background-color: yellow !important;"></div>`);
         });
-
       });
 
       describe("cmd_insert", function () {
@@ -3082,13 +2996,10 @@ insertedText`);
           assert.strictEqual(helper.runCommand(command, doc), undefined);
           assert.strictEqual(doc.body.innerHTML.trim(), `<div><b id="myid" class="myclass">first<a href="mylink">myvalue</a>last</b></div>`);
         });
-
       });
-
     });
 
     describe("capturer.CaptureHelperHandler.run", function () {
-
       it("skip helpers with disabled property", function () {
         var doc = makeHtmlDocument(`\
 <div class="exclude1"></div>
@@ -3152,11 +3063,8 @@ insertedText`);
         var result = helper.run();
         assert.strictEqual(doc.body.innerHTML.trim(), `<div class="exclude2"></div>`);
       });
-
     });
-
   });
-
 });
 
 }));

@@ -155,7 +155,6 @@ function assertNoRecord(rootNode, {deep = true, filter = 'any'} = {}) {
 }
 
 describe('Capture tests', function () {
-
   before(async function () {
     await Promise.all([
       checkBackendServer(),
@@ -165,13 +164,11 @@ describe('Capture tests', function () {
   });
 
   describe('basic structure', function () {
-
     /**
      * capturer.saveDocument
      * capturer.downloadBlob
      */
     describe('HTML', function () {
-
       it('capture.saveAs = htz', async function () {
         var options = Object.assign({}, baseOptions, {
           "capture.saveAs": "zip",
@@ -310,7 +307,6 @@ describe('Capture tests', function () {
         assert.exists(imgElem);
         assert.strictEqual(imgElem.getAttribute('src'), 'data:image/bmp;filename=blue.bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAA/wAAAAAA');
       });
-
     });
 
     /**
@@ -318,7 +314,6 @@ describe('Capture tests', function () {
      * capturer.downloadBlob
      */
     describe('XHTML', function () {
-
       it('capture.saveAs = htz', async function () {
         var options = Object.assign({}, baseOptions, {
           "capture.saveAs": "zip",
@@ -469,14 +464,12 @@ describe('Capture tests', function () {
         assert.exists(imgElem);
         assert.strictEqual(imgElem.getAttribute('src'), 'data:image/bmp;filename=blue.bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAA/wAAAAAA');
       });
-
     });
 
     /**
      * capturer.captureFile
      */
     describe('file (capture.saveFileAsHtml = false)', function () {
-
       it('capture.saveAs = htz', async function () {
         var options = Object.assign({}, baseOptions, {
           "capture.saveAs": "zip",
@@ -637,7 +630,6 @@ describe('Capture tests', function () {
         // The UTF-8 BOM is not included here.
         assert.strictEqual(text, "Lorem ipsum dolor sit amet. 旡羖甾惤怤齶覅煋朸汊狦芎沝抾邞塯乇泹銧裧。");
       });
-
     });
 
     describe('file (capture.saveFileAsHtml = true)', function () {
@@ -697,15 +689,11 @@ describe('Capture tests', function () {
         var preElem = doc.body.querySelector('pre');
         assert.strictEqual(preElem.textContent.trim(), "Lorem ipsum dolor sit amet. 旡羖甾惤怤齶覅煋朸汊狦芎沝抾邞塯乇泹銧裧。");
       });
-
     });
-
   });
 
   describe('filename', function () {
-
     describe('basic', function () {
-
       /**
        * scrapbook.validateFilename
        * scrapbook.escapeFilename
@@ -790,11 +778,9 @@ describe('Capture tests', function () {
         assert.strictEqual(imgs[2].getAttribute('src'), "index-1.rdf");
         assert.strictEqual(imgs[3].getAttribute('src'), "^metadata^-1");
       });
-
     });
 
     describe('capture.saveAsciiFilename', function () {
-
       it('capture.saveAsciiFilename = false', async function () {
         var options = Object.assign({}, baseOptions, {
           "capture.saveAsciiFilename": false,
@@ -856,11 +842,9 @@ p { background-image: url("123ABCabc_%25E4%25B8%25AD%25E6%2596%2587_%25F0%25A0%2
         assert.strictEqual(doc.querySelectorAll('img')[1].getAttribute('srcset'), "123ABCabc_%25E4%25B8%25AD%25E6%2596%2587_%25F0%25A0%2580%2580.bmp 1x, 123ABCabc_%25E4%25B8%25AD%25E6%2596%2587_%25F0%25A0%2580%2580-2.bmp 2x");
         assert.strictEqual(doc.querySelectorAll('img')[2].getAttribute('src'), "123%25.dat");
       });
-
     });
 
     describe('URL', function () {
-
       /**
        * capturer.downloadFile
        */
@@ -906,11 +890,9 @@ p { background-image: url("123ABCabc_%25E4%25B8%25AD%25E6%2596%2587_%25F0%25A0%2
         assert.strictEqual(imgs[5].getAttribute('src'), "abc.bmp#abc%E4%B8%AD%E6%96%87%");
         assert.strictEqual(imgs[6].getAttribute('src'), "abc.bmp#ab%63%e4%b8%ad%e6%96%87%25");
       });
-
     });
 
     describe('HTTP header', function () {
-
       /**
        * Check saved filename is correctly determined by HTTP header
        * (filename, filename with encoding, or content-type)
@@ -1005,11 +987,9 @@ p { background-image: url("123ABCabc_%25E4%25B8%25AD%25E6%2596%2587_%25F0%25A0%2
         assert.strictEqual(doc.querySelectorAll('script')[0].getAttribute("src"), "script.py.js")
         assert.exists(zip.file("script.py.js"));
       });
-
     });
 
     describe('should handle redirection correctly', function () {
-
       /**
        * capturer.captureDocument
        */
@@ -1059,15 +1039,11 @@ p { background-image: url("123ABCabc_%25E4%25B8%25AD%25E6%2596%2587_%25F0%25A0%2
         assert.strictEqual(doc.querySelector('img').getAttribute('src'), `green.bmp#abc`);
         assert.strictEqual(doc.querySelector('iframe').getAttribute('src'), `frame.html#abc`);
       });
-
     });
-
   });
 
   describe('data URL', function () {
-
     describe('basic', function () {
-
       it('capture.saveDataUriAsFile = false', async function () {
         var options = Object.assign({}, baseOptions, {
           "capture.saveDataUriAsFile": false,
@@ -1199,7 +1175,6 @@ p { background-image: url("data:image/bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAE
         assert.strictEqual(imgs[14].getAttribute('src'), "abc.webm");
         assert.strictEqual(imgs[15].getAttribute('src'), "abc.ogv");
       });
-
     });
 
     /**
@@ -1306,14 +1281,12 @@ p { background-image: url("data:image/bmp;filename=red.bmp;base64,Qk08AAAAAAAAAD
 @font-face { font-family: myFont; src: url("null.woff"); }
 p { background-image: url("red.bmp"); }`);
       });
-
     });
 
     /**
      * capturer.captureDocument
      */
     describe('frame with data URL source: basic', function () {
-
       $it.xfail()('should capture the current content of a data URL frame', async function () {
         var options = Object.assign({}, baseOptions, {
           "capture.frame": "save",
@@ -1329,7 +1302,6 @@ p { background-image: url("red.bmp"); }`);
         var doc = await readFileAsDocument(indexBlob);
         assert.strictEqual(doc.querySelector('p').textContent, 'page content modified');
       });
-
     });
 
     describe('frame with data URL source: URL resolution', function () {
@@ -1555,13 +1527,10 @@ p { background-image: url("red.bmp"); }`);
         assert.exists(frameDoc.querySelector('a[href="file.txt"]'));
         assert.exists(frameDoc.querySelector('a[href="page.html"]'));
       });
-
     });
-
   });
 
   describe('single HTML', function () {
-
     /**
      * capturer.captureDocument
      * capturer.downloadBlob
@@ -1719,11 +1688,9 @@ assert.strictEqual(srcdoc.querySelector('img').getAttribute('src'), `data:image/
   to { transform: rotate(1turn); }
 }`);
     });
-
   });
 
   describe('blob: URL', function () {
-
     /**
      * capturer.downloadFile
      * capturer.fetchCSS
@@ -1818,11 +1785,9 @@ assert.strictEqual(srcdoc.querySelector('img').getAttribute('src'), `data:image/
       var re = regex`${uuid}\.bmp`;
       assert(doc.querySelector('img').getAttribute('src').match(re));
     });
-
   });
 
   describe('about: URL', function () {
-
     /**
      * capturer.captureDocument
      * capturer.DocumentCssHandler.rewriteCssText
@@ -1849,14 +1814,12 @@ p { background-image: url("about:blank"); }`);
       var text = (await readFileAsText(await cssFile.async('blob'))).trim();
       assert.strictEqual(text, '');
     });
-
   });
 
   /**
    * capturer.captureDocument
    */
   describe('capture selection', function () {
-
     it('select elements', async function () {
       var blob = await capture({
         url: `${localhost}/capture_selection/selection.html`,
@@ -2152,11 +2115,9 @@ p { background-image: url("about:blank"); }`);
       assert.notExists(doc.querySelector('img[src="blue.bmp"]'));
       assert.notExists(zip.file("blue.bmp"));
     });
-
   });
 
   describe('headless capture', function () {
-
     /**
      * A delay time for tab capture is required to wait for favicon loading complete.
      *
@@ -2164,7 +2125,6 @@ p { background-image: url("about:blank"); }`);
      * capturer.captureRemote
      */
     describe('basic', function () {
-
       it('capture source for tab', async function () {
         var blob = await capture({
           url: `${localhost}/capture_headless/tab-info.html`,
@@ -2299,7 +2259,6 @@ p { background-image: url("about:blank"); }`);
         var doc = await readFileAsDocument(indexBlob);
         assert.exists(doc.querySelector('img[src="./red.bmp"]'));
       });
-
     });
 
     /**
@@ -2307,7 +2266,6 @@ p { background-image: url("about:blank"); }`);
      * scrapbook.parseHeaderRefresh
      */
     describe('should save refreshed target for zero-time meta refresh', function () {
-
       it('time = 0: should save the refreshed page', async function () {
         var blob = await captureHeadless({
           url: `${localhost}/capture_headless_metaRefresh/time-0.html`,
@@ -2351,18 +2309,14 @@ p { background-image: url("about:blank"); }`);
         var doc = await readFileAsDocument(indexBlob);
         assert.strictEqual(doc.querySelector('meta[http-equiv]').getAttribute('content'), "+1 referred.html");
       });
-
     });
-
   });
 
   /**
    * capturer.captureBookmark
    */
   describe('capture bookmark', function () {
-
     describe('basic', function () {
-
       it('for tab: should fetch title and favicon', async function () {
         var blob = await capture({
           url: `${localhost}/capture_bookmark/basic.html`,
@@ -2425,7 +2379,6 @@ p { background-image: url("about:blank"); }`);
         assert.strictEqual(doc.querySelector('a').getAttribute('href'), `${localhost}/capture_bookmark/basic.py`);
         assert.notExists(doc.querySelector('link[rel="shortcut icon"]'));
       });
-
     });
 
     describe('should save as a bookmark item without file if capture.saveTo = server', function () {
@@ -2525,19 +2478,15 @@ p { background-image: url("about:blank"); }`);
         });
         assert.doesNotHaveAnyKeys(response.meta, ['title', 'icon']);
       });
-
     });
-
   });
 
   describe('meta element', function () {
-
     /**
      * capturer.captureDocument
      * capturer.saveDocument
      */
     describe('meta charset', function () {
-
       it('meta[charset]: should rewrite first to UTF-8', async function () {
         var blob = await capture({
           url: `${localhost}/capture_meta_charset/big5.html`,
@@ -2629,14 +2578,12 @@ p { background-image: url("about:blank"); }`);
         var imgElem = doc.querySelectorAll('img')[1];
         assert.strictEqual(imgElem.getAttribute('src'), `圖片.bmp`);
       });
-
     });
 
     /**
      * capturer.captureDocument
      */
     describe('meta refresh', function () {
-
       it('should rewrite URL in meta refresh', async function () {
         var blob = await capture({
           url: `${localhost}/capture_meta_refresh/basic.html`,
@@ -2819,11 +2766,9 @@ p { background-image: url("about:blank"); }`);
 
         assert.strictEqual(doc.documentElement.getAttribute('data-scrapbook-source'), `${localhost}/capture_meta_refresh_noscript/refresh.html`);
       });
-
     });
 
     describe('CSP', function () {
-
       it('should keep meta CSP and nonce attribute if capture.contentSecurityPolicy = save', async function () {
         var options = Object.assign({}, baseOptions, {
           "capture.contentSecurityPolicy": "save",
@@ -2863,11 +2808,9 @@ p { background-image: url("about:blank"); }`);
         assert(!doc.querySelector('script[src]').hasAttribute('nonce'));
         assert(!doc.querySelector('script:not([src])').hasAttribute('nonce'));
       });
-
     });
 
     describe('shadow DOM', function () {
-
       it('should ignore meta elements in shadow DOM', async function () {
         var blob = await capture({
           url: `${localhost}/capture_meta_shadow/meta.html`,
@@ -2889,15 +2832,11 @@ p { background-image: url("about:blank"); }`);
 <meta http-equiv="Content-Security-Policy" content="default-src 'nonce-2726c7f26c';">
 <meta http-equiv="refresh" content="0; url=nonexist.html">`);
       });
-
     });
-
   });
 
   describe('base element', function () {
-
     describe('should handle base elements according to capture.base', function () {
-
       it('should rewrite href attribute if capture.base = save', async function () {
         var options = Object.assign({}, baseOptions, {
           "capture.base": "save",
@@ -2955,7 +2894,6 @@ p { background-image: url("about:blank"); }`);
         var bases = doc.querySelectorAll('base');
         assert(!bases.length);
       });
-
     });
 
     /**
@@ -2963,7 +2901,6 @@ p { background-image: url("about:blank"); }`);
      * capturer.captureDocument
      */
     describe('should rewrite URLs when base set to another directory', function () {
-
       /**
        * Check if the URL for general saved resource is rewritten correctly
        * when base is set to another directory.
@@ -3013,11 +2950,9 @@ p { background-image: url("about:blank"); }`);
         assert.strictEqual(imgs[2].getAttribute('src'), `index-1.html`); // html page saved as img
         assert.strictEqual(imgs[3].getAttribute('src'), `index-2.html`); // html page saved as img
       });
-
     });
 
     describe('should honor base when resolving URLs appearing after it', function () {
-
       for (const base of ["save", "blank", "remove"]) {
         it(`basic (capture.base = ${base})`, async function () {
           var options = Object.assign({}, baseOptions, {
@@ -3216,11 +3151,9 @@ p { background-image: url("about:blank"); }`);
           }
         });
       }
-
     });
 
     describe('should ignore base when resolving URLs appearing before it (against spec)', function () {
-
       for (const base of ["save", "blank", "remove"]) {
         it(`basic (capture.base = ${base})`, async function () {
           var options = Object.assign({}, baseOptions, {
@@ -3404,7 +3337,6 @@ p { background-image: url("about:blank"); }`);
           }
         });
       }
-
     });
 
     /**
@@ -3412,7 +3344,6 @@ p { background-image: url("about:blank"); }`);
      * etc. has been changed.
      */
     describe('base change after resources loaded', function () {
-
       it('capture (source): should resolve URLs using base (not changed since no scripts are run)', async function () {
         var options = Object.assign({}, baseOptions, {
           "capture.base": "blank",
@@ -3457,15 +3388,11 @@ p { background-image: url("about:blank"); }`);
         var doc = await readFileAsDocument(indexBlob);
         assert.strictEqual(doc.querySelector('img').getAttribute('src'), "img.bmp");
       });
-
     });
-
   });
 
   describe('favicon', function () {
-
     describe('should handle favicon according to capture.favicon', function () {
-
       it('capture.favicon = save', async function () {
         var options = Object.assign({}, baseOptions, {
           "capture.favicon": "save",
@@ -3604,11 +3531,9 @@ p { background-image: url("about:blank"); }`);
         var doc = await readFileAsDocument(blob);
         assert.notExists(doc.querySelector('link[rel~="icon"]'));
       });
-
     });
 
     describe('should fetch site favicon when no favicon is defined', function () {
-
       before('generate /favicon.ico', async function () {
         const response = await fetch(`${localhost}/favicon.py?a=create`);
         assert.isTrue(response.ok);
@@ -3699,11 +3624,9 @@ p { background-image: url("about:blank"); }`);
           'data:image/bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAAD/AAAA'
         );
       });
-
     });
 
     describe('should rewrite additional `link`s according to capture.faviconAttrs', function () {
-
       it('capture.faviconAttrs = "apple-touch-icon apple-touch-icon-precomposed"', async function () {
         var options = Object.assign({}, baseOptions, {
           "capture.favicon": "save",
@@ -3778,18 +3701,14 @@ p { background-image: url("about:blank"); }`);
         assert.strictEqual(iconElems[1].getAttribute('href'), `${localhost}/capture_faviconAttrs/yellow.bmp`);
         assert.strictEqual(iconElems[2].getAttribute('href'), `${localhost}/capture_faviconAttrs/green.bmp`);
       });
-
     });
-
   });
 
   describe('CSS', function () {
-
     /**
      * capturer.captureDocument
      */
     describe('should handle internal, external, and imported CSS according to capture.style', function () {
-
       it('capture.style = save', async function () {
         var options = Object.assign({}, baseOptions, {
           "capture.style": "save",
@@ -3873,7 +3792,6 @@ p { background-image: url("about:blank"); }`);
         assert.notExists(doc.querySelector('style'));
         assert.notExists(doc.querySelector('link'));
       });
-
     });
 
     /**
@@ -3948,7 +3866,6 @@ p { background-image: url("about:blank"); }`);
         assert(!elems[2].hasAttribute('style'));
         assert(!elems[3].hasAttribute('style'));
       });
-
     });
 
     /**
@@ -3956,9 +3873,7 @@ p { background-image: url("about:blank"); }`);
      * capturer.DocumentCssHandler.isBrowserPick
      */
     describe('should handle default and alternative stylesheets correctly', function () {
-
       describe('default', function () {
-
         it('should save as-is when the default (persistent and preferred) stylesheets group is picked', async function () {
           var blob = await capture({
             url: `${localhost}/capture_css_disabled/default.html`,
@@ -3984,11 +3899,9 @@ p { background-image: url("about:blank"); }`);
           assert.exists(zip.file("alternative.css"));
           assert.exists(zip.file("alternative2.css"));
         });
-
       });
 
       describe('alternative', function () {
-
         $it.xfailIf(
           userAgent.is('chromium'),
           'browser pick of alternative stylesheet is not supported in Chromium',
@@ -4053,11 +3966,9 @@ p { background-image: url("about:blank"); }`);
           assert.exists(zip.file("alternative.css"));
           assert.exists(zip.file("alternative2.css"));
         });
-
       });
 
       describe('picked by scripts', function () {
-
         $it.xfailIf(
           userAgent.is('chromium'),
           'disabled property of an alternative stylesheet is misleading in Chromium',
@@ -4148,18 +4059,14 @@ p { background-image: url("about:blank"); }`);
 
           assert.notExists(zip.file("persistent.css"));
         });
-
       });
-
     });
 
     /**
      * capturer.DocumentCssHandler
      */
     describe('should rewrite CSS content according to capture.rewriteCss', function () {
-
       describe('basic', function () {
-
         it('capture.rewriteCss = url', async function () {
           var options = Object.assign({}, baseOptions, {
             "capture.rewriteCss": "url",
@@ -4411,11 +4318,9 @@ svg|a text, text svg|a {
           assert.strictEqual(doc.querySelector('blockquote').getAttribute('style'), `\
 background: blue; background: url(rewrite/green.bmp);`);
         });
-
       });
 
       describe('namespace', function () {
-
         it('namsepaced element selector', async function () {
           var options = Object.assign({}, baseOptions, {
             "capture.rewriteCss": "match",
@@ -4491,11 +4396,9 @@ elem-4 { background-color: lime; }`);
           assert.strictEqual(styleElems[5].textContent.trim(), `\
 @namespace url("http://example.com/myns");`);
         });
-
       });
 
       describe('@supports', function () {
-
         it('capture.rewriteCss = url', async function () {
           var options = Object.assign({}, baseOptions, {
             "capture.rewriteCss": "url",
@@ -4623,11 +4526,9 @@ elem-4 { background-color: lime; }`);
 }`
           );
         });
-
       });
 
       $describe.skipIf($.noAtCounterStyle)('@counter-style', function () {
-
         it('capture.rewriteCss = url', async function () {
           var options = Object.assign({}, baseOptions, {
             "capture.rewriteCss": "url",
@@ -4725,11 +4626,9 @@ elem-4 { background-color: lime; }`);
 }`
           );
         });
-
       });
 
       $describe.skipIf($.noAtLayer)('@layer', function () {
-
         it('capture.rewriteCss = match', async function () {
           var options = Object.assign({}, baseOptions, {
             "capture.rewriteCss": "match",
@@ -4766,11 +4665,9 @@ elem-4 { background-color: lime; }`);
 }`
           ));
         });
-
       });
 
       describe('DOM matching for capture.rewriteCss = match', function () {
-
         it('basic', async function () {
           var options = Object.assign({}, baseOptions, {
             "capture.rewriteCss": "match",
@@ -5032,11 +4929,9 @@ div > ::slotted(*) { font-size: 1.2em; }`);
 #host1::part(elem2) { background-color: lime; }
 #host1::part(nonexist) { background-color: red; }`);
         });
-
       });
 
       describe('cross-origin CSS', function () {
-
         it('capture.rewriteCss = tidy', async function () {
           var options = Object.assign({}, baseOptions, {
             "capture.rewriteCss": "tidy",
@@ -5148,11 +5043,9 @@ div > ::slotted(*) { font-size: 1.2em; }`);
           assert.strictEqual(cssText, `\
 #imported { background-color: green; }`);
         });
-
       });
 
       $describe.skipIf($.noNestingCss)('nesting CSS', function () {
-
         it('capture.rewriteCss = url', async function () {
           var options = Object.assign({}, baseOptions, {
             "capture.rewriteCss": "url",
@@ -5456,16 +5349,13 @@ div > ::slotted(*) { font-size: 1.2em; }`);
   }
 }`);
         });
-
       });
-
     });
 
     /**
      * scrapbook.parseCssText
      */
     describe('CSS syntax parsing', function () {
-
       it('background', async function () {
         var options = Object.assign({}, baseOptions, {
           "capture.style": "save",
@@ -5580,21 +5470,18 @@ div > ::slotted(*) { font-size: 1.2em; }`);
         assert.strictEqual(css[14].textContent.trim(), `/* @import "import/style14.css"; */`);
         // assert.strictEqual(css[15].textContent.trim(), `#test15::after { content: '@import "import/style15.css"'; }`);
       });
-
     });
 
     /**
      * scrapbook.parseCssFile
      */
     describe('charset handling', function () {
-
       async function hasBomUtf8(blob) {
         var u8ar = new Uint8Array(await readFileAsArrayBuffer(blob.slice(0, 3)));
         return u8ar[0] === 0xEF && u8ar[1] === 0xBB && u8ar[2] === 0xBF;
       }
 
       describe('@charset', function () {
-
         for (const func of ["capture", "captureHeadless"]) {
           // captureHeadless doen't use dynamic CSS
           it(`should use UTF-8 encoding and add BOM before \`@charset\` rule (${func})`, async function () {
@@ -5654,11 +5541,9 @@ div > ::slotted(*) { font-size: 1.2em; }`);
             assert(await hasBomUtf8(blob));
           });
         }
-
       });
 
       describe('document charset', function () {
-
         it('mode = tab: should use dynamic CSS (determined by browser parsing)', async function () {
           var options = Object.assign({}, baseOptions, {
             "capture.style": "save",
@@ -5752,11 +5637,9 @@ div > ::slotted(*) { font-size: 1.2em; }`);
 #import-charset::after { content: "中文"; }`);
           assert(await hasBomUtf8(blob));
         });
-
       });
 
       describe('link[charset] (obsolete)', function () {
-
         it('mode = tab: should use dynamic CSS (determined by browser parsing)', async function () {
           var options = Object.assign({}, baseOptions, {
             "capture.style": "save",
@@ -5936,13 +5819,10 @@ div > ::slotted(*) { font-size: 1.2em; }`);
           };
           assert.deepEqual(JSON.parse(await readFileAsText(sitemapBlob)), expectedData);
         });
-
       });
-
     });
 
     describe('CSS rewrite path handling', function () {
-
       it('should rewrite external and imported CSS based on the CSS file (rather than the web page)', async function () {
         var options = Object.assign({}, baseOptions, {
           "capture.imageBackground": "link",
@@ -6029,11 +5909,9 @@ div > ::slotted(*) { font-size: 1.2em; }`);
 
         assert.strictEqual(doc.querySelector('style').textContent.trim(), `#bad1 { background-image: url("index-1.html"); }`);
       });
-
     });
 
     describe('circular import', function () {
-
       it('htz: should keep original interlinking between saved files', async function () {
         var options = Object.assign({}, baseOptions, {
           "capture.saveAs": "zip",
@@ -6117,11 +5995,9 @@ body { color: blue; }`);
         assert.strictEqual(text.trim(), `@import "urn:scrapbook:download:circular:url:${localhost}/capture_css_circular_self/style1.css";
 body { color: red; }`);
       });
-
     });
 
     describe('cross-origin', function () {
-
       /**
        * When the origin of a CSS file is different from the source document,
        * the script cannot read its CSS rules directly and a workaround is required.
@@ -6159,16 +6035,13 @@ body { color: red; }`);
 @font-face { font-family: bgFont2; src: url("font2.woff"); }
 @font-face { font-family: neverusedFont2; src: url(""); }`);
       });
-
     });
 
     /**
      * capturer.DocumentCssHandler
      */
     describe('dynamic CSS', function () {
-
       describe('should handle script-modified CSS correctly', function () {
-
         it('capture.{imageBackground, font} = save', async function () {
           var options = Object.assign({}, baseOptions, {
             "capture.imageBackground": "save",
@@ -6238,11 +6111,9 @@ body { color: red; }`);
           var text = await readFileAsText(await cssFile.async('blob'));
           assert.strictEqual(text.trim(), `#import-inserted { background-image: url("import-inserted.bmp"); }`);
         });
-
       });
 
       describe('should save script-modified CSS as an individual file', function () {
-
         it('basic', async function () {
           var options = Object.assign({}, baseOptions, {
             "capture.imageBackground": "save",
@@ -6297,18 +6168,14 @@ body { color: red; }`);
           assert.strictEqual(importNames[2][1], 'abc');
           assert.strictEqual(importNames[3][1], 'def');
         });
-
       });
-
     });
 
     /**
      * capturer.DocumentCssHandler
      */
     $describe.skipIf($.noAdoptedStylesheet)('constructed stylesheets', function () {
-
       describe('should save constructed stylesheets according to capture.{adoptedStyleSheet, style}', function () {
-
         it('capture.adoptedStyleSheet = save, capture.style = save', async function () {
           var options = Object.assign({}, baseOptions, {
             "capture.style": "save",
@@ -6466,7 +6333,6 @@ body { color: red; }`);
           assert(!docElem.hasAttribute('data-scrapbook-adoptedstylesheets'));
           assertNoRecord(docElem, {filter: {regexAttr: /^data-scrapbook-adoptedstylesheet-\d+$/}});
         });
-
       });
 
       describe('should save shared constructed stylesheets as same entry', function () {
@@ -6837,17 +6703,12 @@ body { color: red; }`);
           var host2 = shadow1.querySelector('#shadow2');
           assert(!host2.hasAttribute('data-scrapbook-adoptedstylesheets'));
         });
-
       });
-
     });
-
   });
 
   describe('CSS background images', function () {
-
     describe('should handle background images according to capture.imageBackground', function () {
-
       it('capture.imageBackground = save', async function () {
         var options = Object.assign({}, baseOptions, {
           "capture.imageBackground": "save",
@@ -7037,13 +6898,10 @@ body { color: red; }`);
   to { transform: rotate(1turn); }
 }`);
       });
-
     });
 
     describe('used background images', function () {
-
       describe('basic mapping', function () {
-
         it('normal capture', async function () {
           var options = Object.assign({}, baseOptions, {
             "capture.rewriteCss": "url",
@@ -7160,11 +7018,9 @@ body { color: red; }`);
 #import-unused { background-image: url("import-unused.bmp"); }
 #import-noncaptured { background-image: url("import-noncaptured.bmp"); }`);
         });
-
       });
 
       describe('should check against a selector for the root element', function () {
-
         it('basic', async function () {
           var options = Object.assign({}, baseOptions, {
             "capture.imageBackground": "save-used",
@@ -7184,11 +7040,9 @@ body { color: red; }`);
 
           assert.strictEqual(doc.querySelector('style').textContent.trim(), `html { background-image: url("green.bmp"); }`);
         });
-
       });
 
       describe('in shadow DOM', function () {
-
         it('basic', async function () {
           var options = Object.assign({}, baseOptions, {
             "capture.imageBackground": "save-used",
@@ -7220,11 +7074,9 @@ body { color: red; }`);
   #media { background-image: url("blue.bmp"); }
 }`);
         });
-
       });
 
       describe('in @keyframes', function () {
-
         it('normal capture', async function () {
           var options = Object.assign({}, baseOptions, {
             "capture.rewriteCss": "url",
@@ -7573,11 +7425,9 @@ body { color: red; }`);
   100% { background-image: url("ref-100.bmp"); }
 }`);
         });
-
       });
 
       describe('syntax for @keyframes', function () {
-
         it('basic', async function () {
           var options = Object.assign({}, baseOptions, {
             "capture.imageBackground": "save-used",
@@ -7623,11 +7473,9 @@ body { color: red; }`);
   to { transform: translateX(40px); }
 }`);
         });
-
       });
 
       describe('in scoped @keyframe', function () {
-
         it('basic', async function () {
           var options = Object.assign({}, baseOptions, {
             "capture.imageBackground": "save-used",
@@ -7812,11 +7660,9 @@ body { color: red; }`);
   }
 }`);
         });
-
       });
 
       describe('advanced at-rule', function () {
-
         $it.skipIf($.noAtLayer)('@layer', async function () {
           var options = Object.assign({}, baseOptions, {
             "capture.imageBackground": "save-used",
@@ -7843,11 +7689,9 @@ body { color: red; }`);
   #case1 { background-image: url("base.bmp"); }
 }`);
         });
-
       });
 
       describe('should ignore images referenced only by inline stylesheets', function () {
-
         it('basic', async function () {
           var options = Object.assign({}, baseOptions, {
             "capture.imageBackground": "save-used",
@@ -7875,11 +7719,9 @@ body { color: red; }`);
 
           assert.strictEqual(doc.querySelector('blockquote').getAttribute('style').trim(), `background-image: url("green.bmp");`);
         });
-
       });
 
       $describe.skipIf($.noAdoptedStylesheet)('in constructed stylesheet', function () {
-
         it('basic', async function () {
           var options = Object.assign({}, baseOptions, {
             "capture.imageBackground": "save-used",
@@ -7919,11 +7761,9 @@ body { color: red; }`);
             '1',
           );
         });
-
       });
 
       describe('CSS variable', function () {
-
         $it.xfail()('basic', async function () {
           var options = Object.assign({}, baseOptions, {
             "capture.imageBackground": "save-used",
@@ -7998,11 +7838,9 @@ body { color: red; }`);
 }
 #var6 { animation: var6 3s linear infinite; }`);
         });
-
       });
 
       $describe.skipIf($.noNestingCss)('nesting CSS', function () {
-
         it('basic', async function () {
           var options = Object.assign({}, baseOptions, {
             "capture.imageBackground": "save-used",
@@ -8048,17 +7886,12 @@ body { color: red; }`);
   }
 }`);
         });
-
       });
-
     });
-
   });
 
   describe('CSS font', function () {
-
     describe('should handle fonts according to capture.font', function () {
-
       it('capture.font = save', async function () {
         var options = Object.assign({}, baseOptions, {
           "capture.font": "save",
@@ -8138,13 +7971,10 @@ body { color: red; }`);
         var styleElems = doc.querySelectorAll('style');
         assert.strictEqual(styleElems[0].textContent.trim(), `@font-face { font-family: myFont; src: url(""); }`);
       });
-
     });
 
     describe('used fonts', function () {
-
       describe('basic mapping', function () {
-
         it('normal capture', async function () {
           var options = Object.assign({}, baseOptions, {
             "capture.rewriteCss": "url",
@@ -8233,11 +8063,9 @@ body { color: red; }`);
           var text = await readFileAsText(await cssFile.async('blob'));
           assert.strictEqual(text.trim(), `@font-face { font-family: import; src: url("import.woff"); }`);
         });
-
       });
 
       describe('syntax for @font-face', function () {
-
         it('basic', async function () {
           var options = Object.assign({}, baseOptions, {
             "capture.rewriteCss": "url",
@@ -8289,11 +8117,9 @@ body { color: red; }`);
   to { transform: translateX(40px); font-family: "keyframes\\A 3"; }
 }`);
         });
-
       });
 
       describe('non-loaded font files', function () {
-
         it('save all linked fonts despite non-loaded', async function () {
           var options = Object.assign({}, baseOptions, {
             "capture.rewriteCss": "url",
@@ -8336,11 +8162,9 @@ body { color: red; }`);
 @font-face { font-family: unicode-range; src: url("unicode-range-8.woff"); unicode-range: U+700-800, U+1000; }`,
           );
         });
-
       });
 
       describe('scoped @font-face', function () {
-
         it('basic', async function () {
           var options = Object.assign({}, baseOptions, {
             "capture.rewriteCss": "url",
@@ -8446,11 +8270,9 @@ body { color: red; }`);
   @font-face { font-family: myfont; src: url("shadow.woff"); }
 }`);
         });
-
       });
 
       describe('CSS variable', function () {
-
         $it.xfail()('basic', async function () {
           var options = Object.assign({}, baseOptions, {
             "capture.rewriteCss": "url",
@@ -8511,11 +8333,9 @@ body { color: red; }`);
 }
 #var5 { animation: anime5 3s linear infinite; font-family: var(--var-5); font-size: 1.1em; }`);
         });
-
       });
 
       $describe.skipIf($.noNestingCss)('nesting CSS', function () {
-
         it('basic', async function () {
           var options = Object.assign({}, baseOptions, {
             "capture.font": "save-used",
@@ -8568,11 +8388,9 @@ body { color: red; }`);
   }
 }`);
         });
-
       });
 
       describe('script loaded', function () {
-
         $it.xfail()('basic', async function () {
           var options = Object.assign({}, baseOptions, {
             "capture.rewriteCss": "url",
@@ -8586,17 +8404,12 @@ body { color: red; }`);
           assert.exists(zip.file('scripted.woff'));
           assert.notExists(zip.file('removed.woff'));
         });
-
       });
-
     });
-
   });
 
   describe('script element', function () {
-
     describe('basic', function () {
-
       it('capture.script = save', async function () {
         var options = Object.assign({}, baseOptions, {
           "capture.script": "save",
@@ -8743,15 +8556,11 @@ body { color: red; }`);
         var elem = doc.querySelector('math mrow');
         assert(!elem.hasAttribute('onclick'));
       });
-
     });
-
   });
 
   describe('noscript element', function () {
-
     describe('basic', function () {
-
       it('capture.noscript = save', async function () {
         var options = Object.assign({}, baseOptions, {
           "capture.noscript": "save",
@@ -8828,13 +8637,10 @@ body { color: red; }`);
         var noscripts = doc.querySelectorAll('noscript');
         assert.strictEqual(noscripts.length, 0);
       });
-
     });
-
   });
 
   describe('frame element', function () {
-
     describe('basic', function () {
       var options = Object.assign({}, baseOptions, {
         "capture.saveResourcesSequentially": true,
@@ -9010,11 +8816,9 @@ body { color: red; }`);
         var doc = await readFileAsDocument(indexBlob);
         assert.strictEqual(doc.querySelectorAll('iframe').length, 0);
       });
-
     });
 
     describe('sandboxed iframe', function () {
-
       $it.xfailIf(
         userAgent.is('firefox') && userAgent.major < 128,
         'content script cannot be injected into a sandboxed iframe in Firefox < 128',
@@ -9067,7 +8871,6 @@ body { color: red; }`);
         var imgData = await imgFile.async('base64');
         assert.strictEqual(imgData, 'Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAAD/AAAA');
       });
-
     });
 
     describe('srcdoc frame', function () {
@@ -9228,11 +9031,9 @@ document.querySelector("p").textContent = "srcdoc content modified";
 </script>`);
         assert(!frame.hasAttribute('src'));
       });
-
     });
 
     describe('about: frame', function () {
-
       it('save the current content for about: frames', async function () {
         var options = Object.assign({}, baseOptions, {
           "capture.frame": "save",
@@ -9268,7 +9069,6 @@ document.querySelector("p").textContent = "srcdoc content modified";
         var doc = await readFileAsDocument(indexBlob);
         assert.strictEqual(doc.body.textContent.trim(), 'iframe modified 2');
       });
-
     });
 
     describe('duplication handling', function () {
@@ -9317,7 +9117,6 @@ document.querySelector("p").textContent = "srcdoc content modified";
         assert.strictEqual(frames[3].getAttribute('src'), `${localhost}/capture_frame/frames/text.txt`);
         assert.strictEqual(frames[4].getAttribute('src'), `${localhost}/capture_frame/frames/text.txt`);
       });
-
     });
 
     describe('headless', function () {
@@ -9374,7 +9173,6 @@ document.querySelector("p").textContent = "srcdoc content modified";
         var text = (await readFileAsText(await frameFile.async('blob'))).trim();
         assert.strictEqual(text, "Lorem ipsum dolor sit amet. 旡羖甾惤怤齶覅煋朸汊狦芎沝抾邞塯乇泹銧裧。");
       });
-
     });
 
     describe('headless srcdoc frame', function () {
@@ -9505,11 +9303,9 @@ document.querySelector("p").textContent = "srcdoc content modified";
 </script>`);
         assert.strictEqual(frame.getAttribute('src'), `${localhost}/capture_frame/frames/frame1.html`);
       });
-
     });
 
     describe('headless about: frame', function () {
-
       it('should keep original URL for about: frames', async function () {
         var options = Object.assign({}, baseOptions, {
           "capture.frame": "save",
@@ -9536,11 +9332,9 @@ document.querySelector("p").textContent = "srcdoc content modified";
         assert.strictEqual(frames[6].getAttribute('src'), "about:newtab");
         assert.strictEqual(frames[7].getAttribute('src'), "about:unknown");
       });
-
     });
 
     describe('headless self-pointing frame', function () {
-
       it('should rewrite self-pointing URLs without saving an extra page', async function () {
         var options = Object.assign({}, baseOptions, {
           "capture.frame": "save",
@@ -9563,11 +9357,9 @@ document.querySelector("p").textContent = "srcdoc content modified";
         assert.strictEqual(frames[2].getAttribute('src'), "#123");
         assert.strictEqual(frames[3].getAttribute('src'), "index.html");
       });
-
     });
 
     describe('headless duplication handling', function () {
-
       it('capture.frame = save', async function () {
         var options = Object.assign({}, baseOptions, {
           "capture.frame": "save",
@@ -9590,18 +9382,15 @@ document.querySelector("p").textContent = "srcdoc content modified";
         assert.strictEqual(frames[3].getAttribute('src'), "text.txt");
         assert.strictEqual(frames[4].getAttribute('src'), "text.txt");
       });
-
     });
 
     describe('singleHtml', function () {
-
       /**
        * Check data URL output for frame capture.
        *
        * - Should use the original filename.
        */
       describe('data URL handling', function () {
-
         it('capture.saveDataUriAsSrcdoc = true', async function () {
           // data URI charset should be UTF-8
           var options = Object.assign({}, baseOptions, {
@@ -9712,7 +9501,6 @@ document.querySelector("p").textContent = "srcdoc content modified";
           var frameDoc = (await xhr({url: frameSrc, responseType: "document"})).response;
           assert.strictEqual(frameDoc.querySelector('p').textContent.trim(), `frame2 content modified`);
         });
-
       });
 
       /**
@@ -9722,7 +9510,6 @@ document.querySelector("p").textContent = "srcdoc content modified";
        * - Should not contain a hash for the data URL.
        */
       describe('duplication handling', function () {
-
         it('capture.saveDataUriAsSrcdoc = true', async function () {
           var options = Object.assign({}, baseOptions, {
             "capture.saveAs": "singleHtml",
@@ -9762,13 +9549,10 @@ document.querySelector("p").textContent = "srcdoc content modified";
           assert.strictEqual(frames[0].getAttribute('src'), frames[2].getAttribute('src'));
           assert.strictEqual(frames[3].getAttribute('src'), frames[4].getAttribute('src'));
         });
-
       });
-
     });
 
     describe('circular frame', function () {
-
       it('capture.saveAs = zip', async function () {
         // link to corresponding downloaded frame file
         var options = Object.assign({}, baseOptions, {
@@ -9870,11 +9654,9 @@ document.querySelector("p").textContent = "srcdoc content modified";
         assert.strictEqual(frame.getAttribute('src'), `urn:scrapbook:download:circular:url:${localhost}/capture_frame_circular/index.html`);
         assert(!frame.hasAttribute('srcdoc'));
       });
-
     });
 
     describe('circular frame to self', function () {
-
       it('capture.frame = save', async function () {
         // link to corresponding downloaded frame file
         var options = Object.assign({}, baseOptions, {
@@ -9936,7 +9718,6 @@ document.querySelector("p").textContent = "srcdoc content modified";
         assert.strictEqual(frame.getAttribute('src'), `urn:scrapbook:download:circular:url:${localhost}/capture_frame_circular_self/index.html`);
         assert(!frame.hasAttribute('srcdoc'));
       });
-
     });
 
     describe('should name frames according to capture.frameRename', function () {
@@ -9989,11 +9770,9 @@ document.querySelector("p").textContent = "srcdoc content modified";
         assert.strictEqual(doc.querySelectorAll('iframe')[3].getAttribute('src'), `text.txt`);
         assert.strictEqual(doc.querySelectorAll('iframe')[4].getAttribute('src'), `red.bmp`);
       });
-
     });
 
     describe('should take header filename', function () {
-
       it('capture.frameRename = false', async function () {
         var options = Object.assign({}, baseOptions, {
           "capture.frame": "save",
@@ -10101,15 +9880,11 @@ document.querySelector("p").textContent = "srcdoc content modified";
         var frameSrc = doc.querySelectorAll('iframe')[3].getAttribute('src');
         assert(frameSrc.match(rawRegex`${'^'}data:text/html;charset=UTF-8;filename=a%E4%B8%ADb%23c.php.html,`));
       });
-
     });
-
   });
 
   describe('anchor element', function () {
-
     describe('basic', function () {
-
       it('should rewrite URLs correctly', async function () {
         var blob = await capture({
           url: `${localhost}/capture_anchor/basic/basic.html`,
@@ -10172,11 +9947,9 @@ document.querySelector("p").textContent = "srcdoc content modified";
 
         assert.strictEqual(anchors[42].getAttribute('href'), `mailto:noresponse@example.com`);
       });
-
     });
 
     describe('capture selection', function () {
-
       it('should rewrite URL to original page if targeting a non-captured part in self page', async function () {
         var blob = await capture({
           url: `${localhost}/capture_anchor/partial_noncaptured/partial.html`,
@@ -10220,11 +9993,9 @@ document.querySelector("p").textContent = "srcdoc content modified";
         assert.strictEqual(anchors[6].getAttribute('href'), `#target_id`);
         assert.strictEqual(anchors[7].getAttribute('href'), `#target_name`);
       });
-
     });
 
     describe('anchor in srcdoc', function () {
-
       it('depth = null', async function () {
         // Links to the original page should be rewritten to the captured one,
         // but it's over-complicated to do so for a non-indepth capture.
@@ -10298,11 +10069,9 @@ document.querySelector("p").textContent = "srcdoc content modified";
 
         assert.strictEqual(anchors[10].getAttribute('href'), `about:srcdoc`);
       });
-
     });
 
     describe('honor base[href] when rewriting URL', function () {
-
       it('basic', async function () {
         var blob = await capture({
           url: `${localhost}/capture_anchor/base/base.html`,
@@ -10326,11 +10095,9 @@ document.querySelector("p").textContent = "srcdoc content modified";
 
         assert.strictEqual(anchors[8].getAttribute('href'), `http://example.com/`); // slight changed from http://example.com
       });
-
     });
 
     describe('ping attribute', function () {
-
       it('capture.ping = link', async function () {
         var options = Object.assign({}, baseOptions, {
           "capture.ping": "link",
@@ -10364,15 +10131,11 @@ document.querySelector("p").textContent = "srcdoc content modified";
 
         assert.strictEqual(a.hasAttribute('ping'), false);
       });
-
     });
-
   });
 
   describe('image element', function () {
-
     describe('basic', function () {
-
       it('capture.image = save', async function () {
         var options = Object.assign({}, baseOptions, {
           "capture.image": "save",
@@ -10559,13 +10322,10 @@ document.querySelector("p").textContent = "srcdoc content modified";
         assert.strictEqual(doc.querySelectorAll('picture').length, 0);
         assert.strictEqual(doc.querySelectorAll('input').length, 0);
       });
-
     });
-
   });
 
   describe('audio element', function () {
-
     describe('basic', function () {
       // Use headless for most test cases since loading audio in the browser is slow.
 
@@ -10732,13 +10492,10 @@ document.querySelector("p").textContent = "srcdoc content modified";
         var trackElems = doc.querySelectorAll('track');
         assert.strictEqual(trackElems.length, 0);
       });
-
     });
-
   });
 
   describe('video element', function () {
-
     describe('basic', function () {
       // Use headless for most test cases since loading video in the browser is slow.
 
@@ -10909,13 +10666,10 @@ document.querySelector("p").textContent = "srcdoc content modified";
         var trackElems = doc.querySelectorAll('track');
         assert.strictEqual(trackElems.length, 0);
       });
-
     });
-
   });
 
   describe('canvas element', function () {
-
     describe('basic', function () {
       var options = Object.assign({}, baseOptions, {
         "capture.script": "remove",
@@ -11042,11 +10796,9 @@ document.querySelector("p").textContent = "srcdoc content modified";
         var shadow = frag.content;
         assert(!shadow.querySelector('canvas'));
       });
-
     });
 
     describe('webgl', function () {
-
       it('should save the content of a webgl canvas with `preserveDrawingBuffer` = true', async function () {
         var options = Object.assign({}, baseOptions, {
           "capture.canvas": "save",
@@ -11068,15 +10820,11 @@ document.querySelector("p").textContent = "srcdoc content modified";
 
         assert(doc.querySelector('canvas').getAttribute("data-scrapbook-canvas").match(rawRegex`${'^'}data:image/png;base64,`));
       });
-
     });
-
   });
 
   describe('embed element', function () {
-
     describe('basic', function () {
-
       it('capture.embed = save', async function () {
         var options = Object.assign({}, baseOptions, {
           "capture.embed": "save",
@@ -11152,11 +10900,9 @@ document.querySelector("p").textContent = "srcdoc content modified";
         var embed = doc.querySelector('embed');
         assert.notExists(embed);
       });
-
     });
 
     describe('page', function () {
-
       it('should capture headlessly like a frame', async function () {
         var options = Object.assign({}, baseOptions, {
           "capture.saveResourcesSequentially": true,
@@ -11216,11 +10962,9 @@ document.querySelector("p").textContent = "srcdoc content modified";
 <p>Frame page content.</p>
 <img src="./red.bmp">`);
       });
-
     });
 
     describe('about: page', function () {
-
       it('should keep as-is', async function () {
         var options = Object.assign({}, baseOptions, {
           "capture.saveResourcesSequentially": true,
@@ -11242,11 +10986,9 @@ document.querySelector("p").textContent = "srcdoc content modified";
         assert.strictEqual(frames[2].getAttribute('src'), "about:srcdoc");
         assert.strictEqual(frames[3].getAttribute('src'), "about:invalid");
       });
-
     });
 
     describe('circular', function () {
-
       it('capture.saveAs = zip', async function () {
         // link to corresponding downloaded frame file
         var options = Object.assign({}, baseOptions, {
@@ -11315,13 +11057,10 @@ document.querySelector("p").textContent = "srcdoc content modified";
         var frame = frameDoc.querySelector('embed');
         assert.strictEqual(frame.getAttribute('src'), `urn:scrapbook:download:circular:url:${localhost}/capture_embed_circular/index.html`);
       });
-
     });
-
   });
 
   describe('object element', function () {
-
     describe('basic', function () {
       var options = Object.assign({}, baseOptions, {
         "capture.frameRename": false,
@@ -11416,11 +11155,9 @@ document.querySelector("p").textContent = "srcdoc content modified";
         var doc = await readFileAsDocument(indexBlob);
         assert.notExists(doc.querySelector('object'));
       });
-
     });
 
     describe('page', function () {
-
       it('should capture headlessly like a frame', async function () {
         var options = Object.assign({}, baseOptions, {
           "capture.saveResourcesSequentially": true,
@@ -11480,11 +11217,9 @@ document.querySelector("p").textContent = "srcdoc content modified";
 <p>Frame page content.</p>
 <img src="./red.bmp">`);
       });
-
     });
 
     describe('about: page', function () {
-
       it('should keep as-is', async function () {
         var options = Object.assign({}, baseOptions, {
           "capture.saveResourcesSequentially": true,
@@ -11506,11 +11241,9 @@ document.querySelector("p").textContent = "srcdoc content modified";
         assert.strictEqual(frames[2].getAttribute('data'), "about:srcdoc");
         assert.strictEqual(frames[3].getAttribute('data'), "about:invalid");
       });
-
     });
 
     describe('circular', function () {
-
       it('capture.saveAs = zip', async function () {
         // link to corresponding downloaded frame file
         var options = Object.assign({}, baseOptions, {
@@ -11579,15 +11312,11 @@ document.querySelector("p").textContent = "srcdoc content modified";
         var frame = frameDoc.querySelector('object');
         assert.strictEqual(frame.getAttribute('data'), `urn:scrapbook:download:circular:url:${localhost}/capture_object_circular/index.html`);
       });
-
     });
-
   });
 
   describe('applet element', function () {
-
     describe('basic', function () {
-
       it('capture.applet = save', async function () {
         var options = Object.assign({}, baseOptions, {
           "capture.applet": "save",
@@ -11677,13 +11406,10 @@ document.querySelector("p").textContent = "srcdoc content modified";
         var doc = await readFileAsDocument(indexBlob);
         assert.notExists(doc.querySelector('applet'));
       });
-
     });
-
   });
 
   describe('template element', function () {
-
     /**
      * Check if template content is captured.
      *
@@ -11694,7 +11420,6 @@ document.querySelector("p").textContent = "srcdoc content modified";
      *   be changed by CSS.
      */
     describe('basic', function () {
-
       it('capture tab', async function () {
         var blob = await capture({
           url: `${localhost}/capture_template/template.html`,
@@ -11724,13 +11449,10 @@ document.querySelector("p").textContent = "srcdoc content modified";
 <img src="./nonexist.bmp">
 <a href="./nonexist.html">anchor</a>`);
       });
-
     });
-
   });
 
   describe('form status handling', function () {
-
     describe('basic', function () {
       var options = Object.assign({}, baseOptions, {
         "capture.recordRewrites": true,
@@ -12092,15 +11814,11 @@ document.querySelector("p").textContent = "srcdoc content modified";
         // check records
         assertNoRecord(doc);
       });
-
     });
-
   });
 
   describe('SVG handling', function () {
-
     describe('basic', function () {
-
       it('embed.html', async function () {
         var options = Object.assign({}, baseOptions, {
           "capture.image": "save",
@@ -12160,15 +11878,11 @@ document.querySelector("p").textContent = "srcdoc content modified";
         assert.strictEqual(doc.querySelectorAll('svg script')[0].getAttribute('href'), `script.js`);
         assert.strictEqual(doc.querySelectorAll('svg script')[1].getAttribute('xlink:href'), `script2.js`);
       });
-
     });
-
   });
 
   describe('MathML handling', function () {
-
     describe('basic', function () {
-
       it('embed.html', async function () {
         var options = Object.assign({}, baseOptions, {
           "capture.image": "save",
@@ -12189,13 +11903,10 @@ document.querySelector("p").textContent = "srcdoc content modified";
         assert.strictEqual(doc.querySelectorAll('math msup')[0].getAttribute('href'), `${localhost}/capture_mathml/resources/red.bmp`);
         assert.strictEqual(doc.querySelectorAll('math mi')[2].getAttribute('href'), `${localhost}/capture_mathml/resources/blue.bmp`);
       });
-
     });
-
   });
 
   describe('namespace handling', function () {
-
     it('should save `style`/`script` elements in another namespace', async function () {
       var blob = await capture({
         url: `${localhost}/capture_namespace/namespace.html`,
@@ -12219,11 +11930,9 @@ document.querySelector("p").textContent = "srcdoc content modified";
       assert.strictEqual(scriptElems[2].innerHTML.trim(), `console.log("svg &gt; svg script")`);
       assert.strictEqual(scriptElems[3].innerHTML.trim(), `console.log("svg &gt; html script")`);
     });
-
   });
 
   describe('invalid tags', function () {
-
     it('should escape bad tag content for security', async function () {
       var options = Object.assign({}, baseOptions, {
         "capture.style": "save",
@@ -12244,14 +11953,12 @@ document.querySelector("p").textContent = "srcdoc content modified";
       assert.strictEqual(doc.querySelector('style').textContent.trim(), r`/*Explode <\/style> with a bomb!<script>alert("bomb");</script>*/`);
       assert.strictEqual(doc.querySelector('script').textContent.trim(), r`/*Explode <\/script> with a bomb!<script>alert("bomb");<\/script>*/`);
     });
-
   });
 
   /**
    * capturer.captureDocument
    */
   describe('recursive', function () {
-
     it('should work correctly when parent is to be removed and child is to be captured', async function () {
       var options = Object.assign({}, baseOptions, {
         "capture.image": "remove",
@@ -12275,11 +11982,9 @@ document.querySelector("p").textContent = "srcdoc content modified";
       assert.notExists(doc.querySelector('img'));
       assert.notExists(doc.querySelector('script'));
     });
-
   });
 
   describe('removeHidden', function () {
-
     it('capture.removeHidden = undisplayed', async function () {
       var options = Object.assign({}, baseOptions, {
         "capture.removeHidden": "undisplayed",
@@ -12346,11 +12051,9 @@ document.querySelector("p").textContent = "srcdoc content modified";
       assert.exists(doc.querySelector('noscript'));
       assert.exists(doc.querySelector('template'));
     });
-
   });
 
   describe('cite element', function () {
-
     it('should rewrite the URL', async function () {
       var blob = await capture({
         url: `${localhost}/capture_cite/cite.html`,
@@ -12366,11 +12069,9 @@ document.querySelector("p").textContent = "srcdoc content modified";
       assert.strictEqual(doc.querySelector('ins').getAttribute('cite'), `${localhost}/capture_cite/test.html`);
       assert.strictEqual(doc.querySelector('del').getAttribute('cite'), `${localhost}/capture_cite/test.html`);
     });
-
   });
 
   describe('preload', function () {
-
     it('capture.preload = blank', async function () {
       var options = Object.assign({}, baseOptions, {
         "capture.preload": "blank",
@@ -12416,11 +12117,9 @@ document.querySelector("p").textContent = "srcdoc content modified";
       assert.notExists(doc.querySelector('link[rel="dns-prefetch"]'));
       assert.notExists(doc.querySelector('link[rel="preconnect"]'));
     });
-
   });
 
   describe('prefetch', function () {
-
     it('capture.prefetch = blank', async function () {
       var options = Object.assign({}, baseOptions, {
         "capture.prefetch": "blank",
@@ -12459,11 +12158,9 @@ document.querySelector("p").textContent = "srcdoc content modified";
       assert.notExists(doc.querySelector('link[rel="prefetch"]'));
       assert.notExists(doc.querySelector('link[rel="prerender"]'));
     });
-
   });
 
   describe('crossorigin attribute', function () {
-
     it('save', async function () {
       var options = Object.assign({}, baseOptions, {
         "capture.image": "save",
@@ -12545,11 +12242,9 @@ document.querySelector("p").textContent = "srcdoc content modified";
       assert.strictEqual(doc.querySelector('audio').getAttribute('crossorigin'), '');
       assert.strictEqual(doc.querySelector('video').getAttribute('crossorigin'), '');
     });
-
   });
 
   describe('integrity attribute', function () {
-
     it('save', async function () {
       var options = Object.assign({}, baseOptions, {
         "capture.style": "save",
@@ -12605,13 +12300,10 @@ document.querySelector("p").textContent = "srcdoc content modified";
       assert(!doc.querySelector('link').hasAttribute('integrity'));
       assert(!doc.querySelector('script').hasAttribute('integrity'));
     });
-
   });
 
   describe('referrer', function () {
-
     describe('capture.referrerPolicy', function () {
-
       it('capture.referrerPolicy = no-referrer', async function () {
         var options = Object.assign({}, baseOptions, {
           "capture.referrerPolicy": "no-referrer",
@@ -12747,11 +12439,9 @@ document.querySelector("p").textContent = "srcdoc content modified";
         var text = (await readFileAsText(await file.async('blob'))).trim();
         assert.strictEqual(text, `${localhost}/`);
       });
-
     });
 
     describe('capture.referrerSpoofSource', function () {
-
       it('should send the usual referrer if referrerSpoofSource = false', async function () {
         var options = Object.assign({}, baseOptions, {
           "capture.referrerPolicy": "unsafe-url",
@@ -12805,11 +12495,9 @@ document.querySelector("p").textContent = "srcdoc content modified";
         var text = (await readFileAsText(await file.async('blob'))).trim();
         assert.strictEqual(text, `${localhost2}/`);
       });
-
     });
 
     describe('referrer related attributes', function () {
-
       it('should prioritize `referrerpolicy` and `rel=noreferrer` attributes', async function () {
         var options = Object.assign({}, baseOptions, {
           "capture.referrerPolicy": "unsafe-url",
@@ -12931,11 +12619,9 @@ document.querySelector("p").textContent = "srcdoc content modified";
         var text = (await readFileAsText(await file.async('blob'))).trim();
         assert.strictEqual(text, `${localhost}/capture_referrer_attr/index.html`);
       });
-
     });
 
     describe('document referrer', function () {
-
       it('should prioritize `meta[name="referrer"]`', async function () {
         var options = Object.assign({}, baseOptions, {
           "capture.referrerPolicy": "unsafe-url",
@@ -13233,11 +12919,9 @@ document.querySelector("p").textContent = "srcdoc content modified";
         var text = (await readFileAsText(await file.async('blob'))).trim();
         assert.strictEqual(text, `${localhost}/capture_referrer_dynamic_shadow/index.html`);
       });
-
     });
 
     describe('cross-origin CSS', function () {
-
       for (const rewriteCss of ["url", "tidy", "match"]) {
         it(`should apply referrer policy for cross-origin CSS (capture.rewriteCss = ${rewriteCss})`, async function () {
           var options = Object.assign({}, baseOptions, {
@@ -13283,15 +12967,11 @@ document.querySelector("p").textContent = "srcdoc content modified";
           assert.strictEqual(text, `:root { --referrer: "${localhost2}/capture_referrer_cross_origin/css_link.py"; }`);
         });
       }
-
     });
-
   });
 
   describe('shadow root', function () {
-
     describe('should handle shadow DOMs according to capture.shadowDom', function () {
-
       it('capture.shadowDom = save', async function () {
         var options = Object.assign({}, baseOptions, {
           "capture.shadowDom": "save",
@@ -13361,7 +13041,6 @@ document.querySelector("p").textContent = "srcdoc content modified";
         var host1 = doc.querySelector('div');
         assertNoRecord(host1);
       });
-
     });
 
     $describe.skipIf(
@@ -13411,11 +13090,9 @@ document.querySelector("p").textContent = "srcdoc content modified";
         assertNoRecord(host1);
         assertNoRecord(host2);
       });
-
     });
 
     $describe.skipIf($.noShadowRootClonable)('should handle clonable shadow DOMs', function () {
-
       it('capture.shadowDom = save', async function () {
         var options = Object.assign({}, baseOptions, {
           "capture.shadowDom": "save",
@@ -13487,7 +13164,6 @@ document.querySelector("p").textContent = "srcdoc content modified";
         var host1 = doc.querySelector('div');
         assertNoRecord(host1);
       });
-
     });
 
     $describe.skipIf($.noShadowRootDelegatesFocus)
@@ -13522,7 +13198,6 @@ document.querySelector("p").textContent = "srcdoc content modified";
         // check records
         assertNoRecord(host1);
       });
-
     });
 
     $describe.skipIf($.noShadowRootSlotAssignment)('should handle slots', function () {
@@ -13627,11 +13302,9 @@ document.querySelector("p").textContent = "srcdoc content modified";
         assertNoRecord(shadow2);
         assertNoRecord(shadow2, {filter: {regexAttr: /^data-scrapbook-slot-/}});
       });
-
     });
 
     describe('should handle shadow DOMs auto-generated by custom elements', function () {
-
       it('basic', async function () {
         var options = Object.assign({}, baseOptions, {
           "capture.shadowDom": "save",
@@ -13661,7 +13334,6 @@ document.querySelector("p").textContent = "srcdoc content modified";
         var loader = doc.querySelector('script[data-scrapbook-elem="basic-loader"]');
         assert(loader.textContent.trim().match(rawRegex`${'^'}(function () {${'.+'}})()${'$'}`));
       });
-
     });
 
     $describe.skipIf(
@@ -13699,11 +13371,9 @@ document.querySelector("p").textContent = "srcdoc content modified";
         var loader = doc.querySelector('script[data-scrapbook-elem="basic-loader"]');
         assert(loader.textContent.trim().match(rawRegex`${'^'}(function () {${'.+'}})()${'$'}`));
       });
-
     });
 
     describe('should generate registry for valid custom elements', function () {
-
       it('capture.script = save', async function () {
         var options = Object.assign({}, baseOptions, {
           "capture.script": "save",
@@ -13769,11 +13439,9 @@ document.querySelector("p").textContent = "srcdoc content modified";
         var value = doc.querySelector(`script[data-scrapbook-elem="custom-elements-loader"]`).textContent.trim();
         assert(value.match(rawRegex`${'^'}(function (names) {${'.+'}})(["custom-subelem","custom-elem"])${'$'}`));
       });
-
     });
 
     describe('should not generate registry for invalid custom elements', function () {
-
       it('capture.script = remove', async function () {
         var options = Object.assign({}, baseOptions, {
           "capture.script": "remove",
@@ -13789,15 +13457,11 @@ document.querySelector("p").textContent = "srcdoc content modified";
         var doc = await readFileAsDocument(indexBlob);
         assert.notExists(doc.querySelector(`script[data-scrapbook-elem="custom-elements-loader"]`));
       });
-
     });
-
   });
 
   describe('downLink', function () {
-
     describe('should handle linked files according to capture.downLink.file.mode', function () {
-
       it('capture.downLink.file.mode = header', async function () {
         var options = Object.assign({}, baseOptions, {
           "capture.downLink.file.mode": "header",
@@ -13946,11 +13610,9 @@ document.querySelector("p").textContent = "srcdoc content modified";
         assert.strictEqual(anchors[7].getAttribute('href'), `${localhost}/capture_downLink_file/nofilename.py`);
         assert.strictEqual(anchors[8].getAttribute('href'), `${localhost}/capture_downLink_file/redirect.pyr`);
       });
-
     });
 
     describe('syntax of capture.downLink.file.extFilter', function () {
-
       it('one rule per line', async function () {
         // match URL (*.py) but download using resolved filename using header (*.txt)
         var options = Object.assign({}, baseOptions, {
@@ -14341,7 +14003,6 @@ mime:application/wsb.unknown`,
     });
 
     describe('should handle nonexistent linked files', function () {
-
       it('url mode: should download matched URL with error', async function () {
         var options = Object.assign({}, baseOptions, {
           "capture.downLink.file.mode": "url",
@@ -14383,11 +14044,9 @@ mime:application/wsb.unknown`,
         assert.strictEqual(anchors[10].getAttribute('href'), `${localhost}/capture_downLink_file/nonexist.txt`);
         assert.strictEqual(anchors[11].getAttribute('href'), `${localhost}/capture_downLink_file/nonexist.html`);
       });
-
     });
 
     describe('syntax of capture.downLink.file.urlFilter', function () {
-
       it('plain: basic', async function () {
         // a rule each line
         // plain text rule
@@ -14515,11 +14174,9 @@ ${localhost}/capture_downLink_file/file.css\tbar`,
         assert.exists(zip.file("redirect.txt"));
         assert.lengthOf(Object.keys(zip.files), 5);
       });
-
     });
 
     describe('should handle in-depth capture according to capture.downLink.doc.depth', function () {
-
       it('depth = null', async function () {
         var options = Object.assign({}, baseOptions, {
           "capture.downLink.doc.depth": null,
@@ -14882,11 +14539,9 @@ ${localhost}/capture_downLink_file/file.css\tbar`,
         };
         assert.deepEqual(JSON.parse(await readFileAsText(sitemapBlob)), expectedData);
       });
-
     });
 
     describe('in-depth capture with tab mode', function () {
-
       it('depth = 1', async function () {
         var options = Object.assign({}, baseOptions, {
           "capture.downLink.doc.depth": 1,
@@ -15013,11 +14668,9 @@ ${localhost}/capture_downLink_file/file.css\tbar`,
         };
         assert.deepEqual(JSON.parse(await readFileAsText(sitemapBlob)), expectedData);
       });
-
     });
 
     describe('should ignore in-depth capture for singleHtml', function () {
-
       it('depth = 0', async function () {
         var options = Object.assign({}, baseOptions, {
           "capture.downLink.doc.depth": 0,
@@ -15057,11 +14710,9 @@ ${localhost}/capture_downLink_file/file.css\tbar`,
         assert.strictEqual(doc.querySelectorAll('a')[3].getAttribute('href'), `${localhost}/capture_downLink_indepth/linked1-3.html#333`);
         assert.strictEqual(doc.querySelectorAll('a')[4].getAttribute('href'), `${localhost}/capture_downLink_indepth/linked1-4.html#444`);
       });
-
     });
 
     describe('should ignore in-depth capture when capturing a file', function () {
-
       it('depth = 1', async function () {
         var options = Object.assign({}, baseOptions, {
           "capture.saveAs": "zip",
@@ -15083,7 +14734,6 @@ ${localhost}/capture_downLink_file/file.css\tbar`,
         assert.strictEqual(doc.documentElement.getAttribute('data-scrapbook-type'), 'file');
         assert.exists(doc.querySelector('meta[http-equiv="refresh"][content="0; url=file.bmp"]'));
       });
-
     });
 
     describe('should ignore downLink.file for doc when downLink.doc.depth is set', function () {
@@ -15235,11 +14885,9 @@ ${localhost}/capture_downLink_file/file.css\tbar`,
         assert.notExists(zip.file('linked2-1.html'));
         assert.notExists(zip.file('linked2-2.html'));
       });
-
     });
 
     describe('syntax of capture.downLink.doc.urlFilter', function () {
-
       it('plain: match full URL', async function () {
         var options = Object.assign({}, baseOptions, {
           "capture.downLink.doc.depth": 2,
@@ -15331,11 +14979,9 @@ ${localhost}/capture_downLink_indepth/linked2-1.html`,
 
         assert.notExists(zip.file('linked2-2.html'));
       });
-
     });
 
     describe('should rebuild links for XHTML/SVG pages', function () {
-
       it('depth = 1', async function () {
         var options = Object.assign({}, baseOptions, {
           "capture.downLink.doc.depth": 1,
@@ -15368,11 +15014,9 @@ ${localhost}/capture_downLink_indepth/linked2-1.html`,
         assert.strictEqual(doc.querySelectorAll('a')[0].getAttribute('href'), `linked2.html`);
         assert.strictEqual(doc.querySelectorAll('a')[1].getAttribute('xlink:href'), `linked3.html`);
       });
-
     });
 
     describe('should have the same depth for pages linked from a frame as from the frame parent', function () {
-
       it('depth = 1', async function () {
         var options = Object.assign({}, baseOptions, {
           "capture.downLink.doc.depth": 1,
@@ -15400,7 +15044,6 @@ ${localhost}/capture_downLink_indepth/linked2-1.html`,
         var doc = await readFileAsDocument(indexBlob);
         assert.exists(doc);
       });
-
     });
 
     describe('frame renaming for deep pages', function () {
@@ -15452,11 +15095,9 @@ ${localhost}/capture_downLink_indepth/linked2-1.html`,
         assert.strictEqual(doc.querySelectorAll('iframe')[0].getAttribute('src'), `frame1.html`);
         assert.strictEqual(doc.querySelectorAll('iframe')[1].getAttribute('src'), `frame2.html`);
       });
-
     });
 
     describe('should rebuild links in shadow DOMs', function () {
-
       it('depth = 1', async function () {
         var options = Object.assign({}, baseOptions, {
           "capture.downLink.doc.depth": 1,
@@ -15485,11 +15126,9 @@ ${localhost}/capture_downLink_indepth/linked2-1.html`,
         var shadow = frag.content;
         assert.strictEqual(shadow.querySelectorAll('a')[0].getAttribute('href'), `linked2.html#222`);
       });
-
     });
 
     describe('links handling for meta refresh', function () {
-
       it('depth = 1', async function () {
         var options = Object.assign({}, baseOptions, {
           "capture.downLink.doc.depth": 1,
@@ -15565,11 +15204,9 @@ ${localhost}/capture_downLink_indepth/linked2-1.html`,
 
         assert.exists(zip.file('refreshed.html'));
       });
-
     });
 
     describe('links handling for redirect', function () {
-
       it('depth = 1', async function () {
         var options = Object.assign({}, baseOptions, {
           "capture.downLink.doc.depth": 1,
@@ -15640,11 +15277,9 @@ ${localhost}/capture_downLink_indepth/linked2-1.html`,
         };
         assert.deepEqual(JSON.parse(await readFileAsText(sitemapBlob)), expectedData);
       });
-
     });
 
     describe('should not record URL for data URLs in `index.json`', function () {
-
       it('basic', async function () {
         var options = Object.assign({}, baseOptions, {
           "capture.saveResourcesSequentially": true,
@@ -15716,11 +15351,9 @@ ${localhost}/capture_downLink_indepth/linked2-1.html`,
         };
         assert.deepEqual(JSON.parse(await readFileAsText(sitemapBlob)), expectedData);
       });
-
     });
 
     describe('should not record URL for blob: URLs in `index.json`', function () {
-
       it('depth = 0', async function () {
         var options = Object.assign({}, baseOptions, {
           "capture.saveResourcesSequentially": true,
@@ -15795,11 +15428,9 @@ ${localhost}/capture_downLink_indepth/linked2-1.html`,
         };
         assert.deepEqual(JSON.parse(await readFileAsText(sitemapBlob)), expectedData);
       });
-
     });
 
     describe('should keep as-is for about: URLs', function () {
-
       it('depth = 1', async function () {
         var options = Object.assign({}, baseOptions, {
           "capture.downLink.doc.depth": 1,
@@ -15863,11 +15494,9 @@ ${localhost}/capture_downLink_indepth/linked2-1.html`,
         };
         assert.deepEqual(JSON.parse(await readFileAsText(sitemapBlob)), expectedData);
       });
-
     });
 
     describe('should safely ignore invalid URLs when rebuilding links', function () {
-
       it('depth = 1', async function () {
         var options = Object.assign({}, baseOptions, {
           "capture.downLink.doc.depth": 1,
@@ -15932,7 +15561,6 @@ ${localhost}/capture_downLink_indepth/linked2-1.html`,
         };
         assert.deepEqual(JSON.parse(await readFileAsText(sitemapBlob)), expectedData);
       });
-
     });
 
     /**
@@ -15940,7 +15568,6 @@ ${localhost}/capture_downLink_indepth/linked2-1.html`,
      * Also check that links in an embedded SVG or MathML are handled correctly.
      */
     describe('should not capture attachment pages', function () {
-
       it('downLink', async function () {
         var options = Object.assign({}, baseOptions, {
           "capture.downLink.file.mode": "header",
@@ -16106,7 +15733,6 @@ ${localhost}/capture_downLink_indepth/linked2-1.html`,
         var doc = await readFileAsDocument(indexBlob);
         assert.exists(doc.querySelector('img[src="red.bmp"]'));
       });
-
     });
 
     describe('should add file/page according to capture.downLink.urlExtra', function () {
@@ -16338,11 +15964,9 @@ ${localhost}/capture_downLink_indepth_urlExtra/1-3.txt`,
         };
         assert.deepEqual(JSON.parse(await readFileAsText(sitemapBlob)), expectedData);
       });
-
     });
 
     describe('should preserve case for `path` in `index.json`', function () {
-
       it('basic', async function () {
         var options = Object.assign({}, baseOptions, {
           "capture.downLink.doc.depth": 1,
@@ -16422,11 +16046,9 @@ ${localhost}/capture_downLink_indepth_urlExtra/1-3.txt`,
         };
         assert.deepEqual(JSON.parse(await readFileAsText(sitemapBlob)), expectedData);
       });
-
     });
 
     describe('should save linked blob URL file/page', function () {
-
       it('basic', async function () {
         var options = Object.assign({}, baseOptions, {
           "capture.downLink.file.mode": "header",
@@ -16459,11 +16081,9 @@ ${localhost}/capture_downLink_indepth_urlExtra/1-3.txt`,
         var imgFn1 = doc.querySelector('img').getAttribute('src');
         assert.strictEqual(imgFn1, imgFn);
       });
-
     });
 
     describe('should save upper-scope blob URLs in a deep blob URL page', function () {
-
       $it.xfailIf(
         userAgent.is('firefox'),
         'unable to fetch an upper-scope blob URL from the content script in Firefox',
@@ -16511,9 +16131,7 @@ ${localhost}/capture_downLink_indepth_urlExtra/1-3.txt`,
         var imgFn11 = doc.querySelector('img').getAttribute('src');
         assert.strictEqual(imgFn11, imgFn);
       });
-
     });
-
   });
 
   /**
@@ -16522,7 +16140,6 @@ ${localhost}/capture_downLink_indepth_urlExtra/1-3.txt`,
    * capturer.captureBookmark
    */
   describe('record', function () {
-
     /**
      * Should NOT record the original value of "data-scrapbook-" attributes.
      */
@@ -16624,11 +16241,9 @@ ${localhost}/capture_downLink_indepth_urlExtra/1-3.txt`,
 
         assertNoRecord(doc, {filter: {regexAttr: /^data-scrapbook-/}});
       });
-
     });
 
     describe('should record hash in main document and NOT in frames', function () {
-
       it('html', async function () {
         var options = Object.assign({}, baseOptions, {
           "capture.recordDocumentMeta": true,
@@ -16711,11 +16326,9 @@ ${localhost}/capture_downLink_indepth_urlExtra/1-3.txt`,
         var doc = await readFileAsDocument(blob);
         assert.strictEqual(doc.documentElement.getAttribute('data-scrapbook-source'), `${localhost}/capture_record/meta.html#abc`);
       });
-
     });
 
     describe('should record the redirected URL', function () {
-
       it('html; +capture.recordDocumentMeta', async function () {
         var options = Object.assign({}, baseOptions, {
           "capture.recordDocumentMeta": true,
@@ -16732,11 +16345,9 @@ ${localhost}/capture_downLink_indepth_urlExtra/1-3.txt`,
 
         assert.strictEqual(html.getAttribute('data-scrapbook-source'), `${localhost}/capture_record/meta.html#abc`);
       });
-
     });
 
     describe('should record meta in `index.html` rather than in `*.xhtml` (except for source)', function () {
-
       it('html; +capture.recordDocumentMeta', async function () {
         var options = Object.assign({}, baseOptions, {
           "capture.recordDocumentMeta": true,
@@ -16763,7 +16374,6 @@ ${localhost}/capture_downLink_indepth_urlExtra/1-3.txt`,
         assert.strictEqual(html.getAttribute('data-scrapbook-source'), `${localhost}/capture_record/meta.xhtml`);
         assertNoRecord(html, {filter: {regexAttr: /^data-scrapbook-(?!source)/}});
       });
-
     });
 
     describe('should record removed nodes according to capture.recordRewrites', function () {
@@ -16891,7 +16501,6 @@ ${localhost}/capture_downLink_indepth_urlExtra/1-3.txt`,
 
         assertNoRecord(doc);
       });
-
     });
 
     describe('should record removed source nodes in picture, audio, and video', function () {
@@ -16941,7 +16550,6 @@ ${localhost}/capture_downLink_indepth_urlExtra/1-3.txt`,
 
         assertNoRecord(doc);
       });
-
     });
 
     describe('should record added nodes according to capture.recordRewrites', function () {
@@ -17002,7 +16610,6 @@ ${localhost}/capture_downLink_indepth_urlExtra/1-3.txt`,
         var doc = await readFileAsDocument(indexBlob);
         assertNoRecord(doc);
       });
-
     });
 
     /**
@@ -17060,7 +16667,6 @@ ${localhost}/capture_downLink_indepth_urlExtra/1-3.txt`,
 
         assertNoRecord(doc);
       });
-
     });
 
     describe('record changed attributes: save', function () {
@@ -17184,7 +16790,6 @@ p { background-image: /*scrapbook-orig-url="./null.bmp"*/url("null.bmp"); }`);
 p { background-image: url("null.bmp"); }`);
         assert.strictEqual(doc.querySelector('div').getAttribute('style'), `background: url("null.bmp");`);
       });
-
     });
 
     /**
@@ -17276,7 +16881,6 @@ p { background-image: /*scrapbook-orig-url="./null.bmp"*/url(""); }`);
 p { background-image: url(""); }`);
         assert.strictEqual(doc.querySelector('div').getAttribute('style'), `background: url("");`);
       });
-
     });
 
     describe('record changed attributes: save-current', function () {
@@ -17330,7 +16934,6 @@ p { background-image: url(""); }`);
         // attr
         assertNoRecord(doc);
       });
-
     });
 
     describe('record changed attributes: base elements', function () {
@@ -17369,9 +16972,7 @@ p { background-image: url(""); }`);
 
         assert.strictEqual(doc.querySelector('base').getAttribute(`data-scrapbook-orig-attr-href-${timeId}`), `./null.html`);
       });
-
     });
-
   });
 
   /**
@@ -17381,7 +16982,6 @@ p { background-image: url(""); }`);
    * capturer.captureBookmark
    */
   describe('linkUnsavedUri', function () {
-
     describe('basic', function () {
       var options = Object.assign({}, baseOptions, {
         "capture.image": "save",
@@ -17444,7 +17044,6 @@ p { background-image: url("${localhost}/capture_linkUnsavedUri/nonexist.bmp"); }
         assert.strictEqual(doc.querySelector('img[srcset]').getAttribute('srcset'), `${localhost}/capture_linkUnsavedUri/nonexist.bmp 1x, ${localhost}/capture_linkUnsavedUri/nonexist.bmp 2x`);
         assert.strictEqual(doc.querySelector('iframe').getAttribute('src'), `${localhost}/capture_linkUnsavedUri/nonexist.html`);
       });
-
     });
 
     describe('downLink', function () {
@@ -17509,7 +17108,6 @@ p { background-image: url("${localhost}/capture_linkUnsavedUri/nonexist.bmp"); }
         assert.strictEqual(doc.querySelectorAll('a')[0].getAttribute('href'), `${localhost}/capture_linkUnsavedUri/nonexist.txt`);
         assert.strictEqual(doc.querySelectorAll('a')[1].getAttribute('href'), `${localhost}/capture_linkUnsavedUri/nonexist.css`);
       });
-
     });
 
     /**
@@ -17554,7 +17152,6 @@ p { background-image: url(""); }`);
         assert.strictEqual(doc.querySelector('iframe').getAttribute('src'), ``);
         assert.strictEqual(doc.querySelector('a').getAttribute('href'), ``);
       });
-
     });
 
     /**
@@ -17599,7 +17196,6 @@ p { background-image: url("#123"); }`);
         assert.strictEqual(doc.querySelector('iframe').getAttribute('src'), `#123`);
         assert.strictEqual(doc.querySelector('a').getAttribute('href'), `#123`);
       });
-
     });
 
     /**
@@ -17649,7 +17245,6 @@ p { background-image: url("nonexist.bmp"); }`);
         assert.strictEqual(doc.querySelector('a').getAttribute('href'), `nonexist.txt`);
         assert.strictEqual(doc.querySelector('a[name]').getAttribute('href'), `nonexist.css`);
       });
-
     });
 
     /**
@@ -17695,7 +17290,6 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
         assert.strictEqual(doc.querySelector('a').getAttribute('href'), `ftp://example.com/nonexist.txt`);
         assert.strictEqual(doc.querySelector('a[name]').getAttribute('href'), `mailto:nonexist@example.com`);
       });
-
     });
 
     /**
@@ -17732,9 +17326,7 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
         assert.strictEqual(doc.querySelector('script').getAttribute('src'), `urn:scrapbook:download:error:blob:`);
         assert.strictEqual(doc.querySelector('img').getAttribute('src'), `urn:scrapbook:download:error:blob:`);
       });
-
     });
-
   });
 
   describe('insertInfoBar', function () {
@@ -17769,11 +17361,9 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
 
       assert.notExists(doc.querySelector('script[data-scrapbook-elem="infobar-loader"]'));
     });
-
   });
 
   describe('sizeLimit', function () {
-
     describe('should apply to normal resource and CSS', function () {
       var options = Object.assign({}, baseOptions, {
         "capture.style": "save",
@@ -17881,7 +17471,6 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
         assert.strictEqual(doc.querySelectorAll('a')[2].getAttribute('href'), `linked.html`);
         assert.strictEqual(doc.querySelectorAll('a')[3].getAttribute('href'), `${localhost}/capture_sizeLimit/linked2.html`);
       });
-
     });
 
     describe('should apply to headless frames', function () {
@@ -18013,7 +17602,6 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
         assert.strictEqual(doc.querySelectorAll('iframe')[0].getAttribute('src'), `index_1.html`);
         assert.strictEqual(doc.querySelectorAll('iframe')[1].getAttribute('src'), `${localhost}/capture_sizeLimit_frame/iframe2.html`);
       });
-
     });
 
     describe('should NOT apply to data URL', function () {
@@ -18063,7 +17651,6 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
         assert.strictEqual(doc.querySelectorAll('img')[0].getAttribute('src'), `f3c161973c06d37459e1fa3e14b78387fd4216f7.svg`);
         assert.strictEqual(doc.querySelectorAll('img')[1].getAttribute('src'), `5aa9b03760d4bac901b27efe48a29b210d0bc6ec.svg`);
       });
-
     });
 
     describe('should NOT apply to data URL (for frames)', function () {
@@ -18109,7 +17696,6 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
         assert.strictEqual(doc.querySelectorAll('iframe')[0].getAttribute('src'), `index_1.html`);
         assert.strictEqual(doc.querySelectorAll('iframe')[1].getAttribute('src'), `index_2.html`);
       });
-
     });
 
     describe('should NOT apply to srcdoc', function () {
@@ -18153,15 +17739,11 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
         assert.strictEqual(doc.querySelectorAll('iframe')[0].getAttribute('src'), `index_1.html`);
         assert.strictEqual(doc.querySelectorAll('iframe')[1].getAttribute('src'), `index_2.html`);
       });
-
     });
-
   });
 
   describe('capture helpers', function () {
-
     describe('basic', function () {
-
       it('capture.helpers set and enabled', async function () {
         var options = Object.assign({}, baseOptions, {
           "capture.helpersEnabled": true,
@@ -18341,11 +17923,9 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
         assert.exists(doc.querySelector('.exclude'));
         assert.exists(doc.querySelector('img'));
       });
-
     });
 
     describe('nested', function () {
-
       it('basic', async function () {
         var options = Object.assign({}, baseOptions, {
           "capture.helpersEnabled": true,
@@ -18375,13 +17955,10 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
 
         assert.exists(doc.querySelector('img[src="green.bmp"]'));
       });
-
     });
 
     describe('options', function () {
-
       describe('basic', function () {
-
         it('capture.helpers set and enabled', async function () {
           var options = Object.assign({}, baseOptions, {
             "capture.helpersEnabled": true,
@@ -18559,11 +18136,9 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
           var doc = await readFileAsDocument(indexBlob);
           assert.exists(doc.querySelector('img'));
         });
-
       });
 
       describe('redirect', function () {
-
         it('capture.helpers with matching URL (source)', async function () {
           var options = Object.assign({}, baseOptions, {
             "capture.helpersEnabled": true,
@@ -18634,11 +18209,9 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
           var doc = await readFileAsDocument(indexBlob);
           assert.exists(doc);
         });
-
       });
 
       describe('refresh', function () {
-
         it('capture.helpers with matching URL (source)', async function () {
           var options = Object.assign({}, baseOptions, {
             "capture.helpersEnabled": true,
@@ -18690,15 +18263,11 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
           var doc = await readFileAsDocument(indexBlob);
           assert.exists(doc.querySelector('style'));
         });
-
       });
-
     });
-
   });
 
   describe('recapture', function () {
-
     describe('basic', function () {
       var itemId;
       var itemId2;
@@ -18776,11 +18345,9 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
         assert(response[itemId].meta.modify > itemId);
         assert(response[itemId].meta.modify > itemId2);
       });
-
     });
 
     describe('migrate annotations', function () {
-
       it('linemarker', async function () {
         var options = Object.assign({}, baseOptions, {
           "capture.saveTo": "server",
@@ -18905,13 +18472,10 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
         assert.exists(doc.querySelector('scrapbook-sticky[data-scrapbook-id="20240928140529186"]'));
         assert.exists(doc.querySelector('scrapbook-sticky[data-scrapbook-id="20240928140509146"]'));
       });
-
     });
-
   });
 
   describe('merge capture', function () {
-
     describe('basic', function () {
       var itemId;
 
@@ -19095,11 +18659,9 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
         });
         assert(response[itemId].meta.modify > itemId);
       });
-
     });
 
     describe('recapture', function () {
-
       it('should capture same main document with updated content', async function () {
         var options = Object.assign({}, baseOptions, {
           "capture.saveTo": "server",
@@ -19161,11 +18723,9 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
         assert.strictEqual(doc.querySelector('img').getAttribute('src'), `green.bmp`);
         assert.strictEqual(doc.querySelector('a').getAttribute('href'), `attachment.txt`);
       });
-
     });
 
     describe('redirect', function () {
-
       it('should rewrite every link to a URL that redirects to a resource with an existing captured version in an added page', async function () {
         var options = Object.assign({}, baseOptions, {
           "capture.saveTo": "server",
@@ -19403,11 +18963,8 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
         };
         assert.deepEqual(sitemap, expectedData);
       });
-
     });
-
   });
-
 });  // Capture tests
 
 }));

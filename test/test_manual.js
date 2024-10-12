@@ -17,24 +17,20 @@
 'use strict';
 
 describe('Manual tests', function () {
-
   before(async function () {
     await checkTestServer();
   });
 
   describe('Test capture', function () {
-
     it('should be able to handle rather large data', async function () {
       return await openTestTab({
         url: `${localhost}/capturex_huge/index.html`,
         active: true,
       });
     });
-
   });
 
   describe('Test viewer', function () {
-
     it('should view HTZ/MAFF that conforms to the spec', async function () {
       return await openTestTab({
         url: `${localhost}/viewer_validate_good/index.html`,
@@ -111,9 +107,7 @@ describe('Manual tests', function () {
         active: true,
       });
     });
-
   });
-
 });
 
 }));

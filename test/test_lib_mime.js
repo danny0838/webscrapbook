@@ -26,7 +26,6 @@
 const {MochaQuery: $, assert} = unittest;
 
 describe('lib/mime.js', function () {
-
   describe('Mime.extend', function () {
     let _db;
     let _types;
@@ -107,11 +106,9 @@ describe('lib/mime.js', function () {
         newprop: 'newvalue',
       });
     });
-
   });
 
   describe('Mime.lookup', function () {
-
     it('pure extension', function () {
       assert.strictEqual(Mime.lookup('txt'), 'text/plain');
     });
@@ -163,19 +160,15 @@ describe('lib/mime.js', function () {
       assert.strictEqual(Mime.lookup('htz'), 'application/html+zip');
       assert.strictEqual(Mime.lookup('maff'), 'application/x-maff');
     });
-
   });
 
   describe('Mime.extension', function () {
-
     it('basic', function () {
       assert.strictEqual(Mime.extension('text/plain'), 'txt');
     });
-
   });
 
   describe('Mime.allExtensions', function () {
-
     it('common extensions', function () {
       var exts = Mime.allExtensions('text/html');
       assert.includeMembers(exts, ['html', 'htm']);
@@ -224,9 +217,7 @@ describe('lib/mime.js', function () {
       var exts = Mime.allExtensions('application/x-maff');
       assert.includeMembers(exts, ['maff']);
     });
-
   });
-
 });
 
 }));
