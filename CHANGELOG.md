@@ -3,6 +3,10 @@
 * Versions before 1.0 are in initial development. APIs are not stable for these versions, even a `y` version can involve a breaking change, and only partial notable changes are summarized in this document. See full commit history in the source repository for details.
 * Backend server requirement in this document refers to the version of [`webscrapbook` Python package](https://github.com/danny0838/pywebscrapbook) (or PyWebScrapBook).
 
+## [2.15.1] - 2024-10-12
+* Fixed inconsistencies in recapture or merge-capture results when using certain capture helper options.
+* Miscellaneous improvements of the internal code and test suite.
+
 ## [2.15.0] - 2024-10-10
 * Added `options` capture helper property, allowing for more reliable options overwriting, replacing the `options` command.
 * Allow setting comment and merge capture in the details dialog when performing a capture with multiple pages.
