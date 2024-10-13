@@ -6,12 +6,11 @@
       global,
       require('./lib/mocha'),
       require('./lib/unittest'),
-      require('./t/common'),
     );
   } else if (typeof define === "function" && define.amd) {
     // AMD
     require(
-      ['./lib/mocha', './lib/unittest', './t/common'],
+      ['./lib/mocha', './lib/unittest'],
       (...args) => {
         return factory(global, ...args);
       },
@@ -22,15 +21,13 @@
       global,
       global.mocha,
       global.unittest,
-      global.utils,
     );
   }
-}(this, function (global, mocha, unittest, utils) {
+}(this, function (global, mocha, unittest) {
 
 'use strict';
 
-const {deserializeObject, escapeRegExp} = unittest;
-const {userAgent, delay} = utils;
+const {userAgent, delay, deserializeObject, escapeRegExp} = unittest;
 
 
 /******************************************************************************

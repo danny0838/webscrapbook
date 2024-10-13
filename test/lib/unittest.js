@@ -35,6 +35,8 @@
 
   const {assert} = chai;
 
+  const {userAgent} = utils;
+
   /**
    * A jQuery-style extension of describe or it for chainable and conditional
    * skip or xfail.
@@ -390,6 +392,8 @@
     },
   }));
 
+  function delay(...args) { return scrapbook.delay(...args); }
+
   function deserializeObject(...args) { return scrapbook.deserializeObject(...args); }
 
   function xhr(...args) { return scrapbook.xhr(...args); }
@@ -483,7 +487,7 @@
 
         // run script in a document with specific charset to get the encoded text
         // hadnel different CSP rule for Chromium and Gecko
-        if (utils.userAgent.is('chromium')) {
+        if (userAgent.is('chromium')) {
           frame.src = `data:text/html;charset=${encodeURIComponent(charset)},<script src="${js}" data-text="${encodeURIComponent(_str)}"></script>`;
         } else {
           const markup = `<script src="${js}" data-text="${_str}"></script>`;
@@ -586,6 +590,8 @@
   return {
     assert,
     MochaQuery,
+    userAgent,
+    delay,
     deserializeObject,
     xhr,
     readFileAsText,

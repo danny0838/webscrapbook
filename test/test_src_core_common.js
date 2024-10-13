@@ -3,13 +3,12 @@
     // CommonJS
     module.exports = factory(
       require('./lib/unittest'),
-      require('./t/common'),
       require('./shared/core/common'),
     );
   } else if (typeof define === "function" && define.amd) {
     // AMD
     define(
-      ['./lib/unittest', './t/common', './shared/core/common'],
+      ['./lib/unittest', './shared/core/common'],
       factory,
     );
   } else {
@@ -17,18 +16,17 @@
     global = typeof globalThis !== "undefined" ? globalThis : global || self;
     factory(
       global.unittest,
-      global.utils,
       global.scrapbook,
     );
   }
-}(this, function (unittest, utils, scrapbook) {
+}(this, function (unittest, scrapbook) {
 
 'use strict';
 
-const {MochaQuery: $, assert, encodeText, cssRegex} = unittest;
+const {MochaQuery: $, assert, userAgent, encodeText, cssRegex} = unittest;
+
 const $describe = $(describe);
 const $it = $(it);
-const {userAgent} = utils;
 
 const r = String.raw;
 
