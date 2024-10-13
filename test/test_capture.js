@@ -6,13 +6,12 @@
       global,
       require('./lib/unittest'),
       require('./t/common'),
-      require('./shared/core/common'),
       require('./shared/lib/jszip'),
     );
   } else if (typeof define === "function" && define.amd) {
     // AMD
     define(
-      ['./lib/unittest', './t/common', './shared/core/common', './shared/lib/jszip'],
+      ['./lib/unittest', './t/common', './shared/lib/jszip'],
       (...args) => {
         return factory(global, ...args);
       },
@@ -23,25 +22,22 @@
       global,
       global.unittest,
       global.utils,
-      global.scrapbook,
       global.JSZip,
     );
   }
-}(this, function (global, unittest, utils, scrapbook, JSZip) {
+}(this, function (global, unittest, utils, JSZip) {
 
 'use strict';
 
 const {
   MochaQuery: $, assert,
+  xhr, readFileAsText, readFileAsArrayBuffer, readFileAsDataURL, readFileAsDocument,
   getRulesFromCssText, getToken, escapeRegExp, regex, rawRegex, cssRegex,
 } = unittest;
+const {userAgent, delay} = utils;
+
 const $describe = $(describe);
 const $it = $(it);
-const {userAgent, delay} = utils;
-const {
-  xhr,
-  readFileAsText, readFileAsArrayBuffer, readFileAsDataURL, readFileAsDocument,
-} = scrapbook;
 
 const r = String.raw;;
 

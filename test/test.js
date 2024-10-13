@@ -29,7 +29,7 @@
 
 'use strict';
 
-const {byteStringToArrayBuffer, escapeRegExp} = unittest;
+const {deserializeObject, escapeRegExp} = unittest;
 const {userAgent, delay} = utils;
 
 
@@ -260,11 +260,7 @@ class TestSuite {
       throw new Error(result.error.message);
     }
 
-    if (result instanceof Blob) {
-      return result;
-    }
-
-    return new Blob(result.data.map(x => byteStringToArrayBuffer(x)), {type: result.type});
+    return deserializeObject(result);
   }
 
   /**

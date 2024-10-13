@@ -11,21 +11,21 @@
     module.exports = factory(
       require('./chai'),
       require('../t/common'),
-      require('../shared/lib/sha'),
+      require('../shared/core/common'),
     );
   } else if (typeof define === "function" && define.amd) {
     // AMD
-    define(['./chai', '../t/common', '../shared/lib/sha'], factory);
+    define(['./chai', '../t/common', '../shared/core/common'], factory);
   } else {
     // Browser globals
     global = typeof globalThis !== "undefined" ? globalThis : global || self;
     global.unittest = factory(
       global.chai,
       global.utils,
-      global.jsSHA,
+      global.scrapbook,
     );
   }
-}(this, function (chai, utils, jsSHA) {
+}(this, function (chai, utils, scrapbook) {
 
   'use strict';
 
@@ -390,29 +390,24 @@
     },
   }));
 
-  function sha1(data, type) {
-    let shaObj = new jsSHA("SHA-1", type);
-    shaObj.update(data);
-    return shaObj.getHash("HEX");
-  }
+  function deserializeObject(...args) { return scrapbook.deserializeObject(...args); }
+
+  function xhr(...args) { return scrapbook.xhr(...args); }
+
+  function readFileAsText(...args) { return scrapbook.readFileAsText(...args); }
+
+  function readFileAsArrayBuffer(...args) { return scrapbook.readFileAsArrayBuffer(...args); }
+
+  function readFileAsDataURL(...args) { return scrapbook.readFileAsDataURL(...args); }
+
+  function readFileAsDocument(...args) { return scrapbook.readFileAsDocument(...args); }
+
+  function sha1(...args) { return scrapbook.sha1(...args); }
 
   function getToken(url, role) {
     let token = `${url}\t${role}`;
     token = sha1(token, "TEXT");
     return token;
-  }
-
-  function getUuid() {
-    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
-      let r = Math.random()*16|0, v = (c == 'x') ? r : (r&0x3|0x8);
-      return v.toString(16);
-    });
-  }
-
-  function byteStringToArrayBuffer(bstr) {
-    let n = bstr.length, u8ar = new Uint8Array(n);
-    while (n--) { u8ar[n] = bstr.charCodeAt(n); }
-    return u8ar.buffer;
   }
 
   /**
@@ -528,18 +523,7 @@
     return styleElem.sheet.cssRules;
   }
 
-  var escapeRegExp = (() => {
-    // Don't escape "-" as it causes an error for a RegExp with unicode flag.
-    // Escaping "-" allows the result be embedded in a character class.
-    // Escaping "/" allows the result be embedded in a JS regex literal.
-    const regex = /[/\\^$*+?.|()[\]{}]/g;
-
-    function escapeRegExp(str) {
-      return str.replace(regex, "\\$&");
-    }
-
-    return escapeRegExp;
-  })();
+  function escapeRegExp(...args) { return scrapbook.escapeRegExp(...args); }
 
   /**
    * A RegExp with raw string.
@@ -602,10 +586,14 @@
   return {
     assert,
     MochaQuery,
+    deserializeObject,
+    xhr,
+    readFileAsText,
+    readFileAsArrayBuffer,
+    readFileAsDataURL,
+    readFileAsDocument,
     sha1,
     getToken,
-    getUuid,
-    byteStringToArrayBuffer,
     encodeText,
     getRulesFromCssText,
     escapeRegExp,
