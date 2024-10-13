@@ -2282,7 +2282,7 @@ p { background-image: url("about:blank"); }`);
         var result = await captureHeadless({
           url: `${localhost}/capture_headless_metaRefresh/time-0-self.html`,
           options: baseOptions,
-        });
+        }, {rawResponse: true});
         assert.exists(result.error);
       });
 

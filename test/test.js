@@ -257,7 +257,7 @@ class TestSuite {
     }
 
     if (result.error) {
-      return result;
+      throw new Error(result.error.message);
     }
 
     if (result instanceof Blob) {
