@@ -196,12 +196,12 @@ class TestSuite {
   /**
    * @param {Object} params
    * @param {string} params.url
-   * @param {string} params.mode
-   * @param {Object} params.options
-   * @param {Object} options
-   * @param {boolean} options.headless
-   * @param {float} options.delay
-   * @param {boolean} options.rawResponse
+   * @param {string} [params.mode]
+   * @param {Object} [params.options]
+   * @param {Object} [options]
+   * @param {boolean} [options.headless]
+   * @param {float} [options.delay]
+   * @param {boolean} [options.rawResponse]
    */
   async capture(params, options = {}) {
     const {headless = false, delay: delayTime, rawResponse = false} = options;
