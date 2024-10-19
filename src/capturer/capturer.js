@@ -1202,7 +1202,6 @@
       indexFilename,
       recurseChain: [],
       depth: 0,
-      isHeadless: false,
       isMainPage: true,
       isMainFrame: true,
       fullPage,
@@ -1298,9 +1297,7 @@
 
     const source = `[${tabId}${(frameId ? ':' + frameId : '')}] ${url}`;
     const message = {
-      settings: Object.assign({}, settings, {
-        isHeadless: false,
-      }),
+      settings,
       options,
     };
 
@@ -1345,7 +1342,6 @@
     const message = {
       url, refUrl, refPolicy,
       settings: Object.assign({}, settings, {
-        isHeadless: true,
         fullPage: true,
       }),
       options,
@@ -1435,16 +1431,13 @@
       }
     });
 
-    settings = Object.assign({}, settings, {
-      fullPage: true,
-      isHeadless: false,
-    });
-
     try {
       return await capturer.invoke("captureDocumentOrFile", {
         refUrl,
         refPolicy,
-        settings,
+        settings: Object.assign({}, settings, {
+          fullPage: true,
+        }),
         options,
       }, {
         tabId: tab.id,
@@ -3961,7 +3954,6 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
       isMainPage: false,
       isMainFrame: true,
       fullPage: true,
-      isHeadless: true,
     });
 
     const {linkedPages, redirects} = capturer.captureInfo.get(timeId);

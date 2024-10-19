@@ -93,7 +93,6 @@
    * @property {?string} indexFilename
    * @property {string[]} recurseChain
    * @property {number} depth
-   * @property {boolean} isHeadless
    * @property {boolean} isMainPage
    * @property {boolean} isMainFrame
    * @property {boolean} fullPage
@@ -1444,8 +1443,6 @@
 
                     // frame document inaccessible (headless capture):
                     // contentType of srcdoc is always text/html
-                    frameSettings.isHeadless = true;
-
                     const doc = (new DOMParser()).parseFromString(frame.getAttribute("srcdoc"), 'text/html');
 
                     return capturer.captureDocument({
@@ -1566,7 +1563,6 @@
 
                   // frame window accessible with special cases:
                   // frame window inaccessible: (headless capture)
-                  frameSettings.isHeadless = true;
 
                   // if the frame has srcdoc, use it
                   if (frame.nodeName.toLowerCase() === 'iframe' &&
@@ -2126,7 +2122,6 @@
                       fullPage: true,
                       usedCssFontUrl: undefined,
                       usedCssImageUrl: undefined,
-                      isHeadless: true,
                     });
 
                     let embedOptions = options;
@@ -2249,7 +2244,6 @@
                       fullPage: true,
                       usedCssFontUrl: undefined,
                       usedCssImageUrl: undefined,
-                      isHeadless: true,
                     });
 
                     let objectOptions = options;
@@ -2847,8 +2841,9 @@
     };
 
     const {doc = document, settings, options} = params;
-    const {timeId, isHeadless, isMainPage, isMainFrame} = settings;
+    const {timeId, isMainPage, isMainFrame} = settings;
     const {documentElement: docElemNode, characterSet: charset} = doc;
+    const isHeadless = !doc.defaultView;
 
     // determine docUrl, baseUrl, etc.
     const [metaDocUrl, metaDocUrlHash] = scrapbook.splitUrlByAnchor(params.metaDocUrl || doc.URL);
