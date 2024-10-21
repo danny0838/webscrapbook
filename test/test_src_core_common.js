@@ -1836,6 +1836,7 @@ describe('core/common.js', function () {
 
       var input = `body { image-background: url( ); }`;
       var expected = `body { image-background: url( "http://example.com/"); }`;
+      assert.strictEqual(scrapbook.rewriteCssText(input, optionsImage), expected);
 
       var input = `body { image-background: url(  ); }`;
       var expected = `body { image-background: url(  "http://example.com/"); }`;
