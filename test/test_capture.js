@@ -2119,7 +2119,7 @@ p { background-image: url("about:blank"); }`);
      * capturer.captureRemote
      */
     describe('basic', function () {
-      it('capture source for tab', async function () {
+      it('capture source for tab: should infer title from tab', async function () {
         var blob = await capture({
           url: `${localhost}/capture_headless/tab-info.html`,
           mode: "source",
@@ -2132,12 +2132,14 @@ p { background-image: url("about:blank"); }`);
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
         var doc = await readFileAsDocument(indexBlob);
 
+        assert.strictEqual(doc.documentElement.getAttribute('data-scrapbook-title'), "My Title");
+        assert.notExists(doc.documentElement.getAttribute('data-scrapbook-icon'));
         assert.notExists(doc.querySelector(`title`));
         assert.notExists(doc.querySelector(`link[rel~="icon"]`));
         assert.notExists(zip.file("red.bmp"));
       });
 
-      it('capture bookmark for tab', async function () {
+      it('capture bookmark for tab: should infer title from tab', async function () {
         var blob = await capture({
           url: `${localhost}/capture_headless/tab-info.html`,
           mode: "bookmark",
@@ -2145,7 +2147,9 @@ p { background-image: url("about:blank"); }`);
         }, {delay: 100});
 
         var doc = await readFileAsDocument(blob);
-        assert.notExists(doc.querySelector(`title`));
+        assert.notExists(doc.documentElement.getAttribute('data-scrapbook-title'));
+        assert.notExists(doc.documentElement.getAttribute('data-scrapbook-icon'));
+        assert.strictEqual(doc.querySelector(`title`).textContent, "My Title");
         assert.notExists(doc.querySelector(`link[rel~="icon"]`));
       });
 
@@ -2163,6 +2167,8 @@ p { background-image: url("about:blank"); }`);
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
         var doc = await readFileAsDocument(indexBlob);
 
+        assert.notExists(doc.documentElement.getAttribute('data-scrapbook-title'));
+        assert.notExists(doc.documentElement.getAttribute('data-scrapbook-icon'));
         assert.notExists(doc.querySelector(`title`));
         assert.notExists(doc.querySelector(`link[rel~="icon"]`));
         assert.notExists(zip.file("red.bmp"));
@@ -2177,6 +2183,8 @@ p { background-image: url("about:blank"); }`);
         }, {delay: 100});
 
         var doc = await readFileAsDocument(blob);
+        assert.notExists(doc.documentElement.getAttribute('data-scrapbook-title'));
+        assert.notExists(doc.documentElement.getAttribute('data-scrapbook-icon'));
         assert.notExists(doc.querySelector(`title`));
         assert.notExists(doc.querySelector(`link[rel~="icon"]`));
       });
@@ -2193,6 +2201,8 @@ p { background-image: url("about:blank"); }`);
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
         var doc = await readFileAsDocument(indexBlob);
 
+        assert.notExists(doc.documentElement.getAttribute('data-scrapbook-title'));
+        assert.notExists(doc.documentElement.getAttribute('data-scrapbook-icon'));
         assert.notExists(doc.querySelector(`title`));
         assert.notExists(doc.querySelector(`link[rel~="icon"]`));
         assert.notExists(zip.file("red.bmp"));
@@ -2206,6 +2216,8 @@ p { background-image: url("about:blank"); }`);
         });
 
         var doc = await readFileAsDocument(blob);
+        assert.notExists(doc.documentElement.getAttribute('data-scrapbook-title'));
+        assert.notExists(doc.documentElement.getAttribute('data-scrapbook-icon'));
         assert.notExists(doc.querySelector(`title`));
         assert.notExists(doc.querySelector(`link[rel~="icon"]`));
       });

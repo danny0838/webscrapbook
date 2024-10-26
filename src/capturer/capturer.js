@@ -1278,15 +1278,19 @@
     tabId, frameId,
     mode, settings, options,
   }) {
-    let {url, discarded} = await browser.tabs.get(tabId);
+    let {url, title, discarded} = await browser.tabs.get(tabId);
 
     // redirect headless capture
-    // if frameId not provided, use current tab title and favIcon
+    // infer title from the current tab if frameId not provided
     switch (mode) {
       case "source":
       case "bookmark": {
         if (Number.isInteger(frameId)) {
           ({url} = await browser.webNavigation.getFrame({tabId, frameId}));
+        } else  {
+          settings = Object.assign({}, settings, {
+            title: settings.title || title,
+          });
         }
         return await capturer.captureRemote({
           url,
