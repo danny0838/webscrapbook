@@ -790,7 +790,7 @@
             url: info.frameUrl || tab.url,
             title: tab.title,
           }],
-        });
+        }, {ignoreTitle: true});
       },
     });
 
