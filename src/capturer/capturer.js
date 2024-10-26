@@ -1278,7 +1278,7 @@
     tabId, frameId,
     mode, settings, options,
   }) {
-    let {url, title, discarded} = await browser.tabs.get(tabId);
+    let {url, title, cookieStoreId, discarded} = await browser.tabs.get(tabId);
 
     // redirect headless capture
     // infer title from the current tab if frameId not provided
@@ -1306,6 +1306,15 @@
     };
 
     capturer.log(`Capturing (document) ${source} ...`);
+
+    // Do not capture a tab in a container different from the capturer
+    // to prevent an inconsistent result.
+    if (cookieStoreId) {
+      const tab = await browser.tabs.getCurrent();
+      if (cookieStoreId !== tab.cookieStoreId) {
+        throw new Error(`Disallowed to capture a tab in container "${cookieStoreId}" from container "${tab.cookieStoreId}"`);
+      }
+    }
 
     // throw error for a discarded tab
     // note that tab.discarded is undefined in older Firefox version
