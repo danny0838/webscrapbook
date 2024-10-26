@@ -132,19 +132,19 @@ class TestSuite {
   async openPageTab(url) {
     const params = {
       url,
-      focused: false,
+
+      // Firefox < 86: `focused` in `windows.create()` causes an error.
+      // Firefox >= 86: ignores `focused` in `windows.create()`.
+      ...(!(userAgent.is('firefox') && userAgent.major < 86) && {focused: false}),
+
       type: "popup",
       width: 50,
       height: 50,
+
+      // Firefox < 109: ignores `top` and `left` in `windows.create()`.
       top: window.screen.availHeight - 50,
       left: window.screen.availWidth - 50,
     };
-
-    // Firefox does not support focused in windows.create().
-    // Firefox ignores top and left in windows.create().
-    if (userAgent.is('firefox')) {
-      delete params.focused;
-    }
 
     const win = await browser.windows.create(params);
     const tab = win.tabs[0];
@@ -211,21 +211,6 @@ class TestSuite {
       await delay(delayTime);
     }
 
-    const windowCreateData = {
-      focused: false,
-      type: "popup",
-      width: 50,
-      height: 50,
-      top: window.screen.availHeight - 50,
-      left: window.screen.availWidth - 50,
-    };
-
-    // Firefox does not support focused in windows.create().
-    // Firefox ignores top and left in windows.create().
-    if (userAgent.is('firefox')) {
-      delete windowCreateData.focused;
-    }
-
     const args = {
       taskInfo: {
         tasks: [
@@ -236,7 +221,14 @@ class TestSuite {
           }, params),
         ],
       },
-      windowCreateData,
+      windowCreateData: {
+        focused: false,
+        type: "popup",
+        width: 50,
+        height: 50,
+        top: window.screen.availHeight - 50,
+        left: window.screen.availWidth - 50,
+      },
       waitForResponse: true,
     };
 
