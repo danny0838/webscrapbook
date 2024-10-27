@@ -80,6 +80,7 @@
     // pre-defined order of keys for better userbility
     const info = {
       tasks: undefined,
+      container: undefined,
       bookId: undefined,
       parentId: undefined,
       index: undefined,
