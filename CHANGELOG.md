@@ -3,6 +3,12 @@
 * Versions before 1.0 are in initial development. APIs are not stable for these versions, even a `y` version can involve a breaking change, and only partial notable changes are summarized in this document. See full commit history in the source repository for details.
 * Backend server requirement in this document refers to the version of [`webscrapbook` Python package](https://github.com/danny0838/pywebscrapbook) (or PyWebScrapBook).
 
+## [2.16.0] - 2024-10-27
+* Tab title is now taken when capturing a tab with `source` or `bookmark` mode.
+* Added support of switching container for a capture in Firefox.
+* Capturing a tab in a different container in Firefox is now disallowed to prevent an inconsistency.
+* Miscellaneous improvements and fixes of the UI, internal code, and unit test suite.
+
 ## [2.15.1] - 2024-10-12
 * Fixed inconsistencies in recapture or merge-capture results when using certain capture helper options.
 * Miscellaneous improvements of the internal code and test suite.
