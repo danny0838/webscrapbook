@@ -3,6 +3,9 @@
 * Versions before 1.0 are in initial development. APIs are not stable for these versions, even a `y` version can involve a breaking change, and only partial notable changes are summarized in this document. See full commit history in the source repository for details.
 * Backend server requirement in this document refers to the version of [`webscrapbook` Python package](https://github.com/danny0838/pywebscrapbook) (or PyWebScrapBook).
 
+## [2.16.1] - 2024-10-30
+* Revoked the support of switching container for a capture, which requires a permission that forces Firefox to enable containers.
+
 ## [2.16.0] - 2024-10-27
 * Tab title is now taken when capturing a tab with `source` or `bookmark` mode.
 * Added support of switching container for a capture in Firefox.
