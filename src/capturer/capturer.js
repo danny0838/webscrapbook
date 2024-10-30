@@ -1404,12 +1404,7 @@
   }) {
     capturer.log(`Launching remote tab ...`);
 
-    const {cookieStoreId} = await browser.tabs.getCurrent();
-    const tab = await browser.tabs.create({
-      url,
-      active: false,
-      ...(cookieStoreId && {cookieStoreId}),
-     });
+    const tab = await browser.tabs.create({url, active: false});
 
     // wait until tab loading complete
     {

@@ -733,7 +733,7 @@
         return scrapbook.invokeCapture([{
           url: info.frameUrl,
           mode: "source",
-        }], {container: tab.cookieStoreId});
+        }]);
       },
     });
 
@@ -745,7 +745,7 @@
         return scrapbook.invokeCapture([{
           url: info.frameUrl,
           mode: "bookmark",
-        }], {container: tab.cookieStoreId});
+        }]);
       },
     });
 
@@ -805,7 +805,6 @@
             tabId: tab.id,
             frameId: info.frameId,
           }],
-          container: tab.cookieStoreId,
         });
       },
     });
@@ -818,7 +817,7 @@
         return scrapbook.invokeCapture([{
           url: info.linkUrl,
           mode: "tab",
-        }], {container: tab.cookieStoreId});
+        }]);
       },
     });
 
@@ -830,7 +829,7 @@
         return scrapbook.invokeCapture([{
           url: info.linkUrl,
           mode: "source",
-        }], {container: tab.cookieStoreId});
+        }]);
       },
     });
 
@@ -842,7 +841,7 @@
         return scrapbook.invokeCapture([{
           url: info.linkUrl,
           mode: "bookmark",
-        }], {container: tab.cookieStoreId});
+        }]);
       },
     });
 
@@ -856,7 +855,6 @@
             url: info.linkUrl,
             title: info.linkText,
           }],
-          container: tab.cookieStoreId,
         }, {ignoreTitle: true});
       },
     });
@@ -870,7 +868,7 @@
           url: info.srcUrl,
           refUrl: info.pageUrl,
           mode: "source",
-        }], {container: tab.cookieStoreId});
+        }]);
       },
     });
 
@@ -884,7 +882,6 @@
             url: info.srcUrl,
             refUrl: info.pageUrl,
           }],
-          container: tab.cookieStoreId,
         });
       },
     });

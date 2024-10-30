@@ -148,11 +148,10 @@
    * Simplified API to invoke a capture with an array of tasks.
    *
    * @param {Array} tasks
-   * @param {Object} [options]
    * @return {Promise<(Window|Tab)>}
    */
-  scrapbook.invokeCapture = async function (tasks, options) {
-    return await scrapbook.invokeCaptureEx({taskInfo: {tasks, ...options}, waitForResponse: false});
+  scrapbook.invokeCapture = async function (tasks) {
+    return await scrapbook.invokeCaptureEx({taskInfo: {tasks}, waitForResponse: false});
   };
 
   /**
@@ -230,27 +229,6 @@
     const key = {table: "captureMissionCache", id: missionId};
     await scrapbook.cache.set(key, taskInfo);
     const url = browser.runtime.getURL("capturer/capturer.html") + `?mid=${missionId}`;
-    const cookieStoreId = await (async () => {
-      let cookieStoreId = taskInfo.container;
-
-      // use specified value when valid; or use default
-      if (typeof cookieStoreId !== 'undefined') {
-        try {
-          await browser.contextualIdentities.get(cookieStoreId);
-        } catch (ex) {
-          return null;
-        }
-        return cookieStoreId;
-      }
-
-      // infer from the tabId of the first task
-      try {
-        ({cookieStoreId} = await browser.tabs.get(taskInfo.tasks[0].tabId));
-      } catch (ex) {
-        return null;
-      }
-      return cookieStoreId;
-    })();
 
     // launch capturer
     let tab;
@@ -262,7 +240,6 @@
         width: 400,
         height: 400,
         incognito: win.incognito,
-        ...(cookieStoreId && {cookieStoreId}),
       }, windowCreateData)));
 
       if (!waitForResponse) {
@@ -271,7 +248,6 @@
     } else {
       tab = await browser.tabs.create(Object.assign({
         url,
-        ...(cookieStoreId && {cookieStoreId}),
       }, tabCreateData));
 
       if (!waitForResponse) {
