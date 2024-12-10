@@ -1,4 +1,4 @@
-// mocha@10.3.0 in javascript ES2018
+// mocha@11.1.0 in javascript ES2018
 (function (global, factory) {
   typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
   typeof define === 'function' && define.amd ? define(factory) :
@@ -148,7 +148,7 @@
   };
   var title$1 = 'browser';
   var platform$1 = 'browser';
-  var browser$4 = true;
+  var browser$5 = true;
   var env$1 = {};
   var argv$1 = [];
   var version$2 = ''; // empty string to avoid regexp issues
@@ -212,7 +212,7 @@
   var process = {
     nextTick: nextTick$1,
     title: title$1,
-    browser: browser$4,
+    browser: browser$5,
     env: env$1,
     argv: argv$1,
     version: version$2,
@@ -2842,7 +2842,7 @@
   };
   var title = 'browser';
   var platform = 'browser';
-  var browser$3 = true;
+  var browser$4 = true;
   var env = {};
   var argv = [];
   var version$1 = ''; // empty string to avoid regexp issues
@@ -2906,7 +2906,7 @@
   var browser$1$1 = {
     nextTick: nextTick,
     title: title,
-    browser: browser$3,
+    browser: browser$4,
     env: env,
     argv: argv,
     version: version$1,
@@ -5820,6 +5820,8 @@
     /*istanbul ignore end*/
     diff: function diff(oldString, newString) {
       /*istanbul ignore start*/
+      var _options$timeout;
+
       var
       /*istanbul ignore end*/
       options = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
@@ -5853,84 +5855,123 @@
           oldLen = oldString.length;
       var editLength = 1;
       var maxEditLength = newLen + oldLen;
+
+      if (options.maxEditLength) {
+        maxEditLength = Math.min(maxEditLength, options.maxEditLength);
+      }
+
+      var maxExecutionTime =
+      /*istanbul ignore start*/
+      (_options$timeout =
+      /*istanbul ignore end*/
+      options.timeout) !== null && _options$timeout !== void 0 ? _options$timeout : Infinity;
+      var abortAfterTimestamp = Date.now() + maxExecutionTime;
       var bestPath = [{
-        newPos: -1,
-        components: []
+        oldPos: -1,
+        lastComponent: undefined
       }]; // Seed editLength = 0, i.e. the content starts with the same values
 
-      var oldPos = this.extractCommon(bestPath[0], newString, oldString, 0);
+      var newPos = this.extractCommon(bestPath[0], newString, oldString, 0);
 
-      if (bestPath[0].newPos + 1 >= newLen && oldPos + 1 >= oldLen) {
+      if (bestPath[0].oldPos + 1 >= oldLen && newPos + 1 >= newLen) {
         // Identity per the equality and tokenizer
         return done([{
           value: this.join(newString),
           count: newString.length
         }]);
-      } // Main worker method. checks all permutations of a given edit length for acceptance.
+      } // Once we hit the right edge of the edit graph on some diagonal k, we can
+      // definitely reach the end of the edit graph in no more than k edits, so
+      // there's no point in considering any moves to diagonal k+1 any more (from
+      // which we're guaranteed to need at least k+1 more edits).
+      // Similarly, once we've reached the bottom of the edit graph, there's no
+      // point considering moves to lower diagonals.
+      // We record this fact by setting minDiagonalToConsider and
+      // maxDiagonalToConsider to some finite value once we've hit the edge of
+      // the edit graph.
+      // This optimization is not faithful to the original algorithm presented in
+      // Myers's paper, which instead pointlessly extends D-paths off the end of
+      // the edit graph - see page 7 of Myers's paper which notes this point
+      // explicitly and illustrates it with a diagram. This has major performance
+      // implications for some common scenarios. For instance, to compute a diff
+      // where the new text simply appends d characters on the end of the
+      // original text of length n, the true Myers algorithm will take O(n+d^2)
+      // time while this optimization needs only O(n+d) time.
 
+
+      var minDiagonalToConsider = -Infinity,
+          maxDiagonalToConsider = Infinity; // Main worker method. checks all permutations of a given edit length for acceptance.
 
       function execEditLength() {
-        for (var diagonalPath = -1 * editLength; diagonalPath <= editLength; diagonalPath += 2) {
+        for (var diagonalPath = Math.max(minDiagonalToConsider, -editLength); diagonalPath <= Math.min(maxDiagonalToConsider, editLength); diagonalPath += 2) {
           var basePath =
           /*istanbul ignore start*/
           void 0
           /*istanbul ignore end*/
           ;
+          var removePath = bestPath[diagonalPath - 1],
+              addPath = bestPath[diagonalPath + 1];
 
-          var addPath = bestPath[diagonalPath - 1],
-              removePath = bestPath[diagonalPath + 1],
-              _oldPos = (removePath ? removePath.newPos : 0) - diagonalPath;
-
-          if (addPath) {
+          if (removePath) {
             // No one else is going to attempt to use this value, clear it
             bestPath[diagonalPath - 1] = undefined;
           }
 
-          var canAdd = addPath && addPath.newPos + 1 < newLen,
-              canRemove = removePath && 0 <= _oldPos && _oldPos < oldLen;
+          var canAdd = false;
+
+          if (addPath) {
+            // what newPos will be after we do an insertion:
+            var addPathNewPos = addPath.oldPos - diagonalPath;
+            canAdd = addPath && 0 <= addPathNewPos && addPathNewPos < newLen;
+          }
+
+          var canRemove = removePath && removePath.oldPos + 1 < oldLen;
 
           if (!canAdd && !canRemove) {
             // If this path is a terminal then prune
             bestPath[diagonalPath] = undefined;
             continue;
           } // Select the diagonal that we want to branch from. We select the prior
-          // path whose position in the new string is the farthest from the origin
+          // path whose position in the old string is the farthest from the origin
           // and does not pass the bounds of the diff graph
+          // TODO: Remove the `+ 1` here to make behavior match Myers algorithm
+          //       and prefer to order removals before insertions.
 
 
-          if (!canAdd || canRemove && addPath.newPos < removePath.newPos) {
-            basePath = clonePath(removePath);
-            self.pushComponent(basePath.components, undefined, true);
+          if (!canRemove || canAdd && removePath.oldPos + 1 < addPath.oldPos) {
+            basePath = self.addToPath(addPath, true, undefined, 0);
           } else {
-            basePath = addPath; // No need to clone, we've pulled it from the list
-
-            basePath.newPos++;
-            self.pushComponent(basePath.components, true, undefined);
+            basePath = self.addToPath(removePath, undefined, true, 1);
           }
 
-          _oldPos = self.extractCommon(basePath, newString, oldString, diagonalPath); // If we have hit the end of both strings, then we are done
+          newPos = self.extractCommon(basePath, newString, oldString, diagonalPath);
 
-          if (basePath.newPos + 1 >= newLen && _oldPos + 1 >= oldLen) {
-            return done(buildValues(self, basePath.components, newString, oldString, self.useLongestToken));
+          if (basePath.oldPos + 1 >= oldLen && newPos + 1 >= newLen) {
+            // If we have hit the end of both strings, then we are done
+            return done(buildValues(self, basePath.lastComponent, newString, oldString, self.useLongestToken));
           } else {
-            // Otherwise track this path as a potential candidate and continue.
             bestPath[diagonalPath] = basePath;
+
+            if (basePath.oldPos + 1 >= oldLen) {
+              maxDiagonalToConsider = Math.min(maxDiagonalToConsider, diagonalPath - 1);
+            }
+
+            if (newPos + 1 >= newLen) {
+              minDiagonalToConsider = Math.max(minDiagonalToConsider, diagonalPath + 1);
+            }
           }
         }
 
         editLength++;
       } // Performs the length of edit iteration. Is a bit fugly as this has to support the
       // sync and async mode which is never fun. Loops over execEditLength until a value
-      // is produced.
+      // is produced, or until the edit length exceeds options.maxEditLength (if given),
+      // in which case it will return undefined.
 
 
       if (callback) {
         (function exec() {
           setTimeout(function () {
-            // This should not happen, but we want to be safe.
-
-            /* istanbul ignore next */
-            if (editLength > maxEditLength) {
+            if (editLength > maxEditLength || Date.now() > abortAfterTimestamp) {
               return callback();
             }
 
@@ -5940,7 +5981,7 @@
           }, 0);
         })();
       } else {
-        while (editLength <= maxEditLength) {
+        while (editLength <= maxEditLength && Date.now() <= abortAfterTimestamp) {
           var ret = execEditLength();
 
           if (ret) {
@@ -5953,23 +5994,29 @@
     /*istanbul ignore start*/
 
     /*istanbul ignore end*/
-    pushComponent: function pushComponent(components, added, removed) {
-      var last = components[components.length - 1];
+    addToPath: function addToPath(path, added, removed, oldPosInc) {
+      var last = path.lastComponent;
 
       if (last && last.added === added && last.removed === removed) {
-        // We need to clone here as the component clone operation is just
-        // as shallow array clone
-        components[components.length - 1] = {
-          count: last.count + 1,
-          added: added,
-          removed: removed
+        return {
+          oldPos: path.oldPos + oldPosInc,
+          lastComponent: {
+            count: last.count + 1,
+            added: added,
+            removed: removed,
+            previousComponent: last.previousComponent
+          }
         };
       } else {
-        components.push({
-          count: 1,
-          added: added,
-          removed: removed
-        });
+        return {
+          oldPos: path.oldPos + oldPosInc,
+          lastComponent: {
+            count: 1,
+            added: added,
+            removed: removed,
+            previousComponent: last
+          }
+        };
       }
     },
 
@@ -5979,8 +6026,8 @@
     extractCommon: function extractCommon(basePath, newString, oldString, diagonalPath) {
       var newLen = newString.length,
           oldLen = oldString.length,
-          newPos = basePath.newPos,
-          oldPos = newPos - diagonalPath,
+          oldPos = basePath.oldPos,
+          newPos = oldPos - diagonalPath,
           commonCount = 0;
 
       while (newPos + 1 < newLen && oldPos + 1 < oldLen && this.equals(newString[newPos + 1], oldString[oldPos + 1])) {
@@ -5990,13 +6037,14 @@
       }
 
       if (commonCount) {
-        basePath.components.push({
-          count: commonCount
-        });
+        basePath.lastComponent = {
+          count: commonCount,
+          previousComponent: basePath.lastComponent
+        };
       }
 
-      basePath.newPos = newPos;
-      return oldPos;
+      basePath.oldPos = oldPos;
+      return newPos;
     },
 
     /*istanbul ignore start*/
@@ -6047,7 +6095,20 @@
     }
   };
 
-  function buildValues(diff, components, newString, oldString, useLongestToken) {
+  function buildValues(diff, lastComponent, newString, oldString, useLongestToken) {
+    // First we convert our linked list of components in reverse order to an
+    // array in the right order:
+    var components = [];
+    var nextComponent;
+
+    while (lastComponent) {
+      components.push(lastComponent);
+      nextComponent = lastComponent.previousComponent;
+      delete lastComponent.previousComponent;
+      lastComponent = nextComponent;
+    }
+
+    components.reverse();
     var componentPos = 0,
         componentLen = components.length,
         newPos = 0,
@@ -6090,21 +6151,14 @@
     // This is only available for string mode.
 
 
-    var lastComponent = components[componentLen - 1];
+    var finalComponent = components[componentLen - 1];
 
-    if (componentLen > 1 && typeof lastComponent.value === 'string' && (lastComponent.added || lastComponent.removed) && diff.equals('', lastComponent.value)) {
-      components[componentLen - 2].value += lastComponent.value;
+    if (componentLen > 1 && typeof finalComponent.value === 'string' && (finalComponent.added || finalComponent.removed) && diff.equals('', finalComponent.value)) {
+      components[componentLen - 2].value += finalComponent.value;
       components.pop();
     }
 
     return components;
-  }
-
-  function clonePath(path) {
-    return {
-      newPos: path.newPos,
-      components: path.components.slice(0)
-    };
   }
 
   }(base));
@@ -6322,6 +6376,11 @@
 
   /*istanbul ignore end*/
   lineDiff.tokenize = function (value) {
+    if (this.options.stripTrailingCr) {
+      // remove one \r before \n to match GNU diff's --strip-trailing-cr behavior
+      value = value.replace(/\r\n/g, '\n');
+    }
+
     var retLines = [],
         linesAndNewlines = value.split(/(\n|\r\n)/); // Ignore the final empty token that occurs if the string ends with a new line
 
@@ -7042,7 +7101,7 @@
         var line = _hunk.lines[j],
             operation = line.length > 0 ? line[0] : ' ',
             content = line.length > 0 ? line.substr(1) : line,
-            delimiter = _hunk.linedelimiters[j];
+            delimiter = _hunk.linedelimiters && _hunk.linedelimiters[j] || '\n';
 
         if (operation === ' ') {
           _toPos++;
@@ -7184,6 +7243,11 @@
     diffLines)
     /*istanbul ignore end*/
     (oldStr, newStr, options);
+
+    if (!diff) {
+      return;
+    }
+
     diff.push({
       value: '',
       lines: []
@@ -7360,6 +7424,10 @@
   }
 
   function formatPatch(diff) {
+    if (Array.isArray(diff)) {
+      return diff.map(formatPatch).join('\n');
+    }
+
     var ret = [];
 
     if (diff.oldFileName == diff.newFileName) {
@@ -8038,6 +8106,70 @@
     };
   }
 
+  var reverse = {};
+
+  /*istanbul ignore start*/
+
+  Object.defineProperty(reverse, "__esModule", {
+    value: true
+  });
+  reverse.reversePatch = reversePatch;
+
+  function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
+
+  function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(Object(source), true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
+
+  function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
+  /*istanbul ignore end*/
+  function reversePatch(structuredPatch) {
+    if (Array.isArray(structuredPatch)) {
+      return structuredPatch.map(reversePatch).reverse();
+    }
+
+    return (
+      /*istanbul ignore start*/
+      _objectSpread(_objectSpread({},
+      /*istanbul ignore end*/
+      structuredPatch), {}, {
+        oldFileName: structuredPatch.newFileName,
+        oldHeader: structuredPatch.newHeader,
+        newFileName: structuredPatch.oldFileName,
+        newHeader: structuredPatch.oldHeader,
+        hunks: structuredPatch.hunks.map(function (hunk) {
+          return {
+            oldLines: hunk.newLines,
+            oldStart: hunk.newStart,
+            newLines: hunk.oldLines,
+            newStart: hunk.oldStart,
+            linedelimiters: hunk.linedelimiters,
+            lines: hunk.lines.map(function (l) {
+              if (l.startsWith('-')) {
+                return (
+                  /*istanbul ignore start*/
+                  "+".concat(
+                  /*istanbul ignore end*/
+                  l.slice(1))
+                );
+              }
+
+              if (l.startsWith('+')) {
+                return (
+                  /*istanbul ignore start*/
+                  "-".concat(
+                  /*istanbul ignore end*/
+                  l.slice(1))
+                );
+              }
+
+              return l;
+            })
+          };
+        })
+      })
+    );
+  }
+
   var dmp = {};
 
   /*istanbul ignore start*/
@@ -8211,6 +8343,12 @@
       return _merge.merge;
     }
   });
+  Object.defineProperty(exports, "reversePatch", {
+    enumerable: true,
+    get: function get() {
+      return _reverse.reversePatch;
+    }
+  });
   Object.defineProperty(exports, "structuredPatch", {
     enumerable: true,
     get: function get() {
@@ -8227,6 +8365,12 @@
     enumerable: true,
     get: function get() {
       return _create.createPatch;
+    }
+  });
+  Object.defineProperty(exports, "formatPatch", {
+    enumerable: true,
+    get: function get() {
+      return _create.formatPatch;
     }
   });
   Object.defineProperty(exports, "convertChangesToDMP", {
@@ -8306,6 +8450,12 @@
   var
   /*istanbul ignore start*/
   _merge = merge$1
+  /*istanbul ignore end*/
+  ;
+
+  var
+  /*istanbul ignore start*/
+  _reverse = reverse
   /*istanbul ignore end*/
   ;
 
@@ -10464,7 +10614,7 @@
     return typeof obj.readFloatLE === 'function' && typeof obj.slice === 'function' && isFastBuffer(obj.slice(0, 0))
   }
 
-  var browser$2 = true;
+  var browser$3 = true;
 
   var utils$3 = {};
 
@@ -10951,7 +11101,7 @@
    * canonicalType(global) // 'global'
    * canonicalType(new String('foo') // 'object'
    * canonicalType(async function() {}) // 'asyncfunction'
-   * canonicalType(await import(name)) // 'module'
+   * canonicalType(Object.create(null)) // 'null-prototype'
    */
   var canonicalType = (exports.canonicalType = function canonicalType(value) {
     if (value === undefined) {
@@ -10960,7 +11110,10 @@
       return 'null';
     } else if (isBuffer(value)) {
       return 'buffer';
+    } else if (Object.getPrototypeOf(value) === null) {
+      return 'null-prototype';
     }
+
     return Object.prototype.toString
       .call(value)
       .replace(/^\[.+\s(.+?)]$/, '$1')
@@ -11026,7 +11179,7 @@
   exports.stringify = function (value) {
     var typeHint = canonicalType(value);
 
-    if (!~['object', 'array', 'function'].indexOf(typeHint)) {
+    if (!~['object', 'array', 'function', 'null-prototype'].indexOf(typeHint)) {
       if (typeHint === 'buffer') {
         var json = Buffer.prototype.toJSON.call(value);
         // Based on the toJSON result
@@ -11212,8 +11365,12 @@
           break;
         }
       /* falls through */
+      case 'null-prototype':
       case 'object':
         canonicalizedObj = canonicalizedObj || {};
+        if (typeHint === 'null-prototype' && Symbol.toStringTag in value) {
+          canonicalizedObj['[Symbol.toStringTag]'] = value[Symbol.toStringTag];
+        }
         withStack(value, function () {
           Object.keys(value)
             .sort()
@@ -11392,7 +11549,7 @@
    * @private
    */
   exports.isBrowser = function isBrowser() {
-    return Boolean(browser$2);
+    return Boolean(browser$3);
   };
 
   /*
@@ -11460,6 +11617,48 @@
    */
   exports.getMochaID = obj =>
     obj && typeof obj === 'object' ? obj[MOCHA_ID_PROP_NAME] : undefined;
+
+  /**
+   * Replaces any detected circular dependency with the string '[Circular]'
+   * Mutates original object
+   * @param inputObj {*}
+   * @returns {*}
+   */
+  exports.breakCircularDeps = inputObj => {
+    const seen = new Set();
+
+    function _breakCircularDeps(obj) {
+      if (obj && typeof obj !== 'object') {
+        return obj;
+      }
+
+      if (seen.has(obj)) {
+        return '[Circular]';
+      }
+
+      seen.add(obj);
+      for (const k in obj) {
+        const descriptor = Object.getOwnPropertyDescriptor(obj, k);
+
+        if (descriptor && descriptor.writable) {
+          obj[k] = _breakCircularDeps(obj[k]);
+        }
+      }
+
+      // deleting means only a seen object that is its own child will be detected
+      seen.delete(obj);
+      return obj;
+    }
+
+    return _breakCircularDeps(inputObj);
+  };
+
+  /**
+   * Checks if provided input can be parsed as a JavaScript Number.
+   */
+  exports.isNumeric = input => {
+    return !isNaN(parseFloat(input));
+  };
   }(utils$3));
 
   var _nodeResolve_empty = {};
@@ -11471,7 +11670,7 @@
 
   var require$$18 = /*@__PURE__*/getAugmentedNamespace(_nodeResolve_empty$1);
 
-  var browser$1 = {
+  var browser$2 = {
   	info: 'ℹ️',
   	success: '✅',
   	warning: '⚠️',
@@ -11495,7 +11694,7 @@
     this.message = message;
   }
 
-  var browser = {exports: {}};
+  var browser$1 = {exports: {}};
 
   /**
    * Helpers.
@@ -12202,7 +12401,7 @@
   		return '[UnexpectedJSONParseError]: ' + error.message;
   	}
   };
-  }(browser, browser.exports));
+  }(browser$1, browser$1.exports));
 
   const {format} = require$$0$1;
 
@@ -12759,7 +12958,7 @@
 
   var EventEmitter$1 = require$$0.EventEmitter;
   var Pending$1 = pending;
-  var debug$1 = browser.exports('mocha:runnable');
+  var debug$1 = browser$1.exports('mocha:runnable');
   var milliseconds = ms$1;
   var utils$2 = utils$3;
   const {
@@ -12776,6 +12975,8 @@
   var setTimeout$2 = commonjsGlobal.setTimeout;
   var clearTimeout$1 = commonjsGlobal.clearTimeout;
   var toString = Object.prototype.toString;
+
+  var MAX_TIMEOUT = Math.pow(2, 31) - 1;
 
   var runnable = Runnable$3;
 
@@ -12852,8 +13053,7 @@
     }
 
     // Clamp to range
-    var INT_MAX = Math.pow(2, 31) - 1;
-    var range = [0, INT_MAX];
+    var range = [0, MAX_TIMEOUT];
     ms = utils$2.clamp(ms, range);
 
     // see #1652 for reasoning
@@ -12990,11 +13190,8 @@
    */
   Runnable$3.prototype.resetTimeout = function () {
     var self = this;
-    var ms = this.timeout();
+    var ms = this.timeout() || MAX_TIMEOUT;
 
-    if (ms === 0) {
-      return;
-    }
     this.clearTimeout();
     this.timer = setTimeout$2(function () {
       if (self.timeout() === 0) {
@@ -13339,7 +13536,7 @@
     inherits,
     isString
   } = utils$3;
-  const debug = browser.exports('mocha:suite');
+  const debug = browser$1.exports('mocha:suite');
   const milliseconds = ms$1;
   const errors = errors$2;
 
@@ -13581,7 +13778,7 @@
     var hook = this._createHook(title, fn);
     this._beforeAll.push(hook);
     this.emit(constants.EVENT_SUITE_ADD_HOOK_BEFORE_ALL, hook);
-    return this;
+    return hook;
   };
 
   /**
@@ -13605,7 +13802,7 @@
     var hook = this._createHook(title, fn);
     this._afterAll.push(hook);
     this.emit(constants.EVENT_SUITE_ADD_HOOK_AFTER_ALL, hook);
-    return this;
+    return hook;
   };
 
   /**
@@ -13629,7 +13826,7 @@
     var hook = this._createHook(title, fn);
     this._beforeEach.push(hook);
     this.emit(constants.EVENT_SUITE_ADD_HOOK_BEFORE_EACH, hook);
-    return this;
+    return hook;
   };
 
   /**
@@ -13653,7 +13850,7 @@
     var hook = this._createHook(title, fn);
     this._afterEach.push(hook);
     this.emit(constants.EVENT_SUITE_ADD_HOOK_AFTER_EACH, hook);
-    return this;
+    return hook;
   };
 
   /**
@@ -13997,7 +14194,7 @@
   var EventEmitter = require$$0.EventEmitter;
   var Pending = pending;
   var utils$1 = utils$3;
-  var debug = browser.exports('mocha:runner');
+  var debug = browser$1.exports('mocha:runner');
   var Runnable$1 = runnable;
   var Suite$2 = suite.exports;
   var HOOK_TYPE_BEFORE_EACH = Suite$2.constants.HOOK_TYPE_BEFORE_EACH;
@@ -14433,11 +14630,22 @@
       err = thrown2Error(err);
     }
 
-    try {
-      err.stack =
-        this.fullStackTrace || !err.stack ? err.stack : stackFilter(err.stack);
-    } catch (ignore) {
-      // some environments do not take kindly to monkeying with the stack
+    // Filter the stack traces
+    if (!this.fullStackTrace) {
+      const alreadyFiltered = new Set();
+      let currentErr = err;
+
+      while (currentErr && currentErr.stack && !alreadyFiltered.has(currentErr)) {
+        alreadyFiltered.add(currentErr);
+
+        try {
+          currentErr.stack = stackFilter(currentErr.stack);
+        } catch (ignore) {
+          // some environments do not take kindly to monkeying with the stack
+        }
+
+        currentErr = currentErr.cause;
+      }
     }
 
     this.emit(constants$1.EVENT_TEST_FAIL, test, err);
@@ -15095,11 +15303,11 @@
    * @public
    * @example
    * // this reporter needs proper object references when run in parallel mode
-   * class MyReporter() {
+   * class MyReporter {
    *   constructor(runner) {
-   *     this.runner.linkPartialObjects(true)
+   *     runner.linkPartialObjects(true)
    *       .on(EVENT_SUITE_BEGIN, suite => {
-             // this Suite may be the same object...
+   *         // this Suite may be the same object...
    *       })
    *       .on(EVENT_TEST_BEGIN, test => {
    *         // ...as the `test.parent` property
@@ -15257,7 +15465,7 @@
   var milliseconds = ms$1;
   var utils = utils$3;
   var supportsColor = require$$18;
-  var symbols = browser$1;
+  var symbols = browser$2;
   var constants = runner.constants;
   var EVENT_TEST_PASS = constants.EVENT_TEST_PASS;
   var EVENT_TEST_FAIL = constants.EVENT_TEST_FAIL;
@@ -15469,6 +15677,56 @@
   });
 
   /**
+   * Traverses err.cause and returns all stack traces
+   *
+   * @private
+   * @param {Error} err
+   * @param {Set<Error>} [seen]
+   * @return {FullErrorStack}
+   */
+  var getFullErrorStack = function (err, seen) {
+    if (seen && seen.has(err)) {
+      return { message: '', msg: '<circular>', stack: '' };
+    }
+
+    var message;
+
+    if (typeof err.inspect === 'function') {
+      message = err.inspect() + '';
+    } else if (err.message && typeof err.message.toString === 'function') {
+      message = err.message + '';
+    } else {
+      message = '';
+    }
+
+    var msg;
+    var stack = err.stack || message;
+    var index = message ? stack.indexOf(message) : -1;
+
+    if (index === -1) {
+      msg = message;
+    } else {
+      index += message.length;
+      msg = stack.slice(0, index);
+      // remove msg from stack
+      stack = stack.slice(index + 1);
+
+      if (err.cause) {
+        seen = seen || new Set();
+        seen.add(err);
+        const causeStack = getFullErrorStack(err.cause, seen);
+        stack += '\n   Caused by: ' + causeStack.msg + (causeStack.stack ? '\n' + causeStack.stack : '');
+      }
+    }
+
+    return {
+      message,
+      msg,
+      stack
+    };
+  };
+
+  /**
    * Outputs the given `failures` as a list.
    *
    * @public
@@ -15488,7 +15746,6 @@
         color('error stack', '\n%s\n');
 
       // msg
-      var msg;
       var err;
       if (test.err && test.err.multiple) {
         if (multipleTest !== test) {
@@ -15499,25 +15756,8 @@
       } else {
         err = test.err;
       }
-      var message;
-      if (typeof err.inspect === 'function') {
-        message = err.inspect() + '';
-      } else if (err.message && typeof err.message.toString === 'function') {
-        message = err.message + '';
-      } else {
-        message = '';
-      }
-      var stack = err.stack || message;
-      var index = message ? stack.indexOf(message) : -1;
 
-      if (index === -1) {
-        msg = message;
-      } else {
-        index += message.length;
-        msg = stack.slice(0, index);
-        // remove msg from stack
-        stack = stack.slice(index + 1);
-      }
+      var { message, msg, stack } = getFullErrorStack(err);
 
       // uncaught
       if (err.uncaught) {
@@ -15795,6 +16035,15 @@
   Base.consoleLog = consoleLog;
 
   Base.abstract = true;
+
+  /**
+   * An object with all stack traces recursively mounted from each err.cause
+   * @memberof module:lib/reporters/base
+   * @typedef {Object} FullErrorStack
+   * @property {string} message
+   * @property {string} msg
+   * @property {string} stack
+   */
   }(base$1, base$1.exports));
 
   var dot = {exports: {}};
@@ -16455,143 +16704,6 @@
 
   var html = {exports: {}};
 
-  /**
-   @module browser/Progress
-  */
-
-  /**
-   * Expose `Progress`.
-   */
-
-  var progress$1 = Progress;
-
-  /**
-   * Initialize a new `Progress` indicator.
-   */
-  function Progress() {
-    this.percent = 0;
-    this.size(0);
-    this.fontSize(11);
-    this.font('helvetica, arial, sans-serif');
-  }
-
-  /**
-   * Set progress size to `size`.
-   *
-   * @public
-   * @param {number} size
-   * @return {Progress} Progress instance.
-   */
-  Progress.prototype.size = function (size) {
-    this._size = size;
-    return this;
-  };
-
-  /**
-   * Set text to `text`.
-   *
-   * @public
-   * @param {string} text
-   * @return {Progress} Progress instance.
-   */
-  Progress.prototype.text = function (text) {
-    this._text = text;
-    return this;
-  };
-
-  /**
-   * Set font size to `size`.
-   *
-   * @public
-   * @param {number} size
-   * @return {Progress} Progress instance.
-   */
-  Progress.prototype.fontSize = function (size) {
-    this._fontSize = size;
-    return this;
-  };
-
-  /**
-   * Set font to `family`.
-   *
-   * @param {string} family
-   * @return {Progress} Progress instance.
-   */
-  Progress.prototype.font = function (family) {
-    this._font = family;
-    return this;
-  };
-
-  /**
-   * Update percentage to `n`.
-   *
-   * @param {number} n
-   * @return {Progress} Progress instance.
-   */
-  Progress.prototype.update = function (n) {
-    this.percent = n;
-    return this;
-  };
-
-  /**
-   * Draw on `ctx`.
-   *
-   * @param {CanvasRenderingContext2d} ctx
-   * @return {Progress} Progress instance.
-   */
-  Progress.prototype.draw = function (ctx) {
-    try {
-      var darkMatcher = window.matchMedia('(prefers-color-scheme: dark)');
-      var isDarkMode = !!darkMatcher.matches;
-      var lightColors = {
-        outerCircle: '#9f9f9f',
-        innerCircle: '#eee',
-        text: '#000'
-      };
-      var darkColors = {
-        outerCircle: '#888',
-        innerCircle: '#444',
-        text: '#fff'
-      };
-      var colors = isDarkMode ? darkColors : lightColors;
-
-      var percent = Math.min(this.percent, 100);
-      var size = this._size;
-      var half = size / 2;
-      var x = half;
-      var y = half;
-      var rad = half - 1;
-      var fontSize = this._fontSize;
-
-      ctx.font = fontSize + 'px ' + this._font;
-
-      var angle = Math.PI * 2 * (percent / 100);
-      ctx.clearRect(0, 0, size, size);
-
-      // outer circle
-      ctx.strokeStyle = colors.outerCircle;
-      ctx.beginPath();
-      ctx.arc(x, y, rad, 0, angle, false);
-      ctx.stroke();
-
-      // inner circle
-      ctx.strokeStyle = colors.innerCircle;
-      ctx.beginPath();
-      ctx.arc(x, y, rad - 1, 0, angle, true);
-      ctx.stroke();
-
-      // text
-      var text = this._text || (percent | 0) + '%';
-      var w = ctx.measureText(text).width;
-
-      ctx.fillStyle = colors.text;
-      ctx.fillText(text, x - w / 2 + 1, y + fontSize / 2 - 1);
-    } catch (ignore) {
-      // don't fail if we can't render progress
-    }
-    return this;
-  };
-
   (function (module, exports) {
 
   /* eslint-env browser */
@@ -16604,7 +16716,6 @@
 
   var Base = base$1.exports;
   var utils = utils$3;
-  var Progress = progress$1;
   var escapeRe = escapeStringRegexp;
   var constants = runner.constants;
   var EVENT_TEST_PASS = constants.EVENT_TEST_PASS;
@@ -16627,12 +16738,13 @@
   module.exports = HTML;
 
   /**
-   * Stats template.
+   * Stats template: Result, progress, passes, failures, and duration.
    */
 
   var statsTemplate =
     '<ul id="mocha-stats">' +
-    '<li class="progress"><canvas width="40" height="40"></canvas></li>' +
+    '<li class="result"></li>' +
+    '<li class="progress-contain"><progress class="progress-element" max="100" value="0"></progress><svg class="progress-ring"><circle class="ring-flatlight" stroke-dasharray="100%,0%"/><circle class="ring-highlight" stroke-dasharray="0%,100%"/></svg><div class="progress-text">0%</div></li>' +
     '<li class="passes"><a href="javascript:void(0);">passes:</a> <em>0</em></li>' +
     '<li class="failures"><a href="javascript:void(0);">failures:</a> <em>0</em></li>' +
     '<li class="duration">duration: <em>0</em>s</li>' +
@@ -16657,28 +16769,36 @@
     var stats = this.stats;
     var stat = fragment(statsTemplate);
     var items = stat.getElementsByTagName('li');
-    var passes = items[1].getElementsByTagName('em')[0];
-    var passesLink = items[1].getElementsByTagName('a')[0];
-    var failures = items[2].getElementsByTagName('em')[0];
-    var failuresLink = items[2].getElementsByTagName('a')[0];
-    var duration = items[3].getElementsByTagName('em')[0];
-    var canvas = stat.getElementsByTagName('canvas')[0];
+    const resultIndex = 0;
+    const progressIndex = 1;
+    const passesIndex = 2;
+    const failuresIndex = 3;
+    const durationIndex = 4;
+    /** Stat item containing the root suite pass or fail indicator (hasFailures ? '✖' : '✓') */
+    var resultIndicator = items[resultIndex];
+    /** Passes text and count */
+    const passesStat = items[passesIndex];
+    /** Stat item containing the pass count (not the word, just the number) */
+    const passesCount = passesStat.getElementsByTagName('em')[0];
+    /** Stat item linking to filter to show only passing tests */
+    const passesLink = passesStat.getElementsByTagName('a')[0];
+    /** Failures text and count */
+    const failuresStat = items[failuresIndex];
+    /** Stat item containing the failure count (not the word, just the number) */
+    const failuresCount = failuresStat.getElementsByTagName('em')[0];
+    /** Stat item linking to filter to show only failing tests */
+    const failuresLink = failuresStat.getElementsByTagName('a')[0];
+    /** Stat item linking to the duration time (not the word or unit, just the number) */
+    var duration = items[durationIndex].getElementsByTagName('em')[0];
     var report = fragment('<ul id="mocha-report"></ul>');
     var stack = [report];
-    var progress;
-    var ctx;
+    var progressText = items[progressIndex].getElementsByTagName('div')[0];
+    var progressBar = items[progressIndex].getElementsByTagName('progress')[0];
+    var progressRing = [
+      items[progressIndex].getElementsByClassName('ring-flatlight')[0],
+      items[progressIndex].getElementsByClassName('ring-highlight')[0]
+    ];
     var root = document.getElementById('mocha');
-
-    if (canvas.getContext) {
-      var ratio = window.devicePixelRatio || 1;
-      canvas.style.width = canvas.width;
-      canvas.style.height = canvas.height;
-      canvas.width *= ratio;
-      canvas.height *= ratio;
-      ctx = canvas.getContext('2d');
-      ctx.scale(ratio, ratio);
-      progress = new Progress();
-    }
 
     if (!root) {
       return error('#mocha div missing, add it to your document');
@@ -16709,10 +16829,6 @@
     root.appendChild(stat);
     root.appendChild(report);
 
-    if (progress) {
-      progress.size(40);
-    }
-
     runner.on(EVENT_SUITE_BEGIN, function (suite) {
       if (suite.root) {
         return;
@@ -16734,6 +16850,10 @@
 
     runner.on(EVENT_SUITE_END, function (suite) {
       if (suite.root) {
+        if (stats.failures === 0) {
+          text(resultIndicator, '✓');
+          stat.className += ' pass';
+        }
         updateStats();
         return;
       }
@@ -16754,6 +16874,10 @@
     });
 
     runner.on(EVENT_TEST_FAIL, function (test) {
+      // Update stat items
+      text(resultIndicator, '✖');
+      stat.className += ' fail';
+
       var el = fragment(
         '<li class="test fail"><h2>%e <a href="%e" class="replay">' +
           playIcon +
@@ -16826,16 +16950,33 @@
     }
 
     function updateStats() {
-      // TODO: add to stats
       var percent = ((stats.tests / runner.total) * 100) | 0;
-      if (progress) {
-        progress.update(percent).draw(ctx);
+      progressBar.value = percent;
+      if (progressText) {
+        // setting a toFixed that is too low, makes small changes to progress not shown
+        // setting it too high, makes the progress text longer then it needs to
+        // to address this, calculate the toFixed based on the magnitude of total
+        var decimalPlaces = Math.ceil(Math.log10(runner.total / 100));
+        text(
+          progressText,
+          percent.toFixed(Math.min(Math.max(decimalPlaces, 0), 100)) + '%'
+        );
+      }
+      if (progressRing) {
+        var radius = parseFloat(getComputedStyle(progressRing[0]).getPropertyValue('r'));
+        var wholeArc = Math.PI * 2 * radius;
+        var highlightArc = percent * (wholeArc / 100);
+        // The progress ring is in 2 parts, the flatlight color and highlight color.
+        // Rendering both on top of the other, seems to make a 3rd color on the edges.
+        // To create 1 whole ring with 2 colors, both parts are inverse of the other.
+        progressRing[0].style['stroke-dasharray'] = `0,${highlightArc}px,${wholeArc}px`;
+        progressRing[1].style['stroke-dasharray'] = `${highlightArc}px,${wholeArc}px`;
       }
 
       // update stats
       var ms = new Date() - stats.start;
-      text(passes, stats.passes);
-      text(failures, stats.failures);
+      text(passesCount, stats.passes);
+      text(failuresCount, stats.failures);
       text(duration, (ms / 1000).toFixed(2));
     }
   }
@@ -16849,16 +16990,16 @@
   function makeUrl(s) {
     var search = window.location.search;
 
-    // Remove previous grep query parameter if present
+    // Remove previous {grep, fgrep, invert} query parameters if present
     if (search) {
-      search = search.replace(/[?&]grep=[^&\s]*/g, '').replace(/^&/, '?');
+      search = search.replace(/[?&](?:f?grep|invert)=[^&\s]*/g, '').replace(/^&/, '?');
     }
 
     return (
       window.location.pathname +
       (search ? search + '&' : '?') +
       'grep=' +
-      encodeURIComponent(escapeRe(s))
+      encodeURIComponent(s)
     );
   }
 
@@ -16868,7 +17009,7 @@
    * @param {Object} [suite]
    */
   HTML.prototype.suiteURL = function (suite) {
-    return makeUrl(suite.fullTitle());
+    return makeUrl('^' + escapeRe(suite.fullTitle()) + ' ');
   };
 
   /**
@@ -16877,7 +17018,7 @@
    * @param {Object} [test]
    */
   HTML.prototype.testURL = function (test) {
-    return makeUrl(test.fullTitle());
+    return makeUrl('^' + escapeRe(test.fullTitle()) + '$');
   };
 
   /**
@@ -17658,6 +17799,7 @@
     var attrs = {
       classname: test.parent.fullTitle(),
       name: test.title,
+      file: test.file,
       time: test.duration / 1000 || 0
     };
 
@@ -18458,7 +18600,7 @@
        * @param {Function} fn
        */
       before: function (name, fn) {
-        suites[0].beforeAll(name, fn);
+        return suites[0].beforeAll(name, fn);
       },
 
       /**
@@ -18468,7 +18610,7 @@
        * @param {Function} fn
        */
       after: function (name, fn) {
-        suites[0].afterAll(name, fn);
+        return suites[0].afterAll(name, fn);
       },
 
       /**
@@ -18478,7 +18620,7 @@
        * @param {Function} fn
        */
       beforeEach: function (name, fn) {
-        suites[0].beforeEach(name, fn);
+        return suites[0].beforeEach(name, fn);
       },
 
       /**
@@ -18488,7 +18630,7 @@
        * @param {Function} fn
        */
       afterEach: function (name, fn) {
-        suites[0].afterEach(name, fn);
+        return suites[0].afterEach(name, fn);
       },
 
       suite: {
@@ -19066,14 +19208,234 @@
   };
 
   var name = "mocha";
-  var version = "10.3.0";
+  var version = "11.1.0";
+  var type = "commonjs";
+  var description = "simple, flexible, fun test framework";
+  var keywords = [
+  	"mocha",
+  	"test",
+  	"bdd",
+  	"tdd",
+  	"tap",
+  	"testing",
+  	"chai",
+  	"assertion",
+  	"ava",
+  	"jest",
+  	"tape",
+  	"jasmine",
+  	"karma"
+  ];
+  var author = "TJ Holowaychuk <tj@vision-media.ca>";
+  var license = "MIT";
+  var repository = {
+  	type: "git",
+  	url: "https://github.com/mochajs/mocha.git"
+  };
+  var bugs = {
+  	url: "https://github.com/mochajs/mocha/issues/"
+  };
+  var discord = "https://discord.gg/KeDn2uXhER";
   var homepage = "https://mochajs.org/";
+  var logo = "https://cldup.com/S9uQ-cOLYz.svg";
   var notifyLogo = "https://ibin.co/4QuRuGjXvl36.png";
+  var bin = {
+  	mocha: "./bin/mocha.js",
+  	_mocha: "./bin/_mocha"
+  };
+  var directories = {
+  	lib: "./lib",
+  	test: "./test"
+  };
+  var engines = {
+  	node: "^18.18.0 || ^20.9.0 || >=21.1.0"
+  };
+  var scripts = {
+  	build: "rollup -c ./rollup.config.js",
+  	clean: "rimraf mocha.js mocha.js.map",
+  	"docs-clean": "rimraf docs/_site docs/api",
+  	"docs-watch": "eleventy --serve",
+  	"docs:api": "jsdoc -c jsdoc.conf.json",
+  	"docs:site": "eleventy",
+  	docs: "run-s docs-clean docs:*",
+  	"format:eslint": "eslint --fix . \"bin/*\"",
+  	"format:prettier": "prettier --write \"!(package*).json\" \".*.json\" \"lib/**/*.json\" \"*.yml\"",
+  	format: "run-s format:*",
+  	"lint:installed-check": "installed-check --engine-check",
+  	"lint:knip": "knip --cache",
+  	"lint:code": "eslint . \"bin/*\" --max-warnings 0",
+  	"lint:markdown": "markdownlint \"*.md\" \"docs/**/*.md\" \".github/*.md\" \"lib/**/*.md\" \"test/**/*.md\" \"example/**/*.md\" -i CHANGELOG.md",
+  	lint: "run-p lint:*",
+  	prepublishOnly: "run-s clean build",
+  	"test-browser-run": "cross-env NODE_PATH=. karma start ./karma.conf.js --single-run",
+  	"test-browser:reporters:bdd": "cross-env MOCHA_TEST=bdd npm run -s test-browser-run",
+  	"test-browser:reporters:esm": "cross-env MOCHA_TEST=esm npm run -s test-browser-run",
+  	"test-browser:reporters:qunit": "cross-env MOCHA_TEST=qunit npm run -s test-browser-run",
+  	"test-browser:reporters:tdd": "cross-env MOCHA_TEST=tdd npm run -s test-browser-run",
+  	"test-browser:reporters": "run-s test-browser:reporters:*",
+  	"test-browser:webpack-compat": "webpack --mode development --config ./test/browser-specific/fixtures/webpack/webpack.config.js",
+  	"test-browser": "run-s clean build test-browser:*",
+  	"test-coverage-clean": "rimraf .nyc_output coverage",
+  	"test-coverage-generate": "nyc report --reporter=lcov --reporter=text",
+  	"test-node-run-only": "nyc --no-clean --reporter=json node bin/mocha.js",
+  	"test-node-run": "nyc --no-clean --reporter=json node bin/mocha.js --forbid-only",
+  	"test-node:integration": "run-s clean build && npm run -s test-node-run -- --parallel --timeout 10000 --slow 3750 \"test/integration/**/*.spec.js\"",
+  	"test-node:interfaces:bdd": "npm run -s test-node-run -- --ui bdd test/interfaces/bdd.spec",
+  	"test-node:interfaces:exports": "npm run -s test-node-run -- --ui exports test/interfaces/exports.spec",
+  	"test-node:interfaces:qunit": "npm run -s test-node-run -- --ui qunit test/interfaces/qunit.spec",
+  	"test-node:interfaces:tdd": "npm run -s test-node-run -- --ui tdd test/interfaces/tdd.spec",
+  	"test-node:interfaces": "run-p test-node:interfaces:*",
+  	"test-node:jsapi": "node test/jsapi/index.js",
+  	"test-node:only:bddRequire": "npm run -s test-node-run-only -- --ui qunit test/only/bdd-require.spec --no-parallel",
+  	"test-node:only:globalBdd": "npm run -s test-node-run-only -- --ui bdd test/only/global/bdd.spec --no-parallel",
+  	"test-node:only:globalQunit": "npm run -s test-node-run-only -- --ui qunit test/only/global/qunit.spec --no-parallel",
+  	"test-node:only:globalTdd": "npm run -s test-node-run-only -- --ui tdd test/only/global/tdd.spec --no-parallel",
+  	"test-node:only": "run-p test-node:only:*",
+  	"test-node:reporters": "npm run -s test-node-run -- \"test/reporters/*.spec.js\"",
+  	"test-node:requires": "npm run -s test-node-run -- --require coffeescript/register --require test/require/a.js --require test/require/b.coffee --require test/require/c.js --require test/require/d.coffee test/require/require.spec.js",
+  	"test-node:unit": "npm run -s test-node-run -- \"test/unit/*.spec.js\" \"test/node-unit/**/*.spec.js\"",
+  	"test-node": "run-s test-coverage-clean test-node:* test-coverage-generate",
+  	"test-smoke": "node ./bin/mocha --no-config test/smoke/smoke.spec.js",
+  	test: "run-s lint test-node test-browser",
+  	"version:linkify-changelog": "node scripts/linkify-changelog.mjs",
+  	"version:update-authors": "node scripts/update-authors.js",
+  	version: "run-p version:* && git add -A ./AUTHORS ./CHANGELOG.md"
+  };
+  var dependencies = {
+  	"ansi-colors": "^4.1.3",
+  	"browser-stdout": "^1.3.1",
+  	chokidar: "^3.5.3",
+  	debug: "^4.3.5",
+  	diff: "^5.2.0",
+  	"escape-string-regexp": "^4.0.0",
+  	"find-up": "^5.0.0",
+  	glob: "^10.4.5",
+  	he: "^1.2.0",
+  	"js-yaml": "^4.1.0",
+  	"log-symbols": "^4.1.0",
+  	minimatch: "^5.1.6",
+  	ms: "^2.1.3",
+  	"serialize-javascript": "^6.0.2",
+  	"strip-json-comments": "^3.1.1",
+  	"supports-color": "^8.1.1",
+  	workerpool: "^6.5.1",
+  	yargs: "^17.7.2",
+  	"yargs-parser": "^21.1.1",
+  	"yargs-unparser": "^2.0.0"
+  };
+  var devDependencies = {
+  	"@11ty/eleventy": "^1.0.0",
+  	"@11ty/eleventy-plugin-inclusive-language": "^1.0.3",
+  	"@eslint/js": "^8.56.0",
+  	"@mocha/docdash": "^4.0.1",
+  	"@rollup/plugin-commonjs": "^21.0.2",
+  	"@rollup/plugin-json": "^4.1.0",
+  	"@rollup/plugin-multi-entry": "^4.0.1",
+  	"@rollup/plugin-node-resolve": "^13.1.3",
+  	chai: "^4.3.4",
+  	coffeescript: "^2.6.1",
+  	"cross-env": "^7.0.2",
+  	eslint: "^8.56.0",
+  	"fail-on-errors-webpack-plugin": "^3.0.0",
+  	"fs-extra": "^10.0.0",
+  	globals: "^13.24.0",
+  	"installed-check": "^9.3.0",
+  	jsdoc: "^3.6.7",
+  	"jsdoc-ts-utils": "^2.0.1",
+  	karma: "^6.4.2",
+  	"karma-chrome-launcher": "^3.2.0",
+  	"karma-mocha": "^2.0.1",
+  	"karma-mocha-reporter": "^2.2.5",
+  	"karma-sauce-launcher": "^4.3.6",
+  	knip: "^5.27.0",
+  	"markdown-it": "^12.3.2",
+  	"markdown-it-anchor": "^8.4.1",
+  	"markdown-it-attrs": "^4.1.3",
+  	"markdown-it-emoji": "^2.0.0",
+  	"markdown-it-prism": "^2.2.2",
+  	"markdown-toc": "^1.2.0",
+  	"markdownlint-cli": "^0.30.0",
+  	needle: "^2.5.0",
+  	"npm-run-all2": "^6.2.0",
+  	nyc: "^15.1.0",
+  	pidtree: "^0.5.0",
+  	prettier: "^2.4.1",
+  	remark: "^14.0.2",
+  	"remark-github": "^11.2.2",
+  	"remark-inline-links": "^6.0.1",
+  	rewiremock: "^3.14.3",
+  	rimraf: "^3.0.2",
+  	rollup: "^2.70.1",
+  	"rollup-plugin-node-globals": "^1.4.0",
+  	"rollup-plugin-polyfill-node": "^0.8.0",
+  	"rollup-plugin-visualizer": "^5.6.0",
+  	sinon: "^9.0.3",
+  	unexpected: "^11.14.0",
+  	"unexpected-eventemitter": "^2.2.0",
+  	"unexpected-map": "^2.0.0",
+  	"unexpected-set": "^3.0.0",
+  	"unexpected-sinon": "^10.11.2",
+  	uslug: "^1.0.4",
+  	webpack: "^5.67.0",
+  	"webpack-cli": "^4.9.1"
+  };
+  var files = [
+  	"bin/*mocha*",
+  	"lib/**/*.{js,html,json}",
+  	"index.js",
+  	"mocha.css",
+  	"mocha.js",
+  	"mocha.js.map",
+  	"browser-entry.js"
+  ];
+  var browser = {
+  	"./index.js": "./browser-entry.js",
+  	fs: false,
+  	path: false,
+  	"supports-color": false,
+  	"./lib/nodejs/buffered-worker-pool.js": false,
+  	"./lib/nodejs/esm-utils.js": false,
+  	"./lib/nodejs/file-unloader.js": false,
+  	"./lib/nodejs/parallel-buffered-runner.js": false,
+  	"./lib/nodejs/serializer.js": false,
+  	"./lib/nodejs/worker.js": false,
+  	"./lib/nodejs/reporters/parallel-buffered.js": false,
+  	"./lib/cli/index.js": false
+  };
+  var prettier = {
+  	arrowParens: "avoid",
+  	bracketSpacing: false,
+  	endOfLine: "auto",
+  	singleQuote: true,
+  	trailingComma: "none"
+  };
+  var overrides = {
+  	webdriverio: "^7.33.0"
+  };
   var require$$17 = {
   	name: name,
   	version: version,
+  	type: type,
+  	description: description,
+  	keywords: keywords,
+  	author: author,
+  	license: license,
+  	repository: repository,
+  	bugs: bugs,
+  	discord: discord,
   	homepage: homepage,
-  	notifyLogo: notifyLogo
+  	logo: logo,
+  	notifyLogo: notifyLogo,
+  	bin: bin,
+  	directories: directories,
+  	engines: engines,
+  	scripts: scripts,
+  	dependencies: dependencies,
+  	devDependencies: devDependencies,
+  	files: files,
+  	browser: browser,
+  	prettier: prettier,
+  	overrides: overrides
   };
 
   (function (module, exports) {
@@ -19101,7 +19463,7 @@
   } = errors$2;
   const {EVENT_FILE_PRE_REQUIRE, EVENT_FILE_POST_REQUIRE, EVENT_FILE_REQUIRE} =
     Suite.constants;
-  var debug = browser.exports('mocha:mocha');
+  var debug = browser$1.exports('mocha:mocha');
 
   exports = module.exports = Mocha;
 
@@ -19235,6 +19597,7 @@
    * @param {boolean} [options.delay] - Delay root suite execution?
    * @param {boolean} [options.diff] - Show diff on failure?
    * @param {boolean} [options.dryRun] - Report tests without running them?
+   * @param {boolean} [options.passOnFailingTestSuite] - Fail test run if tests were failed?
    * @param {boolean} [options.failZero] - Fail test run if zero tests?
    * @param {string} [options.fgrep] - Test filter given string.
    * @param {boolean} [options.forbidOnly] - Tests marked `only` fail the suite?
@@ -19271,7 +19634,9 @@
       .ui(options.ui)
       .reporter(
         options.reporter,
-        options.reporterOption || options.reporterOptions // for backwards compatibility
+        options['reporter-option'] ||
+          options.reporterOption ||
+          options.reporterOptions // for backwards compatibility
       )
       .slow(options.slow)
       .global(options.global);
@@ -19294,6 +19659,7 @@
       'delay',
       'diff',
       'dryRun',
+      'passOnFailingTestSuite',
       'failZero',
       'forbidOnly',
       'forbidPending',
@@ -19949,6 +20315,20 @@
   };
 
   /**
+   * Fail test run if tests were failed.
+   *
+   * @public
+   * @see [CLI option](../#-pass-on-failing-test-suite)
+   * @param {boolean} [passOnFailingTestSuite=false] - Whether to fail test run.
+   * @return {Mocha} this
+   * @chainable
+   */
+  Mocha.prototype.passOnFailingTestSuite = function(passOnFailingTestSuite) {
+    this.options.passOnFailingTestSuite = passOnFailingTestSuite === true;
+    return this;
+  };
+
+  /**
    * Causes tests marked `only` to fail the suite.
    *
    * @public
@@ -20465,8 +20845,8 @@
 
   process.on = function (e, fn) {
     if (e === 'uncaughtException') {
-      commonjsGlobal.onerror = function (err, url, line) {
-        fn(new Error(err + ' (' + url + ':' + line + ')'));
+      commonjsGlobal.onerror = function (msg, url, line, col, err) {
+        fn(err || new Error(msg + ' (' + url + ':' + line + ':' + col + ')'));
         return !mocha.options.allowUncaught;
       };
       uncaughtExceptionHandlers.push(fn);
