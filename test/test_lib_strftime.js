@@ -40,7 +40,7 @@ describe('lib/strftime.js', function () {
       var date = new Date(Date.UTC(2020, 0, 1, 0, 0, 0));
       var formatter = new Strftime({date});
       assert.strictEqual(formatter.format('%Y'), date.getFullYear().toString());
-      assert.strictEqual(formatter.format('%y'), date.getFullYear().toString().slice(0, -2));
+      assert.strictEqual(formatter.format('%y'), date.getFullYear().toString().slice(2));
       assert.strictEqual(parseInt(formatter.format('%m'), 10), date.getMonth() + 1);
       assert.strictEqual(parseInt(formatter.format('%d'), 10), date.getDate());
       assert.strictEqual(parseInt(formatter.format('%H'), 10), date.getHours());
