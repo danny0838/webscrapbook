@@ -28,16 +28,16 @@ const {MochaQuery: $, assert} = unittest;
 describe('lib/strftime.js', function () {
   describe('Strftime.format', function () {
     it('isUtc = true', function () {
-      var date = new Date(Date.UTC(2020, 1, 1, 0, 0, 0));
+      var date = new Date(Date.UTC(2018, 1, 1, 0, 0, 0));
       var formatter = new Strftime({date, isUtc: true});
-      assert.strictEqual(formatter.format('%Y-%m-%dT%H:%M:%SZ'), '2020-02-01T00:00:00Z');
+      assert.strictEqual(formatter.format('%Y-%m-%dT%H:%M:%SZ'), '2018-02-01T00:00:00Z');
       assert.strictEqual(formatter.format('%p'), 'AM');
       assert.strictEqual(formatter.format('%%'), '%');
       assert.strictEqual(formatter.format('%z'), '+0000');
     });
 
     it('isUtc = false', function () {
-      var date = new Date(Date.UTC(2020, 0, 1, 0, 0, 0));
+      var date = new Date(Date.UTC(2018, 0, 1, 0, 0, 0));
       var formatter = new Strftime({date});
       assert.strictEqual(formatter.format('%Y'), date.getFullYear().toString());
       assert.strictEqual(formatter.format('%y'), date.getFullYear().toString().slice(2));
