@@ -740,7 +740,7 @@
   },
   "ExtensionName": {
     "description": "Name of the extension as it's visible to the outside world",
-    "message": "WebScrapBook"
+    "message": "WebScrapBook MV3"
   },
   "IndexerTitle": {
     "message": "Generate site index"

@@ -740,7 +740,7 @@
   },
   "ExtensionName": {
     "description": "Name of the extension as it's visible to the outside world",
-    "message": "網頁剪貼簿"
+    "message": "網頁剪貼簿MV3"
   },
   "IndexerTitle": {
     "message": "建立站台索引"
