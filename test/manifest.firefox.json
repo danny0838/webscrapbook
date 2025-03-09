@@ -1,5 +1,5 @@
 {
-  "manifest_version": 2,
+  "manifest_version": 3,
   "name": "WebScrapBook Test Suite",
   "description": "Test suite for WebScrapBook extension.",
   "version": "0.1.0",
@@ -8,15 +8,12 @@
   "browser_specific_settings": {
     "gecko": {
       "id": "webscrapbooktestsuite@danny0838.addons.mozilla.org",
-      "strict_min_version": "68.0"
+      "strict_min_version": "109.0"
     }
   },
 
   "background": {
-    "scripts": [
-      "shared/lib/browser-polyfill.js",
-      "background.js"
-    ]
+    "page": "background-page.html"
   },
 
   "content_scripts": [
@@ -32,13 +29,16 @@
     }
   ],
 
-  "browser_action": {
+  "action": {
     "default_title": "WebScrapBook Test Suite"
   },
 
   "permissions": [
     "contextMenus",
-    "storage",
+    "storage"
+  ],
+
+  "host_permissions": [
     "http://*/*"
   ]
 }
