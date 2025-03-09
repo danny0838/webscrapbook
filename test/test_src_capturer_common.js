@@ -1056,8 +1056,9 @@ ul {
         var rules = getRulesFromCssText(`p { background-image: url("image.jpg"/* comment */); }`);
         assert.strictEqual(rules[0].cssText, `p { background-image: url("image.jpg"); }`);
 
-        var rules = getRulesFromCssText(`p::after { content: attr(  id  ); }`);
-        assert.strictEqual(rules[0].cssText, `p::after { content: attr(id); }`);
+        // Chrome >= 13x: keeps original spaces
+        // var rules = getRulesFromCssText(`p::after { content: attr(  id  ); }`);
+        // assert.strictEqual(rules[0].cssText, `p::after { content: attr(id); }`);
       });
 
       it('browser syntax check/tidy for escaping', function () {
