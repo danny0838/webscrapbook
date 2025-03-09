@@ -449,7 +449,7 @@
     document.getElementById("optionServerUrlTooltip").setAttribute('data-tooltip', scrapbook.lang('OptionServerUrlTooltip', [scrapbook.BACKEND_MIN_VERSION]));
 
     // hide unsupported options
-    if (!browser.browserAction || !browser.browserAction.setBadgeText) {
+    if (!browser.action || !browser.action.setBadgeText) {
       for (const elem of document.querySelectorAll('.ui-uiNotifyPageCaptured')) {
         elem.hidden = true;
       }

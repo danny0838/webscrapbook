@@ -1450,10 +1450,19 @@ if (typeof Promise.withResolvers === 'undefined') {
           .catch(async (ex) => {
             isDebug && console.debug("inject content scripts", tabId, frameId, url);
             try {
-              for (const file of CONTENT_SCRIPT_FILES) {
-                await browser.tabs.executeScript(tabId, {frameId, file, runAt: "document_start"});
-              }
-              await browser.tabs.executeScript(tabId, {frameId, code: `core.frameId = ${frameId};`, runAt: "document_start"});
+              await browser.scripting.executeScript({
+                target: {tabId, frameIds: [frameId]},
+                injectImmediately: true,
+                files: CONTENT_SCRIPT_FILES,
+              });
+              await browser.scripting.executeScript({
+                target: {tabId, frameIds: [frameId]},
+                injectImmediately: true,
+                func: (frameId) => {
+                  core.frameId = frameId;
+                },
+                args: [frameId],
+              });
             } catch (ex) {
               // Chromium may fail to inject content script to some pages due to unclear reason.
               // Record the error and pass.
