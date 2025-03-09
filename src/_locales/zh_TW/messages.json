@@ -740,7 +740,7 @@
   },
   "ExtensionName": {
     "description": "Name of the extension as it's visible to the outside world",
-    "message": "網頁剪貼簿"
+    "message": "網頁剪貼簿MV3"
   },
   "IndexerHeader": {
     "message": "選擇網頁剪貼簿資料夾或其 ZIP 壓縮檔。你可以拖放它們至此頁，或使用以下按鈕："
