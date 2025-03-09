@@ -536,182 +536,278 @@
 
     action: {
       browser.contextMenus.create({
+        id: "captureTabAsOnAction",
         title: scrapbook.lang("CaptureTabAs") + '...',
         contexts: ["browser_action"],
         documentUrlPatterns: urlMatch,
-        onclick: async (info, tab) => {
-          const tabs = await scrapbook.getHighlightedTabs();
-          return await scrapbook.invokeCaptureAs({
-            tasks: tabs.map(tab => ({
-              tabId: tab.id,
-              url: tab.url,
-              title: tab.title,
-            })),
-          });
-        },
       });
 
       browser.contextMenus.create({
+        id: "editTabOnAction",
         title: scrapbook.lang("EditTab"),
         contexts: ["browser_action"],
         documentUrlPatterns: urlMatch,
-        onclick: (info, tab) => {
-          return scrapbook.editTab({
-            tabId: tab.id,
-            force: true,
-          });
-        },
       });
 
       browser.contextMenus.create({
+        id: "searchCaptures",
         title: scrapbook.lang("searchCaptures"),
         contexts: ["browser_action"],
         documentUrlPatterns: urlMatch,
-        onclick: async (info, tab) => {
-          const tabs = await scrapbook.getHighlightedTabs();
-          return scrapbook.searchCaptures({
-            tabs,
-            newTab: true,
-          });
-        },
         enabled: hasServer,
       });
 
       browser.contextMenus.create({
+        id: "openScrapBook",
         title: scrapbook.lang("openScrapBook"),
         contexts: ["browser_action"],
         documentUrlPatterns: urlMatch,
-        onclick: async (info, tab) => {
-          return await scrapbook.openScrapBook();
-        },
         enabled: hasServer,
       });
 
       browser.contextMenus.create({
+        id: "openViewer",
         title: scrapbook.lang("openViewer") + '...',
         contexts: ["browser_action"],
         documentUrlPatterns: urlMatch,
-        onclick: async (info, tab) => {
-          return await scrapbook.visitLink({
-            url: browser.runtime.getURL("viewer/load.html"),
-            newTab: true,
-          });
-        },
       });
     }
 
     // Available only in Firefox >= 53.
     if (browser.contextMenus.ContextType.TAB) {
-      const captureTabs = async ({mode, details = false} = {}) => {
-        const tabs = await scrapbook.getHighlightedTabs();
-        const taskInfo = {
-          tasks: tabs.map(tab => ({
-            tabId: tab.id,
-            url: tab.url,
-            title: tab.title,
-          })),
-          mode,
-        };
-        return details ? await scrapbook.invokeCaptureAs(taskInfo) : await scrapbook.invokeCaptureEx({taskInfo});
-      };
-
       browser.contextMenus.create({
+        id: "captureTab",
         title: scrapbook.lang("CaptureTab"),
         contexts: ["tab"],
         documentUrlPatterns: urlMatch,
-        onclick: (info, tab) => {
-          return captureTabs();
-        },
       });
 
       browser.contextMenus.create({
+        id: "captureTabSource",
         title: scrapbook.lang("CaptureTabSource"),
         contexts: ["tab"],
         documentUrlPatterns: urlMatch,
-        onclick: (info, tab) => {
-          return captureTabs({
-            mode: "source",
-          });
-        },
       });
 
       browser.contextMenus.create({
+        id: "captureTabBookmark",
         title: scrapbook.lang("CaptureTabBookmark"),
         contexts: ["tab"],
         documentUrlPatterns: urlMatch,
-        onclick: (info, tab) => {
-          return captureTabs({
-            mode: "bookmark",
-          });
-        },
       });
 
       browser.contextMenus.create({
+        id: "captureTabAs",
         title: scrapbook.lang("CaptureTabAs") + '...',
         contexts: ["tab"],
         documentUrlPatterns: urlMatch,
-        onclick: async (info, tab) => {
-          return captureTabs({
-            details: true,
-          });
-        },
       });
 
       browser.contextMenus.create({
+        id: "editTab",
         title: scrapbook.lang("EditTab"),
         contexts: ["tab"],
         documentUrlPatterns: urlMatch,
-        onclick: (info, tab) => {
-          return scrapbook.editTab({
-            tabId: tab.id,
-            force: true,
-          });
-        },
       });
     }
 
     browser.contextMenus.create({
+      id: "capturePage",
       title: scrapbook.lang("CapturePage"),
       contexts: ["page"],
       documentUrlPatterns: urlMatch,
-      onclick: (info, tab) => {
+    });
+
+    browser.contextMenus.create({
+      id: "capturePageSource",
+      title: scrapbook.lang("CapturePageSource"),
+      contexts: ["page"],
+      documentUrlPatterns: urlMatch,
+    });
+
+    browser.contextMenus.create({
+      id: "capturePageBookmark",
+      title: scrapbook.lang("CapturePageBookmark"),
+      contexts: ["page"],
+      documentUrlPatterns: urlMatch,
+    });
+
+    browser.contextMenus.create({
+      id: "capturePageAs",
+      title: scrapbook.lang("CapturePageAs") + '...',
+      contexts: ["page"],
+      documentUrlPatterns: urlMatch,
+    });
+
+    browser.contextMenus.create({
+      id: "editPage",
+      title: scrapbook.lang("EditPage"),
+      contexts: ["page"],
+      documentUrlPatterns: urlMatch,
+    });
+
+    browser.contextMenus.create({
+      id: "captureFrame",
+      title: scrapbook.lang("CaptureFrame"),
+      contexts: ["frame"],
+      documentUrlPatterns: urlMatch,
+    });
+
+    browser.contextMenus.create({
+      id: "captureFrameSource",
+      title: scrapbook.lang("CaptureFrameSource"),
+      contexts: ["frame"],
+      documentUrlPatterns: urlMatch,
+    });
+
+    browser.contextMenus.create({
+      id: "captureFrameBookmark",
+      title: scrapbook.lang("CaptureFrameBookmark"),
+      contexts: ["frame"],
+      documentUrlPatterns: urlMatch,
+    });
+
+    browser.contextMenus.create({
+      id: "captureFrameAs",
+      title: scrapbook.lang("CaptureFrameAs") + '...',
+      contexts: ["frame"],
+      documentUrlPatterns: urlMatch,
+    });
+
+    browser.contextMenus.create({
+      id: "captureSelection",
+      title: scrapbook.lang("CaptureSelection"),
+      contexts: ["selection"],
+      documentUrlPatterns: urlMatch,
+    });
+
+    browser.contextMenus.create({
+      id: "captureSelectionAs",
+      title: scrapbook.lang("CaptureSelectionAs") + '...',
+      contexts: ["selection"],
+      documentUrlPatterns: urlMatch,
+    });
+
+    browser.contextMenus.create({
+      id: "batchCaptureLinks",
+      title: scrapbook.lang("BatchCaptureLinks") + '...',
+      contexts: ["selection"],
+      documentUrlPatterns: urlMatch,
+    });
+
+    browser.contextMenus.create({
+      id: "captureLink",
+      title: scrapbook.lang("CaptureLink"),
+      contexts: ["link"],
+      targetUrlPatterns: urlMatch,
+    });
+
+    browser.contextMenus.create({
+      id: "captureLinkSource",
+      title: scrapbook.lang("CaptureLinkSource"),
+      contexts: ["link"],
+      targetUrlPatterns: urlMatch,
+    });
+
+    browser.contextMenus.create({
+      id: "captureLinkBookmark",
+      title: scrapbook.lang("CaptureLinkBookmark"),
+      contexts: ["link"],
+      targetUrlPatterns: urlMatch,
+    });
+
+    browser.contextMenus.create({
+      id: "captureLinkAs",
+      title: scrapbook.lang("CaptureLinkAs") + '...',
+      contexts: ["link"],
+      targetUrlPatterns: urlMatch,
+    });
+
+    browser.contextMenus.create({
+      id: "captureMedia",
+      title: scrapbook.lang("CaptureMedia"),
+      contexts: ["image", "audio", "video"],
+      targetUrlPatterns: urlMatch,
+    });
+
+    browser.contextMenus.create({
+      id: "captureMediaAs",
+      title: scrapbook.lang("CaptureMediaAs") + '...',
+      contexts: ["image", "audio", "video"],
+      targetUrlPatterns: urlMatch,
+    });
+  }
+
+  function initMenusListener() {
+    if (!browser.contextMenus) { return; }
+
+    const handlers = {
+      captureTabAsOnAction(info, tab) {
+        return this.captureTabAs(info, tab);
+      },
+
+      editTabOnAction(info, tab) {
+        return this.editTab(info, tab);
+      },
+
+      searchCaptures(info, tab) {
+        return background.commands.searchCaptures();
+      },
+
+      openScrapBook(info, tab) {
+        return background.commands.openScrapBook();
+      },
+
+      openViewer(info, tab) {
+        return background.commands.openViewer();
+      },
+
+      captureTab(info, tab) {
+        return background.commands.captureTab();
+      },
+
+      captureTabSource(info, tab) {
+        return background.commands.captureTabSource();
+      },
+
+      captureTabBookmark(info, tab) {
+        return background.commands.captureTabBookmark();
+      },
+
+      captureTabAs(info, tab) {
+        return background.commands.captureTabAs();
+      },
+
+      editTab(info, tab) {
+        return scrapbook.editTab({
+          tabId: tab.id,
+          force: true,
+        });
+      },
+
+      capturePage(info, tab) {
         return scrapbook.invokeCapture([{
           tabId: tab.id,
           fullPage: true,
         }]);
       },
-    });
 
-    browser.contextMenus.create({
-      title: scrapbook.lang("CapturePageSource"),
-      contexts: ["page"],
-      documentUrlPatterns: urlMatch,
-      onclick: (info, tab) => {
+      capturePageSource(info, tab) {
         return scrapbook.invokeCapture([{
           tabId: tab.id,
           mode: "source",
         }]);
       },
-    });
 
-    browser.contextMenus.create({
-      title: scrapbook.lang("CapturePageBookmark"),
-      contexts: ["page"],
-      documentUrlPatterns: urlMatch,
-      onclick: (info, tab) => {
+      capturePageBookmark(info, tab) {
         return scrapbook.invokeCapture([{
           tabId: tab.id,
           mode: "bookmark",
         }]);
       },
-    });
 
-    browser.contextMenus.create({
-      title: scrapbook.lang("CapturePageAs") + '...',
-      contexts: ["page"],
-      documentUrlPatterns: urlMatch,
-      onclick: async (info, tab) => {
-        return await scrapbook.invokeCaptureAs({
+      capturePageAs(info, tab) {
+        return scrapbook.invokeCaptureAs({
           tasks: [{
             tabId: tab.id,
             fullPage: true,
@@ -720,63 +816,35 @@
           }],
         });
       },
-    });
 
-    browser.contextMenus.create({
-      title: scrapbook.lang("EditPage"),
-      contexts: ["page"],
-      documentUrlPatterns: urlMatch,
-      onclick: (info, tab) => {
-        return scrapbook.editTab({
-          tabId: tab.id,
-          force: true,
-        });
+      editPage(info, tab) {
+        return this.editTab(info, tab);
       },
-    });
 
-    browser.contextMenus.create({
-      title: scrapbook.lang("CaptureFrame"),
-      contexts: ["frame"],
-      documentUrlPatterns: urlMatch,
-      onclick: (info, tab) => {
+      captureFrame(info, tab) {
         return scrapbook.invokeCapture([{
           tabId: tab.id,
           frameId: info.frameId,
           fullPage: true,
         }]);
       },
-    });
 
-    browser.contextMenus.create({
-      title: scrapbook.lang("CaptureFrameSource"),
-      contexts: ["frame"],
-      documentUrlPatterns: urlMatch,
-      onclick: (info, tab) => {
+      captureFrameSource(info, tab) {
         return scrapbook.invokeCapture([{
           url: info.frameUrl,
           mode: "source",
         }]);
       },
-    });
 
-    browser.contextMenus.create({
-      title: scrapbook.lang("CaptureFrameBookmark"),
-      contexts: ["frame"],
-      documentUrlPatterns: urlMatch,
-      onclick: (info, tab) => {
+      captureFrameBookmark(info, tab) {
         return scrapbook.invokeCapture([{
           url: info.frameUrl,
           mode: "bookmark",
         }]);
       },
-    });
 
-    browser.contextMenus.create({
-      title: scrapbook.lang("CaptureFrameAs") + '...',
-      contexts: ["frame"],
-      documentUrlPatterns: urlMatch,
-      onclick: async (info, tab) => {
-        return await scrapbook.invokeCaptureAs({
+      captureFrameAs(info, tab) {
+        return scrapbook.invokeCaptureAs({
           tasks: [{
             tabId: tab.id,
             frameId: info.frameId,
@@ -786,27 +854,17 @@
           }],
         }, {ignoreTitle: true});
       },
-    });
 
-    browser.contextMenus.create({
-      title: scrapbook.lang("CaptureSelection"),
-      contexts: ["selection"],
-      documentUrlPatterns: urlMatch,
-      onclick: (info, tab) => {
+      captureSelection(info, tab) {
         return scrapbook.invokeCapture([{
           tabId: tab.id,
           frameId: info.frameId,
           fullPage: false,
         }]);
       },
-    });
 
-    browser.contextMenus.create({
-      title: scrapbook.lang("CaptureSelectionAs") + '...',
-      contexts: ["selection"],
-      documentUrlPatterns: urlMatch,
-      onclick: async (info, tab) => {
-        return await scrapbook.invokeCaptureAs({
+      captureSelectionAs(info, tab) {
+        return scrapbook.invokeCaptureAs({
           tasks: [{
             tabId: tab.id,
             frameId: info.frameId,
@@ -815,13 +873,8 @@
           }],
         }, {ignoreTitle: true});
       },
-    });
 
-    browser.contextMenus.create({
-      title: scrapbook.lang("BatchCaptureLinks") + '...',
-      contexts: ["selection"],
-      documentUrlPatterns: urlMatch,
-      onclick: (info, tab) => {
+      batchCaptureLinks(info, tab) {
         return scrapbook.invokeCaptureBatchLinks({
           tasks: [{
             tabId: tab.id,
@@ -829,83 +882,57 @@
           }],
         });
       },
-    });
 
-    browser.contextMenus.create({
-      title: scrapbook.lang("CaptureLink"),
-      contexts: ["link"],
-      targetUrlPatterns: urlMatch,
-      onclick: (info, tab) => {
+      captureLink(info, tab) {
         return scrapbook.invokeCapture([{
           url: info.linkUrl,
           mode: "tab",
         }]);
       },
-    });
 
-    browser.contextMenus.create({
-      title: scrapbook.lang("CaptureLinkSource"),
-      contexts: ["link"],
-      targetUrlPatterns: urlMatch,
-      onclick: (info, tab) => {
+      captureLinkSource(info, tab) {
         return scrapbook.invokeCapture([{
           url: info.linkUrl,
           mode: "source",
         }]);
       },
-    });
 
-    browser.contextMenus.create({
-      title: scrapbook.lang("CaptureLinkBookmark"),
-      contexts: ["link"],
-      targetUrlPatterns: urlMatch,
-      onclick: (info, tab) => {
+      captureLinkBookmark(info, tab) {
         return scrapbook.invokeCapture([{
           url: info.linkUrl,
           mode: "bookmark",
         }]);
       },
-    });
 
-    browser.contextMenus.create({
-      title: scrapbook.lang("CaptureLinkAs") + '...',
-      contexts: ["link"],
-      targetUrlPatterns: urlMatch,
-      onclick: async (info, tab) => {
-        return await scrapbook.invokeCaptureAs({
+      captureLinkAs(info, tab) {
+        return scrapbook.invokeCaptureAs({
           tasks: [{
             url: info.linkUrl,
             title: info.linkText,
           }],
         }, {ignoreTitle: true});
       },
-    });
 
-    browser.contextMenus.create({
-      title: scrapbook.lang("CaptureMedia"),
-      contexts: ["image", "audio", "video"],
-      targetUrlPatterns: urlMatch,
-      onclick: (info, tab) => {
+      captureMedia(info, tab) {
         return scrapbook.invokeCapture([{
           url: info.srcUrl,
           refUrl: info.pageUrl,
           mode: "source",
         }]);
       },
-    });
 
-    browser.contextMenus.create({
-      title: scrapbook.lang("CaptureMediaAs") + '...',
-      contexts: ["image", "audio", "video"],
-      targetUrlPatterns: urlMatch,
-      onclick: async (info, tab) => {
-        return await scrapbook.invokeCaptureAs({
+      captureMediaAs(info, tab) {
+        return scrapbook.invokeCaptureAs({
           tasks: [{
             url: info.srcUrl,
             refUrl: info.pageUrl,
           }],
         });
       },
+    };
+
+    browser.contextMenus.onClicked.addListener((info, tab) => {
+      return handlers[info.menuItemId](info, tab);
     });
   }
 
@@ -1023,6 +1050,7 @@
     initBeforeSendHeadersListener();
     initMessageListener();
     initExternalMessageListener();
+    initMenusListener();
     initInstallListener();
 
     await scrapbook.loadOptionsAuto;
