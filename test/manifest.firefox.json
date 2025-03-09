@@ -13,10 +13,7 @@
   },
 
   "background": {
-    "scripts": [
-      "shared/lib/browser-polyfill.js",
-      "background.js"
-    ]
+    "page": "background-page.html"
   },
 
   "content_scripts": [

@@ -8,10 +8,7 @@
   "minimum_chrome_version": "85",
 
   "background": {
-    "scripts": [
-      "shared/lib/browser-polyfill.js",
-      "background.js"
-    ]
+    "page": "background-page.html"
   },
 
   "content_scripts": [
