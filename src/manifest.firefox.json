@@ -8,7 +8,7 @@
 
   "browser_specific_settings": {
     "gecko": {
-      "id": "webscrapbook@danny0838.addons.mozilla.org",
+      "id": "webscrapbook-mv3@danny0838.addons.mozilla.org",
       "strict_min_version": "79.0"
     },
     "gecko_android": {
