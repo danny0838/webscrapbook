@@ -737,7 +737,7 @@
   },
   "ExtensionName": {
     "description": "Name of the extension as it's visible to the outside world",
-    "message": "WebScrapBook"
+    "message": "WebScrapBook MV3"
   },
   "IndexerHeader": {
     "message": "Pick directories or ZIP archive files of scrapbook folders, via dropping them into this page, or using the buttons below:"
