@@ -1,5 +1,5 @@
 {
-  "manifest_version": 2,
+  "manifest_version": 3,
   "name": "__MSG_ExtensionName__",
   "description": "__MSG_ExtensionDescription__",
   "version": "2.18.4",
@@ -9,7 +9,7 @@
   "browser_specific_settings": {
     "gecko": {
       "id": "webscrapbook-mv3@danny0838.addons.mozilla.org",
-      "strict_min_version": "68.0"
+      "strict_min_version": "109.0"
     },
     "gecko_android": {
       "strict_min_version": "113.0"
@@ -28,44 +28,45 @@
     "downloads",
     "storage",
     "tabs",
+    "scripting",
     "unlimitedStorage",
     "webNavigation",
     "webRequest",
-    "webRequestBlocking",
-    "http://*/*",
-    "https://*/*"
+    "webRequestBlocking"
   ],
 
   "optional_permissions": [
     "geolocation"
   ],
 
+  "host_permissions": [
+    "http://*/*",
+    "https://*/*"
+  ],
+
   "background": {
-    "scripts": [
-      "core/common.js",
-      "core/optionsAuto.js",
-      "core/extension.js",
-      "scrapbook/server.js",
-      "capturer/background.js",
-      "editor/background.js",
-      "viewer/background.js",
-      "core/background.js"
-    ]
+    "page": "background.html"
   },
 
   "web_accessible_resources": [
-    "resources/*",
-    "scrapbook/sitemap.html",
-    "viewer/load.html"
+    {
+      "resources": [
+        "resources/*",
+        "scrapbook/sitemap.html",
+        "viewer/load.html"
+      ],
+      "matches": [
+        "<all_urls>"
+      ]
+    }
   ],
 
   "options_ui": {
-    "browser_style": true,
     "open_in_tab": true,
     "page": "core/options.html"
   },
 
-  "browser_action": {
+  "action": {
     "default_icon": {
       "32": "core/scrapbook_32.png",
       "128": "core/scrapbook_128.png"
@@ -85,7 +86,7 @@
   },
 
   "commands": {
-    "_execute_browser_action": {},
+    "_execute_action": {},
     "_execute_sidebar_action": {},
     "openScrapBook": {
       "description": "__MSG_OpenScrapBook__"

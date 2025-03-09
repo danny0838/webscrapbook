@@ -214,13 +214,13 @@
         count = matchTypeAndCount.session;
       }
 
-      browser.browserAction.setBadgeText({
+      browser.action.setBadgeText({
         tabId,
         text: count.toString(),
       });
 
       // For a set with tabId, badge color will be reset when the tab is navigated
-      browser.browserAction.setBadgeBackgroundColor({
+      browser.action.setBadgeBackgroundColor({
         tabId,
         color,
       });
@@ -228,7 +228,7 @@
   }
 
   async function updateBadgeForAllTabs() {
-    if (!browser.browserAction || !browser.browserAction.setBadgeText) {
+    if (!browser.action || !browser.action.setBadgeText) {
       return;
     }
 
@@ -248,7 +248,7 @@
 
   function toggleNotifyPageCaptured() {
     // Firefox Android < 79 does not support setBadgeText
-    if (!browser.browserAction.setBadgeText) {
+    if (!browser.action.setBadgeText) {
       return;
     }
 

@@ -60,6 +60,7 @@ export default [
         module: false,
         require: false,
         define: false,
+        importScripts: false,
       },
     },
   },
