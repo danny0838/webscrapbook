@@ -740,7 +740,7 @@
   },
   "ExtensionName": {
     "description": "Name of the extension as it's visible to the outside world",
-    "message": "网页剪贴簿"
+    "message": "网页剪贴簿MV3"
   },
   "IndexerTitle": {
     "message": "创建网站索引"
