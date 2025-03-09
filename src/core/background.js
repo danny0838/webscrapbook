@@ -338,10 +338,12 @@
       const response = await scrapbook.invokeContentScript({
         tabId, frameId, cmd, args,
       });
-      await browser.tabs.executeScript(tabId, {
-        frameId,
-        code: `window.focus();`,
-        runAt: "document_start",
+      await browser.scripting.executeScript({
+        target: {tabId, frameIds: [frameId]},
+        injectImmediately: true,
+        func: () => {
+          window.focus();
+        },
       });
       return response;
     } else if (frameIdExcept !== -1) {
@@ -568,9 +570,9 @@
     // eslint-disable-next-line no-func-assign
     const fn = updateAction = () => {
       // clear current listener and popup
-      browser.browserAction.setPopup({popup: ""});
+      browser.action.setPopup({popup: ""});
       if (action) {
-        browser.browserAction.onClicked.removeListener(action);
+        browser.action.onClicked.removeListener(action);
       }
 
       const buttons = scrapbook.getOptions("ui.toolbar");
@@ -578,17 +580,17 @@
       if (activeButtons.length === 0) {
         // if no button is activated, fallback to open option
         action = actions.showOpenOptions;
-        browser.browserAction.onClicked.addListener(action);
+        browser.action.onClicked.addListener(action);
         return;
       } else if (activeButtons.length === 1) {
         // if a supported button is activated, make it the toolbar button click action
         action = actions[activeButtons[0][0].slice(11)];
         if (action) {
-          browser.browserAction.onClicked.addListener(action);
+          browser.action.onClicked.addListener(action);
           return;
         }
       }
-      browser.browserAction.setPopup({popup: "core/action.html"});
+      browser.action.setPopup({popup: "core/action.html"});
     };
 
     return fn(...args);
@@ -609,21 +611,21 @@
       browser.contextMenus.create({
         id: "captureTabAsOnAction",
         title: scrapbook.lang("CaptureTabAs") + '...',
-        contexts: ["browser_action"],
+        contexts: ["action"],
         documentUrlPatterns: urlMatch,
       });
 
       browser.contextMenus.create({
         id: "editTabOnAction",
         title: scrapbook.lang("EditTab"),
-        contexts: ["browser_action"],
+        contexts: ["action"],
         documentUrlPatterns: urlMatch,
       });
 
       browser.contextMenus.create({
         id: "searchCaptures",
         title: scrapbook.lang("searchCaptures"),
-        contexts: ["browser_action"],
+        contexts: ["action"],
         documentUrlPatterns: urlMatch,
         enabled: hasServer,
       });
@@ -631,7 +633,7 @@
       browser.contextMenus.create({
         id: "openScrapBook",
         title: scrapbook.lang("openScrapBook"),
-        contexts: ["browser_action"],
+        contexts: ["action"],
         documentUrlPatterns: urlMatch,
         enabled: hasServer,
       });
@@ -639,7 +641,7 @@
       browser.contextMenus.create({
         id: "openViewer",
         title: scrapbook.lang("openViewer") + '...',
-        contexts: ["browser_action"],
+        contexts: ["action"],
         documentUrlPatterns: urlMatch,
       });
     }
