@@ -29,8 +29,8 @@
  */
 scrapbook.invokeBackgroundScript = function ({cmd, args}) {
   // if this is the background page
-  if (window.background) {
-    return window.background[cmd](args);
+  if (globalThis.background) {
+    return globalThis.background[cmd](args);
   }
 
   return scrapbook.invokeExtensionScript({cmd: `background.${cmd}`, args});

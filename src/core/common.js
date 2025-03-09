@@ -22,6 +22,55 @@ if (typeof Promise.withResolvers === 'undefined') {
   };
 }
 
+// Polyfill for MV2
+if (typeof browser !== 'undefined') {
+  if (browser?.browserAction && !browser?.action) {
+    browser.action = browser.browserAction;
+    browser.contextMenus.ContextType.ACTION = browser.contextMenus.ContextType.BROWSER_ACTION;
+  }
+
+  if (browser?.tabs && !browser?.scripting) {
+    browser.scripting = {
+      async executeScript({args, files, func, injectImmediately, target: {tabId, frameIds, allFrames}}) {
+        frameIds ??= allFrames ?
+          (await browser.webNavigation.getAllFrames({tabId})).map(({frameId}) => frameId) :
+          [0];
+        const runAt = injectImmediately ? "document_start" : undefined;
+        const matchAboutBlank = true;
+
+        const tasks = frameIds.map(frameId => {
+          let p;
+
+          if (files) {
+            p = Promise.resolve();
+            for (const file of files) {
+              p = p.then(results => browser.tabs.executeScript(tabId, {
+                frameId, file, runAt, matchAboutBlank,
+              }));
+            }
+          } else {
+            p = browser.tabs.executeScript(tabId, {
+              frameId,
+              code: `(${func})(...${JSON.stringify(args ?? [])})`,
+              runAt,
+              matchAboutBlank,
+            });
+          }
+
+          p = p.then(([result]) => ({
+            frameId,
+            result,
+          }));
+
+          return p;
+        });
+
+        return Promise.all(tasks);
+      },
+    };
+  }
+}
+
 (function (global, factory) {
   global = typeof globalThis !== "undefined" ? globalThis : global || self;
   if (typeof exports === "object" && typeof module === "object") {
@@ -1454,10 +1503,20 @@ scrapbook.initContentScripts = async function (tabId, frameId) {
         .catch(async (ex) => {
           isDebug && console.debug("inject content scripts", tabId, frameId, url);
           try {
-            for (const file of CONTENT_SCRIPT_FILES) {
-              await browser.tabs.executeScript(tabId, {frameId, file, runAt: "document_start"});
-            }
-            await browser.tabs.executeScript(tabId, {frameId, code: `core.frameId = ${frameId};`, runAt: "document_start"});
+            await browser.scripting.executeScript({
+              target: {tabId, frameIds: [frameId]},
+              injectImmediately: true,
+              files: CONTENT_SCRIPT_FILES,
+            });
+            await browser.scripting.executeScript({
+              target: {tabId, frameIds: [frameId]},
+              injectImmediately: true,
+              func: (frameId) => {
+                // eslint-disable-next-line no-undef
+                core.frameId = frameId;
+              },
+              args: [frameId],
+            });
           } catch (ex) {
             // Chromium may fail to inject content script to some pages due to unclear reason.
             // Record the error and pass.

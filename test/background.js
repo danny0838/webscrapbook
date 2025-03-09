@@ -1,74 +1,82 @@
 'use strict';
 
+// Polyfill for MV2
+if (typeof browser !== 'undefined') {
+  if (browser?.browserAction && !browser?.action) {
+    browser.action = browser.browserAction;
+    browser.contextMenus.ContextType.ACTION = browser.contextMenus.ContextType.BROWSER_ACTION;
+  }
+}
+
 function initMenusListener() {
   const handlers = {
     testAutomated(info, tab) {
-      const url = chrome.runtime.getURL("test.html?grep=^(?!Manual tests)");
-      chrome.tabs.create({url});
+      const url = browser.runtime.getURL("test.html?grep=^(?!Manual tests)");
+      browser.tabs.create({url});
     },
 
     testLibrary(info, tab) {
-      const url = chrome.runtime.getURL("test.html?grep=^(?!Capture tests|Manual tests)");
-      chrome.tabs.create({url});
+      const url = browser.runtime.getURL("test.html?grep=^(?!Capture tests|Manual tests)");
+      browser.tabs.create({url});
     },
 
     testCapture(info, tab) {
-      const url = chrome.runtime.getURL("test.html?grep=^Capture tests");
-      chrome.tabs.create({url});
+      const url = browser.runtime.getURL("test.html?grep=^Capture tests");
+      browser.tabs.create({url});
     },
 
     testManual(info, tab) {
-      const url = chrome.runtime.getURL("test.html?grep=^Manual tests");
-      chrome.tabs.create({url});
+      const url = browser.runtime.getURL("test.html?grep=^Manual tests");
+      browser.tabs.create({url});
     },
 
     testList(info, tab) {
-      const url = chrome.runtime.getURL("test.html?dryrun=1");
-      chrome.tabs.create({url});
+      const url = browser.runtime.getURL("test.html?dryrun=1");
+      browser.tabs.create({url});
     },
   };
 
-  chrome.contextMenus.onClicked.addListener((info, tab) => {
+  browser.contextMenus.onClicked.addListener((info, tab) => {
     return handlers[info.menuItemId](info, tab);
   });
 }
 
 function updateMenus() {
-  chrome.contextMenus.create({
+  browser.contextMenus.create({
     id: "testAutomated",
     title: 'Run automated tests',
-    contexts: ["browser_action"],
+    contexts: [browser.contextMenus.ContextType.ACTION],
   });
 
-  chrome.contextMenus.create({
+  browser.contextMenus.create({
     id: "testLibrary",
     title: '- library tests',
-    contexts: ["browser_action"],
+    contexts: [browser.contextMenus.ContextType.ACTION],
   });
 
-  chrome.contextMenus.create({
+  browser.contextMenus.create({
     id: "testCapture",
     title: '- capture tests',
-    contexts: ["browser_action"],
+    contexts: [browser.contextMenus.ContextType.ACTION],
   });
 
-  chrome.contextMenus.create({
+  browser.contextMenus.create({
     id: "testManual",
     title: 'Run manual tests',
-    contexts: ["browser_action"],
+    contexts: [browser.contextMenus.ContextType.ACTION],
   });
 
-  chrome.contextMenus.create({
+  browser.contextMenus.create({
     id: "testList",
     title: 'List all tests to run manually',
-    contexts: ["browser_action"],
+    contexts: [browser.contextMenus.ContextType.ACTION],
   });
 }
 
 function initActionListener() {
-  chrome.browserAction.onClicked.addListener(() => {
-    const url = chrome.runtime.getURL("test.html");
-    chrome.tabs.create({url});
+  browser.action.onClicked.addListener(() => {
+    const url = browser.runtime.getURL("test.html");
+    browser.tabs.create({url});
   });
 }
 

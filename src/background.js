@@ -1,0 +1,11 @@
+importScripts(
+  "lib/browser-polyfill.js",
+  "core/common.js",
+  "core/options-auto.js",
+  "core/extension.js",
+  "scrapbook/server.js",
+  "capturer/background.js",
+  "editor/background.js",
+  "viewer/background.js",
+  "core/background.js",
+);
