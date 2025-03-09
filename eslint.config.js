@@ -55,6 +55,7 @@ export default [
     languageOptions: {
       globals: {
         ...globals.browser,
+        importScripts: false,
         browser: false,
         chrome: false,
         module: false,
