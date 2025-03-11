@@ -517,6 +517,12 @@ function initInstallListener() {
         console.error("Migration failed: %o", ex);
       }
     }
+
+    if (!browser.runtime.getManifest().background.persistent) {
+      await scrapbook.loadOptionsAuto;
+      updateAction();
+      updateMenus();
+    }
   });
 }
 
@@ -1125,9 +1131,11 @@ async function init() {
   initMenusListener();
   initInstallListener();
 
-  await scrapbook.loadOptionsAuto;
-  updateAction();
-  updateMenus();
+  if (browser.runtime.getManifest().background.persistent) {
+    await scrapbook.loadOptionsAuto;
+    updateAction();
+    updateMenus();
+  }
 }
 
 init();

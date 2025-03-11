@@ -80,6 +80,17 @@ function initActionListener() {
   });
 }
 
+function initInstallListener() {
+  browser.runtime.onInstalled.addListener((details) => {
+    if (!browser.runtime.getManifest().background.persistent) {
+      updateMenus();
+    }
+  });
+}
+
+initInstallListener();
 initMenusListener();
-updateMenus();
 initActionListener();
+if (browser.runtime.getManifest().background.persistent) {
+  updateMenus();
+}
