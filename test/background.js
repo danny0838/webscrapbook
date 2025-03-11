@@ -72,6 +72,12 @@ function initActionListener() {
   });
 }
 
+function initInstallListener() {
+  chrome.runtime.onInstalled.addListener((details) => {
+    updateMenus();
+  });
+}
+
+initInstallListener();
 initMenusListener();
-updateMenus();
 initActionListener();
