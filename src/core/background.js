@@ -320,18 +320,12 @@
   /**
    * @type invokable
    */
-  background.invokeEditorCommand = async function ({code, cmd, args, frameId = -1, frameIdExcept = -1}, sender) {
+  background.invokeEditorCommand = async function ({cmd, args, frameId = -1, frameIdExcept = -1}, sender) {
     const tabId = sender.tab.id;
     if (frameId !== -1) {
-      const response = code ? 
-        await browser.tabs.executeScript(tabId, {
-          frameId,
-          code,
-          runAt: "document_start",
-        }) : 
-        await scrapbook.invokeContentScript({
-          tabId, frameId, cmd, args,
-        });
+      const response = await scrapbook.invokeContentScript({
+        tabId, frameId, cmd, args,
+      });
       await browser.tabs.executeScript(tabId, {
         frameId,
         code: `window.focus();`,
@@ -344,15 +338,9 @@
         async ({tabId, frameId, error, injected}) => {
           if (error) { return undefined; }
           if (frameId === frameIdExcept) { return undefined; }
-          return code ? 
-            await browser.tabs.executeScript(tabId, {
-              frameId,
-              code,
-              runAt: "document_start",
-            }) : 
-            await scrapbook.invokeContentScript({
-              tabId, frameId, cmd, args,
-            });
+          return await scrapbook.invokeContentScript({
+            tabId, frameId, cmd, args,
+          });
         });
       return Promise.all(tasks);
     } else {
@@ -360,15 +348,9 @@
         await scrapbook.initContentScripts(tabId),
         async ({tabId, frameId, error, injected}) => {
           if (error) { return undefined; }
-          return code ? 
-            await browser.tabs.executeScript(tabId, {
-              frameId,
-              code,
-              runAt: "document_start",
-            }) : 
-            await scrapbook.invokeContentScript({
-              tabId, frameId, cmd, args,
-            });
+          return await scrapbook.invokeContentScript({
+            tabId, frameId, cmd, args,
+          });
         });
       return Promise.all(tasks);
     }
