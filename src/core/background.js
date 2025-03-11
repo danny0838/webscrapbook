@@ -439,6 +439,10 @@
           console.error("Migration failed: %o", ex);
         }
       }
+
+      await scrapbook.loadOptionsAuto;
+      updateAction();
+      updateMenus();
     });
   }
 
@@ -1046,10 +1050,6 @@
     initExternalMessageListener();
     initMenusListener();
     initInstallListener();
-
-    await scrapbook.loadOptionsAuto;
-    updateAction();
-    updateMenus();
   }
 
   init();
