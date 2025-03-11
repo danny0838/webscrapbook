@@ -81,6 +81,17 @@ function initActionListener() {
   });
 }
 
+function initInstallListener() {
+  chrome.runtime.onInstalled.addListener((details) => {
+    if (browser.runtime.getManifest().manifest_version === 3) {
+      updateMenus();
+    }
+  });
+}
+
+initInstallListener();
 initMenusListener();
-updateMenus();
 initActionListener();
+if (browser.runtime.getManifest().manifest_version === 2) {
+  updateMenus();
+}
