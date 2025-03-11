@@ -946,6 +946,27 @@ height: 100vh;`;
   /**
    * @type invokable
    */
+  editor.openInternal = function () {
+    document.documentElement.setAttribute('data-scrapbook-toolbar-active', '');
+  };
+
+  /**
+   * @type invokable
+   */
+  editor.closeInternal = function () {
+    document.documentElement.removeAttribute('data-scrapbook-toolbar-active');
+  };
+
+  /**
+   * @type invokable
+   */
+  editor.getFocusedFrameIdInternal = function () {
+    return {frameId: core.frameId, time: editor.lastWindowBlurTime};
+  };
+
+  /**
+   * @type invokable
+   */
   editor.lineMarkerInternal = function ({tagName = 'span', attrs = {}} = {}) {
     editor.addHistory();
 
@@ -1833,7 +1854,7 @@ height: 100vh;`;
     await scrapbook.invokeExtensionScript({
       cmd: "background.invokeEditorCommand",
       args: {
-        code: `document.documentElement.setAttribute('data-scrapbook-toolbar-active', '')`,
+        cmd: "editor.openInternal",
         frameIdExcept: 0,
       },
     });
@@ -1854,7 +1875,7 @@ height: 100vh;`;
     await scrapbook.invokeExtensionScript({
       cmd: "background.invokeEditorCommand",
       args: {
-        code: `document.documentElement.removeAttribute('data-scrapbook-toolbar-active')`,
+        cmd: "editor.closeInternal",
         frameIdExcept: 0,
       },
     });
@@ -2013,7 +2034,7 @@ height: 100vh;`;
     const arr = await scrapbook.invokeExtensionScript({
       cmd: "background.invokeEditorCommand",
       args: {
-        code: "({frameId: core.frameId, time: editor.lastWindowBlurTime})",
+        cmd: "editor.getFocusedFrameIdInternal",
         frameIdExcept: 0,
       },
     });
@@ -3100,9 +3121,13 @@ height: 100vh;`;
         cmd: "background.invokeEditorCommand",
         args: {
           frameId: await editor.getFocusedFrameId(),
-          code: `document.execCommand('bold', false, null);`,
+          cmd: "editor.htmlEditor._strong",
         },
       });
+    },
+
+    _strong() {
+      document.execCommand('bold', false, null);
     },
 
     async em() {
@@ -3110,9 +3135,13 @@ height: 100vh;`;
         cmd: "background.invokeEditorCommand",
         args: {
           frameId: await editor.getFocusedFrameId(),
-          code: `document.execCommand('italic', false, null);`,
+          cmd: "editor.htmlEditor._em",
         },
       });
+    },
+
+    _em() {
+      document.execCommand('italic', false, null);
     },
 
     async underline() {
@@ -3120,9 +3149,13 @@ height: 100vh;`;
         cmd: "background.invokeEditorCommand",
         args: {
           frameId: await editor.getFocusedFrameId(),
-          code: `document.execCommand('underline', false, null);`,
+          cmd: "editor.htmlEditor._underline",
         },
       });
+    },
+
+    _underline() {
+      document.execCommand('underline', false, null);
     },
 
     async strike() {
@@ -3130,9 +3163,13 @@ height: 100vh;`;
         cmd: "background.invokeEditorCommand",
         args: {
           frameId: await editor.getFocusedFrameId(),
-          code: `document.execCommand('strikeThrough', false, null);`,
+          cmd: "editor.htmlEditor._strike",
         },
       });
+    },
+
+    _strike() {
+      document.execCommand('strikeThrough', false, null);
     },
 
     async superscript() {
@@ -3140,9 +3177,13 @@ height: 100vh;`;
         cmd: "background.invokeEditorCommand",
         args: {
           frameId: await editor.getFocusedFrameId(),
-          code: `document.execCommand('superscript', false, null);`,
+          cmd: "editor.htmlEditor._superscript",
         },
       });
+    },
+
+    _superscript() {
+      document.execCommand('superscript', false, null);
     },
 
     async subscript() {
@@ -3150,9 +3191,13 @@ height: 100vh;`;
         cmd: "background.invokeEditorCommand",
         args: {
           frameId: await editor.getFocusedFrameId(),
-          code: `document.execCommand('subscript', false, null);`,
+          cmd: "editor.htmlEditor._subscript",
         },
       });
+    },
+
+    _subscript() {
+      document.execCommand('subscript', false, null);
     },
 
     async foreColor() {
@@ -3163,9 +3208,15 @@ height: 100vh;`;
         cmd: "background.invokeEditorCommand",
         args: {
           frameId,
-          code: `document.execCommand('styleWithCSS', false, true); document.execCommand('foreColor', false, ${JSON.stringify(color)});`,
+          cmd: "editor.htmlEditor._foreColor",
+          args: {color},
         },
       });
+    },
+
+    _foreColor({color}) {
+      document.execCommand('styleWithCSS', false, true);
+      document.execCommand('foreColor', false, color);
     },
 
     async hiliteColor() {
@@ -3176,9 +3227,15 @@ height: 100vh;`;
         cmd: "background.invokeEditorCommand",
         args: {
           frameId,
-          code: `document.execCommand('styleWithCSS', false, true); document.execCommand('hiliteColor', false, ${JSON.stringify(color)});`,
+          cmd: "editor.htmlEditor._hiliteColor",
+          args: {color},
         },
       });
+    },
+
+    _hiliteColor({color}) {
+      document.execCommand('styleWithCSS', false, true);
+      document.execCommand('hiliteColor', false, color);
     },
 
     async formatBlockP() {
@@ -3186,9 +3243,13 @@ height: 100vh;`;
         cmd: "background.invokeEditorCommand",
         args: {
           frameId: await editor.getFocusedFrameId(),
-          code: `document.execCommand('formatBlock', false, 'p');`,
+          cmd: "editor.htmlEditor._formatBlockP",
         },
       });
+    },
+
+    _formatBlockP() {
+      document.execCommand('formatBlock', false, 'p');
     },
 
     async formatBlockH1() {
@@ -3196,9 +3257,13 @@ height: 100vh;`;
         cmd: "background.invokeEditorCommand",
         args: {
           frameId: await editor.getFocusedFrameId(),
-          code: `document.execCommand('formatBlock', false, 'h1');`,
+          cmd: "editor.htmlEditor._formatBlockH1",
         },
       });
+    },
+
+    _formatBlockH1() {
+      document.execCommand('formatBlock', false, 'h1');
     },
 
     async formatBlockH2() {
@@ -3206,9 +3271,13 @@ height: 100vh;`;
         cmd: "background.invokeEditorCommand",
         args: {
           frameId: await editor.getFocusedFrameId(),
-          code: `document.execCommand('formatBlock', false, 'h2');`,
+          cmd: "editor.htmlEditor._formatBlockH2",
         },
       });
+    },
+
+    _formatBlockH2() {
+      document.execCommand('formatBlock', false, 'h2');
     },
 
     async formatBlockH3() {
@@ -3216,9 +3285,13 @@ height: 100vh;`;
         cmd: "background.invokeEditorCommand",
         args: {
           frameId: await editor.getFocusedFrameId(),
-          code: `document.execCommand('formatBlock', false, 'h3');`,
+          cmd: "editor.htmlEditor._formatBlockH3",
         },
       });
+    },
+
+    _formatBlockH3() {
+      document.execCommand('formatBlock', false, 'h3');
     },
 
     async formatBlockH4() {
@@ -3226,9 +3299,13 @@ height: 100vh;`;
         cmd: "background.invokeEditorCommand",
         args: {
           frameId: await editor.getFocusedFrameId(),
-          code: `document.execCommand('formatBlock', false, 'h4');`,
+          cmd: "editor.htmlEditor._formatBlockH4",
         },
       });
+    },
+
+    _formatBlockH4() {
+      document.execCommand('formatBlock', false, 'h4');
     },
 
     async formatBlockH5() {
@@ -3236,9 +3313,13 @@ height: 100vh;`;
         cmd: "background.invokeEditorCommand",
         args: {
           frameId: await editor.getFocusedFrameId(),
-          code: `document.execCommand('formatBlock', false, 'h5');`,
+          cmd: "editor.htmlEditor._formatBlockH5",
         },
       });
+    },
+
+    _formatBlockH5() {
+      document.execCommand('formatBlock', false, 'h5');
     },
 
     async formatBlockH6() {
@@ -3246,9 +3327,13 @@ height: 100vh;`;
         cmd: "background.invokeEditorCommand",
         args: {
           frameId: await editor.getFocusedFrameId(),
-          code: `document.execCommand('formatBlock', false, 'h6');`,
+          cmd: "editor.htmlEditor._formatBlockH6",
         },
       });
+    },
+
+    _formatBlockH6() {
+      document.execCommand('formatBlock', false, 'h6');
     },
 
     async formatBlockDiv() {
@@ -3256,9 +3341,13 @@ height: 100vh;`;
         cmd: "background.invokeEditorCommand",
         args: {
           frameId: await editor.getFocusedFrameId(),
-          code: `document.execCommand('formatBlock', false, 'div');`,
+          cmd: "editor.htmlEditor._formatBlockDiv",
         },
       });
+    },
+
+    _formatBlockDiv() {
+      document.execCommand('formatBlock', false, 'div');
     },
 
     async formatBlockPre() {
@@ -3266,9 +3355,13 @@ height: 100vh;`;
         cmd: "background.invokeEditorCommand",
         args: {
           frameId: await editor.getFocusedFrameId(),
-          code: `document.execCommand('formatBlock', false, 'pre');`,
+          cmd: "editor.htmlEditor._formatBlockPre",
         },
       });
+    },
+
+    _formatBlockPre() {
+      document.execCommand('formatBlock', false, 'pre');
     },
 
     async listUnordered() {
@@ -3276,9 +3369,13 @@ height: 100vh;`;
         cmd: "background.invokeEditorCommand",
         args: {
           frameId: await editor.getFocusedFrameId(),
-          code: `document.execCommand('insertUnorderedList', false, null);`,
+          cmd: "editor.htmlEditor._listUnordered",
         },
       });
+    },
+
+    _listUnordered() {
+      document.execCommand('insertUnorderedList', false, null);
     },
 
     async listOrdered() {
@@ -3286,9 +3383,13 @@ height: 100vh;`;
         cmd: "background.invokeEditorCommand",
         args: {
           frameId: await editor.getFocusedFrameId(),
-          code: `document.execCommand('insertOrderedList', false, null);`,
+          cmd: "editor.htmlEditor._listOrdered",
         },
       });
+    },
+
+    _listOrdered() {
+      document.execCommand('insertOrderedList', false, null);
     },
 
     async outdent() {
@@ -3296,9 +3397,13 @@ height: 100vh;`;
         cmd: "background.invokeEditorCommand",
         args: {
           frameId: await editor.getFocusedFrameId(),
-          code: `document.execCommand('outdent', false, null);`,
+          cmd: "editor.htmlEditor._outdent",
         },
       });
+    },
+
+    _outdent() {
+      document.execCommand('outdent', false, null);
     },
 
     async indent() {
@@ -3306,9 +3411,13 @@ height: 100vh;`;
         cmd: "background.invokeEditorCommand",
         args: {
           frameId: await editor.getFocusedFrameId(),
-          code: `document.execCommand('indent', false, null);`,
+          cmd: "editor.htmlEditor._indent",
         },
       });
+    },
+
+    _indent() {
+      document.execCommand('indent', false, null);
     },
 
     async justifyLeft() {
@@ -3316,9 +3425,13 @@ height: 100vh;`;
         cmd: "background.invokeEditorCommand",
         args: {
           frameId: await editor.getFocusedFrameId(),
-          code: `document.execCommand('justifyLeft', false, null);`,
+          cmd: "editor.htmlEditor._justifyLeft",
         },
       });
+    },
+
+    _justifyLeft() {
+      document.execCommand('justifyLeft', false, null);
     },
 
     async justifyCenter() {
@@ -3326,9 +3439,13 @@ height: 100vh;`;
         cmd: "background.invokeEditorCommand",
         args: {
           frameId: await editor.getFocusedFrameId(),
-          code: `document.execCommand('justifyCenter', false, null);`,
+          cmd: "editor.htmlEditor._justifyCenter",
         },
       });
+    },
+
+    _justifyCenter() {
+      document.execCommand('justifyCenter', false, null);
     },
 
     async justifyRight() {
@@ -3336,9 +3453,13 @@ height: 100vh;`;
         cmd: "background.invokeEditorCommand",
         args: {
           frameId: await editor.getFocusedFrameId(),
-          code: `document.execCommand('justifyRight', false, null);`,
+          cmd: "editor.htmlEditor._justifyRight",
         },
       });
+    },
+
+    _justifyRight() {
+      document.execCommand('justifyRight', false, null);
     },
 
     async justifyFull() {
@@ -3346,9 +3467,13 @@ height: 100vh;`;
         cmd: "background.invokeEditorCommand",
         args: {
           frameId: await editor.getFocusedFrameId(),
-          code: `document.execCommand('justifyFull', false, null);`,
+          cmd: "editor.htmlEditor._justifyFull",
         },
       });
+    },
+
+    _justifyFull() {
+      document.execCommand('justifyFull', false, null);
     },
 
     async createLink() {
@@ -3359,9 +3484,14 @@ height: 100vh;`;
         cmd: "background.invokeEditorCommand",
         args: {
           frameId,
-          code: `document.execCommand('createLink', false, ${JSON.stringify(url)});`,
+          cmd: "editor.htmlEditor._createLink",
+          args: {url},
         },
       });
+    },
+
+    _createLink({url}) {
+      document.execCommand('createLink', false, url);
     },
 
     async hr() {
@@ -3369,9 +3499,13 @@ height: 100vh;`;
         cmd: "background.invokeEditorCommand",
         args: {
           frameId: await editor.getFocusedFrameId(),
-          code: `document.execCommand('insertHorizontalRule', false, null);`,
+          cmd: "editor.htmlEditor._hr",
         },
       });
+    },
+
+    _hr() {
+      document.execCommand('insertHorizontalRule', false, null);
     },
 
     async todo() {
@@ -3379,9 +3513,13 @@ height: 100vh;`;
         cmd: "background.invokeEditorCommand",
         args: {
           frameId: await editor.getFocusedFrameId(),
-          code: `document.execCommand('insertHTML', false, '<input type="checkbox" data-scrapbook-elem="todo"/>');`,
+          cmd: "editor.htmlEditor._todo",
         },
       });
+    },
+
+    _todo() {
+      document.execCommand('insertHTML', false, '<input type="checkbox" data-scrapbook-elem="todo"/>');
     },
 
     async insertDate() {
@@ -3392,9 +3530,14 @@ height: 100vh;`;
         cmd: "background.invokeEditorCommand",
         args: {
           frameId: await editor.getFocusedFrameId(),
-          code: `document.execCommand('insertText', false, ${JSON.stringify(dateStr)});`,
+          cmd: "editor.htmlEditor._insertDate",
+          args: {dateStr},
         },
       });
+    },
+
+    _insertDate({dateStr}) {
+      document.execCommand('insertText', false, dateStr);
     },
 
     async insertHtml() {
@@ -3405,9 +3548,14 @@ height: 100vh;`;
         cmd: "background.invokeEditorCommand",
         args: {
           frameId,
-          code: `document.execCommand('insertHTML', false, ${JSON.stringify(html)});`,
+          cmd: "editor.htmlEditor._insertHtml",
+          args: {html},
         },
       });
+    },
+
+    _insertHtml({html}) {
+      document.execCommand('insertHTML', false, html);
     },
 
     async removeFormat() {
@@ -3415,9 +3563,13 @@ height: 100vh;`;
         cmd: "background.invokeEditorCommand",
         args: {
           frameId: await editor.getFocusedFrameId(),
-          code: `document.execCommand('removeFormat', false, null);`,
+          cmd: "editor.htmlEditor._removeFormat",
         },
       });
+    },
+
+    _removeFormat() {
+      document.execCommand('removeFormat', false, null);
     },
 
     async unlink() {
@@ -3425,9 +3577,13 @@ height: 100vh;`;
         cmd: "background.invokeEditorCommand",
         args: {
           frameId: await editor.getFocusedFrameId(),
-          code: `document.execCommand('unlink', false, null);`,
+          cmd: "editor.htmlEditor._unlink",
         },
       });
+    },
+
+    _unlink() {
+      document.execCommand('unlink', false, null);
     },
   };
 
