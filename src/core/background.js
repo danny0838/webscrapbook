@@ -930,6 +930,11 @@
       extraInfoSpec.push('extraHeaders');
     }
     browser.webRequest.onBeforeSendHeaders.addListener((details) => {
+      // rewrite only the requests sent by this extension
+      if (details.initiator !== location.origin) {
+        return;
+      }
+
       // Some headers (e.g. "referer") are not allowed to be set via
       // XMLHttpRequest.setRequestHeader directly.  Use a prefix and
       // modify it here to workaround.
