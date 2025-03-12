@@ -244,7 +244,7 @@
    * @param {string[]} [params.urls]
    * @return {Object<string~url, integer~count>}
    */
-  background.getCapturedUrls = function ({urls = []} = {}, sender) {
+  background.getCapturedUrls = function ({urls = []} = {}) {
     const rv = {};
     for (const url of urls) {
       rv[url] = capturedUrls.get(url) || 0;
@@ -257,7 +257,7 @@
    * @param {Object} [params]
    * @param {string[]} [params.urls]
    */
-  background.setCapturedUrls = function ({urls = []} = {}, sender) {
+  background.setCapturedUrls = function ({urls = []} = {}) {
     for (const url of urls) {
       capturedUrls.set(url, (capturedUrls.get(url) || 0) + 1);
     }
@@ -414,7 +414,7 @@
    * @param {Object} [params]
    */
   background.onCaptureEnd = async function (params, sender) {
-    background.setCapturedUrls(params, sender);
+    background.setCapturedUrls(params);
     await background.onServerTreeChange(params, sender);
   };
 
