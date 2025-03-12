@@ -66,6 +66,10 @@
     "ui.showContextMenu": true,
     "ui.autoCloseCaptureDialog": "none", // "none", "nowarn", "noerror", "nofailure", "always"
     "ui.notifyPageCaptured": true,
+    "ui.screen.left": 0,
+    "ui.screen.top": 0,
+    "ui.screen.width": 1920,
+    "ui.screen.height": 1080,
     "server.url": "",
     "server.user": "",
     "server.password": "",
@@ -4401,6 +4405,70 @@
   /****************************************************************************
    * Miscellaneous utilities
    ***************************************************************************/
+
+  scrapbook.getScreenBounds = async function (refWindow, {
+    defaultLeft = scrapbook.getOption("ui.screen.left"),
+    defaultTop = scrapbook.getOption("ui.screen.top"),
+    defaultWidth = scrapbook.getOption("ui.screen.width"),
+    defaultHeight = scrapbook.getOption("ui.screen.height"),
+  } = {}) {
+    // supported by Chromium
+    if (browser.system.display) {
+      const screens = await new Promise((resolve, reject) => {
+        browser.system.display.getInfo((result) => {
+          if (browser.runtime.lastError) {
+            reject(browser.runtime.lastError.message);
+          } else {
+            resolve(result);
+          }
+        });
+      }).catch(ex => null);
+
+      if (screens) {
+        let mainScreen;
+        if (refWindow) {
+          let maxOverlapArea = 0;
+          for (const screen of screens) {
+            const workArea = screen.workArea;
+            const overlapLeft = Math.max(refWindow.left, workArea.left);
+            const overlapTop = Math.max(refWindow.top, workArea.top);
+            const overlapRight = Math.min(refWindow.left + refWindow.width, workArea.left + workArea.width);
+            const overlapBottom = Math.min(refWindow.top + refWindow.height, workArea.top + workArea.height);
+
+            if (overlapLeft < overlapRight && overlapTop < overlapBottom) {
+              const overlapWidth = overlapRight - overlapLeft;
+              const overlapHeight = overlapBottom - overlapTop;
+              const overlapArea = overlapWidth * overlapHeight;
+              if (overlapArea > maxOverlapArea) {
+                maxOverlapArea = overlapArea;
+                mainScreen = screen;
+              }
+            }
+          }
+        } else {
+          // take the main screen
+          mainScreen = screens.find((screen) => screen.isPrimary);
+        }
+        return mainScreen.workArea;
+      }
+    }
+
+    if (typeof window !== 'undefined') {
+      return {
+        width: window.screen.availWidth,
+        height: window.screen.availHeight,
+        top: 0,
+        left: 0,
+      };
+    }
+
+    return {
+      width: defaultWidth,
+      height: defaultHeight,
+      top: defaultTop,
+      left: defaultLeft,
+    };
+  };
 
   /**
    * Wrapped browser.windows.create() with automatic compatibility handling.

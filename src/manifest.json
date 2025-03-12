@@ -26,6 +26,7 @@
     "webNavigation",
     "webRequest",
     "webRequestBlocking",
+    "system.display",
     "http://*/*",
     "https://*/*",
     "file:///*"

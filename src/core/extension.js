@@ -442,10 +442,14 @@
       const currentWindow = await browser.windows.getCurrent({windowTypes: ['normal']}).catch(ex => null);
 
       // calculate the desired position of the sidebar window
-      const screenWidth = window.screen.availWidth;
-      const screenHeight = window.screen.availHeight;
-      const left = 0;
-      const top = 0;
+      const {
+        width: screenWidth,
+        height: screenHeight,
+        left: screenLeft,
+        top: screenTop,
+      } = await scrapbook.getScreenBounds(currentWindow);
+      const left = screenLeft;
+      const top = screenTop;
       const width = Math.max(Math.floor(screenWidth / 5 - 1), 200);
       const height = screenHeight - 1;
 
@@ -473,16 +477,18 @@
       // update the current window if it exists
       if (currentWindow) {
         // calculate the desired position of the main window
-        const mainLeft = Math.max(width + 1, currentWindow.left);
-        const mainTop = Math.max(0, currentWindow.top);
+        const mainLeft = Math.max(left + width + 1, currentWindow.left);
+        const mainTop = Math.max(top, currentWindow.top);
         const mainWidth = Math.min(screenWidth - width - 1, currentWindow.width);
         const mainHeight = Math.min(screenHeight - 1, currentWindow.height);
 
-        const axis = {state: 'normal'};
-        if (mainLeft !== currentWindow.left) { axis.left = mainLeft; }
-        if (mainTop !== currentWindow.top) { axis.top = mainTop; }
-        if (mainWidth !== currentWindow.width) { axis.width = mainWidth; }
-        if (mainHeight !== currentWindow.height) { axis.height = mainHeight; }
+        const axis = {
+          state: 'normal',
+          left: mainLeft,
+          top: mainTop,
+          width: mainWidth,
+          height: mainHeight,
+        };
 
         await browser.windows.update(currentWindow.id, axis);
       }
