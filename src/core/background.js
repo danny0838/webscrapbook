@@ -925,10 +925,6 @@
   }
 
   function initBeforeSendHeadersListener() {
-    const extraInfoSpec = ["blocking", "requestHeaders"];
-    if (browser.webRequest.OnBeforeSendHeadersOptions.hasOwnProperty('EXTRA_HEADERS')) {
-      extraInfoSpec.push('extraHeaders');
-    }
     browser.webRequest.onBeforeSendHeaders.addListener((details) => {
       // rewrite only the requests sent by this extension
       if (details.initiator !== location.origin) {
@@ -938,13 +934,23 @@
       // Some headers (e.g. "referer") are not allowed to be set via
       // XMLHttpRequest.setRequestHeader directly.  Use a prefix and
       // modify it here to workaround.
+      let rewritten = false;
       for (const header of details.requestHeaders) {
         if (header.name.slice(0, 15) === "X-WebScrapBook-") {
           header.name = header.name.slice(15);
+          rewritten = true;
         }
       }
+
+      if (!rewritten) {
+        return;
+      }
+
       return {requestHeaders: details.requestHeaders};
-    }, {urls: ["<all_urls>"], types: ["xmlhttprequest"]}, extraInfoSpec);
+    }, {urls: ["<all_urls>"], types: ["xmlhttprequest"]}, [
+      "blocking", "requestHeaders",
+      ...(browser.webRequest.OnBeforeSendHeadersOptions.EXTRA_HEADERS ? ["extraHeaders"] : []),
+    ]);
   }
 
   function initMessageListener() {
