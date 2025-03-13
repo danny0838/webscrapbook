@@ -694,9 +694,7 @@
       return options[key];
     }
     const args = {[key]: DEFAULT_OPTIONS[key]};
-    return browser.storage.sync.get(args).catch((ex) => {
-      return browser.storage.local.get(args);
-    }).then((response) => {
+    return browser.storage.local.get(args).then((response) => {
       return response[key];
     });
   };
@@ -722,11 +720,6 @@
   };
 
   /**
-   * Use storage.sync if available. Fallback to storage.local and passed values.
-   *
-   * - Firefox: browser.storage.sync.*() gets an error if
-   *     webextensions.storage.sync.enabled is false.
-   *
    * @param {null|string|string[]|Object} [keys] - Fallback to DEFAULT_OPTIONS
    *     when passing non-object.
    * @param {Object} [options]
@@ -756,29 +749,20 @@
       }
       return rv;
     }
-    return browser.storage.sync.get(keys).catch((ex) => {
-      return browser.storage.local.get(keys);
-    });
+    return browser.storage.local.get(keys);
   };
 
   /**
-   * Use storage.sync if available. Fallback to storage.local.
-   *
    * @param {Object} keys
    */
   scrapbook.setOptions = async function (keys) {
-    return browser.storage.sync.set(keys).catch((ex) => {
-      return browser.storage.local.set(keys);
-    });
+    return browser.storage.local.set(keys);
   };
 
   /**
-   * Clear for storage.sync and storage.local.
-   *
    * @param {string[]} keys
    */
   scrapbook.clearOptions = async function (keys) {
-    await browser.storage.sync.remove(keys).catch((ex) => {});
     return await browser.storage.local.remove(keys);
   };
 
