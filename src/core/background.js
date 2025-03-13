@@ -426,6 +426,26 @@
     return scrapbook.getGeoLocation(options);
   };
 
+  function initInstallListener() {
+    browser.runtime.onInstalled.addListener(async (details) => {
+      const {reason, previousVersion} = details;
+
+      if (reason === "update" && scrapbook.versionCompare(previousVersion, "2.17") === -1) {
+        console.warn("Migrating options from `storage.sync` to `storage.local` for < 2.17");
+        try {
+          let options = await browser.storage.sync.get();
+          options = scrapbook.getOptions(null, options);
+          await browser.storage.local.set(options);
+          const keys = Object.keys(options).filter(k => options[k] !== undefined);
+          await browser.storage.sync.remove(keys);
+          console.warn("Migrated successfully.");
+        } catch (ex) {
+          console.error("Migration failed: %o", ex);
+        }
+      }
+    });
+  }
+
   function initStorageChangeListener() {
     const toolbarOptions = Object.keys(scrapbook.DEFAULT_OPTIONS).filter(x => x.startsWith('ui.toolbar.'));
 
@@ -1001,6 +1021,7 @@
     initBeforeSendHeadersListener();
     initMessageListener();
     initExternalMessageListener();
+    initInstallListener();
 
     await scrapbook.loadOptionsAuto;
     updateBrowserAction();
