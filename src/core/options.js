@@ -91,8 +91,6 @@
   }
 
   async function importOptions(file) {
-    document.getElementById("import-input").value = null;
-
     try {
       const options = JSON.parse(await scrapbook.readFileAsText(file));
       for (const key in options) {
@@ -414,6 +412,7 @@
   async function onImportInputChange(event) {
     event.preventDefault();
     const file = event.target.files[0];
+    event.target.value = null;
     await importOptions(file);
     refreshForm();
   }
