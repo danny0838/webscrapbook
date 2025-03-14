@@ -1264,27 +1264,43 @@
    * Lang
    ***************************************************************************/
 
-  scrapbook.lang = function (key, args) {
-    const msg = browser.i18n.getMessage(key, args);
-    if (msg) {
-      // recursively replace __MSG_key__
-      return msg.replace(/__MSG_(.*?)__/, (m, k) => scrapbook.lang(k));
-    }
-    return "__MSG_" + key + "__";
+  scrapbook.lang = function (...args) {
+    const msgRegex = /__MSG_(.*?)__/g;
+    const msgReplacer = (m, k) => scrapbook.lang(k);
+    const fn = scrapbook.lang = (key, args) => {
+      const msg = browser.i18n.getMessage(key, args);
+      if (msg) {
+        // recursively replace __MSG_key__
+        return msg.replace(msgRegex, msgReplacer);
+      }
+      return `__MSG_${key}__`;
+    };
+    return fn(...args);
   };
 
-  scrapbook.loadLanguages = function (rootNode) {
-    for (const elem of rootNode.querySelectorAll('*')) {
-      if (elem.childNodes.length === 1) {
-        let child = elem.firstChild;
-        if (child.nodeType === 3) {
-          child.nodeValue = child.nodeValue.replace(/__MSG_(.*?)__/, (m, k) => scrapbook.lang(k));
+  scrapbook.loadLanguages = function (...args) {
+    const msgRegex = /__MSG_(.*?)__/g;
+    const msgReplacer = (m, k) => scrapbook.lang(k);
+    const fn = scrapbook.loadLanguages = (rootNode) => {
+      const doc = rootNode.ownerDocument || rootNode;
+      const walker = doc.createNodeIterator(rootNode, 5 /* NodeFilter.SHOW_ELEMENT | NodeFilter.SHOW_TEXT */);
+
+      let node = walker.nextNode();
+      while (node) {
+        switch (node.nodeType) {
+          case 1:
+            for (const attr of node.attributes) {
+              attr.nodeValue = attr.nodeValue.replace(msgRegex, msgReplacer);
+            }
+            break;
+          case 3:
+            node.nodeValue = node.nodeValue.replace(msgRegex, msgReplacer);
+            break;
         }
+        node = walker.nextNode();
       }
-      for (const attr of elem.attributes) {
-        attr.nodeValue = attr.nodeValue.replace(/__MSG_(.*?)__/, (m, k) => scrapbook.lang(k));
-      }
-    }
+    };
+    return fn(...args);
   };
 
 
