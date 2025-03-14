@@ -417,6 +417,14 @@
     refreshForm();
   }
 
+  async function onCloudClick(event) {
+    event.preventDefault();
+    const u = new URL(browser.runtime.getURL("core/cloud.html"));
+    return await scrapbook.visitLink({
+      url: u.href,
+    });
+  }
+
   function onDetailsToggle(event) {
     saveDetailStatus();
   }
@@ -478,6 +486,7 @@
     document.getElementById("export").addEventListener("click", onExportClick);
     document.getElementById("import").addEventListener("click", onImportClick);
     document.getElementById("import-input").addEventListener("change", onImportInputChange);
+    document.getElementById("cloud").addEventListener("click", onCloudClick);
 
     for (const elem of document.querySelectorAll('#optionsWrapper details')) {
       elem.addEventListener("toggle", onDetailsToggle);

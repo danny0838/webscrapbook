@@ -1,0 +1,17 @@
+table {
+  border-collapse: collapse;
+}
+
+table > thead > tr > th,
+table > tbody > tr > td {
+  border: 1px ridge black;
+  padding: .25em;
+}
+
+table > tbody > tr > td > input {
+  margin: 0 .125em;
+}
+
+form {
+  margin-top: 2em;
+}

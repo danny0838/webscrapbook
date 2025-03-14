@@ -214,6 +214,39 @@
   "CheckerTitle": {
     "message": "檢測資料"
   },
+  "CloudFileActionApplyLabel": {
+    "message": "套用"
+  },
+  "CloudFileActionApplySuccess": {
+    "message": "套用選項成功"
+  },
+  "CloudFileActionDeleteLabel": {
+    "message": "刪除"
+  },
+  "CloudFileActionLabel": {
+    "message": "動作"
+  },
+  "CloudFileDateLabel": {
+    "message": "時間"
+  },
+  "CloudFileNameLabel": {
+    "message": "名稱"
+  },
+  "CloudFileSizeLabel": {
+    "message": "大小"
+  },
+  "CloudPageTitle": {
+    "message": "同步"
+  },
+  "CloudRenameLabel": {
+    "message": "更名"
+  },
+  "CloudRenamePrompt": {
+    "message": "請輸入新名稱:"
+  },
+  "CloudStoreLabel": {
+    "message": "保存"
+  },
   "EditConfirmScriptedDocument": {
     "message": "此頁面含有腳本，可能與編輯工具衝突，造成永久的資訊遺失。確定要儲存嗎？"
   },
@@ -1354,6 +1387,9 @@
   },
   "OptionViewerViewMaffTooltip": {
     "message": "瀏覽器載入 MAFF 檔案時，自動以檢視器檢視。在支援的瀏覽器勾選「允許存取檔案網址」即可用瀏覽器直接開啟此類檔案。"
+  },
+  "OptionsCloudLabel": {
+    "message": "同步"
   },
   "OptionsExportLabel": {
     "message": "匯出"

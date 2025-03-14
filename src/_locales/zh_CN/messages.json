@@ -214,6 +214,39 @@
   "CheckerTitle": {
     "message": "检测数据"
   },
+  "CloudFileActionApplyLabel": {
+    "message": "套用"
+  },
+  "CloudFileActionApplySuccess": {
+    "message": "套用选项成功"
+  },
+  "CloudFileActionDeleteLabel": {
+    "message": "删除"
+  },
+  "CloudFileActionLabel": {
+    "message": "动作"
+  },
+  "CloudFileDateLabel": {
+    "message": "时间"
+  },
+  "CloudFileNameLabel": {
+    "message": "名称"
+  },
+  "CloudFileSizeLabel": {
+    "message": "大小"
+  },
+  "CloudPageTitle": {
+    "message": "同步"
+  },
+  "CloudRenameLabel": {
+    "message": "更名"
+  },
+  "CloudRenamePrompt": {
+    "message": "请输入新名称:"
+  },
+  "CloudStoreLabel": {
+    "message": "保存"
+  },
   "EditConfirmScriptedDocument": {
     "message": "此页面含有脚本，可能与编辑工具冲突，造成永久的信息遗失。确定要保存吗？"
   },
@@ -1354,6 +1387,9 @@
   },
   "OptionViewerViewMaffTooltip": {
     "message": "浏览器载入 MAFF 文件时，自动以检视器检视。在支持的浏览器勾选“允许访问文件网址”即可用浏览器直接开启此类文件。"
+  },
+  "OptionsCloudLabel": {
+    "message": "同步"
   },
   "OptionsExportLabel": {
     "message": "导出"

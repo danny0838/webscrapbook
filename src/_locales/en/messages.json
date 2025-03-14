@@ -214,6 +214,39 @@
   "CheckerTitle": {
     "message": "Check data"
   },
+  "CloudFileActionApplyLabel": {
+    "message": "Apply"
+  },
+  "CloudFileActionApplySuccess": {
+    "message": "Options applied successfully"
+  },
+  "CloudFileActionDeleteLabel": {
+    "message": "Delete"
+  },
+  "CloudFileActionLabel": {
+    "message": "Action"
+  },
+  "CloudFileDateLabel": {
+    "message": "Date"
+  },
+  "CloudFileNameLabel": {
+    "message": "Name"
+  },
+  "CloudFileSizeLabel": {
+    "message": "Size"
+  },
+  "CloudPageTitle": {
+    "message": "Sync"
+  },
+  "CloudRenameLabel": {
+    "message": "Rename"
+  },
+  "CloudRenamePrompt": {
+    "message": "Input a new name:"
+  },
+  "CloudStoreLabel": {
+    "message": "Store"
+  },
   "EditConfirmScriptedDocument": {
     "message": "This page has scripts, which could conflict with the editor causing permanent data loss. Save anyway?"
   },
@@ -1354,6 +1387,9 @@
   },
   "OptionViewerViewMaffTooltip": {
     "message": "When the browser loads a MAFF file, view it with the viewer. Check “Allow access to file URLs” in a supported browser to enable opening such files directly."
+  },
+  "OptionsCloudLabel": {
+    "message": "Sync"
   },
   "OptionsExportLabel": {
     "message": "Export"
