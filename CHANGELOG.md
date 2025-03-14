@@ -3,6 +3,15 @@
 * Versions before 1.0 are in initial development. APIs are not stable for these versions, even a `y` version can involve a breaking change, and only partial notable changes are summarized in this document. See full commit history in the source repository for details.
 * Backend server requirement in this document refers to the version of [`webscrapbook` Python package](https://github.com/danny0838/pywebscrapbook) (or PyWebScrapBook).
 
+## [2.17.0] - 2025-03-14
+* Improved sidebar window positioning on a multi-monitor device for Chromium.
+* Fixed an issue where large size options were not correctly saved and read.
+  * Options are now stored locally.
+  * Saved options from previous versions will be automatically migrated.
+  * Added a sync manager that allows options be manually stored to and retrieved from the sync area.
+* Resolved a security vulnerability that could allow websites or other extensions to forge requests.
+* Miscellaneous improvements and bug fixes of the internal code and unit test suite.
+
 ## [2.16.1] - 2024-10-30
 * Revoked the support of switching container for a capture, which requires a permission that forces Firefox to enable containers.
 
