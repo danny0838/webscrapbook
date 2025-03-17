@@ -456,10 +456,10 @@
     // up-to-date when the listener is called.
     browser.storage.onChanged.addListener((changes, areaName) => {
       if (toolbarOptions.some(x => x in changes)) {
-        updateBrowserAction(); // async
+        updateAction(); // async
       }
       if (("ui.showContextMenu" in changes) || ("server.url" in changes)) {
-        updateContextMenu(); // async
+        updateMenus(); // async
       }
       if ("ui.notifyPageCaptured" in changes) {
         capturer.toggleNotifyPageCaptured(); // async
@@ -479,7 +479,7 @@
     });
   }
 
-  function updateBrowserAction(...args) {
+  function updateAction(...args) {
     const actions = {
       showCaptureTab: background.commands.captureTab,
       showCaptureTabSource: background.commands.captureTabSource,
@@ -495,7 +495,7 @@
     };
     let action;
 
-    const fn = updateBrowserAction = () => {
+    const fn = updateAction = () => {
       // clear current listener and popup
       browser.browserAction.setPopup({popup: ""});
       if (action) {
@@ -517,13 +517,13 @@
           return;
         }
       }
-      browser.browserAction.setPopup({popup: "core/browserAction.html"});
+      browser.browserAction.setPopup({popup: "core/action.html"});
     };
 
     return fn(...args);
   }
 
-  async function updateContextMenu() {
+  async function updateMenus() {
     if (!browser.contextMenus) { return; }
 
     await browser.contextMenus.removeAll();
@@ -534,7 +534,7 @@
     const hasServer = scrapbook.hasServer();
     const urlMatch = await scrapbook.getContentPagePattern();
 
-    browserAction: {
+    action: {
       browser.contextMenus.create({
         title: scrapbook.lang("CaptureTabAs") + '...',
         contexts: ["browser_action"],
@@ -1026,8 +1026,8 @@
     initInstallListener();
 
     await scrapbook.loadOptionsAuto;
-    updateBrowserAction();
-    updateContextMenu();
+    updateAction();
+    updateMenus();
   }
 
   init();
