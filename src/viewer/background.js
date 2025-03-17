@@ -48,8 +48,6 @@
     newUrl = newUrl.href;
 
     if (type === "sub_frame") {
-      // Chromium < 77: an extension page cannot be loaded in a frame and
-      // becomes empty silently if the top frame page is not an extension page.
       // Chromium < 119: an extension page in a frame cannot access IndexedDB.
       if (scrapbook.userAgent.is('chromium') && scrapbook.userAgent.major < 119) {
         const html = `<!DOCTYPE html>

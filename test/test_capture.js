@@ -4931,7 +4931,7 @@ div > ::slotted(*) { font-size: 1.2em; }`);
 div > ::slotted(*) { font-size: 1.2em; }`);
         });
 
-        $it.skipIf($.noPartPseudo)('pseudo ::part', async function () {
+        it('pseudo ::part', async function () {
           var options = Object.assign({}, baseOptions, {
             "capture.rewriteCss": "match",
           });
@@ -7616,7 +7616,7 @@ body { color: red; }`);
 }`);
         });
 
-        $it.skipIf($.noPartPseudo)('::part', async function () {
+        it('::part', async function () {
           var options = Object.assign({}, baseOptions, {
             "capture.imageBackground": "save-used",
             "capture.rewriteCss": "url",
@@ -8241,7 +8241,7 @@ body { color: red; }`);
 @font-face { font-family: local-by-none; src: url(""); }`);
         });
 
-        $it.skipIf($.noPartPseudo)('::part', async function () {
+        it('::part', async function () {
           var options = Object.assign({}, baseOptions, {
             "capture.rewriteCss": "url",
             "capture.font": "save-used",
