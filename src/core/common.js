@@ -2086,12 +2086,6 @@ if (typeof Promise.withResolvers === 'undefined') {
     try {
       yield* docOrShadowRoot.adoptedStyleSheets;
     } catch (ex) {
-      // Firefox < 101.0b1: docOrShadowRoot.adoptedStyleSheets is undefined
-      //
-      // Firefox < 101.0b8: docOrShadowRoot.adoptedStyleSheets of a content
-      // script throws an error when accessed.
-      // https://bugzilla.mozilla.org/show_bug.cgi?id=1767819
-      //
       // Firefox >= 101.0b8: docOrShadowRoot.adoptedStyleSheets of a content
       // script has all properties unreadable.
       // https://bugzilla.mozilla.org/show_bug.cgi?id=1770592
@@ -4557,28 +4551,11 @@ if (typeof Promise.withResolvers === 'undefined') {
     if (scrapbook.userAgent.is('gecko')) {
       let updateData = {};
 
-      // Firefox < 86: `focused` in `createData` causes an error.
       // Firefox >= 86: ignores `focused: false` in `createData`.
       // https://bugzilla.mozilla.org/show_bug.cgi?id=1213484
       // https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/windows/create#browser_compatibility
       if (typeof createData.focused !== 'undefined') {
         updateData.focused = createData.focused;
-        if (scrapbook.userAgent.major < 86) {
-          delete createData.focused;
-        }
-      }
-
-      // Firefox < 109: ignores `left` and `top` in `createData` for popups.
-      // https://bugzilla.mozilla.org/show_bug.cgi?id=1271047
-      if (scrapbook.userAgent.major < 109 && createData.type === 'popup') {
-        if (typeof createData.left !== 'undefined') {
-          updateData.left = createData.left;
-          delete createData.left;
-        }
-        if (typeof createData.top !== 'undefined') {
-          updateData.top = createData.top;
-          delete createData.top;
-        }
       }
 
       if (Object.keys(updateData).length) {
