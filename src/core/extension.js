@@ -46,12 +46,11 @@
    * @return {Promise<Array>} The URL match patterns for content pages.
    */
   scrapbook.getContentPagePattern = async function () {
-    const p = (async () => {
-      const allowFileAccess = await browser.extension.isAllowedFileSchemeAccess();
-      const urlMatch = ["http://*/*", "https://*/*"];
-      if (allowFileAccess) { urlMatch.push("file:///*"); }
-      return urlMatch;
-    })();
+    const p = (async () => [
+      "http://*/*",
+      "https://*/*",
+      ...(await browser.extension.isAllowedFileSchemeAccess() ? ["file:///*"]: []),
+    ])();
     scrapbook.getContentPagePattern = () => p;
     return p;
   };
