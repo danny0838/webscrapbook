@@ -3171,7 +3171,7 @@ Redirecting to file <a href="index.md">index.md</a>
   // record current windowId for later validation if it's sidebar
   if (browser.sidebarAction && browser.windows) {
     (async () => {
-      // Firefox has an issue that getViews({windowId}) does not contain sidebars.
+      // Firefox < 93: getViews({windowId}) does not contain sidebars.
       // https://bugzilla.mozilla.org/show_bug.cgi?id=1612390
       if (browser.extension.getViews({type: 'sidebar'}).some(v => v === window)) {
         sidebar.sidebarWindowId = (await browser.windows.getCurrent()).id;
