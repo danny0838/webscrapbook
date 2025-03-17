@@ -224,10 +224,6 @@
   }
 
   async function updateBadgeForAllTabs() {
-    if (!browser.action || !browser.action.setBadgeText) {
-      return;
-    }
-
     if (!scrapbook.getOption("ui.notifyPageCaptured")) {
       return;
     }
@@ -243,11 +239,6 @@
   }
 
   function toggleNotifyPageCaptured() {
-    // Firefox Android < 79 does not support setBadgeText
-    if (!browser.action.setBadgeText) {
-      return;
-    }
-
     browser.webNavigation.onCommitted.removeListener(onNavigation);
     if (scrapbook.getOption("ui.notifyPageCaptured")) {
       browser.webNavigation.onCommitted.addListener(onNavigation, LISTENER_FILTER);
