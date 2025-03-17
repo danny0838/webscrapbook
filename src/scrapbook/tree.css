@@ -1,6 +1,6 @@
 .tree {
   position: relative;
-  width: -moz-fit-content; /* older Firefox (known for 52-74) */
+  width: -moz-fit-content; /* Firefox < 94 */
   width: fit-content;
   min-width: 100%;
   line-height: 1;

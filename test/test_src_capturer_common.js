@@ -2098,7 +2098,7 @@ class { }`);
           assert.strictEqual(helper.runCommand(command, doc), null);
         });
 
-        $it.skipIf($.noRegexNamedGroup)("named capture group", function () {
+        it("named capture group", function () {
           var helper = new capturer.CaptureHelperHandler();
           var doc = makeTestDoc();
 
