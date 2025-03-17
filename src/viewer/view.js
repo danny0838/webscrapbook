@@ -441,18 +441,13 @@ Redirecting to: <a href="${scrapbook.escapeHtml(info.url)}">${scrapbook.escapeHt
 
             case "embed": {
               if (elem.hasAttribute("src")) {
-                try {
-                  elem.setAttribute("src", rewriteUrl(elem.getAttribute("src"), refUrl));
+                elem.setAttribute("src", rewriteUrl(elem.getAttribute("src"), refUrl));
 
-                  // In Chromium, "blob:" is still allowed even if it's not set in the
-                  // content_security_policy, and thus offensive scripts could run.
-                  // Replace the src with a dummy URL so that scripts are never loaded.
-                  if (elem.src.startsWith('blob:')) {
-                    elem.setAttribute("src", "blob:");
-                  }
-                } catch (ex) {
-                  // In Firefox < 53, an error could be thrown here.
-                  // The modification still take effect, though.
+                // In Chromium, "blob:" is still allowed even if it's not set in the
+                // content_security_policy, and thus offensive scripts could run.
+                // Replace the src with a dummy URL so that scripts are never loaded.
+                if (elem.src.startsWith('blob:')) {
+                  elem.setAttribute("src", "blob:");
                 }
               }
               break;
@@ -460,18 +455,13 @@ Redirecting to: <a href="${scrapbook.escapeHtml(info.url)}">${scrapbook.escapeHt
 
             case "object": {
               if (elem.hasAttribute("data")) {
-                try {
-                  elem.setAttribute("data", rewriteUrl(elem.getAttribute("data"), refUrl));
+                elem.setAttribute("data", rewriteUrl(elem.getAttribute("data"), refUrl));
 
-                  // In Chromium, "blob:" is still allowed even if it's not set in the
-                  // content_security_policy, and thus offensive scripts could run.
-                  // Replace the src with a dummy URL so that scripts are never loaded.
-                  if (elem.data.startsWith('blob:')) {
-                    elem.setAttribute("data", "blob:");
-                  }
-                } catch (ex) {
-                  // In Firefox < 53, an error could be thrown here.
-                  // The modification still take effect, though.
+                // In Chromium, "blob:" is still allowed even if it's not set in the
+                // content_security_policy, and thus offensive scripts could run.
+                // Replace the src with a dummy URL so that scripts are never loaded.
+                if (elem.data.startsWith('blob:')) {
+                  elem.setAttribute("data", "blob:");
                 }
               }
               break;
@@ -479,34 +469,24 @@ Redirecting to: <a href="${scrapbook.escapeHtml(info.url)}">${scrapbook.escapeHt
 
             case "applet": {
               if (elem.hasAttribute("code")) {
-                try {
-                  elem.setAttribute("code", rewriteUrl(elem.getAttribute("code"), refUrl));
+                elem.setAttribute("code", rewriteUrl(elem.getAttribute("code"), refUrl));
 
-                  // In Chromium, "blob:" is still allowed even if it's not set in the
-                  // content_security_policy, and thus offensive scripts could run.
-                  // Replace the src with a dummy URL so that scripts are never loaded.
-                  if (elem.getAttribute("code").startsWith('blob:')) {
-                    elem.setAttribute("code", "blob:");
-                  }
-                } catch (ex) {
-                  // In Firefox < 53, an error could be thrown here.
-                  // The modification still take effect, though.
+                // In Chromium, "blob:" is still allowed even if it's not set in the
+                // content_security_policy, and thus offensive scripts could run.
+                // Replace the src with a dummy URL so that scripts are never loaded.
+                if (elem.getAttribute("code").startsWith('blob:')) {
+                  elem.setAttribute("code", "blob:");
                 }
               }
 
               if (elem.hasAttribute("archive")) {
-                try {
-                  elem.setAttribute("archive", rewriteUrl(elem.getAttribute("archive"), refUrl));
+                elem.setAttribute("archive", rewriteUrl(elem.getAttribute("archive"), refUrl));
 
-                  // In Chromium, "blob:" is still allowed even if it's not set in the
-                  // content_security_policy, and thus offensive scripts could run.
-                  // Replace the src with a dummy URL so that scripts are never loaded.
-                  if (elem.getAttribute("archive").startsWith('blob:')) {
-                    elem.setAttribute("archive", "blob:");
-                  }
-                } catch (ex) {
-                  // In Firefox < 53, an error could be thrown here.
-                  // The modification still take effect, though.
+                // In Chromium, "blob:" is still allowed even if it's not set in the
+                // content_security_policy, and thus offensive scripts could run.
+                // Replace the src with a dummy URL so that scripts are never loaded.
+                if (elem.getAttribute("archive").startsWith('blob:')) {
+                  elem.setAttribute("archive", "blob:");
                 }
               }
               break;

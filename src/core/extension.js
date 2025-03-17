@@ -60,15 +60,12 @@
    * @return {Promise<Array>}
    */
   scrapbook.getContentTabs = async function (filter = {currentWindow: true}) {
-    // scrapbook.getContentPagePattern() resolves to [] on Firefox Android 57
-    // due to a bug of browser.tabs.query:
-    // https://bugzilla.mozilla.org/show_bug.cgi?id=1418737
-    const allowFileAccess = await browser.extension.isAllowedFileSchemeAccess();
+    filter = Object.assign({}, filter, {url: await scrapbook.getContentPagePattern()});
     const tabs = await browser.tabs.query(filter);
 
     // Note that tab.hidden is only supported in Firefox >= 61. For other
     // browsers it's undefined.
-    return tabs.filter((tab) => (scrapbook.isContentPage(tab.url, allowFileAccess) && !tab.hidden));
+    return tabs.filter(tab => !tab.hidden);
   };
 
   /**
@@ -80,22 +77,14 @@
     // (e.g. when at browser action page).
     // Query with {active: true} to get the real active tabs instead.
     if (scrapbook.userAgent.is('chromium') && scrapbook.userAgent.is('mobile')) {
-      return await browser.tabs.query(Object.assign({}, filter, {active: true}));
+      filter = Object.assign({}, filter, {active: true});
+    } else {
+      filter = Object.assign({}, filter, {highlighted: true});
     }
 
-    const allowFileAccess = await browser.extension.isAllowedFileSchemeAccess();
-    // Querying for {highlighted:true} doesn't get highlighted tabs in some
-    // Firefox version (e.g. 55), so we query for all tabs and filter them
-    // afterwards.
-    const tabs = await browser.tabs.query(filter);
-    return tabs.filter(t => (
-      scrapbook.isContentPage(t.url, allowFileAccess) &&
-
-      // Normally active tabs are always highlighted. Also check for .active as
-      // .highlighted doesn't work in some browsers.
-      // - In Opera 58, .highlighted = false for all tabs.
-      (t.active || t.highlighted)
-    ));
+    return await browser.tabs.query(Object.assign(filter, {
+      url: await scrapbook.getContentPagePattern(),
+    }));
   };
 
   /**
