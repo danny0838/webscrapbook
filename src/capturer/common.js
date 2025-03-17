@@ -6004,8 +6004,7 @@
           });
           break;
         }
-        // Chromium < 91: COUNTER_STYLE_RULE not supported
-        case 11/* CSSRule.COUNTER_STYLE_RULE */: {
+        case CSSRule.COUNTER_STYLE_RULE: {
           if (!cssRule.symbols) { break; }
 
           this.forEachUrl(cssRule.symbols, baseUrl, (url) => {

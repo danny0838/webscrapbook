@@ -261,12 +261,8 @@
   function updateInputText(elem, value) {
     // Use execCommand rather than set value to allow undo in the textarea.
     // Note that this removes the current selection.
-    // This may not work in Firefox < 89, and fallback to set value:
-    // https://bugzilla.mozilla.org/show_bug.cgi?id=1220696
     elem.select();
-    if (!document.execCommand('insertText', false, value)) {
-      elem.value = value;
-    }
+    document.execCommand('insertText', false, value);
   }
 
   async function capture({dialog = null, taskInfo, ignoreTitle = false, uniquify = false}) {

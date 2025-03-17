@@ -4548,7 +4548,7 @@ elem-4 { background-color: lime; }`);
         });
       });
 
-      $describe.skipIf($.noAtCounterStyle)('@counter-style', function () {
+      describe('@counter-style', function () {
         it('capture.rewriteCss = url', async function () {
           var options = Object.assign({}, baseOptions, {
             "capture.rewriteCss": "url",
@@ -4648,7 +4648,7 @@ elem-4 { background-color: lime; }`);
         });
       });
 
-      $describe.skipIf($.noAtLayer)('@layer', function () {
+      describe('@layer', function () {
         it('capture.rewriteCss = match', async function () {
           var options = Object.assign({}, baseOptions, {
             "capture.rewriteCss": "match",
@@ -4775,7 +4775,7 @@ elem-4 { background-color: lime; }`);
           assert.strictEqual(styleElems[11].textContent.trim(), ``);
         });
 
-        $it.skipIf($.noIsPseudo)('pseudo :is', async function () {
+        it('pseudo :is', async function () {
           var options = Object.assign({}, baseOptions, {
             "capture.rewriteCss": "match",
           });
@@ -6194,7 +6194,7 @@ body { color: red; }`);
     /**
      * capturer.DocumentCssHandler
      */
-    $describe.skipIf($.noAdoptedStylesheet)('constructed stylesheets', function () {
+    describe('constructed stylesheets', function () {
       describe('should save constructed stylesheets according to capture.{adoptedStyleSheet, style}', function () {
         it('capture.adoptedStyleSheet = save, capture.style = save', async function () {
           var options = Object.assign({}, baseOptions, {
@@ -7683,7 +7683,7 @@ body { color: red; }`);
       });
 
       describe('advanced at-rule', function () {
-        $it.skipIf($.noAtLayer)('@layer', async function () {
+        it('@layer', async function () {
           var options = Object.assign({}, baseOptions, {
             "capture.imageBackground": "save-used",
             "capture.rewriteCss": "url",
@@ -7741,7 +7741,7 @@ body { color: red; }`);
         });
       });
 
-      $describe.skipIf($.noAdoptedStylesheet)('in constructed stylesheet', function () {
+      describe('in constructed stylesheet', function () {
         it('basic', async function () {
           var options = Object.assign({}, baseOptions, {
             "capture.imageBackground": "save-used",
@@ -13407,10 +13407,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
       });
     });
 
-    $describe.skipIf($.noShadowRootDelegatesFocus)
-        .skipIf($.noShadowRootSerializable)
-        .skipIf($.noShadowRootSlotAssignment)('should handle further shadow DOM properties', function () {
-
+    $describe.skipIf($.noShadowRootSerializable)('should handle further shadow DOM properties', function () {
       it('capture.shadowDom = save', async function () {
         var options = Object.assign({}, baseOptions, {
           "capture.shadowDom": "save",
@@ -13441,7 +13438,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
       });
     });
 
-    $describe.skipIf($.noShadowRootSlotAssignment)('should handle slots', function () {
+    describe('should handle slots', function () {
       var options = Object.assign({}, baseOptions, {
         "capture.shadowDom": "save",
         "capture.recordRewrites": true,

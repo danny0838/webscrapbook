@@ -1627,7 +1627,6 @@ if (typeof browser !== 'undefined') {
     }
 
     // create a modal dialog with mask
-    const supportsDialog = typeof HTMLDialogElement !== 'undefined';
 
     // in case there is another existing prompt due to inproper trigger
     for (const elem of doc.documentElement.querySelectorAll('[data-scrapbook-elem="toolbar-prompt"]')) {
@@ -1650,10 +1649,6 @@ dialog {
   position: fixed;
   inset: 0;
 }
-.mask {
-  z-index: 2147483647;
-  background: rgba(0, 0, 0, 0.4);
-}
 `;
 
     const dialog = shadow.appendChild(doc.createElement('dialog'));
@@ -1667,12 +1662,8 @@ dialog {
     });
     observer.observe(doc.documentElement, {childList: true});
 
-    if (supportsDialog) {
-      dialog.addEventListener('close', () => reject(new Error('dialog closed')));
-      dialog.showModal();
-    } else {
-      dialog.classList.add('mask');
-    }
+    dialog.addEventListener('close', () => reject(new Error('dialog closed')));
+    dialog.showModal();
 
     const id = scrapbook.getUuid();
 
@@ -2219,12 +2210,6 @@ dialog {
     try {
       yield* docOrShadowRoot.adoptedStyleSheets;
     } catch (ex) {
-      // Firefox < 101.0b1: docOrShadowRoot.adoptedStyleSheets is undefined
-      //
-      // Firefox < 101.0b8: docOrShadowRoot.adoptedStyleSheets of a content
-      // script throws an error when accessed.
-      // https://bugzilla.mozilla.org/show_bug.cgi?id=1767819
-      //
       // Firefox >= 101.0b8: docOrShadowRoot.adoptedStyleSheets of a content
       // script has all properties unreadable.
       // https://bugzilla.mozilla.org/show_bug.cgi?id=1770592

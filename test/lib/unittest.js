@@ -227,19 +227,6 @@
       Object.defineProperty(this, 'noShadowRootClonable', {value});
       return value;
     },
-    get noShadowRootDelegatesFocus() {
-      // ShadowRoot.delegatesFocus is not supported in Firefox < 94.
-      const value = this.noBrowser.condition ? this.noBrowser : new MochaQuery.Query(
-        (() => {
-          const div = document.createElement('div');
-          const shadowRoot = div.attachShadow({mode: 'open', delegatesFocus: true});
-          return typeof shadowRoot.delegatesFocus === 'undefined';
-        })(),
-        'ShadowRoot.delegatesFocus not supported',
-      );
-      Object.defineProperty(this, 'noShadowRootDelegatesFocus', {value});
-      return value;
-    },
     get noShadowRootSerializable() {
       // ShadowRoot.serializable is not supported in Chromium < 125 and Firefox < 128.
       const value = this.noBrowser.condition ? this.noBrowser : new MochaQuery.Query(
@@ -251,28 +238,6 @@
         'ShadowRoot.serializable not supported',
       );
       Object.defineProperty(this, 'noShadowRootSerializable', {value});
-      return value;
-    },
-    get noShadowRootSlotAssignment() {
-      // ShadowRoot.slotAssignment is not supported in Chromium < 86 and Firefox < 92.
-      const value = this.noBrowser.condition ? this.noBrowser : new MochaQuery.Query(
-        (() => {
-          const div = document.createElement('div');
-          const shadowRoot = div.attachShadow({mode: 'open', slotAssignment: 'manual'});
-          return typeof shadowRoot.slotAssignment === 'undefined';
-        })(),
-        'ShadowRoot.slotAssignment not supported',
-      );
-      Object.defineProperty(this, 'noShadowRootSlotAssignment', {value});
-      return value;
-    },
-    get noAdoptedStylesheet() {
-      // Document.adoptedStyleSheets is not supported in Firefox < 101.
-      const value = this.noBrowser.condition ? this.noBrowser : new MochaQuery.Query(
-        !document.adoptedStyleSheets,
-        'Document.adoptedStyleSheets not supported',
-      );
-      Object.defineProperty(this, 'noAdoptedStylesheet', {value});
       return value;
     },
     get noNestingCss() {
@@ -309,22 +274,6 @@
       Object.defineProperty(this, 'noColumnCombinator', {value});
       return value;
     },
-    get noIsPseudo() {
-      // :is() CSS pseudo-class is not supported in Firefox < 78 and Chromium < 88.
-      const value = this.noBrowser.condition ? this.noBrowser : new MochaQuery.Query(
-        (() => {
-          try {
-            document.querySelector(':is()');
-          } catch (ex) {
-            return true;
-          }
-          return false;
-        })(),
-        ':is() CSS pseudo-class not supported',
-      );
-      Object.defineProperty(this, 'noIsPseudo', {value});
-      return value;
-    },
     get noHostContextPseudo() {
       // :host-context() is not suported in Firefox.
       const value = this.noBrowser.condition ? this.noBrowser : new MochaQuery.Query(
@@ -339,40 +288,6 @@
         ':host-context() CSS pseudo-class not supported',
       );
       Object.defineProperty(this, 'noHostContextPseudo', {value});
-      return value;
-    },
-    get noAtCounterStyle() {
-      // @counter-style is not supported in Chromium < 91.
-      const value = this.noBrowser.condition ? this.noBrowser : new MochaQuery.Query(
-        (() => {
-          const d = document.implementation.createHTMLDocument();
-          const style = d.head.appendChild(d.createElement('style'));
-          style.textContent = '@counter-style my { symbols: "1"; }';
-          if (!style.sheet.cssRules.length) {
-            return true;
-          }
-          return false;
-        })(),
-        '@counter-style CSS rule not supported',
-      );
-      Object.defineProperty(this, 'noAtCounterStyle', {value});
-      return value;
-    },
-    get noAtLayer() {
-      // @layer is not supported in Chromium < 99 and Firefox < 97.
-      const value = this.noBrowser.condition ? this.noBrowser : new MochaQuery.Query(
-        (() => {
-          const d = document.implementation.createHTMLDocument();
-          const style = d.head.appendChild(d.createElement('style'));
-          style.textContent = '@layer mylayer;';
-          if (!style.sheet.cssRules.length) {
-            return true;
-          }
-          return false;
-        })(),
-        '@layer CSS rule not supported',
-      );
-      Object.defineProperty(this, 'noAtLayer', {value});
       return value;
     },
   }));

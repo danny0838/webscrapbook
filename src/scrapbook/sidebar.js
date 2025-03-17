@@ -1330,11 +1330,6 @@
      *   - Listen to 'dialogShow' event for elem to handle initialization.
      */
     async showDialog(elem) {
-      // polyfill for Firefox < 98
-      if (typeof HTMLDialogElement !== 'function') {
-        return await this.showDialogPolyfill(elem);
-      }
-
       elem.method = 'dialog';
 
       const dialog = document.createElement('dialog');
@@ -1356,59 +1351,6 @@
         dialog.showModal();
         elem.dispatchEvent(new CustomEvent('dialogShow'));
       });
-    },
-
-    async showDialogPolyfill(elem) {
-      const mask = document.createElement('div');
-      mask.id = 'dialog-mask';
-
-      const dialog = mask.appendChild(document.createElement('div'));
-      dialog.id = 'dialog-wrapper';
-      dialog.setAttribute('role', 'dialog');
-      dialog.setAttribute('aria-modal', 'true');
-      dialog.setAttribute('tabindex', -1);
-      dialog.appendChild(elem);
-
-      const submitElem = elem.querySelector('input[type="submit"]');
-      const cancelElem = elem.querySelector('.cancel');
-
-      const onKeyDown = (event) => {
-        // skip if there's a modifier
-        if (event.shiftKey || event.ctrlKey || event.altKey || event.metaKey) {
-          return;
-        }
-
-        if (event.code === "Escape") {
-          event.preventDefault();
-          dialog.dispatchEvent(new CustomEvent('close', {detail: ''}));
-        }
-      };
-
-      document.body.appendChild(mask);
-      dialog.focus();
-
-      window.addEventListener('keydown', onKeyDown, true);
-      elem.addEventListener('submit', (event) => {
-        event.preventDefault();
-        dialog.dispatchEvent(new CustomEvent('close', {detail: submitElem.value}));
-      });
-      cancelElem.addEventListener('click', (event) => {
-        event.preventDefault();
-        dialog.dispatchEvent(new CustomEvent('close', {detail: ''}));
-      });
-
-      const result = await new Promise((resolve, reject) => {
-        dialog.addEventListener('close', (event) => {
-          resolve(event.detail);
-        });
-        elem.dispatchEvent(new CustomEvent('dialogShow'));
-      });
-
-      window.removeEventListener('keydown', onKeyDown, true);
-      mask.remove();
-      this.treeElem.focus();
-
-      return result;
     },
 
     async openModalWindow(url) {
@@ -2300,8 +2242,6 @@ ${scrapbook.escapeHtml(content)}
             const location = await (async () => {
               try {
                 // Prompt for extension geolocation permission (if not granted)
-                // Firefox < 101: Sidebar cannot prompt and always returns false.
-                // ref: https://bugzilla.mozilla.org/show_bug.cgi?id=1493396
                 await browser.permissions.request({permissions: ['geolocation']});
               } catch (ex) {
                 // Optional geolocation permission for extension not supported
@@ -3200,10 +3140,9 @@ Redirecting to file <a href="index.md">index.md</a>
   // record current windowId for later validation if it's sidebar
   if (browser.sidebarAction && browser.windows) {
     (async () => {
-      // Firefox < 93: getViews({windowId}) does not contain sidebars.
-      // https://bugzilla.mozilla.org/show_bug.cgi?id=1612390
-      if (browser.extension.getViews({type: 'sidebar'}).some(v => v === window)) {
-        sidebar.sidebarWindowId = (await browser.windows.getCurrent()).id;
+      const {id: windowId} = await browser.windows.getCurrent();
+      if (browser.extension.getViews({windowId, type: 'sidebar'}).some(v => v === window)) {
+        sidebar.sidebarWindowId = windowId;
       }
     })();
   } else if (browser.sidePanel && browser.windows) {
