@@ -4,7 +4,7 @@
   "description": "Test suite for WebScrapBook extension.",
   "version": "2.23.5",
   "author": "Danny Lin",
-  "minimum_chrome_version": "73",
+  "minimum_chrome_version": "85",
   "background": {
     "scripts": [
       "shared/lib/browser-polyfill.js",

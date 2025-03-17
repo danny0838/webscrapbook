@@ -309,22 +309,6 @@ Object.defineProperties(MochaQuery, Object.getOwnPropertyDescriptors({
     Object.defineProperty(this, 'noColumnCombinator', {value});
     return value;
   },
-  get noPartPseudo() {
-    // :part() CSS pseudo-element is not supported in Firefox < 72.
-    const value = this.noBrowser.condition ? this.noBrowser : new MochaQuery.Query(
-      (() => {
-        try {
-          document.querySelector('::part(dummy)');
-        } catch (ex) {
-          return true;
-        }
-        return false;
-      })(),
-      '::part() CSS pseudo-element not supported',
-    );
-    Object.defineProperty(this, 'noPartPseudo', {value});
-    return value;
-  },
   get noIsPseudo() {
     // :is() CSS pseudo-class is not supported in Firefox < 78 and Chromium < 88.
     const value = this.noBrowser.condition ? this.noBrowser : new MochaQuery.Query(
@@ -389,22 +373,6 @@ Object.defineProperties(MochaQuery, Object.getOwnPropertyDescriptors({
       '@layer CSS rule not supported',
     );
     Object.defineProperty(this, 'noAtLayer', {value});
-    return value;
-  },
-  get noRegexNamedGroup() {
-    // Not supported in Firefox < 78.
-    const value = this.noBrowser.condition ? this.noBrowser : new MochaQuery.Query(
-      (() => {
-        try {
-          new RegExp('(?<group>foo)\k<group>');
-        } catch (ex) {
-          return true;
-        }
-        return false;
-      })(),
-      'named capture group of RegExp not supported',
-    );
-    Object.defineProperty(this, 'noRegexNamedGroup', {value});
     return value;
   },
 }));

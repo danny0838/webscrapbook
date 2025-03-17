@@ -5,7 +5,7 @@
   "version": "2.23.5",
   "author": "Danny Lin",
   "default_locale": "en",
-  "minimum_chrome_version": "73",
+  "minimum_chrome_version": "85",
   "homepage_url": "https://github.com/danny0838/webscrapbook",
   "incognito": "split",
   "icons": {

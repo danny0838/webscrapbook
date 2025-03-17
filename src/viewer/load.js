@@ -136,11 +136,6 @@ const viewer = {
       // dialog isn't shown as the main tab is immediately redirected. As a
       // result, the user has to tweak the popup blocker setting in prior to
       // see the popup. Use browser.tabs.create to workaround the issue.
-      //
-      // @FIXME:
-      // In Firefox < 74, browser.tabs is undefined when the page is
-      // redirected from a browser.webRequest event handler (either through a
-      // blocking redirect or browser.tabs.update).
       if (scrapbook.userAgent.is('gecko')) {
         try {
           return await browser.tabs.create({url, active: false});
