@@ -947,7 +947,9 @@
   function initBeforeSendHeadersListener() {
     browser.webRequest.onBeforeSendHeaders.addListener((details) => {
       // rewrite only the requests sent by this extension
-      if (details.initiator !== location.origin) {
+      // Chromium: support details.initiator only
+      // Firefox: support details.originUrl only
+      if (!(details.initiator || details.originUrl).startsWith(location.origin)) {
         return;
       }
 
