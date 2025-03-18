@@ -4398,15 +4398,7 @@
   } = {}) {
     // supported by Chromium
     if (browser.system.display) {
-      const screens = await new Promise((resolve, reject) => {
-        browser.system.display.getInfo((result) => {
-          if (browser.runtime.lastError) {
-            reject(browser.runtime.lastError.message);
-          } else {
-            resolve(result);
-          }
-        });
-      }).catch(ex => null);
+      const screens = await browser.system.display.getInfo();
 
       if (screens) {
         let mainScreen;

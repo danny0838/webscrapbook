@@ -521,6 +521,10 @@
               "minArgs": 0,
               "maxArgs": 1
             },
+            "getKeys": {
+              "minArgs": 0,
+              "maxArgs": 0
+            },
             "remove": {
               "minArgs": 1,
               "maxArgs": 1
@@ -553,12 +557,24 @@
               "minArgs": 0,
               "maxArgs": 1
             },
+            "getKeys": {
+              "minArgs": 0,
+              "maxArgs": 0
+            },
             "remove": {
               "minArgs": 1,
               "maxArgs": 1
             },
             "set": {
               "minArgs": 1,
+              "maxArgs": 1
+            }
+          }
+        },
+        "system": {
+          "display": {
+            "getInfo": {
+              "minArgs": 0,
               "maxArgs": 1
             }
           }

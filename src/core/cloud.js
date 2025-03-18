@@ -48,14 +48,12 @@
       table.tBodies[0].textContent = '';
 
       const keys = await (async () => {
-        try {
-          // supported by Chromium >= 130
-          const keys = await browser.storage.sync.getKeys();
-          return keys;
-        } catch (ex) {
-          const entries = await browser.storage.sync.get();
-          return Object.keys(entries);
+        // supported by Chromium >= 130
+        if (browser.storage.sync.getKeys) {
+          return await browser.storage.sync.getKeys();
         }
+
+        return Object.keys(await browser.storage.sync.get());
       })();
 
       for (const key of keys) {
