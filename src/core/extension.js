@@ -64,6 +64,13 @@ scrapbook.waitTabLoading = async function (tab) {
  * ScrapBook utilities
  ***************************************************************************/
 
+scrapbook.checkPermissions = async function () {
+  return {
+    "webRequestBlocking": await browser.permissions.contains({permissions: ["webRequestBlocking"]}),
+    "host": await browser.permissions.contains({origins: ["http://*/", "https://*/"]}),
+  };
+};
+
 /**
  * @return {Promise<Array>} The URL match patterns for content pages.
  */

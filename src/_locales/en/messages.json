@@ -1395,6 +1395,18 @@
   "OptionsSaveLabel": {
     "message": "Save"
   },
+  "PermissionHostDesc": {
+    "message": "Host access permission of all sites (which can be configured in the extension manager) are required; otherwise a failure may occur when capturing a web page or resource, or when connecting to the configured backend server."
+  },
+  "PermissionHostSummary": {
+    "message": "Host permission not granted"
+  },
+  "PermissionWebRequestBlockingDesc": {
+    "message": "Some browsers require an extension be force-installed to grant web request blocking permission, without which may:\n• Being unable to send an appropriate referrer, which might be checked by the website for access control, causing some web pages or resources not captured properly.\n• Being unable to redirect to the viewer when visiting an archive file, which will be downloaded as a normal ZIP file instead.\n\nTo force install an extension:\n• Windows: Add a new string to the registry:\n  • Google Chrome: {main_key}\\SOFTWARE\\Policies\\Google\\Chrome\\ExtensionInstallForcelist\\{num} = {extension_id}\n  • Microsoft Edge: {main_key}\\SOFTWARE\\Policies\\Microsoft\\Edge\\ExtensionInstallForcelist\\{num} = {extension_id}\n  • Chromium: {main_key}\\SOFTWARE\\Policies\\Chromium\\ExtensionInstallForcelist\\{num} = {extension_id}\n  Where {main_key} can be either HKEY_CURRENT_USER (for the current user) or HKEY_LOCAL_MACHINE (for all users), {num} is any integer, and {extension_id} can be found in the extension management page.\n  Shutdown the browser (including related background processes) and restart it after done.\n• For configuration for another operating system or browser, see the official documentation:\n  • Google Chrome: https://chromeenterprise.google/intl/en_us/policies/#ExtensionInstallForcelist\n  • Microsoft Edge: https://learn.microsoft.com/en-us/DeployEdge/microsoft-edge-policies#extensioninstallforcelist"
+  },
+  "PermissionWebRequestBlockingSummary": {
+    "message": "Web request blocking permission not granted"
+  },
   "ScrapBookCommandBrowse": {
     "message": "Browse locally"
   },

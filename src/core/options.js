@@ -134,10 +134,17 @@ async function loadDetailStatus() {
 
 async function saveDetailStatus() {
   const status = {};
-  for (const elem of document.querySelectorAll('details')) {
+  for (const elem of document.querySelectorAll('#optionsWrapper details[id]')) {
     status[elem.id] = elem.open;
   }
   await scrapbook.cache.set(getDetailStatusKey(), status, 'storage');
+}
+
+async function refreshPermissions() {
+  const perms = await scrapbook.checkPermissions();
+  for (const [perm, value] of Object.entries(perms)) {
+    document.getElementById(`permissions_${perm}`).hidden = value;
+  }
 }
 
 function refreshForm() {
@@ -452,6 +459,12 @@ window.addEventListener("DOMContentLoaded", async (event) => {
 
   // load detail status
   await loadDetailStatus();
+
+  // check permissions and show warning, and update automatically
+  await refreshPermissions();
+
+  browser.permissions.onAdded.addListener(refreshPermissions);
+  browser.permissions.onRemoved.addListener(refreshPermissions);
 
   // event handlers
   document.getElementById("opt_capture.saveTo").addEventListener("change", renewCaptureSaveToDetails);
