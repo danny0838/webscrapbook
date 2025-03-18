@@ -532,6 +532,9 @@ function initStorageChangeListener() {
   // Run this after optionsAuto to make sure that scrapbook.options is
   // up-to-date when the listener is called.
   browser.storage.onChanged.addListener((changes, areaName) => {
+    if ("runtime.backgroundKeeperInterval" in changes) {
+      updateBackgroundKeeper();
+    }
     if (toolbarOptions.some(x => x in changes)) {
       updateAction(); // async
     }
@@ -1121,6 +1124,35 @@ function initExternalMessageListener() {
   });
 }
 
+function updateBackgroundKeeper(...args) {
+  if (browser.runtime.getManifest().background.persistent) {
+    return;
+  }
+
+  let timer;
+
+  // eslint-disable-next-line no-func-assign
+  const fn = updateBackgroundKeeper = () => {
+    if (timer) {
+      clearInterval(timer);
+      timer = null;
+    }
+
+    const interval = scrapbook.getOption("runtime.backgroundKeeperInterval");
+    if (interval > 0) {
+      // Keep the service worker alive to prevent memory cache reset,
+      // especially `capturedUrls`, which bounds to a "browser session".
+      //
+      // The service worker shuts down on 30 seconds of inactivity, and
+      // prevented by calling an API.
+      // ref: https://developer.chrome.com/docs/extensions/develop/concepts/service-workers/lifecycle
+      timer = setInterval(browser.runtime.getPlatformInfo, interval);
+    }
+  };
+
+  return fn(...args);
+}
+
 async function init() {
   initStorageChangeListener();
   initCommandsListener();
@@ -1131,8 +1163,10 @@ async function init() {
   initMenusListener();
   initInstallListener();
 
+  await scrapbook.loadOptionsAuto;
+  updateBackgroundKeeper();
+
   if (browser.runtime.getManifest().background.persistent) {
-    await scrapbook.loadOptionsAuto;
     updateAction();
     updateMenus();
   }
