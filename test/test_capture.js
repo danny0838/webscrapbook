@@ -1128,7 +1128,7 @@ p { background-image: url("data:image/bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAE
         assert.exists(zip.file("abc.html"));
         assert.exists(zip.file("abc.xml"));
         assert.exists(zip.file("abc.bmp"));
-        assert.exists(zip.file("abc.jpeg"));
+        assert.exists(zip.file("abc.jpg"));
         assert.exists(zip.file("abc.gif"));
         assert.exists(zip.file("abc.png"));
         assert.exists(zip.file("abc.svg"));
@@ -1155,7 +1155,7 @@ p { background-image: url("data:image/bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAE
         assert.strictEqual(imgs[0].getAttribute('src'), "abc.html");
         assert.strictEqual(imgs[1].getAttribute('src'), "abc.xml");
         assert.strictEqual(imgs[2].getAttribute('src'), "abc.bmp");
-        assert.strictEqual(imgs[3].getAttribute('src'), "abc.jpeg");
+        assert.strictEqual(imgs[3].getAttribute('src'), "abc.jpg");
         assert.strictEqual(imgs[4].getAttribute('src'), "abc.gif");
         assert.strictEqual(imgs[5].getAttribute('src'), "abc.png");
         assert.strictEqual(imgs[6].getAttribute('src'), "abc.svg");
