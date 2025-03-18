@@ -272,6 +272,7 @@ if (typeof browser !== 'undefined') {
     "geolocation.timeout": 3000,
     "geolocation.maximumAge": 0,
     "geolocation.mapUrl": "https://maps.google.com/?q=%latitude%,%longitude%",
+    "runtime.backgroundKeeperInterval": 19100,
   };
 
   const OPTION_PARSERS = {
