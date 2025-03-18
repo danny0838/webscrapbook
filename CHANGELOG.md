@@ -3,6 +3,10 @@
 * Versions before 1.0 are in initial development. APIs are not stable for these versions, even a `y` version can involve a breaking change, and only partial notable changes are summarized in this document. See full commit history in the source repository for details.
 * Backend server requirement in this document refers to the version of [`webscrapbook` Python package](https://github.com/danny0838/pywebscrapbook) (or PyWebScrapBook).
 
+## [2.17.2] - 2025-03-19
+* Fixed unexpected `undefined` values when migrating synced options from an older version in Firefox.
+* Miscellaneous improvements and bug fixes of the internal code.
+
 ## [2.17.1] - 2025-03-17
 * Fixed non-working referrer rewriting for Firefox.
 * Miscellaneous improvements of the internal code.
