@@ -745,7 +745,9 @@
     if (options) {
       const rv = {};
       for (const key in keys) {
-        rv[key] = options[key];
+        if (key in options) {
+          rv[key] = options[key];
+        }
       }
       return rv;
     }
