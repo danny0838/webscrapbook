@@ -1395,6 +1395,18 @@
   "OptionsSaveLabel": {
     "message": "儲存"
   },
+  "PermissionHostDesc": {
+    "message": "需要授予所有網站主機的存取權限（可在套件管理頁面中設定），否則可能無法擷取部分網頁或資源，或無法連線至設定的後端伺服器。"
+  },
+  "PermissionHostSummary": {
+    "message": "主機權限未授予"
+  },
+  "PermissionWebRequestBlockingDesc": {
+    "message": "有些瀏覽器需要強制安裝套件才能授予網路請求阻擋權限；若無此權限，將有以下影響：\n• 擷取網頁時，無法送出適當的參照網址（referrer），而有些網站會根據參照網址控制存取，這可能導致部分網頁或資源無法正常擷取。\n• 瀏覽封存檔案時，無法重導向至封存頁面檢視器，而會視為一般壓縮檔下載。\n\n強制安裝套件的方法：\n• Windows: 在登錄檔加入一個「字串值」：\n  • Google Chrome: {主機碼}\\SOFTWARE\\Policies\\Google\\Chrome\\ExtensionInstallForcelist\\{編號} = {套件ID}\n  • Microsoft Edge: {主機碼}\\SOFTWARE\\Policies\\Microsoft\\Edge\\ExtensionInstallForcelist\\{編號} = {套件ID}\n  • Chromium: {主機碼}\\SOFTWARE\\Policies\\Chromium\\ExtensionInstallForcelist\\{編號} = {套件ID}\n  其中 {主機碼} 可為 HKEY_CURRENT_USER（對目前使用者）或 HKEY_LOCAL_MACHINE（對所有使用者），{編號} 為任意整數，{套件ID} 可在套件管理頁面中查詢。\n  完成後須關閉瀏覽器（包括相關背景程序）並重新啟動。\n• 其他作業系統或瀏覽器的設定方法請參見官方文件：\n  • Google Chrome: https://chromeenterprise.google/intl/zh_tw/policies/#ExtensionInstallForcelist\n  • Microsoft Edge: https://learn.microsoft.com/zh-tw/DeployEdge/microsoft-edge-policies#extensioninstallforcelist"
+  },
+  "PermissionWebRequestBlockingSummary": {
+    "message": "網路請求阻擋權限未授予"
+  },
   "ScrapBookCommandBrowse": {
     "message": "在檔案管理員檢視"
   },

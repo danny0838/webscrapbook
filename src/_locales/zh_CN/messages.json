@@ -1395,6 +1395,18 @@
   "OptionsSaveLabel": {
     "message": "保存"
   },
+  "PermissionHostDesc": {
+    "message": "需要授予所有网站主机的存取权限（可在套件管理页面中设置），否则可能无法获取部分网页或资源，或无法连接至设置的后端服务器。"
+  },
+  "PermissionHostSummary": {
+    "message": "主机权限未授予"
+  },
+  "PermissionWebRequestBlockingDesc": {
+    "message": "有些浏览器需要强制安装套件才能授予网络请求阻挡权限；若无此权限，将有以下影响：\n• 获取网页时，无法送出适当的参照网址（referrer），而有些网站会根据参照网址限制访问，这可能导致部分网页或资源无法正常获取。\n• 浏览封存文件时，无法重导向至封存页面查看器，而会视为一般压缩文件下载。\n\n强制安装套件的方法：\n• Windows: 在注册表加入一个“字符串”：\n  • Google Chrome: {主机码}\\SOFTWARE\\Policies\\Google\\Chrome\\ExtensionInstallForcelist\\{编号} = {套件ID}\n  • Microsoft Edge: {主机码}\\SOFTWARE\\Policies\\Microsoft\\Edge\\ExtensionInstallForcelist\\{编号} = {套件ID}\n  • Chromium: {主机码}\\SOFTWARE\\Policies\\Chromium\\ExtensionInstallForcelist\\{编号} = {套件ID}\n  其中 {主机码} 可为 HKEY_CURRENT_USER（对目前用户）或 HKEY_LOCAL_MACHINE（对所有用户），{编号} 为任意整数，{套件ID} 可在套件管理页面中查找。\n  完成后须关闭浏览器（包括相关背景进程）并重新启动。\n• 其他操作系统或浏览器的设置方法请参见官方文件：\n  • Google Chrome: https://chromeenterprise.google/intl/zh_cn/policies/#ExtensionInstallForcelist\n  • Microsoft Edge: https://learn.microsoft.com/zh-cn/DeployEdge/microsoft-edge-policies#extensioninstallforcelist"
+  },
+  "PermissionWebRequestBlockingSummary": {
+    "message": "网络请求阻挡权限未授予"
+  },
   "ScrapBookCommandBrowse": {
     "message": "在文件管理员检视"
   },

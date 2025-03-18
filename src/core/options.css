@@ -1,3 +1,28 @@
+#permissionsWrapper {
+  position: sticky;
+  z-index: 1;
+  top: 0;
+  max-height: 100vh;
+  overflow-y: auto;
+  background: white;
+}
+
+#permissionsWrapper details {
+  margin-bottom: .5em;
+  border: 1px solid #EEE;
+  background: #FEE;
+}
+
+#permissionsWrapper details > summary {
+  padding: .5em;
+  background-color: #F11;
+}
+
+#permissionsWrapper details > div {
+  margin: .5em;
+  white-space: pre-wrap;
+}
+
 #optionsWrapper details {
   margin-bottom: .5em;
   border: 1px solid #EEE;
