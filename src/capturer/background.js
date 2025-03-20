@@ -50,7 +50,7 @@
   }
 
   /**
-   * @return {integer[]} bookIds - id of books with a valid cache
+   * @return {string[]} bookIds - id of books with a valid cache
    */
   async function updateBookCaches() {
     if (scrapbook.hasServer()) {
@@ -443,7 +443,7 @@
   }
 
   /**
-   * @param {integer[]} [bookIds] - ID of books with a valid cache
+   * @param {string[]} [bookIds] - ID of books with a valid cache
    */
   function checkDuplicate(url, bookIds) {
     if (background.getCapturedUrls({urls: [url]})[url]) {

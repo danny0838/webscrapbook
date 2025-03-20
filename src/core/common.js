@@ -783,7 +783,7 @@
   /****************************************************************************
    * Cache system
    *
-   * - IndexedDB is powerful and performant but not available for content
+   * - IndexedDB is powerful and performant but not available in content
    *   scripts, and stored data in normal and incognito windows aren't shared
    *   with each other. IndexedDB is not available in Firefox private windows
    *   and will automatically fallback to storage.
@@ -1413,14 +1413,14 @@
   /**
    * A function that can be invoked through messaging.
    * @typedef {Function} invokable
-   * @param {Object} params
+   * @param {Object} [params]
    */
 
   /**
    * Invoke an invokable command in the extension script.
    *
    * @param {Object} params
-   * @param {string} params.id
+   * @param {string} [params.id]
    * @param {string} params.cmd
    * @param {Object} [params.args]
    * @return {Promise<Object>}
@@ -1453,7 +1453,7 @@
    * Invoke an invokable command in a frame.
    *
    * @param {Object} params
-   * @param {integer} params.frameWindow
+   * @param {Window} params.frameWindow
    * @param {string} params.cmd
    * @param {Object} [params.args]
    * @return {Promise<Object>}
