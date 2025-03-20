@@ -133,6 +133,8 @@ class TestSuite {
     const params = {
       url,
 
+      incognito: (await browser.windows.getCurrent()).incognito,
+
       // Firefox < 86: `focused` in `windows.create()` causes an error.
       // Firefox >= 86: ignores `focused` in `windows.create()`.
       ...(!(userAgent.is('firefox') && userAgent.major < 86) && {focused: false}),
@@ -222,6 +224,7 @@ class TestSuite {
         ],
       },
       windowCreateData: {
+        incognito: (await browser.windows.getCurrent()).incognito,
         focused: false,
         type: "popup",
         width: 50,

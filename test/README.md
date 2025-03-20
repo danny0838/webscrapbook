@@ -24,6 +24,8 @@ Unit tests
 
 6. Click on the browser action of the test suite extension. A tab will be opened and the test will start automatically. Alternatively, right-click on the browser action for subgroup tests.
 
+7. Do the same tests in a private window for Firefox (which may behave differently from in a normal window).
+
 ### Notes
 
 * It's recommended to use a different user account or profile of the browser, or use another build of browser (such as Development Edition of Firefox) for tests.
