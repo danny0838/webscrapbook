@@ -19,10 +19,10 @@
 
   async function clearCapturerCaches() {
     const tableSet = new Set(["captureMissionCache", "batchCaptureMissionCache", "fetchCache", "blobCache"]);
-    await scrapbook.cache.remove((obj) => {
+    await scrapbook.cache.removeAll((obj) => {
       return tableSet.has(obj.table);
     }, 'indexedDB');
-    await scrapbook.cache.remove((obj) => {
+    await scrapbook.cache.removeAll((obj) => {
       return tableSet.has(obj.table);
     }, 'storage');
   }

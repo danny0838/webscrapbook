@@ -990,10 +990,18 @@
     },
 
     /**
+     * @param {string|Object} key
+     */
+    async remove(key, cache = this.current) {
+      const keyStr = (typeof key === "string") ? key : JSON.stringify(key);
+      return this[cache].remove(keyStr);
+    },
+
+    /**
      * @param {string|Object|string[]|Object[]|Function} keys - a filter
      *     function or a key (string or Object) or an array of keys
      */
-    async remove(keys, cache = this.current) {
+    async removeAll(keys, cache = this.current) {
       if (typeof keys !== 'function') {
         if (!Array.isArray(keys)) {
           keys = [keys];
@@ -1002,7 +1010,7 @@
           return (typeof key === "string") ? key : JSON.stringify(key);
         });
       }
-      return this[cache].remove(keys);
+      return this[cache].removeAll(keys);
     },
 
     storage: {
@@ -1054,7 +1062,11 @@
         return await browser.storage.local.set({[key]: await this._serializeObject(value)});
       },
 
-      async remove(keys) {
+      async remove(key) {
+        return await browser.storage.local.remove(key);
+      },
+
+      async removeAll(keys) {
         if (typeof keys === 'function') {
           keys = Object.keys(await this.getAll(keys));
         }
@@ -1168,7 +1180,18 @@
         });
       },
 
-      async remove(keys) {
+      async remove(key) {
+        return await this._transaction(async (objectStore) => {
+          objectStore.delete(key);
+        }, "readwrite").catch(ex => {
+          if (ex.name === 'InvalidStateError') {
+            return scrapbook.cache.storage.remove(key);
+          }
+          throw ex;
+        });
+      },
+
+      async removeAll(keys) {
         return await this._transaction(async (objectStore) => {
           if (typeof keys === 'function') {
             const filter = keys;
@@ -1194,7 +1217,7 @@
           }
         }, "readwrite").catch(ex => {
           if (ex.name === 'InvalidStateError') {
-            return scrapbook.cache.storage.remove(keys);
+            return scrapbook.cache.storage.removeAll(keys);
           }
           throw ex;
         });
@@ -1238,7 +1261,11 @@
         return sessionStorage.setItem(key, JSON.stringify(await this._serializeObject(value)));
       },
 
-      async remove(keys) {
+      async remove(key) {
+        sessionStorage.removeItem(key);
+      },
+
+      async removeAll(keys) {
         if (typeof keys === 'function') {
           const filter = keys;
           // reverse the order to prevent an error due to index shift after removal

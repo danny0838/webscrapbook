@@ -49,7 +49,7 @@ describe('core/common.js', function () {
         await dbDelete(DB_NAME);
       } catch (ex) {
         console.error('Failed to delete database "%s": %s', DB_NAME, ex);
-        await scrapbook.cache.remove(() => true, "indexedDB");
+        await scrapbook.cache.removeAll(() => true, "indexedDB");
       }
 
       sessionStorage.clear();
@@ -232,14 +232,6 @@ describe('core/common.js', function () {
             });
           });
 
-          it('keys as object[]', async function () {
-            await scrapbook.cache.remove([key1, key2], STORAGE);
-            assert.deepEqual(await scrapbook.cache.getAll(null, STORAGE), {
-              [JSON.stringify(key3)]: "value789",
-              [JSON.stringify(key4)]: "value012",
-            });
-          });
-
           it('keys as string', async function () {
             await scrapbook.cache.remove(JSON.stringify(key1), STORAGE);
             assert.deepEqual(await scrapbook.cache.getAll(null, STORAGE), {
@@ -248,9 +240,31 @@ describe('core/common.js', function () {
               [JSON.stringify(key4)]: "value012",
             });
           });
+        });
+
+        describe('removeAll', function () {
+          const key1 = {table: "test", id: "123"};
+          const key2 = {table: "test", id: "456"};
+          const key3 = {table: "test", id: "789"};
+          const key4 = {table: "test2", id: "012"};
+
+          beforeEach(async function () {
+            await scrapbook.cache.set(key1, "value123", STORAGE);
+            await scrapbook.cache.set(key2, "value456", STORAGE);
+            await scrapbook.cache.set(key3, "value789", STORAGE);
+            await scrapbook.cache.set(key4, "value012", STORAGE);
+          });
+
+          it('keys as object[]', async function () {
+            await scrapbook.cache.removeAll([key1, key2], STORAGE);
+            assert.deepEqual(await scrapbook.cache.getAll(null, STORAGE), {
+              [JSON.stringify(key3)]: "value789",
+              [JSON.stringify(key4)]: "value012",
+            });
+          });
 
           it('keys as string[]', async function () {
-            await scrapbook.cache.remove([JSON.stringify(key1), JSON.stringify(key2)], STORAGE);
+            await scrapbook.cache.removeAll([JSON.stringify(key1), JSON.stringify(key2)], STORAGE);
             assert.deepEqual(await scrapbook.cache.getAll(null, STORAGE), {
               [JSON.stringify(key3)]: "value789",
               [JSON.stringify(key4)]: "value012",
@@ -258,7 +272,7 @@ describe('core/common.js', function () {
           });
 
           it('keys as Function', async function () {
-            await scrapbook.cache.remove(obj => obj.table === "test", STORAGE);
+            await scrapbook.cache.removeAll(obj => obj.table === "test", STORAGE);
             assert.deepEqual(await scrapbook.cache.getAll(null, STORAGE), {
               [JSON.stringify(key4)]: "value012",
             });

@@ -138,10 +138,10 @@ a {
     }
 
     /* remove cache entry for all IDs that are not being viewed */
-    await scrapbook.cache.remove((obj) => {
+    await scrapbook.cache.removeAll((obj) => {
       return obj.table === 'pageCache' && !usedIds.has(obj.id);
     }, 'indexedDB');
-    await scrapbook.cache.remove((obj) => {
+    await scrapbook.cache.removeAll((obj) => {
       return obj.table === 'pageCache' && !usedIds.has(obj.id);
     }, 'storage');
   }
