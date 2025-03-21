@@ -31,6 +31,243 @@ const $it = $(it);
 const r = String.raw;
 
 describe('core/common.js', function () {
+  $describe.skipIf($.noExtensionBrowser)('scrapbook.cache', function () {
+    const DB_NAME = "scrapbook";
+
+    async function dbDelete(dbName) {
+      return await new Promise((resolve, reject) => {
+        const req = indexedDB.deleteDatabase(dbName);
+        req.onsuccess = (event) => resolve(event.target.result);
+        req.onerror = (event) => reject(event.target.error);
+      });
+    }
+
+    async function cleanUp() {
+      await browser.storage.local.clear();
+
+      try {
+        await dbDelete(DB_NAME);
+      } catch (ex) {
+        console.error('Failed to delete database "%s": %s', DB_NAME, ex);
+        await scrapbook.cache.remove(() => true, "indexedDB");
+      }
+
+      sessionStorage.clear();
+    }
+
+    before(cleanUp);
+
+    afterEach(cleanUp);
+
+    for (const STORAGE of ["storage", "indexedDB", "sessionStorage"]) {
+      describe(STORAGE, function () {
+        describe('set', function () {
+          const key1 = {table: "test", id: "123"};
+          const key2 = {table: "test", id: "456"};
+          const key3 = {table: "test", id: "789"};
+
+          it('key as object', async function () {
+            await scrapbook.cache.set(key1, "value123", STORAGE);
+            await scrapbook.cache.set(key2, "value456", STORAGE);
+            await scrapbook.cache.set(key2, "value456-2", STORAGE);
+            assert.deepEqual(await scrapbook.cache.getAll(null, STORAGE), {
+              [JSON.stringify(key1)]: "value123",
+              [JSON.stringify(key2)]: "value456-2",
+            });
+          });
+
+          it('key as string', async function () {
+            await scrapbook.cache.set(JSON.stringify(key1), "value123", STORAGE);
+            await scrapbook.cache.set(JSON.stringify(key2), "value456", STORAGE);
+            await scrapbook.cache.set(JSON.stringify(key2), "value456-2", STORAGE);
+            assert.deepEqual(await scrapbook.cache.getAll(null, STORAGE), {
+              [JSON.stringify(key1)]: "value123",
+              [JSON.stringify(key2)]: "value456-2",
+            });
+          });
+
+          it('should save and read basic types as-is', async function () {
+            var key = {table: "test", id: "123"};
+
+            // var value = undefined;
+            // await scrapbook.cache.set(key, value, STORAGE);
+            // assert.strictEqual(await scrapbook.cache.get(key, STORAGE), value);
+
+            var value = null;
+            await scrapbook.cache.set(key, value, STORAGE);
+            assert.strictEqual(await scrapbook.cache.get(key, STORAGE), value);
+
+            var value = true;
+            await scrapbook.cache.set(key, value, STORAGE);
+            assert.strictEqual(await scrapbook.cache.get(key, STORAGE), value);
+
+            var value = 123;
+            await scrapbook.cache.set(key, value, STORAGE);
+            assert.strictEqual(await scrapbook.cache.get(key, STORAGE), value);
+
+            var value = "my string";
+            await scrapbook.cache.set(key, value, STORAGE);
+            assert.strictEqual(await scrapbook.cache.get(key, STORAGE), value);
+
+            var value = [123, "abc"];
+            await scrapbook.cache.set(key, value, STORAGE);
+            assert.deepEqual(await scrapbook.cache.get(key, STORAGE), value);
+
+            var value = {abc: 123, def: 456};
+            await scrapbook.cache.set(key, value, STORAGE);
+            assert.deepEqual(await scrapbook.cache.get(key, STORAGE), value);
+
+            var value = new Blob(["foo"], {type: "text/plain"});
+            await scrapbook.cache.set(key, value, STORAGE);
+            var value2 = await scrapbook.cache.get(key, STORAGE);
+            assert.strictEqual(value.type, value2.type);
+            assert.strictEqual(value.size, value2.size);
+            assert.deepEqual(await scrapbook.readFileAsText(value), "foo");
+
+            var value = new File(["foo"], "myfile", {type: "text/plain", lastModified: Date.now()});
+            await scrapbook.cache.set(key, value, STORAGE);
+            var value2 = await scrapbook.cache.get(key, STORAGE);
+            assert.strictEqual(value.name, value2.name);
+            assert.strictEqual(value.type, value2.type);
+            assert.strictEqual(value.size, value2.size);
+            assert.strictEqual(value.lastModified, value2.lastModified);
+            assert.deepEqual(await scrapbook.readFileAsText(value), "foo");
+          });
+        });
+
+        describe('get', function () {
+          const key1 = {table: "test", id: "123"};
+          const key2 = {table: "test", id: "456"};
+
+          beforeEach(async function () {
+            await scrapbook.cache.set(key1, "value123", STORAGE);
+            await scrapbook.cache.set(key2, "value456", STORAGE);
+          });
+
+          it('key as object', async function () {
+            assert.strictEqual(await scrapbook.cache.get(key1, STORAGE), "value123");
+            assert.strictEqual(await scrapbook.cache.get(key2, STORAGE), "value456");
+          });
+
+          it('key as string', async function () {
+            assert.strictEqual(await scrapbook.cache.get(JSON.stringify(key1), STORAGE), "value123");
+            assert.strictEqual(await scrapbook.cache.get(JSON.stringify(key2), STORAGE), "value456");
+          });
+        });
+
+        describe('getAll', function () {
+          const key1 = {table: "test", id: "123"};
+          const key2 = {table: "test", id: "456"};
+          const key3 = {table: "test", id: "789"};
+          const key4 = {table: "test2", id: "012"};
+
+          beforeEach(async function () {
+            await scrapbook.cache.set(key1, "value123", STORAGE);
+            await scrapbook.cache.set(key2, "value456", STORAGE);
+            await scrapbook.cache.set(key3, "value789", STORAGE);
+            await scrapbook.cache.set(key4, "value012", STORAGE);
+          });
+
+          it('filter as undefined', async function () {
+            assert.deepEqual(await scrapbook.cache.getAll(undefined, STORAGE), {
+              [JSON.stringify(key1)]: "value123",
+              [JSON.stringify(key2)]: "value456",
+              [JSON.stringify(key3)]: "value789",
+              [JSON.stringify(key4)]: "value012",
+            });
+          });
+
+          it('filter as null', async function () {
+            assert.deepEqual(await scrapbook.cache.getAll(null, STORAGE), {
+              [JSON.stringify(key1)]: "value123",
+              [JSON.stringify(key2)]: "value456",
+              [JSON.stringify(key3)]: "value789",
+              [JSON.stringify(key4)]: "value012",
+            });
+          });
+
+          it('filter as object', async function () {
+            assert.deepEqual(await scrapbook.cache.getAll({table: "test"}, STORAGE), {
+              [JSON.stringify(key1)]: "value123",
+              [JSON.stringify(key2)]: "value456",
+              [JSON.stringify(key3)]: "value789",
+            });
+          });
+
+          it('filter as string', async function () {
+            assert.deepEqual(await scrapbook.cache.getAll(JSON.stringify({table: "test"}), STORAGE), {
+              [JSON.stringify(key1)]: "value123",
+              [JSON.stringify(key2)]: "value456",
+              [JSON.stringify(key3)]: "value789",
+            });
+          });
+
+          it('filter as Function', async function () {
+            assert.deepEqual(await scrapbook.cache.getAll(obj => obj.table === 'test' && obj.id <= "456", STORAGE), {
+              [JSON.stringify(key1)]: "value123",
+              [JSON.stringify(key2)]: "value456",
+            });
+          });
+        });
+
+        describe('remove', function () {
+          const key1 = {table: "test", id: "123"};
+          const key2 = {table: "test", id: "456"};
+          const key3 = {table: "test", id: "789"};
+          const key4 = {table: "test2", id: "012"};
+
+          beforeEach(async function () {
+            await scrapbook.cache.set(key1, "value123", STORAGE);
+            await scrapbook.cache.set(key2, "value456", STORAGE);
+            await scrapbook.cache.set(key3, "value789", STORAGE);
+            await scrapbook.cache.set(key4, "value012", STORAGE);
+          });
+
+          it('keys as object', async function () {
+            await scrapbook.cache.remove(key1, STORAGE);
+            assert.deepEqual(await scrapbook.cache.getAll(null, STORAGE), {
+              [JSON.stringify(key2)]: "value456",
+              [JSON.stringify(key3)]: "value789",
+              [JSON.stringify(key4)]: "value012",
+            });
+          });
+
+          it('keys as object[]', async function () {
+            await scrapbook.cache.remove([key1, key2], STORAGE);
+            assert.deepEqual(await scrapbook.cache.getAll(null, STORAGE), {
+              [JSON.stringify(key3)]: "value789",
+              [JSON.stringify(key4)]: "value012",
+            });
+          });
+
+          it('keys as string', async function () {
+            await scrapbook.cache.remove(JSON.stringify(key1), STORAGE);
+            assert.deepEqual(await scrapbook.cache.getAll(null, STORAGE), {
+              [JSON.stringify(key2)]: "value456",
+              [JSON.stringify(key3)]: "value789",
+              [JSON.stringify(key4)]: "value012",
+            });
+          });
+
+          it('keys as string[]', async function () {
+            await scrapbook.cache.remove([JSON.stringify(key1), JSON.stringify(key2)], STORAGE);
+            assert.deepEqual(await scrapbook.cache.getAll(null, STORAGE), {
+              [JSON.stringify(key3)]: "value789",
+              [JSON.stringify(key4)]: "value012",
+            });
+          });
+
+          it('keys as Function', async function () {
+            await scrapbook.cache.remove(obj => obj.table === "test", STORAGE);
+            assert.deepEqual(await scrapbook.cache.getAll(null, STORAGE), {
+              [JSON.stringify(key4)]: "value012",
+            });
+          });
+        });
+      });
+    }
+  });
+
   describe('scrapbook.escapeFilename', function () {
     it('basic', function () {
       // escape " ", "%", "?", "#"
