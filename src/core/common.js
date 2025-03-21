@@ -1067,6 +1067,15 @@
         return obj;
       },
 
+      async _getKeys() {
+        // supported by Chromium >= 130
+        if (browser.storage.local.getKeys) {
+          return await browser.storage.local.getKeys();
+        }
+
+        return Object.keys(await browser.storage.local.get());
+      },
+
       async get(key) {
         const items = await browser.storage.local.get(key);
         return await this._deserializeObject(items[key]);
@@ -1094,7 +1103,7 @@
 
       async removeAll(filter) {
         const keys = [];
-        for (const key of Object.keys(await this.getAll(keys))) {
+        for (const key of (await this._getKeys())) {
           if (scrapbook.cache._applyFilter(key, filter)) {
             keys.push(key);
           }
