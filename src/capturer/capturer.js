@@ -423,10 +423,13 @@
   };
 
   capturer.clearFileCache = async function ({timeId}) {
-    const tableSet = new Set(["pageCache", "fetchCache"]);
-    await scrapbook.cache.removeAll((obj) => {
-      return tableSet.has(obj.table) && obj.id === timeId;
-    }, 'indexedDB');
+    const filter = {
+      includes: {
+        table: new Set(["pageCache", "fetchCache"]),
+        id: timeId,
+      },
+    };
+    await scrapbook.cache.removeAll(filter, 'indexedDB');
   };
 
   /**

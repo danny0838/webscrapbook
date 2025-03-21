@@ -18,13 +18,13 @@
   'use strict';
 
   async function clearCapturerCaches() {
-    const tableSet = new Set(["captureMissionCache", "batchCaptureMissionCache", "fetchCache", "blobCache"]);
-    await scrapbook.cache.removeAll((obj) => {
-      return tableSet.has(obj.table);
-    }, 'indexedDB');
-    await scrapbook.cache.removeAll((obj) => {
-      return tableSet.has(obj.table);
-    }, 'storage');
+    const filter = {
+      includes: {
+        table: new Set(["captureMissionCache", "batchCaptureMissionCache", "fetchCache", "blobCache"]),
+      },
+    };
+    await scrapbook.cache.removeAll(filter, 'indexedDB');
+    await scrapbook.cache.removeAll(filter, 'storage');
   }
 
 

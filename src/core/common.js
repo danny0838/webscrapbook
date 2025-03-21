@@ -947,10 +947,61 @@
       });
     },
 
-    _filterByObject(filter, obj) {
-      for (let cond in filter) {
-        if (obj[cond] !== filter[cond]) {
-          return false;
+    /**
+     * @typedef {Object} cacheFilter
+     * @property {Object<string, (string|string[]|Set<string>)>} [includes]
+     * @property {Object<string, (string|string[]|Set<string>)>} [excludes]
+     */
+
+    /**
+     * @param {string} key
+     * @param {cacheFilter} [filter]
+     */
+    _applyFilter(key, filter) {
+      let obj;
+      try {
+        obj = JSON.parse(key);
+      } catch (ex) {
+        // invalid JSON format => meaning not a cache
+        return false;
+      }
+
+      filter = filter || {};
+
+      if (filter.includes) {
+        for (const key in filter.includes) {
+          const value = filter.includes[key];
+          if (value instanceof Set) {
+            if (!value.has(obj[key])) {
+              return false;
+            }
+          } else if (Array.isArray(value)) {
+            if (!value.includes(obj[key])) {
+              return false;
+            }
+          } else {
+            if (obj[key] !== value) {
+              return false;
+            }
+          }
+        }
+      }
+      if (filter.excludes) {
+        for (const key in filter.excludes) {
+          const value = filter.excludes[key];
+          if (value instanceof Set) {
+            if (value.has(obj[key])) {
+              return false;
+            }
+          } else if (Array.isArray(value)) {
+            if (value.includes(obj[key])) {
+              return false;
+            }
+          } else {
+            if (obj[key] === value) {
+              return false;
+            }
+          }
         }
       }
       return true;
@@ -965,19 +1016,9 @@
     },
 
     /**
-     * @param {string|Object|Function} filter
+     * @param {cacheFilter} filter
      */
     async getAll(filter, cache = this.current) {
-      if (typeof filter === 'function') {
-        // use unchanged filter
-      } else if (typeof filter === 'object') {
-        filter = this._filterByObject.bind(this, filter);
-      } else if (typeof filter === 'string') {
-        filter = this._filterByObject.bind(this, JSON.parse(filter));
-      } else {
-        // unsupported type
-        filter = this._filterByObject.bind(this, {});
-      }
       return this[cache].getAll(filter);
     },
 
@@ -998,19 +1039,10 @@
     },
 
     /**
-     * @param {string|Object|string[]|Object[]|Function} keys - a filter
-     *     function or a key (string or Object) or an array of keys
+     * @param {cacheFilter} filter
      */
-    async removeAll(keys, cache = this.current) {
-      if (typeof keys !== 'function') {
-        if (!Array.isArray(keys)) {
-          keys = [keys];
-        }
-        keys = keys.map((key) => {
-          return (typeof key === "string") ? key : JSON.stringify(key);
-        });
-      }
-      return this[cache].removeAll(keys);
+    async removeAll(filter, cache = this.current) {
+      return this[cache].removeAll(filter);
     },
 
     storage: {
@@ -1041,17 +1073,11 @@
       },
 
       async getAll(filter) {
-        const items = await browser.storage.local.get(null);
-        for (let key in items) {
-          try {
-            let obj = JSON.parse(key);
-            if (!filter(obj)) {
-              throw new Error("filter not matched");
-            }
+        const items = await browser.storage.local.get();
+        for (const key in items) {
+          if (scrapbook.cache._applyFilter(key, filter)) {
             items[key] = await this._deserializeObject(items[key]);
-          } catch (ex) {
-            // invalid JSON format => meaning not a cache
-            // or does not match the filter
+          } else {
             delete(items[key]);
           }
         }
@@ -1066,9 +1092,12 @@
         return await browser.storage.local.remove(key);
       },
 
-      async removeAll(keys) {
-        if (typeof keys === 'function') {
-          keys = Object.keys(await this.getAll(keys));
+      async removeAll(filter) {
+        const keys = [];
+        for (const key of Object.keys(await this.getAll(keys))) {
+          if (scrapbook.cache._applyFilter(key, filter)) {
+            keys.push(key);
+          }
         }
         return await browser.storage.local.remove(keys);
       },
@@ -1153,11 +1182,9 @@
                 resolve(result);
                 return;
               }
-              try {
-                if (filter(JSON.parse(cursor.key))) {
-                  result[cursor.key] = cursor.value;
-                }
-              } catch (ex) {}
+              if (scrapbook.cache._applyFilter(cursor.key, filter)) {
+                result[cursor.key] = cursor.value;
+              }
               cursor.continue();
             };
           });
@@ -1191,33 +1218,24 @@
         });
       },
 
-      async removeAll(keys) {
+      async removeAll(filter) {
         return await this._transaction(async (objectStore) => {
-          if (typeof keys === 'function') {
-            const filter = keys;
-            return await new Promise((resolve, reject) => {
-              objectStore.openCursor().onsuccess = (event) => {
-                const cursor = event.target.result;
-                if (!cursor) {
-                  resolve();
-                  return;
-                }
-                try {
-                  if (filter(JSON.parse(cursor.key))) {
-                    cursor.delete();
-                  }
-                } catch (ex) {}
-                cursor.continue();
-              };
-            });
-          }
-
-          for (const key of keys) {
-            objectStore.delete(key);
-          }
+          return await new Promise((resolve, reject) => {
+            objectStore.openCursor().onsuccess = (event) => {
+              const cursor = event.target.result;
+              if (!cursor) {
+                resolve();
+                return;
+              }
+              if (scrapbook.cache._applyFilter(cursor.key, filter)) {
+                cursor.delete();
+              }
+              cursor.continue();
+            };
+          });
         }, "readwrite").catch(ex => {
           if (ex.name === 'InvalidStateError') {
-            return scrapbook.cache.storage.removeAll(keys);
+            return scrapbook.cache.storage.removeAll(filter);
           }
           throw ex;
         });
@@ -1242,15 +1260,8 @@
         const items = {};
         for (let i = 0, I = sessionStorage.length; i < I; i++) {
           const key = sessionStorage.key(i);
-          try {
-            let obj = JSON.parse(key);
-            if (!filter(obj)) {
-              throw new Error("filter not matched");
-            }
+          if (scrapbook.cache._applyFilter(key, filter)) {
             items[key] = await this._deserializeObject(JSON.parse(sessionStorage.getItem(key)));
-          } catch (ex) {
-            // invalid JSON format => meaning not a cache
-            // or does not match the filter
           }
         }
         return items;
@@ -1262,26 +1273,16 @@
       },
 
       async remove(key) {
-        sessionStorage.removeItem(key);
+        return sessionStorage.removeItem(key);
       },
 
-      async removeAll(keys) {
-        if (typeof keys === 'function') {
-          const filter = keys;
-          // reverse the order to prevent an error due to index shift after removal
-          for (let i = sessionStorage.length - 1; i >= 0; i--) {
-            const key = sessionStorage.key(i);
-            try {
-              if (filter(JSON.parse(key))) {
-                sessionStorage.removeItem(key);
-              }
-            } catch (ex) {}
+      async removeAll(filter) {
+        // reverse the order to prevent an error due to index shift after removal
+        for (let i = sessionStorage.length - 1; i >= 0; i--) {
+          const key = sessionStorage.key(i);
+          if (scrapbook.cache._applyFilter(key, filter)) {
+            sessionStorage.removeItem(key);
           }
-          return;
-        }
-
-        for (const key of keys) {
-          sessionStorage.removeItem(key);
         }
       },
     },
