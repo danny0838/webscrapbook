@@ -1113,6 +1113,18 @@
     },
 
     indexedDB: {
+      get _nosupport() {
+        // Firefox: an incognito extension tab throws `InvalidStateError`
+        // when accessing indexedDB.
+        // ref: https://bugzilla.mozilla.org/show_bug.cgi?id=1955668
+        const p = this._connect().then(
+          (db) => (db.close(), false),
+          (ex) => (ex.name === 'InvalidStateError'),
+        );
+        delete this._nosupport;
+        return this._nosupport = p;
+      },
+
       async _connect() {
         return await new Promise((resolve, reject) => {
           const request = indexedDB.open("scrapbook", 3);
@@ -1167,21 +1179,24 @@
       },
 
       async get(key) {
+        if (await this._nosupport) {
+          return scrapbook.cache.storage.get(key);
+        }
+
         return await this._transaction(async (objectStore) => {
           return await new Promise((resolve, reject) => {
             objectStore.get(key).onsuccess = (event) => {
               resolve(event.target.result);
             };
           });
-        }, "readonly").catch(ex => {
-          if (ex.name === 'InvalidStateError') {
-            return scrapbook.cache.storage.get(key);
-          }
-          throw ex;
-        });
+        }, "readonly");
       },
 
       async getAll(filter) {
+        if (await this._nosupport) {
+          return scrapbook.cache.storage.getAll(filter);
+        }
+
         return await this._transaction(async (objectStore) => {
           const result = {};
           return await new Promise((resolve, reject) => {
@@ -1197,37 +1212,34 @@
               cursor.continue();
             };
           });
-        }, "readonly").catch(ex => {
-          if (ex.name === 'InvalidStateError') {
-            return scrapbook.cache.storage.getAll(filter);
-          }
-          throw ex;
-        });
+        }, "readonly");
       },
 
       async set(key, value) {
+        if (await this._nosupport) {
+          return scrapbook.cache.storage.set(key, value);
+        }
+
         return await this._transaction(async (objectStore) => {
           objectStore.put(value, key);
-        }, "readwrite").catch(ex => {
-          if (ex.name === 'InvalidStateError') {
-            return scrapbook.cache.storage.set(key, value);
-          }
-          throw ex;
-        });
+        }, "readwrite");
       },
 
       async remove(key) {
+        if (await this._nosupport) {
+          return scrapbook.cache.storage.remove(key);
+        }
+
         return await this._transaction(async (objectStore) => {
           objectStore.delete(key);
-        }, "readwrite").catch(ex => {
-          if (ex.name === 'InvalidStateError') {
-            return scrapbook.cache.storage.remove(key);
-          }
-          throw ex;
-        });
+        }, "readwrite");
       },
 
       async removeAll(filter) {
+        if (await this._nosupport) {
+          return scrapbook.cache.storage.removeAll(filter);
+        }
+
         return await this._transaction(async (objectStore) => {
           return await new Promise((resolve, reject) => {
             objectStore.openCursor().onsuccess = (event) => {
@@ -1242,12 +1254,7 @@
               cursor.continue();
             };
           });
-        }, "readwrite").catch(ex => {
-          if (ex.name === 'InvalidStateError') {
-            return scrapbook.cache.storage.removeAll(filter);
-          }
-          throw ex;
-        });
+        }, "readwrite");
       },
     },
 
