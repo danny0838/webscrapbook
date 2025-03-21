@@ -158,6 +158,22 @@
       Object.defineProperty(this, 'noBrowser', {value});
       return value;
     },
+    get noExtensionBrowser() {
+      const value = this.noBrowser.condition ? this.noBrowser : new MochaQuery.Query(
+        typeof browser === "undefined",
+        'globalThis.browser does not exist',
+      );
+      Object.defineProperty(this, 'noExtensionBrowser', {value});
+      return value;
+    },
+    get noExtensionChrome() {
+      const value = this.noBrowser.condition ? this.noBrowser : new MochaQuery.Query(
+        typeof chrome === "undefined",
+        'globalThis.chrome does not exist',
+      );
+      Object.defineProperty(this, 'noExtensionChrome', {value});
+      return value;
+    },
     get noMultipleSelection() {
       const value = this.noBrowser.condition ? this.noBrowser : new MochaQuery.Query(
         (() => {

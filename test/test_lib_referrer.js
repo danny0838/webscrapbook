@@ -307,18 +307,12 @@ describe('lib/referrer.js', function () {
       assert.includeMembers(Referrer.trustworthyProtocols, ['https:', 'wss:', 'data:', 'file:']);
     });
 
-    $it.skipIf(
-      typeof browser === 'undefined',
-      'globalThis.browser does not exist',
-    )('browser extension protocol (globalThis.browser)', function () {
+    $it.skipIf($.noExtensionBrowser)('browser extension protocol (globalThis.browser)', function () {
       const protocol = new URL(browser.runtime.getURL('')).protocol;
       assert.includeMembers(Referrer.trustworthyProtocols, [protocol]);
     });
 
-    $it.skipIf(
-      typeof chrome === 'undefined',
-      'globalThis.chrome does not exist',
-    )('browser extension protocol (globalThis.chrome)', function () {
+    $it.skipIf($.noExtensionChrome)('browser extension protocol (globalThis.chrome)', function () {
       const protocol = new URL(chrome.runtime.getURL('')).protocol;
       assert.includeMembers(Referrer.trustworthyProtocols, [protocol]);
     });
