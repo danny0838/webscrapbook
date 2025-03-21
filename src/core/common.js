@@ -1212,11 +1212,11 @@
 
       async get(key) {
         // @TODO: direct string to object deserialization?
-        return this._deserializeObject(JSON.parse(sessionStorage.getItem(key)));
+        return await this._deserializeObject(JSON.parse(sessionStorage.getItem(key)));
       },
 
       async getAll(filter) {
-        const items = [];
+        const items = {};
         for (let i = 0, I = sessionStorage.length; i < I; i++) {
           const key = sessionStorage.key(i);
           try {
@@ -1224,7 +1224,7 @@
             if (!filter(obj)) {
               throw new Error("filter not matched");
             }
-            items[key] = this._deserializeObject(JSON.parse(sessionStorage.getItem(key)));
+            items[key] = await this._deserializeObject(JSON.parse(sessionStorage.getItem(key)));
           } catch (ex) {
             // invalid JSON format => meaning not a cache
             // or does not match the filter
@@ -1241,7 +1241,8 @@
       async remove(keys) {
         if (typeof keys === 'function') {
           const filter = keys;
-          for (let i = 0, I = sessionStorage.length; i < I; i++) {
+          // reverse the order to prevent an error due to index shift after removal
+          for (let i = sessionStorage.length - 1; i >= 0; i--) {
             const key = sessionStorage.key(i);
             try {
               if (filter(JSON.parse(key))) {
