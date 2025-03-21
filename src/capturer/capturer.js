@@ -1411,18 +1411,14 @@
 
     // wait until tab loading complete
     {
-      let _resolve, _reject;
-      const promise = new Promise((resolve, reject) => {
-        _resolve = resolve;
-        _reject = reject;
-      });
+      const {promise, resolve, reject} = Promise.withResolvers();
       const listener = (tabId, changeInfo, t) => {
         if (!(tabId === tab.id && changeInfo.status === 'complete')) { return; }
-        _resolve(t);
+        resolve(t);
       };
       const listener2 = (tabId, removeInfo) => {
         if (!(tabId === tab.id)) { return; }
-        _reject(new Error('Tab removed before loading complete.'));
+        reject(new Error('Tab removed before loading complete.'));
       };
       try {
         browser.tabs.onUpdated.addListener(listener);

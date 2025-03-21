@@ -7,6 +7,18 @@
  * @public {Object} scrapbook
  *****************************************************************************/
 
+// Polyfill for Chrome < 119 and Firefox < 121
+if (typeof Promise.withResolvers === 'undefined') {
+  Promise.withResolvers = function () {
+    let resolve, reject;
+    const promise = new Promise((res, rej) => {
+      resolve = res;
+      reject = rej;
+    });
+    return {promise, resolve, reject};
+  }
+}
+
 (function (global, factory) {
   global = typeof globalThis !== "undefined" ? globalThis : global || self;
   if (typeof exports === "object" && typeof module === "object") {
