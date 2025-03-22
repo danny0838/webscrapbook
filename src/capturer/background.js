@@ -72,9 +72,12 @@
           }
 
           // build cache for faster retrieval
+          // Check treeLastModified explicitly as `book.validateTree` may have
+          // been called otherwhere.
           let cache = bookCaches.get(bookId);
-          if (refresh || !cache) {
+          if (!(cache && cache.treeLastModified === book.treeLastModified)) {
             cache = new Map();
+            cache.treeLastModified = book.treeLastModified;
             bookCaches.set(bookId, cache);
 
             for (const id of book.getReachableItems('root')) {
@@ -408,9 +411,12 @@
           }
 
           // build cache for faster retrieval
+          // Check treeLastModified explicitly as `book.validateTree` may have
+          // been called otherwhere.
           let cache = autoCaptureBookCaches.get(bookId);
-          if (refresh || !cache) {
+          if (!(cache && cache.treeLastModified === book.treeLastModified)) {
             cache = new Set();
+            cache.treeLastModified = book.treeLastModified;
             autoCaptureBookCaches.set(bookId, cache);
 
             for (const id of book.getReachableItems('root')) {
