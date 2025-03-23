@@ -531,8 +531,7 @@
     const hasServer = scrapbook.hasServer();
     const urlMatch = await scrapbook.getContentPagePattern();
 
-    // Available in Chromium and Firefox >= 53.
-    if (browser.contextMenus.ContextType.BROWSER_ACTION) {
+    browserAction: {
       browser.contextMenus.create({
         title: scrapbook.lang("CaptureTabAs") + '...',
         contexts: ["browser_action"],
@@ -983,8 +982,6 @@
   }
 
   function initExternalMessageListener() {
-    if (!browser.runtime.onMessageExternal) { return; }
-
     browser.runtime.onMessageExternal.addListener((message, sender) => {
       const {cmd, args} = message;
 
