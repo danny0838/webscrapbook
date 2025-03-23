@@ -58,8 +58,9 @@
       },
 
       async captureTab() {
+        const tabs = await scrapbook.getHighlightedTabs();
         return await scrapbook.invokeCapture(
-          (await scrapbook.getHighlightedTabs()).map(tab => ({
+          tabs.map(tab => ({
             tabId: tab.id,
             url: tab.url,
             title: tab.title,
@@ -68,8 +69,9 @@
       },
 
       async captureTabSource() {
+        const tabs = await scrapbook.getHighlightedTabs();
         return await scrapbook.invokeCapture(
-          (await scrapbook.getHighlightedTabs()).map(tab => ({
+          tabs.map(tab => ({
             tabId: tab.id,
             url: tab.url,
             title: tab.title,
@@ -79,8 +81,9 @@
       },
 
       async captureTabBookmark() {
+        const tabs = await scrapbook.getHighlightedTabs();
         return await scrapbook.invokeCapture(
-          (await scrapbook.getHighlightedTabs()).map(tab => ({
+          tabs.map(tab => ({
             tabId: tab.id,
             url: tab.url,
             title: tab.title,
@@ -123,7 +126,7 @@
       },
 
       async editTab() {
-        const tab = (await browser.tabs.query({active: true, currentWindow: true}))[0];
+        const [tab] = await browser.tabs.query({active: true, currentWindow: true});
         return await scrapbook.editTab({
           tabId: tab.id,
           force: true,
