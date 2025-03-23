@@ -909,7 +909,7 @@
     });
   }
 
-  function initCommands() {
+  function initCommandsListener() {
     if (!browser.commands) { return; }
 
     browser.commands.onCommand.addListener((cmd) => {
@@ -1018,7 +1018,7 @@
 
   async function init() {
     initStorageChangeListener();
-    initCommands();
+    initCommandsListener();
     initLastFocusedWindowListener();
     initBeforeSendHeadersListener();
     initMessageListener();
