@@ -85,6 +85,8 @@
   },
 
   "commands": {
+    "_execute_browser_action": {},
+    "_execute_sidebar_action": {},
     "openScrapBook": {
       "description": "__MSG_OpenScrapBook__"
     },

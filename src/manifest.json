@@ -69,6 +69,7 @@
   },
 
   "commands": {
+    "_execute_browser_action": {},
     "openScrapBook": {
       "suggested_key": {
         "default": "Alt+K"
