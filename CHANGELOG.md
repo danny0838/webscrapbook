@@ -3,6 +3,10 @@
 * Versions before 1.0 are in initial development. APIs are not stable for these versions, even a `y` version can involve a breaking change, and only partial notable changes are summarized in this document. See full commit history in the source repository for details.
 * Backend server requirement in this document refers to the version of [`webscrapbook` Python package](https://github.com/danny0838/pywebscrapbook) (or PyWebScrapBook).
 
+## [2.18.2] - 2025-03-24
+* Added support of shortcut customization of action and sidebar toggling.
+* Miscellaneous refactoring and improvements of the internal code.
+
 ## [2.18.1] - 2025-03-23
 * Fixed an issue where auto-capture and notification of captured pages sometimes don't work correctly after a data change in the backend server.
 * Miscellaneous improvements and bug fixes of the internal code.
