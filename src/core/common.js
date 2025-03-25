@@ -1079,13 +1079,18 @@ if (typeof Promise.withResolvers === 'undefined') {
         return obj;
       },
 
-      async _getKeys() {
-        // supported by Chromium >= 130
-        if (browser.storage.local.getKeys) {
-          return await browser.storage.local.getKeys();
+      async _getKeys(fallback = true) {
+        // Chromium < 130 and Firefox
+        // ref: https://bugzilla.mozilla.org/show_bug.cgi?id=1910669
+        if (!browser.storage.local.getKeys) {
+          if (fallback) {
+            return Object.keys(await browser.storage.local.get());
+          }
+
+          return null;
         }
 
-        return Object.keys(await browser.storage.local.get());
+        return await browser.storage.local.getKeys();
       },
 
       async get(key) {
@@ -1094,15 +1099,24 @@ if (typeof Promise.withResolvers === 'undefined') {
       },
 
       async getAll(filter) {
-        const items = await browser.storage.local.get();
-        for (const key in items) {
-          if (scrapbook.cache._applyFilter(key, filter)) {
-            items[key] = await this._deserializeObject(items[key]);
-          } else {
-            delete(items[key]);
+        const keys = await this._getKeys(false);
+
+        // Chromium < 130 and Firefox
+        // ref: https://bugzilla.mozilla.org/show_bug.cgi?id=1910669
+        if (!keys) {
+          const items = await browser.storage.local.get();
+          for (const key in items) {
+            if (!scrapbook.cache._applyFilter(key, filter)) {
+              delete items[key];
+            }
           }
+          return await this._deserializeObject(items);
         }
-        return items;
+
+        const items = await browser.storage.local.get(
+          keys.filter(key => scrapbook.cache._applyFilter(key, filter))
+        );
+        return await this._deserializeObject(items);
       },
 
       async set(key, value) {
@@ -1289,10 +1303,10 @@ if (typeof Promise.withResolvers === 'undefined') {
         for (let i = 0, I = sessionStorage.length; i < I; i++) {
           const key = sessionStorage.key(i);
           if (scrapbook.cache._applyFilter(key, filter)) {
-            items[key] = await this._deserializeObject(JSON.parse(sessionStorage.getItem(key)));
+            items[key] = JSON.parse(sessionStorage.getItem(key));
           }
         }
-        return items;
+        return await this._deserializeObject(items);
       },
 
       async set(key, value) {
