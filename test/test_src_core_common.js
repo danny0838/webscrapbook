@@ -62,11 +62,9 @@ describe('core/common.js', function () {
     for (const STORAGE of ["storage", "indexedDB", "sessionStorage"]) {
       describe(STORAGE, function () {
         describe('set', function () {
-          const key1 = {table: "test", id: "123"};
-          const key2 = {table: "test", id: "456"};
-          const key3 = {table: "test", id: "789"};
-
           it('key as object', async function () {
+            const key1 = {table: "test", id: "123"};
+            const key2 = {table: "test", id: "456"};
             await scrapbook.cache.set(key1, "value123", STORAGE);
             await scrapbook.cache.set(key2, "value456", STORAGE);
             await scrapbook.cache.set(key2, "value456-2", STORAGE);
@@ -77,6 +75,8 @@ describe('core/common.js', function () {
           });
 
           it('key as string', async function () {
+            const key1 = {table: "test", id: "123"};
+            const key2 = {table: "test", id: "456"};
             await scrapbook.cache.set(JSON.stringify(key1), "value123", STORAGE);
             await scrapbook.cache.set(JSON.stringify(key2), "value456", STORAGE);
             await scrapbook.cache.set(JSON.stringify(key2), "value456-2", STORAGE);
@@ -85,8 +85,28 @@ describe('core/common.js', function () {
               [JSON.stringify(key2)]: "value456-2",
             });
           });
+        });
 
-          it('should save and read basic types as-is', async function () {
+        describe('get', function () {
+          it('key as object', async function () {
+            const key1 = {table: "test", id: "123"};
+            const key2 = {table: "test", id: "456"};
+            await scrapbook.cache.set(key1, "value123", STORAGE);
+            await scrapbook.cache.set(key2, "value456", STORAGE);
+            assert.strictEqual(await scrapbook.cache.get(key1, STORAGE), "value123");
+            assert.strictEqual(await scrapbook.cache.get(key2, STORAGE), "value456");
+          });
+
+          it('key as string', async function () {
+            const key1 = {table: "test", id: "123"};
+            const key2 = {table: "test", id: "456"};
+            await scrapbook.cache.set(key1, "value123", STORAGE);
+            await scrapbook.cache.set(key2, "value456", STORAGE);
+            assert.strictEqual(await scrapbook.cache.get(JSON.stringify(key1), STORAGE), "value123");
+            assert.strictEqual(await scrapbook.cache.get(JSON.stringify(key2), STORAGE), "value456");
+          });
+
+          it('should restore basic types as-is', async function () {
             var key = {table: "test", id: "123"};
 
             // var value = undefined;
@@ -117,41 +137,30 @@ describe('core/common.js', function () {
             await scrapbook.cache.set(key, value, STORAGE);
             assert.deepEqual(await scrapbook.cache.get(key, STORAGE), value);
 
-            var value = new Blob(["foo"], {type: "text/plain"});
-            await scrapbook.cache.set(key, value, STORAGE);
-            var value2 = await scrapbook.cache.get(key, STORAGE);
-            assert.strictEqual(value.type, value2.type);
-            assert.strictEqual(value.size, value2.size);
-            assert.deepEqual(await scrapbook.readFileAsText(value), "foo");
+            var blob = new Blob(["foo"], {type: "text/plain"});
+            await scrapbook.cache.set(key, blob, STORAGE);
+            var value = await scrapbook.cache.get(key, STORAGE);
+            assert.strictEqual(blob.type, value.type);
+            assert.strictEqual(blob.size, value.size);
+            assert.deepEqual(await scrapbook.readFileAsText(blob), await scrapbook.readFileAsText(value));
 
-            var value = new File(["foo"], "myfile", {type: "text/plain", lastModified: Date.now()});
-            await scrapbook.cache.set(key, value, STORAGE);
-            var value2 = await scrapbook.cache.get(key, STORAGE);
-            assert.strictEqual(value.name, value2.name);
-            assert.strictEqual(value.type, value2.type);
-            assert.strictEqual(value.size, value2.size);
-            assert.strictEqual(value.lastModified, value2.lastModified);
-            assert.deepEqual(await scrapbook.readFileAsText(value), "foo");
-          });
-        });
+            var file = new File(["foo"], "myfile", {type: "text/plain", lastModified: Date.now()});
+            await scrapbook.cache.set(key, file, STORAGE);
+            var value = await scrapbook.cache.get(key, STORAGE);
+            assert.strictEqual(file.name, value.name);
+            assert.strictEqual(file.type, value.type);
+            assert.strictEqual(file.size, value.size);
+            assert.strictEqual(file.lastModified, value.lastModified);
+            assert.deepEqual(await scrapbook.readFileAsText(file), await scrapbook.readFileAsText(value));
 
-        describe('get', function () {
-          const key1 = {table: "test", id: "123"};
-          const key2 = {table: "test", id: "456"};
-
-          beforeEach(async function () {
-            await scrapbook.cache.set(key1, "value123", STORAGE);
-            await scrapbook.cache.set(key2, "value456", STORAGE);
-          });
-
-          it('key as object', async function () {
-            assert.strictEqual(await scrapbook.cache.get(key1, STORAGE), "value123");
-            assert.strictEqual(await scrapbook.cache.get(key2, STORAGE), "value456");
-          });
-
-          it('key as string', async function () {
-            assert.strictEqual(await scrapbook.cache.get(JSON.stringify(key1), STORAGE), "value123");
-            assert.strictEqual(await scrapbook.cache.get(JSON.stringify(key2), STORAGE), "value456");
+            var complex = {
+              f1: new Blob(["foo"], {type: "text/plain"}),
+              f2: new Blob(["bar"], {type: "text/plain"}),
+            };
+            await scrapbook.cache.set(key, complex, STORAGE);
+            var value = await scrapbook.cache.get(key, STORAGE);
+            assert.deepEqual(await scrapbook.readFileAsText(complex.f1), await scrapbook.readFileAsText(value.f1));
+            assert.deepEqual(await scrapbook.readFileAsText(complex.f2), await scrapbook.readFileAsText(value.f2));
           });
         });
 
@@ -234,6 +243,49 @@ describe('core/common.js', function () {
             assert.deepEqual(await scrapbook.cache.getAll({includes: {table: "test"}, excludes: {id: ["123", "789"]}}, STORAGE), {
               [JSON.stringify(key2)]: "value456",
             });
+          });
+
+          it('should restore basic types as-is', async function () {
+            var blob = new Blob(["foo"], {type: "text/plain"});
+            var file = new File(["foo"], "myfile", {type: "text/plain", lastModified: Date.now()});
+            var complex = {
+              f1: new Blob(["foo"], {type: "text/plain"}),
+              f2: new Blob(["bar"], {type: "text/plain"}),
+            };
+
+            await scrapbook.cache.set({id: "1"}, null, STORAGE);
+            await scrapbook.cache.set({id: "2"}, true, STORAGE);
+            await scrapbook.cache.set({id: "3"}, 123, STORAGE);
+            await scrapbook.cache.set({id: "4"}, "my string", STORAGE);
+            await scrapbook.cache.set({id: "5"}, [123, "abc"], STORAGE);
+            await scrapbook.cache.set({id: "6"}, {abc: 123, def: 456}, STORAGE);
+            await scrapbook.cache.set({id: "7"}, blob, STORAGE);
+            await scrapbook.cache.set({id: "8"}, file, STORAGE);
+            await scrapbook.cache.set({id: "9"}, complex, STORAGE);
+
+            var items = await scrapbook.cache.getAll(null, STORAGE);
+            assert.strictEqual(items[JSON.stringify({id: "1"})], null);
+            assert.strictEqual(items[JSON.stringify({id: "2"})], true);
+            assert.strictEqual(items[JSON.stringify({id: "3"})], 123);
+            assert.strictEqual(items[JSON.stringify({id: "4"})], "my string");
+            assert.deepEqual(items[JSON.stringify({id: "5"})], [123, "abc"]);
+            assert.deepEqual(items[JSON.stringify({id: "6"})], {abc: 123, def: 456});
+
+            var value = items[JSON.stringify({id: "7"})];
+            assert.strictEqual(blob.type, value.type);
+            assert.strictEqual(blob.size, value.size);
+            assert.strictEqual(await scrapbook.readFileAsText(blob), await scrapbook.readFileAsText(value));
+
+            var value = items[JSON.stringify({id: "8"})];
+            assert.strictEqual(file.name, value.name);
+            assert.strictEqual(file.type, value.type);
+            assert.strictEqual(file.size, value.size);
+            assert.strictEqual(file.lastModified, value.lastModified);
+            assert.strictEqual(await scrapbook.readFileAsText(file), await scrapbook.readFileAsText(value));
+
+            var value = items[JSON.stringify({id: "9"})];
+            assert.deepEqual(await scrapbook.readFileAsText(complex.f1), await scrapbook.readFileAsText(value.f1));
+            assert.deepEqual(await scrapbook.readFileAsText(complex.f2), await scrapbook.readFileAsText(value.f2));
           });
         });
 
