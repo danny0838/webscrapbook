@@ -199,7 +199,18 @@
         selects,
       };
 
-      await scrapbook.cache.set(key, data, this.cacheType);
+      try {
+        await scrapbook.cache.set(key, data, this.cacheType);
+      } catch (ex) {
+        if (ex.name === 'QuotaExceededError') {
+          // In case the view status is too large (mostly for sessionStorage),
+          // clear the data to prevent loading the old value.
+          await scrapbook.cache.remove(key, this.cacheType);
+          console.warn('Cleared stored view status as the latest value is too large to store.');
+        } else {
+          throw ex;
+        }
+      }
     }
 
     async loadViewStatus() {
