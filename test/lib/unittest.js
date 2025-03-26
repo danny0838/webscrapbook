@@ -38,7 +38,7 @@
   const {userAgent} = utils;
 
   /**
-   * A jQuery-style extension of describe or it for chainable and conditional
+   * A jQuery-style extension of `describe` or `it` for chainable and conditional
    * skip or xfail.
    *
    * Also globally exposed as:
@@ -49,7 +49,7 @@
    *   .skip([reason])           // skip (if not yet skipped)
    *   .skipIf(cond [, reason])  // skip if cond (and not yet skipped)
    *   .xfail([reason])          // expect fail (if not yet skipped/xfailed)
-   *   .xfailIf(cond, [reason])  // expect fail if cond (and not yet skipped/xfailed)
+   *   .xfailIf(cond [, reason]) // expect fail if cond (and not yet skipped/xfailed)
    *
    *   $it
    *     .skipIf(cond1, skipReason1)

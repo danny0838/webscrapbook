@@ -1140,9 +1140,9 @@ if (typeof Promise.withResolvers === 'undefined') {
 
     indexedDB: {
       get _nosupport() {
-        // Firefox: an incognito extension tab throws `InvalidStateError`
-        // when accessing indexedDB.
-        // ref: https://bugzilla.mozilla.org/show_bug.cgi?id=1955668
+        // Firefox: `indexedDB.open` throws `InvalidStateError` in an extension
+        // tab in a private window.
+        // ref: https://bugzilla.mozilla.org/show_bug.cgi?id=1841806
         const p = this._connect().then(
           (db) => (db.close(), false),
           (ex) => (ex.name === 'InvalidStateError'),
