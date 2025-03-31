@@ -242,8 +242,8 @@
     });
 
     document.getElementById("searchCaptures").addEventListener('click', async (event) => {
-      const tabs = targetTab ? 
-          await scrapbook.getHighlightedTabs() : 
+      const tabs = targetTab ?
+          await scrapbook.getHighlightedTabs() :
           [await selectTabFromDom(event.currentTarget)];
       await scrapbook.searchCaptures({
         tabs,

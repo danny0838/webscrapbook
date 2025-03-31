@@ -44,7 +44,7 @@
             if (Number.isInteger(gTaskInfo.tasks[0].tabId)) {
               const tabId = gTaskInfo.tasks[0].tabId;
               const frameId = Number.isInteger(gTaskInfo.tasks[0].frameId) ? ':' + gTaskInfo.tasks[0].frameId : '';
-              const title = gTaskInfo.tasks[0].title ? ' ' + gTaskInfo.tasks[0].title : 
+              const title = gTaskInfo.tasks[0].title ? ' ' + gTaskInfo.tasks[0].title :
                   gTaskInfo.tasks[0].url ? ' ' + gTaskInfo.tasks[0].url : '';
               source = `[${tabId}${frameId}]${title}`;
             } else if (gTaskInfo.tasks[0].url) {

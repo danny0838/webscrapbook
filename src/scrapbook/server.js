@@ -40,7 +40,7 @@
   }
 
   class Server {
-    constructor () {
+    constructor() {
       this._config = null;
       this._serverRoot = null;
       this._bookId = null;
@@ -1150,8 +1150,8 @@ scrapbook.toc(${JSON.stringify(jsonData, null, 2).replace(/\u2028/g, '\\u2028').
       return matchedItem;
     }
 
-    *findItemPaths(id, rootId) {
-      const tracePath = (function* () {
+    * findItemPaths(id, rootId) {
+      const tracePath = function* () {
         const toc = this.toc[path[path.length - 1].id];
         if (!toc) { return; }
 
@@ -1169,7 +1169,7 @@ scrapbook.toc(${JSON.stringify(jsonData, null, 2).replace(/\u2028/g, '\\u2028').
           path.pop();
           ids.delete(child);
         }
-      }).bind(this);
+      }.bind(this);
 
       const path = [{id: rootId}];
       const ids = new Set(rootId);
@@ -1306,7 +1306,7 @@ scrapbook.toc(${JSON.stringify(jsonData, null, 2).replace(/\u2028/g, '\\u2028').
         }).then(r => r.json());
 
         // save favicon if nonexistent or emptied
-        if (json.data.type === null || 
+        if (json.data.type === null ||
             (file.size > 0 && json.data.type === 'file' && json.data.size === 0)) {
           await this.server.request({
             url: target + '?a=save',

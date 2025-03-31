@@ -279,7 +279,7 @@
               const {book_id, id, file, context} = info.data;
               let list = rv.get(book_id);
               if (!list) {
-                list = []
+                list = [];
                 rv.set(book_id, list);
               }
               list.push({id, file, context});
@@ -314,7 +314,7 @@
             this.addMsg(scrapbook.lang('SearchNotFound'), {wrapper});
           }
         }
-      } catch(ex) {
+      } catch (ex) {
         console.error(ex);
         this.addMsg(scrapbook.lang('ErrorSearch', [ex.message]), {type: 'error', wrapper});
       };

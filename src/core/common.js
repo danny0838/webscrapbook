@@ -16,7 +16,7 @@ if (typeof Promise.withResolvers === 'undefined') {
       reject = rej;
     });
     return {promise, resolve, reject};
-  }
+  };
 }
 
 (function (global, factory) {
@@ -676,7 +676,7 @@ if (typeof Promise.withResolvers === 'undefined') {
         soup.add('gecko');
       }
 
-      Object.defineProperty(this, 'userAgent', { value: flavor });
+      Object.defineProperty(this, 'userAgent', {value: flavor});
       return flavor;
     },
 
@@ -879,14 +879,14 @@ if (typeof Promise.withResolvers === 'undefined') {
         return new File(
           data.map(x => scrapbook.byteStringToArrayBuffer(x)),
           name,
-          {type, lastModified}
+          {type, lastModified},
         );
       }
       case "Blob": {
         const {data, type} = obj;
         return new Blob(
           data.map(x => scrapbook.byteStringToArrayBuffer(x)),
-          {type}
+          {type},
         );
       }
     }
@@ -1114,7 +1114,7 @@ if (typeof Promise.withResolvers === 'undefined') {
         }
 
         const items = await browser.storage.local.get(
-          keys.filter(key => scrapbook.cache._applyFilter(key, filter))
+          keys.filter(key => scrapbook.cache._applyFilter(key, filter)),
         );
         return await this._deserializeObject(items);
       },
@@ -1395,7 +1395,7 @@ if (typeof Promise.withResolvers === 'undefined') {
 
       const {cmd, args} = message;
       const senderInfo = '[' +
-        (sender.tab ? sender.tab.id : -1) + 
+        (sender.tab ? sender.tab.id : -1) +
         (typeof sender.frameId !== 'undefined' ? ':' + sender.frameId : '') +
         ']';
 
@@ -1475,7 +1475,7 @@ if (typeof Promise.withResolvers === 'undefined') {
               result.error = {message: response};
             }
             return result;
-          })
+          }),
       );
     }
     return await Promise.all(tasks);
@@ -1931,7 +1931,7 @@ if (typeof Promise.withResolvers === 'undefined') {
     format_recycled(key, mode) {
       return this.formatDate(this.item.recycled, key, mode);
     }
-  }
+  };
 
   /**
    * @param {string} url
@@ -2117,7 +2117,7 @@ if (typeof Promise.withResolvers === 'undefined') {
     const {contentType: mime, documentElement: docElemNode} = doc;
     const newDoc = (new DOMParser()).parseFromString(
       '<' + docElemNode.nodeName.toLowerCase() + '/>',
-      DOMPARSER_SUPPORT_TYPES.has(mime) ? mime : 'text/html'
+      DOMPARSER_SUPPORT_TYPES.has(mime) ? mime : 'text/html',
     );
     while (newDoc.firstChild) {
       newDoc.removeChild(newDoc.firstChild);
@@ -2725,10 +2725,10 @@ if (typeof Promise.withResolvers === 'undefined') {
         while (true) {
           try {
             return this.utf8ToUnicode(bytes) + ellipsis;
-          } catch(e) {
+          } catch (e) {
             // error if we cut a UTF-8 char sequence in the middle
           };
-          bytes = bytes.substring(0, bytes.length-1);
+          bytes = bytes.substring(0, bytes.length - 1);
         }
       }
     }
@@ -2777,7 +2777,7 @@ if (typeof Promise.withResolvers === 'undefined') {
     const map = {
       "&": "&amp;",
       "<": "&lt;",
-      ">": "&gt;"
+      ">": "&gt;",
     };
     const fn = scrapbook.escapeHtml = function (str, noDoubleQuotes, singleQuotes, spaces) {
       map['"'] = noDoubleQuotes ? '"' : "&quot;";
@@ -2798,10 +2798,10 @@ if (typeof Promise.withResolvers === 'undefined') {
     const map = {
       "&amp;": "&",
       "&lt;": "<",
-      "&gt;" : ">",
-      "&quot;" : '"',
-      "&apos;" : "'",
-      "&nbsp;" : " "
+      "&gt;": ">",
+      "&quot;": '"',
+      "&apos;": "'",
+      "&nbsp;": " ",
     };
     const fn = scrapbook.unescapeHtml = function (str) {
       return str.replace(regex, func);
@@ -2889,8 +2889,8 @@ if (typeof Promise.withResolvers === 'undefined') {
 
   scrapbook.quoteXPath = function (str) {
     const parts = str.split('"');
-    return parts.length > 1 ? 
-        ('concat("' + parts.join(`",'"',"`) + '")') : 
+    return parts.length > 1 ?
+        ('concat("' + parts.join(`",'"',"`) + '")') :
         `"${str}"`;
   };
 
@@ -2916,7 +2916,7 @@ if (typeof Promise.withResolvers === 'undefined') {
   scrapbook.unicodeToDataUri = function (str, mime) {
     const regex = /[\x00-\x1F\x7F "'#%<>[\]^`{|}]+/g;
     const func = m => encodeURIComponent(m);
-    const fn = scrapbook.unicodeToDataUri = (str, mime) =>  {
+    const fn = scrapbook.unicodeToDataUri = (str, mime) => {
       return `data:${(mime || "")};charset=UTF-8,${str.replace(regex, func)}`;
     };
     return fn(str, mime);
@@ -4225,7 +4225,7 @@ if (typeof Promise.withResolvers === 'undefined') {
             }
             return NodeFilter.FILTER_SKIP;
           },
-        }
+        },
       );
       let node;
       while (node = walker.nextNode()) {
@@ -4284,7 +4284,7 @@ if (typeof Promise.withResolvers === 'undefined') {
       for (let i = 0; i < s.length; i++) {
         const xs = doc.createRange();
         if (i) {
-          xs.setStartAfter(s[i-1]);
+          xs.setStartAfter(s[i - 1]);
           xs.setEnd(s[i], s[i].childNodes.length);
         } else {
           xs.setStart(s[i], dangerous.startOffset);
@@ -4309,7 +4309,7 @@ if (typeof Promise.withResolvers === 'undefined') {
         const xe = doc.createRange();
         if (i) {
           xe.setStart(e[i], 0);
-          xe.setEndBefore(e[i-1]);
+          xe.setEndBefore(e[i - 1]);
         } else {
           if ([3, 4, 8].includes(e[i].nodeType)) {
             xe.setStartBefore(e[i]);

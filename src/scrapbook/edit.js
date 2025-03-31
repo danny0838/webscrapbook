@@ -63,7 +63,7 @@
 
         try {
           let target = this.target = checkRedirect ?
-            await book.getItemIndexUrl(item) : 
+            await book.getItemIndexUrl(item) :
             book.dataUrl + scrapbook.escapeFilename(file);
 
           const text = await server.request({

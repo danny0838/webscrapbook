@@ -73,7 +73,7 @@
             tabId: tab.id,
             url: tab.url,
             title: tab.title,
-          }))
+          })),
         );
       },
 
@@ -85,7 +85,7 @@
             url: tab.url,
             title: tab.title,
             mode: "source",
-          }))
+          })),
         );
       },
 
@@ -97,7 +97,7 @@
             url: tab.url,
             title: tab.title,
             mode: "bookmark",
-          }))
+          })),
         );
       },
 
@@ -341,7 +341,7 @@
       await browser.tabs.executeScript(tabId, {
         frameId,
         code: `window.focus();`,
-        runAt: "document_start"
+        runAt: "document_start",
       });
       return response;
     } else if (frameIdExcept !== -1) {

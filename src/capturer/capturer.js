@@ -923,7 +923,7 @@
   capturer.addItemToServer = async function ({item, parentId, index}) {
     await server.init();
     const book = server.books[server.bookId];
-    if (!!book.config.no_tree) {
+    if (book.config.no_tree) {
       return;
     }
 
@@ -949,7 +949,7 @@
 
         // update book
         const newItem = book.addItem(
-          Object.assign({}, item, {icon})
+          Object.assign({}, item, {icon}),
         );
 
         await server.request({
@@ -1296,7 +1296,7 @@
       case "bookmark": {
         if (Number.isInteger(frameId)) {
           ({url} = await browser.webNavigation.getFrame({tabId, frameId}));
-        } else  {
+        } else {
           settings = Object.assign({}, settings, {
             title: settings.title || title,
           });
@@ -1793,10 +1793,10 @@
 
     const html = (() => {
       const url = sourceUrl.startsWith("data:") ? "data:" : sourceUrl;
-      const meta = params.options["capture.recordDocumentMeta"] ? 
-          ' data-scrapbook-source="' + scrapbook.escapeHtml(scrapbook.normalizeUrl(url)) + '"' + 
-          ' data-scrapbook-create="' + scrapbook.escapeHtml(timeId) + '"' + 
-          ' data-scrapbook-type="bookmark"' : 
+      const meta = params.options["capture.recordDocumentMeta"] ?
+          ' data-scrapbook-source="' + scrapbook.escapeHtml(scrapbook.normalizeUrl(url)) + '"' +
+          ' data-scrapbook-create="' + scrapbook.escapeHtml(timeId) + '"' +
+          ' data-scrapbook-type="bookmark"' :
           "";
       const titleElem = title ? `<title>${scrapbook.escapeHtml(title, false)}</title>\n` : "";
       const favIconElem = (favIconUrl && !["blank", "remove", "link"].includes(options["capture.favicon"])) ?
@@ -1903,11 +1903,11 @@ Bookmark for <a href="${scrapbook.escapeHtml(sourceUrl)}">${scrapbook.escapeHtml
     // for the main frame, create a index.html that redirects to the file
     const html = (() => {
       const url = sourceUrl.startsWith("data:") ? "data:" : sourceUrl;
-      const meta = params.options["capture.recordDocumentMeta"] ? 
-          ' data-scrapbook-source="' + scrapbook.escapeHtml(scrapbook.normalizeUrl(url)) + '"' + 
-          ' data-scrapbook-create="' + scrapbook.escapeHtml(timeId) + '"' + 
-          ' data-scrapbook-type="file"' + 
-          (charset ? ' data-scrapbook-charset="' + charset + '"' : "") : 
+      const meta = params.options["capture.recordDocumentMeta"] ?
+          ' data-scrapbook-source="' + scrapbook.escapeHtml(scrapbook.normalizeUrl(url)) + '"' +
+          ' data-scrapbook-create="' + scrapbook.escapeHtml(timeId) + '"' +
+          ' data-scrapbook-type="file"' +
+          (charset ? ' data-scrapbook-charset="' + charset + '"' : "") :
           "";
       const titleElem = title ? `<title>${scrapbook.escapeHtml(title, false)}</title>\n` : "";
       return `\
@@ -2865,8 +2865,8 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
           let newDocumentName = documentNameBase;
           let newDocumentNameCI = newDocumentName.toLowerCase();
           let count = 0;
-          while (files.has(newDocumentNameCI + ".html") || 
-              files.has(newDocumentNameCI + ".xhtml") || 
+          while (files.has(newDocumentNameCI + ".html") ||
+              files.has(newDocumentNameCI + ".xhtml") ||
               files.has(newDocumentNameCI + ".svg")) {
             newDocumentName = documentNameBase + "_" + (++count);
             newDocumentNameCI = newDocumentName.toLowerCase();
@@ -2985,7 +2985,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
       if (headers.contentType) {
         const mime = headers.contentType;
         let [base, ext] = scrapbook.filenameParts(filename);
-        if ((!ext && !MIMES_NO_EXT_OK.has(mime)) || 
+        if ((!ext && !MIMES_NO_EXT_OK.has(mime)) ||
             (MIMES_NEED_MATCH.has(mime) && !Mime.allExtensions(mime).includes(ext.toLowerCase()))) {
           ext = Mime.extension(mime);
           if (ext) {
@@ -3258,12 +3258,12 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
     const {timeId, type: itemType} = settings;
 
     const addIndexHtml = async (path, target, title) => {
-      const meta = options["capture.recordDocumentMeta"] ? 
-          ' data-scrapbook-source="' + scrapbook.escapeHtml(scrapbook.normalizeUrl(sourceUrl)) + '"' + 
-          ' data-scrapbook-create="' + scrapbook.escapeHtml(timeId) + '"' + 
-          (settings.title ? ' data-scrapbook-title="' + scrapbook.escapeHtml(settings.title) + '"' : "") + 
-          (settings.favIconUrl ? ' data-scrapbook-icon="' + scrapbook.escapeHtml(settings.favIconUrl) + '"' : "") + 
-          (itemType ? ' data-scrapbook-type="' + scrapbook.escapeHtml(itemType) + '"' : "") : 
+      const meta = options["capture.recordDocumentMeta"] ?
+          ' data-scrapbook-source="' + scrapbook.escapeHtml(scrapbook.normalizeUrl(sourceUrl)) + '"' +
+          ' data-scrapbook-create="' + scrapbook.escapeHtml(timeId) + '"' +
+          (settings.title ? ' data-scrapbook-title="' + scrapbook.escapeHtml(settings.title) + '"' : "") +
+          (settings.favIconUrl ? ' data-scrapbook-icon="' + scrapbook.escapeHtml(settings.favIconUrl) + '"' : "") +
+          (itemType ? ' data-scrapbook-type="' + scrapbook.escapeHtml(itemType) + '"' : "") :
           "";
 
       const html = `<!DOCTYPE html>

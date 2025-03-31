@@ -529,7 +529,7 @@
 
       // check downLink
       if (['http:', 'https:', 'file:', 'blob:'].some(p => url.startsWith(p))) {
-        if (["header", "url"].includes(options["capture.downLink.file.mode"]) || 
+        if (["header", "url"].includes(options["capture.downLink.file.mode"]) ||
             (parseInt(options["capture.downLink.doc.depth"], 10) > 0 && options['capture.saveAs'] !== 'singleHtml')) {
           let refPolicy = docRefPolicy;
           if (isHtml) {
@@ -658,8 +658,8 @@
         switch (options["capture.removeHidden"]) {
           case "undisplayed": {
             const excludeNodes =
-                rootName === "svg" ? REMOVE_HIDDEN_EXCLUDE_SVG : 
-                rootName === "math" ? REMOVE_HIDDEN_EXCLUDE_MATH : 
+                rootName === "svg" ? REMOVE_HIDDEN_EXCLUDE_SVG :
+                rootName === "math" ? REMOVE_HIDDEN_EXCLUDE_MATH :
                 REMOVE_HIDDEN_EXCLUDE_HTML;
             if (!excludeNodes.has(elem.nodeName.toLowerCase())) {
               const styles = doc.defaultView.getComputedStyle(elemOrig, null);
@@ -862,7 +862,7 @@
 
                     // check downLink
                     if (['http:', 'https:', 'file:'].some(p => url.startsWith(p))) {
-                      if (["header", "url"].includes(options["capture.downLink.file.mode"]) || 
+                      if (["header", "url"].includes(options["capture.downLink.file.mode"]) ||
                           (parseInt(options["capture.downLink.doc.depth"], 10) > 0 && options['capture.saveAs'] !== 'singleHtml')) {
                         downLinkTasks.push(async () => {
                           const downLinkSettings = Object.assign({}, settings, {
@@ -2004,7 +2004,7 @@
                         refPolicy,
                         settings,
                         options,
-                      })
+                      });
                       captureRewriteAttr(elem, "src", response.url);
                       return response;
                     });
@@ -2802,7 +2802,7 @@
           // removing an attribute shrinks elem.attributes list
           Array.prototype.filter.call(
             elem.attributes,
-            attr => attr.name.toLowerCase().startsWith("on")
+            attr => attr.name.toLowerCase().startsWith("on"),
           ).forEach((attr) => {
             captureRewriteAttr(elem, attr.name, null);
           });
@@ -3223,7 +3223,7 @@
 
     // add extra URLs with depth 0
     if (settings.isMainPage && settings.isMainFrame) {
-      if (["header", "url"].includes(options["capture.downLink.file.mode"]) || 
+      if (["header", "url"].includes(options["capture.downLink.file.mode"]) ||
           (parseInt(options["capture.downLink.doc.depth"], 10) >= 0 && options['capture.saveAs'] !== 'singleHtml')) {
         const downLinkSettings = Object.assign({}, settings, {
           depth: 0,
@@ -4278,7 +4278,7 @@
     }));
 
     if (filter) {
-      rv = rv.filter(x => filter.some(f => x.url.startsWith(f)))
+      rv = rv.filter(x => filter.some(f => x.url.startsWith(f)));
     }
 
     return rv;
@@ -5494,7 +5494,7 @@
 
       init: {
         if (cssType === 'internal') {
-          //prevent missing rootNode
+          // prevent missing rootNode
           rootNode = rootNode || elem.getRootNode();
 
           refCss = this.getElemCss(elem);
@@ -5504,13 +5504,13 @@
         }
 
         if (cssType === 'external') {
-          //prevent missing rootNode
+          // prevent missing rootNode
           rootNode = rootNode || elem.getRootNode();
 
           refCss = this.getElemCss(elem);
           sourceUrl = elem.getAttribute("href");
         } else if (cssType === 'imported') {
-          //rootNode should exist (passed by the importer CSS)
+          // rootNode should exist (passed by the importer CSS)
 
           sourceUrl = url;
         }

@@ -48,8 +48,8 @@
   function onDragLeave(e) {
     let shouldUnMask = false;
     try {
-      if (e.target === viewer.lastDropTarget || 
-          e.target === document || 
+      if (e.target === viewer.lastDropTarget ||
+          e.target === document ||
           e.target.nodeName === "#document"/* XULDocument */) {
         shouldUnMask = true;
       }
@@ -68,7 +68,7 @@
 
     const entries = Array.prototype.map.call(
       e.dataTransfer.items,
-      x => x.webkitGetAsEntry && x.webkitGetAsEntry()
+      x => x.webkitGetAsEntry && x.webkitGetAsEntry(),
     );
 
     const files = [];

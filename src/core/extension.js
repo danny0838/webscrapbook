@@ -49,7 +49,7 @@
     const p = (async () => [
       "http://*/*",
       "https://*/*",
-      ...(await browser.extension.isAllowedFileSchemeAccess() ? ["file:///*"]: []),
+      ...(await browser.extension.isAllowedFileSchemeAccess() ? ["file:///*"] : []),
     ])();
     scrapbook.getContentPagePattern = () => p;
     return p;

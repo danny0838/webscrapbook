@@ -955,30 +955,30 @@ p { background-image: url("123ABCabc_%25E4%25B8%25AD%25E6%2596%2587_%25F0%25A0%2
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
         var doc = await readFileAsDocument(indexBlob);
 
-        assert.strictEqual(doc.querySelectorAll('img')[0].getAttribute("src"), "image_bmp.py.bmp")
+        assert.strictEqual(doc.querySelectorAll('img')[0].getAttribute("src"), "image_bmp.py.bmp");
         assert.exists(zip.file("image_bmp.py.bmp"));
-        assert.strictEqual(doc.querySelectorAll('img')[1].getAttribute("src"), "image_svg.py.svg")
+        assert.strictEqual(doc.querySelectorAll('img')[1].getAttribute("src"), "image_svg.py.svg");
         assert.exists(zip.file("image_svg.py.svg"));
 
         // extension validation should be case-insensitive
-        assert.strictEqual(doc.querySelectorAll('img')[2].getAttribute("src"), "image.SVG")
+        assert.strictEqual(doc.querySelectorAll('img')[2].getAttribute("src"), "image.SVG");
         assert.exists(zip.file("image.SVG"));
 
         // a well-known MIME may have a new-age extension not known yet, don't overfix
-        assert.strictEqual(doc.querySelectorAll('img')[3].getAttribute("src"), "newext.mp1")
+        assert.strictEqual(doc.querySelectorAll('img')[3].getAttribute("src"), "newext.mp1");
         assert.exists(zip.file("newext.mp1"));
 
         // always attempt to fix for a file without extension
-        assert.strictEqual(doc.querySelectorAll('img')[4].getAttribute("src"), "noext.doc")
+        assert.strictEqual(doc.querySelectorAll('img')[4].getAttribute("src"), "noext.doc");
         assert.exists(zip.file("noext.doc"));
 
         // allow empty extension for universal MIME types, e.g. application/octet-stream
-        assert.strictEqual(doc.querySelectorAll('img')[5].getAttribute("src"), "noextoctet")
+        assert.strictEqual(doc.querySelectorAll('img')[5].getAttribute("src"), "noextoctet");
         assert.exists(zip.file("noextoctet"));
 
-        assert.strictEqual(doc.querySelectorAll('link')[0].getAttribute("href"), "stylesheet.py.css")
+        assert.strictEqual(doc.querySelectorAll('link')[0].getAttribute("href"), "stylesheet.py.css");
         assert.exists(zip.file("stylesheet.py.css"));
-        assert.strictEqual(doc.querySelectorAll('script')[0].getAttribute("src"), "script.py.js")
+        assert.strictEqual(doc.querySelectorAll('script')[0].getAttribute("src"), "script.py.js");
         assert.exists(zip.file("script.py.js"));
       });
     });
@@ -2341,7 +2341,7 @@ p { background-image: url("about:blank"); }`);
         assert.strictEqual(doc.querySelector('a').getAttribute('href'), `${localhost}/capture_bookmark/basic.html`);
         assert.strictEqual(
           doc.querySelector('link[rel="shortcut icon"]').getAttribute('href'),
-          `data:image/bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAAD/AAAA`
+          `data:image/bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAAD/AAAA`,
         );
       });
 
@@ -2363,7 +2363,7 @@ p { background-image: url("about:blank"); }`);
         assert.strictEqual(doc.querySelector('a').getAttribute('href'), `${localhost}/capture_bookmark/basic.html`);
         assert.strictEqual(
           doc.querySelector('link[rel="shortcut icon"]').getAttribute('href'),
-          `data:image/bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAAD/AAAA`
+          `data:image/bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAAD/AAAA`,
         );
       });
 
@@ -3032,7 +3032,7 @@ p { background-image: url("about:blank"); }`);
               cssRegex`:root { --referrer: "${escapeRegExp(localhost)}/capture_base_dynamic_css/basic.html"; }
 @font-face { font-family: linkFont; src: url("link_font.py"); }
 #link-font { font-family: linkFont; }
-#link-bg { background-image: url("link_bg.py"); }`
+#link-bg { background-image: url("link_bg.py"); }`,
             ));
 
             var file = zip.file('link_font.py');
@@ -3049,7 +3049,7 @@ p { background-image: url("about:blank"); }`);
               cssRegex`:root { --referrer: "${escapeRegExp(localhost)}/capture_base_dynamic_css/basic.html"; }
 @font-face { font-family: styleImportFont; src: url("style_import_font.py"); }
 #style-import-font { font-family: styleImportFont; }
-#style-import-bg { background-image: url("style_import_bg.py"); }`
+#style-import-bg { background-image: url("style_import_bg.py"); }`,
             ));
 
             var file = zip.file('style_import_font.py');
@@ -3230,7 +3230,7 @@ p { background-image: url("about:blank"); }`);
               cssRegex`:root { --referrer: "${escapeRegExp(localhost)}/capture_base_dynamic_css/bad.html"; }
 @font-face { font-family: linkFont; src: url("link_font.py"); }
 #link-font { font-family: linkFont; }
-#link-bg { background-image: url("link_bg.py"); }`
+#link-bg { background-image: url("link_bg.py"); }`,
             ));
 
             var file = zip.file('link_font.py');
@@ -3247,7 +3247,7 @@ p { background-image: url("about:blank"); }`);
               cssRegex`:root { --referrer: "${escapeRegExp(localhost)}/capture_base_dynamic_css/bad.html"; }
 @font-face { font-family: styleImportFont; src: url("style_import_font.py"); }
 #style-import-font { font-family: styleImportFont; }
-#style-import-bg { background-image: url("style_import_bg.py"); }`
+#style-import-bg { background-image: url("style_import_bg.py"); }`,
             ));
 
             var file = zip.file('style_import_font.py');
@@ -3492,7 +3492,7 @@ p { background-image: url("about:blank"); }`);
         var doc = await readFileAsDocument(blob);
         assert.strictEqual(
           doc.querySelector('link[rel="shortcut icon"]').getAttribute('href'),
-          'data:image/bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAAD/AAAA'
+          'data:image/bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAAD/AAAA',
         );
       });
 
@@ -3581,7 +3581,7 @@ p { background-image: url("about:blank"); }`);
         var doc = await readFileAsDocument(blob);
         assert.strictEqual(
           doc.querySelector('link[rel="shortcut icon"]').getAttribute('href'),
-          'data:image/x-icon;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAP8AAAAA'
+          'data:image/x-icon;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAP8AAAAA',
         );
       });
 
@@ -3627,7 +3627,7 @@ p { background-image: url("about:blank"); }`);
         var doc = await readFileAsDocument(blob);
         assert.strictEqual(
           doc.querySelector('link[rel="shortcut icon"]').getAttribute('href'),
-          'data:image/bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAAD/AAAA'
+          'data:image/bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAAD/AAAA',
         );
       });
     });
@@ -4427,7 +4427,7 @@ elem-4 { background-color: lime; }`);
   #case1 {
     background-image: url("case1.bmp");
   }
-}`
+}`,
           );
 
           assert.strictEqual(styleElems[2].textContent.trim(), `\
@@ -4435,7 +4435,7 @@ elem-4 { background-color: lime; }`);
   #case2 {
     background-image: url("case2.bmp");
   }
-}`
+}`,
           );
         });
 
@@ -4459,13 +4459,13 @@ elem-4 { background-color: lime; }`);
           assert(styleElems[1].textContent.trim().match(
             cssRegex`@supports (display: block) {
   #case1 { background-image: url("case1.bmp"); }
-}`
+}`,
           ));
 
           assert(styleElems[2].textContent.trim().match(
             cssRegex`@supports (display: nonexist) {
   #case2 { background-image: url("case2.bmp"); }
-}`
+}`,
           ));
         });
 
@@ -4489,13 +4489,13 @@ elem-4 { background-color: lime; }`);
           assert(styleElems[1].textContent.trim().match(
             cssRegex`@supports (display: block) {
   #case1 { background-image: url("case1.bmp"); }
-}`
+}`,
           ));
 
           assert(styleElems[2].textContent.trim().match(
             cssRegex`@supports (display: nonexist) {
   #case2 { background-image: url("case2.bmp"); }
-}`
+}`,
           ));
         });
 
@@ -4521,7 +4521,7 @@ elem-4 { background-color: lime; }`);
   #case1 {
     background-image: url(resources/case1.bmp);
   }
-}`
+}`,
           );
 
           assert.strictEqual(styleElems[2].textContent.trim(), `\
@@ -4529,7 +4529,7 @@ elem-4 { background-color: lime; }`);
   #case2 {
     background-image: url(resources/case2.bmp);
   }
-}`
+}`,
           );
         });
       });
@@ -4556,7 +4556,7 @@ elem-4 { background-color: lime; }`);
   suffix: " ";
   symbols: url("1.bmp") url("2.bmp") url("3.bmp");
   symbols: Ⓐ Ⓑ Ⓒ Ⓓ Ⓔ Ⓕ Ⓖ;
-}`
+}`,
           );
         });
 
@@ -4580,7 +4580,7 @@ elem-4 { background-color: lime; }`);
               '(?=[\\s\\S]*?'}system: cyclic;${')'}${
               '(?=[\\s\\S]*?'}suffix: "${' '}";${')'}${
               '(?=[\\s\\S]*?'}symbols: Ⓐ Ⓑ Ⓒ Ⓓ Ⓔ Ⓕ Ⓖ;${')'}${
-              '[\\s\\S]*?'}}`
+              '[\\s\\S]*?'}}`,
           ));
         });
 
@@ -4604,7 +4604,7 @@ elem-4 { background-color: lime; }`);
               '(?=[\\s\\S]*?'}system: cyclic;${')'}${
               '(?=[\\s\\S]*?'}suffix: "${' '}";${')'}${
               '(?=[\\s\\S]*?'}symbols: Ⓐ Ⓑ Ⓒ Ⓓ Ⓔ Ⓕ Ⓖ;${')'}${
-              '[\\s\\S]*?'}}`
+              '[\\s\\S]*?'}}`,
           ));
         });
 
@@ -4629,7 +4629,7 @@ elem-4 { background-color: lime; }`);
   suffix: " ";
   symbols: url(./resources/1.bmp) url(./resources/2.bmp) url(./resources/3.bmp);
   symbols: Ⓐ Ⓑ Ⓒ Ⓓ Ⓔ Ⓕ Ⓖ;
-}`
+}`,
           );
         });
       });
@@ -4659,7 +4659,7 @@ elem-4 { background-color: lime; }`);
 }
 @layer base {
   #case1 { background-image: url("case1b.bmp"); }
-}`
+}`,
           ));
 
           assert(styleElems[2].textContent.trim().match(
@@ -4668,7 +4668,7 @@ elem-4 { background-color: lime; }`);
 }
 @layer base2 {
   #case2 { background-image: url("case2b.bmp"); }
-}`
+}`,
           ));
         });
       });
@@ -5764,64 +5764,64 @@ div > ::slotted(*) { font-size: 1.2em; }`);
           var expectedData = {
             "version": 3,
             "indexPages": [
-              "index.html"
+              "index.html",
             ],
             "redirects": [],
             "files": [
               {
-                "path": "index.json"
+                "path": "index.json",
               },
               {
-                "path": "index.dat"
+                "path": "index.dat",
               },
               {
-                "path": "index.rdf"
+                "path": "index.rdf",
               },
               {
-                "path": "history.rdf"
+                "path": "history.rdf",
               },
               {
-                "path": "^metadata^"
+                "path": "^metadata^",
               },
               {
                 "path": "index.html",
                 "url": `${localhost}/capture_css_charset/link_charset/bad.html`,
                 "role": "document",
-                "token": getToken(`${localhost}/capture_css_charset/link_charset/bad.html`, "document")
+                "token": getToken(`${localhost}/capture_css_charset/link_charset/bad.html`, "document"),
               },
               {
                 "path": "index.xhtml",
-                "role": "document"
+                "role": "document",
               },
               {
                 "path": "index.svg",
-                "role": "document"
+                "role": "document",
               },
               {
                "path": "link.css",
                "url": `${localhost}/capture_css_charset/link_charset/link.css`,
                "role": "css-big5",
-               "token": getToken(`${localhost}/capture_css_charset/link_charset/link.css`, "css-big5")
+               "token": getToken(`${localhost}/capture_css_charset/link_charset/link.css`, "css-big5"),
               },
               {
                "path": "link_import.css",
                "url": `${localhost}/capture_css_charset/link_charset/link_import.css`,
                "role": "css-big5",
-               "token": getToken(`${localhost}/capture_css_charset/link_charset/link_import.css`, "css-big5")
+               "token": getToken(`${localhost}/capture_css_charset/link_charset/link_import.css`, "css-big5"),
               },
               {
                "path": "link-1.css",
                "url": `${localhost}/capture_css_charset/link_charset/link.css`,
                "role": "css-utf-8",
-               "token": getToken(`${localhost}/capture_css_charset/link_charset/link.css`, "css-utf-8")
+               "token": getToken(`${localhost}/capture_css_charset/link_charset/link.css`, "css-utf-8"),
               },
               {
                "path": "link_import-1.css",
                "url": `${localhost}/capture_css_charset/link_charset/link_import.css`,
                "role": "css-utf-8",
-               "token": getToken(`${localhost}/capture_css_charset/link_charset/link_import.css`, "css-utf-8")
+               "token": getToken(`${localhost}/capture_css_charset/link_charset/link_import.css`, "css-utf-8"),
               },
-            ]
+            ],
           };
           assert.deepEqual(JSON.parse(await readFileAsText(sitemapBlob)), expectedData);
         });
@@ -8653,7 +8653,7 @@ body { color: red; }`);
       });
 
       it('capture.frame = save', async function () {
-        options["capture.frame"]  = "save";
+        options["capture.frame"] = "save";
 
         var blob = await capture({
           url: `${localhost}/capture_frame/same_origin.html`,
@@ -8709,7 +8709,7 @@ body { color: red; }`);
       it('capture.frame = save (cross-origin)', async function () {
         // Capture the frame content via content script and messaging.
         // The result should be same as same origin if it works normally.
-        options["capture.frame"]  = "save";
+        options["capture.frame"] = "save";
 
         var blob = await capture({
           url: `${localhost}/capture_frame/cross_origin.py`,
@@ -8763,7 +8763,7 @@ body { color: red; }`);
       });
 
       it('capture.frame = link', async function () {
-        options["capture.frame"]  = "link";
+        options["capture.frame"] = "link";
 
         var blob = await capture({
           url: `${localhost}/capture_frame/same_origin.html`,
@@ -8785,7 +8785,7 @@ body { color: red; }`);
       });
 
       it('capture.frame = blank', async function () {
-        options["capture.frame"]  = "blank";
+        options["capture.frame"] = "blank";
 
         var blob = await capture({
           url: `${localhost}/capture_frame/same_origin.html`,
@@ -8807,7 +8807,7 @@ body { color: red; }`);
       });
 
       it('capture.frame = remove', async function () {
-        options["capture.frame"]  = "remove";
+        options["capture.frame"] = "remove";
 
         var blob = await capture({
           url: `${localhost}/capture_frame/same_origin.html`,
@@ -8887,7 +8887,7 @@ body { color: red; }`);
       it('capture.frame = save', async function () {
         // srcdoc should be removed
         // otherwise same as same origin
-        options["capture.frame"]  = "save";
+        options["capture.frame"] = "save";
 
         var blob = await capture({
           url: `${localhost}/capture_frame/srcdoc.html`,
@@ -8946,7 +8946,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
       it('capture.frame = link', async function () {
         // record resolved src and save rewritten srcdoc
         // resources in srcdoc should be saved as data URL
-        options["capture.frame"]  = "link";
+        options["capture.frame"] = "link";
 
         var blob = await capture({
           url: `${localhost}/capture_frame/srcdoc.html`,
@@ -8996,7 +8996,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
 
       it('capture.frame = blank', async function () {
         // srcdoc should be removed
-        options["capture.frame"]  = "blank";
+        options["capture.frame"] = "blank";
 
         var blob = await capture({
           url: `${localhost}/capture_frame/srcdoc.html`,
@@ -9083,7 +9083,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
       });
 
       it('capture.frame = save', async function () {
-        options["capture.frame"]  = "save";
+        options["capture.frame"] = "save";
 
         var blob = await capture({
           url: `${localhost}/capture_frame/duplicate.html`,
@@ -9104,7 +9104,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
       });
 
       it('capture.frame = link', async function () {
-        options["capture.frame"]  = "link";
+        options["capture.frame"] = "link";
 
         var blob = await capture({
           url: `${localhost}/capture_frame/duplicate.html`,
@@ -9132,7 +9132,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
 
       it('capture.frame = save', async function () {
         // frame contents are source (not modified by scripts) due to headless capture
-        options["capture.frame"]  = "save";
+        options["capture.frame"] = "save";
 
         var blob = await captureHeadless({
           url: `${localhost}/capture_frame/same_origin.html`,
@@ -9188,7 +9188,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
 
       it('capture.frame = save', async function () {
         // srcdoc content should be rewritten
-        options["capture.frame"]  = "save";
+        options["capture.frame"] = "save";
 
         var blob = await captureHeadless({
           url: `${localhost}/capture_frame/srcdoc.html`,
@@ -9254,7 +9254,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
       it('capture.frame = link', async function () {
         // record resolved src and save rewritten srcdoc
         // resources in srcdoc should be saved as data URL
-        options["capture.frame"]  = "link";
+        options["capture.frame"] = "link";
 
         var blob = await captureHeadless({
           url: `${localhost}/capture_frame/srcdoc.html`,
@@ -14237,40 +14237,40 @@ ${localhost}/capture_downLink_file/file.css\tbar`,
         var expectedData = {
           "version": 3,
           "indexPages": [
-            "index.html"
+            "index.html",
           ],
           "redirects": [],
           "files": [
             {
-              "path": "index.json"
+              "path": "index.json",
             },
             {
-              "path": "index.dat"
+              "path": "index.dat",
             },
             {
-              "path": "index.rdf"
+              "path": "index.rdf",
             },
             {
-              "path": "history.rdf"
+              "path": "history.rdf",
             },
             {
-              "path": "^metadata^"
+              "path": "^metadata^",
             },
             {
               "path": "index.html",
               "url": `${localhost}/capture_downLink_indepth/in-depth.html`,
               "role": "document",
-              "token": getToken(`${localhost}/capture_downLink_indepth/in-depth.html`, "document")
+              "token": getToken(`${localhost}/capture_downLink_indepth/in-depth.html`, "document"),
             },
             {
               "path": "index.xhtml",
-              "role": "document"
+              "role": "document",
             },
             {
               "path": "index.svg",
-              "role": "document"
-            }
-          ]
+              "role": "document",
+            },
+          ],
         };
         assert.deepEqual(JSON.parse(await readFileAsText(sitemapBlob)), expectedData);
       });
@@ -14333,70 +14333,70 @@ ${localhost}/capture_downLink_file/file.css\tbar`,
         var expectedData = {
           "version": 3,
           "indexPages": [
-            "index.html"
+            "index.html",
           ],
           "redirects": [],
           "files": [
             {
-              "path": "index.json"
+              "path": "index.json",
             },
             {
-              "path": "index.dat"
+              "path": "index.dat",
             },
             {
-              "path": "index.rdf"
+              "path": "index.rdf",
             },
             {
-              "path": "history.rdf"
+              "path": "history.rdf",
             },
             {
-              "path": "^metadata^"
+              "path": "^metadata^",
             },
             {
               "path": "index.html",
               "url": `${localhost}/capture_downLink_indepth/in-depth.html`,
               "role": "document",
-              "token": getToken(`${localhost}/capture_downLink_indepth/in-depth.html`, "document")
+              "token": getToken(`${localhost}/capture_downLink_indepth/in-depth.html`, "document"),
             },
             {
               "path": "index.xhtml",
-              "role": "document"
+              "role": "document",
             },
             {
               "path": "index.svg",
-              "role": "document"
+              "role": "document",
             },
             {
               "path": "linked1-1.html",
               "url": `${localhost}/capture_downLink_indepth/linked1-1.html`,
               "role": "document",
-              "token": getToken(`${localhost}/capture_downLink_indepth/linked1-1.html`, "document")
+              "token": getToken(`${localhost}/capture_downLink_indepth/linked1-1.html`, "document"),
             },
             {
               "path": "linked1-2.html",
               "url": `${localhost}/capture_downLink_indepth/linked1-2.html`,
               "role": "document",
-              "token": getToken(`${localhost}/capture_downLink_indepth/linked1-2.html`, "document")
+              "token": getToken(`${localhost}/capture_downLink_indepth/linked1-2.html`, "document"),
             },
             {
               "path": "linked1-3.html",
               "url": `${localhost}/capture_downLink_indepth/linked1-3.html`,
               "role": "document",
-              "token": getToken(`${localhost}/capture_downLink_indepth/linked1-3.html`, "document")
+              "token": getToken(`${localhost}/capture_downLink_indepth/linked1-3.html`, "document"),
             },
             {
               "path": "linked1-4.html",
               "url": `${localhost}/capture_downLink_indepth/linked1-4.html`,
               "role": "document",
-              "token": getToken(`${localhost}/capture_downLink_indepth/linked1-4.html`, "document")
+              "token": getToken(`${localhost}/capture_downLink_indepth/linked1-4.html`, "document"),
             },
             {
               "path": "linked1-5.html",
               "url": `${localhost}/capture_downLink_indepth/linked1-5.html`,
               "role": "document",
-              "token": getToken(`${localhost}/capture_downLink_indepth/linked1-5.html`, "document")
-            }
-          ]
+              "token": getToken(`${localhost}/capture_downLink_indepth/linked1-5.html`, "document"),
+            },
+          ],
         };
         assert.deepEqual(JSON.parse(await readFileAsText(sitemapBlob)), expectedData);
       });
@@ -14465,82 +14465,82 @@ ${localhost}/capture_downLink_file/file.css\tbar`,
         var expectedData = {
           "version": 3,
           "indexPages": [
-            "index.html"
+            "index.html",
           ],
           "redirects": [],
           "files": [
             {
-              "path": "index.json"
+              "path": "index.json",
             },
             {
-              "path": "index.dat"
+              "path": "index.dat",
             },
             {
-              "path": "index.rdf"
+              "path": "index.rdf",
             },
             {
-              "path": "history.rdf"
+              "path": "history.rdf",
             },
             {
-              "path": "^metadata^"
+              "path": "^metadata^",
             },
             {
               "path": "index.html",
               "url": `${localhost}/capture_downLink_indepth/in-depth.html`,
               "role": "document",
-              "token": getToken(`${localhost}/capture_downLink_indepth/in-depth.html`, "document")
+              "token": getToken(`${localhost}/capture_downLink_indepth/in-depth.html`, "document"),
             },
             {
               "path": "index.xhtml",
-              "role": "document"
+              "role": "document",
             },
             {
               "path": "index.svg",
-              "role": "document"
+              "role": "document",
             },
             {
               "path": "linked1-1.html",
               "url": `${localhost}/capture_downLink_indepth/linked1-1.html`,
               "role": "document",
-              "token": getToken(`${localhost}/capture_downLink_indepth/linked1-1.html`, "document")
+              "token": getToken(`${localhost}/capture_downLink_indepth/linked1-1.html`, "document"),
             },
             {
               "path": "linked1-2.html",
               "url": `${localhost}/capture_downLink_indepth/linked1-2.html`,
               "role": "document",
-              "token": getToken(`${localhost}/capture_downLink_indepth/linked1-2.html`, "document")
+              "token": getToken(`${localhost}/capture_downLink_indepth/linked1-2.html`, "document"),
             },
             {
               "path": "linked1-3.html",
               "url": `${localhost}/capture_downLink_indepth/linked1-3.html`,
               "role": "document",
-              "token": getToken(`${localhost}/capture_downLink_indepth/linked1-3.html`, "document")
+              "token": getToken(`${localhost}/capture_downLink_indepth/linked1-3.html`, "document"),
             },
             {
               "path": "linked1-4.html",
               "url": `${localhost}/capture_downLink_indepth/linked1-4.html`,
               "role": "document",
-              "token": getToken(`${localhost}/capture_downLink_indepth/linked1-4.html`, "document")
+              "token": getToken(`${localhost}/capture_downLink_indepth/linked1-4.html`, "document"),
             },
             {
               "path": "linked1-5.html",
               "url": `${localhost}/capture_downLink_indepth/linked1-5.html`,
               "role": "document",
-              "token": getToken(`${localhost}/capture_downLink_indepth/linked1-5.html`, "document")
+              "token": getToken(`${localhost}/capture_downLink_indepth/linked1-5.html`, "document"),
             },
             {
               "path": "linked2-1.html",
               "url": `${localhost}/capture_downLink_indepth/linked2-1.html`,
               "role": "document",
-              "token": getToken(`${localhost}/capture_downLink_indepth/linked2-1.html`, "document")
+              "token": getToken(`${localhost}/capture_downLink_indepth/linked2-1.html`, "document"),
             },
             {
               "path": "linked2-2.html",
               "url": `${localhost}/capture_downLink_indepth/linked2-2.html`,
               "role": "document",
-              "token": getToken(`${localhost}/capture_downLink_indepth/linked2-2.html`, "document")
-            }
-          ]
+              "token": getToken(`${localhost}/capture_downLink_indepth/linked2-2.html`, "document"),
+            },
+          ],
         };
         assert.deepEqual(JSON.parse(await readFileAsText(sitemapBlob)), expectedData);
       });
@@ -14606,70 +14606,70 @@ ${localhost}/capture_downLink_file/file.css\tbar`,
         var expectedData = {
           "version": 3,
           "indexPages": [
-            "index.html"
+            "index.html",
           ],
           "redirects": [],
           "files": [
             {
-              "path": "index.json"
+              "path": "index.json",
             },
             {
-              "path": "index.dat"
+              "path": "index.dat",
             },
             {
-              "path": "index.rdf"
+              "path": "index.rdf",
             },
             {
-              "path": "history.rdf"
+              "path": "history.rdf",
             },
             {
-              "path": "^metadata^"
+              "path": "^metadata^",
             },
             {
               "path": "index.html",
               "url": `${localhost}/capture_downLink_indepth/in-depth.html`,
               "role": "document",
-              "token": getToken(`${localhost}/capture_downLink_indepth/in-depth.html`, "document")
+              "token": getToken(`${localhost}/capture_downLink_indepth/in-depth.html`, "document"),
             },
             {
               "path": "index.xhtml",
-              "role": "document"
+              "role": "document",
             },
             {
               "path": "index.svg",
-              "role": "document"
+              "role": "document",
             },
             {
               "path": "linked1-1.html",
               "url": `${localhost}/capture_downLink_indepth/linked1-1.html`,
               "role": "document",
-              "token": getToken(`${localhost}/capture_downLink_indepth/linked1-1.html`, "document")
+              "token": getToken(`${localhost}/capture_downLink_indepth/linked1-1.html`, "document"),
             },
             {
               "path": "linked1-2.html",
               "url": `${localhost}/capture_downLink_indepth/linked1-2.html`,
               "role": "document",
-              "token": getToken(`${localhost}/capture_downLink_indepth/linked1-2.html`, "document")
+              "token": getToken(`${localhost}/capture_downLink_indepth/linked1-2.html`, "document"),
             },
             {
               "path": "linked1-3.html",
               "url": `${localhost}/capture_downLink_indepth/linked1-3.html`,
               "role": "document",
-              "token": getToken(`${localhost}/capture_downLink_indepth/linked1-3.html`, "document")
+              "token": getToken(`${localhost}/capture_downLink_indepth/linked1-3.html`, "document"),
             },
             {
               "path": "linked1-4.html",
               "url": `${localhost}/capture_downLink_indepth/linked1-4.html`,
               "role": "document",
-              "token": getToken(`${localhost}/capture_downLink_indepth/linked1-4.html`, "document")
+              "token": getToken(`${localhost}/capture_downLink_indepth/linked1-4.html`, "document"),
             },
             {
               "path": "linked1-5.html",
               "url": `${localhost}/capture_downLink_indepth/linked1-5.html`,
               "role": "document",
-              "token": getToken(`${localhost}/capture_downLink_indepth/linked1-5.html`, "document")
-            }
-          ]
+              "token": getToken(`${localhost}/capture_downLink_indepth/linked1-5.html`, "document"),
+            },
+          ],
         };
         assert.deepEqual(JSON.parse(await readFileAsText(sitemapBlob)), expectedData);
       });
@@ -15234,51 +15234,51 @@ ${localhost}/capture_downLink_indepth/linked2-1.html`,
         var expectedData = {
          "version": 3,
          "indexPages": [
-          "index.html"
+          "index.html",
          ],
          "redirects": [
           [
            `${localhost}/capture_downLink_indepth_redirect/linked1-1.pyr`,
-           `${localhost}/capture_downLink_indepth_redirect/redirected.html`
-          ]
+           `${localhost}/capture_downLink_indepth_redirect/redirected.html`,
+          ],
          ],
          "files": [
           {
-           "path": "index.json"
+           "path": "index.json",
           },
           {
-           "path": "index.dat"
+           "path": "index.dat",
           },
           {
-           "path": "index.rdf"
+           "path": "index.rdf",
           },
           {
-           "path": "history.rdf"
+           "path": "history.rdf",
           },
           {
-           "path": "^metadata^"
+           "path": "^metadata^",
           },
           {
            "path": "index.html",
            "url": `${localhost}/capture_downLink_indepth_redirect/in-depth.html`,
            "role": "document",
-           "token": getToken(`${localhost}/capture_downLink_indepth_redirect/in-depth.html`, "document")
+           "token": getToken(`${localhost}/capture_downLink_indepth_redirect/in-depth.html`, "document"),
           },
           {
            "path": "index.xhtml",
-           "role": "document"
+           "role": "document",
           },
           {
            "path": "index.svg",
-           "role": "document"
+           "role": "document",
           },
           {
            "path": "redirected.html",
            "url": `${localhost}/capture_downLink_indepth_redirect/redirected.html`,
            "role": "document",
-           "token": getToken(`${localhost}/capture_downLink_indepth_redirect/redirected.html`, "document")
-          }
-         ]
+           "token": getToken(`${localhost}/capture_downLink_indepth_redirect/redirected.html`, "document"),
+          },
+         ],
         };
         assert.deepEqual(JSON.parse(await readFileAsText(sitemapBlob)), expectedData);
       });
@@ -15309,50 +15309,50 @@ ${localhost}/capture_downLink_indepth/linked2-1.html`,
         var expectedData = {
           "version": 3,
           "indexPages": [
-            "index.html"
+            "index.html",
           ],
           "redirects": [],
           "files": [
             {
-              "path": "index.json"
+              "path": "index.json",
             },
             {
-              "path": "index.dat"
+              "path": "index.dat",
             },
             {
-              "path": "index.rdf"
+              "path": "index.rdf",
             },
             {
-              "path": "history.rdf"
+              "path": "history.rdf",
             },
             {
-              "path": "^metadata^"
+              "path": "^metadata^",
             },
             {
               "path": "index.html",
               "url": `${localhost}/capture_downLink_indepth_datauri/in-depth.html`,
               "role": "document",
-              "token": getToken(`${localhost}/capture_downLink_indepth_datauri/in-depth.html`, "document")
+              "token": getToken(`${localhost}/capture_downLink_indepth_datauri/in-depth.html`, "document"),
             },
             {
               "path": "index.xhtml",
-              "role": "document"
+              "role": "document",
             },
             {
               "path": "index.svg",
-              "role": "document"
+              "role": "document",
             },
             {
              "path": "dbc82be549e49d6db9a5719086722a4f1c5079cd.bmp",
              "role": "resource",
-             "token": "53724543b9eec02e09e333bf253affae8bbf71d4"
+             "token": "53724543b9eec02e09e333bf253affae8bbf71d4",
             },
             {
              "path": "test.bmp",
              "role": "resource",
-             "token": "273f4b77f14df7c6f331c0cd1ee01746e41797e7"
-            }
-          ]
+             "token": "273f4b77f14df7c6f331c0cd1ee01746e41797e7",
+            },
+          ],
         };
         assert.deepEqual(JSON.parse(await readFileAsText(sitemapBlob)), expectedData);
       });
@@ -15376,9 +15376,9 @@ ${localhost}/capture_downLink_indepth/linked2-1.html`,
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
         var doc = await readFileAsDocument(indexBlob);
         var imgElems = doc.querySelectorAll('img');
-        var imgFn =imgElems[0].getAttribute('src');
-        var imgFn1 =imgElems[1].getAttribute('src');
-        var imgFn2 =imgElems[2].getAttribute('src');
+        var imgFn = imgElems[0].getAttribute('src');
+        var imgFn1 = imgElems[1].getAttribute('src');
+        var imgFn2 = imgElems[2].getAttribute('src');
         assert.strictEqual(imgFn, imgFn1);
         assert.notStrictEqual(imgFn, imgFn2);
 
@@ -15386,50 +15386,50 @@ ${localhost}/capture_downLink_indepth/linked2-1.html`,
         var expectedData = {
           "version": 3,
           "indexPages": [
-            "index.html"
+            "index.html",
           ],
           "redirects": [],
           "files": [
             {
-              "path": "index.json"
+              "path": "index.json",
             },
             {
-              "path": "index.dat"
+              "path": "index.dat",
             },
             {
-              "path": "index.rdf"
+              "path": "index.rdf",
             },
             {
-              "path": "history.rdf"
+              "path": "history.rdf",
             },
             {
-              "path": "^metadata^"
+              "path": "^metadata^",
             },
             {
               "path": "index.html",
               "url": `${localhost}/capture_downLink_indepth_blob/in-depth.html`,
               "role": "document",
-              "token": getToken(`${localhost}/capture_downLink_indepth_blob/in-depth.html`, "document")
+              "token": getToken(`${localhost}/capture_downLink_indepth_blob/in-depth.html`, "document"),
             },
             {
               "path": "index.xhtml",
-              "role": "document"
+              "role": "document",
             },
             {
               "path": "index.svg",
-              "role": "document"
+              "role": "document",
             },
             {
              "path": imgFn,
              "role": "resource",
-             "token": getToken(`blob:${localhost}/${imgFn.slice(0, -4)}`, "resource")
+             "token": getToken(`blob:${localhost}/${imgFn.slice(0, -4)}`, "resource"),
             },
             {
              "path": imgFn2,
              "role": "resource",
-             "token": getToken(`blob:${localhost}/${imgFn2.slice(0, -4)}`, "resource")
-            }
-          ]
+             "token": getToken(`blob:${localhost}/${imgFn2.slice(0, -4)}`, "resource"),
+            },
+          ],
         };
         assert.deepEqual(JSON.parse(await readFileAsText(sitemapBlob)), expectedData);
       });
@@ -15462,40 +15462,40 @@ ${localhost}/capture_downLink_indepth/linked2-1.html`,
         var expectedData = {
           "version": 3,
           "indexPages": [
-            "index.html"
+            "index.html",
           ],
           "redirects": [],
           "files": [
             {
-              "path": "index.json"
+              "path": "index.json",
             },
             {
-              "path": "index.dat"
+              "path": "index.dat",
             },
             {
-              "path": "index.rdf"
+              "path": "index.rdf",
             },
             {
-              "path": "history.rdf"
+              "path": "history.rdf",
             },
             {
-              "path": "^metadata^"
+              "path": "^metadata^",
             },
             {
               "path": "index.html",
               "url": `${localhost}/capture_downLink_indepth_about/in-depth.html`,
               "role": "document",
-              "token": getToken(`${localhost}/capture_downLink_indepth_about/in-depth.html`, "document")
+              "token": getToken(`${localhost}/capture_downLink_indepth_about/in-depth.html`, "document"),
             },
             {
               "path": "index.xhtml",
-              "role": "document"
+              "role": "document",
             },
             {
               "path": "index.svg",
-              "role": "document"
-            }
-          ]
+              "role": "document",
+            },
+          ],
         };
         assert.deepEqual(JSON.parse(await readFileAsText(sitemapBlob)), expectedData);
       });
@@ -15529,40 +15529,40 @@ ${localhost}/capture_downLink_indepth/linked2-1.html`,
         var expectedData = {
           "version": 3,
           "indexPages": [
-            "index.html"
+            "index.html",
           ],
           "redirects": [],
           "files": [
             {
-              "path": "index.json"
+              "path": "index.json",
             },
             {
-              "path": "index.dat"
+              "path": "index.dat",
             },
             {
-              "path": "index.rdf"
+              "path": "index.rdf",
             },
             {
-              "path": "history.rdf"
+              "path": "history.rdf",
             },
             {
-              "path": "^metadata^"
+              "path": "^metadata^",
             },
             {
               "path": "index.html",
               "url": `${localhost}/capture_downLink_indepth_invalid/in-depth.html`,
               "role": "document",
-              "token": getToken(`${localhost}/capture_downLink_indepth_invalid/in-depth.html`, "document")
+              "token": getToken(`${localhost}/capture_downLink_indepth_invalid/in-depth.html`, "document"),
             },
             {
               "path": "index.xhtml",
-              "role": "document"
+              "role": "document",
             },
             {
               "path": "index.svg",
-              "role": "document"
-            }
-          ]
+              "role": "document",
+            },
+          ],
         };
         assert.deepEqual(JSON.parse(await readFileAsText(sitemapBlob)), expectedData);
       });
@@ -15831,47 +15831,47 @@ ${localhost}/capture_downLink_indepth_urlExtra/1-3.txt`,
           "redirects": [],
           "files": [
             {
-              "path": "index.json"
+              "path": "index.json",
             },
             {
-              "path": "index.dat"
+              "path": "index.dat",
             },
             {
-              "path": "index.rdf"
+              "path": "index.rdf",
             },
             {
-              "path": "history.rdf"
+              "path": "history.rdf",
             },
             {
-              "path": "^metadata^"
+              "path": "^metadata^",
             },
             {
               "path": "index.html",
               "url": `${localhost}/capture_downLink_indepth_urlExtra/main.html`,
               "role": "document",
-              "token": getToken(`${localhost}/capture_downLink_indepth_urlExtra/main.html`, "document")
+              "token": getToken(`${localhost}/capture_downLink_indepth_urlExtra/main.html`, "document"),
             },
             {
               "path": "index.xhtml",
-              "role": "document"
+              "role": "document",
             },
             {
               "path": "index.svg",
-              "role": "document"
+              "role": "document",
             },
             {
               "path": "1-1.html",
               "url": `${localhost}/capture_downLink_indepth_urlExtra/1-1.html`,
               "role": "document",
-              "token": getToken(`${localhost}/capture_downLink_indepth_urlExtra/1-1.html`, "document")
+              "token": getToken(`${localhost}/capture_downLink_indepth_urlExtra/1-1.html`, "document"),
             },
             {
               "path": "1-1.bmp",
               "url": `${localhost}/capture_downLink_indepth_urlExtra/1-1.bmp`,
               "role": "resource",
-              "token": getToken(`${localhost}/capture_downLink_indepth_urlExtra/1-1.bmp`, "resource")
-            }
-          ]
+              "token": getToken(`${localhost}/capture_downLink_indepth_urlExtra/1-1.bmp`, "resource"),
+            },
+          ],
         };
         assert.deepEqual(JSON.parse(await readFileAsText(sitemapBlob)), expectedData);
       });
@@ -15913,59 +15913,59 @@ ${localhost}/capture_downLink_indepth_urlExtra/1-3.txt`,
           "redirects": [],
           "files": [
             {
-              "path": "index.json"
+              "path": "index.json",
             },
             {
-              "path": "index.dat"
+              "path": "index.dat",
             },
             {
-              "path": "index.rdf"
+              "path": "index.rdf",
             },
             {
-              "path": "history.rdf"
+              "path": "history.rdf",
             },
             {
-              "path": "^metadata^"
+              "path": "^metadata^",
             },
             {
               "path": "index.html",
               "url": `${localhost}/capture_downLink_indepth_urlExtra/main.html`,
               "role": "document",
-              "token": getToken(`${localhost}/capture_downLink_indepth_urlExtra/main.html`, "document")
+              "token": getToken(`${localhost}/capture_downLink_indepth_urlExtra/main.html`, "document"),
             },
             {
               "path": "index.xhtml",
-              "role": "document"
+              "role": "document",
             },
             {
               "path": "index.svg",
-              "role": "document"
+              "role": "document",
             },
             {
               "path": "1-2.html",
               "url": `${localhost}/capture_downLink_indepth_urlExtra/1-2.py`,
               "role": "resource",
-              "token": getToken(`${localhost}/capture_downLink_indepth_urlExtra/1-2.py`, "resource")
+              "token": getToken(`${localhost}/capture_downLink_indepth_urlExtra/1-2.py`, "resource"),
             },
             {
               "path": "1-3.txt",
               "url": `${localhost}/capture_downLink_indepth_urlExtra/1-3.txt`,
               "role": "resource",
-              "token": getToken(`${localhost}/capture_downLink_indepth_urlExtra/1-3.txt`, "resource")
+              "token": getToken(`${localhost}/capture_downLink_indepth_urlExtra/1-3.txt`, "resource"),
             },
             {
               "path": "1-1.html",
               "url": `${localhost}/capture_downLink_indepth_urlExtra/1-1.html`,
               "role": "document",
-              "token": getToken(`${localhost}/capture_downLink_indepth_urlExtra/1-1.html`, "document")
+              "token": getToken(`${localhost}/capture_downLink_indepth_urlExtra/1-1.html`, "document"),
             },
             {
               "path": "1-1.bmp",
               "url": `${localhost}/capture_downLink_indepth_urlExtra/1-1.bmp`,
               "role": "resource",
-              "token": getToken(`${localhost}/capture_downLink_indepth_urlExtra/1-1.bmp`, "resource")
-            }
-          ]
+              "token": getToken(`${localhost}/capture_downLink_indepth_urlExtra/1-1.bmp`, "resource"),
+            },
+          ],
         };
         assert.deepEqual(JSON.parse(await readFileAsText(sitemapBlob)), expectedData);
       });
@@ -15996,58 +15996,58 @@ ${localhost}/capture_downLink_indepth_urlExtra/1-3.txt`,
         var expectedData = {
           "version": 3,
           "indexPages": [
-            "index.html"
+            "index.html",
           ],
           "redirects": [],
           "files": [
             {
-              "path": "index.json"
+              "path": "index.json",
             },
             {
-              "path": "index.dat"
+              "path": "index.dat",
             },
             {
-              "path": "index.rdf"
+              "path": "index.rdf",
             },
             {
-              "path": "history.rdf"
+              "path": "history.rdf",
             },
             {
-              "path": "^metadata^"
+              "path": "^metadata^",
             },
             {
               "path": "index.html",
               "url": `${localhost}/capture_downLink_indepth_case/index.html`,
               "role": "document",
-              "token": getToken(`${localhost}/capture_downLink_indepth_case/index.html`, "document")
+              "token": getToken(`${localhost}/capture_downLink_indepth_case/index.html`, "document"),
             },
             {
               "path": "index.xhtml",
-              "role": "document"
+              "role": "document",
             },
             {
               "path": "index.svg",
-              "role": "document"
+              "role": "document",
             },
             {
               "path": "Green.bmp",
               "url": `${localhost}/capture_downLink_indepth_case/Green.bmp`,
               "role": "resource",
-              "token": getToken(`${localhost}/capture_downLink_indepth_case/Green.bmp`, "resource")
+              "token": getToken(`${localhost}/capture_downLink_indepth_case/Green.bmp`, "resource"),
             },
             {
              "path": "Yellow.bmp",
              "url": `${localhost}/capture_downLink_indepth_case/Yellow.bmp`,
              "role": "resource",
-             "token": getToken(`${localhost}/capture_downLink_indepth_case/Yellow.bmp`, "resource")
+             "token": getToken(`${localhost}/capture_downLink_indepth_case/Yellow.bmp`, "resource"),
             },
             {
              "path": "Linked.html",
              "url": `${localhost}/capture_downLink_indepth_case/Linked.html`,
              "role": "document",
-             "token": getToken(`${localhost}/capture_downLink_indepth_case/Linked.html`, "document")
-            }
-          ]
+             "token": getToken(`${localhost}/capture_downLink_indepth_case/Linked.html`, "document"),
+            },
+          ],
         };
         assert.deepEqual(JSON.parse(await readFileAsText(sitemapBlob)), expectedData);
       });
@@ -16416,79 +16416,79 @@ ${localhost}/capture_downLink_indepth_urlExtra/1-3.txt`,
         var timeId = doc.documentElement.getAttribute('data-scrapbook-create');
 
         assert(head.innerHTML.match(
-          regex`<!--scrapbook-orig-node-${timeId}=<base[^>]*?>-->`
+          regex`<!--scrapbook-orig-node-${timeId}=<base[^>]*?>-->`,
         ));
 
         assert(head.innerHTML.match(
-          regex`<!--scrapbook-orig-node-${timeId}=<link[^>]*? rel="shortcut icon"[^>]*?>-->`
+          regex`<!--scrapbook-orig-node-${timeId}=<link[^>]*? rel="shortcut icon"[^>]*?>-->`,
         ));
 
         assert(head.innerHTML.match(
-          regex`<!--scrapbook-orig-node-${timeId}=<link[^>]*? rel="stylesheet"[^>]*?>-->`
+          regex`<!--scrapbook-orig-node-${timeId}=<link[^>]*? rel="stylesheet"[^>]*?>-->`,
         ));
 
         assert(head.innerHTML.match(
-          regex`<!--scrapbook-orig-node-${timeId}=<link[^>]*? rel="preload"[^>]*?>-->`
+          regex`<!--scrapbook-orig-node-${timeId}=<link[^>]*? rel="preload"[^>]*?>-->`,
         ));
 
         assert(head.innerHTML.match(
-          regex`<!--scrapbook-orig-node-${timeId}=<link[^>]*? rel="prefetch"[^>]*?>-->`
+          regex`<!--scrapbook-orig-node-${timeId}=<link[^>]*? rel="prefetch"[^>]*?>-->`,
         ));
 
         assert(head.innerHTML.match(
-          regex`<!--scrapbook-orig-node-${timeId}=<script[^>]*?>[\s\S]*?</script>-->`
+          regex`<!--scrapbook-orig-node-${timeId}=<script[^>]*?>[\s\S]*?</script>-->`,
         ));
 
         assert(body.innerHTML.match(
-          regex`<!--scrapbook-orig-node-${timeId}=<img[^>]*? src=[^>]*?>-->`
+          regex`<!--scrapbook-orig-node-${timeId}=<img[^>]*? src=[^>]*?>-->`,
         ));
 
         assert(body.innerHTML.match(
-          regex`<!--scrapbook-orig-node-${timeId}=<img[^>]*? srcset=[^>]*?>-->`
+          regex`<!--scrapbook-orig-node-${timeId}=<img[^>]*? srcset=[^>]*?>-->`,
         ));
 
         assert(body.innerHTML.match(
-          regex`<!--scrapbook-orig-node-${timeId}=<picture>[\s\S]*?</picture>-->`
+          regex`<!--scrapbook-orig-node-${timeId}=<picture>[\s\S]*?</picture>-->`,
         ));
 
         assert(body.innerHTML.match(
-          regex`<!--scrapbook-orig-node-${timeId}=<input[^>]*? type="image"[^>]*?>-->`
+          regex`<!--scrapbook-orig-node-${timeId}=<input[^>]*? type="image"[^>]*?>-->`,
         ));
 
         assert(body.innerHTML.match(
-          regex`<!--scrapbook-orig-node-${timeId}=<canvas[^>]*?>[\s\S]*?</canvas>-->`
+          regex`<!--scrapbook-orig-node-${timeId}=<canvas[^>]*?>[\s\S]*?</canvas>-->`,
         ));
 
         assert(body.innerHTML.match(
-          regex`<!--scrapbook-orig-node-${timeId}=<audio[^>]*?>[\s\S]*?</audio>-->`
+          regex`<!--scrapbook-orig-node-${timeId}=<audio[^>]*?>[\s\S]*?</audio>-->`,
         ));
 
         assert(body.innerHTML.match(
-          regex`<!--scrapbook-orig-node-${timeId}=<video[^>]*?>[\s\S]*?</video>-->`
+          regex`<!--scrapbook-orig-node-${timeId}=<video[^>]*?>[\s\S]*?</video>-->`,
         ));
 
         assert(body.innerHTML.match(
-          regex`<!--scrapbook-orig-node-${timeId}=<video[^>]*?>[\s\S]*?</video>-->`
+          regex`<!--scrapbook-orig-node-${timeId}=<video[^>]*?>[\s\S]*?</video>-->`,
         ));
 
         assert(body.innerHTML.match(
-          regex`<!--scrapbook-orig-node-${timeId}=<embed[^>]*?>-->`
+          regex`<!--scrapbook-orig-node-${timeId}=<embed[^>]*?>-->`,
         ));
 
         assert(body.innerHTML.match(
-          regex`<!--scrapbook-orig-node-${timeId}=<object[^>]*?>[\s\S]*?</object>-->`
+          regex`<!--scrapbook-orig-node-${timeId}=<object[^>]*?>[\s\S]*?</object>-->`,
         ));
 
         assert(body.innerHTML.match(
-          regex`<!--scrapbook-orig-node-${timeId}=<applet[^>]*?>[\s\S]*?</applet>-->`
+          regex`<!--scrapbook-orig-node-${timeId}=<applet[^>]*?>[\s\S]*?</applet>-->`,
         ));
 
         assert(body.innerHTML.match(
-          regex`<!--scrapbook-orig-node-${timeId}=<iframe[^>]*?>[\s\S]*?</iframe>-->`
+          regex`<!--scrapbook-orig-node-${timeId}=<iframe[^>]*?>[\s\S]*?</iframe>-->`,
         ));
 
         assert(body.innerHTML.match(
-          regex`<!--scrapbook-orig-node-${timeId}=<noscript[^>]*?>[\s\S]*?</noscript>-->`
+          regex`<!--scrapbook-orig-node-${timeId}=<noscript[^>]*?>[\s\S]*?</noscript>-->`,
         ));
       });
 
@@ -16529,15 +16529,15 @@ ${localhost}/capture_downLink_indepth_urlExtra/1-3.txt`,
         var timeId = doc.documentElement.getAttribute('data-scrapbook-create');
 
         assert(doc.querySelector('picture').innerHTML.match(
-          regex`<!--scrapbook-orig-node-${timeId}=<source[^>]*?>-->`
+          regex`<!--scrapbook-orig-node-${timeId}=<source[^>]*?>-->`,
         ));
 
         assert(doc.querySelector('audio').innerHTML.match(
-          regex`<!--scrapbook-orig-node-${timeId}=<source[^>]*?>-->`
+          regex`<!--scrapbook-orig-node-${timeId}=<source[^>]*?>-->`,
         ));
 
         assert(doc.querySelector('video').innerHTML.match(
-          regex`<!--scrapbook-orig-node-${timeId}=<source[^>]*?>-->`
+          regex`<!--scrapbook-orig-node-${timeId}=<source[^>]*?>-->`,
         ));
       });
 
@@ -18590,64 +18590,64 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
             "linked1-1.html",
             "linked1-2.xhtml",
             "linked1-3.svg",
-            "linked1-4.txt"
+            "linked1-4.txt",
           ],
           "redirects": [],
           "files": [
             {
-              "path": "index.json"
+              "path": "index.json",
             },
             {
-              "path": "index.dat"
+              "path": "index.dat",
             },
             {
-              "path": "index.rdf"
+              "path": "index.rdf",
             },
             {
-              "path": "history.rdf"
+              "path": "history.rdf",
             },
             {
-              "path": "^metadata^"
+              "path": "^metadata^",
             },
             {
               "path": "index.html",
               "url": `${localhost}/capture_mergeCapture/main.html`,
               "role": "document",
-              "token": getToken(`${localhost}/capture_mergeCapture/main.html`, "document")
+              "token": getToken(`${localhost}/capture_mergeCapture/main.html`, "document"),
             },
             {
               "path": "index.xhtml",
-              "role": "document"
+              "role": "document",
             },
             {
               "path": "index.svg",
-              "role": "document"
+              "role": "document",
             },
             {
               "path": "linked1-1.html",
               "url": `${localhost}/capture_mergeCapture/linked1-1.html`,
               "role": "document",
-              "token": getToken(`${localhost}/capture_mergeCapture/linked1-1.html`, "document")
+              "token": getToken(`${localhost}/capture_mergeCapture/linked1-1.html`, "document"),
             },
             {
               "path": "linked1-2.xhtml",
               "url": `${localhost}/capture_mergeCapture/linked1-2.xhtml`,
               "role": "document",
-              "token": getToken(`${localhost}/capture_mergeCapture/linked1-2.xhtml`, "document")
+              "token": getToken(`${localhost}/capture_mergeCapture/linked1-2.xhtml`, "document"),
             },
             {
               "path": "linked1-3.svg",
               "url": `${localhost}/capture_mergeCapture/linked1-3.svg`,
               "role": "document",
-              "token": getToken(`${localhost}/capture_mergeCapture/linked1-3.svg`, "document")
+              "token": getToken(`${localhost}/capture_mergeCapture/linked1-3.svg`, "document"),
             },
             {
               "path": "linked1-4.txt",
               "url": `${localhost}/capture_mergeCapture/linked1-4.txt`,
               "role": "resource",
-              "token": getToken(`${localhost}/capture_mergeCapture/linked1-4.txt`, "resource")
-            }
-          ]
+              "token": getToken(`${localhost}/capture_mergeCapture/linked1-4.txt`, "resource"),
+            },
+          ],
         };
         assert.deepEqual(sitemap, expectedData);
       });
@@ -18787,7 +18787,7 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
           "version": 3,
           "indexPages": [
             "index.html",
-            "other.html"
+            "other.html",
           ],
           "redirects": [
             [
@@ -18801,53 +18801,53 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
           ],
           "files": [
             {
-              "path": "index.json"
+              "path": "index.json",
             },
             {
-              "path": "index.dat"
+              "path": "index.dat",
             },
             {
-              "path": "index.rdf"
+              "path": "index.rdf",
             },
             {
-              "path": "history.rdf"
+              "path": "history.rdf",
             },
             {
-              "path": "^metadata^"
+              "path": "^metadata^",
             },
             {
               "path": "index.html",
               "url": `${localhost}/capture_mergeCapture_redirect/main.html`,
               "role": "document",
-              "token": getToken(`${localhost}/capture_mergeCapture_redirect/main.html`, "document")
+              "token": getToken(`${localhost}/capture_mergeCapture_redirect/main.html`, "document"),
             },
             {
               "path": "index.xhtml",
-              "role": "document"
+              "role": "document",
             },
             {
               "path": "index.svg",
-              "role": "document"
+              "role": "document",
             },
             {
               "path": "redirected1-1.html",
               "url": `${localhost}/capture_mergeCapture_redirect/redirected1-1.html`,
               "role": "document",
-              "token": getToken(`${localhost}/capture_mergeCapture_redirect/redirected1-1.html`, "document")
+              "token": getToken(`${localhost}/capture_mergeCapture_redirect/redirected1-1.html`, "document"),
             },
             {
               "path": "redirected1-2.xhtml",
               "url": `${localhost}/capture_mergeCapture_redirect/redirected1-2.xhtml`,
               "role": "document",
-              "token": getToken(`${localhost}/capture_mergeCapture_redirect/redirected1-2.xhtml`, "document")
+              "token": getToken(`${localhost}/capture_mergeCapture_redirect/redirected1-2.xhtml`, "document"),
             },
             {
               "path": "other.html",
               "url": `${localhost}/capture_mergeCapture_redirect/other.html`,
               "role": "document",
-              "token": getToken(`${localhost}/capture_mergeCapture_redirect/other.html`, "document")
-            }
-          ]
+              "token": getToken(`${localhost}/capture_mergeCapture_redirect/other.html`, "document"),
+            },
+          ],
         };
         assert.deepEqual(sitemap, expectedData);
       });
@@ -18921,7 +18921,7 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
           "indexPages": [
             "index.html",
             "redirected1-1.html",
-            "redirected1-2.xhtml"
+            "redirected1-2.xhtml",
           ],
           "redirects": [
             [
@@ -18935,47 +18935,47 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
           ],
           "files": [
             {
-              "path": "index.json"
+              "path": "index.json",
             },
             {
-              "path": "index.dat"
+              "path": "index.dat",
             },
             {
-              "path": "index.rdf"
+              "path": "index.rdf",
             },
             {
-              "path": "history.rdf"
+              "path": "history.rdf",
             },
             {
-              "path": "^metadata^"
+              "path": "^metadata^",
             },
             {
               "path": "index.html",
               "url": `${localhost}/capture_mergeCapture_redirect/main.html`,
               "role": "document",
-              "token": getToken(`${localhost}/capture_mergeCapture_redirect/main.html`, "document")
+              "token": getToken(`${localhost}/capture_mergeCapture_redirect/main.html`, "document"),
             },
             {
               "path": "index.xhtml",
-              "role": "document"
+              "role": "document",
             },
             {
               "path": "index.svg",
-              "role": "document"
+              "role": "document",
             },
             {
               "path": "redirected1-1.html",
               "url": `${localhost}/capture_mergeCapture_redirect/redirected1-1.html`,
               "role": "document",
-              "token": getToken(`${localhost}/capture_mergeCapture_redirect/redirected1-1.html`, "document")
+              "token": getToken(`${localhost}/capture_mergeCapture_redirect/redirected1-1.html`, "document"),
             },
             {
               "path": "redirected1-2.xhtml",
               "url": `${localhost}/capture_mergeCapture_redirect/redirected1-2.xhtml`,
               "role": "document",
-              "token": getToken(`${localhost}/capture_mergeCapture_redirect/redirected1-2.xhtml`, "document")
-            }
-          ]
+              "token": getToken(`${localhost}/capture_mergeCapture_redirect/redirected1-2.xhtml`, "document"),
+            },
+          ],
         };
         assert.deepEqual(sitemap, expectedData);
       });

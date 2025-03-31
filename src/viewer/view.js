@@ -249,7 +249,7 @@
                       break;
                     }
                     if (info.inZip) {
-                      tasks[tasks.length] = 
+                      tasks[tasks.length] =
                       viewer.fetchPage({
                         inZipPath: info.inZipPath,
                         url: info.url,
@@ -288,7 +288,7 @@ Redirecting to: <a href="${scrapbook.escapeHtml(info.url)}">${scrapbook.escapeHt
               if (elem.hasAttribute("href")) {
                 if (elem.matches('[rel~="stylesheet"]')) {
                   const info = viewer.parseUrl(elem.getAttribute("href"), refUrl);
-                  tasks[tasks.length] = 
+                  tasks[tasks.length] =
                   viewer.fetchFile({
                     inZipPath: info.inZipPath,
                     rewriteFunc: viewer.processCssFile,
@@ -306,7 +306,7 @@ Redirecting to: <a href="${scrapbook.escapeHtml(info.url)}">${scrapbook.escapeHt
             }
 
             case "style": {
-              tasks[tasks.length] = 
+              tasks[tasks.length] =
               viewer.processCssText(elem.textContent, refUrl, recurseChain).then((response) => {
                 elem.textContent = response;
                 return response;
@@ -354,7 +354,7 @@ Redirecting to: <a href="${scrapbook.escapeHtml(info.url)}">${scrapbook.escapeHt
                   }
                 }
 
-                tasks[tasks.length] = 
+                tasks[tasks.length] =
                 viewer.fetchPage({
                   inZipPath: info.inZipPath,
                   url: info.url,
@@ -395,7 +395,7 @@ Redirecting to: <a href="${scrapbook.escapeHtml(info.url)}">${scrapbook.escapeHt
                 elem.setAttribute("srcset",
                   scrapbook.rewriteSrcset(elem.getAttribute("srcset"), (url) => {
                     return rewriteUrl(url, refUrl);
-                  })
+                  }),
                 );
               }
               break;
@@ -426,7 +426,7 @@ Redirecting to: <a href="${scrapbook.escapeHtml(info.url)}">${scrapbook.escapeHt
                 elem.setAttribute("srcset",
                   scrapbook.rewriteSrcset(elem.getAttribute("srcset"), (url) => {
                     return rewriteUrl(url, refUrl);
-                  })
+                  }),
                 );
               }
               break;
@@ -493,7 +493,7 @@ Redirecting to: <a href="${scrapbook.escapeHtml(info.url)}">${scrapbook.escapeHt
             }
 
             case "form": {
-              if ( elem.hasAttribute("action") ) {
+              if (elem.hasAttribute("action")) {
                 elem.setAttribute("action", rewriteUrl(elem.getAttribute("action"), refUrl));
               }
               break;
@@ -514,7 +514,7 @@ Redirecting to: <a href="${scrapbook.escapeHtml(info.url)}">${scrapbook.escapeHt
 
           // styles: style attribute
           if (elem.hasAttribute("style")) {
-            tasks[tasks.length] = 
+            tasks[tasks.length] =
             viewer.processCssText(elem.getAttribute("style"), refUrl, recurseChain).then((response) => {
               elem.setAttribute("style", response);
               return response;
@@ -573,7 +573,7 @@ Redirecting to: <a href="${scrapbook.escapeHtml(info.url)}">${scrapbook.escapeHt
         },
         rewriteBackgroundUrl(url) {
           return {url: fetcher.getUrlHash(url)};
-        }
+        },
       });
 
       await fetcher.startFetches();

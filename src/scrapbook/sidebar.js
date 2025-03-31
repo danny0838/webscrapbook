@@ -205,7 +205,7 @@
           if (this.rootId === 'root') {
             document.title = scrapbook.lang('SidebarTitle', [server.config.app.name, this.book.name]);
           } else {
-            document.title = scrapbook.lang('SidebarTitleWithRoot', [server.config.app.name, this.book.name, this.rootId])
+            document.title = scrapbook.lang('SidebarTitleWithRoot', [server.config.app.name, this.book.name, this.rootId]);
           }
 
           const isLocal = server.config.app.is_local;
@@ -689,7 +689,7 @@
       if (event.clipboardData.types.includes('Files') && this.rootId !== 'recycle') {
         const entries = Array.prototype.map.call(
           event.clipboardData.items,
-          x => x.webkitGetAsEntry && x.webkitGetAsEntry()
+          x => x.webkitGetAsEntry && x.webkitGetAsEntry(),
         ).sort((a, b) => {
           if (a.name > b.name) { return 1; }
           if (a.name < b.name) { return -1; }
@@ -864,7 +864,7 @@
       if (event.dataTransfer.types.includes('Files') && this.rootId !== 'recycle') {
         const entries = Array.prototype.map.call(
           event.dataTransfer.items,
-          x => x.webkitGetAsEntry && x.webkitGetAsEntry()
+          x => x.webkitGetAsEntry && x.webkitGetAsEntry(),
         );
 
         const files = [];
@@ -1037,7 +1037,7 @@
             if (id === this.rootId) { continue; }
             yield id;
           }
-        }).call(this) :
+        }.call(this)) :
         book.specialItems;
       let rootId;
       let path;

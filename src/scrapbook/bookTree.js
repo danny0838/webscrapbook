@@ -91,7 +91,7 @@
       const highlights = new Map();
       if (keepHighlights) {
         for (const elem of this.treeElem.querySelectorAll('.highlight')) {
-          this.getXpaths(elem.parentElement, highlights, {includeParents: false})
+          this.getXpaths(elem.parentElement, highlights, {includeParents: false});
         }
       }
 
@@ -163,7 +163,7 @@
           if (path) {
             parents = path.reduce((parents, {id, pos}, index, path) => {
               // skip last
-              if (path[index +1]) {
+              if (path[index + 1]) {
                 const parent = {elem: null, id};
                 if (includeIndex) {
                   parent.index = path[index + 1].pos;
@@ -311,7 +311,7 @@
       }
 
       // load child nodes if not loaded yet
-      if (willOpen)  {
+      if (willOpen) {
         this.loadChildren(elem);
       }
 

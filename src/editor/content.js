@@ -2076,7 +2076,7 @@ height: 100vh;`;
     try {
       // not in the DOM tree, skip
       if (!node.isConnected) { return -1; }
-    } catch(ex) {
+    } catch (ex) {
       // not an element or a dead object, skip
       return -1;
     }
@@ -2562,7 +2562,7 @@ height: 100vh;`;
           // if it's before a (relative) sticky note, move it to be after
           let nextNode;
           while ((nextNode = refNode.nextSibling)
-              && scrapbook.getScrapbookObjectType(nextNode) === "sticky")  {
+              && scrapbook.getScrapbookObjectType(nextNode) === "sticky") {
             refNode = refNode.nextSibling;
           }
 
@@ -2924,7 +2924,7 @@ height: 100vh;`;
               frameIdExcept: core.frameId,
             },
           });
-        })()
+        })();
 
         domEraser.clearTarget();
 

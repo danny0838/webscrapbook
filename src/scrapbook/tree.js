@@ -162,7 +162,7 @@
     getSelectedItemElems() {
       return Array.prototype.map.call(
         this.treeElem.querySelectorAll('.highlight'),
-        x => x.parentNode
+        x => x.parentNode,
       );
     }
 
@@ -382,8 +382,8 @@
         var icon = a.insertBefore(document.createElement('img'), a.firstChild);
         icon.draggable = false;
         if (meta.icon) {
-          icon.src = /^(?:[a-z][a-z0-9+.-]*:|[/])/i.test(meta.icon || '') ? 
-              meta.icon : 
+          icon.src = /^(?:[a-z][a-z0-9+.-]*:|[/])/i.test(meta.icon || '') ?
+              meta.icon :
               (this.book.dataUrl + scrapbook.escapeFilename(meta.index || '')).replace(/[/][^/]+$/, '/') + meta.icon;
         } else {
           icon.src = ITEM_TYPE_ICON[meta.type] || ITEM_TYPE_ICON[''];
@@ -438,7 +438,7 @@
 
       if (ranged) {
         const itemElems = this.treeElem.querySelectorAll('li[data-id]');
-        let startElem = 
+        let startElem =
             this.treeElem.contains(this.lastHighlightElem) && !this.lastHighlightElem.closest('[hidden]') ? this.lastHighlightElem :
             this.treeElem.contains(this.anchorElem) && !this.anchorElem.closest('[hidden]') ? this.anchorElem :
             null;
@@ -723,11 +723,11 @@
             const {parentItemId: parentId, index} = this.getParentAndIndex(elem, cacheMap);
             return {id: this.getItemId(elem), parentId, index};
           }),
-        })
+        }),
       );
       event.clipboardData.setData(
         'text/plain',
-        selectedItemElems.map(x => this.getItemId(x)).join('\r\n')
+        selectedItemElems.map(x => this.getItemId(x)).join('\r\n'),
       );
     }
 
@@ -789,11 +789,11 @@
             const {parentItemId: parentId, index} = this.getParentAndIndex(elem, cacheMap);
             return {id: this.getItemId(elem), parentId, index};
           }),
-        })
+        }),
       );
       event.dataTransfer.setData(
         'text/plain',
-        selectedItemElems.map(x => this.getItemId(x)).join('\r\n')
+        selectedItemElems.map(x => this.getItemId(x)).join('\r\n'),
       );
 
       // prevent mis-intereprated as a regular link
@@ -847,11 +847,11 @@
         const wrapperRect = wrapper.getBoundingClientRect();
         const pos = (event.clientY - wrapperRect.top) / wrapperRect.height;
 
-        if (pos < 1/3) {
+        if (pos < 1 / 3) {
           wrapper.classList.add('above');
           wrapper.classList.remove('below');
           wrapper.classList.remove('within');
-        } else if (pos > 2/3) {
+        } else if (pos > 2 / 3) {
           wrapper.classList.remove('above');
           wrapper.classList.add('below');
           wrapper.classList.remove('within');
@@ -902,11 +902,11 @@
       const itemElem = wrapper.parentNode;
       let targetId;
       let targetIndex;
-      if (pos < 1/3) {
+      if (pos < 1 / 3) {
         // above
         targetId = this.getItemId(this.getParent(itemElem));
         targetIndex = this.getIndex(itemElem);
-      } else if (pos > 2/3) {
+      } else if (pos > 2 / 3) {
         // below
         targetId = this.getItemId(this.getParent(itemElem));
         targetIndex = this.getIndex(itemElem) + 1;

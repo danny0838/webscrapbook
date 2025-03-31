@@ -111,7 +111,7 @@
 
         const results = await this.getSearchResults(urls, bookIds);
         this.showResults(results);
-      } catch(ex) {
+      } catch (ex) {
         console.error(ex);
         this.addMsg(scrapbook.lang('ErrorSearch', [ex.message]), 'error');
       };

@@ -27,7 +27,7 @@
       try {
         for (const key in changes) { JSON.parse(key); }
         return;
-      } catch(ex) {}
+      } catch (ex) {}
 
       for (const key in changes) {
         scrapbook.options[key] = 'newValue' in changes[key] ? changes[key].newValue : scrapbook.DEFAULT_OPTIONS[key];

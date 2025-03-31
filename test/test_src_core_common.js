@@ -853,7 +853,7 @@ describe('core/common.js', function () {
       var buffer = scrapbook.byteStringToArrayBuffer(bstr);
       assert.deepEqual(
         [...new Uint8Array(buffer)],
-        [66,77,60,0,0,0,0,0,0,0,54,0,0,0,40,0,0,0,1,0,0,0,1,0,0,0,1,0,32,0,0,0,0,0,6,0,0,0,18,11,0,0,18,11,0,0,0,0,0,0,0,0,0,0,0,255,0,0,0,0],
+        [66, 77, 60, 0, 0, 0, 0, 0, 0, 0, 54, 0, 0, 0, 40, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 32, 0, 0, 0, 0, 0, 6, 0, 0, 0, 18, 11, 0, 0, 18, 11, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 255, 0, 0, 0, 0],
       );
     });
   });
@@ -877,7 +877,7 @@ describe('core/common.js', function () {
       assert.strictEqual(scrapbook.arrayBufferToByteString(buffer), '\xFF\xFE\x40\xD8\x00\xDC');
 
       // blob of green bmp
-      var buffer = new Uint8Array([66,77,60,0,0,0,0,0,0,0,54,0,0,0,40,0,0,0,1,0,0,0,1,0,0,0,1,0,32,0,0,0,0,0,6,0,0,0,18,11,0,0,18,11,0,0,0,0,0,0,0,0,0,0,0,255,0,0,0,0]);
+      var buffer = new Uint8Array([66, 77, 60, 0, 0, 0, 0, 0, 0, 0, 54, 0, 0, 0, 40, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 32, 0, 0, 0, 0, 0, 6, 0, 0, 0, 18, 11, 0, 0, 18, 11, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 255, 0, 0, 0, 0]);
       assert.strictEqual(
         btoa(scrapbook.arrayBufferToByteString(buffer)),
         "Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAP8AAAAA",
@@ -1750,7 +1750,7 @@ describe('core/common.js', function () {
     it('basic', async function () {
       var blob = new Blob(["ABC123 中文 𠀀"], {type: "text/plain"});
       var ab = await scrapbook.readFileAsArrayBuffer(blob);
-      assert.deepEqual([...new Uint8Array(ab)], [65,66,67,49,50,51,32,228,184,173,230,150,135,32,240,160,128,128]);
+      assert.deepEqual([...new Uint8Array(ab)], [65, 66, 67, 49, 50, 51, 32, 228, 184, 173, 230, 150, 135, 32, 240, 160, 128, 128]);
     });
   });
 
@@ -2995,7 +2995,7 @@ div { image-background: var(${/(--sb(\d+)-2)/}); }`;
         '/image.bmp',
         'image.jpg',
         'about:blank',
-        'data:text/css,'
+        'data:text/css,',
       ];
 
       // individual ASCII white space
@@ -3023,7 +3023,7 @@ div { image-background: var(${/(--sb(\d+)-2)/}); }`;
         '/image.bmp',
         'image.jpg',
         'about:blank',
-        'data:text/css,'
+        'data:text/css,',
       ];
 
       // individual ASCII white space
