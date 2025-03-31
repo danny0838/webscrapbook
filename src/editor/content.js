@@ -4,6 +4,8 @@
  *
  * @require {boolean} isDebug
  * @require {Object} scrapbook
+ * @require {Class} Strftime
+ * @require {Object} core
  * @public {Object} editor
  *****************************************************************************/
 
@@ -14,8 +16,9 @@
     global.isDebug,
     global.scrapbook,
     global.Strftime,
+    global.core,
   );
-}(this, function (isDebug, scrapbook, Strftime) {
+}(this, function (isDebug, scrapbook, Strftime, core) {
 
   'use strict';
 

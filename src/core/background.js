@@ -2,6 +2,11 @@
  *
  * The background script for the main (auto-generated) background page.
  *
+ * @require {Object} scrapbook
+ * @require {Object} server
+ * @require {Object} capturer
+ * @require {Object} editor
+ * @require {Object} viewer
  * @public {Object} background
  *****************************************************************************/
 
@@ -10,8 +15,12 @@
   global.background = factory(
     global.isDebug,
     global.scrapbook,
+    global.server,
+    global.capturer,
+    global.editor,
+    global.viewer,
   );
-}(this, function (isDebug, scrapbook) {
+}(this, function (isDebug, scrapbook, server, capturer, editor, viewer) {
 
   'use strict';
 

@@ -3,6 +3,8 @@
  * Script for load.html
  *
  * @require {Object} scrapbook
+ * @require {Object} JSZip
+ * @require {Object} Mime
  *****************************************************************************/
 
 (function (global, factory) {
@@ -11,8 +13,9 @@
     global.isDebug,
     global.scrapbook,
     global.JSZip,
+    global.Mime,
   );
-}(this, function (isDebug, scrapbook, JSZip) {
+}(this, function (isDebug, scrapbook, JSZip, Mime) {
 
   'use strict';
 

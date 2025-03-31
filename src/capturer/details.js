@@ -3,6 +3,7 @@
  * Script for details.html.
  *
  * @require {Object} scrapbook
+ * @require {Object} server
  * @public {Object} details
  *****************************************************************************/
 
@@ -11,8 +12,9 @@
   global.details = factory(
     global.isDebug,
     global.scrapbook,
+    global.server,
   );
-}(this, function (isDebug, scrapbook) {
+}(this, function (isDebug, scrapbook, server) {
 
   'use strict';
 

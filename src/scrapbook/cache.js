@@ -3,6 +3,7 @@
  * Script for cache.html
  *
  * @require {Object} scrapbook
+ * @require {Object} server
  *****************************************************************************/
 
 (function (global, factory) {
@@ -10,8 +11,9 @@
   factory(
     global.isDebug,
     global.scrapbook,
+    global.server,
   );
-}(this, function (isDebug, scrapbook) {
+}(this, function (isDebug, scrapbook, server) {
 
   'use strict';
 

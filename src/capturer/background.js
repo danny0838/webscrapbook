@@ -2,7 +2,9 @@
  *
  * Background script for capturer functionality.
  *
+ * @require {Object} background
  * @require {Object} scrapbook
+ * @require {Object} server
  * @public {Object} capturer
  *****************************************************************************/
 
@@ -11,9 +13,11 @@
   if (global.hasOwnProperty('capturer')) { return; }
   global.capturer = factory(
     global.isDebug,
+    global.background,
     global.scrapbook,
+    global.server,
   );
-}(this, function (isDebug, scrapbook) {
+}(this, function (isDebug, background, scrapbook, server) {
 
   'use strict';
 

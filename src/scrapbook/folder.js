@@ -4,6 +4,7 @@
  *
  * @require {Object} scrapbook
  * @require {Object} server
+ * @require {Class} BookTree
  * @public {Object} controller
  *****************************************************************************/
 
@@ -13,8 +14,9 @@
     global.isDebug,
     global.scrapbook,
     global.server,
+    global.BookTree,
   );
-}(this, function (isDebug, scrapbook, server) {
+}(this, function (isDebug, scrapbook, server, BookTree) {
 
   'use strict';
 

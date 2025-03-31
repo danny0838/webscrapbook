@@ -3,6 +3,7 @@
  * Shared class for server related manipulation.
  *
  * @require {Object} scrapbook
+ * @require {Object} Mime
  * @public {Object} server
  *****************************************************************************/
 
@@ -12,8 +13,9 @@
   global.server = factory(
     global.isDebug,
     global.scrapbook,
+    global.Mime,
   );
-}(this, function (isDebug, scrapbook) {
+}(this, function (isDebug, scrapbook, Mime) {
 
   'use strict';
 

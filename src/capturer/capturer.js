@@ -6,6 +6,10 @@
  * @require {Object} scrapbook
  * @require {Object} server
  * @require {Object} capturer
+ * @require {Object} JSZip
+ * @require {Object} Mime
+ * @require {Object} MapWithDefault
+ * @require {Object} Referrer
  * @extends capturer
  *****************************************************************************/
 
@@ -17,9 +21,11 @@
     global.server,
     global.capturer,
     global.JSZip,
+    global.Mime,
     global.MapWithDefault,
+    global.Referrer,
   );
-}(this, function (isDebug, scrapbook, server, capturer, JSZip, MapWithDefault) {
+}(this, function (isDebug, scrapbook, server, capturer, JSZip, Mime, MapWithDefault, Referrer) {
 
   'use strict';
 
