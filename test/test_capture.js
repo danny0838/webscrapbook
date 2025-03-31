@@ -9413,7 +9413,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
           var doc = await readFileAsDocument(blob);
           var frames = doc.querySelectorAll('iframe');
 
-          var frameSrc = `data:text\/html;charset=UTF-8,${encodeURIComponent(frames[0].getAttribute('srcdoc'))}`;
+          var frameSrc = `data:text/html;charset=UTF-8,${encodeURIComponent(frames[0].getAttribute('srcdoc'))}`;
           var frameDoc = (await xhr({url: frameSrc, responseType: "document"})).response;
           assert.strictEqual(frameDoc.querySelector('p').textContent.trim(), `frame1 content modified`);
 
@@ -10384,8 +10384,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
 
         var audioElems = doc.querySelectorAll('audio');
         assert.strictEqual(audioElems[0].getAttribute('src'), `horse.mp3`);
-        assert.strictEqual(audioElems[1].getAttribute('src'), `horse.ogg`
-            || audioElems[1].getAttribute('src') === `horse.mp3`);
+        assert.strictEqual(audioElems[1].getAttribute('src'), `horse.ogg`);
         var sourceElems = audioElems[1].querySelectorAll('source');
         assert.strictEqual(sourceElems.length, 0);
         var trackElems = audioElems[1].querySelectorAll('track');
@@ -14944,7 +14943,7 @@ ${localhost}/capture_downLink_indepth/linked2-1.html`,
       it('regex', async function () {
         var options = Object.assign({}, baseOptions, {
           "capture.downLink.doc.depth": 2,
-          "capture.downLink.doc.urlFilter": `/linked1-[12]\.HTML$/i`,
+          "capture.downLink.doc.urlFilter": `/linked1-[12]\\.HTML$/i`,
         });
 
         var blob = await captureHeadless({
@@ -18139,7 +18138,7 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
             "capture.helpersEnabled": true,
             "capture.helpers": JSON.stringify([
               {
-                "pattern": "/redirected\.html/",
+                "pattern": "/redirected\\.html/",
                 "options": {
                   "capture.style": "remove",
                 },
@@ -18164,7 +18163,7 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
             "capture.helpersEnabled": true,
             "capture.helpers": JSON.stringify([
               {
-                "pattern": "/redirect\.pyr/",
+                "pattern": "/redirect\\.pyr/",
                 "options": {
                   "capture.style": "remove",
                 },
@@ -18210,7 +18209,7 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
             "capture.helpersEnabled": true,
             "capture.helpers": JSON.stringify([
               {
-                "pattern": "/redirected\.html/",
+                "pattern": "/redirected\\.html/",
                 "options": {
                   "capture.style": "remove",
                 },
@@ -18235,7 +18234,7 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
             "capture.helpersEnabled": true,
             "capture.helpers": JSON.stringify([
               {
-                "pattern": "/refresh\.html/",
+                "pattern": "/refresh\\.html/",
                 "options": {
                   "capture.style": "remove",
                 },

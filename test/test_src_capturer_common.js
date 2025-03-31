@@ -3032,7 +3032,7 @@ insertedText`);
             ],
           },
           {
-            pattern: new RegExp(`^http://example\.com`),
+            pattern: new RegExp(`^http://example\\.com`),
             commands: [
               ["remove", ".exclude3"],
             ],

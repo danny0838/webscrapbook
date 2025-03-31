@@ -486,6 +486,7 @@
     };
     let action;
 
+    // eslint-disable-next-line no-func-assign
     const fn = updateAction = () => {
       // clear current listener and popup
       browser.browserAction.setPopup({popup: ""});

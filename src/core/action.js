@@ -25,8 +25,9 @@
         selector.className = "selector";
         baseElem.parentNode.insertBefore(selector, baseElem.nextSibling);
       }
-      return await new Promise(async (resolve, reject) => {
-        for (const tab of await scrapbook.getContentTabs()) {
+      const tabs = await scrapbook.getContentTabs();
+      return await new Promise((resolve, reject) => {
+        for (const tab of tabs) {
           const elem = document.createElement("button");
           elem.className = "sub";
           elem.textContent = (tab.index + 1) + ": " + tab.title;

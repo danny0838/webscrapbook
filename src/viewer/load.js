@@ -121,14 +121,14 @@
     },
 
     log(msg) {
-      logger.appendChild(document.createTextNode(msg + '\n'));
+      this.logger.appendChild(document.createTextNode(msg + '\n'));
     },
 
     error(msg) {
       const span = document.createElement('span');
       span.className = 'error';
       span.appendChild(document.createTextNode(msg + '\n'));
-      logger.appendChild(span);
+      this.logger.appendChild(span);
     },
 
     async openUrl(url, inNewTab = false) {
@@ -267,7 +267,7 @@
         })();
 
         for (const [inZipPath, zipObj] of Object.entries(zip.files)) {
-          const data = new File([zipObj.dir ? "" : await zipObj.async("blob")], inZipPath.match(/([^\/]+)\/?$/)[1], {
+          const data = new File([zipObj.dir ? "" : await zipObj.async("blob")], inZipPath.match(/([^/]+)\/?$/)[1], {
             type: zipObj.dir ? "inode/directory" : Mime.lookup(inZipPath),
             lastModified: scrapbook.zipFixModifiedTime(zipObj.date),
           });
@@ -285,12 +285,14 @@
             } catch (ex) {
               this.error(ex.message);
             }
+            break;
           }
           case "htz":
           default: {
             if (zip.files["index.html"]) {
               indexFiles = ["index.html"];
             }
+            break;
           }
         }
 

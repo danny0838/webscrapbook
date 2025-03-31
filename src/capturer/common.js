@@ -589,7 +589,7 @@
           return;
         case "save-current":
         case "save":
-        default:
+        default: {
           // skip further processing for non-absolute links
           if (!scrapbook.isUrlAbsolute(url)) {
             break;
@@ -608,6 +608,7 @@
             return response;
           });
           break;
+        }
       }
     };
 
@@ -703,7 +704,7 @@
                 captureRemoveNode(elem);
                 return;
               case "save":
-              default:
+              default: {
                 const refPolicy = docRefPolicy;
                 for (const attr of ["href", "xlink:href"]) {
                   if (!elem.hasAttribute(attr)) { continue; }
@@ -720,6 +721,7 @@
                   });
                 }
                 break;
+              }
             }
             break;
           }
@@ -1061,7 +1063,7 @@
                   }
                   return;
                 case "save":
-                default:
+                default: {
                   let useFavIcon = false;
                   if (typeof favIconUrl === 'undefined' && elem.getRootNode().nodeType !== 11) {
                     favIconUrl = elem.getAttribute("href");
@@ -1088,6 +1090,7 @@
                   // remove crossorigin as the origin has changed
                   captureRewriteAttr(elem, "crossorigin", null);
                   break;
+                }
               }
             } else if (elem.matches('[rel~="preload"][href], [rel~="preload"][imagesrcset], [rel~="modulepreload"][href], [rel~="dns-prefetch"][href], [rel~="preconnect"][href]')) {
               // @TODO: handle preloads according to its "as" attribute
@@ -1130,7 +1133,7 @@
                   captureRemoveNode(elem);
                   return;
                 case "save":
-                default:
+                default: {
                   const refPolicy = elem.matches('[rel~="noreferrer"]') ? 'no-referrer' : elem.referrerPolicy || docRefPolicy;
                   tasks.push(async () => {
                     const response = await downloadFile({
@@ -1147,6 +1150,7 @@
                   // remove crossorigin as the origin has changed
                   captureRewriteAttr(elem, "crossorigin", null);
                   break;
+                }
               }
             }
             break;
@@ -1310,7 +1314,7 @@
                 captureRemoveNode(elem);
                 return;
               case "save":
-              default:
+              default: {
                 // In browsers conforming the spec, elem contains only text
                 // (innerHTML and textContent work like <style>)
                 // when JavaScript is enabled. Replace with normal HTML content.
@@ -1328,6 +1332,7 @@
                   }
                 }
                 break;
+              }
             }
             break;
           }
@@ -1352,7 +1357,7 @@
                   break;
                 case "save-used":
                 case "save":
-                default:
+                default: {
                   const refPolicy = docRefPolicy;
                   tasks.push(async () => {
                     const response = await downloadFile({
@@ -1366,6 +1371,7 @@
                     return response;
                   });
                   break;
+                }
               }
             }
             break;
@@ -1714,6 +1720,7 @@
                   break;
                 }
                 // Headless capture doesn't support currentSrc, fallback to "save".
+                // eslint-disable-next-line no-fallthrough
               case "save":
               default:
                 if (elem.hasAttribute("src")) {
@@ -1793,8 +1800,9 @@
                   break;
                 }
                 // Headless capture doesn't support currentSrc, fallback to "save".
+                // eslint-disable-next-line no-fallthrough
               case "save":
-              default:
+              default: {
                 const refPolicy = docRefPolicy;
                 for (const subElem of elem.querySelectorAll('source[srcset]')) {
                   tasks.push(async () => {
@@ -1813,6 +1821,7 @@
                   });
                 }
                 break;
+              }
             }
             break;
           }
@@ -1886,6 +1895,7 @@
                   break;
                 }
                 // Headless capture doesn't support currentSrc, fallback to "save".
+                // eslint-disable-next-line no-fallthrough
               case "save":
               default:
                 if (elem.hasAttribute("src")) {
@@ -2017,6 +2027,7 @@
                   break;
                 }
                 // Headless capture doesn't support currentSrc, fallback to "save".
+                // eslint-disable-next-line no-fallthrough
               case "save":
               default:
                 if (elem.hasAttribute("poster")) {
@@ -2217,7 +2228,7 @@
                 captureRemoveNode(elem);
                 return;
               case "save":
-              default:
+              default: {
                 const refPolicy = docRefPolicy;
                 if (elem.hasAttribute("data")) {
                   tasks.push(async () => {
@@ -2302,6 +2313,7 @@
                   });
                 }
                 break;
+              }
             }
             break;
           }
@@ -2349,7 +2361,7 @@
                 captureRemoveNode(elem);
                 return;
               case "save":
-              default:
+              default: {
                 const refPolicy = docRefPolicy;
                 if (elem.hasAttribute("code")) {
                   tasks.push(async () => {
@@ -2379,6 +2391,7 @@
                   });
                 }
                 break;
+              }
             }
             break;
           }
@@ -2443,8 +2456,9 @@
                     return;
                   case "save-current":
                     // srcset and currentSrc are not supported, do the same as save
+                    // eslint-disable-next-line no-fallthrough
                   case "save":
-                  default:
+                  default: {
                     const refPolicy = docRefPolicy;
                     tasks.push(async () => {
                       const response = await downloadFile({
@@ -2458,6 +2472,7 @@
                       return response;
                     });
                     break;
+                  }
                 }
                 break;
               }
@@ -2521,6 +2536,7 @@
                         requireBasicLoader = true;
                       }
                     }
+                    // eslint-disable-next-line no-fallthrough
                   case "html-all":
                   case "html":
                     if (elemOrig) {
@@ -3642,6 +3658,7 @@
                 elem.removeAttribute("data-scrapbook-input-indeterminate");
               }
             }
+            // eslint-disable-next-line no-fallthrough
             case "radio":
               if (elemOrig.checked) {
                 elem.setAttribute("checked", "");
@@ -3652,6 +3669,7 @@
             case "password":
             case "file":
               // skip for security
+              // eslint-disable-next-line no-fallthrough
             case "image":
               // skip image
               break;
@@ -3946,8 +3964,8 @@
             k14 = "data-scrapbook-shadowdom-slot-assignment",
             k15 = "data-scrapbook-slot-assigned",
             k16 = "data-scrapbook-slot-index",
-            k17 = /^scrapbook-slot-index=(\d+)$/;
-            k18 = '/scrapbook-slot-index';
+            k17 = /^scrapbook-slot-index=(\d+)$/,
+            k18 = '/scrapbook-slot-index',
             d = document,
             r = d.documentElement,
             $s = !!r.attachShadow,
@@ -4481,7 +4499,6 @@
               depth: this.depth,
             });
             return this.regexLiteral.lastIndex;
-            break;
           }
           case '(': {
             this.tokens.push({
@@ -4606,7 +4623,6 @@
         switch (match[1]) {
           case ']': {
             return this.regexLiteral.lastIndex;
-            break;
           }
           case '"': {
             this.regexLiteral.lastIndex = this.matchQuote(selectorText, this.regexLiteral.lastIndex);

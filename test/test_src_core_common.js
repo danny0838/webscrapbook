@@ -979,7 +979,7 @@ describe('core/common.js', function () {
       );
     });
 
-    it('decode unreserved chars [0-9A-Za-z\-_.~] in search and hash', function () {
+    it('decode unreserved chars [0-9A-Za-z-_.~] in search and hash', function () {
       assert.strictEqual(
         scrapbook.normalizeUrl(`http://example.com/?%70%61%67%65%2d%33=(5)`),
         `http://example.com/?page-3=(5)`,

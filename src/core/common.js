@@ -222,10 +222,10 @@ if (typeof Promise.withResolvers === 'undefined') {
 
   const OPTION_PARSERS = {
     "capture.saveFolder": (source) => {
-      return source.split(/[\\\/]/).map(x => scrapbook.validateFilename(x)).join('/');
+      return source.split(/[\\/]/).map(x => scrapbook.validateFilename(x)).join('/');
     },
     "capture.saveFilename": (source) => {
-      return source.split(/[\\\/]/).map(x => scrapbook.validateFilename(x)).join('/');
+      return source.split(/[\\/]/).map(x => scrapbook.validateFilename(x)).join('/');
     },
     "capture.downLink.file.extFilter": (...args) => {
       const PREFIX_MIME = 'mime:';
@@ -1576,7 +1576,7 @@ if (typeof Promise.withResolvers === 'undefined') {
    * Escapes the given filename (may contain '/') string to be used in a canonical URI
    */
   scrapbook.quote = function (filename) {
-    return filename.replace(/[^\/]+/g, m => encodeURIComponent(m));
+    return filename.replace(/[^/]+/g, m => encodeURIComponent(m));
   };
 
   /**
@@ -1914,7 +1914,6 @@ if (typeof Promise.withResolvers === 'undefined') {
           return this.item.source;
         }
       }
-      return '';
     }
 
     format_url() {
@@ -2308,6 +2307,7 @@ if (typeof Promise.withResolvers === 'undefined') {
               elem.setAttribute('data-scrapbook-input-indeterminate', '');
             }
           }
+          // eslint-disable-next-line no-fallthrough
           case "radio": {
             const checked = elem.checked;
             if (checked !== elem.hasAttribute('checked')) {
@@ -2676,8 +2676,8 @@ if (typeof Promise.withResolvers === 'undefined') {
       return "." + (s.toLowerCase().charCodeAt(0) - 2147483647) + ".";
     }
 
-    a = ("" + a).replace(/[^0-9\.]/g, fix).split('.');
-    b = ("" + b).replace(/[^0-9\.]/g, fix).split('.');
+    a = ("" + a).replace(/[^0-9.]/g, fix).split('.');
+    b = ("" + b).replace(/[^0-9.]/g, fix).split('.');
     const c = Math.max(a.length, b.length);
     for (let i = 0; i < c; i++) {
       // convert to integer with the most efficient way
@@ -3037,7 +3037,7 @@ if (typeof Promise.withResolvers === 'undefined') {
     // ref: https://url.spec.whatwg.org/#percent-encoded-bytes
     // reserved = :/?#[]@!$&'()*+,;=
     const percentEncodingRegex = /%(?:[0-9A-F]{2}(?:%[0-9A-F]{2})*)?/gi;
-    const fixPathnameRegex = /[^:\/[\]@!$&'()*+,;=]+/g;
+    const fixPathnameRegex = /[^:/[\]@!$&'()*+,;=]+/g;
     const extraReservedCharsRegex = /[!*'()]+/g;  // these are not covered by encodeURIComponent
 
     const fixPathnameReplace = str => str.replace(percentEncodingRegex, fixPathnameReplace2);
@@ -3317,7 +3317,6 @@ if (typeof Promise.withResolvers === 'undefined') {
                     break;
                   default:
                     throw new Error(`Ignored unsupported charset for content-disposition: ${field}=${value}`);
-                    break;
                 }
               } else {
                 throw new Error(`Ignored malformed value for content-disposition: ${field}=${value}`);
@@ -3397,7 +3396,7 @@ if (typeof Promise.withResolvers === 'undefined') {
    * A simple tool to compress code (CSS or JavaScript)
    */
   scrapbook.compressCode = function (code) {
-    const regex = /[^\S　]+/g;
+    const regex = new RegExp(`[${ASCII_WHITESPACE}]+`, "g");
     const fn = scrapbook.compressCode = function (code) {
       return code.toString().replace(regex, " ");
     };

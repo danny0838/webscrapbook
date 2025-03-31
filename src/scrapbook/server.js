@@ -226,7 +226,7 @@
         url.searchParams.set('token', await this.acquireToken());
       }
 
-      return await new Promise(async (resolve, reject) => {
+      return await new Promise((resolve, reject) => {
         const evtSource = new EventSource(url.href);
 
         evtSource.addEventListener('complete', (event) => {
@@ -372,7 +372,7 @@
       // load books
       {
         this._books = {};
-        for (const bookId in server.config.book) {
+        for (const bookId in this.config.book) {
           this._books[bookId] = new Book(bookId, this);
         }
       }
@@ -398,7 +398,7 @@
     }
 
     async getMetaRefreshTarget(refUrl) {
-      const doc = await server.request({
+      const doc = await this.request({
         url: refUrl,
         method: "GET",
       })
@@ -963,6 +963,7 @@
           try {
             await this.unlockTree({id: lockId});
           } catch (ex) {
+            // eslint-disable-next-line no-unsafe-finally
             throw new Error(`Failed to unlock tree for remote book "${this.id}".`);
           }
         }
@@ -1106,7 +1107,7 @@ scrapbook.toc(${JSON.stringify(jsonData, null, 2).replace(/\u2028/g, '\\u2028').
 
       const p = u.toLowerCase();
       if (p.endsWith('.maff')) {
-        const regex = new RegExp('^' + scrapbook.escapeRegExp(u) + '!/[^/]*/index\.html$');
+        const regex = new RegExp('^' + scrapbook.escapeRegExp(u) + '!/[^/]*/index\\.html$');
         return regex.test(u1);
       }
       if (p.endsWith('.htz')) {
@@ -1176,7 +1177,7 @@ scrapbook.toc(${JSON.stringify(jsonData, null, 2).replace(/\u2028/g, '\\u2028').
     }
 
     async loadPostit(item) {
-      const json = await server.request({
+      const json = await this.server.request({
         query: {
           a: 'query',
           lock: '',
@@ -1208,7 +1209,7 @@ scrapbook.toc(${JSON.stringify(jsonData, null, 2).replace(/\u2028/g, '\\u2028').
             throw new Error(`Specified item "${id}" does not exist.`);
           }
 
-          const json = await server.request({
+          const json = await this.server.request({
             query: {
               a: 'query',
               lock: '',
@@ -1298,7 +1299,7 @@ scrapbook.toc(${JSON.stringify(jsonData, null, 2).replace(/\u2028/g, '\\u2028').
         const file = await getFavIcon(icon);
         const target = this.treeUrl + 'favicon/' + file.name;
 
-        const json = await server.request({
+        const json = await this.server.request({
           url: target,
           method: "GET",
           format: 'json',
@@ -1307,7 +1308,7 @@ scrapbook.toc(${JSON.stringify(jsonData, null, 2).replace(/\u2028/g, '\\u2028').
         // save favicon if nonexistent or emptied
         if (json.data.type === null || 
             (file.size > 0 && json.data.type === 'file' && json.data.size === 0)) {
-          await server.request({
+          await this.server.request({
             url: target + '?a=save',
             method: "POST",
             format: 'json',

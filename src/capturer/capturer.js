@@ -4330,7 +4330,6 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
         }
         default: {
           throw new Error(`Sitemap version ${sitemap.version} not supported.`);
-          break;
         }
       }
     };
@@ -4476,16 +4475,19 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
             break;
           }
         }
+        // eslint-disable-next-line no-fallthrough
         case "noerror": {
           if (capturer.logger.querySelector('.error')) {
             break;
           }
         }
+        // eslint-disable-next-line no-fallthrough
         case "nofailure": {
           if (hasFailure) {
             break;
           }
         }
+        // eslint-disable-next-line no-fallthrough
         case "always": {
           await closeWindow();
           break;

@@ -396,7 +396,7 @@
   }
 
   function onFormChange(event) {
-    details.updateUi();
+    updateUi();
   }
 
   function onBookIdChange(event) {
