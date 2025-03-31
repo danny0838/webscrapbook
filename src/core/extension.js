@@ -208,7 +208,7 @@
       // remove title if ignoreTitle is set
       if (ignoreTitle) {
         for (const task of taskInfo.tasks) {
-          delete(task.title);
+          delete task.title;
         }
       }
     }

@@ -2553,7 +2553,7 @@ if (typeof Promise.withResolvers === 'undefined') {
             clonable: elem.hasAttribute('data-scrapbook-shadowdom-clonable'),
             delegatesFocus: elem.hasAttribute('data-scrapbook-shadowdom-delegates-focus'),
             serializable: elem.hasAttribute('data-scrapbook-shadowdom-serializable'),
-            slotAssignment: (m = elem.getAttribute('data-scrapbook-shadowdom-slot-assignment')) !== null ? m : void(0),
+            slotAssignment: (m = elem.getAttribute('data-scrapbook-shadowdom-slot-assignment')) !== null ? m : undefined,
           });
           shadowRoot.innerHTML = html;
         } catch (ex) {
@@ -2741,6 +2741,7 @@ if (typeof Promise.withResolvers === 'undefined') {
    * @link http://stackoverflow.com/questions/105034/how-to-create-a-guid-uuid-in-javascript/21963136#21963136
    */
   scrapbook.getUuid = function () {
+    /* eslint-disable @stylistic/no-multi-spaces */
     const lut = Array(256).fill().map((_, i) => (i < 16 ? '0' : '') + (i).toString(16));
     const formatUuid = ([d0, d1, d2, d3]) =>
       lut[d0       & 0xff]        + lut[d0 >>  8 & 0xff] + lut[d0 >> 16 & 0xff] + lut[d0 >> 24 & 0xff] + '-' +
@@ -2750,6 +2751,7 @@ if (typeof Promise.withResolvers === 'undefined') {
       lut[d2 >> 16 & 0xff]        + lut[d2 >> 24 & 0xff] +
       lut[d3       & 0xff]        + lut[d3 >>  8 & 0xff] +
       lut[d3 >> 16 & 0xff]        + lut[d3 >> 24 & 0xff];
+    /* eslint-enable @stylistic/no-multi-spaces */
 
     const getRandomValuesFunc = crypto && crypto.getRandomValues ?
       () => {
@@ -4091,7 +4093,8 @@ if (typeof Promise.withResolvers === 'undefined') {
    * @return {string|undefined} Absolute URL of the meta refresh target.
    */
   scrapbook.getMetaRefreshTarget = function (doc, baseUrl = doc.URL,
-      includeDelayedRefresh = false, includeNoscript = false) {
+    includeDelayedRefresh = false, includeNoscript = false,
+  ) {
     let lastMetaRefreshTime = Infinity;
     let lastMetaRefreshUrl;
     let seenBaseElem = false;

@@ -37,7 +37,7 @@ const {
 const $describe = $(describe);
 const $it = $(it);
 
-const r = String.raw;;
+const r = String.raw;
 
 const baseOptions = {
   "capture.saveTo": "memory",

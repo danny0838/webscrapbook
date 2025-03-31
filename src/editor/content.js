@@ -1670,7 +1670,7 @@ height: 100vh;`;
           '.toolbar-annotation > button',
           '.toolbar-eraser > button',
           '.toolbar-domEraser > button',
-          '.toolbar-undo > button'
+          '.toolbar-undo > button',
         ].join(','))) {
       elem.disabled = willActive;
     }

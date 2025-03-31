@@ -377,7 +377,7 @@ class TestSuite {
         }
         return tests;
       }
-      return void(0);
+      return undefined;
     })(),
     ...(dryRun && {dryRun}),
     noHighlighting: true,

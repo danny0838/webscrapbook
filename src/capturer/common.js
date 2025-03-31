@@ -4059,7 +4059,7 @@
                         clonable: e.hasAttribute(k11),
                         delegatesFocus: e.hasAttribute(k12),
                         serializable: e.hasAttribute(k13),
-                        slotAssignment: (m = e.getAttribute(k14)) !== null ? m : void(0),
+                        slotAssignment: (m = e.getAttribute(k14)) !== null ? m : void 0,
                       });
                       s.innerHTML = d;
                     } catch (ex) {
@@ -5725,7 +5725,7 @@
         // convert the saved CSS file if the assumed charset is incorrect.
         let blob = new Blob(
           [charset ? cssText : scrapbook.byteStringToArrayBuffer(cssText)],
-          {type: charset ? "text/css;charset=UTF-8" : "text/css"}
+          {type: charset ? "text/css;charset=UTF-8" : "text/css"},
           );
         blob = await capturer.saveBlobCache(blob);
 
