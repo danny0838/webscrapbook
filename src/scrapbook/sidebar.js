@@ -1398,7 +1398,7 @@
 
       const result = await new Promise((resolve, reject) => {
         dialog.addEventListener('close', (event) => {
-         resolve(event.detail);
+          resolve(event.detail);
         });
         elem.dispatchEvent(new CustomEvent('dialogShow'));
       });
@@ -1535,7 +1535,8 @@
     },
 
     async copyItems({src, bookId: sourceBookId, treeLastModified, items: sourceItems},
-        targetParentId, targetIndex, targetBookId = this.bookId, recursively = true) {
+      targetParentId, targetIndex, targetBookId = this.bookId, recursively = true,
+    ) {
       if (src && src !== this.book.server.serverRoot) { return; }
 
       const sourceBook = server.books[sourceBookId];

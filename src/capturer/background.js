@@ -493,7 +493,7 @@
     const taskInfo = Object.assign({
       autoClose: "always",
       tasks: [Object.assign({
-       tabId: tabInfo.id,
+        tabId: tabInfo.id,
       }, config.eachTaskInfo)],
     }, config.taskInfo);
 

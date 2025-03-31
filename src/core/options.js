@@ -118,7 +118,7 @@
   }
 
   function getDetailStatusKey() {
-      return {table: "optionDetailStatus"};
+    return {table: "optionDetailStatus"};
   }
 
   async function loadDetailStatus() {

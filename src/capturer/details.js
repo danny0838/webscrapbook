@@ -203,7 +203,7 @@
   }
 
   function getDetailStatusKey() {
-      return {table: "captureDetailStatus"};
+    return {table: "captureDetailStatus"};
   }
 
   async function loadDetailStatus() {

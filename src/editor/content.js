@@ -1616,14 +1616,14 @@ height: 100vh;`;
     }
 
     for (const elem of editor.internalElement.querySelectorAll([
-          '.toolbar-locate > button',
-          '.toolbar-marker > button',
-          '.toolbar-annotation > button',
-          '.toolbar-eraser > button',
-          '.toolbar-htmlEditor > button',
-          '.toolbar-undo > button',
-          '.toolbar-save > button',
-        ].join(','))) {
+      '.toolbar-locate > button',
+      '.toolbar-marker > button',
+      '.toolbar-annotation > button',
+      '.toolbar-eraser > button',
+      '.toolbar-htmlEditor > button',
+      '.toolbar-undo > button',
+      '.toolbar-save > button',
+    ].join(','))) {
       elem.disabled = willActive;
     }
 
@@ -1666,12 +1666,12 @@ height: 100vh;`;
     }
 
     for (const elem of editor.internalElement.querySelectorAll([
-          '.toolbar-marker > button',
-          '.toolbar-annotation > button',
-          '.toolbar-eraser > button',
-          '.toolbar-domEraser > button',
-          '.toolbar-undo > button',
-        ].join(','))) {
+      '.toolbar-marker > button',
+      '.toolbar-annotation > button',
+      '.toolbar-eraser > button',
+      '.toolbar-domEraser > button',
+      '.toolbar-undo > button',
+    ].join(','))) {
       elem.disabled = willActive;
     }
 
@@ -2426,7 +2426,7 @@ height: 100vh;`;
           this.saveLineMarker(popupElem);
         });
         formElem.addEventListener('keydown', (event) => {
-           if (event.code === 'KeyS' && event.altKey) {
+          if (event.code === 'KeyS' && event.altKey) {
             event.preventDefault();
             event.stopPropagation();
             this.saveLineMarker(popupElem);

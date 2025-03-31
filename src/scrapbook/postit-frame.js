@@ -133,11 +133,11 @@
     scrapbook.loadLanguages(document);
 
     document.getElementById('btn-expand').addEventListener('click', (event) => {
-       editor.expand();
+      editor.expand();
     });
 
     document.getElementById('btn-exit').addEventListener('click', (event) => {
-       editor.exit();
+      editor.exit();
     });
 
     editor.init();

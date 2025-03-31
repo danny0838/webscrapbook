@@ -144,13 +144,13 @@
     scrapbook.loadLanguages(document);
 
     document.getElementById('btn-save').addEventListener('click', (event) => {
-       editor.save();
+      editor.save();
     });
     document.getElementById('btn-locate').addEventListener('click', (event) => {
-       editor.locate();
+      editor.locate();
     });
     document.getElementById('btn-exit').addEventListener('click', (event) => {
-       editor.exit();
+      editor.exit();
     });
 
     editor.init();

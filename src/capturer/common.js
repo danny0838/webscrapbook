@@ -4273,8 +4273,8 @@
     }
 
     let rv = Array.prototype.map.call(nodes, a => ({
-     url: a.href,
-     title: a.textContent,
+      url: a.href,
+      title: a.textContent,
     }));
 
     if (filter) {
@@ -4843,7 +4843,7 @@
         'first-child', 'first-of-type', 'last-child', 'last-of-type',
         'nth-child', 'nth-of-type', 'nth-last-child', 'nth-last-of-type',
         'only-child', 'only-of-type',
-        ]);
+      ]);
 
       // @TODO: rewrite only standalone ':host', as ':host > div' etc. can
       //        still match using ShadowRoot.querySelector().
@@ -5726,7 +5726,7 @@
         let blob = new Blob(
           [charset ? cssText : scrapbook.byteStringToArrayBuffer(cssText)],
           {type: charset ? "text/css;charset=UTF-8" : "text/css"},
-          );
+        );
         blob = await capturer.saveBlobCache(blob);
 
         // imported or external CSS

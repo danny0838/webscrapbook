@@ -453,7 +453,7 @@ if (typeof Promise.withResolvers === 'undefined') {
     "/core/content.js",
     "/capturer/common.js",
     "/editor/content.js",
-    ];
+  ];
 
   const HTTP_STATUS_TEXT = {
     // 1××: Informational
@@ -542,8 +542,8 @@ if (typeof Promise.withResolvers === 'undefined') {
   ]);
 
   const COMPRESSIBLE_SUFFIXES = new Set([
-      '+xml',
-      '+json',
+    '+xml',
+    '+json',
   ]);
 
   const DOMPARSER_SUPPORT_TYPES = new Set(['text/html', 'application/xhtml+xml', 'text/xml', 'application/xml', 'image/svg+xml']);
@@ -4581,11 +4581,11 @@ if (typeof Promise.withResolvers === 'undefined') {
       // with these states.
       // Change state after window creation instead.
       if (typeof createData.focused !== 'undefined'
-          || typeof createData.top !== 'undefined'
-          || typeof createData.left !== 'undefined'
-          || typeof createData.width !== 'undefined'
-          || typeof createData.height !== 'undefined'
-          ) {
+        || typeof createData.top !== 'undefined'
+        || typeof createData.left !== 'undefined'
+        || typeof createData.width !== 'undefined'
+        || typeof createData.height !== 'undefined'
+      ) {
         updateDatas.push({state: createData.state});
         delete createData.state;
       }

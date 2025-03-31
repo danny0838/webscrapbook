@@ -238,10 +238,10 @@
     itempicker.init();
 
     document.getElementById('btn-save').addEventListener('click', (event) => {
-       itempicker.save();
+      itempicker.save();
     });
     document.getElementById('btn-exit').addEventListener('click', (event) => {
-       itempicker.exit();
+      itempicker.exit();
     });
     document.getElementById('recent').addEventListener('change', (event) => {
       const elem = event.target;
