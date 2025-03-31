@@ -1,4 +1,15 @@
-*.pyc
-/dist/
-/test/shared/
+# Configs
 /test/config.local.json
+
+# IDE - Node.js
+/node_modules/
+/package-lock.json
+
+# IDE - Python
+*.pyc
+
+# Build outputs
+/dist/
+
+# Temporary files
+/test/shared/
