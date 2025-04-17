@@ -285,7 +285,7 @@
     }
   },
   "EditorButtonAnnotation": {
-    "message": "批註工具 - 點擊建立便利貼批註。"
+    "message": "批註工具 - 點選建立便利貼批註。"
   },
   "EditorButtonAnnotationLink": {
     "message": "附加超連結"
@@ -309,7 +309,7 @@
     "message": "關閉工具列"
   },
   "EditorButtonDOMEraser": {
-    "message": "元素橡皮擦工具 - 開啟後點擊可擦除目標元素；Ctrl 或中鍵點擊擦除目標以外的元素。（擦除的內容可還原）"
+    "message": "元素橡皮擦工具 - 開啟後點選可擦除目標元素；Ctrl 或中鍵點選擦除目標以外的元素。（擦除的內容可還原）"
   },
   "EditorButtonDOMEraserErase": {
     "message": "擦除選取範圍 [$KEY$]",
@@ -347,7 +347,7 @@
     }
   },
   "EditorButtonEraser": {
-    "message": "橡皮擦工具 - 點擊擦除選取範圍的內容；Ctrl 或中鍵點擊移除選取範圍的剪貼簿註記。（擦除的內容可還原）"
+    "message": "橡皮擦工具 - 點選擦除選取範圍的內容；Ctrl 或中鍵點選移除選取範圍的剪貼簿註記。（擦除的內容可還原）"
   },
   "EditorButtonEraserRevertAll": {
     "message": "還原所有擦除內容（所有框架頁）"
@@ -377,7 +377,7 @@
     "message": "請輸入用於擦除內容的 XPath："
   },
   "EditorButtonHtmlEditor": {
-    "message": "HTML 編輯工具 - 點擊開啟或關閉。開啟後可自由編輯頁面內容。（儲存後無法復原）"
+    "message": "HTML 編輯工具 - 點選開啟或關閉。開啟後可自由編輯頁面內容。（儲存後無法復原）"
   },
   "EditorButtonHtmlEditorBgColor": {
     "message": "設定背景顏色"
@@ -490,7 +490,7 @@
     "message": "檢視原始頁面"
   },
   "EditorButtonMarker": {
-    "message": "標示工具 - 點擊以標示選取的文字。點擊標示可建立或編輯批註。"
+    "message": "標示工具 - 點選以標示選取的文字。點選標示可建立或編輯批註。"
   },
   "EditorButtonMarkerItem": {
     "message": "標示 $INDEX$",
@@ -1825,6 +1825,6 @@
     }
   },
   "WarnSidebarLoginPromptMissing": {
-    "message": "如果瀏覽器未跳出登入對話框，請點擊我登入再重新整理此頁。"
+    "message": "如果瀏覽器未跳出登入對話框，請點選我登入再重新整理此頁。"
   }
 }
