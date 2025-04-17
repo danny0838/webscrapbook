@@ -931,7 +931,12 @@
 
     // cache favicon
     let icon = item.icon;
-    icon = await book.cacheFavIcon({item, icon});
+    try {
+      icon = await book.cacheFavIcon({item, icon});
+    } catch (ex) {
+      console.warn(ex);
+      capturer.warn(scrapbook.lang("ErrorFileDownloadError", [icon, ex.message]));
+    }
 
     // lock tree before loading to avoid a conflict due to parallel captures
     await book.transaction({
@@ -2298,10 +2303,17 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
         item.type = result.type;
         item.modify = timeId;
         item.source = scrapbook.normalizeUrl(result.sourceUrl);
-        item.icon = await book.cacheFavIcon({
-          item,
-          icon: result.favIconUrl,
-        });
+        item.icon = result.favIconUrl;
+
+        try {
+          item.icon = await book.cacheFavIcon({
+            item,
+            icon: item.icon,
+          });
+        } catch (ex) {
+          console.warn(ex);
+          capturer.warn(scrapbook.lang("ErrorFileDownloadError", [item.icon, ex.message]));
+        }
 
         // attempt to migrate annotations
         // @TODO:

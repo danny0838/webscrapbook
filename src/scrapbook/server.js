@@ -1240,6 +1240,7 @@ scrapbook.toc(${JSON.stringify(jsonData, null, 2).replace(/\u2028/g, '\\u2028').
      * @param {Object} params.item
      * @param {string} params.icon - icon URL to cache
      * @return {Promise<string>} the new icon URL
+     * @throws {Error} when the favicon cannot be cached
      */
     async cacheFavIcon({book, item, icon}) {
       const getShaFile = (data) => {
@@ -1294,38 +1295,31 @@ scrapbook.toc(${JSON.stringify(jsonData, null, 2).replace(/\u2028/g, '\\u2028').
         return icon;
       }
 
-      try {
-        const base = this.dataUrl + item.index;
-        const file = await getFavIcon(icon);
-        const target = this.treeUrl + 'favicon/' + file.name;
+      const base = this.dataUrl + item.index;
+      const file = await getFavIcon(icon);
+      const target = this.treeUrl + 'favicon/' + file.name;
 
-        const json = await this.server.request({
-          url: target,
-          method: "GET",
+      const json = await this.server.request({
+        url: target,
+        method: "GET",
+        format: 'json',
+      }).then(r => r.json());
+
+      // save favicon if nonexistent or emptied
+      if (json.data.type === null ||
+          (file.size > 0 && json.data.type === 'file' && json.data.size === 0)) {
+        await this.server.request({
+          url: target + '?a=save',
+          method: "POST",
           format: 'json',
-        }).then(r => r.json());
-
-        // save favicon if nonexistent or emptied
-        if (json.data.type === null ||
-            (file.size > 0 && json.data.type === 'file' && json.data.size === 0)) {
-          await this.server.request({
-            url: target + '?a=save',
-            method: "POST",
-            format: 'json',
-            csrfToken: true,
-            body: {
-              upload: file,
-            },
-          });
-        }
-
-        return scrapbook.getRelativeUrl(target, base);
-      } catch (ex) {
-        console.warn(ex);
-        capturer.warn(scrapbook.lang("ErrorFileDownloadError", [icon, ex.message]));
+          csrfToken: true,
+          body: {
+            upload: file,
+          },
+        });
       }
 
-      return icon;
+      return scrapbook.getRelativeUrl(target, base);
     }
   }
 
