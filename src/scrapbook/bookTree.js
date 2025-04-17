@@ -514,7 +514,7 @@
         }
         if (parent) {
           if (this.allowMultiSelect && event.shiftKey) {
-            this.highlightItem(target, true, {reselect: !event.ctrlKey, ranged: true});
+            this.highlightItem(parent, true, {reselect: !event.ctrlKey, ranged: true});
           } else if (event.ctrlKey) {
             this.anchorItem(parent);
           } else {
@@ -548,7 +548,7 @@
         const child = anchorElem.querySelector('li[data-id]');
         if (child) {
           if (this.allowMultiSelect && event.shiftKey) {
-            this.highlightItem(target, true, {reselect: !event.ctrlKey, ranged: true});
+            this.highlightItem(child, true, {reselect: !event.ctrlKey, ranged: true});
           } else if (event.ctrlKey) {
             this.anchorItem(child);
           } else {
