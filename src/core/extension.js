@@ -26,9 +26,9 @@
    * @param {Object} params
    * @param {string} params.cmd
    * @param {Object} [params.args]
-   * @return {Promise<Object>}
+   * @return {*}
    */
-  scrapbook.invokeBackgroundScript = async function ({cmd, args}) {
+  scrapbook.invokeBackgroundScript = function ({cmd, args}) {
     // if this is the background page
     if (window.background) {
       return window.background[cmd](args);

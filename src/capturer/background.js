@@ -2,7 +2,6 @@
  *
  * Background script for capturer functionality.
  *
- * @require {Object} background
  * @require {Object} scrapbook
  * @require {Object} server
  * @public {Object} capturer
@@ -13,11 +12,10 @@
   if (global.hasOwnProperty('capturer')) { return; }
   global.capturer = factory(
     global.isDebug,
-    global.background,
     global.scrapbook,
     global.server,
   );
-}(this, function (isDebug, background, scrapbook, server) {
+}(this, function (isDebug, scrapbook, server) {
 
   'use strict';
 
@@ -153,7 +151,10 @@
       };
 
       // check from session
-      matchTypeAndCount.session += background.getCapturedUrls({urls: [urlCheck]})[urlCheck];
+      matchTypeAndCount.session += scrapbook.invokeBackgroundScript({
+        cmd: "getCapturedUrls",
+        args: {urls: [urlCheck]},
+      })[urlCheck];
 
       // check from backend
       for (const bookId of bookIds) {
@@ -456,7 +457,10 @@
    * @param {string[]} [bookIds] - ID of books with a valid cache
    */
   function checkDuplicate(url, bookIds) {
-    if (background.getCapturedUrls({urls: [url]})[url]) {
+    if (scrapbook.invokeBackgroundScript({
+      cmd: "getCapturedUrls",
+      args: {urls: [url]},
+    })[url]) {
       return true;
     }
 
