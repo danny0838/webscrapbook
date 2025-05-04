@@ -15230,6 +15230,13 @@ ${localhost}/capture_downLink_indepth/linked2-1.html`,
         assert.strictEqual(doc.querySelectorAll('a')[0].getAttribute('href'), `linked1-1-2.html#in-depth`);
         assert.strictEqual(doc.querySelectorAll('a')[1].getAttribute('href'), `${localhost}/capture_downLink_indepth_redirect/linked1-2.pyr#in-depth`);
 
+        var indexFile = zip.file('linked1-1-2.html');
+        var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+        var doc = await readFileAsDocument(indexBlob);
+        assert.strictEqual(doc.querySelectorAll('a')[0].getAttribute('href'), `${localhost}/capture_downLink_indepth_redirect/linked2-1.html#1-1-2`);
+
+        assert.notExists(zip.file('linked2-1.html'));
+
         var sitemapBlob = await zip.file('index.json').async('blob');
         var expectedData = {
          "version": 3,
@@ -15277,6 +15284,90 @@ ${localhost}/capture_downLink_indepth/linked2-1.html`,
            "url": `${localhost}/capture_downLink_indepth_redirect/linked1-1-2.html`,
            "role": "document",
            "token": getToken(`${localhost}/capture_downLink_indepth_redirect/linked1-1-2.html`, "document"),
+          },
+         ],
+        };
+        assert.deepEqual(JSON.parse(await readFileAsText(sitemapBlob)), expectedData);
+      });
+
+      it('depth = 2', async function () {
+        var options = Object.assign({}, baseOptions, {
+          "capture.downLink.doc.depth": 2,
+        });
+
+        var blob = await capture({
+          url: `${localhost}/capture_downLink_indepth_redirect/in-depth.html`,
+          options,
+        });
+
+        var zip = await new JSZip().loadAsync(blob);
+
+        var indexFile = zip.file('index.html');
+        var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+        var doc = await readFileAsDocument(indexBlob);
+        assert.strictEqual(doc.querySelectorAll('a')[0].getAttribute('href'), `linked1-1-2.html#in-depth`);
+        assert.strictEqual(doc.querySelectorAll('a')[1].getAttribute('href'), `${localhost}/capture_downLink_indepth_redirect/linked1-2.pyr#in-depth`);
+
+        var indexFile = zip.file('linked1-1-2.html');
+        var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+        var doc = await readFileAsDocument(indexBlob);
+        assert.strictEqual(doc.querySelectorAll('a')[0].getAttribute('href'), `linked2-1.html#1-1-2`);
+
+        assert.exists(zip.file('linked2-1.html'));
+
+        var sitemapBlob = await zip.file('index.json').async('blob');
+        var expectedData = {
+         "version": 3,
+         "indexPages": [
+          "index.html",
+         ],
+         "redirects": [
+          [
+           `${localhost}/capture_downLink_indepth_redirect/linked1-1.pyr`,
+           `${localhost}/capture_downLink_indepth_redirect/linked1-1-2.html`,
+          ],
+         ],
+         "files": [
+          {
+           "path": "index.json",
+          },
+          {
+           "path": "index.dat",
+          },
+          {
+           "path": "index.rdf",
+          },
+          {
+           "path": "history.rdf",
+          },
+          {
+           "path": "^metadata^",
+          },
+          {
+           "path": "index.html",
+           "url": `${localhost}/capture_downLink_indepth_redirect/in-depth.html`,
+           "role": "document",
+           "token": getToken(`${localhost}/capture_downLink_indepth_redirect/in-depth.html`, "document"),
+          },
+          {
+           "path": "index.xhtml",
+           "role": "document",
+          },
+          {
+           "path": "index.svg",
+           "role": "document",
+          },
+          {
+           "path": "linked1-1-2.html",
+           "url": `${localhost}/capture_downLink_indepth_redirect/linked1-1-2.html`,
+           "role": "document",
+           "token": getToken(`${localhost}/capture_downLink_indepth_redirect/linked1-1-2.html`, "document"),
+          },
+          {
+           "path": "linked2-1.html",
+           "url": `${localhost}/capture_downLink_indepth_redirect/linked2-1.html`,
+           "role": "document",
+           "token": getToken(`${localhost}/capture_downLink_indepth_redirect/linked2-1.html`, "document"),
           },
          ],
         };
