@@ -15167,6 +15167,8 @@ ${localhost}/capture_downLink_indepth/linked2-1.html`,
         assert.notExists(zip.file('linked2-2.html'));
 
         assert.notExists(zip.file('linked3-1.html'));
+
+        assert.notExists(zip.file('linked3-2.html'));
       });
 
       it('depth = 2', async function () {
@@ -15201,6 +15203,7 @@ ${localhost}/capture_downLink_indepth/linked2-1.html`,
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
         var doc = await readFileAsDocument(indexBlob);
         assert.strictEqual(doc.querySelectorAll('meta[http-equiv="refresh"]')[0].getAttribute('content'), `0; url=${localhost}/capture_downLink_indepth_metaRefresh/linked3-1.html#linked2-1`);
+        assert.strictEqual(doc.querySelectorAll('a')[0].getAttribute('href'), `${localhost}/capture_downLink_indepth_metaRefresh/linked3-2.html#linked2-1`);
 
         var indexFile = zip.file('linked2-2.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -15208,6 +15211,8 @@ ${localhost}/capture_downLink_indepth/linked2-1.html`,
         assert.strictEqual(doc.querySelectorAll('meta[http-equiv="refresh"]')[0].getAttribute('content'), `0; url=linked1-2.html`);
 
         assert.notExists(zip.file('linked3-1.html'));
+
+        assert.notExists(zip.file('linked3-2.html'));
       });
 
       it('depth = 3', async function () {
@@ -15242,6 +15247,7 @@ ${localhost}/capture_downLink_indepth/linked2-1.html`,
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
         var doc = await readFileAsDocument(indexBlob);
         assert.strictEqual(doc.querySelectorAll('meta[http-equiv="refresh"]')[0].getAttribute('content'), `0; url=linked3-1.html#linked2-1`);
+        assert.strictEqual(doc.querySelectorAll('a')[0].getAttribute('href'), `linked3-2.html#linked2-1`);
 
         var indexFile = zip.file('linked2-2.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -15249,6 +15255,8 @@ ${localhost}/capture_downLink_indepth/linked2-1.html`,
         assert.strictEqual(doc.querySelectorAll('meta[http-equiv="refresh"]')[0].getAttribute('content'), `0; url=linked1-2.html`);
 
         assert.exists(zip.file('linked3-1.html'));
+
+        assert.exists(zip.file('linked3-2.html'));
       });
     });
 
