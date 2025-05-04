@@ -983,7 +983,7 @@ p { background-image: url("123ABCabc_%25E4%25B8%25AD%25E6%2596%2587_%25F0%25A0%2
       });
     });
 
-    describe('should handle redirection correctly', function () {
+    describe('should handle redirects correctly', function () {
       /**
        * capturer.captureDocument
        */
