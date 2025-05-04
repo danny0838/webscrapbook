@@ -4014,6 +4014,11 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
         return {url: capturer.getErrorUrl(url, options), error: {message: ex.message}};
       });
 
+      // Add redirected pages to ensure proper capturing
+      if (response.url && response.url !== url) {
+        linkedPages.set(response.url, { url: response.url, refUrl, depth: depth + 1 });
+      }
+      
       // add pages with depth 0 to indexPages
       if (depth === 0) {
         capturer.captureInfo.get(timeId).indexPages.add(response.filename);
