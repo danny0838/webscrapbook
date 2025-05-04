@@ -15211,7 +15211,7 @@ ${localhost}/capture_downLink_indepth/linked2-1.html`,
       });
     });
 
-    describe('links handling for redirect', function () {
+    describe('should trace redirects and record in `redirects`', function () {
       it('depth = 1', async function () {
         var options = Object.assign({}, baseOptions, {
           "capture.downLink.doc.depth": 1,
@@ -15227,7 +15227,7 @@ ${localhost}/capture_downLink_indepth/linked2-1.html`,
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
         var doc = await readFileAsDocument(indexBlob);
-        assert.strictEqual(doc.querySelectorAll('a')[0].getAttribute('href'), `redirected.html#in-depth`);
+        assert.strictEqual(doc.querySelectorAll('a')[0].getAttribute('href'), `linked1-1-2.html#in-depth`);
         assert.strictEqual(doc.querySelectorAll('a')[1].getAttribute('href'), `${localhost}/capture_downLink_indepth_redirect/linked1-2.pyr#in-depth`);
 
         var sitemapBlob = await zip.file('index.json').async('blob');
@@ -15239,7 +15239,7 @@ ${localhost}/capture_downLink_indepth/linked2-1.html`,
          "redirects": [
           [
            `${localhost}/capture_downLink_indepth_redirect/linked1-1.pyr`,
-           `${localhost}/capture_downLink_indepth_redirect/redirected.html`,
+           `${localhost}/capture_downLink_indepth_redirect/linked1-1-2.html`,
           ],
          ],
          "files": [
@@ -15273,10 +15273,10 @@ ${localhost}/capture_downLink_indepth/linked2-1.html`,
            "role": "document",
           },
           {
-           "path": "redirected.html",
-           "url": `${localhost}/capture_downLink_indepth_redirect/redirected.html`,
+           "path": "linked1-1-2.html",
+           "url": `${localhost}/capture_downLink_indepth_redirect/linked1-1-2.html`,
            "role": "document",
-           "token": getToken(`${localhost}/capture_downLink_indepth_redirect/redirected.html`, "document"),
+           "token": getToken(`${localhost}/capture_downLink_indepth_redirect/linked1-1-2.html`, "document"),
           },
          ],
         };
