@@ -2595,6 +2595,12 @@ height: 100vh;`;
           editor.addHistory();
         }
 
+        // Replace mainElem with a clone to prevent attaching shadow root,
+        // which will show up inconsistently after an undo.
+        const mainElemNew = mainElem.cloneNode(true);
+        mainElem.replaceWith(mainElemNew);
+        mainElem = mainElemNew;
+
         const shadowRoot = mainElem.attachShadow({mode: 'open'});
         mainElem.classList.add('editing');
 
