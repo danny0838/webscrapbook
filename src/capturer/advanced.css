@@ -51,7 +51,7 @@ a[data-tooltip] {
   text-decoration: unset;
   width: 1em;
   height: 1em;
-  background: url("../resources/question.png") no-repeat;
+  background: url("../resources/help.svg") no-repeat;
   background-size: contain;
   cursor: help;
 }
