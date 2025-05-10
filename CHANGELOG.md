@@ -3,6 +3,10 @@
 * Versions before 1.0 are in initial development. APIs are not stable for these versions, even a `y` version can involve a breaking change, and only partial notable changes are summarized in this document. See full commit history in the source repository for details.
 * Backend server requirement in this document refers to the version of [`webscrapbook` Python package](https://github.com/danny0838/pywebscrapbook) (or PyWebScrapBook).
 
+## [2.18.6] - 2025-05-10
+* Fixed an issue where `Undo` doesn't work well with a sticky note.
+* Miscellaneous improvements of the internal code and test suite.
+
 ## [2.18.5] - 2025-04-22
 * Fixed script error for `notify captured pages` and `auto capture` features.
 
