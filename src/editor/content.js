@@ -271,35 +271,35 @@ height: 100vh;`;
   display: none;
 }
 
-#toolbar #toolbar-locate > button:first-of-type {
+#toolbar #toolbar-locate > button {
   background-image: url("${browser.runtime.getURL("resources/edit-locate.svg")}");
 }
 
-#toolbar #toolbar-marker > button:first-of-type {
+#toolbar #toolbar-marker > button {
   background-image: url("${browser.runtime.getURL("resources/edit-marker.png")}");
 }
 
-#toolbar #toolbar-annotation > button:first-of-type {
+#toolbar #toolbar-annotation > button {
   background-image: url("${browser.runtime.getURL("resources/edit-annotation.png")}");
 }
 
-#toolbar #toolbar-eraser > button:first-of-type {
+#toolbar #toolbar-eraser > button {
   background-image: url("${browser.runtime.getURL("resources/edit-eraser.png")}");
 }
 
-#toolbar #toolbar-domEraser > button:first-of-type {
+#toolbar #toolbar-domEraser > button {
   background-image: url("${browser.runtime.getURL("resources/edit-dom-eraser.png")}");
 }
 
-#toolbar #toolbar-htmlEditor > button:first-of-type {
+#toolbar #toolbar-htmlEditor > button {
   background-image: url("${browser.runtime.getURL("resources/edit-html.png")}");
 }
 
-#toolbar #toolbar-undo > button:first-of-type {
+#toolbar #toolbar-undo > button {
   background-image: url("${browser.runtime.getURL("resources/edit-undo.png")}");
 }
 
-#toolbar #toolbar-save > button:first-of-type {
+#toolbar #toolbar-save > button {
   background-image: url("${browser.runtime.getURL("resources/edit-save.png")}");
 }
 
@@ -534,7 +534,7 @@ height: 100vh;`;
     const wrapper = editor.internalElement = shadow.getElementById('toolbar');
 
     // locate
-    var elem = wrapper.querySelector('#toolbar-locate > button:first-of-type');
+    var elem = wrapper.querySelector('#toolbar-locate > button');
     elem.addEventListener("click", (event) => {
       editor.locate();
     }, {passive: true});
@@ -574,7 +574,7 @@ height: 100vh;`;
     }, {passive: true});
 
     // marker
-    var elem = wrapper.querySelector('#toolbar-marker > button:first-of-type');
+    var elem = wrapper.querySelector('#toolbar-marker > button');
     elem.addEventListener("click", async (event) => {
       await editor.updateLineMarkers();
       const marker = wrapper.querySelector('#toolbar-marker ul button[checked] scrapbook-toolbar-samp');
@@ -597,7 +597,7 @@ height: 100vh;`;
     }
 
     // annotation
-    var elem = wrapper.querySelector('#toolbar-annotation > button:first-of-type');
+    var elem = wrapper.querySelector('#toolbar-annotation > button');
     elem.addEventListener("click", (event) => {
       editor.createSticky();
     }, {passive: true});
@@ -632,7 +632,7 @@ height: 100vh;`;
     }, {passive: true});
 
     // eraser
-    var elem = wrapper.querySelector('#toolbar-eraser > button:first-of-type');
+    var elem = wrapper.querySelector('#toolbar-eraser > button');
     elem.addEventListener("click", (event) => {
       if (event.ctrlKey) {
         editor.removeEdits(true);
@@ -697,7 +697,7 @@ height: 100vh;`;
     }, {passive: true});
 
     // DOMEraser
-    var elem = wrapper.querySelector('#toolbar-domEraser > button:first-of-type');
+    var elem = wrapper.querySelector('#toolbar-domEraser > button');
     elem.addEventListener("click", (event) => {
       editor.toggleDomEraser();
     }, {passive: true});
@@ -724,7 +724,7 @@ height: 100vh;`;
     elem.addEventListener("click", domEraser.isolateTarget.bind(domEraser), {passive: true});
 
     // htmlEditor
-    var elem = wrapper.querySelector('#toolbar-htmlEditor > button:first-of-type');
+    var elem = wrapper.querySelector('#toolbar-htmlEditor > button');
     elem.addEventListener("click", (event) => {
       editor.toggleHtmlEditor();
     }, {passive: true});
@@ -836,7 +836,7 @@ height: 100vh;`;
     elem.addEventListener("click", htmlEditor.unlink, {passive: true});
 
     // undo
-    var elem = wrapper.querySelector('#toolbar-undo > button:first-of-type');
+    var elem = wrapper.querySelector('#toolbar-undo > button');
     elem.addEventListener("click", (event) => {
       editor.undo();
     }, {passive: true});
@@ -851,7 +851,7 @@ height: 100vh;`;
     }, {passive: true});
 
     // save
-    var elem = wrapper.querySelector('#toolbar-save > button:first-of-type');
+    var elem = wrapper.querySelector('#toolbar-save > button');
     elem.addEventListener("click", (event) => {
       editor.save();
     }, {passive: true});
