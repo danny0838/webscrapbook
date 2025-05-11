@@ -2043,11 +2043,8 @@ height: 100vh;`;
     });
 
     const lastFrame = arr.reduce((acc, cur) => {
-      if (cur) {
-        cur = cur[0];
-        if (cur.time > acc.time) {
-          return cur;
-        }
+      if (cur && cur.time > acc.time) {
+        return cur;
       }
       return acc;
     }, {frameId: 0, time: -1});
