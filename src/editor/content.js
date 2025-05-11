@@ -161,37 +161,39 @@ height: 100vh;`;
     }
 
     // generate toolbar content
-    let wrapper = editor.element = document.documentElement.appendChild(document.createElement("scrapbook-toolbar"));
-    wrapper.setAttribute('data-scrapbook-elem', 'toolbar');
-    wrapper.setAttribute('dir', scrapbook.lang('@@bidi_dir'));
+    const host = editor.element = document.documentElement.appendChild(document.createElement("scrapbook-toolbar"));
+    host.setAttribute('data-scrapbook-elem', 'toolbar');
 
     // Attach a shadowRoot.
-    editor.internalElement = wrapper = wrapper.attachShadow({mode: 'open'});
+    const shadow = host.attachShadow({mode: 'closed'});
 
     // this needs to be XHTML compatible
-    wrapper.innerHTML = `\
+    shadow.innerHTML = (`\
 <style>
 :host {
   all: initial !important;
-  position: fixed !important;
-  display: block !important;
-  ${scrapbook.lang('@@bidi_start_edge')}: 0px !important;
-  bottom: 0px !important;
-  width: 100% !important;
-  height: 40px !important;
-  z-index: 2147483647 !important;
+  position: absolute !important;
 }
 
-:host(.top) {
-  top: 0px !important;
-  bottom: auto !important;
+#toolbar {
+  position: fixed;
+  inset: auto 0 0 0;
+  z-index: 2147483647;
+  display: block;
+  box-sizing: border-box;
+  height: 40px;
+  border: 1px solid rgb(204, 204, 204);
+  padding: 1px;
+  background: rgba(240, 240, 240, 0.9);
+  font-family: sans-serif;
+  white-space: nowrap;
 }
 
-:host style {
-  display: none;
+#toolbar.top {
+  inset: 0 0 auto 0;
 }
 
-:host *:not(scrapbook-toolbar-samp) {
+#toolbar *:not(scrapbook-toolbar-samp) {
   visibility: unset;
   opacity: unset;
   position: unset;
@@ -218,32 +220,19 @@ height: 100vh;`;
   vertical-align: unset;
 }
 
-:host scrapbook-toolbar-samp {
+#toolbar scrapbook-toolbar-samp {
   all: unset;
 }
 
-:host .toolbar {
-  display: block;
-  position: relative;
-  box-sizing: border-box;
-  padding: 1px;
-  border: 1px solid rgb(204, 204, 204);
-  background: rgba(240, 240, 240, 0.9) none repeat scroll 0% 0%;
-  width: 100%;
-  height: 100%;
-  font-family: sans-serif;
-  white-space: nowrap;
-}
-
-:host .toolbar > div {
+#toolbar > div {
   display: inline-block;
 }
 
-:host .toolbar > div[hidden] {
+#toolbar > div[hidden] {
   display: none;
 }
 
-:host .toolbar > div > button {
+#toolbar > div > button {
   display: inline-block;
   margin: 0;
   padding: 0;
@@ -255,66 +244,66 @@ height: 100vh;`;
   background-repeat: no-repeat;
 }
 
-:host .toolbar > div > button:enabled {
+#toolbar > div > button:enabled {
   cursor: pointer;
 }
 
-:host .toolbar > div > button:enabled:hover,
-:host .toolbar > div > button:enabled:focus {
+#toolbar > div > button:enabled:hover,
+#toolbar > div > button:enabled:focus {
   border-color: #CCC;
   background-color: #FFF;
 }
 
-:host .toolbar > div > button:enabled:active {
+#toolbar > div > button:enabled:active {
   border-style: inset;
 }
 
-:host .toolbar > div > button:disabled {
+#toolbar > div > button:disabled {
   filter: grayscale(100%);
   opacity: 0.3;
 }
 
-:host .toolbar > div > button[checked] {
+#toolbar > div > button[checked] {
   box-shadow: 0px 0px 10px 0px #909090 inset;
 }
 
-:host .toolbar > div > button[hidden] {
+#toolbar > div > button[hidden] {
   display: none;
 }
 
-:host .toolbar .toolbar-locate > button:first-of-type {
+#toolbar .toolbar-locate > button:first-of-type {
   background-image: url("${browser.runtime.getURL("resources/edit-locate.svg")}");
 }
 
-:host .toolbar .toolbar-marker > button:first-of-type {
+#toolbar .toolbar-marker > button:first-of-type {
   background-image: url("${browser.runtime.getURL("resources/edit-marker.png")}");
 }
 
-:host .toolbar .toolbar-annotation > button:first-of-type {
+#toolbar .toolbar-annotation > button:first-of-type {
   background-image: url("${browser.runtime.getURL("resources/edit-annotation.png")}");
 }
 
-:host .toolbar .toolbar-eraser > button:first-of-type {
+#toolbar .toolbar-eraser > button:first-of-type {
   background-image: url("${browser.runtime.getURL("resources/edit-eraser.png")}");
 }
 
-:host .toolbar .toolbar-domEraser > button:first-of-type {
+#toolbar .toolbar-domEraser > button:first-of-type {
   background-image: url("${browser.runtime.getURL("resources/edit-dom-eraser.png")}");
 }
 
-:host .toolbar .toolbar-htmlEditor > button:first-of-type {
+#toolbar .toolbar-htmlEditor > button:first-of-type {
   background-image: url("${browser.runtime.getURL("resources/edit-html.png")}");
 }
 
-:host .toolbar .toolbar-undo > button:first-of-type {
+#toolbar .toolbar-undo > button:first-of-type {
   background-image: url("${browser.runtime.getURL("resources/edit-undo.png")}");
 }
 
-:host .toolbar .toolbar-save > button:first-of-type {
+#toolbar .toolbar-save > button:first-of-type {
   background-image: url("${browser.runtime.getURL("resources/edit-save.png")}");
 }
 
-:host .toolbar > div > ul {
+#toolbar > div > ul {
   display: block;
   position: absolute;
   overflow: auto;
@@ -330,20 +319,20 @@ height: 100vh;`;
   max-height: calc(100vh - 40px - ${editor.scrollbar.vWidth}px - 2px);
 }
 
-:host(.top) .toolbar > div > ul {
+#toolbar.top > div > ul {
   top: 40px;
   bottom: auto;
 }
 
-:host .toolbar > div > ul[hidden] {
+#toolbar > div > ul[hidden] {
   display: none;
 }
 
-:host .toolbar > div > ul > li {
+#toolbar > div > ul > li {
   display: block;
 }
 
-:host .toolbar > div > ul > li > button {
+#toolbar > div > ul > li > button {
   display: block;
   padding: 4px 8px;
   width: 100%;
@@ -351,35 +340,35 @@ height: 100vh;`;
   color: #333;
 }
 
-:host .toolbar > div > ul > li > button:enabled:focus {
+#toolbar > div > ul > li > button:enabled:focus {
   outline: 1px solid rgba(125, 162, 206, 0.8);
   background: linear-gradient(rgba(235, 244, 253, 0.3), rgba(196, 221, 252, 0.8));
 }
 
-:host .toolbar > div > ul > li > button:enabled:hover {
+#toolbar > div > ul > li > button:enabled:hover {
   background-color: rgba(202, 202, 202, 0.8);
 }
 
-:host .toolbar > div > ul > li > button:enabled:active {
+#toolbar > div > ul > li > button:enabled:active {
   background-image: radial-gradient(rgba(0, 0, 0, 0.9), rgba(64, 64, 64, 0.9));
   color: #FFFFFF;
 }
 
-:host .toolbar > div > ul > li > button:disabled {
+#toolbar > div > ul > li > button:disabled {
   filter: grayscale(100%);
   opacity: 0.3;
 }
 
-:host .toolbar > div > ul > li > button[checked] {
+#toolbar > div > ul > li > button[checked] {
   box-shadow: 0px 0px 10px 0px #909090 inset;
 }
 
-:host .toolbar > div > ul > hr {
+#toolbar > div > ul > hr {
   display: block;
   border: 1px inset #EEE;
 }
 
-:host .toolbar .toolbar-close {
+#toolbar .toolbar-close {
   display: block;
   position: absolute;
   top: 0;
@@ -390,8 +379,8 @@ height: 100vh;`;
   opacity: 0.3;
 }
 
-:host .toolbar .toolbar-close::before,
-:host .toolbar .toolbar-close::after {
+#toolbar .toolbar-close::before,
+#toolbar .toolbar-close::after {
   content: "";
   position: absolute;
   height: 4px;
@@ -401,19 +390,19 @@ height: 100vh;`;
   background: #000;
 }
 
-:host .toolbar .toolbar-close::before {
+#toolbar .toolbar-close::before {
   transform: rotate(45deg);
 }
 
-:host .toolbar .toolbar-close::after {
+#toolbar .toolbar-close::after {
   transform: rotate(-45deg);
 }
 
-:host .toolbar .toolbar-close:hover {
+#toolbar .toolbar-close:hover {
   opacity: 1;
 }
 </style>
-<div class="toolbar">
+<div id="toolbar" dir="${scrapbook.lang('@@bidi_dir')}">
   <div class="toolbar-locate" title="${scrapbook.lang('EditorButtonLocate')}">
     <button></button>
     <ul hidden="" title="">
@@ -541,7 +530,8 @@ height: 100vh;`;
   </div>
   <a class="toolbar-close" href="javascript:" title="${scrapbook.lang('EditorButtonClose')}"></a>
 </div>
-`;
+`);
+    const wrapper = editor.internalElement = shadow.getElementById('toolbar');
 
     // locate
     var elem = wrapper.querySelector('.toolbar-locate > button:first-of-type');
@@ -1832,14 +1822,14 @@ height: 100vh;`;
         return;
       }
       editElem.setAttribute("checked", "");
-      editor.element.classList.add('top');
+      editor.internalElement.classList.add('top');
     } else {
       if (!editElem.hasAttribute("checked")) {
         // already inactive or is doing async deactivating
         return;
       }
       editElem.removeAttribute("checked");
-      editor.element.classList.remove('top');
+      editor.internalElement.classList.remove('top');
     }
   };
 
@@ -2986,7 +2976,7 @@ height: 100vh;`;
 
         const boundingRect = elem.getBoundingClientRect();
         const viewport = scrapbook.getViewport(window);
-        const toolbarHeight = editor.element ? editor.element.offsetHeight : 0;
+        const toolbarHeight = editor.internalElement ? editor.internalElement.offsetHeight : 0;
         const availX = viewport.width - labelElem.offsetWidth;
         const availY = viewport.height - toolbarHeight - labelElem.offsetHeight;
         let x = boundingRect.left;
