@@ -2175,13 +2175,10 @@ height: 100vh;`;
       // create a whole page mask to prevent mouse event be trapped by an iframe
       const maskElem = draggingData.mask = document.createElement('scrapbook-toolbar-mask');
       maskElem.setAttribute('data-scrapbook-elem', 'toolbar-mask');
-      maskElem.style.setProperty('display', 'block', 'important');
+      maskElem.style.setProperty('all', 'initial', 'important');
       maskElem.style.setProperty('position', 'fixed', 'important');
-      maskElem.style.setProperty('z-index', '2147483640', 'important');
-      maskElem.style.setProperty('top', 0, 'important');
-      maskElem.style.setProperty('right', 0, 'important');
-      maskElem.style.setProperty('bottom', 0, 'important');
-      maskElem.style.setProperty('left', 0, 'important');
+      maskElem.style.setProperty('z-index', '2147483647', 'important');
+      maskElem.style.setProperty('inset', 0, 'important');
       document.documentElement.appendChild(maskElem);
 
       window.addEventListener("mousemove", onMouseMove, true);
