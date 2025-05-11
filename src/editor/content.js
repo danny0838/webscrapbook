@@ -2202,13 +2202,7 @@ height: 100vh;`;
           break;
         }
 
-        case 'sticky':
-        case 'sticky-header':
-        case 'sticky-footer':
-        case 'sticky-save':
-        case 'sticky-delete':
-        case 'freenote':
-        case 'block-comment': {
+        case 'sticky': {
           if (scrapbook.getSelection().type === 'Range') { break; }
           if (target.shadowRoot) { break; }
 
