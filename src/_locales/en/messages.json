@@ -551,14 +551,6 @@
   "EditorEditAnnotation": {
     "message": "Edit the annotation text:"
   },
-  "EditorEditAnnotationPrompt": {
-    "message": "Edit the annotation text (add 2 trailing spaces to insert a new line):\n$TEXT$",
-    "placeholders": {
-      "text": {
-        "content": "$1"
-      }
-    }
-  },
   "EditorLineMarkerCancel": {
     "message": "Cancel editing [$KEY$]",
     "placeholders": {

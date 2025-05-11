@@ -551,14 +551,6 @@
   "EditorEditAnnotation": {
     "message": "编辑批注内容："
   },
-  "EditorEditAnnotationPrompt": {
-    "message": "编辑批注内容（行尾输入两个空白可添加新行）：\n$TEXT$",
-    "placeholders": {
-      "text": {
-        "content": "$1"
-      }
-    }
-  },
   "EditorLineMarkerCancel": {
     "message": "取消修改 [$KEY$]",
     "placeholders": {

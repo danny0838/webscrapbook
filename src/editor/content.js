@@ -2144,8 +2144,7 @@ height: 100vh;`;
 
           event.preventDefault();
 
-          const {clientX, clientY} = getEventPositionObject(event);
-          annotator.editLineMarker(target, {clientX, clientY});
+          annotator.editLineMarker(target);
           break;
         }
 
@@ -2275,8 +2274,8 @@ height: 100vh;`;
       },
 
       saveAll() {
-        for (const elem of document.querySelectorAll('[data-scrapbook-elem="toolbar-popup"].editLineMarker')) {
-          this.saveLineMarker(elem);
+        for (const elem of document.querySelectorAll('[data-scrapbook-elem="toolbar-prompt"]')) {
+          elem.remove();
         }
         for (const elem of document.querySelectorAll('[data-scrapbook-elem="sticky"].editing')) {
           this.saveSticky(elem);
@@ -2286,7 +2285,8 @@ height: 100vh;`;
       /**
        * @type invokable
        */
-      editLineMarker(elem, pos, skipHistory = false) {
+      async editLineMarker(elem) {
+        // this is unexpected
         if (elem.shadowRoot) { return; }
 
         // Retrieve element ID. Generate a new one if none.
@@ -2296,140 +2296,19 @@ height: 100vh;`;
           elem.setAttribute('data-scrapbook-id', id);
         }
 
-        if (!skipHistory) {
-          editor.addHistory();
+        const content = await scrapbook.prompt(scrapbook.lang('EditorEditAnnotation'), elem.title);
+
+        if (content == null) {
+          return;
         }
 
-        elem.classList.add('editing');
-
-        const popupElem = document.createElement('scrapbook-toolbar-popup');
-        popupElem.setAttribute('data-scrapbook-elem', 'toolbar-popup');
-        popupElem.setAttribute('data-scrapbook-id', id);
-        popupElem.classList.add('editLineMarker');
-        popupElem.addEventListener('keydown', (event) => {
-          if (event.code === 'Escape') {
-            event.preventDefault();
-            event.stopPropagation();
-            this.cancelLineMarker(popupElem);
-          }
-        });
-
-        const shadowRoot = popupElem.attachShadow({mode: 'open'});
-
-        const styleElem = shadowRoot.appendChild(document.createElement('style'));
-        styleElem.textContent = `\
-:host {
-  all: initial;
-  display: block;
-  position: absolute;
-  z-index: 2147483640;
-  margin: auto;
-  width: 80%;
-}
-:host > form {
-  all: initial;
-  display: block;
-  padding: .5em;
-  border: 1px solid #CCCCCC;
-  border-radius: .25em;
-  background: #EEEEEE;
-  box-shadow: .15em .15em .3em black;
-}
-:host > form > header {
-  font: .875em/1.5 sans-serif;
-}
-:host > form > textarea {
-  box-sizing: border-box;
-  padding: .25em;
-  width: 100%;
-  min-height: 100px;
-  resize: none;
-}
-:host > form > footer {
-  display: flex;
-  justify-content: flex-end;
-}
-:host > form > footer input {
-  margin: 0 .25em;
-}
-`;
-
-        const formElem = shadowRoot.appendChild(document.createElement('form'));
-        formElem.addEventListener('submit', (event) => {
-          event.preventDefault();
-          event.stopPropagation();
-          this.saveLineMarker(popupElem);
-        });
-        formElem.addEventListener('keydown', (event) => {
-          if (event.code === 'KeyS' && event.altKey) {
-            event.preventDefault();
-            event.stopPropagation();
-            this.saveLineMarker(popupElem);
-          } else if (event.code === 'KeyC' && event.altKey) {
-            event.preventDefault();
-            event.stopPropagation();
-            this.cancelLineMarker(popupElem);
-          } else if (event.code === 'Escape') {
-            event.preventDefault();
-            event.stopPropagation();
-            this.cancelLineMarker(popupElem);
-          }
-        });
-
-        const headerElem = formElem.appendChild(document.createElement('header'));
-        headerElem.textContent = scrapbook.lang('EditorEditAnnotation');
-
-        const bodyElem = formElem.appendChild(document.createElement('textarea'));
-        bodyElem.textContent = elem.title;
-
-        const footerElem = formElem.appendChild(document.createElement('footer'));
-
-        const saveElem = footerElem.appendChild(document.createElement('input'));
-        saveElem.setAttribute('type', 'submit');
-        saveElem.value = scrapbook.lang('OK');
-        saveElem.title = scrapbook.lang('EditorLineMarkerSave', ['Alt+S']);
-        saveElem.classList.add('save');
-
-        const cancelElem = footerElem.appendChild(document.createElement('input'));
-        cancelElem.setAttribute('type', 'button');
-        cancelElem.classList.add('cancel');
-        cancelElem.value = scrapbook.lang('Cancel');
-        cancelElem.title = scrapbook.lang('EditorLineMarkerCancel', ['Alt+C']);
-        cancelElem.addEventListener('click', (event) => {
-          this.cancelLineMarker(popupElem);
-        });
-
-        document.body.appendChild(popupElem);
-        let x = Math.round((window.innerWidth - popupElem.offsetWidth) / 2);
-        let y = pos.clientY + POINTER_SIZE;
-        if (y + popupElem.offsetHeight > window.innerHeight) {
-          y = pos.clientY - POINTER_SIZE - popupElem.offsetHeight;
-        }
-
-        popupElem.style.setProperty('left', (window.scrollX + x) + 'px');
-        popupElem.style.setProperty('top', (window.scrollY + y) + 'px');
-
-        bodyElem.focus();
-      },
-
-      saveLineMarker(popupElem) {
-        if (!popupElem.shadowRoot) { return; }
-
-        const annotation = popupElem.shadowRoot.querySelector('textarea').value;
-        popupElem.remove();
-        for (const part of scrapbook.getScrapBookObjectElems(popupElem)) {
-          part.classList.remove('editing');
-          if (!part.classList.length) { part.removeAttribute('class'); }
-          if (annotation) {
-            part.setAttribute('title', annotation);
+        for (const part of scrapbook.getScrapBookObjectElems(elem)) {
+          if (content) {
+            part.setAttribute('title', content);
           } else {
             part.removeAttribute('title');
           }
         }
-      },
-
-      cancelLineMarker(popupElem) {
-        popupElem.remove();
       },
 
       /**
@@ -2506,13 +2385,12 @@ height: 100vh;`;
         }
       },
 
-      editSticky(mainElem, skipHistory = false) {
+      async editSticky(mainElem, skipHistory = false) {
         if (mainElem.shadowRoot) { return; }
 
         if (!mainElem.classList.contains('styled')) {
           const attr = mainElem.classList.contains('plaintext') ? 'textContent' : 'innerHTML';
-          let content = mainElem[attr];
-          content = scrapbook.prompt(scrapbook.lang('EditorEditAnnotationPrompt', [content]), content);
+          const content = await scrapbook.prompt(scrapbook.lang('EditorEditAnnotation'), mainElem[attr]);
           if (content === null) {
             return;
           }
