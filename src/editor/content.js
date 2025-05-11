@@ -2412,7 +2412,6 @@ height: 100vh;`;
 }
 :host > form > footer {
   display: flex;
-  height: 1.25em;
   justify-content: flex-end;
 }
 :host > form > footer input {
