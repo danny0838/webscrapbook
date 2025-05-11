@@ -193,37 +193,6 @@ height: 100vh;`;
   inset: 0 0 auto 0;
 }
 
-#toolbar *:not(scrapbook-toolbar-samp) {
-  visibility: unset;
-  opacity: unset;
-  position: unset;
-  overflow: unset;
-  z-index: unset;
-  outline: unset;
-  margin: unset;
-  border: unset;
-  padding: unset;
-  width: unset;
-  height: unset;
-  max-width: unset;
-  max-height: unset;
-  min-width: unset;
-  min-height: unset;
-  top: unset;
-  bottom: unset;
-  left: unset;
-  right: unset;
-  background: unset;
-  color: unset;
-  font: unset;
-  text-align: unset;
-  vertical-align: unset;
-}
-
-#toolbar scrapbook-toolbar-samp {
-  all: unset;
-}
-
 #toolbar > div {
   display: inline-block;
 }
@@ -233,15 +202,14 @@ height: 100vh;`;
 }
 
 #toolbar > div > button {
+  all: unset;
+  user-select: none;
   display: inline-block;
-  margin: 0;
-  padding: 0;
-  border: 1px solid transparent;
+  box-sizing: border-box;
   width: 36px;
   height: 36px;
-  background-size: 24px 24px;
-  background-position: center;
-  background-repeat: no-repeat;
+  border: 1px solid transparent;
+  background: center / 24px no-repeat transparent;
 }
 
 #toolbar > div > button:enabled {
@@ -304,13 +272,12 @@ height: 100vh;`;
 }
 
 #toolbar > div > ul {
-  display: block;
+  all: unset;
   position: absolute;
   overflow: auto;
   box-sizing: border-box;
   list-style: none;
   bottom: 40px;
-  margin: 0;
   border: 1px solid #999;
   border-radius: 2px;
   box-shadow: 0 0 4px 1px rgba(0, 0, 0, 0.3);
@@ -329,11 +296,15 @@ height: 100vh;`;
 }
 
 #toolbar > div > ul > li {
+  all: unset;
   display: block;
 }
 
 #toolbar > div > ul > li > button {
+  all: unset;
+  user-select: none;
   display: block;
+  box-sizing: border-box;
   padding: 4px 8px;
   width: 100%;
   font-size: 14px;
@@ -364,6 +335,7 @@ height: 100vh;`;
 }
 
 #toolbar > div > ul > hr {
+  all: unset;
   display: block;
   border: 1px inset #EEE;
 }
