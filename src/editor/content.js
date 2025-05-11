@@ -2510,6 +2510,7 @@ height: 100vh;`;
         const mainElem = document.createElement(useNativeTags ? 'div' : 'scrapbook-sticky');
         mainElem.setAttribute('data-scrapbook-id', scrapbook.dateToId());
         mainElem.setAttribute('data-scrapbook-elem', 'sticky');
+        mainElem.dir = scrapbook.lang('@@bidi_dir');
         mainElem.classList.add('styled');
         if (!richText) {
           mainElem.classList.add('plaintext');
