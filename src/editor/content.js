@@ -271,35 +271,35 @@ height: 100vh;`;
   display: none;
 }
 
-#toolbar .toolbar-locate > button:first-of-type {
+#toolbar #toolbar-locate > button:first-of-type {
   background-image: url("${browser.runtime.getURL("resources/edit-locate.svg")}");
 }
 
-#toolbar .toolbar-marker > button:first-of-type {
+#toolbar #toolbar-marker > button:first-of-type {
   background-image: url("${browser.runtime.getURL("resources/edit-marker.png")}");
 }
 
-#toolbar .toolbar-annotation > button:first-of-type {
+#toolbar #toolbar-annotation > button:first-of-type {
   background-image: url("${browser.runtime.getURL("resources/edit-annotation.png")}");
 }
 
-#toolbar .toolbar-eraser > button:first-of-type {
+#toolbar #toolbar-eraser > button:first-of-type {
   background-image: url("${browser.runtime.getURL("resources/edit-eraser.png")}");
 }
 
-#toolbar .toolbar-domEraser > button:first-of-type {
+#toolbar #toolbar-domEraser > button:first-of-type {
   background-image: url("${browser.runtime.getURL("resources/edit-dom-eraser.png")}");
 }
 
-#toolbar .toolbar-htmlEditor > button:first-of-type {
+#toolbar #toolbar-htmlEditor > button:first-of-type {
   background-image: url("${browser.runtime.getURL("resources/edit-html.png")}");
 }
 
-#toolbar .toolbar-undo > button:first-of-type {
+#toolbar #toolbar-undo > button:first-of-type {
   background-image: url("${browser.runtime.getURL("resources/edit-undo.png")}");
 }
 
-#toolbar .toolbar-save > button:first-of-type {
+#toolbar #toolbar-save > button:first-of-type {
   background-image: url("${browser.runtime.getURL("resources/edit-save.png")}");
 }
 
@@ -368,7 +368,7 @@ height: 100vh;`;
   border: 1px inset #EEE;
 }
 
-#toolbar .toolbar-close {
+#toolbar #toolbar-close {
   display: block;
   position: absolute;
   top: 0;
@@ -379,8 +379,8 @@ height: 100vh;`;
   opacity: 0.3;
 }
 
-#toolbar .toolbar-close::before,
-#toolbar .toolbar-close::after {
+#toolbar #toolbar-close::before,
+#toolbar #toolbar-close::after {
   content: "";
   position: absolute;
   height: 4px;
@@ -390,28 +390,28 @@ height: 100vh;`;
   background: #000;
 }
 
-#toolbar .toolbar-close::before {
+#toolbar #toolbar-close::before {
   transform: rotate(45deg);
 }
 
-#toolbar .toolbar-close::after {
+#toolbar #toolbar-close::after {
   transform: rotate(-45deg);
 }
 
-#toolbar .toolbar-close:hover {
+#toolbar #toolbar-close:hover {
   opacity: 1;
 }
 </style>
 <div id="toolbar" dir="${scrapbook.lang('@@bidi_dir')}">
-  <div class="toolbar-locate" title="${scrapbook.lang('EditorButtonLocate')}">
+  <div id="toolbar-locate" title="${scrapbook.lang('EditorButtonLocate')}">
     <button></button>
     <ul hidden="" title="">
-      <li><button class="toolbar-locate-viewSitemap">${scrapbook.lang('EditorButtonLocateViewSitemap')}</button></li>
-      <li><button class="toolbar-locate-viewDirectory">${scrapbook.lang('EditorButtonLocateViewDirectory')}</button></li>
-      <li><button class="toolbar-locate-viewSource">${scrapbook.lang('EditorButtonLocateViewSource')}</button></li>
+      <li><button id="toolbar-locate-viewSitemap">${scrapbook.lang('EditorButtonLocateViewSitemap')}</button></li>
+      <li><button id="toolbar-locate-viewDirectory">${scrapbook.lang('EditorButtonLocateViewDirectory')}</button></li>
+      <li><button id="toolbar-locate-viewSource">${scrapbook.lang('EditorButtonLocateViewSource')}</button></li>
     </ul>
   </div>
-  <div class="toolbar-marker" title="${scrapbook.lang('EditorButtonMarker')}">
+  <div id="toolbar-marker" title="${scrapbook.lang('EditorButtonMarker')}">
     <button></button>
     <ul hidden="" title="">
       <li><button><scrapbook-toolbar-samp data-scrapbook-elem="toolbar-samp">${scrapbook.lang('EditorButtonMarkerItem', [1])}</scrapbook-toolbar-samp></button></li>
@@ -428,113 +428,113 @@ height: 100vh;`;
       <li><button><scrapbook-toolbar-samp data-scrapbook-elem="toolbar-samp">${scrapbook.lang('EditorButtonMarkerItem', [12])}</scrapbook-toolbar-samp></button></li>
     </ul>
   </div>
-  <div class="toolbar-annotation" title="${scrapbook.lang('EditorButtonAnnotation')}">
+  <div id="toolbar-annotation" title="${scrapbook.lang('EditorButtonAnnotation')}">
     <button></button>
     <ul hidden="" title="">
-      <li><button class="toolbar-annotation-prev">${scrapbook.lang('EditorButtonAnnotationPrev')}</button></li>
-      <li><button class="toolbar-annotation-next">${scrapbook.lang('EditorButtonAnnotationNext')}</button></li>
+      <li><button id="toolbar-annotation-prev">${scrapbook.lang('EditorButtonAnnotationPrev')}</button></li>
+      <li><button id="toolbar-annotation-next">${scrapbook.lang('EditorButtonAnnotationNext')}</button></li>
       <hr/>
-      <li><button class="toolbar-annotation-link">${scrapbook.lang('EditorButtonAnnotationLink')}</button></li>
-      <li><button class="toolbar-annotation-sticky">${scrapbook.lang('EditorButtonAnnotationSticky')}</button></li>
-      <li><button class="toolbar-annotation-sticky-richtext">${scrapbook.lang('EditorButtonAnnotationStickyRichText')}</button></li>
+      <li><button id="toolbar-annotation-link">${scrapbook.lang('EditorButtonAnnotationLink')}</button></li>
+      <li><button id="toolbar-annotation-sticky">${scrapbook.lang('EditorButtonAnnotationSticky')}</button></li>
+      <li><button id="toolbar-annotation-sticky-richtext">${scrapbook.lang('EditorButtonAnnotationStickyRichText')}</button></li>
     </ul>
   </div>
-  <div class="toolbar-eraser" title="${scrapbook.lang('EditorButtonEraser')}">
+  <div id="toolbar-eraser" title="${scrapbook.lang('EditorButtonEraser')}">
     <button></button>
     <ul hidden="" title="">
-      <li><button class="toolbar-eraser-eraseSelection">${scrapbook.lang('EditorButtonEraserSelection')}</button></li>
-      <li><button class="toolbar-eraser-eraseSelector">${scrapbook.lang('EditorButtonEraserSelector')}...</button></li>
-      <li><button class="toolbar-eraser-eraseSelectorAll">${scrapbook.lang('EditorButtonEraserSelectorAll')}...</button></li>
-      <li><button class="toolbar-eraser-eraseXpath">${scrapbook.lang('EditorButtonEraserXpath')}...</button></li>
-      <li><button class="toolbar-eraser-eraseXpathAll">${scrapbook.lang('EditorButtonEraserXpathAll')}...</button></li>
+      <li><button id="toolbar-eraser-eraseSelection">${scrapbook.lang('EditorButtonEraserSelection')}</button></li>
+      <li><button id="toolbar-eraser-eraseSelector">${scrapbook.lang('EditorButtonEraserSelector')}...</button></li>
+      <li><button id="toolbar-eraser-eraseSelectorAll">${scrapbook.lang('EditorButtonEraserSelectorAll')}...</button></li>
+      <li><button id="toolbar-eraser-eraseXpath">${scrapbook.lang('EditorButtonEraserXpath')}...</button></li>
+      <li><button id="toolbar-eraser-eraseXpathAll">${scrapbook.lang('EditorButtonEraserXpathAll')}...</button></li>
       <hr/>
-      <li><button class="toolbar-eraser-uneraseSelection">${scrapbook.lang('EditorButtonEraserRevertSelection')}</button></li>
-      <li><button class="toolbar-eraser-uneraseAll">${scrapbook.lang('EditorButtonEraserRevertAll')}</button></li>
+      <li><button id="toolbar-eraser-uneraseSelection">${scrapbook.lang('EditorButtonEraserRevertSelection')}</button></li>
+      <li><button id="toolbar-eraser-uneraseAll">${scrapbook.lang('EditorButtonEraserRevertAll')}</button></li>
       <hr/>
-      <li><button class="toolbar-eraser-removeEditsSelected">${scrapbook.lang('EditorButtonRemoveEditsSelection')}</button></li>
-      <li><button class="toolbar-eraser-removeEditsAll">${scrapbook.lang('EditorButtonRemoveEditsAll')}</button></li>
+      <li><button id="toolbar-eraser-removeEditsSelected">${scrapbook.lang('EditorButtonRemoveEditsSelection')}</button></li>
+      <li><button id="toolbar-eraser-removeEditsAll">${scrapbook.lang('EditorButtonRemoveEditsAll')}</button></li>
     </ul>
   </div>
-  <div class="toolbar-domEraser" title="${scrapbook.lang('EditorButtonDOMEraser')}">
+  <div id="toolbar-domEraser" title="${scrapbook.lang('EditorButtonDOMEraser')}">
     <button></button>
     <ul hidden="" title="">
-      <li><button class="toolbar-domEraser-expand">${scrapbook.lang('EditorButtonDOMEraserExpand', ['W'])}</button></li>
-      <li><button class="toolbar-domEraser-shrink">${scrapbook.lang('EditorButtonDOMEraserShrink', ['N'])}</button></li>
-      <li><button class="toolbar-domEraser-erase">${scrapbook.lang('EditorButtonDOMEraserErase', ['R'])}</button></li>
-      <li><button class="toolbar-domEraser-isolate">${scrapbook.lang('EditorButtonDOMEraserIsolate', ['I'])}</button></li>
+      <li><button id="toolbar-domEraser-expand">${scrapbook.lang('EditorButtonDOMEraserExpand', ['W'])}</button></li>
+      <li><button id="toolbar-domEraser-shrink">${scrapbook.lang('EditorButtonDOMEraserShrink', ['N'])}</button></li>
+      <li><button id="toolbar-domEraser-erase">${scrapbook.lang('EditorButtonDOMEraserErase', ['R'])}</button></li>
+      <li><button id="toolbar-domEraser-isolate">${scrapbook.lang('EditorButtonDOMEraserIsolate', ['I'])}</button></li>
     </ul>
   </div>
-  <div class="toolbar-htmlEditor" title="${scrapbook.lang('EditorButtonHtmlEditor')}">
+  <div id="toolbar-htmlEditor" title="${scrapbook.lang('EditorButtonHtmlEditor')}">
     <button></button>
     <ul hidden="" title="">
-      <li><button class="toolbar-htmlEditor-strong">${scrapbook.lang('EditorButtonHtmlEditorStrong')}</button></li>
-      <li><button class="toolbar-htmlEditor-em">${scrapbook.lang('EditorButtonHtmlEditorEm')}</button></li>
-      <li><button class="toolbar-htmlEditor-underline">${scrapbook.lang('EditorButtonHtmlEditorUnderline')}</button></li>
-      <li><button class="toolbar-htmlEditor-strike">${scrapbook.lang('EditorButtonHtmlEditorStrike')}</button></li>
+      <li><button id="toolbar-htmlEditor-strong">${scrapbook.lang('EditorButtonHtmlEditorStrong')}</button></li>
+      <li><button id="toolbar-htmlEditor-em">${scrapbook.lang('EditorButtonHtmlEditorEm')}</button></li>
+      <li><button id="toolbar-htmlEditor-underline">${scrapbook.lang('EditorButtonHtmlEditorUnderline')}</button></li>
+      <li><button id="toolbar-htmlEditor-strike">${scrapbook.lang('EditorButtonHtmlEditorStrike')}</button></li>
       <hr/>
-      <li><button class="toolbar-htmlEditor-superscript">${scrapbook.lang('EditorButtonHtmlEditorSuperscript')}</button></li>
-      <li><button class="toolbar-htmlEditor-subscript">${scrapbook.lang('EditorButtonHtmlEditorSubscript')}</button></li>
+      <li><button id="toolbar-htmlEditor-superscript">${scrapbook.lang('EditorButtonHtmlEditorSuperscript')}</button></li>
+      <li><button id="toolbar-htmlEditor-subscript">${scrapbook.lang('EditorButtonHtmlEditorSubscript')}</button></li>
       <hr/>
-      <li><button class="toolbar-htmlEditor-fgColor">${scrapbook.lang('EditorButtonHtmlEditorFgColor')}...</button></li>
-      <li><button class="toolbar-htmlEditor-bgColor">${scrapbook.lang('EditorButtonHtmlEditorBgColor')}...</button></li>
+      <li><button id="toolbar-htmlEditor-fgColor">${scrapbook.lang('EditorButtonHtmlEditorFgColor')}...</button></li>
+      <li><button id="toolbar-htmlEditor-bgColor">${scrapbook.lang('EditorButtonHtmlEditorBgColor')}...</button></li>
       <hr/>
-      <li><button class="toolbar-htmlEditor-formatBlockP">${scrapbook.lang('EditorButtonHtmlEditorFormatBlockP')}</button></li>
-      <li><button class="toolbar-htmlEditor-formatBlockH1">${scrapbook.lang('EditorButtonHtmlEditorFormatBlockH', [1])}</button></li>
-      <li><button class="toolbar-htmlEditor-formatBlockH2">${scrapbook.lang('EditorButtonHtmlEditorFormatBlockH', [2])}</button></li>
-      <li><button class="toolbar-htmlEditor-formatBlockH3">${scrapbook.lang('EditorButtonHtmlEditorFormatBlockH', [3])}</button></li>
-      <li><button class="toolbar-htmlEditor-formatBlockH4">${scrapbook.lang('EditorButtonHtmlEditorFormatBlockH', [4])}</button></li>
-      <li><button class="toolbar-htmlEditor-formatBlockH5">${scrapbook.lang('EditorButtonHtmlEditorFormatBlockH', [5])}</button></li>
-      <li><button class="toolbar-htmlEditor-formatBlockH6">${scrapbook.lang('EditorButtonHtmlEditorFormatBlockH', [6])}</button></li>
-      <li><button class="toolbar-htmlEditor-formatBlockDiv">${scrapbook.lang('EditorButtonHtmlEditorFormatBlockDiv')}</button></li>
-      <li><button class="toolbar-htmlEditor-formatBlockPre">${scrapbook.lang('EditorButtonHtmlEditorFormatBlockPre')}</button></li>
+      <li><button id="toolbar-htmlEditor-formatBlockP">${scrapbook.lang('EditorButtonHtmlEditorFormatBlockP')}</button></li>
+      <li><button id="toolbar-htmlEditor-formatBlockH1">${scrapbook.lang('EditorButtonHtmlEditorFormatBlockH', [1])}</button></li>
+      <li><button id="toolbar-htmlEditor-formatBlockH2">${scrapbook.lang('EditorButtonHtmlEditorFormatBlockH', [2])}</button></li>
+      <li><button id="toolbar-htmlEditor-formatBlockH3">${scrapbook.lang('EditorButtonHtmlEditorFormatBlockH', [3])}</button></li>
+      <li><button id="toolbar-htmlEditor-formatBlockH4">${scrapbook.lang('EditorButtonHtmlEditorFormatBlockH', [4])}</button></li>
+      <li><button id="toolbar-htmlEditor-formatBlockH5">${scrapbook.lang('EditorButtonHtmlEditorFormatBlockH', [5])}</button></li>
+      <li><button id="toolbar-htmlEditor-formatBlockH6">${scrapbook.lang('EditorButtonHtmlEditorFormatBlockH', [6])}</button></li>
+      <li><button id="toolbar-htmlEditor-formatBlockDiv">${scrapbook.lang('EditorButtonHtmlEditorFormatBlockDiv')}</button></li>
+      <li><button id="toolbar-htmlEditor-formatBlockPre">${scrapbook.lang('EditorButtonHtmlEditorFormatBlockPre')}</button></li>
       <hr/>
-      <li><button class="toolbar-htmlEditor-listUnordered">${scrapbook.lang('EditorButtonHtmlEditorListUnordered')}</button></li>
-      <li><button class="toolbar-htmlEditor-listOrdered">${scrapbook.lang('EditorButtonHtmlEditorListOrdered')}</button></li>
+      <li><button id="toolbar-htmlEditor-listUnordered">${scrapbook.lang('EditorButtonHtmlEditorListUnordered')}</button></li>
+      <li><button id="toolbar-htmlEditor-listOrdered">${scrapbook.lang('EditorButtonHtmlEditorListOrdered')}</button></li>
       <hr/>
-      <li><button class="toolbar-htmlEditor-outdent">${scrapbook.lang('EditorButtonHtmlEditorOutdent')}</button></li>
-      <li><button class="toolbar-htmlEditor-indent">${scrapbook.lang('EditorButtonHtmlEditorIndent')}</button></li>
+      <li><button id="toolbar-htmlEditor-outdent">${scrapbook.lang('EditorButtonHtmlEditorOutdent')}</button></li>
+      <li><button id="toolbar-htmlEditor-indent">${scrapbook.lang('EditorButtonHtmlEditorIndent')}</button></li>
       <hr/>
-      <li><button class="toolbar-htmlEditor-justifyLeft">${scrapbook.lang('EditorButtonHtmlEditorJustifyLeft')}</button></li>
-      <li><button class="toolbar-htmlEditor-justifyCenter">${scrapbook.lang('EditorButtonHtmlEditorJustifyCenter')}</button></li>
-      <li><button class="toolbar-htmlEditor-justifyRight">${scrapbook.lang('EditorButtonHtmlEditorJustifyRight')}</button></li>
-      <li><button class="toolbar-htmlEditor-justifyFull">${scrapbook.lang('EditorButtonHtmlEditorJustifyFull')}</button></li>
+      <li><button id="toolbar-htmlEditor-justifyLeft">${scrapbook.lang('EditorButtonHtmlEditorJustifyLeft')}</button></li>
+      <li><button id="toolbar-htmlEditor-justifyCenter">${scrapbook.lang('EditorButtonHtmlEditorJustifyCenter')}</button></li>
+      <li><button id="toolbar-htmlEditor-justifyRight">${scrapbook.lang('EditorButtonHtmlEditorJustifyRight')}</button></li>
+      <li><button id="toolbar-htmlEditor-justifyFull">${scrapbook.lang('EditorButtonHtmlEditorJustifyFull')}</button></li>
       <hr/>
-      <li><button class="toolbar-htmlEditor-createLink">${scrapbook.lang('EditorButtonHtmlEditorCreateLink')}...</button></li>
-      <li><button class="toolbar-htmlEditor-hr">${scrapbook.lang('EditorButtonHtmlEditorHr')}</button></li>
-      <li><button class="toolbar-htmlEditor-todo">${scrapbook.lang('EditorButtonHtmlEditorTodo')}</button></li>
-      <li><button class="toolbar-htmlEditor-insertDate">${scrapbook.lang('EditorButtonHtmlEditorInsertDate')}</button></li>
-      <li><button class="toolbar-htmlEditor-insertHtml">${scrapbook.lang('EditorButtonHtmlEditorInsertHtml')}...</button></li>
+      <li><button id="toolbar-htmlEditor-createLink">${scrapbook.lang('EditorButtonHtmlEditorCreateLink')}...</button></li>
+      <li><button id="toolbar-htmlEditor-hr">${scrapbook.lang('EditorButtonHtmlEditorHr')}</button></li>
+      <li><button id="toolbar-htmlEditor-todo">${scrapbook.lang('EditorButtonHtmlEditorTodo')}</button></li>
+      <li><button id="toolbar-htmlEditor-insertDate">${scrapbook.lang('EditorButtonHtmlEditorInsertDate')}</button></li>
+      <li><button id="toolbar-htmlEditor-insertHtml">${scrapbook.lang('EditorButtonHtmlEditorInsertHtml')}...</button></li>
       <hr/>
-      <li><button class="toolbar-htmlEditor-removeFormat">${scrapbook.lang('EditorButtonHtmlEditorRemoveFormat')}</button></li>
-      <li><button class="toolbar-htmlEditor-unlink">${scrapbook.lang('EditorButtonHtmlEditorUnlink')}</button></li>
+      <li><button id="toolbar-htmlEditor-removeFormat">${scrapbook.lang('EditorButtonHtmlEditorRemoveFormat')}</button></li>
+      <li><button id="toolbar-htmlEditor-unlink">${scrapbook.lang('EditorButtonHtmlEditorUnlink')}</button></li>
     </ul>
   </div>
-  <div class="toolbar-undo" title="${scrapbook.lang('EditorButtonUndo')}">
+  <div id="toolbar-undo" title="${scrapbook.lang('EditorButtonUndo')}">
     <button></button>
     <ul hidden="" title="">
-      <li><button class="toolbar-undo-toggle" checked="">${scrapbook.lang('EditorButtonUndoToggle')}</button></li>
+      <li><button id="toolbar-undo-toggle" checked="">${scrapbook.lang('EditorButtonUndoToggle')}</button></li>
     </ul>
   </div>
-  <div class="toolbar-save" title="${scrapbook.lang('EditorButtonSave')}">
+  <div id="toolbar-save" title="${scrapbook.lang('EditorButtonSave')}">
     <button></button>
     <ul hidden="" title="">
-      <li><button class="toolbar-save-deleteErased">${scrapbook.lang('EditorButtonSaveDeleteErased')}</button></li>
-      <li><button class="toolbar-save-internalize">${scrapbook.lang('EditorButtonSaveInternalize')}</button></li>
-      <li><button class="toolbar-save-createSubPage">${scrapbook.lang('EditorButtonSaveCreateSubPage')}...</button></li>
+      <li><button id="toolbar-save-deleteErased">${scrapbook.lang('EditorButtonSaveDeleteErased')}</button></li>
+      <li><button id="toolbar-save-internalize">${scrapbook.lang('EditorButtonSaveInternalize')}</button></li>
+      <li><button id="toolbar-save-createSubPage">${scrapbook.lang('EditorButtonSaveCreateSubPage')}...</button></li>
       <hr/>
-      <li><button class="toolbar-save-editTitle">${scrapbook.lang('EditorButtonSaveEditTitle')}...</button></li>
-      <li><button class="toolbar-save-setViewport">${scrapbook.lang('EditorButtonSaveSetViewport')}...</button></li>
+      <li><button id="toolbar-save-editTitle">${scrapbook.lang('EditorButtonSaveEditTitle')}...</button></li>
+      <li><button id="toolbar-save-setViewport">${scrapbook.lang('EditorButtonSaveSetViewport')}...</button></li>
       <hr/>
-      <li><button class="toolbar-save-pinTop">${scrapbook.lang('EditorButtonSavePinTop')}</button></li>
+      <li><button id="toolbar-save-pinTop">${scrapbook.lang('EditorButtonSavePinTop')}</button></li>
     </ul>
   </div>
-  <a class="toolbar-close" href="javascript:" title="${scrapbook.lang('EditorButtonClose')}"></a>
+  <a id="toolbar-close" href="javascript:" title="${scrapbook.lang('EditorButtonClose')}"></a>
 </div>
 `);
     const wrapper = editor.internalElement = shadow.getElementById('toolbar');
 
     // locate
-    var elem = wrapper.querySelector('.toolbar-locate > button:first-of-type');
+    var elem = wrapper.querySelector('#toolbar-locate > button:first-of-type');
     elem.addEventListener("click", (event) => {
       editor.locate();
     }, {passive: true});
@@ -545,19 +545,19 @@ height: 100vh;`;
     });
     elem.disabled = elem.hidden = !editor.inScrapBook;
 
-    var elem = wrapper.querySelector('.toolbar-locate-viewSitemap');
+    var elem = wrapper.querySelector('#toolbar-locate-viewSitemap');
     elem.addEventListener("click", (event) => {
       const u = new URL(browser.runtime.getURL("scrapbook/sitemap.html"));
       u.searchParams.append('url', document.location.href);
       document.location.assign(u.href);
     }, {passive: true});
 
-    var elem = wrapper.querySelector('.toolbar-locate-viewDirectory');
+    var elem = wrapper.querySelector('#toolbar-locate-viewDirectory');
     elem.addEventListener("click", (event) => {
       document.location.assign('.');
     }, {passive: true});
 
-    var elem = wrapper.querySelector('.toolbar-locate-viewSource');
+    var elem = wrapper.querySelector('#toolbar-locate-viewSource');
     elem.addEventListener("click", (event) => {
       const url = document.documentElement.getAttribute('data-scrapbook-source');
       try {
@@ -574,10 +574,10 @@ height: 100vh;`;
     }, {passive: true});
 
     // marker
-    var elem = wrapper.querySelector('.toolbar-marker > button:first-of-type');
+    var elem = wrapper.querySelector('#toolbar-marker > button:first-of-type');
     elem.addEventListener("click", async (event) => {
       await editor.updateLineMarkers();
-      const marker = wrapper.querySelector('.toolbar-marker ul button[checked] scrapbook-toolbar-samp');
+      const marker = wrapper.querySelector('#toolbar-marker ul button[checked] scrapbook-toolbar-samp');
       editor.lineMarker(marker.getAttribute('style'));
     }, {passive: true});
     elem.addEventListener("contextmenu", async (event) => {
@@ -587,17 +587,17 @@ height: 100vh;`;
       editor.showContextMenu(elem.nextElementSibling, event);
     });
 
-    for (const elem of wrapper.querySelectorAll('.toolbar-marker ul button')) {
+    for (const elem of wrapper.querySelectorAll('#toolbar-marker ul button')) {
       elem.addEventListener("click", (event) => {
         const elem = event.currentTarget;
-        const idx = Array.prototype.indexOf.call(wrapper.querySelectorAll('.toolbar-marker ul button'), elem);
+        const idx = Array.prototype.indexOf.call(wrapper.querySelectorAll('#toolbar-marker ul button'), elem);
         scrapbook.cache.set(editor.getStatusKey('lineMarkerSelected'), idx, 'storage'); // async
         editor.lineMarker(elem.querySelector('scrapbook-toolbar-samp').getAttribute('style'));
       }, {passive: true});
     }
 
     // annotation
-    var elem = wrapper.querySelector('.toolbar-annotation > button:first-of-type');
+    var elem = wrapper.querySelector('#toolbar-annotation > button:first-of-type');
     elem.addEventListener("click", (event) => {
       editor.createSticky();
     }, {passive: true});
@@ -606,33 +606,33 @@ height: 100vh;`;
       editor.showContextMenu(event.currentTarget.nextElementSibling, event);
     });
 
-    var elem = wrapper.querySelector('.toolbar-annotation-prev');
+    var elem = wrapper.querySelector('#toolbar-annotation-prev');
     elem.addEventListener("click", (event) => {
       editor.locateAnnotation(-1);
     }, {passive: true});
 
-    var elem = wrapper.querySelector('.toolbar-annotation-next');
+    var elem = wrapper.querySelector('#toolbar-annotation-next');
     elem.addEventListener("click", (event) => {
       editor.locateAnnotation(1);
     }, {passive: true});
 
-    var elem = wrapper.querySelector('.toolbar-annotation-link');
+    var elem = wrapper.querySelector('#toolbar-annotation-link');
     elem.addEventListener("click", (event) => {
       editor.createLink();
     }, {passive: true});
 
-    var elem = wrapper.querySelector('.toolbar-annotation-sticky');
+    var elem = wrapper.querySelector('#toolbar-annotation-sticky');
     elem.addEventListener("click", (event) => {
       editor.createSticky();
     }, {passive: true});
 
-    var elem = wrapper.querySelector('.toolbar-annotation-sticky-richtext');
+    var elem = wrapper.querySelector('#toolbar-annotation-sticky-richtext');
     elem.addEventListener("click", (event) => {
       editor.createSticky(true);
     }, {passive: true});
 
     // eraser
-    var elem = wrapper.querySelector('.toolbar-eraser > button:first-of-type');
+    var elem = wrapper.querySelector('#toolbar-eraser > button:first-of-type');
     elem.addEventListener("click", (event) => {
       if (event.ctrlKey) {
         editor.removeEdits(true);
@@ -651,53 +651,53 @@ height: 100vh;`;
       editor.showContextMenu(event.currentTarget.nextElementSibling, event);
     });
 
-    var elem = wrapper.querySelector('.toolbar-eraser-eraseSelection');
+    var elem = wrapper.querySelector('#toolbar-eraser-eraseSelection');
     elem.addEventListener("click", (event) => {
       editor.eraseNodes();
     }, {passive: true});
 
-    var elem = wrapper.querySelector('.toolbar-eraser-eraseSelector');
+    var elem = wrapper.querySelector('#toolbar-eraser-eraseSelector');
     elem.addEventListener("click", (event) => {
       editor.eraseSelector();
     }, {passive: true});
 
-    var elem = wrapper.querySelector('.toolbar-eraser-eraseSelectorAll');
+    var elem = wrapper.querySelector('#toolbar-eraser-eraseSelectorAll');
     elem.addEventListener("click", (event) => {
       editor.eraseSelector(true);
     }, {passive: true});
 
-    var elem = wrapper.querySelector('.toolbar-eraser-eraseXpath');
+    var elem = wrapper.querySelector('#toolbar-eraser-eraseXpath');
     elem.addEventListener("click", (event) => {
       editor.eraseXpath();
     }, {passive: true});
 
-    var elem = wrapper.querySelector('.toolbar-eraser-eraseXpathAll');
+    var elem = wrapper.querySelector('#toolbar-eraser-eraseXpathAll');
     elem.addEventListener("click", (event) => {
       editor.eraseXpath(true);
     }, {passive: true});
 
-    var elem = wrapper.querySelector('.toolbar-eraser-uneraseSelection');
+    var elem = wrapper.querySelector('#toolbar-eraser-uneraseSelection');
     elem.addEventListener("click", (event) => {
       editor.uneraseNodes();
     }, {passive: true});
 
-    var elem = wrapper.querySelector('.toolbar-eraser-uneraseAll');
+    var elem = wrapper.querySelector('#toolbar-eraser-uneraseAll');
     elem.addEventListener("click", (event) => {
       editor.uneraseAllNodes();
     }, {passive: true});
 
-    var elem = wrapper.querySelector('.toolbar-eraser-removeEditsSelected');
+    var elem = wrapper.querySelector('#toolbar-eraser-removeEditsSelected');
     elem.addEventListener("click", (event) => {
       editor.removeEdits();
     }, {passive: true});
 
-    var elem = wrapper.querySelector('.toolbar-eraser-removeEditsAll');
+    var elem = wrapper.querySelector('#toolbar-eraser-removeEditsAll');
     elem.addEventListener("click", (event) => {
       editor.removeAllEdits();
     }, {passive: true});
 
     // DOMEraser
-    var elem = wrapper.querySelector('.toolbar-domEraser > button:first-of-type');
+    var elem = wrapper.querySelector('#toolbar-domEraser > button:first-of-type');
     elem.addEventListener("click", (event) => {
       editor.toggleDomEraser();
     }, {passive: true});
@@ -711,20 +711,20 @@ height: 100vh;`;
       editor.showContextMenu(menuElem, event);
     });
 
-    var elem = wrapper.querySelector('.toolbar-domEraser-expand');
+    var elem = wrapper.querySelector('#toolbar-domEraser-expand');
     elem.addEventListener("click", domEraser.expandTarget.bind(domEraser), {passive: true});
 
-    var elem = wrapper.querySelector('.toolbar-domEraser-shrink');
+    var elem = wrapper.querySelector('#toolbar-domEraser-shrink');
     elem.addEventListener("click", domEraser.shrinkTarget.bind(domEraser), {passive: true});
 
-    var elem = wrapper.querySelector('.toolbar-domEraser-erase');
+    var elem = wrapper.querySelector('#toolbar-domEraser-erase');
     elem.addEventListener("click", domEraser.eraseTarget.bind(domEraser), {passive: true});
 
-    var elem = wrapper.querySelector('.toolbar-domEraser-isolate');
+    var elem = wrapper.querySelector('#toolbar-domEraser-isolate');
     elem.addEventListener("click", domEraser.isolateTarget.bind(domEraser), {passive: true});
 
     // htmlEditor
-    var elem = wrapper.querySelector('.toolbar-htmlEditor > button:first-of-type');
+    var elem = wrapper.querySelector('#toolbar-htmlEditor > button:first-of-type');
     elem.addEventListener("click", (event) => {
       editor.toggleHtmlEditor();
     }, {passive: true});
@@ -739,104 +739,104 @@ height: 100vh;`;
       editor.showContextMenu(menuElem, event);
     });
 
-    var elem = wrapper.querySelector('.toolbar-htmlEditor-strong');
+    var elem = wrapper.querySelector('#toolbar-htmlEditor-strong');
     elem.addEventListener("click", htmlEditor.strong, {passive: true});
 
-    var elem = wrapper.querySelector('.toolbar-htmlEditor-em');
+    var elem = wrapper.querySelector('#toolbar-htmlEditor-em');
     elem.addEventListener("click", htmlEditor.em, {passive: true});
 
-    var elem = wrapper.querySelector('.toolbar-htmlEditor-underline');
+    var elem = wrapper.querySelector('#toolbar-htmlEditor-underline');
     elem.addEventListener("click", htmlEditor.underline, {passive: true});
 
-    var elem = wrapper.querySelector('.toolbar-htmlEditor-strike');
+    var elem = wrapper.querySelector('#toolbar-htmlEditor-strike');
     elem.addEventListener("click", htmlEditor.strike, {passive: true});
 
-    var elem = wrapper.querySelector('.toolbar-htmlEditor-superscript');
+    var elem = wrapper.querySelector('#toolbar-htmlEditor-superscript');
     elem.addEventListener("click", htmlEditor.superscript, {passive: true});
 
-    var elem = wrapper.querySelector('.toolbar-htmlEditor-subscript');
+    var elem = wrapper.querySelector('#toolbar-htmlEditor-subscript');
     elem.addEventListener("click", htmlEditor.subscript, {passive: true});
 
-    var elem = wrapper.querySelector('.toolbar-htmlEditor-fgColor');
+    var elem = wrapper.querySelector('#toolbar-htmlEditor-fgColor');
     elem.addEventListener("click", htmlEditor.foreColor, {passive: true});
 
-    var elem = wrapper.querySelector('.toolbar-htmlEditor-bgColor');
+    var elem = wrapper.querySelector('#toolbar-htmlEditor-bgColor');
     elem.addEventListener("click", htmlEditor.hiliteColor, {passive: true});
 
-    var elem = wrapper.querySelector('.toolbar-htmlEditor-formatBlockP');
+    var elem = wrapper.querySelector('#toolbar-htmlEditor-formatBlockP');
     elem.addEventListener("click", htmlEditor.formatBlockP, {passive: true});
 
-    var elem = wrapper.querySelector('.toolbar-htmlEditor-formatBlockH1');
+    var elem = wrapper.querySelector('#toolbar-htmlEditor-formatBlockH1');
     elem.addEventListener("click", htmlEditor.formatBlockH1, {passive: true});
 
-    var elem = wrapper.querySelector('.toolbar-htmlEditor-formatBlockH2');
+    var elem = wrapper.querySelector('#toolbar-htmlEditor-formatBlockH2');
     elem.addEventListener("click", htmlEditor.formatBlockH2, {passive: true});
 
-    var elem = wrapper.querySelector('.toolbar-htmlEditor-formatBlockH3');
+    var elem = wrapper.querySelector('#toolbar-htmlEditor-formatBlockH3');
     elem.addEventListener("click", htmlEditor.formatBlockH3, {passive: true});
 
-    var elem = wrapper.querySelector('.toolbar-htmlEditor-formatBlockH4');
+    var elem = wrapper.querySelector('#toolbar-htmlEditor-formatBlockH4');
     elem.addEventListener("click", htmlEditor.formatBlockH4, {passive: true});
 
-    var elem = wrapper.querySelector('.toolbar-htmlEditor-formatBlockH5');
+    var elem = wrapper.querySelector('#toolbar-htmlEditor-formatBlockH5');
     elem.addEventListener("click", htmlEditor.formatBlockH5, {passive: true});
 
-    var elem = wrapper.querySelector('.toolbar-htmlEditor-formatBlockH6');
+    var elem = wrapper.querySelector('#toolbar-htmlEditor-formatBlockH6');
     elem.addEventListener("click", htmlEditor.formatBlockH6, {passive: true});
 
-    var elem = wrapper.querySelector('.toolbar-htmlEditor-formatBlockDiv');
+    var elem = wrapper.querySelector('#toolbar-htmlEditor-formatBlockDiv');
     elem.addEventListener("click", htmlEditor.formatBlockDiv, {passive: true});
 
-    var elem = wrapper.querySelector('.toolbar-htmlEditor-formatBlockPre');
+    var elem = wrapper.querySelector('#toolbar-htmlEditor-formatBlockPre');
     elem.addEventListener("click", htmlEditor.formatBlockPre, {passive: true});
 
-    var elem = wrapper.querySelector('.toolbar-htmlEditor-listUnordered');
+    var elem = wrapper.querySelector('#toolbar-htmlEditor-listUnordered');
     elem.addEventListener("click", htmlEditor.listUnordered, {passive: true});
 
-    var elem = wrapper.querySelector('.toolbar-htmlEditor-listOrdered');
+    var elem = wrapper.querySelector('#toolbar-htmlEditor-listOrdered');
     elem.addEventListener("click", htmlEditor.listOrdered, {passive: true});
 
-    var elem = wrapper.querySelector('.toolbar-htmlEditor-outdent');
+    var elem = wrapper.querySelector('#toolbar-htmlEditor-outdent');
     elem.addEventListener("click", htmlEditor.outdent, {passive: true});
 
-    var elem = wrapper.querySelector('.toolbar-htmlEditor-indent');
+    var elem = wrapper.querySelector('#toolbar-htmlEditor-indent');
     elem.addEventListener("click", htmlEditor.indent, {passive: true});
 
-    var elem = wrapper.querySelector('.toolbar-htmlEditor-justifyLeft');
+    var elem = wrapper.querySelector('#toolbar-htmlEditor-justifyLeft');
     elem.addEventListener("click", htmlEditor.justifyLeft, {passive: true});
 
-    var elem = wrapper.querySelector('.toolbar-htmlEditor-justifyCenter');
+    var elem = wrapper.querySelector('#toolbar-htmlEditor-justifyCenter');
     elem.addEventListener("click", htmlEditor.justifyCenter, {passive: true});
 
-    var elem = wrapper.querySelector('.toolbar-htmlEditor-justifyRight');
+    var elem = wrapper.querySelector('#toolbar-htmlEditor-justifyRight');
     elem.addEventListener("click", htmlEditor.justifyRight, {passive: true});
 
-    var elem = wrapper.querySelector('.toolbar-htmlEditor-justifyFull');
+    var elem = wrapper.querySelector('#toolbar-htmlEditor-justifyFull');
     elem.addEventListener("click", htmlEditor.justifyFull, {passive: true});
 
-    var elem = wrapper.querySelector('.toolbar-htmlEditor-createLink');
+    var elem = wrapper.querySelector('#toolbar-htmlEditor-createLink');
     elem.addEventListener("click", htmlEditor.createLink, {passive: true});
 
-    var elem = wrapper.querySelector('.toolbar-htmlEditor-hr');
+    var elem = wrapper.querySelector('#toolbar-htmlEditor-hr');
     elem.addEventListener("click", htmlEditor.hr, {passive: true});
 
-    var elem = wrapper.querySelector('.toolbar-htmlEditor-todo');
+    var elem = wrapper.querySelector('#toolbar-htmlEditor-todo');
     elem.addEventListener("click", htmlEditor.todo, {passive: true});
 
-    var elem = wrapper.querySelector('.toolbar-htmlEditor-insertDate');
+    var elem = wrapper.querySelector('#toolbar-htmlEditor-insertDate');
     elem.addEventListener("click", htmlEditor.insertDate, {passive: true});
 
-    var elem = wrapper.querySelector('.toolbar-htmlEditor-insertHtml');
+    var elem = wrapper.querySelector('#toolbar-htmlEditor-insertHtml');
     elem.addEventListener("click", htmlEditor.insertHtml, {passive: true});
 
-    var elem = wrapper.querySelector('.toolbar-htmlEditor-removeFormat');
+    var elem = wrapper.querySelector('#toolbar-htmlEditor-removeFormat');
     elem.addEventListener("click", htmlEditor.removeFormat, {passive: true});
 
-    var elem = wrapper.querySelector('.toolbar-htmlEditor-unlink');
+    var elem = wrapper.querySelector('#toolbar-htmlEditor-unlink');
     elem.addEventListener("click", htmlEditor.unlink, {passive: true});
 
     // undo
-    var elem = wrapper.querySelector('.toolbar-undo > button:first-of-type');
+    var elem = wrapper.querySelector('#toolbar-undo > button:first-of-type');
     elem.addEventListener("click", (event) => {
       editor.undo();
     }, {passive: true});
@@ -845,13 +845,13 @@ height: 100vh;`;
       editor.showContextMenu(event.currentTarget.nextElementSibling, event);
     });
 
-    var elem = wrapper.querySelector('.toolbar-undo-toggle');
+    var elem = wrapper.querySelector('#toolbar-undo-toggle');
     elem.addEventListener("click", (event) => {
       editor.toggleMutationHandler();
     }, {passive: true});
 
     // save
-    var elem = wrapper.querySelector('.toolbar-save > button:first-of-type');
+    var elem = wrapper.querySelector('#toolbar-save > button:first-of-type');
     elem.addEventListener("click", (event) => {
       editor.save();
     }, {passive: true});
@@ -860,40 +860,40 @@ height: 100vh;`;
       editor.showContextMenu(event.currentTarget.nextElementSibling, event);
     });
 
-    var elem = wrapper.querySelector('.toolbar-save-deleteErased');
+    var elem = wrapper.querySelector('#toolbar-save-deleteErased');
     elem.addEventListener("click", (event) => {
       editor.deleteErased();
     }, {passive: true});
 
-    var elem = wrapper.querySelector('.toolbar-save-internalize');
+    var elem = wrapper.querySelector('#toolbar-save-internalize');
     elem.addEventListener("click", (event) => {
       editor.save({internalize: true});
     }, {passive: true});
     elem.disabled = !editor.inScrapBook;
 
-    var elem = wrapper.querySelector('.toolbar-save-createSubPage');
+    var elem = wrapper.querySelector('#toolbar-save-createSubPage');
     elem.addEventListener("click", (event) => {
       editor.createSubPage();
     }, {passive: true});
     elem.disabled = !editor.inScrapBook;
 
-    var elem = wrapper.querySelector('.toolbar-save-editTitle');
+    var elem = wrapper.querySelector('#toolbar-save-editTitle');
     elem.addEventListener("click", (event) => {
       editor.editTitle();
     }, {passive: true});
 
-    var elem = wrapper.querySelector('.toolbar-save-setViewport');
+    var elem = wrapper.querySelector('#toolbar-save-setViewport');
     elem.addEventListener("click", (event) => {
       editor.setViewport();
     }, {passive: true});
 
-    var elem = wrapper.querySelector('.toolbar-save-pinTop');
+    var elem = wrapper.querySelector('#toolbar-save-pinTop');
     elem.addEventListener("click", (event) => {
       editor.pinTop();
     }, {passive: true});
 
     // close
-    var elem = wrapper.querySelector('.toolbar-close');
+    var elem = wrapper.querySelector('#toolbar-close');
     elem.addEventListener("click", (event) => {
       event.preventDefault();
       editor.close();
@@ -1585,7 +1585,7 @@ height: 100vh;`;
   };
 
   editor.toggleDomEraser = async function (willActive, ignoreAnnotator = false) {
-    const editElem = editor.internalElement.querySelector('.toolbar-domEraser > button');
+    const editElem = editor.internalElement.querySelector('#toolbar-domEraser > button');
 
     if (typeof willActive === "undefined") {
       willActive = !editElem.hasAttribute("checked");
@@ -1606,13 +1606,13 @@ height: 100vh;`;
     }
 
     for (const elem of editor.internalElement.querySelectorAll([
-      '.toolbar-locate > button',
-      '.toolbar-marker > button',
-      '.toolbar-annotation > button',
-      '.toolbar-eraser > button',
-      '.toolbar-htmlEditor > button',
-      '.toolbar-undo > button',
-      '.toolbar-save > button',
+      '#toolbar-locate > button',
+      '#toolbar-marker > button',
+      '#toolbar-annotation > button',
+      '#toolbar-eraser > button',
+      '#toolbar-htmlEditor > button',
+      '#toolbar-undo > button',
+      '#toolbar-save > button',
     ].join(','))) {
       elem.disabled = willActive;
     }
@@ -1635,7 +1635,7 @@ height: 100vh;`;
   };
 
   editor.toggleHtmlEditor = async function (willActive, ignoreAnnotator = false) {
-    const editElem = editor.internalElement.querySelector('.toolbar-htmlEditor > button');
+    const editElem = editor.internalElement.querySelector('#toolbar-htmlEditor > button');
 
     if (typeof willActive === "undefined") {
       willActive = !editElem.hasAttribute("checked");
@@ -1656,11 +1656,11 @@ height: 100vh;`;
     }
 
     for (const elem of editor.internalElement.querySelectorAll([
-      '.toolbar-marker > button',
-      '.toolbar-annotation > button',
-      '.toolbar-eraser > button',
-      '.toolbar-domEraser > button',
-      '.toolbar-undo > button',
+      '#toolbar-marker > button',
+      '#toolbar-annotation > button',
+      '#toolbar-eraser > button',
+      '#toolbar-domEraser > button',
+      '#toolbar-undo > button',
     ].join(','))) {
       elem.disabled = willActive;
     }
@@ -1683,7 +1683,7 @@ height: 100vh;`;
   };
 
   editor.toggleMutationHandler = async function (willActive) {
-    const editElem = editor.internalElement.querySelector('.toolbar-undo-toggle');
+    const editElem = editor.internalElement.querySelector('#toolbar-undo-toggle');
 
     if (typeof willActive === "undefined") {
       willActive = !editElem.hasAttribute("checked");
@@ -1810,7 +1810,7 @@ height: 100vh;`;
   };
 
   editor.pinTop = async function (willActive) {
-    const editElem = editor.internalElement.querySelector('.toolbar-save-pinTop');
+    const editElem = editor.internalElement.querySelector('#toolbar-save-pinTop');
 
     if (typeof willActive === "undefined") {
       willActive = !editElem.hasAttribute("checked");
@@ -1996,13 +1996,13 @@ height: 100vh;`;
   };
 
   editor.updateLineMarkers = async function () {
-    for (const [i, elem] of editor.internalElement.querySelectorAll('.toolbar-marker ul scrapbook-toolbar-samp').entries()) {
+    for (const [i, elem] of editor.internalElement.querySelectorAll('#toolbar-marker ul scrapbook-toolbar-samp').entries()) {
       const style = scrapbook.getOption(`editor.lineMarker.style.${i + 1}`);
       elem.setAttribute('style', style);
       elem.title = style;
     }
 
-    const buttons = Array.from(editor.internalElement.querySelectorAll('.toolbar-marker ul button'));
+    const buttons = Array.from(editor.internalElement.querySelectorAll('#toolbar-marker ul button'));
     for (const elem of buttons) {
       elem.removeAttribute('checked');
     }
@@ -2012,7 +2012,7 @@ height: 100vh;`;
   };
 
   editor.updateHtmlEditorMenu = function () {
-    const elem = editor.internalElement.querySelector('.toolbar-htmlEditor-insertDate');
+    const elem = editor.internalElement.querySelector('#toolbar-htmlEditor-insertDate');
     const format = scrapbook.getOption("editor.insertDateFormat");
     const isUtc = scrapbook.getOption("editor.insertDateFormatIsUtc");
     const sample = Strftime.format(format, {isUtc});
