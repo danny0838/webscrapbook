@@ -2109,6 +2109,9 @@ height: 100vh;`;
   };
 
   editor.addHistory = () => {
+    // Save active editing in prior to prevent restoring to an editing state.
+    annotator.saveAll();
+
     mutationHandler.addRestorePoint();
   };
 
@@ -2351,8 +2354,6 @@ height: 100vh;`;
       editLineMarker(elem, pos, skipHistory = false) {
         if (elem.shadowRoot) { return; }
 
-        this.saveAll();
-
         // Retrieve element ID. Generate a new one if none.
         let id = elem.getAttribute('data-scrapbook-id');
         if (!id) {
@@ -2572,8 +2573,6 @@ height: 100vh;`;
 
       editSticky(mainElem, skipHistory = false) {
         if (mainElem.shadowRoot) { return; }
-
-        this.saveAll();
 
         if (!mainElem.classList.contains('styled')) {
           const attr = mainElem.classList.contains('plaintext') ? 'textContent' : 'innerHTML';
