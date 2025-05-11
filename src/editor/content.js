@@ -3363,8 +3363,21 @@ height: 100vh;`;
 
     async insertHtml() {
       const frameId = await editor.getFocusedFrameId();
-      const html = prompt(scrapbook.lang('EditorButtonHtmlEditorInsertHtmlPrompt'));
+
+      // backup current selection ranges
+      const ranges = scrapbook.getSelectionRanges();
+
+      const html = await scrapbook.prompt(scrapbook.lang('EditorButtonHtmlEditorInsertHtmlPrompt'));
+
+      // restore selection ranges after await
+      const sel = document.getSelection();
+      sel.removeAllRanges();
+      for (const range of ranges) {
+        sel.addRange(range);
+      }
+
       if (!html) { return; }
+
       return await scrapbook.invokeExtensionScript({
         cmd: "background.invokeEditorCommand",
         args: {
