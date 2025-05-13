@@ -1419,27 +1419,7 @@
     capturer.log(`Launching remote tab ...`);
 
     const tab = await browser.tabs.create({url, active: false});
-
-    // wait until tab loading complete
-    {
-      const {promise, resolve, reject} = Promise.withResolvers();
-      const listener = (tabId, changeInfo, t) => {
-        if (!(tabId === tab.id && changeInfo.status === 'complete')) { return; }
-        resolve(t);
-      };
-      const listener2 = (tabId, removeInfo) => {
-        if (!(tabId === tab.id)) { return; }
-        reject(new Error('Tab removed before loading complete.'));
-      };
-      try {
-        browser.tabs.onUpdated.addListener(listener);
-        browser.tabs.onRemoved.addListener(listener2);
-        await promise;
-      } finally {
-        browser.tabs.onUpdated.removeListener(listener);
-        browser.tabs.onRemoved.removeListener(listener2);
-      }
-    }
+    await scrapbook.waitTabLoading(tab);
 
     const delay = options["capture.remoteTabDelay"];
     if (delay > 0) {
