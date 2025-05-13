@@ -271,6 +271,21 @@ height: 100vh;`;
   background-image: url("${browser.runtime.getURL("resources/edit-save.png")}");
 }
 
+#toolbar #toolbar-close {
+  position: absolute;
+  ${scrapbook.lang('@@bidi_end_edge')}: 0;
+}
+
+#toolbar #toolbar-close > button {
+  background-image: url("${browser.runtime.getURL("resources/edit-exit.svg")}");
+  opacity: 0.3;
+}
+
+#toolbar #toolbar-close > button:enabled:hover,
+#toolbar #toolbar-close > button:enabled:focus {
+  opacity: 1;
+}
+
 #toolbar > div > ul {
   all: unset;
   position: absolute;
@@ -338,22 +353,6 @@ height: 100vh;`;
   all: unset;
   display: block;
   border: 1px inset #EEE;
-}
-
-#toolbar #toolbar-close {
-  display: block;
-  position: absolute;
-  top: 0;
-  ${scrapbook.lang('@@bidi_end_edge')}: 0;
-  margin: 3px;
-  background: url("${browser.runtime.getURL("resources/edit-exit.svg")}") center / 24px no-repeat transparent;
-  width: 32px;
-  height: 32px;
-  opacity: 0.3;
-}
-
-#toolbar #toolbar-close:hover {
-  opacity: 1;
 }
 </style>
 <div id="toolbar" dir="${scrapbook.lang('@@bidi_dir')}">
@@ -482,7 +481,9 @@ height: 100vh;`;
       <li><button id="toolbar-save-pinTop">${scrapbook.lang('EditorButtonSavePinTop')}</button></li>
     </ul>
   </div>
-  <a id="toolbar-close" href="javascript:" title="${scrapbook.lang('EditorButtonClose')}"></a>
+  <div id="toolbar-close" title="${scrapbook.lang('EditorButtonClose')}">
+    <button></button>
+  </div>
 </div>
 `);
     const wrapper = editor.internalElement = shadow.getElementById('toolbar');
@@ -847,7 +848,7 @@ height: 100vh;`;
     }, {passive: true});
 
     // close
-    var elem = wrapper.querySelector('#toolbar-close');
+    var elem = wrapper.querySelector('#toolbar-close > button');
     elem.addEventListener("click", (event) => {
       event.preventDefault();
       editor.close();
