@@ -346,28 +346,10 @@ height: 100vh;`;
   top: 0;
   ${scrapbook.lang('@@bidi_end_edge')}: 0;
   margin: 3px;
+  background: url("${browser.runtime.getURL("resources/edit-exit.svg")}") center / 24px no-repeat transparent;
   width: 32px;
   height: 32px;
   opacity: 0.3;
-}
-
-#toolbar #toolbar-close::before,
-#toolbar #toolbar-close::after {
-  content: "";
-  position: absolute;
-  height: 4px;
-  width: 100%;
-  top: 50%;
-  margin-top: -2px;
-  background: #000;
-}
-
-#toolbar #toolbar-close::before {
-  transform: rotate(45deg);
-}
-
-#toolbar #toolbar-close::after {
-  transform: rotate(-45deg);
 }
 
 #toolbar #toolbar-close:hover {
