@@ -182,7 +182,8 @@ height: 100vh;`;
   display: block;
   box-sizing: border-box;
   height: 40px;
-  border: 1px solid rgb(204, 204, 204);
+  border: 0 solid rgb(204, 204, 204);
+  border-width: 1px 0 0 0;
   padding: 1px;
   background: rgba(240, 240, 240, 0.9);
   font-family: sans-serif;
@@ -191,6 +192,7 @@ height: 100vh;`;
 
 #toolbar.top {
   inset: 0 0 auto 0;
+  border-width: 0 0 1px 0;
 }
 
 #toolbar > div {
