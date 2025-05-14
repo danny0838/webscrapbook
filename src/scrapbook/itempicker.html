@@ -12,12 +12,14 @@
 <script src="../core/common.js"></script>
 <script src="../core/optionsAuto.js"></script>
 <script src="../core/extension.js"></script>
+<script src="../core/dialog.js"></script>
 <script src="server.js"></script>
 <script src="tree.js"></script>
 <script src="bookTree.js"></script>
 <script src="itempicker.js"></script>
 </head>
 <body hidden>
+<form>
 <fieldset id="wrapper" disabled>
 <select id="recent" hidden>
   <option value="" selected>...</option>
@@ -25,12 +27,11 @@
 <div id="tree">
   <div id="items"></div>
 </div>
-<div id="toolbar">
-  <div>
-    <input id="btn-save" type="button" value="__MSG_OK__" accesskey="S" autocomplete="off">
-    <input id="btn-exit" type="button" value="__MSG_Cancel__" accesskey="X" autocomplete="off">
-  </div>
-</div>
+<footer>
+  <button id="ok" accesskey="S">__MSG_OK__</button>
+  <button id="cancel" accesskey="X">__MSG_Cancel__</button>
+</footer>
 </fieldset>
+</form>
 </body>
 </html>

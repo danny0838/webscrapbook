@@ -404,12 +404,15 @@
   }
 
   async function onFillParentIdClick(event) {
-    await scrapbook.invokeItemPicker({
-      targetTabId: (await browser.tabs.getCurrent()).id,
-      targetCallback: 'details.pickItem',
-      bookId: getOptionFromElement(document.getElementById('tasks_bookId')),
-      recentItemsKey: 'scrapbookLastPickedItems',
+    const result = await scrapbook.openModalWindow({
+      url: browser.runtime.getURL("scrapbook/itempicker.html"),
+      args: {
+        bookId: getOptionFromElement(document.getElementById('tasks_bookId')),
+        recentItemsKey: 'scrapbookLastPickedItems',
+      },
+      windowCreateData: {width: 350, height: 600},
     });
+    if (result) { pickItem(result); }
   }
 
   async function onFillDownLinkDocUrlFilterChange(event) {

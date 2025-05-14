@@ -12,35 +12,52 @@
   global.itempicker = factory(
     global.isDebug,
     global.scrapbook,
+    global.dialog,
     global.server,
     global.BookTree,
   );
-}(this, function (isDebug, scrapbook, server, BookTree) {
+}(this, function (isDebug, scrapbook, dialog, server, BookTree) {
 
   'use strict';
 
+  const dialogOnLoad = dialog.onLoad;
+
+  Object.assign(dialog, {
+    async init(args) {
+      const {promise, resolve} = Promise.withResolvers();
+      this.resolve = resolve;
+      itempicker.init(args);
+      return await promise;
+    },
+
+    onLoad(event) {
+      dialogOnLoad.call(this);
+
+      document.getElementById('recent').addEventListener('change', (event) => {
+        const elem = event.target;
+        itempicker.selectRecentItem(elem.value);
+        elem.value = "";
+      });
+    },
+
+    onSubmit(event) {
+      if (event.submitter.id === 'ok') {
+        itempicker.save();
+      } else {
+        itempicker.exit();
+      }
+    },
+  });
+
   const itempicker = {
-    targetTabId: null,
-    targetCallback: null,
     bookId: null,
     tree: null,
     recentItemsKey: null,
 
-    async init() {
+    async init({bookId, recentItemsKey}) {
       try {
-        const params = new URL(document.URL).searchParams;
-        this.targetTabId = parseInt(params.get('tid'), 10);
-        this.targetCallback = params.get('cb');
-        this.recentItemsKey = params.get('rkey');
-        let bookId = this.bookId = params.get('bookId');
-
-        if (!Number.isInteger(this.targetTabId)) {
-          throw new Error(`Missing target tab ID.`);
-        }
-
-        if (!this.targetCallback) {
-          throw new Error(`Missing callback.`);
-        }
+        this.recentItemsKey = recentItemsKey;
+        this.bookId = bookId;
 
         await scrapbook.loadOptionsAuto;
         await server.init();
@@ -83,6 +100,7 @@
 
         this.enableUi(true);
         document.body.hidden = false;
+        tree.treeElem.focus();
       } catch (ex) {
         console.error(ex);
         alert(`Error: ${ex.message}`);
@@ -200,55 +218,20 @@
 
         await this.saveRecentItems(id);
 
-        await scrapbook.invokeContentScript({
-          tabId: this.targetTabId,
-          frameId: 0,
-          cmd: this.targetCallback,
-          args: {
-            bookId,
-            id,
-            title,
-          },
+        dialog.close({
+          bookId,
+          id,
+          title,
         });
-
-        await this.exit();
       } finally {
         this.enableUi(true);
       }
     },
 
     async exit() {
-      try {
-        this.enableUi(false);
-
-        if (this.target) {
-          location.assign(this.target);
-        } else {
-          const tab = await browser.tabs.getCurrent();
-          return browser.tabs.remove(tab.id);
-        }
-      } finally {
-        this.enableUi(true);
-      }
+      dialog.close();
     },
   };
-
-  document.addEventListener('DOMContentLoaded', (event) => {
-    scrapbook.loadLanguages(document);
-    itempicker.init();
-
-    document.getElementById('btn-save').addEventListener('click', (event) => {
-      itempicker.save();
-    });
-    document.getElementById('btn-exit').addEventListener('click', (event) => {
-      itempicker.exit();
-    });
-    document.getElementById('recent').addEventListener('change', (event) => {
-      const elem = event.target;
-      itempicker.selectRecentItem(elem.value);
-      elem.value = "";
-    });
-  });
 
   return itempicker;
 
