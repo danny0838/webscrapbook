@@ -1554,6 +1554,84 @@ if (typeof Promise.withResolvers === 'undefined') {
     }
   };
 
+  scrapbook.openModalWindow = async function (options) {
+    const doc = window.document;
+
+    if (!doc) {
+      throw new Error('Must run in a document.');
+    }
+
+    // create a modal dialog with mask
+    const supportsDialog = typeof HTMLDialogElement !== 'undefined';
+
+    // in case there is another existing prompt due to inproper trigger
+    for (const elem of doc.documentElement.querySelectorAll('[data-scrapbook-elem="toolbar-prompt"]')) {
+      elem.remove();
+    }
+
+    const host = doc.documentElement.appendChild(doc.createElement('scrapbook-toolbar-prompt'));
+    host.setAttribute('data-scrapbook-elem', 'toolbar-prompt');
+
+    const shadow = host.attachShadow({mode: 'closed'});
+
+    const cssElem = shadow.appendChild(doc.createElement('style'));
+    cssElem.textContent = `
+:host {
+  all: initial !important;
+  position: absolute !important;
+}
+dialog {
+  all: initial;
+  position: fixed;
+  inset: 0;
+}
+.mask {
+  z-index: 2147483647;
+  background: rgba(0, 0, 0, 0.4);
+}
+`;
+
+    const dialog = shadow.appendChild(doc.createElement('dialog'));
+
+    const {promise, resolve, reject} = Promise.withResolvers();
+
+    const observer = new MutationObserver((mutations) => {
+      if (!doc.documentElement.contains(host)) {
+        reject(new Error('dialog host removed from DOM'));
+      }
+    });
+    observer.observe(doc.documentElement, {childList: true});
+
+    if (supportsDialog) {
+      dialog.addEventListener('close', () => reject(new Error('dialog closed')));
+      dialog.showModal();
+    } else {
+      dialog.classList.add('mask');
+    }
+
+    const id = scrapbook.getUuid();
+
+    // launch modal window/tab
+    scrapbook.invokeExtensionScript({
+      cmd: 'background.openModalWindow',
+      args: {...options, id},
+    }).then(resolve, reject);
+
+    try {
+      return await promise;
+    } catch (ex) {
+      // close the dialog window/tab if interrupted
+      scrapbook.invokeExtensionScript({
+        cmd: 'background.openModalWindow.close',
+        args: {id},
+      }).catch(() => {});
+      return null;
+    } finally {
+      observer.disconnect();
+      host.remove();
+    }
+  };
+
 
   /****************************************************************************
    * ScrapBook related path/file/string/etc handling

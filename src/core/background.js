@@ -371,6 +371,80 @@
   /**
    * @type invokable
    */
+  background.openModalWindow = async function ({
+    id,
+    url,
+    args,
+    windowCreateData,
+    tabCreateData,
+  }, sender) {
+    const {promise, resolve, reject} = Promise.withResolvers();
+
+    background.openModalWindow.map.set(id, resolve);
+
+    let tab;
+
+    (async () => {
+      if (browser.windows) {
+        const win = await browser.windows.getCurrent();
+        ({tabs: [tab]} = await scrapbook.createWindow({
+          url,
+          type: 'popup',
+          width: 600,
+          height: 240,
+          incognito: win.incognito,
+          ...windowCreateData,
+        }));
+      } else {
+        tab = await browser.tabs.create({
+          url,
+          ...tabCreateData,
+        });
+      }
+
+      try {
+        await scrapbook.waitTabLoading(tab);
+      } catch (ex) {
+        console.error(ex);
+        resolve(null);
+        return;
+      }
+
+      try {
+        const result = await scrapbook.invokeContentScript({
+          tabId: tab.id,
+          frameId: 0,
+          cmd: 'dialog.init',
+          args,
+        });
+        resolve(result);
+      } catch (ex) {
+        console.error(ex);
+        resolve(null);
+      }
+    })();
+
+    try {
+      return await promise;
+    } finally {
+      background.openModalWindow.map.delete(id);
+      try {
+        await browser.tabs.remove(tab.id);
+      } catch {}
+    }
+  };
+
+  Object.assign(background.openModalWindow, {
+    map: new Map(),
+    close({id}) {
+      const resolve = background.openModalWindow.map.get(id);
+      resolve && resolve(null);
+    },
+  });
+
+  /**
+   * @type invokable
+   */
   background.onServerTreeChange = async function (params = {}, sender) {
     const tasks = [];
 
