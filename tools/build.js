@@ -90,7 +90,7 @@ function pack(target) {
     artifactsDir,
     filename,
     overwriteDest: true,
-    ignorefiles: [
+    ignoreFiles: [
       'manifest.chromium.json',
       'manifest.firefox.json',
     ],
