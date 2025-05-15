@@ -1,34 +1,34 @@
-Unit tests
-----------
+# Tests
 
-### System requirements
+## System requirements
 
-* Firefox ≥ 68, Chromium ≥ 73
-* Python ≥ 3.7
-* PyWebScrapBook (compatible version)
+* Chromium ≥ 73 and/or Firefox ≥ 68
+* [Python](https://www.python.org) ≥ 3.7
+* [PyWebScrapBook](https://github.com/danny0838/PyWebScrapBook) (Optional)
 
-### Usage
+## Running tests
 
-1. Copy `config.json` to `config.local.json` and edit it:
-   * Make sure `wsb_extension_id` matches the extension ID of WebScrapBook.
-   * Make sure `server_port`, `server_port2`, and `backend_port` are available (not used by other applications).
+1. Install WebScrapBook extension (standard install or as a temporary extension).
 
-2. Run `server.py` to start the local hosting server and do some initialization.
+2. Copy `config.json` to `config.local.json` and configure:
+   * `wsb_extension_id`: should match the extension ID of the installed WebScrapBook extension
+   * `server_port`, `server_port2`, and `backend_port`: should be available (not used by other applications)
 
-3. Install WebScrapBook extension (standard install or as a temporary extension).
+3. Install PyWebScrapBook and configure related extension options: (Optional)
+   * `Backend server > Address`: should match `http://localhost:<backend_port>/`
 
-4. Install `WebScrapBook Test Suite` extension in this directory (as a temporary extension).
+4. Run `server.py` to start the local hosting server and do some initialization.
 
-5. Configure WebScrapBook options:
-   * Make sure backend server URL matches the configured `backend_port`.
+5. Install `WebScrapBook Test Suite` extension from this directory (as a temporary extension).
 
-6. Click on the browser action of the test suite extension. A tab will be opened and the test will start automatically. Alternatively, right-click on the browser action for subgroup tests.
+6. Click on the browser action of the test suite extension. A tab will be opened and the test will start automatically.
+   > Alternatively, right-click on the browser action for subgroup tests.
 
 7. Do the same tests in a private window for Firefox (which may behave differently from in a normal window).
 
-### Notes
+## Notes
 
-* It's recommended to use a different user account or profile of the browser, or use another build of browser (such as Development Edition of Firefox) for tests.
+* It's recommended to use a different user account or profile of the browser, or use another build of browser (such as Firefox Developer Edition) for tests.
 
 * Tests may fail due to several unclear issues of the browser. Here are some hints for further investigation:
   * **Run tests repeatedly**: varying fails/errors suggest there's an issue of the browser or somewhere rather than the extension itself.
