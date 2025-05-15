@@ -2289,13 +2289,6 @@ height: 100vh;`;
         // this is unexpected
         if (elem.shadowRoot) { return; }
 
-        // Retrieve element ID. Generate a new one if none.
-        let id = elem.getAttribute('data-scrapbook-id');
-        if (!id) {
-          id = scrapbook.dateToId();
-          elem.setAttribute('data-scrapbook-id', id);
-        }
-
         const content = await scrapbook.prompt(scrapbook.lang('EditorEditAnnotation'), elem.title);
 
         if (content == null) {
@@ -2303,6 +2296,13 @@ height: 100vh;`;
         }
 
         editor.addHistory();
+
+        // Retrieve element ID. Generate a new one if none.
+        let id = elem.getAttribute('data-scrapbook-id');
+        if (!id) {
+          id = scrapbook.dateToId();
+          elem.setAttribute('data-scrapbook-id', id);
+        }
 
         for (const part of scrapbook.getScrapBookObjectElems(elem)) {
           if (content) {
