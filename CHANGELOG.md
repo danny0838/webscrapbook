@@ -3,6 +3,11 @@
 * Versions before 1.0 are in initial development. APIs are not stable for these versions, even a `y` version can involve a breaking change, and only partial notable changes are summarized in this document. See full commit history in the source repository for details.
 * Backend server requirement in this document refers to the version of [`webscrapbook` Python package](https://github.com/danny0838/pywebscrapbook) (or PyWebScrapBook).
 
+## [2.19.0] - 2025-05-15
+* Improved dialog prompts for editing multiline texts or selecting items.
+* Enhanced icon semantics and visual quality.
+* Miscellaneous improvements and bug fixes of the UI, internal code, builder scripts, documentation, and test suite.
+
 ## [2.18.8] - 2025-05-11
 * Fixed an issue where editor commands don't work in frames.
 * Fixed content direction of sticky notes for rtl user agents.
