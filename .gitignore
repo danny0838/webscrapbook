@@ -9,6 +9,8 @@
 *.pyc
 
 # Build outputs
+/src/manifest.json
+/test/manifest.json
 /dist/
 
 # Temporary files

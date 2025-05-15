@@ -38,8 +38,8 @@ jobs:
         env:
           TIMEZONE: ${{ vars.TIMEZONE || 'UTC' }}
         run: |
-          VERSION=$(jq -r '.version' './src/manifest.json')
-          VERSION_FX=$(jq -r '.version' './src/manifest-firefox.json')
+          VERSION=$(jq -r '.version' './src/manifest.chromium.json')
+          VERSION_FX=$(jq -r '.version' './src/manifest.firefox.json')
           if [ "$VERSION" != "$VERSION_FX" ]; then
             echo "❌ Mismatching manifest versions"
             exit 1
@@ -53,8 +53,8 @@ jobs:
 
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "tag_name=$VERSION" >> $GITHUB_OUTPUT
-          echo "ext_path_zip=dist/WebScrapbook.zip" >> $GITHUB_OUTPUT
-          echo "ext_path_xpi=dist/WebScrapbook.xpi" >> $GITHUB_OUTPUT
+          echo "ext_path_zip=dist/webscrapbook.zip" >> $GITHUB_OUTPUT
+          echo "ext_path_xpi=dist/webscrapbook.xpi" >> $GITHUB_OUTPUT
           echo "artifact_dir=dist" >> $GITHUB_OUTPUT
           echo "artifact_zip=webscrapbook-zip" >> $GITHUB_OUTPUT
           echo "artifact_xpi=webscrapbook-xpi" >> $GITHUB_OUTPUT
@@ -71,7 +71,7 @@ jobs:
         run: npm run lint
 
       - name: Build extension
-        run: build/pack.sh
+        run: npm run pack
 
       - name: Create Git tag
         run: |

@@ -28,13 +28,13 @@ jobs:
       - name: Configure and verify
         id: config
         run: |
-          MANIFEST_VERSION=$(jq -r '.manifest_version' './src/manifest.json')
+          MANIFEST_VERSION=$(jq -r '.manifest_version' './src/manifest.chromium.json')
           if [ "$MANIFEST_VERSION" != 3 ]; then
             echo "❌ Unexpected \`manifest_version\`: $MANIFEST_VERSION"
             exit 1
           fi
 
-          echo "ext_path_zip=dist/WebScrapbook.zip" >> $GITHUB_OUTPUT
+          echo "ext_path_zip=dist/webscrapbook.zip" >> $GITHUB_OUTPUT
           echo "artifact_dir=dist" >> $GITHUB_OUTPUT
           echo "artifact_zip=webscrapbook-zip" >> $GITHUB_OUTPUT
 
@@ -50,7 +50,7 @@ jobs:
         run: npm run lint
 
       - name: Build extension
-        run: build/pack.sh
+        run: npm run pack
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4

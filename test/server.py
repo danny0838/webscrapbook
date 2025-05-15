@@ -131,55 +131,6 @@ def main():
         with fh as fh:
             config.update(json.load(fh))
 
-    # build hardlinks for shared libraries
-    link_files = (
-        (
-            os.path.join(root, '..', 'src', 'lib', 'browser-polyfill.js'),
-            os.path.join(root, 'shared', 'lib', 'browser-polyfill.js'),
-        ),
-        (
-            os.path.join(root, '..', 'src', 'lib', 'jszip.js'),
-            os.path.join(root, 'shared', 'lib', 'jszip.js'),
-        ),
-        (
-            os.path.join(root, '..', 'src', 'lib', 'sha.js'),
-            os.path.join(root, 'shared', 'lib', 'sha.js'),
-        ),
-        (
-            os.path.join(root, '..', 'src', 'lib', 'mime.js'),
-            os.path.join(root, 'shared', 'lib', 'mime.js'),
-        ),
-        (
-            os.path.join(root, '..', 'src', 'lib', 'referrer.js'),
-            os.path.join(root, 'shared', 'lib', 'referrer.js'),
-        ),
-        (
-            os.path.join(root, '..', 'src', 'lib', 'map-with-default.js'),
-            os.path.join(root, 'shared', 'lib', 'map-with-default.js'),
-        ),
-        (
-            os.path.join(root, '..', 'src', 'lib', 'strftime.js'),
-            os.path.join(root, 'shared', 'lib', 'strftime.js'),
-        ),
-        (
-            os.path.join(root, '..', 'src', 'core', 'common.js'),
-            os.path.join(root, 'shared', 'core', 'common.js'),
-        ),
-        (
-            os.path.join(root, '..', 'src', 'capturer', 'common.js'),
-            os.path.join(root, 'shared', 'capturer', 'common.js'),
-        ),
-    )
-
-    try:
-        shutil.rmtree(os.path.join(root, 'shared'))
-    except FileNotFoundError:
-        pass
-
-    for fsrc, fdst in link_files:
-        os.makedirs(os.path.dirname(fdst), exist_ok=True)
-        os.link(fsrc, fdst)
-
     # start server
     site_root = os.path.join(root, 't')
     os.chdir(site_root)
