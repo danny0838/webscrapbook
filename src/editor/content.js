@@ -2302,6 +2302,8 @@ height: 100vh;`;
           return;
         }
 
+        editor.addHistory();
+
         for (const part of scrapbook.getScrapBookObjectElems(elem)) {
           if (content) {
             part.setAttribute('title', content);
