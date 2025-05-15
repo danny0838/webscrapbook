@@ -2305,7 +2305,7 @@ height: 100vh;`;
         }
 
         for (const part of scrapbook.getScrapBookObjectElems(elem)) {
-          if (content) {
+          if (content.trim()) {
             part.setAttribute('title', content);
           } else {
             part.removeAttribute('title');
