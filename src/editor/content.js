@@ -1815,7 +1815,12 @@ height: 100vh;`;
     if (!editor.active) { return; }
 
     document.documentElement.removeAttribute('data-scrapbook-toolbar-active');
-    editor.element.remove();
+
+    // remove possible stale elements due to a disabled/removed extension
+    for (const elem of document.querySelectorAll('scrapbook-toolbar')) {
+      elem.remove();
+    }
+
     await scrapbook.invokeExtensionScript({
       cmd: "background.registerActiveEditorTab",
       args: {
