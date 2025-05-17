@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html dir="__MSG_@@bidi_dir__">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>__MSG_EditorButtonHtmlEditorColor__</title>
+<link rel="stylesheet" href="color.css">
+<script src="../lib/browser-polyfill.js"></script>
+<script src="../core/common.js"></script>
+<script src="../core/dialog.js"></script>
+<script src="color.js"></script>
+</head>
+<body hidden>
+<form>
+<section>
+  <div>
+    <input type="checkbox" id="fg-use" data-for="fg" checked>
+    <label for="fg-use">__MSG_EditorButtonHtmlEditorColorFg__</label>
+    <input type="color" id="fg-fill" data-for="fg">
+    <input type="text" id="fg" data-for="fg-fill">
+  </div>
+  <div>
+    <input type="checkbox" id="bg-use" data-for="bg" checked>
+    <label for="bg-use">__MSG_EditorButtonHtmlEditorColorBg__</label>
+    <input type="color" id="bg-fill" data-for="bg">
+    <input type="text" id="bg" data-for="bg-fill">
+  </div>
+</section>
+<footer>
+  <button id="ok" accesskey="S">__MSG_OK__</button>
+  <button id="cancel" accesskey="X">__MSG_Cancel__</button>
+</footer>
+</form>
+</body>
+</html>

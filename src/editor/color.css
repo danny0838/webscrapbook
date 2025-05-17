@@ -1,0 +1,31 @@
+form {
+  position: absolute;
+  box-sizing: border-box;
+  inset: 8px;
+  display: flex;
+  flex-direction: column;
+}
+
+section {
+  margin: .5em 0;
+  flex: 1;
+}
+
+section > div {
+  margin: .5em 0;
+  line-height: 2;
+  text-align: center;
+}
+
+footer {
+  text-align: end;
+}
+
+footer > button {
+  margin: 0 .25em;
+  padding: .25em .5em;
+}
+
+input[type="text"] {
+  width: 8em;
+}

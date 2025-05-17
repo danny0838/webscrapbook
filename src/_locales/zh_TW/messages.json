@@ -379,11 +379,14 @@
   "EditorButtonHtmlEditor": {
     "message": "HTML 編輯工具 - 點選開啟或關閉。開啟後可自由編輯頁面內容。（儲存後無法復原）"
   },
-  "EditorButtonHtmlEditorBgColor": {
-    "message": "設定背景顏色"
+  "EditorButtonHtmlEditorColor": {
+    "message": "編輯顏色"
   },
-  "EditorButtonHtmlEditorBgColorPrompt": {
-    "message": "請輸入要設定的背景顏色（使用 CSS 顏色語法）："
+  "EditorButtonHtmlEditorColorBg": {
+    "message": "設定背景顏色:"
+  },
+  "EditorButtonHtmlEditorColorFg": {
+    "message": "設定文字顏色:"
   },
   "EditorButtonHtmlEditorCreateLink": {
     "message": "建立超連結"
@@ -393,12 +396,6 @@
   },
   "EditorButtonHtmlEditorEm": {
     "message": "切換斜體"
-  },
-  "EditorButtonHtmlEditorFgColor": {
-    "message": "設定文字顏色"
-  },
-  "EditorButtonHtmlEditorFgColorPrompt": {
-    "message": "請輸入要設定的文字顏色（使用 CSS 顏色語法）："
   },
   "EditorButtonHtmlEditorFormatBlockDiv": {
     "message": "設定為 DIV 區塊"
@@ -604,6 +601,9 @@
         "content": "$1"
       }
     }
+  },
+  "ErrorEditorButtonHtmlEditorColorInvalid": {
+    "message": "無效的 CSS 顏色碼"
   },
   "ErrorFileDownloadError": {
     "message": "下載檔案錯誤 ($URL$): $REASON$",

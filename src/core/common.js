@@ -4782,6 +4782,31 @@ dialog {
     }, {});
   };
 
+  scrapbook.debounce = function (func, {
+    delay = 300,
+    withFlusher = false,
+    withCancler = false,
+  } = {}) {
+    let timer;
+    const fn = (...args) => {
+      clearTimeout(timer);
+      timer = setTimeout(() => func(...args), delay);
+    };
+    if (withFlusher) {
+      fn.flush = (...args) => {
+        clearTimeout(timer);
+        func(...args);
+      };
+    }
+    if (withCancler) {
+      fn.cancel = () => {
+        clearTimeout(timer);
+      };
+    }
+    return fn;
+  };
+
+
   /****************************************************************************
    * Zip utilities
    *

@@ -379,11 +379,14 @@
   "EditorButtonHtmlEditor": {
     "message": "HTML 编辑工具 - 点击开启或关闭。开启后可自由编辑页面内容。（保存后无法复原）"
   },
-  "EditorButtonHtmlEditorBgColor": {
-    "message": "设置背景颜色"
+  "EditorButtonHtmlEditorColor": {
+    "message": "编辑颜色"
   },
-  "EditorButtonHtmlEditorBgColorPrompt": {
-    "message": "请输入要设置的背景颜色（使用 CSS 颜色语法）："
+  "EditorButtonHtmlEditorColorBg": {
+    "message": "设置背景颜色:"
+  },
+  "EditorButtonHtmlEditorColorFg": {
+    "message": "设置文本颜色:"
   },
   "EditorButtonHtmlEditorCreateLink": {
     "message": "创建链接"
@@ -393,12 +396,6 @@
   },
   "EditorButtonHtmlEditorEm": {
     "message": "切换斜体"
-  },
-  "EditorButtonHtmlEditorFgColor": {
-    "message": "设置文本颜色"
-  },
-  "EditorButtonHtmlEditorFgColorPrompt": {
-    "message": "请输入要设置的文本颜色（使用 CSS 颜色语法）："
   },
   "EditorButtonHtmlEditorFormatBlockDiv": {
     "message": "设置为 DIV 区块"
@@ -604,6 +601,9 @@
         "content": "$1"
       }
     }
+  },
+  "ErrorEditorButtonHtmlEditorColorInvalid": {
+    "message": "无效的 CSS 颜色码"
   },
   "ErrorFileDownloadError": {
     "message": "下载文件错误 ($URL$): $REASON$",

@@ -379,11 +379,14 @@
   "EditorButtonHtmlEditor": {
     "message": "HTML editor - Click to toggle page content editing. (Edits cannot be undone after save.)"
   },
-  "EditorButtonHtmlEditorBgColor": {
-    "message": "Set background color"
+  "EditorButtonHtmlEditorColor": {
+    "message": "Edit color"
   },
-  "EditorButtonHtmlEditorBgColorPrompt": {
-    "message": "Input a background color (using CSS color syntax):"
+  "EditorButtonHtmlEditorColorBg": {
+    "message": "Set background color:"
+  },
+  "EditorButtonHtmlEditorColorFg": {
+    "message": "Set text color:"
   },
   "EditorButtonHtmlEditorCreateLink": {
     "message": "Create hyperlink"
@@ -393,12 +396,6 @@
   },
   "EditorButtonHtmlEditorEm": {
     "message": "Toggle italic"
-  },
-  "EditorButtonHtmlEditorFgColor": {
-    "message": "Set text color"
-  },
-  "EditorButtonHtmlEditorFgColorPrompt": {
-    "message": "Input a text color (using CSS color syntax):"
   },
   "EditorButtonHtmlEditorFormatBlockDiv": {
     "message": "Set to DIV block"
@@ -604,6 +601,9 @@
         "content": "$1"
       }
     }
+  },
+  "ErrorEditorButtonHtmlEditorColorInvalid": {
+    "message": "Invalid CSS color code"
   },
   "ErrorFileDownloadError": {
     "message": "Error downloading file ($URL$): $REASON$",
