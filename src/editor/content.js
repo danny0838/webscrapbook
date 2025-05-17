@@ -1860,9 +1860,33 @@ height: 100vh;`;
         return;
       }
 
-      if (event.code === "Escape" || event.code === "F10") {
-        event.preventDefault();
-        exitContextMenu();
+      switch (event.code) {
+        case "Escape":
+        case "F10": {
+          event.preventDefault();
+          exitContextMenu();
+          break;
+        }
+        case "ArrowUp": {
+          event.preventDefault();
+          const elems = Array.from(elem.querySelectorAll('li > button:enabled'));
+          const focusIdx = elems.findIndex((elem) => elem.matches(':focus'));
+          let idx = (focusIdx === -1) ? 0 : focusIdx - 1;
+          if (idx < 0) { idx = elems.length - 1; }
+          const target = elems[idx];
+          target && target.focus();
+          break;
+        }
+        case "ArrowDown": {
+          event.preventDefault();
+          const elems = Array.from(elem.querySelectorAll('li > button:enabled'));
+          const focusIdx = elems.findIndex((elem) => elem.matches(':focus'));
+          let idx = (focusIdx === -1) ? 0 : focusIdx + 1;
+          if (idx >= elems.length) { idx = 0; }
+          const target = elems[idx];
+          target && target.focus();
+          break;
+        }
       }
     };
 
