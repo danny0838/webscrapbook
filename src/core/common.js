@@ -4445,6 +4445,64 @@ dialog {
     return blank.toDataURL();
   };
 
+  scrapbook.getOffsetInSource = function (root, node, offset) {
+    let pos = 0;
+    let tmpParent = node.parentNode;
+    let tmpSibling = node.previousSibling;
+
+    switch (node.nodeName) {
+      case "#text":
+        pos += textToHtmlOffset(node, offset);
+        break;
+      case "#comment":
+        pos += ("<!--").length + offset;
+        break;
+      case "#cdata-section":
+        pos += ("<![CDATA[").length + offset;
+        break;
+      default:
+        tmpParent = node;
+        tmpSibling = node.childNodes[offset - 1];
+        break;
+    }
+
+    while (tmpParent) {
+      while (tmpSibling) {
+        switch (tmpSibling.nodeName) {
+          case "#text":
+            pos += textToHtmlOffset(tmpSibling);
+            break;
+          case "#comment":
+            pos += ("<!--" + tmpSibling.textContent + "-->").length;
+            break;
+          case "#cdata-section":
+            pos += ("<![CDATA[" + tmpSibling.textContent + "]]>").length;
+            break;
+          default:
+            pos += tmpSibling.outerHTML.length;
+            break;
+        }
+        tmpSibling = tmpSibling.previousSibling;
+      }
+
+      pos += tmpParent.outerHTML.lastIndexOf(tmpParent.innerHTML, tmpParent.outerHTML.lastIndexOf('<'));
+
+      if (tmpParent === root) { break; }
+
+      tmpSibling = tmpParent.previousSibling;
+      tmpParent = tmpParent.parentNode;
+    }
+
+    return pos;
+
+    function textToHtmlOffset(node, offset) {
+      const content = (typeof offset === "undefined") ? node.textContent : node.textContent.substring(0, offset);
+      const span = node.ownerDocument.createElement("span");
+      span.textContent = content;
+      return span.innerHTML.length;
+    }
+  };
+
 
   /****************************************************************************
    * Network utilities

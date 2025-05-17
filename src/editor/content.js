@@ -3371,32 +3371,92 @@ height: 100vh;`;
     async insertHtml() {
       const frameId = await editor.getFocusedFrameId();
 
-      // backup current selection ranges
-      const ranges = scrapbook.getSelectionRanges();
-
-      const html = await scrapbook.prompt(scrapbook.lang('EditorButtonHtmlEditorInsertHtmlPrompt'));
-
-      // restore selection ranges after await
-      const sel = document.getSelection();
-      sel.removeAllRanges();
-      for (const range of ranges) {
-        sel.addRange(range);
-      }
-
-      if (!html) { return; }
-
       return await scrapbook.invokeExtensionScript({
         cmd: "background.invokeEditorCommand",
         args: {
           frameId,
           cmd: "editor.htmlEditor._insertHtml",
-          args: {html},
         },
       });
     },
 
-    _insertHtml({html}) {
-      document.execCommand('insertHTML', false, html);
+    async _insertHtml() {
+      const sel = scrapbook.getSelection();
+
+      // backup current selection ranges
+      const ranges = scrapbook.getSelectionRanges(sel);
+
+      const collapsed = ranges[0].collapsed;
+
+      const data = {
+        preTag: "",
+        preContext: "",
+        value: "",
+        postContext: "",
+        postTag: "",
+      };
+
+      let ac;
+      if (!collapsed) {
+        // get selection area to edit
+        const range = ranges[0];
+        ac = getReplaceableNode(range.commonAncestorContainer);
+        const source = ac.outerHTML;
+        const sourceInner = ac.innerHTML;
+        const istart = source.lastIndexOf(sourceInner, source.lastIndexOf('<'));
+        const start = scrapbook.getOffsetInSource(ac, range.startContainer, range.startOffset);
+        const end = scrapbook.getOffsetInSource(ac, range.endContainer, range.endOffset);
+        const iend = istart + sourceInner.length;
+        data.preTag = source.substring(0, istart);
+        data.preContext = source.substring(istart, start);
+        data.value = source.substring(start, end);
+        data.postContext = source.substring(end, iend);
+        data.postTag = source.substring(iend);
+      }
+
+      const result = await scrapbook.openModalWindow({
+        url: browser.runtime.getURL('editor/insertHtml.html'),
+        args: data,
+        windowCreateData: {width: 600, height: 600},
+      });
+
+      // restore selection ranges after await
+      sel.removeAllRanges();
+      for (const range of ranges) {
+        sel.addRange(range);
+      }
+
+      if (!result) { return; }
+
+      let html;
+      if (!collapsed) {
+        const range = document.createRange();
+
+        // replace the whole tag in some cases to prevent a bad result
+        if (["TABLE", "A"].includes(ac.nodeName)) {
+          html = data.preTag + result.preContext + result.value + result.postContext + data.postTag;
+          range.selectNode(ac);
+        } else {
+          html = result.preContext + result.value + result.postContext;
+          range.selectNodeContents(ac);
+        }
+
+        sel.removeAllRanges();
+        sel.addRange(range);
+      } else {
+        html = result.value;
+      }
+
+      document.execCommand("insertHTML", false, html);
+
+      function getReplaceableNode(node) {
+        // replacing these nodes could get a bad and not-undoable result
+        const forbiddenList = ["#text", "THEAD", "TBODY", "TFOOT", "TR"];
+        while (forbiddenList.includes(node.nodeName)) {
+          node = node.parentNode;
+        }
+        return node;
+      }
     },
 
     async removeFormat() {

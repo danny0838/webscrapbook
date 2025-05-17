@@ -3041,6 +3041,133 @@ div { image-background: var(${/(--sb(\d+)-2)/}); }`;
       }
     });
   });
+
+  describe('scrapbook.getOffsetInSource', function () {
+    it('should correctly handle `node` and `offset`', function () {
+      const sample = document.createElement('template');
+      sample.innerHTML = `
+<section>
+<p id="topic">My Title</p>
+<p>My <strong>weight</strong> text.</p>
+<!-- my <comment> -->
+</section>
+`;
+      const section = sample.content.querySelector('section');
+
+      assert.strictEqual(scrapbook.getOffsetInSource(section, section.childNodes[0], 0), 9);
+      assert.strictEqual(scrapbook.getOffsetInSource(section, section.childNodes[0], 1), 10);
+
+      assert.strictEqual(scrapbook.getOffsetInSource(section, section.childNodes[1], 0), 24);
+      assert.strictEqual(scrapbook.getOffsetInSource(section, section.childNodes[1], 1), 32);
+
+      assert.strictEqual(scrapbook.getOffsetInSource(section, section.childNodes[2], 0), 36);
+
+      assert.strictEqual(scrapbook.getOffsetInSource(section, section.childNodes[3], 0), 40);
+      assert.strictEqual(scrapbook.getOffsetInSource(section, section.childNodes[3].childNodes[0], 0), 40);
+      assert.strictEqual(scrapbook.getOffsetInSource(section, section.childNodes[3].childNodes[0], 3), 43);
+      assert.strictEqual(scrapbook.getOffsetInSource(section, section.childNodes[3], 1), 43);
+      assert.strictEqual(scrapbook.getOffsetInSource(section, section.childNodes[3].childNodes[1], 0), 51);
+      assert.strictEqual(scrapbook.getOffsetInSource(section, section.childNodes[3].childNodes[1], 1), 57);
+      assert.strictEqual(scrapbook.getOffsetInSource(section, section.childNodes[3], 2), 66);
+      assert.strictEqual(scrapbook.getOffsetInSource(section, section.childNodes[3].childNodes[2], 0), 66);
+      assert.strictEqual(scrapbook.getOffsetInSource(section, section.childNodes[3].childNodes[2], 6), 72);
+      assert.strictEqual(scrapbook.getOffsetInSource(section, section.childNodes[3], 3), 72);
+
+      assert.strictEqual(scrapbook.getOffsetInSource(section, section.childNodes[4], 0), 76);
+
+      assert.strictEqual(scrapbook.getOffsetInSource(section, section.childNodes[5], 0), 81);
+
+      assert.strictEqual(scrapbook.getOffsetInSource(section, section.childNodes[6], 0), 98);
+    });
+
+    it('should correctly handle special chars in a text node', function () {
+      // treated as `1 &lt; 2; 3 &gt; 2; a &amp; b`
+      var sample = document.createElement('template');
+      sample.innerHTML = `
+<section>
+1 &lt; 2; 3 &gt; 2; a &amp; b
+<p>My Title</p>
+</section>
+`;
+      var section = sample.content.querySelector('section');
+      var idx = scrapbook.getOffsetInSource(section, section.childNodes[1], 0);
+      assert.strictEqual(section.outerHTML.slice(idx, idx + 8), 'My Title');
+
+      // treated as `1 &lt; 2; 3 &gt; 2; a &amp; b`
+      var sample = document.createElement('template');
+      sample.innerHTML = `
+<section>
+1 < 2; 3 > 2; a & b
+<p>My Title</p>
+</section>
+`;
+      var section = sample.content.querySelector('section');
+      var idx = scrapbook.getOffsetInSource(section, section.childNodes[1], 0);
+      assert.strictEqual(section.outerHTML.slice(idx, idx + 8), 'My Title');
+    });
+
+    it('should correctly handle special chars in an attribute', function () {
+      // treated as `title="mytitle"`
+      var sample = document.createElement('template');
+      sample.innerHTML = `
+<section>
+<p title=mytitle>My Title</p>
+</section>
+`;
+      var section = sample.content.querySelector('section');
+      var idx = scrapbook.getOffsetInSource(section, section.childNodes[1], 0);
+      assert.strictEqual(section.outerHTML.slice(idx, idx + 8), 'My Title');
+
+      // treated as `title="<s>title &amp; name</s>"`
+      var sample = document.createElement('template');
+      sample.innerHTML = `
+<section>
+<p title="<s>title & name</s>">My Title</p>
+</section>
+`;
+      var section = sample.content.querySelector('section');
+      var idx = scrapbook.getOffsetInSource(section, section.childNodes[1], 0);
+      assert.strictEqual(section.outerHTML.slice(idx, idx + 8), 'My Title');
+
+      // treated as `title="&quot;123&quot;"`
+      var sample = document.createElement('template');
+      sample.innerHTML = `
+<section>
+<p title="&quot;123&quot;">My Title</p>
+</section>
+`;
+      var section = sample.content.querySelector('section');
+      var idx = scrapbook.getOffsetInSource(section, section.childNodes[1], 0);
+      assert.strictEqual(section.outerHTML.slice(idx, idx + 8), 'My Title');
+
+      // treated as `title="&quot;123&quot;"`
+      var sample = document.createElement('template');
+      sample.innerHTML = `
+<section>
+<p title='"123"'>My Title</p>
+</section>
+`;
+      var section = sample.content.querySelector('section');
+      var idx = scrapbook.getOffsetInSource(section, section.childNodes[1], 0);
+      assert.strictEqual(section.outerHTML.slice(idx, idx + 8), 'My Title');
+    });
+
+    it('should throw if `parent` does not contain `node`', function () {
+      const sample = document.createElement('template');
+      sample.innerHTML = `
+<section>
+<p id="topic">My Title</p>
+<p>My <strong>weight</strong> text.</p>
+<!-- my <comment> -->
+</section>
+`;
+      const section = sample.content.querySelector('section');
+
+      assert.throws(() => {
+        scrapbook.getOffsetInSource(section.querySelector('p'), section.querySelector('p strong'), 0);
+      });
+    });
+  });
 });
 
 }));

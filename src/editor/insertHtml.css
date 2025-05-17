@@ -1,0 +1,52 @@
+form {
+  position: absolute;
+  box-sizing: border-box;
+  inset: 8px;
+  display: flex;
+  flex-direction: column;
+}
+
+section {
+  margin: .5em 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  row-gap: .25em;
+}
+
+footer {
+  text-align: end;
+}
+
+footer > button {
+  margin: 0 .25em;
+  padding: .25em .5em;
+}
+
+textarea {
+  box-sizing: border-box;
+  flex: 1 0 auto;
+  padding: .25em;
+  width: 100%;
+  resize: none;
+  word-break: break-all;
+}
+
+textarea[readonly] {
+  color: GrayText;
+}
+
+textarea[name="pre-tag"], textarea[name="post-tag"] {
+  flex-grow: 0;
+  height: calc(1.5em + 4px);
+  line-height: 1em;
+  overflow: hidden;
+}
+
+textarea[name="pre-context"], textarea[name="post-context"] {
+  color: blue;
+}
+
+textarea[name="value"] {
+  flex-grow: 2;
+}
