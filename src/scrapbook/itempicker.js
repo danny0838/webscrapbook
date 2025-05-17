@@ -41,11 +41,7 @@
     },
 
     onSubmit(event) {
-      if (event.submitter.id === 'ok') {
-        itempicker.save();
-      } else {
-        itempicker.exit();
-      }
+      itempicker.save();
     },
   });
 
@@ -226,10 +222,6 @@
       } finally {
         this.enableUi(true);
       }
-    },
-
-    async exit() {
-      dialog.close();
     },
   };
 

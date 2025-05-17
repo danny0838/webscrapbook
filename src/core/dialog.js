@@ -44,27 +44,27 @@
         event.preventDefault();
         this.onSubmit(event);
       });
+
+      document.querySelector('#cancel').addEventListener('click', (event) => {
+        event.preventDefault();
+        this.close();
+      });
     },
 
     onSubmit(event) {
-      let value;
-      if (event.submitter.id === 'ok') {
-        value = {};
-        for (const elem of document.querySelectorAll('form [name]')) {
-          if (elem.matches('input[type="checkbox"]')) {
-            value[elem.name] = elem.checked;
-          } else if (elem.matches('input[type="radio"]')) {
-            if (elem.checked) {
-              value[elem.name] = elem.value;
-            }
-          } else if (elem.matches('input[type="number"]')) {
-            value[elem.name] = elem.valueAsNumber;
-          } else {
+      const value = {};
+      for (const elem of document.querySelectorAll('form [name]')) {
+        if (elem.matches('input[type="checkbox"]')) {
+          value[elem.name] = elem.checked;
+        } else if (elem.matches('input[type="radio"]')) {
+          if (elem.checked) {
             value[elem.name] = elem.value;
           }
+        } else if (elem.matches('input[type="number"]')) {
+          value[elem.name] = elem.valueAsNumber;
+        } else {
+          value[elem.name] = elem.value;
         }
-      } else {
-        value = null;
       }
 
       this.close(value);
