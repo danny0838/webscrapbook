@@ -152,6 +152,15 @@
 
         await server.init();
 
+        const searchInfo = await server.request({
+          query: {
+            a: 'config',
+            k: 'search_help',
+          },
+          format: 'json',
+          method: "GET",
+        }).then(r => r.json()).then(r => r.data);
+
         // parse URL params
         // id: book(s) to select and load. Pick current book if not specified.
         // root: root id(s) to search for.
@@ -199,6 +208,17 @@
             document.title = scrapbook.lang('SearchTitle', bookName);
           } else {
             document.title = scrapbook.lang('SearchTitleWithRoot', [bookName, rootIds.join(' | ')]);
+          }
+        }
+
+        {
+          document.querySelector('#help div').textContent = searchInfo.help.desc;
+
+          const helpers = document.querySelector('#helper');
+          for (const {text, value} of searchInfo.helpers) {
+            const opt = helpers.appendChild(document.createElement('option'));
+            opt.textContent = text;
+            opt.value = value;
           }
         }
 

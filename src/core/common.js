@@ -57,7 +57,7 @@ if (typeof Promise.withResolvers === 'undefined') {
 
   'use strict';
 
-  const BACKEND_MIN_VERSION = '2.0.1';
+  const BACKEND_MIN_VERSION = '2.6.0';
 
   /**
    * @typedef {Object} scrapbookOptions
