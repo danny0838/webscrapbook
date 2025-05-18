@@ -1265,7 +1265,7 @@
     "message": "默认搜索条件:"
   },
   "OptionScrapbookDefaultSearchTooltip": {
-    "message": "设置搜索栏位默认填入的搜索条件，例如设置为“-type:separator”，则在搜索栏位填入“keyword”相当于搜索“-type:separator keyword”。\n\n• 除一般搜索指令以外，还可用“default:”指令设置默认指令，例如设置为“default:title”，则在搜索栏位填入“keyword”相当于搜索“title:keyword”。（默认为 default:tcc）"
+    "message": "设置搜索栏位默认填入的搜索条件，例如设置为“-type:separator”，则在搜索栏位填入“keyword”相当于搜索“-type:separator keyword”。"
   },
   "OptionScrapbookExportNonSingletonLabel": {
     "message": "导出: 允许重复导出不同位置的同一项目"
