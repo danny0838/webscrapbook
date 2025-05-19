@@ -12,7 +12,7 @@ section {
 }
 
 footer {
-  text-align: right;
+  text-align: end;
 }
 
 footer > button {

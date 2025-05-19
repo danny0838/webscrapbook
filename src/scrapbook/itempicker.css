@@ -33,7 +33,7 @@ form {
 
 footer {
   margin-top: .75em;
-  text-align: right;
+  text-align: end;
 }
 
 footer > button {
