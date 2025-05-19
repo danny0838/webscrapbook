@@ -30,7 +30,7 @@
 
 #optionsWrapper details > div > fieldset > blockquote {
   margin: .5em 0;
-  margin-__MSG_@@bidi_start_edge__: 1.5em;
+  margin-inline-start: 1.5em;
   border: 0;
   padding: 0;
 }

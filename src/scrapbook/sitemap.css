@@ -3,7 +3,7 @@ body {
 }
 
 ul {
-  padding-__MSG_@@bidi_start_edge__: 20px;
+  padding-inline-start: 20px;
 }
 
 a.frame, a.iframe {

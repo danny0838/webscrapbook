@@ -86,7 +86,7 @@ body {
   padding: 1px 3px;
   width: 100%;
   font-size: 0.833em;
-  text-align: __MSG_@@bidi_start_edge__;
+  text-align: start;
   white-space: nowrap;
 }
 

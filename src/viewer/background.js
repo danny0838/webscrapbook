@@ -60,7 +60,7 @@
 <style>
 a {
   background: ${scrapbook.lang('@@bidi_start_edge')}/1em url("${scrapbook.escapeHtml(browser.runtime.getURL("core/scrapbook_128.png"))}") no-repeat;
-  padding-${scrapbook.lang('@@bidi_start_edge')}: 1em;
+  padding-inline-start: 1em;
 }
 </style>
 </head>
