@@ -978,141 +978,152 @@ height: 100vh;`;
     }
   };
 
-  /**
-   * @type invokable
-   */
-  editor.locateAnnotationInternal = function (...args) {
-    const getAnnotationElems = () => {
-      const rv = [];
-      const checkedIds = new Set();
-      const nodeIterator = document.createNodeIterator(
-        document.documentElement,
-        NodeFilter.SHOW_ELEMENT,
-      );
-      let elem;
-      while (elem = nodeIterator.nextNode()) {
+  function getAnnotationElems({
+    root = document,
+    includeHidden = false,
+  } = {}) {
+    const rv = [];
+    const checkedIds = new Set();
+    const doc = root.ownerDocument || root;
+    const nodeIterator = doc.createNodeIterator(
+      root,
+      NodeFilter.SHOW_ELEMENT,
+    );
+    let elem;
+    while (elem = nodeIterator.nextNode()) {
+      if (!(scrapbook.getScrapBookObjectRemoveType(elem) > 0)) {
+        continue;
+      }
+
+      // check the first element among those with the same ID
+      const id = elem.getAttribute('data-scrapbook-id');
+      if (id !== null) {
+        if (checkedIds.has(id)) {
+          continue;
+        }
+        checkedIds.add(id);
+        elem = root.querySelector(`[data-scrapbook-id="${CSS.escape(id)}"]`);
+      }
+
+      if (!(includeHidden ? elem.isConnected : elem.offsetParent)) {
+        continue;
+      }
+
+      rv.push(elem);
+    }
+    return rv;
+  }
+
+  function getAnnotationRange(elem) {
+    const range = document.createRange();
+    range.selectNode(elem);
+
+    const id = elem.getAttribute('data-scrapbook-id');
+    if (id !== null) {
+      const otherRange = document.createRange();
+      for (const elem of document.querySelectorAll(`[data-scrapbook-id="${CSS.escape(id)}"]`)) {
         if (!(scrapbook.getScrapBookObjectRemoveType(elem) > 0)) {
           continue;
         }
 
-        // check the first element among those with the same ID
-        const id = elem.getAttribute('data-scrapbook-id');
-        if (id !== null) {
-          if (checkedIds.has(id)) {
-            continue;
-          }
-          checkedIds.add(id);
-          elem = document.querySelector(`[data-scrapbook-id="${CSS.escape(id)}"]`);
+        otherRange.selectNode(elem);
+        if (otherRange.compareBoundaryPoints(Range.END_TO_END, range) > 0) {
+          range.setEndAfter(elem);
         }
-
-        if (!elem.offsetParent) {
-          continue;
-        }
-
-        rv.push(elem);
       }
-      return rv;
-    };
+    }
 
-    const getAnnotationRange = (elem) => {
-      const range = document.createRange();
+    return range;
+  }
+
+  function getCurrentAnnotationIndex(annotationElems, refSelection = null) {
+    if (!refSelection) {
+      return -0.5;
+    }
+
+    const currentRange = getCurrentAnnotationIndexValidRange(refSelection);
+    if (!currentRange) {
+      return -0.5;
+    }
+
+    const range = document.createRange();
+    for (let i = 0, I = annotationElems.length; i < I; i++) {
+      const elem = annotationElems[i];
       range.selectNode(elem);
+      const delta = range.compareBoundaryPoints(Range.START_TO_START, currentRange);
+      if (delta === 0) {
+        return i;
+      }
+      if (delta > 0) {
+        return i - 0.5;
+      }
+    }
 
-      const id = elem.getAttribute('data-scrapbook-id');
-      if (id !== null) {
-        const otherRange = document.createRange();
-        for (const elem of document.querySelectorAll(`[data-scrapbook-id="${CSS.escape(id)}"]`)) {
-          if (!(scrapbook.getScrapBookObjectRemoveType(elem) > 0)) {
-            continue;
-          }
+    return annotationElems.length - 0.5;
+  }
 
-          otherRange.selectNode(elem);
-          if (otherRange.compareBoundaryPoints(Range.END_TO_END, range) > 0) {
-            range.setEndAfter(elem);
-          }
-        }
+  function getCurrentAnnotationIndexValidRange(sel) {
+    for (let i = 0, I = sel.rangeCount; i < I; i++) {
+      let range = sel.getRangeAt(i);
+      let ca = range.commonAncestorContainer;
+
+      // Firefox may include selection ranges for elements inside the toolbar.
+      // Exclude them to prevent an error.
+      if (editor.internalElement && editor.internalElement.contains(ca)) {
+        continue;
+      }
+
+      // if range is inside a shadow root, treat as selecting the topmost shadow host.
+      let node = ca, host;
+      while (host = node.getRootNode().host) {
+        node = host;
+      }
+      if (node !== ca) {
+        range = new Range();
+        range.selectNode(node);
       }
 
       return range;
-    };
+    }
+    return null;
+  }
 
-    const getCurrentAnnotationIndex = (annotationElems, refSelection = null) => {
-      if (!refSelection) {
-        return -0.5;
-      }
+  /**
+   * @type invokable
+   */
+  editor.highlightAnnotation = function ({elem, sel}) {
+    if (!sel) {
+      sel = scrapbook.getSelection();
+    }
 
-      const currentRange = getValidRange(refSelection);
-      if (!currentRange) {
-        return -0.5;
-      }
+    const range = getAnnotationRange(elem);
+    sel.removeAllRanges();
+    sel.addRange(range);
+    elem.scrollIntoView();
+  };
 
-      const range = document.createRange();
-      for (let i = 0, I = annotationElems.length; i < I; i++) {
-        const elem = annotationElems[i];
-        range.selectNode(elem);
-        const delta = range.compareBoundaryPoints(Range.START_TO_START, currentRange);
-        if (delta === 0) {
-          return i;
-        }
-        if (delta > 0) {
-          return i - 0.5;
-        }
-      }
+  /**
+   * @type invokable
+   */
+  editor.locateAnnotationInternal = function ({offset = 0} = {}) {
+    // collect valid annotation elements
+    const annotationElems = getAnnotationElems();
+    if (!annotationElems.length) {
+      return;
+    }
 
-      return annotationElems.length - 0.5;
-    };
+    // find current annotation index
+    const sel = scrapbook.getSelection();
+    let index = getCurrentAnnotationIndex(annotationElems, sel);
+    index = offset > 0 ? Math.floor(index) : Math.ceil(index);
 
-    const getValidRange = (sel) => {
-      for (let i = 0, I = sel.rangeCount; i < I; i++) {
-        let range = sel.getRangeAt(i);
-        let ca = range.commonAncestorContainer;
+    // apply offset
+    index = (index + offset) % annotationElems.length;
+    if (index < 0) { index += annotationElems.length; }
 
-        // Firefox may include selection ranges for elements inside the toolbar.
-        // Exclude them to prevent an error.
-        if (editor.internalElement && editor.internalElement.contains(ca)) {
-          continue;
-        }
-
-        // if range is inside a shadow root, treat as selecting the topmost shadow host.
-        let node = ca, host;
-        while (host = node.getRootNode().host) {
-          node = host;
-        }
-        if (node !== ca) {
-          range = new Range();
-          range.selectNode(node);
-        }
-
-        return range;
-      }
-      return null;
-    };
-
-    const fn = editor.locateAnnotationInternal = ({offset = 0} = {}) => {
-      // collect valid annotation elements
-      const annotationElems = getAnnotationElems();
-      if (!annotationElems.length) {
-        return;
-      }
-
-      // find current annotation index
-      const sel = scrapbook.getSelection();
-      let index = getCurrentAnnotationIndex(annotationElems, sel);
-      index = offset > 0 ? Math.floor(index) : Math.ceil(index);
-
-      // apply offset
-      index = (index + offset) % annotationElems.length;
-      if (index < 0) { index += annotationElems.length; }
-
-      // select found annotation
-      const elem = annotationElems[index];
-      const range = getAnnotationRange(elem);
-      sel.removeAllRanges();
-      sel.addRange(range);
-      elem.scrollIntoView();
-    };
-
-    return fn(...args);
+    // highlight found annotation
+    const elem = annotationElems[index];
+    editor.highlightAnnotation({elem, sel});
   };
 
   /**
