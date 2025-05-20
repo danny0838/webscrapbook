@@ -305,6 +305,9 @@
   "EditorButtonAnnotationStickyRichText": {
     "message": "Create sticky note (rich text)"
   },
+  "EditorButtonAnnotationView": {
+    "message": "View all annotations"
+  },
   "EditorButtonClose": {
     "message": "Close toolbar"
   },

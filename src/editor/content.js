@@ -386,6 +386,7 @@ height: 100vh;`;
   <div id="toolbar-annotation" title="${scrapbook.lang('EditorButtonAnnotation')}">
     <button></button>
     <ul hidden="" title="">
+      <li><button id="toolbar-annotation-view">${scrapbook.lang('EditorButtonAnnotationView')}</button></li>
       <li><button id="toolbar-annotation-prev">${scrapbook.lang('EditorButtonAnnotationPrev')}</button></li>
       <li><button id="toolbar-annotation-next">${scrapbook.lang('EditorButtonAnnotationNext')}</button></li>
       <hr/>
@@ -561,6 +562,11 @@ height: 100vh;`;
       event.preventDefault();
       editor.showContextMenu(event.currentTarget.nextElementSibling, event);
     });
+
+    var elem = wrapper.querySelector('#toolbar-annotation-view');
+    elem.addEventListener("click", (event) => {
+      editor.viewAnnotations();
+    }, {passive: true});
 
     var elem = wrapper.querySelector('#toolbar-annotation-prev');
     elem.addEventListener("click", (event) => {
@@ -1088,10 +1094,87 @@ height: 100vh;`;
     return null;
   }
 
+  function getAnnotationsSummary(annotationElems) {
+    const sel = scrapbook.getSelection();
+    const currentIndex = getCurrentAnnotationIndex(annotationElems, sel);
+    const currentElem = annotationElems[currentIndex];
+
+    const rv = [];
+    for (const elem of annotationElems) {
+      const id = elem.getAttribute('data-scrapbook-id');
+      const type = elem.getAttribute('data-scrapbook-elem');
+
+      switch (type) {
+        case 'linemarker': {
+          if (!id) { break; }
+          rv.push({
+            id,
+            type,
+            text: Array.prototype.reduce.call(
+              document.querySelectorAll(`[data-scrapbook-id="${CSS.escape(id)}"]`),
+              (acc, elem) => acc + elem.textContent,
+              "",
+            ),
+            note: elem.title,
+            style: elem.style.cssText,
+            ...(elem === currentElem && {highlighted: true}),
+          });
+          break;
+        }
+        case 'sticky': {
+          rv.push({
+            id,
+            type,
+            note: elem.textContent,
+            classes: Array.from(elem.classList),
+            ...(elem === currentElem && {highlighted: true}),
+          });
+          break;
+        }
+        case 'link-url': {
+          rv.push({
+            id,
+            type,
+            text: elem.textContent,
+            note: elem.href,
+            ...(elem === currentElem && {highlighted: true}),
+          });
+          break;
+        }
+        case 'custom': {
+          rv.push({
+            id,
+            type,
+            note: elem.textContent,
+            ...(elem === currentElem && {highlighted: true}),
+          });
+          break;
+        }
+        case 'custom-wrapper': {
+          rv.push({
+            id,
+            type,
+            text: Array.prototype.reduce.call(
+              document.querySelectorAll(`[data-scrapbook-id="${CSS.escape(id)}"]`),
+              (acc, elem) => acc + elem.textContent,
+              "",
+            ),
+            ...(elem === currentElem && {highlighted: true}),
+          });
+          break;
+        }
+      }
+    }
+    return rv;
+  }
+
   /**
    * @type invokable
    */
-  editor.highlightAnnotation = function ({elem, sel}) {
+  editor.highlightAnnotation = function ({elem, id, sel}) {
+    if (!elem && id) {
+      elem = document.querySelector(`[data-scrapbook-id="${CSS.escape(id)}"]`);
+    }
     if (!sel) {
       sel = scrapbook.getSelection();
     }
@@ -1100,6 +1183,22 @@ height: 100vh;`;
     sel.removeAllRanges();
     sel.addRange(range);
     elem.scrollIntoView();
+  };
+
+  /**
+   * @type invokable
+   */
+  editor.viewAnnotationsInternal = async function () {
+    const annotationElems = getAnnotationElems({includeHidden: true});
+    const annotations = getAnnotationsSummary(annotationElems);
+    await scrapbook.openModalWindow({
+      url: browser.runtime.getURL('editor/annotations.html'),
+      args: {
+        annotations,
+      },
+      senderProp: 'source',
+      windowCreateData: {width: 600, height: 600},
+    });
   };
 
   /**
@@ -1379,6 +1478,16 @@ height: 100vh;`;
         frameId: await editor.getFocusedFrameId(),
         cmd: "editor.lineMarkerInternal",
         args,
+      },
+    });
+  };
+
+  editor.viewAnnotations = async function () {
+    return await scrapbook.invokeExtensionScript({
+      cmd: "background.invokeEditorCommand",
+      args: {
+        frameId: await editor.getFocusedFrameId(),
+        cmd: "editor.viewAnnotationsInternal",
       },
     });
   };

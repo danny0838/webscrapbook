@@ -1,0 +1,51 @@
+div.annotation {
+  margin: 4px 0;
+}
+
+div.annotation:hover {
+  background-color: rgba(0,0,0,.1);
+}
+
+div.annotation:focus {
+  outline: unset;
+  background-color: rgba(0,0,0,.1);
+}
+
+div.linemarker, div.sticky, div.link-url, div.custom, div.custom-wrapper, div.note {
+  border-inline-start: 4px solid gray;
+  padding: 4px;
+  padding-inline-start: 10px;
+}
+
+div.linemarker {
+  border-inline-start-color: #FFF176;
+}
+
+div.link-url {
+  border-inline-start-color: #64B5F6;
+}
+
+div.link-url span {
+  text-decoration: underline;
+}
+
+div.custom {
+  border-inline-start-color:	darkgray;
+}
+
+div.custom-wrapper {
+  border-inline-start-color: #26A69A;
+}
+
+footer {
+  text-align: end;
+}
+
+footer > button {
+  margin: 0 .25em;
+  padding: .25em .5em;
+}
+
+input[type="text"] {
+  width: 8em;
+}

@@ -377,6 +377,7 @@
     args,
     windowCreateData,
     tabCreateData,
+    senderProp,
   }, sender) {
     const {promise, resolve, reject} = Promise.withResolvers();
 
@@ -408,6 +409,10 @@
         console.error(ex);
         resolve(null);
         return;
+      }
+
+      if (senderProp) {
+        args[senderProp] = sender;
       }
 
       try {

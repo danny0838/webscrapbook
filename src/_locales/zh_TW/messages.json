@@ -305,6 +305,9 @@
   "EditorButtonAnnotationStickyRichText": {
     "message": "建立便利貼（富文本）"
   },
+  "EditorButtonAnnotationView": {
+    "message": "檢視所有註記"
+  },
   "EditorButtonClose": {
     "message": "關閉工具列"
   },
