@@ -3,6 +3,17 @@
 * Versions before 1.0 are in initial development. APIs are not stable for these versions, even a `y` version can involve a breaking change, and only partial notable changes are summarized in this document. See full commit history in the source repository for details.
 * Backend server requirement in this document refers to the version of [`webscrapbook` Python package](https://github.com/danny0838/pywebscrapbook) (or PyWebScrapBook).
 
+## [2.20.0] - 2025-05-20
+* Bumped server requirement to >= 2.6.0.
+* Reworked scrapbook search to support the new `default:` command, which allows searching across multiple fields.
+* Improved the editor:
+  * Added `Annotation tool > View all annotations` to view and locate annotations.
+  * Reworked `HTML editor > Insert HTML` tool to support in-place HTML code editing.
+  * Reworked `HTML editor > Edit color` tool to support interactive color selection.
+  * Added support for keyboard navigation of context menus via arrow keys.
+* Fixed an issue where the `Edit tab` command wouldn't work on a page with an active editor after extension reload.
+* Fixed bidirectional text support in some modal dialog windows.
+
 ## [2.19.1] - 2025-05-16
 * Fixed an issue where editing a marker cannot be undone.
 * Fixed a packging issue leaving unexpected files in the extension package.
