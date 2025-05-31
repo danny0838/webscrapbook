@@ -426,6 +426,14 @@ scrapbook.openScrapBook = async function ({newTab = true} = {}) {
     return await browser.sidebarAction.open();
   }
 
+  // Mobile browser (e.g. Kiwi) crashes when opening the side panel
+  if (browser.sidePanel && !scrapbook.userAgent.is('mobile') && await scrapbook.getOption("scrapbook.useBrowserSidebars")) {
+    const {id: windowId} = await browser.windows.getCurrent({windowTypes: ['normal']});
+    // This may only be called in response to a user action.
+    // https://developer.chrome.com/docs/extensions/reference/api/sidePanel#method-open
+    return await browser.sidePanel.open({windowId});
+  }
+
   const url = browser.runtime.getURL("scrapbook/sidebar.html");
 
   let sidebarTab = (await browser.tabs.query({}))

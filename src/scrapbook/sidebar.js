@@ -3206,6 +3206,12 @@ if (browser.sidebarAction && browser.windows) {
       sidebar.sidebarWindowId = (await browser.windows.getCurrent()).id;
     }
   })();
+} else if (browser.sidePanel && browser.windows) {
+  (async () => {
+    if (await browser.tabs.getCurrent()) { return; }
+    const {id: windowId} = await browser.windows.getCurrent();
+    sidebar.sidebarWindowId = windowId;
+  })();
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
