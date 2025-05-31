@@ -4624,7 +4624,7 @@ dialog {
     defaultHeight = scrapbook.getOption("ui.screen.height"),
   } = {}) {
     // supported by Chromium
-    if (browser.system.display) {
+    if (browser.system && browser.system.display) {
       const screens = await browser.system.display.getInfo();
 
       if (screens) {
