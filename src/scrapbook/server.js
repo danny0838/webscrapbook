@@ -287,46 +287,56 @@
 
         const url = rootUrlObj.href + '?a=config&f=json&ts=' + Date.now(); // ignore cache
 
-        // Take user and password only when both are non-empty;
-        // otherwise omit both fields for the browser to try the cached
-        // auth credentials.
-        let user = await scrapbook.getOption("server.user");
-        let password = await scrapbook.getOption("server.password");
-        if (!(user && password)) {
-          user = password = null;
-        }
+        const config = await (async () => {
+          // Fallback for worker that does not support XHR
+          // (need to authorize in prior)
+          if (typeof XMLHttpRequest === 'undefined') {
+            const response = await this.request({url});
+            const {data} = await response.json();
+            return data;
+          }
 
-        // Use XHR for the first time for authentication as fetch API doesn't
-        // support a URL with user/password.
-        let xhr;
-        try {
-          xhr = await scrapbook.xhr({
-            url,
-            user,
-            password,
-            responseType: 'json',
-            requestHeaders: {
-              Accept: 'application/json, */*;q=0.1',
-            },
-            method: "GET",
-            allowAnyStatus: true,
-          });
-        } catch (ex) {
-          throw new RequestError('Unable to connect to backend server.', {url});
-        }
+          // Take user and password only when both are non-empty;
+          // otherwise omit both fields for the browser to try the cached
+          // auth credentials.
+          let user = await scrapbook.getOption("server.user");
+          let password = await scrapbook.getOption("server.password");
+          if (!(user && password)) {
+            user = password = null;
+          }
 
-        if (xhr.status === 401) {
-          throw new RequestError('HTTP authentication failed.', {
-            url: xhr.responseURL,
-            status: xhr.status,
-          });
-        }
+          // Use XHR for the first time for authentication as fetch API doesn't
+          // support a URL with user/password.
+          let xhr;
+          try {
+            xhr = await scrapbook.xhr({
+              url,
+              user,
+              password,
+              responseType: 'json',
+              requestHeaders: {
+                Accept: 'application/json, */*;q=0.1',
+              },
+              method: "GET",
+              allowAnyStatus: true,
+            });
+          } catch (ex) {
+            throw new RequestError('Unable to connect to backend server.', {url});
+          }
 
-        if (!(xhr.status >= 200 && xhr.status < 300 && xhr.response?.data)) {
-          throw new Error('The server does not support WebScrapBook protocol.');
-        }
+          if (xhr.status === 401) {
+            throw new RequestError('HTTP authentication failed.', {
+              url: xhr.responseURL,
+              status: xhr.status,
+            });
+          }
 
-        const config = xhr.response.data;
+          if (!(xhr.status >= 200 && xhr.status < 300 && xhr.response?.data)) {
+            throw new Error('The server does not support WebScrapBook protocol.');
+          }
+
+          return xhr.response.data;
+        })();
 
         // revise server root URL
         // rootUrlObj.href may be too deep, replace with server base path
