@@ -205,6 +205,7 @@ if (typeof Promise.withResolvers === 'undefined') {
     "scrapbook.import.rebuildFolders": true,
     "scrapbook.import.resolveItemUsedNew": true,
     "scrapbook.transactionAutoBackup": true,
+    "scrapbook.useBrowserSidebars": true,
     "scrapbook.autoRebuildSidebars": true,
     "scrapbook.defaultSearch": "-type:folder -type:separator",
     "scrapbook.searchCommentLength": 100,

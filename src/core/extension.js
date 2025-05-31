@@ -367,7 +367,7 @@
    * @return {undefined|Tab}
    */
   scrapbook.openScrapBook = async function ({newTab = true} = {}) {
-    if (browser.sidebarAction) {
+    if (browser.sidebarAction && await scrapbook.getOption("scrapbook.useBrowserSidebars")) {
       // This can only be called in a user action handler.
       // https://developer.mozilla.org/docs/Mozilla/Add-ons/WebExtensions/User_actions
       return await browser.sidebarAction.open();
