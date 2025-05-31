@@ -3144,6 +3144,12 @@ Redirecting to file <a href="index.md">index.md</a>
         sidebar.sidebarWindowId = windowId;
       }
     })();
+  } else if (browser.sidePanel && browser.windows) {
+    (async () => {
+      if (await browser.tabs.getCurrent()) { return; }
+      const {id: windowId} = await browser.windows.getCurrent();
+      sidebar.sidebarWindowId = windowId;
+    })();
   }
 
   document.addEventListener('DOMContentLoaded', async () => {

@@ -27,6 +27,7 @@
     "webNavigation",
     "webRequest",
     "webRequestBlocking",
+    "sidePanel",
     "system.display"
   ],
 
@@ -66,6 +67,10 @@
     },
     "default_title": "__MSG_ExtensionName__",
     "default_popup": "core/action.html"
+  },
+
+  "side_panel": {
+    "default_path": "scrapbook/sidebar.html"
   },
 
   "commands": {
