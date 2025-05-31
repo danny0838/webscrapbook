@@ -216,6 +216,16 @@
       return await scrapbook.invokeExtensionScript({id: (await browser.windows.getCurrent()).id, cmd, args});
     }
 
+    if (browser.sidePanel && !scrapbook.userAgent.is('mobile')) {
+      // pass windowId to restrict response to the current window sidebar
+      try {
+        return await scrapbook.invokeExtensionScript({id: (await browser.windows.getCurrent()).id, cmd, args});
+      } catch (ex) {
+        console.error('Unable to locate item: %o', ex);
+        return false;
+      }
+    }
+
     const sidebarTab = (await browser.tabs.query({}))
         .filter(t => scrapbook.splitUrl(t.url)[0] === sidebarUrl)[0];
 
@@ -469,7 +479,7 @@
     const cmd = 'sidebar.onServerTreeChange';
     const args = {};
 
-    if (browser.sidebarAction) {
+    if (browser.sidebarAction || browser.sidePanel) {
       tasks.push(scrapbook.invokeExtensionScript({cmd, args}).catch(errorHandler));
     }
 
