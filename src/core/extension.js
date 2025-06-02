@@ -132,27 +132,27 @@
         return tab;
       }
 
-      if (newTab) {
-        return await browser.tabs.create({url, windowId: win.id});
+      if (!newTab) {
+        const [targetTab] = win.tabs.filter(x => x.active);
+        if (targetTab) {
+          return await browser.tabs.update(targetTab.id, {url});
+        }
       }
 
-      const [targetTab] = win.tabs.filter(x => x.active);
+      return await browser.tabs.create({url, windowId: win.id});
+    }
 
-      if (!targetTab) {
-        return await browser.tabs.create({url, windowId: win.id});
+    if (!newTab) {
+      const targetTab = await browser.tabs.getCurrent();
+      if (targetTab) {
+        return await browser.tabs.update(targetTab.id, {url, active: true});
       }
-
-      return await browser.tabs.update(targetTab.id, {url});
     }
 
     // create/update a tab in the current window (or an auto-picked "last
     // focused window" when e.g. creating the second tab in a popup window in
     // Chromium).
-    if (newTab) {
-      return await browser.tabs.create({url});
-    }
-
-    return await browser.tabs.update({url, active: true});
+    return await browser.tabs.create({url});
   };
 
   /**
