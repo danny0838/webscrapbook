@@ -139,7 +139,7 @@
 
     // the page where the user invokes browserAction
     // activeTab === currentTab if the browserAction page is opened by visiting URL.
-    const activeTab = (await browser.tabs.query({active: true, currentWindow: true}))[0];
+    const [activeTab] = await browser.tabs.query({active: true, currentWindow: true});
 
     // the target tab for the browserAction commands
     const targetTab = (isPrompt || activeTab && activeTab.id !== currentTab.id) ? activeTab : undefined;
