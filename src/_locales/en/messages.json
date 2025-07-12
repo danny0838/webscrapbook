@@ -1407,6 +1407,9 @@
   "ScrapBookCommandCopyDialogRoot": {
     "message": "Copy into the item of this ID:"
   },
+  "ScrapBookCommandCopyDialogRootFill": {
+    "message": "Select"
+  },
   "ScrapBookCommandCopyInfo": {
     "message": "Copy info"
   },
@@ -1516,6 +1519,9 @@
   },
   "ScrapBookCommandMoveDialogId": {
     "message": "Move into the item of this ID:"
+  },
+  "ScrapBookCommandMoveDialogIdFill": {
+    "message": "Select"
   },
   "ScrapBookCommandMoveDialogIndex": {
     "message": "Position (start from 0, empty for last):"

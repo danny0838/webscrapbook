@@ -1445,6 +1445,18 @@
       });
     },
 
+    async pickItem({bookId, recentItemsKey = 'scrapbookLastPickedItems'}) {
+      const result = await scrapbook.openModalWindow({
+        url: browser.runtime.getURL("scrapbook/itempicker.html"),
+        args: {
+          bookId,
+          recentItemsKey,
+        },
+        windowCreateData: {width: 350, height: 600},
+      });
+      return result;
+    },
+
     async moveItems({items: sourceItems}, targetId, targetIndex) {
       if (!targetId || !(!!this.book.meta[targetId] || this.book.isSpecialItem(targetId))) {
         this.warn(`Unable to move: target ID "${targetId}" is invalid.`);
@@ -2896,6 +2908,12 @@ Redirecting to file <a href="index.md">index.md</a>
 
           dialog.addEventListener('dialogShow', (event) => {
             dialog.querySelector('[name="id"]').select();
+
+            dialog.querySelector('[name="fill-id"]').addEventListener('click', async (event) => {
+              const result = await this.pickItem({bookId: this.bookId});
+              if (!result) { return; }
+              dialog.querySelector('[name="id"]').value = result.id;
+            });
           });
 
           if (!await this.showDialog(dialog)) {
@@ -2941,7 +2959,7 @@ Redirecting to file <a href="index.md">index.md</a>
           const dialog = frag.children[0];
           scrapbook.loadLanguages(dialog);
 
-          const bookSelector = dialog.querySelector('select');
+          const bookSelector = dialog.querySelector('[name="book"]');
           for (const key of Object.keys(server.books).sort()) {
             const book = server.books[key];
             if (book.config.no_tree) { continue; }
@@ -2954,6 +2972,12 @@ Redirecting to file <a href="index.md">index.md</a>
 
           dialog.addEventListener('dialogShow', (event) => {
             dialog.querySelector('[name="id"]').select();
+
+            dialog.querySelector('[name="fill-id"]').addEventListener('click', async (event) => {
+              const result = await this.pickItem({bookId: bookSelector.value});
+              if (!result) { return; }
+              dialog.querySelector('[name="id"]').value = result.id;
+            });
           });
 
           if (!await this.showDialog(dialog)) {

@@ -1407,6 +1407,9 @@
   "ScrapBookCommandCopyDialogRoot": {
     "message": "复制到这个 ID 的项目下:"
   },
+  "ScrapBookCommandCopyDialogRootFill": {
+    "message": "选择"
+  },
   "ScrapBookCommandCopyInfo": {
     "message": "复制信息"
   },
@@ -1516,6 +1519,9 @@
   },
   "ScrapBookCommandMoveDialogId": {
     "message": "移动到这个 ID 的项目下:"
+  },
+  "ScrapBookCommandMoveDialogIdFill": {
+    "message": "选择"
   },
   "ScrapBookCommandMoveDialogIndex": {
     "message": "位置 (从 0 开始，留空则置于最后):"
