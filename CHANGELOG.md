@@ -3,6 +3,10 @@
 * Versions before 1.0 are in initial development. APIs are not stable for these versions, even a `y` version can involve a breaking change, and only partial notable changes are summarized in this document. See full commit history in the source repository for details.
 * Backend server requirement in this document refers to the version of [`webscrapbook` Python package](https://github.com/danny0838/pywebscrapbook) (or PyWebScrapBook).
 
+## [2.22.0] - 2025-07-13
+* Added item picker for Move and Copy commands in the scrapbook sidebar.
+* Miscellaneous improvements of the internal code.
+
 ## [2.21.0] - 2025-06-03
 * Fixed an issue where `Sync` does not work in a Chromium-based mobile browser.
 * Added an option `scrapbook.useBrowserSidebars` to customize whether to use the native browser sidebar.
