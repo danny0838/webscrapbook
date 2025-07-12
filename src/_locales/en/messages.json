@@ -742,21 +742,6 @@
     "description": "Name of the extension as it's visible to the outside world",
     "message": "WebScrapBook"
   },
-  "IndexerHeader": {
-    "message": "Pick directories or ZIP archive files of scrapbook folders, via dropping them into this page, or using the buttons below:"
-  },
-  "IndexerLoadServer": {
-    "message": "Index for server"
-  },
-  "IndexerPickDir": {
-    "message": "Pick a folder"
-  },
-  "IndexerPickDirTooltip": {
-    "message": "When selecting a folder in this way, the root directory cannot be correctly identified if the root directory contains only a single folder. Select a folder via dropping, or add a file or a folder containing files to the root directory, to avoid this issue."
-  },
-  "IndexerPickFiles": {
-    "message": "Pick ZIP files"
-  },
   "IndexerTitle": {
     "message": "Generate site index"
   },

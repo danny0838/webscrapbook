@@ -742,21 +742,6 @@
     "description": "Name of the extension as it's visible to the outside world",
     "message": "网页剪贴簿"
   },
-  "IndexerHeader": {
-    "message": "选择网页剪贴簿文件夹或其 ZIP 压缩文件。你可以拖放它们至此页，或使用以下按钮："
-  },
-  "IndexerLoadServer": {
-    "message": "索引服务器数据"
-  },
-  "IndexerPickDir": {
-    "message": "选择文件夹"
-  },
-  "IndexerPickDirTooltip": {
-    "message": "用此方式选择文件夹时，若根目录下只有单一文件夹，会无法正确辨识根目录。用拖放方式选择文件夹或在根目录下增加文件或含有文件的文件夹可避免此问题。"
-  },
-  "IndexerPickFiles": {
-    "message": "选择 ZIP 压缩文件"
-  },
   "IndexerTitle": {
     "message": "创建网站索引"
   },
