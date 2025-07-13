@@ -5,12 +5,12 @@
 
 ## [2.22.0] - 2025-07-13
 * Added item picker for Move and Copy commands in the scrapbook sidebar.
-* Miscellaneous improvements of the internal code.
+* Miscellaneous improvements to the internal code.
 
 ## [2.21.0] - 2025-06-03
-* Fixed an issue where `Sync` does not work in a Chromium-based mobile browser.
-* Added an option `scrapbook.useBrowserSidebars` to customize whether to use the native browser sidebar.
-* Miscellaneous improvements of the internal code.
+* Fixed an issue where the `Sync` command did not work in a Chromium-based mobile browser.
+* Added option `scrapbook.useBrowserSidebars` to control use of the native browser sidebar.
+* Miscellaneous improvements to the internal code.
 
 ## [2.20.0] - 2025-05-20
 * Bumped server requirement to >= 2.6.0.
@@ -24,173 +24,174 @@
 * Fixed bidirectional text support in some modal dialog windows.
 
 ## [2.19.1] - 2025-05-16
-* Fixed an issue where editing a marker cannot be undone.
-* Fixed a packging issue leaving unexpected files in the extension package.
+* Fixed an issue where editing a marker could not be undone.
+* Fixed a packging issue that left unexpected files in the extension package.
 
 ## [2.19.0] - 2025-05-15
-* Improved dialog prompts for editing multiline texts or selecting items.
+* Improved dialog prompts for editing multiline text or selecting items.
 * Enhanced icon semantics and visual quality.
-* Miscellaneous improvements and bug fixes of the UI, internal code, builder scripts, documentation, and test suite.
+* Miscellaneous improvements and bug fixes to the UI, internal code, builder scripts, documentation, and test suite.
 
 ## [2.18.8] - 2025-05-11
-* Fixed an issue where editor commands don't work in frames.
-* Fixed content direction of sticky notes for rtl user agents.
+* Fixed an issue where editor commands did not work in frames.
+* Fixed content direction of sticky notes for RTL user agents.
 
 ## [2.18.7] - 2025-05-11
-* Fixed an issue where `Undo` sometimes re-activates an already saved editing.
-* Fixed an issue where buttons in the editing box of a marker are clipped.
+* Fixed an issue where `Undo` sometimes reactivated an already saved edit.
+* Fixed an issue where buttons in a marker's editing box were clipped.
 
 ## [2.18.6] - 2025-05-10
-* Fixed an issue where `Undo` doesn't work well with a sticky note.
-* Miscellaneous improvements of the internal code and test suite.
+* Fixed an issue where `Undo` didn't work properly with sticky notes.
+* Miscellaneous improvements to the internal code and test suite.
 
 ## [2.18.5] - 2025-04-22
-* Fixed script error for `notify captured pages` and `auto capture` features.
+* Fixed script error affecting the `notify captured pages` and `auto capture` features.
 
 ## [2.18.4] - 2025-04-18
-* Fixed an error for `Shift-←` and `Shift-→` in the sidebar.
+* Fixed an error with `Shift-←` and `Shift-→` in the sidebar.
 * Improved localization for zh_TW.
-* Miscellaneous improvements and bug fixes of the internal code and test suite.
-* Added code linting tool for development.
+* Miscellaneous improvements and bug fixes to the internal code and test suite.
+* Added a code linting tool for development.
 
 ## [2.18.3] - 2025-03-29
-* Fixed a view status persisting issue for a large tree in a manage window.
-* Miscellaneous improvements of the internal code and test suite.
+* Fixed a view status persistence issue for a large tree in a manage window.
+* Miscellaneous improvements to the internal code and test suite.
 
 ## [2.18.2] - 2025-03-24
-* Added support of shortcut customization of action and sidebar toggling.
-* Miscellaneous refactoring and improvements of the internal code.
+* Added support for shortcut customization for action and sidebar toggling.
+* Miscellaneous refactoring and improvements to the internal code.
 
 ## [2.18.1] - 2025-03-23
-* Fixed an issue where auto-capture and notification of captured pages sometimes don't work correctly after a data change in the backend server.
-* Miscellaneous improvements and bug fixes of the internal code.
+* Fixed an issue where auto-capture and page capture notifications sometimes did not work correctly after backend data changes.
+* Miscellaneous improvements and bug fixes to the internal code.
 
 ## [2.18.0] - 2025-03-20
-* Use `jpg` rather than `jpeg` as the default file extension of `image/jpeg` MIME type.
-* Miscellaneous improvements and bug fixes of the internal code.
+* Changed the default file extension for the `image/jpeg` MIME type from `jpeg` to `jpg`.
+* Miscellaneous improvements and bug fixes to the internal code.
 
 ## [2.17.2] - 2025-03-19
-* Fixed unexpected `undefined` values when migrating synced options from an older version in Firefox.
-* Miscellaneous improvements and bug fixes of the internal code.
+* Fixed unexpected `undefined` values when migrating synced options from older versions in Firefox.
+* Miscellaneous improvements and bug fixes to the internal code.
 
 ## [2.17.1] - 2025-03-17
-* Fixed non-working referrer rewriting for Firefox.
-* Miscellaneous improvements of the internal code.
+* Fixed an issue where referrer rewriting did not work in Firefox.
+* Miscellaneous improvements to the internal code.
 
 ## [2.17.0] - 2025-03-14
-* Improved sidebar window positioning on a multi-monitor device for Chromium.
+* Improved sidebar window positioning on multi-monitor setups for Chromium.
 * Fixed an issue where large size options were not correctly saved and read.
   * Options are now stored locally.
   * Saved options from previous versions will be automatically migrated.
-  * Added a sync manager that allows options be manually stored to and retrieved from the sync area.
+  * Added a sync manager that allows options to be manually stored to and retrieved from the sync area.
 * Resolved a security vulnerability that could allow websites or other extensions to forge requests.
-* Miscellaneous improvements and bug fixes of the internal code and test suite.
+* Miscellaneous improvements and bug fixes to the internal code and test suite.
 
 ## [2.16.1] - 2024-10-30
-* Revoked the support of switching container for a capture, which requires a permission that forces Firefox to enable containers.
+* Removed support for switching the container during a capture, as it required a permission that forces Firefox to enable containers.
 
 ## [2.16.0] - 2024-10-27
 * Tab title is now taken when capturing a tab with `source` or `bookmark` mode.
-* Added support of switching container for a capture in Firefox.
+* Added support for switching container for a capture in Firefox.
 * Capturing a tab in a different container in Firefox is now disallowed to prevent an inconsistency.
-* Miscellaneous improvements and fixes of the UI, internal code, and test suite.
+* Miscellaneous improvements and fixes to the UI, internal code, and test suite.
 
 ## [2.15.1] - 2024-10-12
 * Fixed inconsistencies in recapture or merge-capture results when using certain capture helper options.
-* Miscellaneous improvements of the internal code and test suite.
+* Miscellaneous improvements to the internal code and test suite.
 
 ## [2.15.0] - 2024-10-10
-* Added `options` capture helper property, allowing for more reliable options overwriting, replacing the `options` command.
-* Allow setting comment and merge capture in the details dialog when performing a capture with multiple pages.
-* No longer download a linked file if the HTTP request fails when `capture.downLink.file.mode` is `header` for a capture.
-* No longer fetch title and favicon for an attachment file when capturing a bookmark.
-* The main document of a merge capture is now captured and updated even if a captured version already exists.
-* No longer generate a redirect page for a merge capture on a file.
-* Fixed an issue where the `index.html` page is incorrectly overwritten when capturing a deep XHTML/SVG page.
-* Fixed an issue where an extra `index.json` is saved when capturing a file with depth set.
-* Fixed incorrect site favicon path for a page that meta-refreshes to another page when capturing bookmark.
+* Added the `options` capture helper property, enabling more reliable overwriting of options (replaces the `options` command).
+* Enabled comment and merge-capture configuration in the capture details dialog for multi-page captures.
+* Linked files are no longer downloaded if the HTTP request fails when `capture.downLink.file.mode` is set to `header`.
+* Favicon and title are no longer fetched for an attachment file when capturing a bookmark.
+* The main document of a merge capture is now always captured and updated, even if a previous version exists.
+* A redirect page is no longer generated when performing a merge capture on a file.
+* Fixed an issue where the `index.html` page was incorrectly overwritten when capturing deep XHTML/SVG pages.
+* Fixed an issue where an extra `index.json` was saved when capturing a file with depth set.
+* Fixed incorrect favicon path when a page meta-refreshes to another page when capturing a bookmark.
 * Fixed incorrect saving path when the item directory path contains "%" for a merge capture.
-* Fixed an issue where a link resolving to a page that redirects to a page with a captured version was not rewritten in the newly captured page of a merge capture.
-* Fixed an issue where `capture.downLink.urlExtra` is applied for a merge capture without depth set.
+* Fixed an issue where a link resolving to a page that redirects to another page with a captured version was not rewritten in the newly captured page for a merge capture.
+* Fixed an issue where `capture.downLink.urlExtra` was applied to a merge capture without depth set.
 * Fixed file renaming for the `application/ogg` MIME type in some older browsers.
-* Miscellaneous improvements of the UI, internal code, and test suite.
+* Miscellaneous improvements to the UI, internal code, and test suite.
 
 ## [2.14.0] - 2024-09-14
 * The expanded/collapsed status of option groups in the capture detail dialog now persists.
-* Fixed a CSS handling error for certain `url()` when capturing a page.
-* Fixed an error on certain invalid custom element names when capturing a page.
+* Fixed a CSS handling error for certain `url()` values when capturing a page.
+* Fixed an error caused by invalid custom element names when capturing a page.
 
 ## [2.13.1] - 2024-08-15
-* Fixed script error when performing a merge capture on a file.
-* Miscellaneous improvements of the UI and test suite.
+* Fixed a script error that occurred during a merge capture on a file.
+* Miscellaneous improvements to the UI and test suite.
 
 ## [2.13.0] - 2024-08-02
-* Added suppport of preserving manually assigned slots.
-* Fixed an issue where capture selection does not work when the current selection is in a shadow DOM for Chromium.
+* Added support for preserving manually assigned slots.
+* Fixed an issue where capture selection does not work when the current selection is in a shadow DOM in Chromium.
 * Fixed an issue where the current presentation of a canvas with non-2D context cannot be captured correctly.
-* Fixed an issue where `Revert all erases` may cause a crash of the web page.
-* Fixed an issue where some annotation tools work incorrectly inside a shadow DOM.
-* Fixed an issue where the status of some form elements in the erased content is not appropriately reverted when the page is resaved and reopened.
-* Fixed an issue where shadow DOMs and constructed stylesheets in the erased content cannot be reverted when the page is resaved and reopened.
-* Miscellaneous improvements and fixes of the UI, internal code, and test suite.
+* Fixed an issue where `Revert all erases` may cause a page crash.
+* Fixed an issue where some annotation tools do not work correctly inside a shadow DOM.
+* Fixed an issue where the status of certain form elements in erased content is not appropriately reverted when the page is resaved and reopened.
+* Fixed an issue where shadow DOMs and constructed stylesheets in erased content cannot be reverted when the page is resaved and reopened.
+* Miscellaneous improvements and fixes to the UI, internal code, and test suite.
 
 ## [2.12.6] - 2024-07-29
-* Improved handling of the value of `checked` or `selected` attributes when capturing a page.
-* No more record the original null value of special attributes generated by WebScrapBook when capturing a page.
-* Fixed an issue where the selected status of option elements are not preserved when resaving a page.
+* Improved handling of the `checked` or `selected` attributes when capturing a page.
+* No longer record the original null value of special attributes generated by WebScrapBook when capturing a page.
+* Fixed an issue where the selected status of option elements was not preserved after a page resave.
 
 ## [2.12.5] - 2024-07-28
-* Fixed an issue where the `capture.rewriteCss` option is not honored by constructed stylesheets during a capture.
-* Fixed possible bad record value for shadowRoot.slotAssignment.
-* Fixed missing constructed stylesheets when resaving a page.
+* Fixed an issue where the `capture.rewriteCss` option was not applied to constructed stylesheets during a capture.
+* Fixed an issue where the recorded value of `shadowRoot.slotAssignment` was incorrect when the browser does not support it.
+* Fixed missing constructed stylesheets after a page resave.
 
 ## [2.12.4] - 2024-07-28
 * Fixed error when capturing a clonable shadow DOM.
-* Reworked handling of further shadow DOM options.
+* Reworked handling of advanced shadow DOM options.
 
 ## [2.12.3] - 2024-07-25
-* Adjusted the marking for closed shadow DOM contents.
+* Adjusted the marking of closed shadow DOM contents.
 
 ## [2.12.2] - 2024-07-25
-* Added support of capturing closed shadow DOM contents.
-* Miscellaneous improvements of the test suite.
+* Added support for capturing closed shadow DOM contents.
+* Miscellaneous improvements to the test suite.
 
 ## [2.12.1] - 2024-07-25
-* Fixed a script error during resaving a page in Firefox.
-* No more refresh constructed stylesheets data if the browser doesn't support it when resaving a page.
-* Miscellaneous improvements of the UI.
+* Fixed a script error that occurred during a page resave in Firefox.
+* No longer refresh constructed stylesheets data if the browser does not support it during a page resave.
+* Miscellaneous improvements to the UI.
 
 ## [2.12.0] - 2024-07-21
-* Improved the data scheme for constructed stylesheets to prevent a catastrophic volume/memory usage on one shared among different DOMs. Also added an option `capture.adoptedStyleSheet` for it.
-* Miscellaneous improvements and fixes of the UI.
+* Improved the data scheme for constructed stylesheets to prevent excessive volume/memory usage when shared across multiple DOMs.
+* Added the `capture.adoptedStyleSheet` option to control whether constructed stylesheets should be recorded.
+* Miscellaneous improvements and fixes to the UI.
 
 ## [2.11.1] - 2024-07-20
 * Improved mobile navigation for scrapbooks.
-* Miscellaneous improvements and fixes of the UI and internal code.
+* Miscellaneous improvements and fixes to the UI and internal code.
 
 ## [2.11.0] - 2024-07-19
-* The toolbar dialog now automatically closes when a command is invoked, which can be tweaked through option `ui.autoCloseBrowserAction`.
-* No more restrict single indexer or checker to be run.
-* Miscellaneous improvements and fixes of the UI and internal code.
+* The toolbar dialog now automatically closes when a command is invoked, with a new option `ui.autoCloseBrowserAction` to configure the behavior.
+* Removed the restriction that only one indexer or checker can run at a time.
+* Miscellaneous improvements and fixes to the UI and internal code.
 
 ## [2.10.1] - 2024-07-08
 * Fixed a packaging error.
 
 ## [2.10.0] - 2024-07-08
-* Added support of capturing site favicon.
+* Added support for capturing the site favicon.
 * Improved `capture.prettyPrint` for some elements inserted during a capture.
-* `capture.favicon` option is now honored when capturing a bookmark to a file.
-* Miscellaneous improvements and fixes of the internal code and test suite.
+* The `capture.favicon` option is now honored when capturing a bookmark to a file.
+* Miscellaneous improvements and fixes to the internal code and test suite.
 
 ## [2.9.1] - 2024-04-05
-* Fixed an issue where the `@charset` rule in a CSS file is not correctly handled.
-* Fixed an issue where BOM in a CSS file is not taking as highest precedence for charset detection.
-* Fixed an issue where the document charset and the `charset` attribute of a `link` element are not honored when determining the encoding of a CSS file.
-* Miscellaneous improvements and fixes of the internal code and test suite.
+* Fixed an issue where the `@charset` rule in a CSS file was not correctly handled.
+* Fixed an issue where BOM in a CSS file was not taking as highest precedence for charset detection.
+* Fixed an issue where the document charset and the `charset` attribute of a `link` element were not honored when determining the encoding of a CSS file.
+* Miscellaneous improvements and fixes to the internal code and test suite.
 
 ## [2.9.0] - 2024-03-30
 * Fixed and improved capture helpers:
-  * Fixed an issue where many commands do not expand parameters whose value is a command correctly.
+  * Fixed an issue where many commands did not expand parameters whose value was a command correctly.
   * A selector can now reset its reference node using `base` property.
   * Added "equal" command.
   * "get_html" and "html" commands now support an additional `isOuter` parameter for getting and setting outer HTML.
@@ -212,7 +213,7 @@
 ## [2.8.1] - 2024-03-10
 * Fixed bad tidying of a CSS rule having an attribute selector with a `|=` operator.
 * Use `text/javascript` as the default MIME type of `js` files.
-* Miscellaneous improvements of the internal code and test suite.
+* Miscellaneous improvements to the internal code and test suite.
 
 ## [2.8.0] - 2024-03-02
 * Fixed rewriting of srcset attribute that are separated by alternative spaces.
@@ -224,38 +225,38 @@
 * Fixed bad URL rewriting for links in an srcdoc iframe to the main page.
 * Fixed bad URL hash rewriting when rebuilding links for an in-depth capture.
 * Adjusted parameters handling of a content-type and content-disposition header in some rare cases.
-* Miscellaneous improvements of the internal code and test suite.
-* Added many tests for the internal API and failure tests for known issues..
+* Miscellaneous improvements to the internal code and test suite.
+* Added many tests for the internal API and failure tests for known issues.
 
 ## [2.7.0] - 2024-02-24
 * Fixed bad referrer when capturing `iframe[srcdoc]` headlessly.
 * Fixed possible random errors when capturing an inaccessible `iframe[srcdoc]`.
 * No more save `about:` pages for headless frames.
 * No more save resources whose URL uses an unsupported protocol.
-* Miscellaneous improvements of the internal code and test suite.
+* Miscellaneous improvements to the internal code and test suite.
 * Rewrite the test suite with mocha.js.
 
 ## [2.6.5] - 2024-02-17
 * Fixed style images in a nested CSS rule in a shadow DOM be emptied when `Style images` is `Save used` for a capture.
 * Fixed style images that apppear before the first base element be emptied when `Style images` is `Save used` for a capture.
 * Fixed incorrect referrer for CSS resources for a document with customized base URL for a capture.
-* Miscellaneous improvements of the internal code and test suite.
+* Miscellaneous improvements to the internal code and test suite.
 
 ## [2.6.4] - 2024-02-13
-* Fixed an issue where downloading linked files and in-depth capture for a blob URL doesn't work.
-* Fixed an issue where geolocation cannot be obtained from the sidebar in Firefox. (For Firefox < 101 a one-time grant in a non-sidebar window is required. For some old Firefox versions reloading the extension (by disabling and enabling, restarting the browser, etc.) after the grant is required.)
-* Fixed an issue where clearing geolocation is not corretly saved.
+* Fixed an issue where downloading linked files and in-depth capture for a blob URL did not work.
+* Fixed an issue where geolocation could not be obtained from the sidebar in Firefox. (For Firefox < 101 a one-time grant in a non-sidebar window is required. For some old Firefox versions reloading the extension (by disabling and enabling, restarting the browser, etc.) after the grant is required.)
+* Fixed an issue where clearing geolocation was not corretly saved.
 
 ## [2.6.3] - 2024-02-11
-* Fixed an issue where a blob URL cannot be captured in Firefox.
-* Fixed an issue where MIME type is not detected for a blob URL for a capture in Chromium.
-* Miscellaneous improvements of the internal code and test suite.
+* Fixed an issue where a blob URL could not be captured in Firefox.
+* Fixed an issue where MIME type was not detected for a blob URL for a capture in Chromium.
+* Miscellaneous improvements to the internal code and test suite.
 
 ## [2.6.2] - 2024-02-09
-* Fixed an issue where meta and favicon in a shadow Root be taken for a capture.
+* Fixed an issue where meta and favicon data in a shadow root were incorrectly taken for a capture.
 * Fixed charset and content disposition parsing and meta charset rewriting in some special cases for a capture.
 * Fixed meta refresh parsing in some special cases for a capture.
-* Miscellaneous optimization of the internal code and test suite.
+* Miscellaneous optimization to the internal code and test suite.
 
 ## [2.6.1] - 2024-02-06
 * Fixed CSS images for the root element be emptied when `Style images` is `Save used`.
@@ -263,30 +264,30 @@
 * Fixed referrer policy handling for a document with multiple document referrer policy definition for a capture.
 * Fixed base URL resolution for some spec-violating cases for a capture.
 * Fixed meta element handling for some spec-violating cases for a capture.
-* Miscellaneous optimization of the internal code and test suite.
+* Miscellaneous optimization to the internal code and test suite.
 
 ## [2.6.0] - 2024-02-04
-* Added support of nesting CSS for a capture.
-* Added support of referrer policy related attributes when performing a capture.
+* Added support for nesting CSS for a capture.
+* Added support for referrer policy related attributes when performing a capture.
 * Reworked `capture.referrerPolicy` to provide default referrer policy, or provide dominant referrer policy by prepending "+".
 * Fixed some bad referrer handling cases for downgrading requests for a capture.
 * Fixed script error when `Rewrite styles` is `(Advanced) tidy` for an external or imported CSS for a headless capture.
 * Fixed missing resources inside an at-rule like `@layer` when `Style images` is `Save used` for a capture.
 * Fixed `:root` and `:scope` CSS rules not correctly handled when `Rewrite styles` is `Tidy` for a capture.
-* Fixed an issue where constructed stylesheets are not captured in Firefox.
+* Fixed an issue where constructed stylesheets were not captured in Firefox.
 * Fixed downloading linked files and in-depth capture of hyperlink elements in an SVG or MathML for a capture.
 * Fixed broken version 3 sitemap.
 * Fixed missing links in an embedded SVG or MathML for sitemap.
 * Fixed misleading links of `a[download], area[download], iframe[srcdoc]` elements for sitemap.
-* Miscellaneous optimization of the internal code and test suite.
+* Miscellaneous optimization to the internal code and test suite.
 
 ## [2.5.0] - 2024-01-24
 * Added auto-fixing of item create/modify time when the input value is too short or too long, and auto-fill current time if empty.
 * Fixed bad handling of ID-Date conversion for some rare cases.
 
 ## [2.4.0] - 2024-01-21
-* Fixed an issue where a cross-origin imported CSS is captured empty in Chromium >= 120.
-* Added support of viewing HTZ/MAFF in a frame directly for Chromium >= 119.
+* Fixed an issue where a cross-origin imported CSS was captured empty in Chromium >= 120.
+* Added support for viewing HTZ/MAFF in a frame directly for Chromium >= 119.
 * Fixed minimal compatible Chromium version to >= 73.
 * Optimized code by removing compatibility code for old browsers.
 * Improved test suite to support customizing tests.
@@ -296,19 +297,19 @@
 
 ## [2.3.0] - 2024-01-14
 * Added Android support for the new policy of Firefox Add-on Site.
-* Dropped support of Firefox Desktop < 69 and Firefox for Android < 113.
+* Dropped support for Firefox Desktop < 69 and Firefox for Android < 113.
 
 ## [2.2.1] - 2023-09-17
-* Added a restriction for download workers, which can be tweaked through option `capture.downloadWorkers`.
+* Added a limit on concurrent download workers, with a new option `capture.downloadWorkers` to configure the behavior.
 
 ## [2.1.0] - 2023-08-15
 * Bumped version of the `index.json` file generated by in-depth capture to 3.
 * Fixed bad path case of the `index.json`, which may cause invalid rebuilt links after a merge capture on a case-sensitive filesystem.
-* Added support of uploading/importing through copy and paste (for supported browsers).
+* Added support for uploading/importing through copy and paste (for supported browsers).
 
 ## [2.0.4] - 2023-06-21
-* Fixed an issue where `Capture tabs` like actions in the context menu of a tab does not apply to all selected tabs.
-* Fixed an issue where item locating does not work in Firefox < 59.
+* Fixed an issue where `Capture tabs` like actions in the context menu of a tab did not apply to all selected tabs.
+* Fixed an issue where item locating did not work in Firefox < 59.
 
 ## [2.0.3] - 2023-06-18
 * Remove obsolete debug code.
@@ -320,18 +321,18 @@
 * Bumped server requirement to >= 2.0.1.
 * Reworked scrapbook search as server sided.
 * Optimized several scrapbook operations using new server-sided API.
-* Added support of recent picked items for the item picker of the details dialog.
-* Added support of erasing elements with XPath.
-* Added support of permanently deleting item(s) by holding shift when performing a `Remove`.
+* Added support for recent picked items for the item picker of the details dialog.
+* Added support for erasing elements with XPath.
+* Added support for permanently deleting item(s) by holding shift when performing a `Remove`.
 * Added `Empty recycle bin` command.
-* Added support of item exporting/importing.
+* Added support for item exporting/importing.
 * Added new options `scrapbook.autoCache.fulltextCache` and `scrapbook.autoCache.createStaticSite` for automatic cache update.
 * Fulltext cache is now updated automatically when creating a new note or uploading files.
 * Adjusted DnD effect for the sidebar tree.
 * Improved UI for modal dialogs.
 
 ## [1.14.7] - 2023-06-11
-* Fixed an issue where erasing by selector may remove the custom elements loader.
+* Fixed an issue where erasing by selector might remove the custom elements loader.
 
 ## [1.14.6] - 2023-06-04
 * Fixed misbehaving tree scrollbar for the item picker dialog.
@@ -349,7 +350,7 @@
 * Fixed server-related API error for some older browsers.
 
 ## [1.14.2] - 2023-05-17
-* Fixed an issue where a long word in a message is not wrapped somewhere.
+* Fixed an issue where a long word in a message was not wrapped somewhere.
 
 ## [1.14.1] - 2023-05-14
 * Fixed script error when copying info from a non-root scrapbook tree with folder-related formatters.
@@ -360,26 +361,26 @@
 * Added a tooltip for the title of the postit editor frame.
 
 ## [1.13.1] - 2023-05-05
-* Fixed an issue where a long postit title is not truncated.
+* Fixed an issue where a long postit title was not truncated.
 
 ## [1.13.0] - 2023-05-04
 * No more save a postit automatically if its content is not changed.
-* Fixed an issue where the postit is poorly sized and can hardly be resized when the sidebar tree is large.
-* Fixed an issue where an item without title shows marked alternative title in the search result.
+* Fixed an issue where the postit was poorly sized and could hardly be resized when the sidebar tree was large.
+* Fixed an issue where an item without title showed marked alternative title in the search result.
 
 ## [1.12.0] - 2023-04-29
 * Small text files are now compressed when added to an archive.
 
 ## [1.11.0] - 2023-04-25
-* Added support of multiple include and exclude patterns for auto-capture.
-* Fixed an issue where no-tree books are shown in `Capture as` dialog.
-* Fixed an issue of showing items unrelated with the current selected parent book in `Capture as` dialog.
-* Fixed an issue where item locking does not prevent a recapture or merge-capture.
-* Fixed an issue where copying an item across scrapbooks can generate two transaction backups.
+* Added support for multiple include and exclude patterns for auto-capture.
+* Fixed an issue where no-tree books were shown in `Capture as` dialog.
+* Fixed an issue of showing items unrelated to the current selected parent book in `Capture as` dialog.
+* Fixed an issue where item locking did not prevent a recapture or merge-capture.
+* Fixed an issue where copying an item across scrapbooks could generate two transaction backups.
 * Miscellaneous code optimization and refactoring.
 
 ## [1.10.2] - 2023-04-18
-* Fixed an issue where removing an item may get an error when the recycle bin is empty.
+* Fixed an issue where removing an item may got an error when the recycle bin was empty.
 
 ## [1.10.1] - 2023-04-13
 * Improved UI for `View captured pages` page.
@@ -396,10 +397,10 @@
   * `book:` conditions are now matched by book ID.
   * Search results are now shown in the order of provided `book:` conditions.
   * A bad input for `sort:` and `limit:` is now forbidden.
-  * Fixed an issue where the results of an interrupted search interminges into the current search.
+  * Fixed an issue where the results of an interrupted search were intermingled with the current search.
 
 ## [1.8.1] - 2023-03-18
-* Fixed an issue where a sticky note cannot be dragged in Chromium >= 109.
+* Fixed an issue where a sticky note could not be dragged in Chromium >= 109.
 
 ## [1.8.0] - 2023-02-10
 * Fixed several possible errors for concurrent captures that saves as a folder to the default download directory.
@@ -412,7 +413,7 @@
 * Added `Capture mode` option for `Capture as` dialog.
 * Improved UI for the sidebar:
   * Whole title is now selected when entering the `Properties` dialog.
-  * Added support of renaming during folder or note creation.
+  * Added support for renaming during folder or note creation.
   * Improved automatic scrolling for keyboard navigation and item locating.
   * Improved displaying effect when dragging an internal link or image of an item.
   * Prevent some link-like elements from being opened unexpectedly.
@@ -439,10 +440,10 @@
 * Fixed missing error message when an error occurs during folder name determination.
 
 ## [1.5.1] - 2022-11-23
-* Fixed an issue where the "attrs" property is ignored when the "value" property is set for the "insert" command of a capture helper.
+* Fixed an issue where the "attrs" property was ignored when the "value" property was set for the "insert" command of a capture helper.
 
 ## [1.5.0] - 2022-11-03
-* Added support of more URL placeholders for `capture.saveFilename` option.
+* Added support for more URL placeholders for `capture.saveFilename` option.
 * Improved some tooltips.
 
 ## [1.4.3] - 2022-06-03
@@ -457,69 +458,69 @@
 ## [1.4.0] - 2022-03-12
 * Added GUI for `NOSCRIPTs` capture option.
 * Minor option groups in the options page are now collapsed by default.
-* Fixed an issue where `on*` attributes are not correctly handled if `capture.styleInline` is `remove`.
-* Fixed an issue where a unicode surrogate pair is not correctly handled during text cropping in certain cases.
+* Fixed an issue where `on*` attributes were not correctly handled if `capture.styleInline` was `remove`.
+* Fixed an issue where a unicode surrogate pair was not correctly handled during text cropping in certain cases.
 * Fixed tooltips about filename length restriction.
 * Fixed some issues of test code.
 * Upgraded 3rd party libraries.
 
 ## [1.3.1] - 2022-02-19
-* Fixed an issue where an item moved into another item through drag-and-drop is placed at top rather than the bottem.
+* Fixed an issue where an item moved into another item through drag-and-drop was placed at top rather than the bottem.
 
 ## [1.3.0] - 2022-02-16
-* Fixed an error when a capture is invoked from the context menu of a Firefox private window.
-* Fixed an error when a capture is invoked from a private tab in Firefox for Android.
-* Fixed an issue where the archive viewer doesn't open additional tabs for a MAFF with multiple web pages in a Firefox private window.
+* Fixed an error when a capture was invoked from the context menu in a Firefox private window.
+* Fixed an error when a capture was invoked from a private tab in Firefox for Android.
+* Fixed an issue where the archive viewer did not open additional tabs for a MAFF with multiple web pages in a Firefox private window.
 * Adjusted sidebar updating mechanism as a tentative fix for an issue where items get disappeared or misplaced after several move/link/copy operations.
 
 ## [1.2.0] - 2022-01-21
-* Fixed an issue where some control chars in a filename causes a downloading error.
+* Fixed an issue where some control characters in a filename cause a downloading error.
 * Fixed the bad path rule filler for in-depth capture.
 * Fixed an inaccurate error log message for a link with an invalid URL.
 * Intermediate data is now cached using indexedDB when available in Firefox.
 
 ## [1.1.0] - 2022-01-06
-* Fixed an issue where all tabs are treated as selected when performing a capture or so in a Chromium-based mobile browser.
+* Fixed an issue where all tabs were treated as selected when performing a capture or so in a Chromium-based mobile browser.
 * Disable drag-and-drop in a Chromium-based mobile browser to prevent an unfixed bug.
 * Internal code optimization.
 
 ## [1.0.1] - 2021-12-22
-* Fixed an issue where the sidebar scrolling point is reset when the tree refreshes.
+* Fixed an issue where the sidebar scrolling point was reset when the tree refreshes.
 
 ## [1.0.0] - 2021-12-07
-* Dropped support of legacy ScrapBook objects. (Use `wsb convert sb2wsb` and `wsb convert migrate` command of PyWebScrapBook to convert pages captured using legacy ScrapBook to WebScrapBook format.)
+* Dropped support for legacy ScrapBook objects. (Use `wsb convert sb2wsb` and `wsb convert migrate` command of PyWebScrapBook to convert pages captured using legacy ScrapBook to WebScrapBook format.)
 
 ## [0.144.0] - 2021-11-21
-* Added support of rewriting the `cite` attribute for several elements.
-* Added support of handling the `ping` attribute for anchor elements, with a new option `capture.ping` to tweak the behavior.
+* Added support for rewriting the `cite` attribute for several elements.
+* Added support for handling the `ping` attribute for anchor elements, with a new option `capture.ping` to configure the behavior.
 * Resources used only by inline styles are no more counted as used when `Style images` is `Save used`.
-* Added support of `%folder%` and `%path%` formatters for `Copy info` command of the sidebar.
+* Added support for `%folder%` and `%path%` formatters for `Copy info` command of the sidebar.
 
 ## [0.143.0] - 2021-11-18
-* Added support of capturing the source document embedded through an `<embed>` tag.
-* Added support of handling legacy HTML attributes for a capture: `embed[pluginspage]`, `object[codebase]`, `object[archive]`, `object[classid]`, `applet[codebase]`, `applet[classid]`.
+* Added support for capturing the source document embedded through an `<embed>` tag.
+* Added support for handling legacy HTML attributes for a capture: `embed[pluginspage]`, `object[codebase]`, `object[archive]`, `object[classid]`, `applet[codebase]`, `applet[classid]`.
 * Fixed an issue of message length error for Chromium if a page to be captured or saved exceeds around 50MB.
-* Fixed an issue where `View source` in the current tab doesn't create new tabs when multiple items are selected.
-* Fixed an issue where a link like "foo.html#?bar" is not shown in the sitemap.
-* Fixed an issue where a frame page embedded through `<embed>` is not shown in the sitemap.
-* Fixed an issue where a resource embedded through `<embed>`, `<object>`, or `<applet>` may not be blocked correctly in the viewer for Chromium.
+* Fixed an issue where `View source` in the current tab did not create new tabs when multiple items were selected.
+* Fixed an issue where a link like "foo.html#?bar" was not shown in the sitemap.
+* Fixed an issue where a frame page embedded through `<embed>` was not shown in the sitemap.
+* Fixed an issue where a resource embedded through `<embed>`, `<object>`, or `<applet>` might not be blocked correctly in the viewer for Chromium.
 
 ## [0.142.0] - 2021-11-14
-* Fixed an issue where a line of a rule for downloading links that is prefixed with spaces is not treated as a comment.
+* Fixed an issue where a line of a rule for downloading links that is prefixed with spaces was not treated as a comment.
 * No more take the link text as title (but available in the dropdown) when capturing a link for `Capture as` dialog.
 * Allow the rule filler for in-depth capture be used for a capture with multiple tasks.
-* Added `Same domain`, `Include with filter`, and `Exclude with filter` rule helpers for `Capture as` dialog.
-* Fixed an issue where links covered by multiple selection ranges are duplicately included in a batch capture dialog.
-* Fixed an issue where a failure to save the index file when saving as folder is not treated as a capture failure.
-* Fixed an issue where a failure to save the file when saving as file is not treated as a capture failure.
+* Added `Same domain`, `Include with filter`, and `Exclude with filter` rule helpers for the `Capture as` dialog.
+* Fixed an issue where links covered by multiple selection ranges were duplicately included in a batch capture dialog.
+* Fixed an issue where a failure to save the index file when saving as folder was not treated as a capture failure.
+* Fixed an issue where a failure to save the file when saving as file was not treated as a capture failure.
 
 ## [0.141.0] - 2021-11-13
-* Fixed an issue where an incorret option value is sometimes get when the options change.
-* Added `Delay for capturing linked pages` option for the `Capture as` dialog.
-* Added support of single click invocation of the toolbar button when only one command is shown.
-* No more force all resources be data URL when an iframe with a data URL source is saved as srcdoc.
-* Fixed an issue where the srcdoc attribute of a frame element is removed whan `Frames` option is `Blank`.
-* Fixed an issue where the URL of a meta refresh is not correctly resolved when the page has a base element.
+* Fixed an issue where an incorret option value was sometimes retrieved when the options change.
+* Added `Delay for capturing linked pages` option to the `Capture as` dialog.
+* Added support for single-click invocation of the toolbar button when only one command is shown.
+* No more force all resources be data URLs when an iframe with a data URL source is saved as srcdoc.
+* Fixed an issue where the `srcdoc` attribute of a frame element was removed whan `Frames` option was `Blank`.
+* Fixed an issue where the URL of a meta refresh was not correctly resolved when the page had a base element.
 * Fixed incorrect source URL in the log message when there's an error during capturing a frame.
 * The editor toolbar now appears at the top.
 * Sticky notes now appear at the top, except for being under the editor toolbar.
@@ -529,7 +530,7 @@
 * Added modifiers support for toolbar commands.
 * Added multi-tab support for `Batch capture selected links` toolbar command.
 * Added drag-and-drop support for `Batch capture all tabs` and `Batch capture selected links` toolbar commands.
-* Fixed an issue where sidebar fails to reload when data changes rapidly within a second.
+* Fixed an issue where the sidebar failed to reload when data changed rapidly within a second.
 * Fixed a siderbar styling issue for older Firefox.
 
 ## [0.139.0] - 2021-11-10
@@ -538,7 +539,7 @@
 * Adjusted scrollings for the item picker dialog.
 
 ## [0.138.0] - 2021-11-09
-* Fixed an issue where a capture may be interrupted occasionally when saved to folder as folder.
+* Fixed an issue where a capture might be interrupted occasionally when saved to folder as folder.
 * Minor UI improvements.
 
 ## [0.137.0] - 2021-11-07
@@ -547,28 +548,28 @@
 * Improved the GUI of the target item selector for `Capture as` dialog.
 * Added a rule filler for in-depth capture for `Capture as` dialog.
 * No more include URLs with non-http(s) protocol for batch capture.
-* Fixed an issue where the item picker for `Capture as` dialog incorrectly allows multi-selection through holding Shift.
+* Fixed an issue where the item picker for `Capture as` dialog incorrectly allowed multi-selection through holding Shift.
 * Various minor bug fixes and UI improvements.
 
 ## [0.136.0] - 2021-11-05
 * Fixed several GUI issues for the `Capture as` dialog for a multi-item capture.
 
 ## [0.135.0] - 2021-11-04
-* Fixed an issue where `Capture again` does not work correctly if `Save captured data to` is not `Backend server`.
+* Fixed an issue where `Capture again` did not work correctly if `Save captured data to` was not `Backend server`.
 * Added a link for the backuped page for re-capture if available. (Requires server >= 0.46)
 
 ## [0.134.0] - 2021-11-02
-* Added support of `mime:` prefix to filter linked files by MIME type.
-* Fixed an issue where a linked file with no Content-Type header is not correctly handled by the file type filter.
-* Fixed an issue where a reloaded iframe has inconsistent editor status with the main frame.
+* Added support for `mime:` prefix to filter linked files by MIME type.
+* Fixed an issue where a linked file with no Content-Type header was not correctly handled by the file type filter.
+* Fixed an issue where a reloaded iframe had inconsistent editor status with the main frame.
 
 ## [0.133.0] - 2021-10-31
 * A linked web page is no more downloaded as a resource file if `Depth to capture linked pages` is set.
 * A linked attachment web page is now correctly treated as a resource file.
 * Added `Extra URLs` option for the capture dialog.
-* Fixed an issue where size limit does not work for a linked page with depth 1.
+* Fixed an issue where size limit did not work for a linked page with depth 1.
 * Fixed an issue of capturing unexpected linked pages in a frame whose source is data protocol.
-* Fixed an issue where a link in an extension tab cannot be opened in some browsers.
+* Fixed an issue where a link in an extension tab could not be opened in some browsers.
 
 ## [0.132.0] - 2021-10-29
 * Improved GUI for the `Capture as` dialog.
@@ -579,7 +580,7 @@
 * Various bug fixes and minor UI improvements.
 
 ## [0.130.0] - 2021-10-23
-* Fixed an issue where some resource files such as SVG be incorrectly included for links rebuilding.
+* Fixed an issue where some resource files such as SVG were incorrectly included for links rebuilding.
 * An error during links rebulding for a document no more terminates the capture task.
 * Fixed missing meta attributes for the index.html when capturing a XHTML or SVG file.
 * Pages other than index.html now records only source URL in meta attributes.
@@ -589,7 +590,7 @@
 * Improved UI and tooltips for edit and postit dialog pages.
 
 ## [0.129.0] - 2021-10-22
-* Added support of saving meta refreshed pages for in-depth capture.
+* Added support for saving meta refreshed pages for in-depth capture.
 * An automatically opened remote tab is now closed on error.
 * An error on capturing a linked page no more terminates the capture task.
 * Improved internal processing and log messages for remote tab and in-depth capture.
@@ -614,10 +615,10 @@
 ## [0.126.0] - 2021-10-11
 * Added a new `capture.faviconAttrs` option for saving favicon-like resources.
 * Adjusted UI for the `Capture as` dialog.
-* Added support of sidebar auto-rebuilding after a capture, with a new option `scrapbook.autoRebuildSidebars` to tweak the behavior..
+* Added support for sidebar auto-rebuilding after a capture, with a new option `scrapbook.autoRebuildSidebars` to configure the behavior.
 
 ## [0.125.7] - 2021-10-10
-* Fixed an issue where downloading links not working in the archive page viewer.
+* Fixed an issue where downloading links did not work in the archive page viewer.
 
 ## [0.125.6] - 2021-09-22
 * Fixed a packing error.
@@ -626,9 +627,9 @@
 * Fixed capture error for a page with a link element without href attribute.
 
 ## [0.125.4] - 2021-09-21
-* Fixed an issue where noscript content is not correctly saved when captured using Firefox.
-* Fixed an issue where noscript content is not correctly saved when capturing source.
-* Fixed an issue where noscript content becomes escaped after saved by the editor.
+* Fixed an issue where noscript content was not correctly saved when captured using Firefox.
+* Fixed an issue where noscript content was not correctly saved when capturing source.
+* Fixed an issue where noscript content became escaped after saved by the editor.
 
 ## [0.125.3] - 2021-09-21
 * Fixed a compatibility issue for saved tree data with old browsers not supporting ES2019.
@@ -638,20 +639,20 @@
 
 ## [0.124.0] - 2021-06-09
 * Added hotkeys for batch capture page.
-* Fixed an issue where clicked links with specified target or base URL not working in the archive page viewer.
+* Fixed an issue where clicked links with specified target or base URL did not work in the archive page viewer.
 
 ## [0.123.0] - 2021-06-06
-* Fixed an issue where modified options not taken when invoking a capture in some ways.
+* Fixed an issue where modified options were not taken when invoking a capture in some ways.
 * Imported options without saving are no more applied.
 * Support auto-updating options for sidebar and more scrapbook-related pages.
 
 ## [0.122.0] - 2021-05-30
 * Bumped version of the `index.json` file generated by in-depth capture to 2.
-* Added support of depth > 0 for merge capture.
+* Added support for depth > 0 for merge capture.
 * Added `View source page` editor tool.
-* Fixed an issue where the URL of a redirected or meta refreshed page is not correctly rewritten for in-depth capture.
-* Fixed an issue where resources under file: protocol cannot be captured.
-* Fixed an issue where some context menu commands don't work.
+* Fixed an issue where the URL of a redirected or meta refreshed page was not correctly rewritten for in-depth capture.
+* Fixed an issue where resources under file: protocol could not be captured.
+* Fixed an issue where some context menu commands did not work.
 
 ## [0.121.0] - 2021-05-26
 * Added `Find previous/next annotation` editor tool.
@@ -662,22 +663,21 @@
 
 ## [0.119.0] - 2021-05-14
 * Added and adjusted several default highlighter style options.
-* Adjusted default highlighter styles.
-* Added support of `imagesrcset` attribute for `<link>`s.
-* Added support of `rel` value `modulepreload`, `prerender`, `dns-prefetch`, or `preconnect` for `<link>` tags.
-* Added a new `capture.prefetch` option to tweak handling of prefetch-like `<link>` tags.
-* Added `capture.contentSecurityPolicy` option to tweak handling of `content-security-policy` meta tag and `nonce` attribute.
+* Added support for the `imagesrcset` attribute on `<link>` tags.
+* Added support for `rel` value `modulepreload`, `prerender`, `dns-prefetch`, or `preconnect` for `<link>` tags.
+* Added a new `capture.prefetch` option to configure handling of prefetch-like `<link>` tags.
+* Added `capture.contentSecurityPolicy` option to configure handling of `content-security-policy` meta tag and `nonce` attribute.
 * Removed `capture.removeIntegrity` option.
 * `crossorigin` attribute is now removed only when a resource is saved.
 * `integrity` attribute is now removed only for related tags.
 
 ## [0.118.0] - 2021-05-08
-* Added support of capturing the source document embedded through an `<object>` tag.
+* Added support for capturing the source document embedded through an `<object>` tag.
 * No more save XHTML or SVG files as srcdoc when saving as single HTML.
 
 ## [0.117.0] - 2021-05-05
 * Improved config checking of capture helpers and auto-capture to prevent more possible bad input.
-* Fixed an issue where unfetchable resources are not skipped during internalization.
+* Fixed an issue where unfetchable resources were not skipped during internalization.
 * Fixed an error when internalizaing a single HTML item. Internalized resources are now saved as data URLs in such case.
 
 ## [0.116.0] - 2021-05-03
@@ -688,42 +688,42 @@
 * Fixed a potential error handling for nested svg and math elements.
 
 ## [0.115.0] - 2021-05-01
-* Preloads and prefetches are now removed by default, with a new option `capture.preload` to tweak the behavior.
+* Preloads and prefetches are now removed by default, with a new option `capture.preload` to configure the behavior.
 * Shadow DOMs are saved as `data-scrapbook-shadowdom` attribute in place of `data-scrapbook-shadowroot`, with simplified data structure and smaller size.
 
 ## [0.114.0] - 2021-04-27
 * Hash part of source URL is now considered when viewing an item.
-* Fixed an issue where URL hash is not included in the source URL for the captured item.
+* Fixed an issue where URL hash was not included in the source URL for the captured item.
 * Fixed several issues on handling an item whose index file is an archive.
 
 ## [0.113.0] - 2021-04-24
-* Added support of more modes for `Form status` capture option.
+* Added support for more modes for `Form status` capture option.
 * Added a default option for the backend server URL option.
-* Added support of enabling/disabling undo feature from its context menu.
-* Added support of `Home` and `End` for sidebar key navigation.
+* Added support for enabling/disabling undo feature from its context menu.
+* Added support for `Home` and `End` for sidebar key navigation.
 * Added a message for a scrapbook configured as `no_tree` in the sidebar.
-* Added support of `limit:` command for search.
-* Fixed an issue where certain interactive properties, such as form status, canvas, and shadow DOM, are lost after an unerase in a re-loaded document.
-* Fixed an issue where unrelated content in the document be refreshed after an undo.
-* Fixed an issue where certain interactive properties, such as canvas and shadow DOM, are lost after an undo.
-* Fixed missing support of opening in new tab for `View index page` sidebar command.
-* Fixed an issue where the opened postit is not saved when switching scrapbook.
-* Fixed an issue where switching scrapbook after a change of server config can load incorrect tree data.
+* Added support for `limit:` command for search.
+* Fixed an issue where certain interactive properties, such as form status, canvas, and shadow DOM, were lost after an unerase in a re-loaded document.
+* Fixed an issue where unrelated content in the document was refreshed after an undo.
+* Fixed an issue where certain interactive properties, such as canvas and shadow DOM, were lost after an undo.
+* Fixed missing support for opening in new tab for `View index page` sidebar command.
+* Fixed an issue where the opened postit was not saved when switching scrapbook.
+* Fixed an issue where switching scrapbook after a change of server config could load incorrect tree data.
 * Fixed an error causing the copy item dialog in a manage dialog not working.
 * Fixed an error causing unit tests not working.
 
 ## [0.112.0] - 2021-04-19
 * Added options for whether to open in new tab for sidebar operations. Most operations now defaults to open in the active tab.
-* Added support of opening in new tab by holding Ctrl or Shift for sidebar operations.
-* Added support of adding as child item by holding Alt when creating a new item in the sidebar.
-* Added support of recursive copy info by holding Ctrl or Shift.
+* Added support for opening in new tab by holding Ctrl or Shift for sidebar operations.
+* Added support for adding as child item by holding Alt when creating a new item in the sidebar.
+* Added support for recursive copy info by holding Ctrl or Shift.
 * Allow opening multiple search tabs from the sidebar.
 * Fixed an issue of missing `index` key when invoking `capture as` through dragging and dropping.
 * Fixed an error when invoking copy info with an item having a malformed source URL.
 
 ## [0.111.0] - 2021-04-17
 * Improved GUI for batch capture dialog.
-* Added support of captured pages notification for captures during the same browser session.
+* Added support for captured pages notification for captures during the same browser session.
 * Moved option `scrapbook.notifyPageCaptured` to `ui.notifyPageCaptured`.
 * Notification of captured pages now updates when a capture succeeds.
 * Reworked duplicates detection for auto-capture to check for captures during the same browser session and items in the backend server.
@@ -733,81 +733,81 @@
 * Fixed a regression that saved filename for a capture does not have `/`s generated by a placeholder tidied.
 
 ## [0.109.0] - 2021-04-11
-* Added support of context displaying for the search page.
+* Added support for context displaying for the search page.
 * No more save a file named `history.rdf`, which is preserved by MAFF format, when capturing a page.
 * Fixed an issue of occasional unexpected extending of highlight range for the page editor.
-* Fixed an issue where a text crop may cut between a unicode surrogate pair.
+* Fixed an issue where a text crop might cut between a unicode surrogate pair.
 
 ## [0.108.0] - 2021-04-05
 * Improved GUI for options verification.
 * Reworked the syntax of `capture.saveFilename` option.
-* Added support of auto-capture in the options.
+* Added support for auto-capture in the options.
 * Added `copyinfo` command to sidebar.
 
 ## [0.107.0] - 2021-04-03
-* Added support of viewing folder items.
-* Added support of editing a postit in the sidebar.
-* Added support of `tc:`, `charset:`, and `location:` search commands.
+* Added support for viewing folder items.
+* Added support for editing a postit in the sidebar.
+* Added support for `tc:`, `charset:`, and `location:` search commands.
 * Improved GUI for note and postit editors.
 * Fixed several compatibility issues in Firefox 52.
 
 ## [0.106.0] - 2021-04-01
 * Bumped server requirement to >= 0.36.
-* Added support of note for a backup.
-* Automatically create a tree backup for each transaction to prevent an accidental file corruption, with a new option `scrapbook.transactionAutoBackup` to tweak the behavior.
+* Added support for note for a backup.
+* Automatically create a tree backup for each transaction to prevent an accidental file corruption, with a new option `scrapbook.transactionAutoBackup` to configure the behavior.
 
 ## [0.105.0] - 2021-03-28
-* Fixed an issue where nothing is captured when selecting exactly a single node.
-* Fixed an issue where nodes outside the html node are not captured.
+* Fixed an issue where nothing was captured when selecting exactly a single node.
+* Fixed an issue where nodes outside the html node were not captured.
 * Improved capture selection to support more special cases, such as a selection outside of the body node.
-* No more generate linefeeds for the capture/save content by default, with a new option `capture.preffyPrint` to tweak the behavior.
+* No more generate linefeeds for the capture/save content by default, with a new option `capture.preffyPrint` to configure the behavior.
 * Added `attach link` to the editor tools.
 
 ## [0.104.1] - 2021-03-27
-* Fixed an issue where special chars (e.g. `<`, `&`, and `>`) in a postit item are not loaded correctly.
+* Fixed an issue where special chars (e.g. `<`, `&`, and `>`) in a postit item were not loaded correctly.
 
 ## [0.104.0] - 2021-03-27
 * WebScrapBook loaders are now injected as last elements in `<body>` rather than after `<body>`.
 * No more create loaders for non-annotated highlights.
 
 ## [0.102.0] - 2021-03-16
-* Added support of copying item IDs of the tree selection via Ctrl+C.
+* Added support for copying item IDs of the tree selection via Ctrl+C.
 * Fulltext cache is now updated automatically only when `Generate fulltext cache` option is checked.
 
 ## [0.101.0] - 2021-03-08
-* Added support of capturing via dragging a browser action command into the sidebar.
+* Added support for capturing via dragging a browser action command into the sidebar.
 
 ## [0.100.0] - 2021-03-01
-* Added support of geolocation metadata.
+* Added support for geolocation metadata.
 
 ## [0.98.0] - 2021-01-24
 * Reworked option `capture.requestReferrer` as `capture.referrerPolicy`, which supports options as the `Referrer-Policy` HTTP header.
 * Added option `capture.referrerSpoofSource`.
 
 ## [0.97.0] - 2021-01-03
-* Added support of post-it items.
+* Added support for post-it items.
 
 ## [0.95.0] - 2020-11-18
 * Changed internal identifier for auto-close dialog option.
-* Added support of `Capture as`.
+* Added support for `Capture as`.
 
 ## [0.93.0] - 2020-11-13
 * Added a capture option `Save resources sequentially`.
 * Reworked auto-close dialog option to support more modes.
 
 ## [0.92.0] - 2020-11-11
-* Added support of in-depth capture.
+* Added support for in-depth capture.
 * Changed internal identifier for some capture links (download linked files) related options.
 
 ## [0.89.0] - 2020-10-31
 * Added `Copy` command to sidebar.
 * Added support for cross-scrapbook drag-and-drop.
 * The descendant items are now automatically deselected when an item is toggled collapsed.
-* Fixed an issue where the sidebar is unlocked when a dialog is dismissed, even though the command is still running.
+* Fixed an issue where the sidebar was unlocked when a dialog was dismissed, even though the command was still running.
 
 ## [0.88.0] - 2020-10-29
-* Added support of editing created and modified time in the sidebar.
-* Added support of `index:` command for the search page.
+* Added support for editing created and modified time in the sidebar.
+* Added support for `index:` command for the search page.
 
 ## [0.87.0] - 2020-10-27
 * Bumped server requirement to >= 0.29.
@@ -826,7 +826,7 @@
 
 ## [0.83.0] - 2020-10-19
 * Changed view status caching format for sidebar to avoid a comflict within different views.
-* Added support of top-level null value for *.js tree files.
+* Added support for top-level null value for *.js tree files.
 
 ## [0.82.0] - 2020-10-17
 * Added a capture option to specify delay time before capturing an auto-launching tab.
@@ -834,7 +834,7 @@
 * Improved capture helpers:
   * Added `name` and `debug` properties.
   * Added `options` and `insert` commands.
-  * Added support to debug a capture helper commands using `*` prefix.
+  * Added support for debugging a capture helper commands using `*` prefix.
   * Improved error reporting.
 * Improved sidebar and manage dialog:
   * Adjusted command button to show scrapbook-related commands rather than echo the context menu.
@@ -853,15 +853,15 @@
   * Shifted site indexer to server-side, with greatly improved performance, and minor format change. (Consider recreate fulltext cache.)
   * Automatically update fulltext cache when a web page or note is captured or edited.
   * Added data checker. Moved the feature of importing non-indexed web page files through site indexer to data checker.
-  * Dropped support of site indexing through dragging and dropping local filesystem folders or ZIP files.
-  * Dropped support of importing legacy ScrapBook data through site indexer. (Use `wsb convert sb2wsb` of PyWebScrapBook instead.)
+  * Dropped support for site indexing through dragging and dropping local filesystem folders or ZIP files.
+  * Dropped support for importing legacy ScrapBook data through site indexer. (Use `wsb convert sb2wsb` of PyWebScrapBook instead.)
 * Added `disabled` capture helper property.
 
 ## [0.78.0] - 2020-09-20
 * Added `Accept` header for requests to the backend server. This allows the reverse proxy server or upper server to response with a more appropriate format to the client.
 
 ## [0.76.0] - 2020-09-06
-* Added support of self version checking. An error will now be thrown if the extension version is too old to work with the corresponding backend server.
+* Added support for self version checking. An error will now be thrown if the extension version is too old to work with the corresponding backend server.
 * A request for acquiring an access token now uses a POST rather than GET method.
 
 ## [0.75.6] - 2020-09-05
@@ -871,14 +871,14 @@
 * Merged record related capture options.
 
 ## [0.73.0] - 2020-05-08
-* Added support of GUI editor of annotated marker for page editor.
+* Added support for GUI editor of annotated marker for page editor.
 
 ## [0.70.0] - 2020-04-27
-* Added support of annotated marker for page editor.
-* Added support of sticky note for page editor.
+* Added support for annotated marker for page editor.
+* Added support for sticky note for page editor.
 
 ## [0.68.0] - 2020-04-17
-* Dropped support of using filesystem API for viewing a page archive.
+* Dropped support for using filesystem API for viewing a page archive.
 
 ## [0.63.0] - 2020-04-04
 * Added search and edit to the sidebar.
@@ -891,7 +891,7 @@
 * Implemented new transferring protocol to improve the performance of indexing through the backend server.
 
 ## [0.59.0] - 2020-01-18
-* Added support of context menu for the sidebar.
+* Added support for context menu for the sidebar.
 
 ## [0.53.0] - 2019-09-27
 * Added a capture option to remove hidden elements.
@@ -899,13 +899,13 @@
 * Added a capture option to limit resource size to download.
 
 ## [0.52.0] - 2019-09-15
-* Dropped support of `Scripted single HTML` format for a page capture.
+* Dropped support for `Scripted single HTML` format for a page capture.
 
 ## [0.51.0] - 2019-09-13
-* Added support to capture shadowRoot content.
+* Added support for capturing shadowRoot content.
 
 ## [0.50.0] - 2019-09-08
-* Fixed an issue where page editor is loaded for every page if backend server URL is not set.
+* Fixed an issue where page editor was loaded for every page if backend server URL was not set.
 
 ## [0.49.0] - 2019-09-07
 * Added page editor.
@@ -915,10 +915,10 @@
 * Added support for `no_tree` scrapbooks.
 
 ## [0.46.0] - 2019-08-25
-* Added support of drag and drop to manage scrapbook items.
+* Added support for drag and drop to manage scrapbook items.
 
 ## [0.45.0] - 2019-07-01
-* Added support to capture dynamic CSS.
+* Added support for capturing dynamic CSS.
 
 ## [0.44.1] - 2019-05-30
 * Fixed a packaging error for 0.44.0.
@@ -932,17 +932,17 @@
 
 ## [0.37.0] - 2019-03-18
 * Bumped server requirement to >= 0.2.
-* Added support of backend server version checking. An error will now be thrown if the backend server version is too old to work with this extension.
+* Added support for backend server version checking. An error will now be thrown if the backend server version is too old to work with this extension.
 
 ## [0.36.0] - 2019-03-14
 * Added support for sidebar and backend server.
 
 ## [0.32.0] - 2019-02-23
-* Dropped support of Firefox < 52 and Chromium < 55.
+* Dropped support for Firefox < 52 and Chromium < 55.
 * Refactor the code to work with async function.
 
 ## [0.27.0] - 2018-08-25
-* Dropped support of JavaScript when viewing a page archive, due to a security concern.
+* Dropped support for JavaScript when viewing a page archive, due to a security concern.
 
 ## [0.25.0] - 2017-12-29
 * Added unit tests.
