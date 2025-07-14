@@ -31,6 +31,10 @@ form {
   overflow: auto;
 }
 
+#relation {
+  margin-top: .5em;
+}
+
 footer {
   margin-top: .75em;
   text-align: end;

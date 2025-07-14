@@ -1445,12 +1445,13 @@
       });
     },
 
-    async pickItem({bookId, recentItemsKey = 'scrapbookLastPickedItems'}) {
+    async pickItem({bookId, recentItemsKey = 'scrapbookLastPickedItems', withRelation = true}) {
       const result = await scrapbook.openModalWindow({
         url: browser.runtime.getURL("scrapbook/itempicker.html"),
         args: {
           bookId,
           recentItemsKey,
+          withRelation,
         },
         windowCreateData: {width: 350, height: 600},
       });
@@ -2913,6 +2914,7 @@ Redirecting to file <a href="index.md">index.md</a>
               const result = await this.pickItem({bookId: this.bookId});
               if (!result) { return; }
               dialog.querySelector('[name="id"]').value = result.id;
+              dialog.querySelector('[name="index"]').value = result.index;
             });
           });
 
@@ -2977,6 +2979,7 @@ Redirecting to file <a href="index.md">index.md</a>
               const result = await this.pickItem({bookId: bookSelector.value});
               if (!result) { return; }
               dialog.querySelector('[name="id"]').value = result.id;
+              dialog.querySelector('[name="index"]').value = result.index;
             });
           });
 

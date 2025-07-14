@@ -409,6 +409,7 @@
       args: {
         bookId: getOptionFromElement(document.getElementById('tasks_bookId')),
         recentItemsKey: 'scrapbookLastPickedItems',
+        withRelation: !document.getElementById('tasks_index').matches(':disabled'),
       },
       windowCreateData: {width: 350, height: 600},
     });
@@ -563,12 +564,15 @@
     }
   }
 
-  function pickItem({bookId, id, title}) {
+  function pickItem({bookId, id, title, index}) {
     const bookIdElem = document.getElementById('tasks_bookId');
     setOptionToElement(bookIdElem, bookId);
 
     const idElem = document.getElementById('tasks_parentId');
     setOptionToElement(idElem, id);
+
+    const indexElem = document.getElementById('tasks_index');
+    setOptionToElement(indexElem, index);
 
     if (id !== 'root') {
       const elem = idElem.selectedOptions[0];

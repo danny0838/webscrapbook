@@ -745,6 +745,15 @@
   "IndexerTitle": {
     "message": "Generate site index"
   },
+  "ItemPickerRelationAbove": {
+    "message": "Above"
+  },
+  "ItemPickerRelationBelow": {
+    "message": "Below"
+  },
+  "ItemPickerRelationWithin": {
+    "message": "Inside"
+  },
   "ItemPickerTitle": {
     "message": "Select item"
   },

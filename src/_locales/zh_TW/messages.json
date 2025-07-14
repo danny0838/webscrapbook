@@ -745,6 +745,15 @@
   "IndexerTitle": {
     "message": "建立站台索引"
   },
+  "ItemPickerRelationAbove": {
+    "message": "上方"
+  },
+  "ItemPickerRelationBelow": {
+    "message": "下方"
+  },
+  "ItemPickerRelationWithin": {
+    "message": "內部"
+  },
   "ItemPickerTitle": {
     "message": "選擇項目"
   },

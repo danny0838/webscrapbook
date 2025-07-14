@@ -50,10 +50,12 @@
     tree: null,
     recentItemsKey: null,
 
-    async init({bookId, recentItemsKey}) {
+    async init({bookId, recentItemsKey, withRelation = false}) {
       try {
         this.recentItemsKey = recentItemsKey;
         this.bookId = bookId;
+
+        document.getElementById('relation').hidden = !withRelation;
 
         await scrapbook.loadOptionsAuto;
         await server.init();
@@ -204,20 +206,43 @@
         const bookId = this.bookId;
         const book = server.books[bookId];
         let id = 'root';
-        let title = id;
+        let title;
+        let index;
 
-        const elems = this.tree.getSelectedItemElems();
-        if (elems.length) {
-          id = elems[0].getAttribute('data-id');
-          title = book.meta[id].title;
+        const [itemElem] = this.tree.getSelectedItemElems();
+        if (itemElem) {
+          const pickedId = this.tree.getItemId(itemElem);
+
+          // apply relation
+          const relation = document.getElementById('relation').value;
+          switch (relation) {
+            case 'above': {
+              id = this.tree.getItemId(this.tree.getParent(itemElem));
+              index = this.tree.getIndex(itemElem);
+              break;
+            }
+            case 'below': {
+              id = this.tree.getItemId(this.tree.getParent(itemElem));
+              index = this.tree.getIndex(itemElem) + 1;
+              break;
+            }
+            case 'within':
+            default: {
+              id = pickedId;
+              break;
+            }
+          }
+
+          title = book.meta[id] && book.meta[id].title;
+
+          await this.saveRecentItems(pickedId);
         }
-
-        await this.saveRecentItems(id);
 
         dialog.close({
           bookId,
           id,
           title,
+          index,
         });
       } finally {
         this.enableUi(true);
