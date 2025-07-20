@@ -2418,7 +2418,7 @@
 
           case "form": {
             if (elem.hasAttribute("action")) {
-              const newUrl = capturer.resolveRelativeUrl(elem.getAttribute("action"), baseUrl);
+              const newUrl = capturer.resolveRelativeUrl(elem.getAttribute("action"), baseUrlFinal);
               captureRewriteAttr(elem, "action", newUrl);
             }
             break;

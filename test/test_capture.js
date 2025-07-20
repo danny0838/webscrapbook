@@ -2988,6 +2988,7 @@ p { background-image: url("about:blank"); }`);
           assert.strictEqual(doc.querySelector('table').getAttribute('background'), `table_background.py`);
 
           assert.strictEqual(doc.querySelector('a').getAttribute('href'), `${localhost}/capture_base_dynamic/resources/anchor.py`);
+          assert.strictEqual(doc.querySelector('form').getAttribute('action'), `${localhost}/capture_base_dynamic/resources/form.py`);
           assert.strictEqual(doc.querySelector('q').getAttribute('cite'), `${localhost}/capture_base_dynamic/resources/q.py`);
 
           var file = zip.file('img_src.py');
@@ -3189,6 +3190,7 @@ p { background-image: url("about:blank"); }`);
           assert.strictEqual(doc.querySelector('table').getAttribute('background'), `table_background.py`);
 
           assert.strictEqual(doc.querySelector('a').getAttribute('href'), `${localhost}/capture_base_dynamic/resources/resources/anchor.py`);
+          assert.strictEqual(doc.querySelector('form').getAttribute('action'), `${localhost}/capture_base_dynamic/resources/resources/form.py`);
           assert.strictEqual(doc.querySelector('q').getAttribute('cite'), `${localhost}/capture_base_dynamic/resources/resources/q.py`);
 
           var file = zip.file('img_src.py');
