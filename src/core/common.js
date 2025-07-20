@@ -2899,18 +2899,30 @@ dialog {
     return fn(str);
   };
 
+  /**
+   * ref: https://developer.mozilla.org/docs/Web/HTML/Guides/Comments
+   * ref: https://html.spec.whatwg.org/multipage/syntax.html#comments
+   */
   scrapbook.escapeHtmlComment = function (str) {
-    const regex = /-([\u200B]*)(?=-)/g;
+    const regex1 = /-([\u200B]*)(?=-)/g;
+    const regex2 = /^([\u200B]*-?)>/;
+    const regex3 = /<!([\u200B]*)-$/;
     const fn = scrapbook.escapeHtmlComment = function (str) {
-      return str.replace(regex, "-\u200B$1");
+      return str.replace(regex1, "-\u200B$1")
+                .replace(regex2, "\u200B$1>")
+                .replace(regex3, "<!\u200B$1-");
     };
     return fn(str);
   };
 
   scrapbook.unescapeHtmlComment = function (str) {
-    const regex = /-[\u200B]([\u200B]*)(?=-)/g;
+    const regex1 = /-[\u200B]([\u200B]*)-/g;
+    const regex2 = /^[\u200B]([\u200B]*-?)>/;
+    const regex3 = /<![\u200B]([\u200B]*)-$/;
     const fn = scrapbook.unescapeHtmlComment = function (str) {
-      return str.replace(regex, "-$1");
+      return str.replace(regex1, "-$1-")
+                .replace(regex2, "$1>")
+                .replace(regex3, "<!$1-");
     };
     return fn(str);
   };

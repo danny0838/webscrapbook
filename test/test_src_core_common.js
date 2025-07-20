@@ -412,6 +412,115 @@ describe('core/common.js', function () {
     }
   });
 
+  describe('scrapbook.escapeHtmlComment', function () {
+    it('basic', function () {
+      // starts with ">"
+      assert.strictEqual(
+        scrapbook.escapeHtmlComment('> a'),
+        '\u200B> a',
+      );
+      assert.strictEqual(
+        scrapbook.escapeHtmlComment('\u200B> a'),
+        '\u200B\u200B> a',
+      );
+
+      // starts with "->"
+      assert.strictEqual(
+        scrapbook.escapeHtmlComment('-> a'),
+        '\u200B-> a',
+      );
+      assert.strictEqual(
+        scrapbook.escapeHtmlComment('\u200B-> a'),
+        '\u200B\u200B-> a',
+      );
+
+      // contains "-->"
+      assert.strictEqual(
+        scrapbook.escapeHtmlComment('a --> b'),
+        'a -\u200B-> b',
+      );
+      assert.strictEqual(
+        scrapbook.escapeHtmlComment('a -\u200B-> b'),
+        'a -\u200B\u200B-> b',
+      );
+
+      // contains "--!>"
+      assert.strictEqual(
+        scrapbook.escapeHtmlComment('a --!> b'),
+        'a -\u200B-!> b',
+      );
+      assert.strictEqual(
+        scrapbook.escapeHtmlComment('a -\u200B-!> b'),
+        'a -\u200B\u200B-!> b',
+      );
+
+      // ends with "<!-"
+      assert.strictEqual(
+        scrapbook.escapeHtmlComment('a <!-'),
+        'a <!\u200B-',
+      );
+      assert.strictEqual(
+        scrapbook.escapeHtmlComment('a <!\u200B-'),
+        'a <!\u200B\u200B-',
+      );
+
+      // contains "--" (for XML)
+      assert.strictEqual(
+        scrapbook.escapeHtmlComment('--'),
+        '-\u200B-',
+      );
+      assert.strictEqual(
+        scrapbook.escapeHtmlComment('-\u200B-'),
+        '-\u200B\u200B-',
+      );
+    });
+  });
+
+  describe('scrapbook.unescapeHtmlComment', function () {
+    function checkUnescape(str) {
+      var s = str;
+      s = scrapbook.escapeHtmlComment(s);
+      s = scrapbook.unescapeHtmlComment(s);
+      assert.strictEqual(s, str, `"${escape(s)}" not equal to "${escape(str)}"`);
+
+      var s = str;
+      s = scrapbook.escapeHtmlComment(s);
+      s = scrapbook.escapeHtmlComment(s);
+      s = scrapbook.unescapeHtmlComment(s);
+      s = scrapbook.unescapeHtmlComment(s);
+      assert.strictEqual(s, str, `"${escape(s)}" not equal to "${escape(str)}"`);
+    }
+
+    it('basic', function () {
+      // basic
+      checkUnescape('<b>basic text</b>');
+
+      // starts with ">"
+      checkUnescape('> a');
+
+      // starts with "->"
+      checkUnescape('-> a');
+
+      // contains "-->"
+      checkUnescape('--> b');
+      checkUnescape('a --> b');
+      checkUnescape('a -->');
+
+      // contains "--!>"
+      checkUnescape('--!> b');
+      checkUnescape('a --!> b');
+      checkUnescape('a --!>');
+
+      // ends with "<!-"
+      checkUnescape('a <!-');
+
+      // contains "--" (for XML)
+      checkUnescape('a --');
+      checkUnescape('a -- b');
+      checkUnescape('-- b');
+    });
+  });
+
   describe('scrapbook.escapeFilename', function () {
     it('basic', function () {
       // escape " ", "%", "?", "#"
