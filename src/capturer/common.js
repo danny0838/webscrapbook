@@ -787,7 +787,7 @@
             if (!elem.hasAttribute("href")) { break; }
 
             // resolve using baseUrlFallback
-            const newUrl = capturer.resolveRelativeUrl(elem.getAttribute("href"), baseUrlFallback);
+            const newUrl = capturer.resolveRelativeUrl(elem.getAttribute("href"), baseUrlFallback, {skipLocal: false});
             captureRewriteAttr(elem, "href", newUrl);
 
             // Update baseUrl for the first base[href].

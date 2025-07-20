@@ -2861,6 +2861,9 @@ p { background-image: url("about:blank"); }`);
         assert.strictEqual(bases[0].getAttribute('href'), `http://example.com/`);
         assert.strictEqual(bases[0].getAttribute('target'), `_blank`);
         assert.strictEqual(bases[1].getAttribute('href'), `${localhost}/capture_base/subdir/dummy.html`);
+        assert.strictEqual(bases[2].getAttribute('href'), `${localhost}/capture_base/base.html?id=123`);
+        assert.strictEqual(bases[3].getAttribute('href'), `${localhost}/capture_base/base.html#foo`);
+        assert.strictEqual(bases[4].getAttribute('href'), `${localhost}/capture_base/base.html`);
       });
 
       it('should remove href attribute if capture.base = blank', async function () {
@@ -2881,6 +2884,9 @@ p { background-image: url("about:blank"); }`);
         assert(!bases[0].hasAttribute('href'));
         assert.strictEqual(bases[0].getAttribute('target'), `_blank`);
         assert(!bases[1].hasAttribute('href'));
+        assert(!bases[2].hasAttribute('href'));
+        assert(!bases[3].hasAttribute('href'));
+        assert(!bases[4].hasAttribute('href'));
       });
 
       it('should remove base element if capture.base = remove', async function () {
