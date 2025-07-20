@@ -464,14 +464,10 @@
     };
 
     const rewriteLocalLink = (relativeUrl, baseUrl) => {
-      let url = relativeUrl;
-      try {
-        url = new URL(relativeUrl, baseUrl).href;
-      } catch (ex) {}
-
-      const [urlMain, urlHash] = scrapbook.splitUrlByAnchor(url);
+      const url = capturer.resolveRelativeUrl(relativeUrl, baseUrl, {skipLocal: false});
 
       // This link targets the current page
+      const [urlMain, urlHash] = scrapbook.splitUrlByAnchor(url);
       if (urlMain === metaDocUrl && !capturer.isAboutUrl(metaDocUrl)) {
         // @TODO: for iframe whose URL is about:blank or about:srcdoc,
         // this link should point to the captured page
@@ -4363,10 +4359,12 @@
     return redirectedUrlMain + sourceUrlHash;
   };
 
-  capturer.resolveRelativeUrl = function (url, baseUrl) {
+  capturer.resolveRelativeUrl = function (url, baseUrl, {skipLocal = true} = {}) {
     // do not resolve an empty or pure hash URL
-    if (!url || url.startsWith("#")) {
-      return url;
+    if (skipLocal) {
+      if (!url || url.startsWith("#")) {
+        return url;
+      }
     }
 
     try {
