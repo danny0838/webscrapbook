@@ -3167,10 +3167,9 @@ dialog {
 
   scrapbook.isUrlAbsolute = function (url) {
     const regex = /^[a-z][a-z0-9+.-]*:/i;
-    const isUrlAbsolute = function (url) {
+    const isUrlAbsolute = scrapbook.isUrlAbsolute = function (url) {
       return regex.test(url || "");
     };
-    scrapbook.isUrlAbsolute = isUrlAbsolute;
     return isUrlAbsolute(url);
   };
 
