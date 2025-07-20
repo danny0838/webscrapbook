@@ -2449,7 +2449,9 @@
                   case "blank":
                     // HTML 5.1 2nd Edition / W3C Recommendation:
                     // The src attribute must be present, and must contain a valid non-empty URL.
-                    captureRewriteAttr(elem, "src", "about:blank");
+                    if (elem.hasAttribute("src")) {
+                      captureRewriteAttr(elem, "src", "about:blank");
+                    }
                     break;
                   case "remove":
                     captureRemoveNode(elem);
@@ -2459,18 +2461,20 @@
                     // eslint-disable-next-line no-fallthrough
                   case "save":
                   default: {
-                    const refPolicy = docRefPolicy;
-                    tasks.push(async () => {
-                      const response = await downloadFile({
-                        url: elem.getAttribute("src"),
-                        refUrl,
-                        refPolicy,
-                        settings,
-                        options,
+                    if (elem.hasAttribute("src")) {
+                      const refPolicy = docRefPolicy;
+                      tasks.push(async () => {
+                        const response = await downloadFile({
+                          url: elem.getAttribute("src"),
+                          refUrl,
+                          refPolicy,
+                          settings,
+                          options,
+                        });
+                        captureRewriteAttr(elem, "src", response.url);
+                        return response;
                       });
-                      captureRewriteAttr(elem, "src", response.url);
-                      return response;
-                    });
+                    }
                     break;
                   }
                 }
