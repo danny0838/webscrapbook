@@ -499,7 +499,7 @@
       let url = elem.getAttribute(attr);
 
       // scripts: script-like anchors
-      if (url.toLowerCase().startsWith("javascript:")) {
+      if (capturer.isJavascriptUrl(url)) {
         switch (options["capture.script"]) {
           case "save":
           case "link":
@@ -4405,6 +4405,14 @@
       return true;
     }
     return false;
+  };
+
+  capturer.isJavascriptUrl = function (url) {
+    try {
+      return new URL(url).protocol === "javascript:";
+    } catch {
+      return false;
+    }
   };
 
   capturer.getErrorUrl = function (sourceUrl, options) {

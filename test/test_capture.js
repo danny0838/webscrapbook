@@ -8446,6 +8446,7 @@ body { color: red; }`);
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
         var doc = await readFileAsDocument(indexBlob);
+
         var scripts = doc.querySelectorAll('script');
         assert.strictEqual(scripts[0].textContent.trim(), `console.log('head');`);
         assert.strictEqual(scripts[1].getAttribute('src'), `script1.js`);
@@ -8454,8 +8455,14 @@ body { color: red; }`);
         assert.strictEqual(scripts[3].textContent.trim(), `console.log('body');`);
         assert.strictEqual(scripts[4].textContent.trim(), `console.log('post-body');`);
         assert.strictEqual(scripts[5].textContent.trim(), `console.log('post-html');`);
-        var elem = doc.querySelector('a');
-        assert.strictEqual(elem.getAttribute('href').trim(), `javascript:console.log('a');`);
+
+        var anchors = doc.querySelectorAll('a');
+        assert.strictEqual(anchors[0].getAttribute('href'), `javascript:console.log('a');`);
+        assert.strictEqual(anchors[1].getAttribute('href'), `Javascript:console.log('a');`);
+        assert.strictEqual(anchors[2].getAttribute('href'), ` javascript:console.log('a');`);
+        assert.strictEqual(anchors[3].getAttribute('href'), `\tjavascript:console.log('a');`);
+        assert.strictEqual(anchors[4].getAttribute('href'), `\nj\na\nv\na\ns\nc\nr\ni\np\nt\n:console.log('a');`);
+
         var elem = doc.body;
         assert.strictEqual(elem.getAttribute('onload').trim(), `console.log('load');`);
         assert.strictEqual(elem.getAttribute('oncontextmenu').trim(), `return false;`);
@@ -8484,6 +8491,7 @@ body { color: red; }`);
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
         var doc = await readFileAsDocument(indexBlob);
+
         var scripts = doc.querySelectorAll('script');
         assert.strictEqual(scripts[0].textContent.trim(), `console.log('head');`);
         assert.strictEqual(scripts[1].getAttribute('src'), `${localhost}/capture_script/script1.js`);
@@ -8492,8 +8500,14 @@ body { color: red; }`);
         assert.strictEqual(scripts[3].textContent.trim(), `console.log('body');`);
         assert.strictEqual(scripts[4].textContent.trim(), `console.log('post-body');`);
         assert.strictEqual(scripts[5].textContent.trim(), `console.log('post-html');`);
-        var elem = doc.querySelector('a');
-        assert.strictEqual(elem.getAttribute('href').trim(), `javascript:console.log('a');`);
+
+        var anchors = doc.querySelectorAll('a');
+        assert.strictEqual(anchors[0].getAttribute('href'), `javascript:console.log('a');`);
+        assert.strictEqual(anchors[1].getAttribute('href'), `Javascript:console.log('a');`);
+        assert.strictEqual(anchors[2].getAttribute('href'), ` javascript:console.log('a');`);
+        assert.strictEqual(anchors[3].getAttribute('href'), `\tjavascript:console.log('a');`);
+        assert.strictEqual(anchors[4].getAttribute('href'), `\nj\na\nv\na\ns\nc\nr\ni\np\nt\n:console.log('a');`);
+
         var elem = doc.body;
         assert.strictEqual(elem.getAttribute('onload').trim(), `console.log('load');`);
         assert.strictEqual(elem.getAttribute('oncontextmenu').trim(), `return false;`);
@@ -8522,6 +8536,7 @@ body { color: red; }`);
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
         var doc = await readFileAsDocument(indexBlob);
+
         var scripts = doc.querySelectorAll('script');
         assert.strictEqual(scripts[0].textContent.trim(), ``);
         assert(!scripts[1].hasAttribute('src'));
@@ -8530,8 +8545,14 @@ body { color: red; }`);
         assert.strictEqual(scripts[3].textContent.trim(), ``);
         assert.strictEqual(scripts[4].textContent.trim(), ``);
         assert.strictEqual(scripts[5].textContent.trim(), ``);
-        var elem = doc.querySelector('a');
-        assert.strictEqual(elem.getAttribute('href').trim(), `javascript:`);
+
+        var anchors = doc.querySelectorAll('a');
+        assert.strictEqual(anchors[0].getAttribute('href'), `javascript:`);
+        assert.strictEqual(anchors[1].getAttribute('href'), `javascript:`);
+        assert.strictEqual(anchors[2].getAttribute('href'), `javascript:`);
+        assert.strictEqual(anchors[3].getAttribute('href'), `javascript:`);
+        assert.strictEqual(anchors[4].getAttribute('href'), `javascript:`);
+
         var elem = doc.body;
         assert(!elem.hasAttribute('onload'));
         assert(!elem.hasAttribute('oncontextmenu'));
@@ -8560,10 +8581,17 @@ body { color: red; }`);
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
         var doc = await readFileAsDocument(indexBlob);
+
         var scripts = doc.querySelectorAll('script');
         assert.strictEqual(scripts.length, 0);
-        var elem = doc.querySelector('a');
-        assert.strictEqual(elem.getAttribute('href').trim(), `javascript:`);
+
+        var anchors = doc.querySelectorAll('a');
+        assert.strictEqual(anchors[0].getAttribute('href'), `javascript:`);
+        assert.strictEqual(anchors[1].getAttribute('href'), `javascript:`);
+        assert.strictEqual(anchors[2].getAttribute('href'), `javascript:`);
+        assert.strictEqual(anchors[3].getAttribute('href'), `javascript:`);
+        assert.strictEqual(anchors[4].getAttribute('href'), `javascript:`);
+
         var elem = doc.body;
         assert(!elem.hasAttribute('onload'));
         assert(!elem.hasAttribute('oncontextmenu'));
