@@ -463,6 +463,25 @@
       }
     };
 
+    const resolveRelativeUrl = (relativeUrl, baseUrl, {checkJavascript = false, skipLocal} = {}) => {
+      // scripts: script-like URLs
+      if (checkJavascript && capturer.isJavascriptUrl(relativeUrl)) {
+        switch (options["capture.script"]) {
+          case "save":
+          case "link":
+            // do nothing
+            break;
+          case "blank":
+          case "remove":
+          default:
+            relativeUrl = "javascript:";
+            break;
+        }
+      }
+
+      return capturer.resolveRelativeUrl(relativeUrl, baseUrl, {skipLocal});
+    };
+
     const resolveLocalLink = (relativeUrl, baseUrl) => {
       const url = capturer.resolveRelativeUrl(relativeUrl, baseUrl, {skipLocal: false});
 
@@ -676,7 +695,7 @@
           case "script": {
             for (const attr of ["href", "xlink:href"]) {
               if (!elem.hasAttribute(attr)) { continue; }
-              const newUrl = capturer.resolveRelativeUrl(elem.getAttribute(attr), baseUrl);
+              const newUrl = resolveRelativeUrl(elem.getAttribute(attr), baseUrl);
               captureRewriteAttr(elem, attr, newUrl);
             }
 
@@ -782,7 +801,7 @@
             if (!elem.hasAttribute("href")) { break; }
 
             // resolve using baseUrlFallback
-            const newUrl = capturer.resolveRelativeUrl(elem.getAttribute("href"), baseUrlFallback, {skipLocal: false});
+            const newUrl = resolveRelativeUrl(elem.getAttribute("href"), baseUrlFallback, {skipLocal: false});
             captureRewriteAttr(elem, "href", newUrl);
 
             // Update baseUrl for the first base[href].
@@ -923,13 +942,13 @@
 
           case "link": {
             if (elem.hasAttribute("href")) {
-              const newUrl = capturer.resolveRelativeUrl(elem.getAttribute("href"), baseUrl);
+              const newUrl = resolveRelativeUrl(elem.getAttribute("href"), baseUrl);
               captureRewriteAttr(elem, "href", newUrl);
             }
 
             if (elem.hasAttribute("imagesrcset")) {
               const rewriteSrcset = scrapbook.rewriteSrcset(elem.getAttribute("imagesrcset"), (url) => {
-                return capturer.resolveRelativeUrl(url, baseUrl);
+                return resolveRelativeUrl(url, baseUrl);
               });
               captureRewriteAttr(elem, "imagesrcset", rewriteSrcset);
             }
@@ -1231,7 +1250,7 @@
           // scripts: script
           case "script": {
             if (elem.hasAttribute("src")) {
-              const newUrl = capturer.resolveRelativeUrl(elem.getAttribute("src"), baseUrl);
+              const newUrl = resolveRelativeUrl(elem.getAttribute("src"), baseUrl);
               captureRewriteAttr(elem, "src", newUrl);
             }
 
@@ -1335,7 +1354,7 @@
           case "td": {
             // deprecated: background attribute (deprecated since HTML5)
             if (elem.hasAttribute("background")) {
-              const newUrl = capturer.resolveRelativeUrl(elem.getAttribute("background"), baseUrl);
+              const newUrl = resolveRelativeUrl(elem.getAttribute("background"), baseUrl);
               captureRewriteAttr(elem, "background", newUrl);
 
               switch (options["capture.imageBackground"]) {
@@ -1374,10 +1393,12 @@
             const frameSrc = origNodeMap.get(frame);
             let sourceUrl;
             if (frame.hasAttribute("src")) {
-              sourceUrl = capturer.resolveRelativeUrl(frame.getAttribute("src"), baseUrl);
+              sourceUrl = resolveRelativeUrl(frame.getAttribute("src"), baseUrl, {checkJavascript: true});
               captureRewriteAttr(frame, "src", sourceUrl);
             }
 
+            // @TODO: javascript: URL content is preserved only when the frame
+            // page content is not saved.
             const baseUrlCurrent = baseUrl;
             const refPolicy = frame.referrerPolicy || docRefPolicy;
             switch (options["capture.frame"]) {
@@ -1640,7 +1661,7 @@
               switch (options["capture.ping"]) {
                 case "link": {
                   const newUrls = scrapbook.rewriteUrls(elem.getAttribute("ping"), (url) => {
-                    return capturer.resolveRelativeUrl(url, baseUrlFinal);
+                    return resolveRelativeUrl(url, baseUrlFinal);
                   });
                   captureRewriteAttr(elem, "ping", newUrls);
                   break;
@@ -1660,13 +1681,13 @@
           // images: img
           case "img": {
             if (elem.hasAttribute("src")) {
-              const newUrl = capturer.resolveRelativeUrl(elem.getAttribute("src"), baseUrl);
+              const newUrl = resolveRelativeUrl(elem.getAttribute("src"), baseUrl);
               captureRewriteAttr(elem, "src", newUrl);
             }
 
             if (elem.hasAttribute("srcset")) {
               const rewriteSrcset = scrapbook.rewriteSrcset(elem.getAttribute("srcset"), (url) => {
-                return capturer.resolveRelativeUrl(url, baseUrl);
+                return resolveRelativeUrl(url, baseUrl);
               });
               captureRewriteAttr(elem, "srcset", rewriteSrcset);
             }
@@ -1755,7 +1776,7 @@
           case "picture": {
             for (const subElem of elem.querySelectorAll('source[srcset]')) {
               const rewriteSrcset = scrapbook.rewriteSrcset(subElem.getAttribute("srcset"), (url) => {
-                return capturer.resolveRelativeUrl(url, baseUrl);
+                return resolveRelativeUrl(url, baseUrl);
               });
               captureRewriteAttr(subElem, "srcset", rewriteSrcset);
             }
@@ -1798,7 +1819,7 @@
                 for (const subElem of elem.querySelectorAll('source[srcset]')) {
                   tasks.push(async () => {
                     const response = await scrapbook.rewriteSrcset(subElem.getAttribute("srcset"), async (url) => {
-                      const newUrl = capturer.resolveRelativeUrl(url, baseUrl);
+                      const newUrl = resolveRelativeUrl(url, baseUrl);
                       return (await downloadFile({
                         url: newUrl,
                         refUrl,
@@ -1820,12 +1841,12 @@
           // media: audio
           case "audio": {
             if (elem.hasAttribute("src")) {
-              const newUrl = capturer.resolveRelativeUrl(elem.getAttribute("src"), baseUrl);
+              const newUrl = resolveRelativeUrl(elem.getAttribute("src"), baseUrl);
               captureRewriteAttr(elem, "src", newUrl);
             }
 
             for (const subElem of elem.querySelectorAll('source[src], track[src]')) {
-              const newUrl = capturer.resolveRelativeUrl(subElem.getAttribute("src"), baseUrl);
+              const newUrl = resolveRelativeUrl(subElem.getAttribute("src"), baseUrl);
               captureRewriteAttr(subElem, "src", newUrl);
             }
 
@@ -1927,17 +1948,17 @@
           // media: video
           case "video": {
             if (elem.hasAttribute("poster")) {
-              const newUrl = capturer.resolveRelativeUrl(elem.getAttribute("poster"), baseUrl);
+              const newUrl = resolveRelativeUrl(elem.getAttribute("poster"), baseUrl);
               captureRewriteAttr(elem, "poster", newUrl);
             }
 
             if (elem.hasAttribute("src")) {
-              const newUrl = capturer.resolveRelativeUrl(elem.getAttribute("src"), baseUrl);
+              const newUrl = resolveRelativeUrl(elem.getAttribute("src"), baseUrl);
               captureRewriteAttr(elem, "src", newUrl);
             }
 
             for (const subElem of elem.querySelectorAll('source[src], track[src]')) {
-              const newUrl = capturer.resolveRelativeUrl(subElem.getAttribute("src"), baseUrl);
+              const newUrl = resolveRelativeUrl(subElem.getAttribute("src"), baseUrl);
               captureRewriteAttr(subElem, "src", newUrl);
             }
 
@@ -2073,12 +2094,12 @@
           // media: embed
           case "embed": {
             if (elem.hasAttribute("src")) {
-              const newUrl = capturer.resolveRelativeUrl(elem.getAttribute("src"), baseUrl);
+              const newUrl = resolveRelativeUrl(elem.getAttribute("src"), baseUrl);
               captureRewriteAttr(elem, "src", newUrl);
             }
 
             if (elem.hasAttribute("pluginspage")) {
-              const newUrl = capturer.resolveRelativeUrl(elem.getAttribute("pluginspage"), baseUrl);
+              const newUrl = resolveRelativeUrl(elem.getAttribute("pluginspage"), baseUrl);
               captureRewriteAttr(elem, "pluginspage", newUrl);
             }
 
@@ -2176,7 +2197,7 @@
             // Some browsers ignore the codebase attribute (e.g. Chromium).
             // We follow it anyway.
             if (elem.hasAttribute("codebase")) {
-              objectBaseUrl = capturer.resolveRelativeUrl(elem.getAttribute("codebase"), objectBaseUrl);
+              objectBaseUrl = resolveRelativeUrl(elem.getAttribute("codebase"), objectBaseUrl);
               captureRewriteAttr(elem, "codebase", null);
             }
 
@@ -2184,18 +2205,18 @@
             // it's usually an absolute non-http URI.
             // https://developer.mozilla.org/en-US/docs/Web/HTML/Element/object
             if (elem.hasAttribute("classid")) {
-              const newUrl = capturer.resolveRelativeUrl(elem.getAttribute("classid"), objectBaseUrl);
+              const newUrl = resolveRelativeUrl(elem.getAttribute("classid"), objectBaseUrl);
               captureRewriteAttr(elem, "classid", newUrl);
             }
 
             if (elem.hasAttribute("data")) {
-              const newUrl = capturer.resolveRelativeUrl(elem.getAttribute("data"), objectBaseUrl);
+              const newUrl = resolveRelativeUrl(elem.getAttribute("data"), objectBaseUrl);
               captureRewriteAttr(elem, "data", newUrl);
             }
 
             if (elem.hasAttribute("archive")) {
               const newUrls = scrapbook.rewriteUrls(elem.getAttribute("archive"), (url) => {
-                return capturer.resolveRelativeUrl(url, objectBaseUrl);
+                return resolveRelativeUrl(url, objectBaseUrl);
               });
               captureRewriteAttr(elem, "archive", newUrls);
             }
@@ -2314,24 +2335,24 @@
             let appletBaseUrl = baseUrl;
 
             if (elem.hasAttribute("codebase")) {
-              appletBaseUrl = capturer.resolveRelativeUrl(elem.getAttribute("codebase"), appletBaseUrl);
+              appletBaseUrl = resolveRelativeUrl(elem.getAttribute("codebase"), appletBaseUrl);
               captureRewriteAttr(elem, "codebase", null);
             }
 
             // According to doc, classid is used by applet.
             // http://help.dottoro.com/lhbvlpge.php
             if (elem.hasAttribute("classid")) {
-              const newUrl = capturer.resolveRelativeUrl(elem.getAttribute("classid"), appletBaseUrl);
+              const newUrl = resolveRelativeUrl(elem.getAttribute("classid"), appletBaseUrl);
               captureRewriteAttr(elem, "classid", newUrl);
             }
 
             if (elem.hasAttribute("code")) {
-              let newUrl = capturer.resolveRelativeUrl(elem.getAttribute("code"), appletBaseUrl);
+              let newUrl = resolveRelativeUrl(elem.getAttribute("code"), appletBaseUrl);
               captureRewriteAttr(elem, "code", newUrl);
             }
 
             if (elem.hasAttribute("archive")) {
-              let newUrl = capturer.resolveRelativeUrl(elem.getAttribute("archive"), appletBaseUrl);
+              let newUrl = resolveRelativeUrl(elem.getAttribute("archive"), appletBaseUrl);
               captureRewriteAttr(elem, "archive", newUrl);
             }
 
@@ -2418,7 +2439,7 @@
 
           case "form": {
             if (elem.hasAttribute("action")) {
-              const newUrl = capturer.resolveRelativeUrl(elem.getAttribute("action"), baseUrlFinal);
+              const newUrl = resolveRelativeUrl(elem.getAttribute("action"), baseUrlFinal, {checkJavascript: true});
               captureRewriteAttr(elem, "action", newUrl);
             }
             break;
@@ -2431,12 +2452,12 @@
               // images: input
               case "image": {
                 if (elem.hasAttribute("formaction")) {
-                  const newUrl = capturer.resolveRelativeUrl(elem.getAttribute("formaction"), baseUrlFinal);
+                  const newUrl = resolveRelativeUrl(elem.getAttribute("formaction"), baseUrlFinal, {checkJavascript: true});
                   captureRewriteAttr(elem, "formaction", newUrl);
                 }
 
                 if (elem.hasAttribute("src")) {
-                  const newUrl = capturer.resolveRelativeUrl(elem.getAttribute("src"), baseUrl);
+                  const newUrl = resolveRelativeUrl(elem.getAttribute("src"), baseUrl);
                   captureRewriteAttr(elem, "src", newUrl);
                 }
                 switch (options["capture.image"]) {
@@ -2554,7 +2575,7 @@
               // form: input (submit)
               case "submit": {
                 if (elem.hasAttribute("formaction")) {
-                  const newUrl = capturer.resolveRelativeUrl(elem.getAttribute("formaction"), baseUrlFinal);
+                  const newUrl = resolveRelativeUrl(elem.getAttribute("formaction"), baseUrlFinal, {checkJavascript: true});
                   captureRewriteAttr(elem, "formaction", newUrl);
                 }
               }
@@ -2594,7 +2615,7 @@
           // form: button
           case "button": {
             if (elem.hasAttribute("formaction")) {
-              const newUrl = capturer.resolveRelativeUrl(elem.getAttribute("formaction"), baseUrlFinal);
+              const newUrl = resolveRelativeUrl(elem.getAttribute("formaction"), baseUrlFinal, {checkJavascript: true});
               captureRewriteAttr(elem, "formaction", newUrl);
             }
             break;
@@ -2664,7 +2685,7 @@
           case "ins":
           case "del": {
             if (elem.hasAttribute("cite")) {
-              const newUrl = capturer.resolveRelativeUrl(elem.getAttribute("cite"), baseUrlFinal);
+              const newUrl = resolveRelativeUrl(elem.getAttribute("cite"), baseUrlFinal);
               captureRewriteAttr(elem, "cite", newUrl);
             }
             break;

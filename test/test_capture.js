@@ -8463,6 +8463,11 @@ body { color: red; }`);
         assert.strictEqual(anchors[3].getAttribute('href'), `\tjavascript:console.log('a');`);
         assert.strictEqual(anchors[4].getAttribute('href'), `\nj\na\nv\na\ns\nc\nr\ni\np\nt\n:console.log('a');`);
 
+        assert.strictEqual(doc.querySelector('form').getAttribute('action'), `javascript:console.log('form');`);
+        assert.strictEqual(doc.querySelector('input[type="image"]').getAttribute('formaction'), `javascript:console.log('input[type=image]');`);
+        assert.strictEqual(doc.querySelector('input[type="submit"]').getAttribute('formaction'), `javascript:console.log('input[type=submit]');`);
+        assert.strictEqual(doc.querySelector('button').getAttribute('formaction'), `javascript:console.log('button');`);
+
         var elem = doc.body;
         assert.strictEqual(elem.getAttribute('onload').trim(), `console.log('load');`);
         assert.strictEqual(elem.getAttribute('oncontextmenu').trim(), `return false;`);
@@ -8507,6 +8512,11 @@ body { color: red; }`);
         assert.strictEqual(anchors[2].getAttribute('href'), ` javascript:console.log('a');`);
         assert.strictEqual(anchors[3].getAttribute('href'), `\tjavascript:console.log('a');`);
         assert.strictEqual(anchors[4].getAttribute('href'), `\nj\na\nv\na\ns\nc\nr\ni\np\nt\n:console.log('a');`);
+
+        assert.strictEqual(doc.querySelector('form').getAttribute('action'), `javascript:console.log('form');`);
+        assert.strictEqual(doc.querySelector('input[type="image"]').getAttribute('formaction'), `javascript:console.log('input[type=image]');`);
+        assert.strictEqual(doc.querySelector('input[type="submit"]').getAttribute('formaction'), `javascript:console.log('input[type=submit]');`);
+        assert.strictEqual(doc.querySelector('button').getAttribute('formaction'), `javascript:console.log('button');`);
 
         var elem = doc.body;
         assert.strictEqual(elem.getAttribute('onload').trim(), `console.log('load');`);
@@ -8553,6 +8563,11 @@ body { color: red; }`);
         assert.strictEqual(anchors[3].getAttribute('href'), `javascript:`);
         assert.strictEqual(anchors[4].getAttribute('href'), `javascript:`);
 
+        assert.strictEqual(doc.querySelector('form').getAttribute('action'), `javascript:`);
+        assert.strictEqual(doc.querySelector('input[type="image"]').getAttribute('formaction'), `javascript:`);
+        assert.strictEqual(doc.querySelector('input[type="submit"]').getAttribute('formaction'), `javascript:`);
+        assert.strictEqual(doc.querySelector('button').getAttribute('formaction'), `javascript:`);
+
         var elem = doc.body;
         assert(!elem.hasAttribute('onload'));
         assert(!elem.hasAttribute('oncontextmenu'));
@@ -8591,6 +8606,11 @@ body { color: red; }`);
         assert.strictEqual(anchors[2].getAttribute('href'), `javascript:`);
         assert.strictEqual(anchors[3].getAttribute('href'), `javascript:`);
         assert.strictEqual(anchors[4].getAttribute('href'), `javascript:`);
+
+        assert.strictEqual(doc.querySelector('form').getAttribute('action'), `javascript:`);
+        assert.strictEqual(doc.querySelector('input[type="image"]').getAttribute('formaction'), `javascript:`);
+        assert.strictEqual(doc.querySelector('input[type="submit"]').getAttribute('formaction'), `javascript:`);
+        assert.strictEqual(doc.querySelector('button').getAttribute('formaction'), `javascript:`);
 
         var elem = doc.body;
         assert(!elem.hasAttribute('onload'));
@@ -9082,7 +9102,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
     });
 
     describe('about: frame', function () {
-      it('save the current content for about: frames', async function () {
+      it('should save the current content for about: frames', async function () {
         var options = Object.assign({}, baseOptions, {
           "capture.frame": "save",
           "capture.saveResourcesSequentially": true,
@@ -9116,6 +9136,180 @@ document.querySelector("p").textContent = "srcdoc content modified";
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
         var doc = await readFileAsDocument(indexBlob);
         assert.strictEqual(doc.body.textContent.trim(), 'iframe modified 2');
+      });
+    });
+
+    describe('javascript: frame', function () {
+      var options = Object.assign({}, baseOptions, {
+        "capture.saveResourcesSequentially": true,
+      });
+
+      describe('should tidy source URL according to `capture.script` when the raw URL is to be saved', function () {
+        for (const captureFrame of ["save"]) {
+          for (const captureScript of ["save", "link"]) {
+            it(`capture.frame = ${captureFrame}, capture.script = ${captureScript}`, async function () {
+              options["capture.frame"] = captureFrame;
+              options["capture.script"] = captureScript;
+
+              var blob = await capture({
+                url: `${localhost}/capture_frame/javascript.html`,
+                options,
+              });
+
+              var zip = await new JSZip().loadAsync(blob);
+
+              var indexFile = zip.file('index.html');
+              var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+              var doc = await readFileAsDocument(indexBlob);
+
+              var frames = doc.querySelectorAll('iframe');
+              assert.strictEqual(frames[0].getAttribute('src'), "index_1.html");
+              assert.strictEqual(frames[1].getAttribute('src'), `javascript:console.log('iframe');`);
+            });
+          }
+          for (const captureScript of ["blank", "remove"]) {
+            it(`capture.frame = ${captureFrame}, capture.script = ${captureScript}`, async function () {
+              options["capture.frame"] = captureFrame;
+              options["capture.script"] = captureScript;
+
+              var blob = await capture({
+                url: `${localhost}/capture_frame/javascript.html`,
+                options,
+              });
+
+              var zip = await new JSZip().loadAsync(blob);
+
+              var indexFile = zip.file('index.html');
+              var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+              var doc = await readFileAsDocument(indexBlob);
+
+              var frames = doc.querySelectorAll('iframe');
+              assert.strictEqual(frames[0].getAttribute('src'), "index_1.html");
+              assert.strictEqual(frames[1].getAttribute('src'), `javascript:`);
+            });
+          }
+        }
+
+        for (const captureFrame of ["link"]) {
+          for (const captureScript of ["save", "link"]) {
+            it(`capture.frame = ${captureFrame}, capture.script = ${captureScript}`, async function () {
+              options["capture.frame"] = captureFrame;
+              options["capture.script"] = captureScript;
+
+              var blob = await capture({
+                url: `${localhost}/capture_frame/javascript.html`,
+                options,
+              });
+
+              var zip = await new JSZip().loadAsync(blob);
+
+              var indexFile = zip.file('index.html');
+              var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+              var doc = await readFileAsDocument(indexBlob);
+
+              var frames = doc.querySelectorAll('iframe');
+              assert.strictEqual(frames[0].getAttribute('src'), `javascript:console.log('iframe');`);
+              assert.strictEqual(frames[1].getAttribute('src'), `javascript:console.log('iframe');`);
+
+              // frame
+              var blob = await capture({
+                url: `${localhost}/capture_frame/javascript_frame.html`,
+                options,
+              });
+
+              var zip = await new JSZip().loadAsync(blob);
+
+              var indexFile = zip.file('index.html');
+              var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+              var doc = await readFileAsDocument(indexBlob);
+
+              var frames = doc.querySelectorAll('frame');
+              assert.strictEqual(frames[0].getAttribute('src'), `javascript:console.log('frame');`);
+            });
+          }
+          for (const captureScript of ["blank", "remove"]) {
+            it(`capture.frame = ${captureFrame}, capture.script = ${captureScript}`, async function () {
+              options["capture.frame"] = captureFrame;
+              options["capture.script"] = captureScript;
+
+              var blob = await capture({
+                url: `${localhost}/capture_frame/javascript.html`,
+                options,
+              });
+
+              var zip = await new JSZip().loadAsync(blob);
+
+              var indexFile = zip.file('index.html');
+              var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+              var doc = await readFileAsDocument(indexBlob);
+
+              var frames = doc.querySelectorAll('iframe');
+              assert.strictEqual(frames[0].getAttribute('src'), `javascript:`);
+              assert.strictEqual(frames[1].getAttribute('src'), `javascript:`);
+
+              // frame
+              var blob = await capture({
+                url: `${localhost}/capture_frame/javascript_frame.html`,
+                options,
+              });
+
+              var zip = await new JSZip().loadAsync(blob);
+
+              var indexFile = zip.file('index.html');
+              var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+              var doc = await readFileAsDocument(indexBlob);
+
+              var frames = doc.querySelectorAll('frame');
+              assert.strictEqual(frames[0].getAttribute('src'), `javascript:`);
+            });
+          }
+        }
+
+        for (const captureFrame of ["blank"]) {
+          for (const captureScript of ["save", "link", "blank", "remove"]) {
+            it(`capture.frame = ${captureFrame}, capture.script = ${captureScript}`, async function () {
+              options["capture.frame"] = captureFrame;
+              options["capture.script"] = captureScript;
+
+              var blob = await capture({
+                url: `${localhost}/capture_frame/javascript.html`,
+                options,
+              });
+
+              var zip = await new JSZip().loadAsync(blob);
+
+              var indexFile = zip.file('index.html');
+              var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+              var doc = await readFileAsDocument(indexBlob);
+
+              var frames = doc.querySelectorAll('iframe');
+              assert(!frames[0].hasAttribute('src'));
+              assert(!frames[1].hasAttribute('src'));
+            });
+          }
+        }
+
+        for (const captureFrame of ["remove"]) {
+          for (const captureScript of ["save", "link", "blank", "remove"]) {
+            it(`capture.frame = ${captureFrame}, capture.script = ${captureScript}`, async function () {
+              options["capture.frame"] = captureFrame;
+              options["capture.script"] = captureScript;
+
+              var blob = await capture({
+                url: `${localhost}/capture_frame/javascript.html`,
+                options,
+              });
+
+              var zip = await new JSZip().loadAsync(blob);
+
+              var indexFile = zip.file('index.html');
+              var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+              var doc = await readFileAsDocument(indexBlob);
+
+              assert(!doc.querySelector('iframe'));
+            });
+          }
+        }
       });
     });
 
