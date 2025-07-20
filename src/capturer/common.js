@@ -518,11 +518,6 @@
       url = rewriteLocalLink(url, baseUrlFinal);
       captureRewriteAttr(elem, attr, url);
 
-      // skip further processing for non-absolute links
-      if (!scrapbook.isUrlAbsolute(url)) {
-        return;
-      }
-
       // check downLink
       if (['http:', 'https:', 'file:', 'blob:'].some(p => url.startsWith(p))) {
         if (["header", "url"].includes(options["capture.downLink.file.mode"]) ||
