@@ -2427,8 +2427,14 @@
           // form: input
           case "input": {
             switch (elem.type.toLowerCase()) {
+              // form: input (image)
               // images: input
               case "image": {
+                if (elem.hasAttribute("formaction")) {
+                  const newUrl = capturer.resolveRelativeUrl(elem.getAttribute("formaction"), baseUrlFinal);
+                  captureRewriteAttr(elem, "formaction", newUrl);
+                }
+
                 if (elem.hasAttribute("src")) {
                   const newUrl = capturer.resolveRelativeUrl(elem.getAttribute("src"), baseUrl);
                   captureRewriteAttr(elem, "src", newUrl);
@@ -2545,7 +2551,15 @@
                 }
                 break;
               }
+              // form: input (submit)
+              case "submit": {
+                if (elem.hasAttribute("formaction")) {
+                  const newUrl = capturer.resolveRelativeUrl(elem.getAttribute("formaction"), baseUrlFinal);
+                  captureRewriteAttr(elem, "formaction", newUrl);
+                }
+              }
               // form: input (other)
+              // eslint-disable-next-line no-fallthrough
               default: {
                 switch (options["capture.formStatus"]) {
                   case "save-all":
@@ -2573,6 +2587,15 @@
                 }
                 break;
               }
+            }
+            break;
+          }
+
+          // form: button
+          case "button": {
+            if (elem.hasAttribute("formaction")) {
+              const newUrl = capturer.resolveRelativeUrl(elem.getAttribute("formaction"), baseUrlFinal);
+              captureRewriteAttr(elem, "formaction", newUrl);
             }
             break;
           }

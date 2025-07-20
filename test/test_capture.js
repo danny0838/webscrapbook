@@ -2989,6 +2989,9 @@ p { background-image: url("about:blank"); }`);
 
           assert.strictEqual(doc.querySelector('a').getAttribute('href'), `${localhost}/capture_base_dynamic/resources/anchor.py`);
           assert.strictEqual(doc.querySelector('form').getAttribute('action'), `${localhost}/capture_base_dynamic/resources/form.py`);
+          assert.strictEqual(doc.querySelector('form input[type="image"]').getAttribute('formaction'), `${localhost}/capture_base_dynamic/resources/input-image.py`);
+          assert.strictEqual(doc.querySelector('form input[type="submit"]').getAttribute('formaction'), `${localhost}/capture_base_dynamic/resources/input-submit.py`);
+          assert.strictEqual(doc.querySelector('form button').getAttribute('formaction'), `${localhost}/capture_base_dynamic/resources/button.py`);
           assert.strictEqual(doc.querySelector('q').getAttribute('cite'), `${localhost}/capture_base_dynamic/resources/q.py`);
 
           var file = zip.file('img_src.py');
@@ -3191,6 +3194,9 @@ p { background-image: url("about:blank"); }`);
 
           assert.strictEqual(doc.querySelector('a').getAttribute('href'), `${localhost}/capture_base_dynamic/resources/resources/anchor.py`);
           assert.strictEqual(doc.querySelector('form').getAttribute('action'), `${localhost}/capture_base_dynamic/resources/resources/form.py`);
+          assert.strictEqual(doc.querySelector('form input[type="image"]').getAttribute('formaction'), `${localhost}/capture_base_dynamic/resources/resources/input-image.py`);
+          assert.strictEqual(doc.querySelector('form input[type="submit"]').getAttribute('formaction'), `${localhost}/capture_base_dynamic/resources/resources/input-submit.py`);
+          assert.strictEqual(doc.querySelector('form button').getAttribute('formaction'), `${localhost}/capture_base_dynamic/resources/resources/button.py`);
           assert.strictEqual(doc.querySelector('q').getAttribute('cite'), `${localhost}/capture_base_dynamic/resources/resources/q.py`);
 
           var file = zip.file('img_src.py');
