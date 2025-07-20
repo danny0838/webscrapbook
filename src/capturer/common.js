@@ -463,7 +463,7 @@
       }
     };
 
-    const rewriteLocalLink = (relativeUrl, baseUrl) => {
+    const resolveLocalLink = (relativeUrl, baseUrl) => {
       const url = capturer.resolveRelativeUrl(relativeUrl, baseUrl, {skipLocal: false});
 
       // This link targets the current page
@@ -515,7 +515,7 @@
       }
 
       // check local link and rewrite url
-      url = rewriteLocalLink(url, baseUrlFinal);
+      url = resolveLocalLink(url, baseUrlFinal);
       captureRewriteAttr(elem, attr, url);
 
       // check downLink
@@ -563,7 +563,7 @@
       let url = elem.getAttribute(attr);
 
       // check local link and rewrite url
-      url = rewriteLocalLink(url, baseUrlFinal);
+      url = resolveLocalLink(url, baseUrlFinal);
       captureRewriteAttr(elem, attr, url);
 
       switch (options["capture.image"]) {
@@ -848,7 +848,7 @@
                   // rewrite meta refresh
                   const metaRefresh = scrapbook.parseHeaderRefresh(elem.getAttribute("content"));
                   if (metaRefresh.url) {
-                    const url = rewriteLocalLink(metaRefresh.url, baseUrl);
+                    const url = resolveLocalLink(metaRefresh.url, baseUrl);
                     captureRewriteAttr(elem, "content", metaRefresh.time + (url ? "; url=" + url : ""));
 
                     // check downLink
