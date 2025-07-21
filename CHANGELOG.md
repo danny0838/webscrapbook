@@ -3,6 +3,14 @@
 * Versions before 1.0 are in initial development. APIs are not stable for these versions, even a `y` version can involve a breaking change, and only partial notable changes are summarized in this document. See full commit history in the source repository for details.
 * Backend server requirement in this document refers to the version of [`webscrapbook` Python package](https://github.com/danny0838/pywebscrapbook) (or PyWebScrapBook).
 
+## [2.23.0] - 2025-07-21
+* Added support for rewriting the `formaction` attribute on related elements.
+* Fixed an issue where `javascript:` URLs were not cleared according to the `capture.script` option on `action` and frame `src` attributes, and in certain edge cases on anchor `href` attributes.
+* Fixed a script error on `input[type="image"]` without a `src` attribute.
+* Fixed incorrect base URL resolution for `form[action]` in certain spec-violating cases.
+* Fixed incorrect escaping of HTML comments in certain edge cases.
+* Miscellaneous improvements to the internal code.
+
 ## [2.22.1] - 2025-07-14
 * Item picker now allows specifying a relative position.
 
