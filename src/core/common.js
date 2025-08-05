@@ -673,7 +673,7 @@ if (typeof Promise.withResolvers === 'undefined') {
         soup.add('node.js');
       }
 
-      if (manifest.browser_specific_settings && manifest.browser_specific_settings.gecko) {
+      if (manifest.browser_specific_settings?.gecko) {
         soup.add('gecko');
       }
 
@@ -874,7 +874,7 @@ if (typeof Promise.withResolvers === 'undefined') {
    * @return {*|Promise<*>}
    */
   scrapbook.deserializeObject = function (obj) {
-    switch (obj && obj.__type__) {
+    switch (obj?.__type__) {
       case "File": {
         const {data, name, type, lastModified} = obj;
         return new File(
@@ -1878,7 +1878,7 @@ dialog {
         return date.toLocaleString();
       }
 
-      const isUtc = mode && mode.toLowerCase() === 'utc';
+      const isUtc = mode?.toLowerCase() === 'utc';
       const k = id + (isUtc ? '-utc' : '');
       const formatter = this._formatters[k] = this._formatters[k] || new Strftime({date, isUtc});
       return formatter.formatKey(key);
@@ -2201,8 +2201,8 @@ dialog {
     while (newDoc.firstChild) {
       newDoc.removeChild(newDoc.firstChild);
     }
-    origNodeMap && origNodeMap.set(newDoc, doc);
-    clonedNodeMap && clonedNodeMap.set(doc, newDoc);
+    origNodeMap?.set(newDoc, doc);
+    clonedNodeMap?.set(doc, newDoc);
     return newDoc;
   };
 
@@ -2230,8 +2230,8 @@ dialog {
         let node1 = walker1.nextNode();
         let node2 = walker2.nextNode();
         while (node1) {
-          origNodeMap && origNodeMap.set(node2, node1);
-          clonedNodeMap && clonedNodeMap.set(node1, node2);
+          origNodeMap?.set(node2, node1);
+          clonedNodeMap?.set(node1, node2);
           includeShadowDom && cloneShadowDom(node1, node2, options);
           node1 = walker1.nextNode();
           node2 = walker2.nextNode();
@@ -2244,8 +2244,8 @@ dialog {
           serializable: shadowRoot.serializable,
           slotAssignment: shadowRoot.slotAssignment,
         });
-        origNodeMap && origNodeMap.set(newShadowRoot, shadowRoot);
-        clonedNodeMap && clonedNodeMap.set(shadowRoot, newShadowRoot);
+        origNodeMap?.set(newShadowRoot, shadowRoot);
+        clonedNodeMap?.set(shadowRoot, newShadowRoot);
         for (const node of shadowRoot.childNodes) {
           newShadowRoot.appendChild(scrapbook.cloneNode(node, true, options));
         }
@@ -2268,15 +2268,15 @@ dialog {
         let node1 = walker1.nextNode();
         let node2 = walker2.nextNode();
         while (node1) {
-          origNodeMap && origNodeMap.set(node2, node1);
-          clonedNodeMap && clonedNodeMap.set(node1, node2);
+          origNodeMap?.set(node2, node1);
+          clonedNodeMap?.set(node1, node2);
           includeShadowDom && cloneShadowDom(node1, node2, options);
           node1 = walker1.nextNode();
           node2 = walker2.nextNode();
         }
       } else {
-        origNodeMap && origNodeMap.set(newNode, node);
-        clonedNodeMap && clonedNodeMap.set(node, newNode);
+        origNodeMap?.set(newNode, node);
+        clonedNodeMap?.set(node, newNode);
         includeShadowDom && cloneShadowDom(node, newNode, options);
       }
 
@@ -2832,7 +2832,7 @@ dialog {
       lut[d3 >> 16 & 0xff]        + lut[d3 >> 24 & 0xff];
     /* eslint-enable @stylistic/no-multi-spaces */
 
-    const getRandomValuesFunc = crypto && crypto.getRandomValues ?
+    const getRandomValuesFunc = crypto?.getRandomValues ?
       () => {
         const dvals = new Uint32Array(4);
         crypto.getRandomValues(dvals);
@@ -4140,7 +4140,7 @@ dialog {
     // The innermost ancestor element that is relatively positioned.
     let relativeAncestor = null;
     let ancestor = elem.parentElement;
-    while (ancestor && ancestor.nodeType === 1) {
+    while (ancestor?.nodeType === 1) {
       if (win.getComputedStyle(ancestor).getPropertyValue('position') === 'relative') {
         relativeAncestor = ancestor;
         break;
@@ -4257,7 +4257,7 @@ dialog {
         break getDeepSelection;
       }
       const selDeep = scrapbook.getSelection(shadowRoot);
-      if (selDeep && selDeep.type !== 'None') {
+      if (selDeep?.type !== 'None') {
         sel = selDeep;
       }
     }
@@ -4636,7 +4636,7 @@ dialog {
     defaultHeight = scrapbook.getOption("ui.screen.height"),
   } = {}) {
     // supported by Chromium
-    if (browser.system && browser.system.display) {
+    if (browser.system?.display) {
       const screens = await browser.system.display.getInfo();
 
       if (screens) {
@@ -4755,7 +4755,7 @@ dialog {
       url: browser.runtime.getURL('core/prompt.html'),
       args: {message, defaultValue},
     });
-    return result && result.input;
+    return result?.input;
   };
 
   scrapbook.getGeoLocation = async function (options) {

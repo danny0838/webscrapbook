@@ -77,7 +77,7 @@
           // Check treeLastModified explicitly as `book.validateTree` may have
           // been called otherwhere.
           let cache = bookCaches.get(bookId);
-          if (!(cache && cache.treeLastModified === book.treeLastModified)) {
+          if (cache?.treeLastModified !== book.treeLastModified) {
             cache = new Map();
             cache.treeLastModified = book.treeLastModified;
             bookCaches.set(bookId, cache);
@@ -378,7 +378,7 @@
           invokeCapture(tabInfo, config, false, true);
         }
       } catch (ex) {
-        const nameStr = (config && config.name) ? ` (${config.name})` : '';
+        const nameStr = config?.name ? ` (${config.name})` : '';
         console.error(`Failed to run auto-capture config[${i}]${nameStr} for tab[${tabInfo.id}] (${tabInfo.url}): ${ex.message}`);
       }
     }
@@ -410,7 +410,7 @@
           // Check treeLastModified explicitly as `book.validateTree` may have
           // been called otherwhere.
           let cache = autoCaptureBookCaches.get(bookId);
-          if (!(cache && cache.treeLastModified === book.treeLastModified)) {
+          if (cache?.treeLastModified !== book.treeLastModified) {
             cache = new Set();
             cache.treeLastModified = book.treeLastModified;
             autoCaptureBookCaches.set(bookId, cache);

@@ -266,7 +266,7 @@
 
       if (!elem.container.hasAttribute('data-loaded')) {
         const toc = this.book.toc[elem.getAttribute('data-id')];
-        if (toc && toc.length) {
+        if (toc?.length) {
           return;
         }
       }
@@ -295,7 +295,7 @@
 
       // set child container
       var childIdList = this.book.toc[meta.id];
-      if (childIdList && childIdList.length) {
+      if (childIdList?.length) {
         this.itemMakeContainer(elem);
       }
 
@@ -468,7 +468,7 @@
         // item element to the new position since the number of parent elements
         // must match.
         for (const parentElem of this.treeElem.querySelectorAll(`[data-id="${CSS.escape(currentParentId)}"]`)) {
-          if (!(this.treeElem.contains(parentElem) && parentElem.container && parentElem.container.hasAttribute('data-loaded'))) { continue; }
+          if (!(this.treeElem.contains(parentElem) && parentElem.container?.hasAttribute('data-loaded'))) { continue; }
           const container = parentElem.container;
           const itemElem = container.children[currentIndex];
           itemElem.remove();  // remove itemElem to get container.children recalculated
@@ -537,7 +537,7 @@
         }
 
         // toogle expand if collapsed
-        if (anchorElem.container && anchorElem.container.hidden) {
+        if (anchorElem.container?.hidden) {
           this.toggleItem(anchorElem, true);
           this.saveViewStatus();
           this.scrollIntoView(anchorElem);
