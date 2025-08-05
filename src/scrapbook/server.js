@@ -322,8 +322,7 @@
           });
         }
 
-        if (!(xhr.status >= 200 && xhr.status < 300 &&
-            xhr.response && xhr.response.data)) {
+        if (!(xhr.status >= 200 && xhr.status < 300 && xhr.response?.data)) {
           throw new Error('The server does not support WebScrapBook protocol.');
         }
 
@@ -1099,7 +1098,7 @@ scrapbook.toc(${JSON.stringify(jsonData, null, 2).replace(/\u2028/g, '\\u2028').
      *   the item.
      */
     isItemIndexUrl(item, url) {
-      if (!(item && item.index && url)) { return false; }
+      if (!(item?.index && url)) { return false; }
 
       let u = scrapbook.normalizeUrl(scrapbook.splitUrl(this.dataUrl + scrapbook.escapeFilename(item.index))[0]);
       let u1 = scrapbook.normalizeUrl(scrapbook.splitUrl(url)[0]);
