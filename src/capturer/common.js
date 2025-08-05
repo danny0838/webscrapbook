@@ -1329,7 +1329,7 @@ capturer.captureDocument = async function (params) {
               // when JavaScript is enabled. Replace with normal HTML content.
               // https://html.spec.whatwg.org/multipage/scripting.html#the-noscript-element
               const elemOrig = origNodeMap.get(elem);
-              if (elemOrig && elemOrig.innerHTML === elemOrig.textContent) {
+              if (elemOrig?.innerHTML === elemOrig.textContent) {
                 // elemOrig may not exist for nested <noscript> when handling the inner level,
                 // skip as the replacement should have been done in the outer level
                 const tempElem = newDoc.createElement('scrapbook-noscript');
@@ -1713,7 +1713,7 @@ capturer.captureDocument = async function (params) {
               return;
             case "save-current":
               if (!isHeadless) {
-                if (elemOrig && elemOrig.currentSrc) {
+                if (elemOrig?.currentSrc) {
                   const url = elemOrig.currentSrc;
                   captureRewriteAttr(elem, "srcset", null);
                   tasks.push(async () => {
@@ -1797,7 +1797,7 @@ capturer.captureDocument = async function (params) {
                 for (const subElem of elem.querySelectorAll('img')) {
                   const subElemOrig = origNodeMap.get(subElem);
 
-                  if (subElemOrig && subElemOrig.currentSrc) {
+                  if (subElemOrig?.currentSrc) {
                     // subElem will be further processed in the following loop that handles "img"
                     captureRewriteAttr(subElem, "src", subElemOrig.currentSrc);
                     captureRewriteAttr(subElem, "srcset", null);
@@ -1871,7 +1871,7 @@ capturer.captureDocument = async function (params) {
               return;
             case "save-current":
               if (!isHeadless) {
-                if (elemOrig && elemOrig.currentSrc) {
+                if (elemOrig?.currentSrc) {
                   const url = elemOrig.currentSrc;
                   for (const subElem of elem.querySelectorAll('source[src]')) {
                     captureRemoveNode(subElem);
@@ -2003,7 +2003,7 @@ capturer.captureDocument = async function (params) {
                   });
                 }
 
-                if (elemOrig && elemOrig.currentSrc) {
+                if (elemOrig?.currentSrc) {
                   const url = elemOrig.currentSrc;
                   for (const subElem of elem.querySelectorAll('source[src]')) {
                     captureRemoveNode(subElem);
@@ -2999,7 +2999,7 @@ capturer.captureDocument = async function (params) {
   let rootNode, headNode;
   let selection = settings.fullPage ? null : scrapbook.getSelection(doc);
   {
-    if (selection && selection.type !== 'Range') {
+    if (selection?.type !== 'Range') {
       selection = null;
     }
 
@@ -3873,7 +3873,7 @@ capturer.retrieveDocumentContent = async function (params) {
     const isMainFrame = i === 0;
     const info = {
       isMainFrame,
-      title: (isMainPage && isMainFrame ? item && item.title : doc.title) || "",
+      title: (isMainPage && isMainFrame ? item?.title : doc.title) || "",
     };
     const resources = {};
     let requireBasicLoader = false;
@@ -4743,7 +4743,7 @@ class DocumentCssHandler {
           continue;
         }
 
-        const title = css.title && css.title.trim();
+        const title = css.title?.trim();
 
         // ignore persistent CSS
         if (!title) {
@@ -4953,11 +4953,11 @@ class DocumentCssHandler {
             skipPseudoAndGetNextPos: {
               let j = i = i + 2;
               const parenToken = tokens[j];
-              if (parenToken && parenToken.value === '(' && parenToken.type === 'operator') {
+              if (parenToken?.value === '(' && parenToken.type === 'operator') {
                 const depth = parenToken.depth;
                 for (j += 1; j < I; j++) {
                   const token = tokens[j];
-                  if (token && token.depth === depth) {
+                  if (token?.depth === depth) {
                     i = j + 1;
                     break skipPseudoAndGetNextPos;
                   }
@@ -5046,7 +5046,7 @@ class DocumentCssHandler {
     const origElem = origNodeMap.get(elem);
 
     // origElem.sheet may be null for a headless document in some browsers
-    return origElem && origElem.sheet;
+    return origElem?.sheet;
   }
 
   static getRulesFromCssText(cssText) {
@@ -5106,7 +5106,7 @@ class DocumentCssHandler {
     } catch (ex) {
       // cssRules not accessible, probably a cross-domain CSS.
       if (crossOrigin) {
-        if (css && css.ownerNode && css.ownerNode.nodeName.toLowerCase() === 'style') {
+        if (css?.ownerNode?.nodeName.toLowerCase() === 'style') {
           rules = this.getRulesFromCssText(css.ownerNode.textContent);
         } else {
           const {settings, options} = this;
@@ -5226,7 +5226,7 @@ class DocumentCssHandler {
             const rule = importRules[importRuleIdx++];
             await this.rewriteCss({
               url,
-              refCss: rule && rule.styleSheet,
+              refCss: rule?.styleSheet,
               baseUrl,
               refUrl,
               refPolicy,
@@ -5342,7 +5342,7 @@ class DocumentCssHandler {
             }
           }
 
-          if (cssRule.cssRules && cssRule.cssRules.length) {
+          if (cssRule.cssRules?.length) {
             // nesting CSS
 
             // style declarations of this rule
@@ -5938,7 +5938,7 @@ class DocumentCssResourcesHandler {
         this.inspectStyle({style: cssRule.style, baseUrl});
 
         // recurse into sub-rules for nesting CSS
-        if (cssRule.cssRules && cssRule.cssRules.length) {
+        if (cssRule.cssRules?.length) {
           for (const rule of cssRule.cssRules) {
             await this.parseCssRule({rule, baseUrl, refUrl, refPolicy, envCharset, root});
           }

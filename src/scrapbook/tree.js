@@ -647,9 +647,9 @@ class Tree {
       }
 
       let target;
-      if (anchorElem.anchor && anchorElem.anchor.hasAttribute('href')) {
+      if (anchorElem.anchor?.hasAttribute('href')) {
         target = anchorElem.anchor;
-      } else if (anchorElem.toggler && anchorElem.toggler.hasAttribute('href')) {
+      } else if (anchorElem.toggler?.hasAttribute('href')) {
         target = anchorElem.toggler;
       }
 
@@ -869,12 +869,12 @@ class Tree {
     let enteredElem = event.relatedTarget;
 
     // In Firefox the relatedTarget could be a text node
-    if (enteredElem && enteredElem.nodeType !== 1) {
+    if (enteredElem?.nodeType !== 1) {
       enteredElem = enteredElem.parentElement;
     }
 
     // skip when entering another descendant of the same dragover element
-    if (enteredElem && enteredElem.closest('.dragover') === wrapper) {
+    if (enteredElem?.closest('.dragover') === wrapper) {
       return;
     }
 

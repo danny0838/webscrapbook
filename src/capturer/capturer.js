@@ -258,7 +258,7 @@ capturer.getAvailableSaveFilename = async function (params) {
                   // - Chromium will prompt the user to select another path.
                   // - Firefox will fail to start downloading.
                   resolve(null);
-                } else if (delta.state && delta.state.current === "complete") {
+                } else if (delta.state?.current === "complete") {
                   cleanup();
                   const [item] = await browser.downloads.search({id});
                   resolve(item);
@@ -1991,7 +1991,7 @@ capturer.resaveTab = async function ({
     callback: async (book, {updated}) => {
       await book.loadMeta(updated);
       const item = await book.findItemFromUrl(url);
-      if (item && item.locked) {
+      if (item?.locked) {
         throw new Error(scrapbook.lang("ErrorSaveLockedItem"));
       }
 
@@ -1999,7 +1999,7 @@ capturer.resaveTab = async function ({
 
       let internalizePrefix;
       if (internalize) {
-        if (item && item.index) {
+        if (item?.index) {
           const index = item.index;
           const indexCI = index.toLowerCase();
           if (index.endsWith('/index.html')) {
@@ -2402,7 +2402,7 @@ capturer.recapture = async function ({
 
                 if (firstChild.nodeType === 3) {
                   const prev = elem.previousSibling;
-                  if (prev && prev.nodeType === 3) {
+                  if (prev?.nodeType === 3) {
                     startContainer = prev;
                     startOffset = prev.nodeValue.length;
                   }
@@ -2415,7 +2415,7 @@ capturer.recapture = async function ({
                     endOffset = startOffset + lastChild.nodeValue.length;
                   } else {
                     const next = elem.nextSibling;
-                    if (next && next.nodeType === 3) {
+                    if (next?.nodeType === 3) {
                       endContainer = lastChild;
                       endOffset = lastChild.nodeValue.length;
                     }
@@ -4370,7 +4370,7 @@ browser.downloads.onChanged.addListener(async (downloadDelta) => {
 
   let erase = true;
   try {
-    if (downloadDelta.state && downloadDelta.state.current === "complete") {
+    if (downloadDelta.state?.current === "complete") {
       const downloadItem = (await browser.downloads.search({id: downloadId}))[0];
       if (downloadItem) {
         downloadHooks.get(downloadId).onComplete(downloadItem);

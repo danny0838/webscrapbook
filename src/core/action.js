@@ -17,7 +17,7 @@
 document.addEventListener('DOMContentLoaded', async () => {
   async function selectTabFromDom(baseElem) {
     let selector = baseElem.nextSibling;
-    if (selector && selector.className === "selector") {
+    if (selector?.className === "selector") {
       while (selector.firstChild) { selector.firstChild.remove(); }
     } else {
       selector = document.createElement("div");
@@ -141,7 +141,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const [activeTab] = await browser.tabs.query({active: true, currentWindow: true});
 
   // the target tab for the browserAction commands
-  const targetTab = (isPrompt || activeTab && activeTab.id !== currentTab.id) ? activeTab : undefined;
+  const targetTab = (isPrompt || activeTab?.id !== currentTab.id) ? activeTab : undefined;
 
   const allowFileAccess = await browser.extension.isAllowedFileSchemeAccess();
 

@@ -115,7 +115,7 @@ const itempicker = {
       bookId,
     };
     const list = await scrapbook.cache.get(key);
-    if (!(list && list.length)) { return; }
+    if (!list?.length) { return; }
 
     const selector = document.getElementById('recent');
     const reachable = book.getReachableItems('root');

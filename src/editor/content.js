@@ -1074,7 +1074,7 @@ function getCurrentAnnotationIndexValidRange(sel) {
 
     // Firefox may include selection ranges for elements inside the toolbar.
     // Exclude them to prevent an error.
-    if (editor.internalElement && editor.internalElement.contains(ca)) {
+    if (editor.internalElement?.contains(ca)) {
       continue;
     }
 
@@ -1993,7 +1993,7 @@ editor.showContextMenu = function (elem, pos = {}) {
         let idx = (focusIdx === -1) ? 0 : focusIdx - 1;
         if (idx < 0) { idx = elems.length - 1; }
         const target = elems[idx];
-        target && target.focus();
+        target?.focus();
         break;
       }
       case "ArrowDown": {
@@ -2003,7 +2003,7 @@ editor.showContextMenu = function (elem, pos = {}) {
         let idx = (focusIdx === -1) ? 0 : focusIdx + 1;
         if (idx >= elems.length) { idx = 0; }
         const target = elems[idx];
-        target && target.focus();
+        target?.focus();
         break;
       }
     }
@@ -2134,7 +2134,7 @@ editor.getFocusedFrameId = async function () {
   });
 
   const lastFrame = arr.reduce((acc, cur) => {
-    if (cur && cur.time > acc.time) {
+    if (cur?.time > acc.time) {
       return cur;
     }
     return acc;
@@ -2484,7 +2484,7 @@ const annotator = editor.annotator = (function () {
 
         // Don't allow a relative sticky note in a shadow root, which makes
         // the annotation CSS not apply on it.
-        if (refNode && refNode.getRootNode() instanceof ShadowRoot) {
+        if (refNode?.getRootNode() instanceof ShadowRoot) {
           refNode = false;
         }
       }

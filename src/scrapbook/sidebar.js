@@ -307,7 +307,7 @@ const sidebar = {
     });
 
     // restore active element
-    if (activeElement && activeElement.isConnected) {
+    if (activeElement?.isConnected) {
       activeElement.focus();
     }
   },
@@ -2118,7 +2118,7 @@ ${scrapbook.escapeHtml(content)}
       const reverse = direction === 'desc';
       const recursive = dialog.recursive.checked;
 
-      if (!(itemElems && itemElems.length)) {
+      if (!itemElems?.length) {
         itemElems = [this.tree.rootElem];
       }
       const itemIds = itemElems.map(itemElem => itemElem.getAttribute('data-id'));

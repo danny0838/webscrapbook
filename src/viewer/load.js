@@ -91,7 +91,7 @@ async function onDrop(e) {
 function onChangeFiles(e) {
   e.preventDefault();
   const files = Array.from(e.target.files);
-  if (!(files && files.length)) { return; }
+  if (!files.length) { return; }
 
   return viewer.loadFiles(files);
 };
