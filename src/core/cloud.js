@@ -48,7 +48,7 @@
       table.tBodies[0].textContent = '';
 
       const keys = await (async () => {
-        // supported by Chromium >= 130
+        // supported in Chromium >= 130
         if (browser.storage.sync.getKeys) {
           return await browser.storage.sync.getKeys();
         }
