@@ -35,8 +35,6 @@
 
   const {assert} = chai;
 
-  const {userAgent} = utils;
-
   /**
    * A jQuery-style extension of `describe` or `it` for chainable and conditional
    * skip or xfail.
@@ -407,6 +405,8 @@
       return value;
     },
   }));
+
+  var {userAgent} = scrapbook;
 
   function delay(...args) { return scrapbook.delay(...args); }
 
