@@ -1896,7 +1896,7 @@ describe('core/common.js', function () {
   $describe.skipIf($.noBrowser)('scrapbook.readFileAsDocument', function () {
     it('basic', async function () {
       var html = `<a href="http://example.com">ABC123 中文 𠀀</a>`;
-      var blob = new Blob([html], {type: "text/html"});
+      var blob = new Blob([html], {type: "text/html; charset=utf-8"});
       var doc = await scrapbook.readFileAsDocument(blob);
       assert.strictEqual(doc.querySelector('a').textContent, 'ABC123 中文 𠀀');
       assert.strictEqual(doc.querySelector('a').getAttribute('href'), 'http://example.com');
