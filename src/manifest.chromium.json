@@ -1,0 +1,113 @@
+{
+  "manifest_version": 3,
+  "name": "__MSG_ExtensionName__",
+  "description": "__MSG_ExtensionDescription__",
+  "version": "2.23.5",
+  "author": "Danny Lin",
+  "default_locale": "en",
+  "minimum_chrome_version": "102",
+  "homepage_url": "https://github.com/danny0838/webscrapbook",
+  "incognito": "split",
+  "icons": {
+    "32": "resources/scrapbook-32.png",
+    "128": "resources/scrapbook-128.png"
+  },
+  "permissions": [
+    "contextMenus",
+    "downloads",
+    "scripting",
+    "sidePanel",
+    "storage",
+    "tabs",
+    "unlimitedStorage",
+    "webNavigation",
+    "webRequest",
+    "webRequestBlocking",
+    "system.display"
+  ],
+  "host_permissions": [
+    "http://*/*",
+    "https://*/*",
+    "file:///*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "*.map",
+        "resources/*",
+        "scrapbook/sitemap.html",
+        "viewer/load.html"
+      ],
+      "matches": [
+        "<all_urls>"
+      ],
+      "use_dynamic_url": true
+    }
+  ],
+  "options_ui": {
+    "open_in_tab": true,
+    "page": "core/options.html"
+  },
+  "action": {
+    "default_icon": {
+      "32": "resources/scrapbook-32.png",
+      "128": "resources/scrapbook-128.png"
+    },
+    "default_title": "__MSG_ExtensionName__",
+    "default_popup": "core/action.html"
+  },
+  "side_panel": {
+    "default_path": "scrapbook/sidebar.html"
+  },
+  "commands": {
+    "_execute_action": {},
+    "openScrapBook": {
+      "suggested_key": {
+        "default": "Alt+K"
+      },
+      "description": "__MSG_OpenScrapBook__"
+    },
+    "openOptions": {
+      "description": "__MSG_OpenOptions__"
+    },
+    "openViewer": {
+      "suggested_key": {
+        "default": "Alt+V"
+      },
+      "description": "__MSG_OpenViewer__..."
+    },
+    "openSearch": {
+      "description": "__MSG_OpenSearch__..."
+    },
+    "searchCaptures": {
+      "description": "__MSG_SearchCaptures__"
+    },
+    "captureTab": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+K"
+      },
+      "description": "__MSG_CaptureTab__"
+    },
+    "captureTabSource": {
+      "description": "__MSG_CaptureTabSource__"
+    },
+    "captureTabBookmark": {
+      "description": "__MSG_CaptureTabBookmark__"
+    },
+    "captureTabAs": {
+      "description": "__MSG_CaptureTabAs__..."
+    },
+    "batchCaptureLinks": {
+      "description": "__MSG_BatchCaptureLinks__..."
+    },
+    "editTab": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+E"
+      },
+      "description": "__MSG_EditTab__"
+    }
+  }
+}

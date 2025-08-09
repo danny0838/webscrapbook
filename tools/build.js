@@ -32,14 +32,26 @@ function hardlink(src, dst) {
 
 function build(target) {
   switch (target) {
-    case 'firefox': {
-      console.log('Building files for Firefox...');
+    case 'firefox-mv3': {
+      console.log('Building files for Firefox (MV3)...');
       hardlink(path.join(srcDir, 'manifest.firefox.json'), path.join(srcDir, 'manifest.json'));
       break;
     }
-    case 'chromium': {
-      console.log('Building files for Chromium...');
+    case 'chromium-mv3': {
+      console.log('Building files for Chromium (MV3)...');
       hardlink(path.join(srcDir, 'manifest.chromium.json'), path.join(srcDir, 'manifest.json'));
+      break;
+    }
+    case 'firefox':
+    case 'firefox-mv2': {
+      console.log('Building files for Firefox (MV2)...');
+      hardlink(path.join(srcDir, 'manifest.firefox-mv2.json'), path.join(srcDir, 'manifest.json'));
+      break;
+    }
+    case 'chromium':
+    case 'chromium-mv2': {
+      console.log('Building files for Chromium (MV2)...');
+      hardlink(path.join(srcDir, 'manifest.chromium-mv2.json'), path.join(srcDir, 'manifest.json'));
       break;
     }
     default: {
@@ -65,14 +77,26 @@ function build(target) {
 
 function buildTest(target) {
   switch (target) {
-    case 'firefox': {
-      console.log('Building test files for Firefox...');
+    case 'firefox-mv3': {
+      console.log('Building test files for Firefox (MV3)...');
       hardlink(path.join(testDir, 'manifest.firefox.json'), path.join(testDir, 'manifest.json'));
       break;
     }
-    case 'chromium': {
-      console.log('Building test files for Chromium...');
+    case 'chromium-mv3': {
+      console.log('Building test files for Chromium (MV3)...');
       hardlink(path.join(testDir, 'manifest.chromium.json'), path.join(testDir, 'manifest.json'));
+      break;
+    }
+    case 'firefox':
+    case 'firefox-mv2': {
+      console.log('Building test files for Firefox (MV2)...');
+      hardlink(path.join(testDir, 'manifest.firefox-mv2.json'), path.join(testDir, 'manifest.json'));
+      break;
+    }
+    case 'chromium':
+    case 'chromium-mv2': {
+      console.log('Building test files for Chromium (MV2)...');
+      hardlink(path.join(testDir, 'manifest.chromium-mv2.json'), path.join(testDir, 'manifest.json'));
       break;
     }
     default: {
@@ -126,7 +150,7 @@ function dev(target) {
 function pack(target) {
   build(target);
 
-  const filename = `webscrapbook.${target === 'firefox' ? 'xpi' : 'zip'}`;
+  const filename = `webscrapbook.${target.startsWith('firefox') ? 'xpi' : 'zip'}`;
   webExt.cmd.build({
     target,
     sourceDir: srcDir,
@@ -135,8 +159,7 @@ function pack(target) {
     overwriteDest: true,
     ignoreFiles: [
       '**/*.map',
-      'manifest.chromium.json',
-      'manifest.firefox.json',
+      'manifest.*.json',
     ],
   });
 }
@@ -167,7 +190,7 @@ Usage: node build.js [options ...]
 
 Options:
   -h, --help           Display usage help.
-  -t, --target=TARGET  Target browser. {chromium,firefox}
+  -t, --target=TARGET  Target browser. {chromium,firefox}[-{mv3,mv2}]
   -m, --mode=MODE      Mode of action. {dev,build,pack}
 `;
     process.stdout.write(usage);
