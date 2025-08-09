@@ -4086,10 +4086,8 @@
             as = function (d, e) {
               var l, i, I;
               if ($as && (l = e.getAttribute(k8)) !== null) {
-                l = l.split(',');
-                for (i = 0, I = l.length; i < I; i++) {
-                  d.adoptedStyleSheets.push(asl[l[i]]);
-                }
+                l = l.split(',').map(i => asl[i]);
+                d.adoptedStyleSheets = d.adoptedStyleSheets.concat(l);
                 e.removeAttribute(k8);
               }
             },

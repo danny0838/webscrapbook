@@ -57,12 +57,12 @@ css3.insertRule('#image2-2 { background-image: url(./image2-2.bmp); }', css3.css
 css3.insertRule('#image2-3 { background-image: url(./image2-3.bmp); }', css3.cssRules.length);
 css3.insertRule('#image2-4 { background-image: url(./image2-4.bmp); }', css3.cssRules.length);
 
-document.adoptedStyleSheets.push(css, css2);
+document.adoptedStyleSheets = [css, css2];
 
 var s = document.querySelector('#shadow1').shadowRoot;
-s.adoptedStyleSheets.push(css, css2, css3);
+s.adoptedStyleSheets = [css, css2, css3];
 
 var s = s.querySelector('#shadow2').shadowRoot;
-s.adoptedStyleSheets.push(css3);
+s.adoptedStyleSheets = [css3];
 </script>
 </html>
