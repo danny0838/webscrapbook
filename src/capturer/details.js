@@ -307,8 +307,8 @@
       }
       case "mergeCapture": {
         Object.assign(options, {
-          title: void 0,
-          comment: void 0,
+          title: undefined,
+          comment: undefined,
           mergeCaptureInfo: {
             bookId: taskInfo.bookId,
             itemId: taskInfo.parentId,
