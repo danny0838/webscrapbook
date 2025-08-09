@@ -4046,7 +4046,15 @@
                   d[j] = sls[parseInt(d[j], 10)];
                 }
                 try {
-                  e.assign.apply(e, d);
+                  try {
+                    e.assign.apply(e, d);
+                  } catch (ex) {
+                    if (ex.message.includes('must have a callable @@iterator')) {
+                      e.assign(d);
+                    } else {
+                      throw ex;
+                    }
+                  }
                 } catch (ex) {
                   console.error(ex);
                 }

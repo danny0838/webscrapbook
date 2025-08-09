@@ -38,17 +38,29 @@ Default3
 <script>
 utils.loadShadowDoms();
 
+function slotAssign(slotElem, ...nodes) {
+  try {
+    return slotElem.assign(...nodes);
+  } catch (ex) {
+    if (ex.message.includes('must have a callable @@iterator')) {
+      return slotElem.assign(nodes);
+    } else {
+      throw ex;
+    }
+  }
+}
+
 var host = document.querySelector('div');
 var shadow = host.shadowRoot;
 var slots = shadow.querySelectorAll('slot');
 var spans = host.querySelectorAll('span');
-slots[0].assign(spans[0], spans[1].nextSibling);
-slots[1].assign(spans[2], spans[3]);
+slotAssign(slots[0], spans[0], spans[1].nextSibling);
+slotAssign(slots[1], spans[2], spans[3]);
 
 var host = shadow.querySelector('div');
 var shadow = host.shadowRoot;
 var slots = shadow.querySelectorAll('slot');
 var spans = host.querySelectorAll('span');
-slots[0].assign(spans[1], spans[2]);
+slotAssign(slots[0], spans[1], spans[2]);
 </script>
 </html>
