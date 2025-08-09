@@ -173,6 +173,7 @@
       return value;
     },
     get noMultipleSelection() {
+      // Not supported in Chromium.
       const value = this.noBrowser.condition ? this.noBrowser : new MochaQuery.Query(
         (() => {
           const sel = document.getSelection();
@@ -216,7 +217,7 @@
       return value;
     },
     get noShadowRootClonable() {
-      // ShadowRoot.clonable is not supported by Chromium < 124 and Firefox < 123.
+      // ShadowRoot.clonable is not supported in Chromium < 124 and Firefox < 123.
       const value = this.noBrowser.condition ? this.noBrowser : new MochaQuery.Query(
         (() => {
           const div = document.createElement('div');
@@ -229,7 +230,7 @@
       return value;
     },
     get noShadowRootDelegatesFocus() {
-      // ShadowRoot.delegatesFocus is not supported by Firefox < 94.
+      // ShadowRoot.delegatesFocus is not supported in Firefox < 94.
       const value = this.noBrowser.condition ? this.noBrowser : new MochaQuery.Query(
         (() => {
           const div = document.createElement('div');
@@ -242,7 +243,7 @@
       return value;
     },
     get noShadowRootSerializable() {
-      // ShadowRoot.serializable is not supported by Chromium < 125 and Firefox.
+      // ShadowRoot.serializable is not supported in Chromium < 125 and Firefox < 128.
       const value = this.noBrowser.condition ? this.noBrowser : new MochaQuery.Query(
         (() => {
           const div = document.createElement('div');
@@ -255,7 +256,7 @@
       return value;
     },
     get noShadowRootSlotAssignment() {
-      // ShadowRoot.slotAssignment is not supported by Chromium < 86 and Firefox < 92.
+      // ShadowRoot.slotAssignment is not supported in Chromium < 86 and Firefox < 92.
       const value = this.noBrowser.condition ? this.noBrowser : new MochaQuery.Query(
         (() => {
           const div = document.createElement('div');
@@ -268,7 +269,7 @@
       return value;
     },
     get noAdoptedStylesheet() {
-      // Document.adoptedStyleSheets is not supported by Firefox < 101.
+      // Document.adoptedStyleSheets is not supported in Firefox < 101.
       const value = this.noBrowser.condition ? this.noBrowser : new MochaQuery.Query(
         !document.adoptedStyleSheets,
         'Document.adoptedStyleSheets not supported',
@@ -277,7 +278,7 @@
       return value;
     },
     get noNestingCss() {
-      // CSS nesting selector is supported in Firefox >= 117 and Chromium >= 120.
+      // CSS nesting selector is not supported in Firefox < 117 and Chromium < 120.
       const value = this.noBrowser.condition ? this.noBrowser : new MochaQuery.Query(
         (() => {
           const d = document.implementation.createHTMLDocument();
@@ -295,6 +296,7 @@
       return value;
     },
     get noColumnCombinator() {
+      // Not supported by major browsers.
       const value = this.noBrowser.condition ? this.noBrowser : new MochaQuery.Query(
         (() => {
           try {
@@ -310,7 +312,7 @@
       return value;
     },
     get noPartPseudo() {
-      // :part() CSS pseudo-element is supported in Firefox >= 72 and Chromium >= 73.
+      // :part() CSS pseudo-element is not supported in Firefox < 72.
       const value = this.noBrowser.condition ? this.noBrowser : new MochaQuery.Query(
         (() => {
           try {
@@ -326,7 +328,7 @@
       return value;
     },
     get noIsPseudo() {
-      // :is() CSS pseudo-class is supported in Firefox >= 78 and Chromium >= 88.
+      // :is() CSS pseudo-class is not supported in Firefox < 78 and Chromium < 88.
       const value = this.noBrowser.condition ? this.noBrowser : new MochaQuery.Query(
         (() => {
           try {
@@ -342,7 +344,7 @@
       return value;
     },
     get noHostContextPseudo() {
-      // :host-context() not suported in some browsers (e.g. Firefox)
+      // :host-context() is not suported in Firefox.
       const value = this.noBrowser.condition ? this.noBrowser : new MochaQuery.Query(
         (() => {
           try {
@@ -358,6 +360,7 @@
       return value;
     },
     get noAtCounterStyle() {
+      // @counter-style is not supported in Chromium < 91.
       const value = this.noBrowser.condition ? this.noBrowser : new MochaQuery.Query(
         (() => {
           const d = document.implementation.createHTMLDocument();
@@ -374,6 +377,7 @@
       return value;
     },
     get noAtLayer() {
+      // @layer is not supported in Chromium < 99 and Firefox < 97.
       const value = this.noBrowser.condition ? this.noBrowser : new MochaQuery.Query(
         (() => {
           const d = document.implementation.createHTMLDocument();
@@ -390,6 +394,7 @@
       return value;
     },
     get noRegexNamedGroup() {
+      // Not supported in Firefox < 78.
       const value = this.noBrowser.condition ? this.noBrowser : new MochaQuery.Query(
         (() => {
           try {

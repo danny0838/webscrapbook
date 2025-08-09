@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """A quick test for a CSS loaded via HTTP Link header.
 
-- Supported by Firefox (76.*) but not accessible via CSSOM.
-- Not supported by Chromium (80.*).
+- Supported in Firefox (76.*) but not accessible via CSSOM.
+- Not supported in Chromium (80.*).
 """
 import sys
 
