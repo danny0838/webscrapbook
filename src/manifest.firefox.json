@@ -54,6 +54,7 @@
   },
 
   "web_accessible_resources": [
+    "*.map",
     "resources/*",
     "scrapbook/sitemap.html",
     "viewer/load.html"
