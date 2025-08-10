@@ -1,15 +1,9 @@
 /******************************************************************************
  * Shared script for modal dialog windows.
- *
- * @requires scrapbook
  *****************************************************************************/
 
-(function (global, factory) {
-  // Browser globals
-  factory(global.scrapbook, global.dialog);
-}(this, function (scrapbook, dialog) {
-
-'use strict';
+import {scrapbook} from "../core/common.mjs";
+import {dialog} from "../core/dialog.js";
 
 Object.assign(dialog, {
   /**
@@ -170,6 +164,5 @@ const annotationViewer = {
   },
 };
 
-return annotationViewer;
-
-}));
+/** @global */
+globalThis.annotationViewer = annotationViewer;

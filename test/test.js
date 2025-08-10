@@ -1,33 +1,10 @@
-(function (global, factory) {
-  global = typeof globalThis !== "undefined" ? globalThis : global || self;
-  if (typeof exports === "object" && typeof module === "object") {
-    // CommonJS
-    module.exports = factory(
-      global,
-      require('./lib/mocha'),
-      require('./lib/unittest'),
-    );
-  } else if (typeof define === "function" && define.amd) {
-    // AMD
-    require(
-      ['./lib/mocha', './lib/unittest'],
-      (...args) => {
-        return factory(global, ...args);
-      },
-    );
-  } else {
-    // Browser globals
-    factory(
-      global,
-      global.mocha,
-      global.unittest,
-    );
-  }
-}(this, function (global, mocha, unittest) {
+/******************************************************************************
+ * @requires browser
+ * @requires mocha
+ * @modifies globalThis
+ *****************************************************************************/
 
-'use strict';
-
-const {userAgent, delay, deserializeObject, escapeRegExp} = unittest;
+import {userAgent, delay, deserializeObject, escapeRegExp} from "./unittest.mjs";
 
 
 /******************************************************************************
@@ -384,7 +361,7 @@ class TestSuite {
   });
 
   // expose to global scope
-  Object.assign(global, {
+  Object.assign(globalThis, {
     backend: suite.backend,
     localhost: suite.localhost,
     localhost2: suite.localhost2,
@@ -398,16 +375,14 @@ class TestSuite {
   });
 
   // import all tests
-  await import('./test_lib_mime.js');
-  await import('./test_lib_referrer.js');
-  await import('./test_lib_map-with-default.js');
-  await import('./test_lib_strftime.js');
-  await import('./test_src_core_common.js');
-  await import('./test_src_capturer_common.js');
-  await import('./test_capture.js');
-  await import('./test_manual.js');
+  await import('./test_lib_mime.mjs');
+  await import('./test_lib_referrer.mjs');
+  await import('./test_lib_map-with-default.mjs');
+  await import('./test_lib_strftime.mjs');
+  await import('./test_src_core_common.mjs');
+  await import('./test_src_capturer_common.mjs');
+  await import('./test_capture.mjs');
+  await import('./test_manual.mjs');
 
   mocha.run();
 })();
-
-}));

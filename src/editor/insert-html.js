@@ -1,15 +1,9 @@
 /******************************************************************************
  * Shared script for modal dialog windows.
- *
- * @requires scrapbook
  *****************************************************************************/
 
-(function (global, factory) {
-  // Browser globals
-  factory(global.scrapbook, global.dialog);
-}(this, function (scrapbook, dialog) {
-
-'use strict';
+import {scrapbook} from "../core/common.mjs";
+import {dialog} from "../core/dialog.js";
 
 Object.assign(dialog, {
   async init(data) {
@@ -49,5 +43,3 @@ Object.assign(dialog, {
     this.close(value);
   },
 });
-
-}));

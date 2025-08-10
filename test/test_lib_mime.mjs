@@ -1,31 +1,8 @@
-(function (global, factory) {
-  if (typeof exports === "object" && typeof module === "object") {
-    // CommonJS
-    module.exports = factory(
-      require('./lib/unittest'),
-      require('./shared/lib/mime'),
-    );
-  } else if (typeof define === "function" && define.amd) {
-    // AMD
-    define(
-      ['./lib/unittest', './shared/lib/mime'],
-      factory,
-    );
-  } else {
-    // Browser globals
-    global = typeof globalThis !== "undefined" ? globalThis : global || self;
-    factory(
-      global.unittest,
-      global.Mime,
-    );
-  }
-}(this, function (unittest, Mime) {
+import {MochaQuery as $, assert} from "./unittest.mjs";
 
-'use strict';
+import * as Mime from "./shared/lib/mime.mjs";
 
-const {MochaQuery: $, assert} = unittest;
-
-describe('lib/mime.js', function () {
+describe('lib/mime.mjs', function () {
   describe('Mime.extend', function () {
     let _db;
     let _types;
@@ -219,5 +196,3 @@ describe('lib/mime.js', function () {
     });
   });
 });
-
-}));

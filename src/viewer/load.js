@@ -1,22 +1,11 @@
 /******************************************************************************
  * Script for load.html
- *
- * @requires scrapbook
- * @requires JSZip
- * @requires Mime
  *****************************************************************************/
 
-(function (global, factory) {
-  // Browser globals
-  factory(
-    global.isDebug,
-    global.scrapbook,
-    global.JSZip,
-    global.Mime,
-  );
-}(this, function (isDebug, scrapbook, JSZip, Mime) {
+/* global JSZip */
+/* global Mime */
 
-'use strict';
+import {scrapbook} from "../core/common.mjs";
 
 /**
  * We usually get:
@@ -318,5 +307,3 @@ document.addEventListener("DOMContentLoaded", async function () {
   await scrapbook.loadOptions();
   await viewer.start();
 });
-
-}));

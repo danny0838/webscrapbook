@@ -1,25 +1,11 @@
 /******************************************************************************
  * Script for search.html.
- *
- * @requires scrapbook
- * @requires server
- * @requires CustomTree
- * @requires MapWithDefault
- * @module searchCaptures
  *****************************************************************************/
 
-(function (global, factory) {
-  // Browser globals
-  global.searchCaptures = factory(
-    global.isDebug,
-    global.scrapbook,
-    global.server,
-    global.CustomTree,
-    global.MapWithDefault,
-  );
-}(this, function (isDebug, scrapbook, server, CustomTree, MapWithDefault) {
-
-'use strict';
+import {scrapbook} from "../core/common.mjs";
+import {server} from "./server.mjs";
+import {CustomTree} from "./custom-tree.mjs";
+import {MapWithDefault} from "../lib/map-with-default.mjs";
 
 const REGEX_IPv4 = /^(?:\d{1,3}\.){3}\d{1,3}$/;
 
@@ -290,7 +276,5 @@ document.addEventListener('DOMContentLoaded', (event) => {
   search.init();
 });
 
-
-return search;
-
-}));
+/** @global */
+globalThis.search = search;

@@ -1,21 +1,11 @@
 /******************************************************************************
  * Script for sitemap.html.
- *
- * @requires scrapbook
- * @requires server
- * @module sitemap
  *****************************************************************************/
 
-(function (global, factory) {
-  // Browser globals
-  global.sitemap = factory(
-    global.isDebug,
-    global.scrapbook,
-    global.server,
-  );
-}(this, function (isDebug, scrapbook, server) {
-
-'use strict';
+import {scrapbook} from "../core/common.mjs";
+import "../core/extension.mjs";
+import "../core/options-auto.mjs";
+import {server} from "./server.mjs";
 
 const SITEMAP_DOCTYPE = new Set(["text/html", "application/xhtml+xml"]);
 
@@ -330,6 +320,5 @@ document.addEventListener('DOMContentLoaded', (event) => {
   sitemap.init();
 });
 
-return sitemap;
-
-}));
+/** @global */
+globalThis.sitemap = sitemap;

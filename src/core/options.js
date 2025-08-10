@@ -1,18 +1,9 @@
 /******************************************************************************
  * Script for options.html
- *
- * @requires scrapbook
  *****************************************************************************/
 
-(function (global, factory) {
-  // Browser globals
-  factory(
-    global.isDebug,
-    global.scrapbook,
-  );
-}(this, function (isDebug, scrapbook) {
-
-'use strict';
+import {scrapbook} from "./common.mjs";
+import "./extension.mjs";
 
 const OPTION_PREFIX = "opt_";
 
@@ -508,5 +499,3 @@ window.addEventListener("DOMContentLoaded", async (event) => {
   // refresh form
   refreshForm();
 });
-
-}));

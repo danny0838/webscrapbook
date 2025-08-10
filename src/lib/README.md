@@ -6,4 +6,4 @@
 
 * `sha.js`: from [jsSHA](https://github.com/Caligatio/jsSHA/blob/v3.3.1/dist/sha.js)
 
-* `mime.js`: self-made API wrapper with database taken from [mime-db](https://github.com/jshttp/mime-db/blob/v1.54.0/db.json).
+* `mime.mjs`: self-made API wrapper with database taken from [mime-db](https://github.com/jshttp/mime-db/blob/v1.54.0/db.json).

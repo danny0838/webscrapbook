@@ -1,19 +1,11 @@
 /******************************************************************************
  * Shared utilities for extension page/background scripts.
  *
- * @requires scrapbook
  * @modifies scrapbook
  *****************************************************************************/
 
-(function (global, factory) {
-  // Browser globals
-  factory(
-    global.isDebug,
-    global.scrapbook,
-  );
-}(this, function (isDebug, scrapbook) {
+import {scrapbook} from "./common.mjs";
 
-'use strict';
 
 /****************************************************************************
  * ScrapBook messaging
@@ -542,5 +534,3 @@ scrapbook.searchCaptures = async function ({tabs, newTab = true}) {
     newTab,
   });
 };
-
-}));

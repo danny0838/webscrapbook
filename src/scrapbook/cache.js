@@ -1,20 +1,10 @@
 /******************************************************************************
  * Script for cache.html
- *
- * @requires scrapbook
- * @requires server
  *****************************************************************************/
 
-(function (global, factory) {
-  // Browser globals
-  factory(
-    global.isDebug,
-    global.scrapbook,
-    global.server,
-  );
-}(this, function (isDebug, scrapbook, server) {
-
-'use strict';
+import {scrapbook} from "../core/common.mjs";
+import "../core/options-auto.mjs";
+import {server} from "./server.mjs";
 
 let logger;
 
@@ -59,5 +49,3 @@ async function load() {
 }
 
 document.addEventListener("DOMContentLoaded", load);
-
-}));

@@ -1,6 +1,7 @@
 import js from "@eslint/js";
 import {includeIgnoreFile} from "@eslint/compat";
 import globals from "globals";
+import importPlugin from "eslint-plugin-import";
 import stylistic from "@stylistic/eslint-plugin";
 
 import path from "node:path";
@@ -24,12 +25,15 @@ export default [
       "src/lib/jszip.js",
       "src/lib/mime.js",
       "src/lib/sha.js",
+      "src/core/content.js",
       "test/lib/**/*.js",
+      "test/lib/**/*.mjs",
     ],
   },
   {
     plugins: {
       ...stylisticCustomized.plugins,
+      ...importPlugin.flatConfigs.recommended.plugins,
     },
     rules: {
       // ref: https://eslint.org/docs/latest/rules/
@@ -59,16 +63,16 @@ export default [
       "@stylistic/padded-blocks": "off",
       "@stylistic/quote-props": ["error", "consistent"],
       "@stylistic/quotes": "off",
+
+      // ref: https://github.com/import-js/eslint-plugin-import
+      ...importPlugin.flatConfigs.recommended.rules,
+      "import/no-named-as-default-member": "off",
     },
     languageOptions: {
       globals: {
         ...globals.browser,
-        importScripts: false,
         browser: false,
         chrome: false,
-        module: false,
-        require: false,
-        define: false,
       },
     },
   },
@@ -83,11 +87,13 @@ export default [
   {
     files: [
       "src/**/*.js",
+      "src/**/*.mjs",
     ],
   },
   {
     files: [
       "test/**/*.js",
+      "test/**/*.mjs",
     ],
     rules: {
       "@stylistic/eol-last": "off", // for some one-liner test files

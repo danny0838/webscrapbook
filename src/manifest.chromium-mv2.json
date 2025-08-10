@@ -32,6 +32,8 @@
   },
   "web_accessible_resources": [
     "*.map",
+    "*.js",
+    "*.mjs",
     "resources/*",
     "scrapbook/sitemap.html",
     "viewer/load.html"

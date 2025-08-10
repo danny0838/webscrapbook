@@ -1,19 +1,9 @@
 /******************************************************************************
  * Script for batch.html.
- *
- * @requires scrapbook
- * @module batch
  *****************************************************************************/
 
-(function (global, factory) {
-  // Browser globals
-  global.batch = factory(
-    global.isDebug,
-    global.scrapbook,
-  );
-}(this, function (isDebug, scrapbook) {
-
-'use strict';
+import {scrapbook} from "../core/common.mjs";
+import "../core/extension.mjs";
 
 let gTaskInfo;
 
@@ -172,8 +162,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   init();
 });
 
-return {
+/** @global */
+globalThis.batch = {
   capture,
 };
-
-}));

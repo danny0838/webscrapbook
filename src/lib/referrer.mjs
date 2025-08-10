@@ -9,22 +9,6 @@
  * https://opensource.org/licenses/MIT
  *****************************************************************************/
 
-(function (global, factory) {
-  if (typeof exports === "object" && typeof module === "object") {
-    // CommonJS
-    module.exports = factory();
-  } else if (typeof define === "function" && define.amd) {
-    // AMD
-    define(factory);
-  } else {
-    // Browser globals
-    global = typeof globalThis !== "undefined" ? globalThis : global || self;
-    global.Referrer = factory();
-  }
-}(this, function () {
-
-'use strict';
-
 class Referrer {
   /**
    * @param {string} refUrl - the source URL
@@ -169,5 +153,6 @@ class Referrer {
   }
 }
 
-return Referrer;
-}));
+export {
+  Referrer,
+};

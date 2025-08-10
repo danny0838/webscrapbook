@@ -1,20 +1,11 @@
 /******************************************************************************
  * Shared utilities for most content scripts.
- *
- * @requires scrapbook
- * @module core
  *****************************************************************************/
 
-(function (global, factory) {
-  // Browser globals
-  if (global.hasOwnProperty('core')) { return; }
-  global.core = factory(
-    global.isDebug,
-    global.scrapbook,
-  );
-}(this, function (isDebug, scrapbook) {
-
-'use strict';
+import {scrapbook} from "./common.mjs";
+import "./options-auto.mjs";
+import {capturer} from "../capturer/common.mjs";
+import {editor} from "../editor/content.mjs";
 
 const core = {};
 
@@ -51,6 +42,18 @@ window.addEventListener("message", async (event) => {
 
 scrapbook.addMessageListener();
 
-return core;
+/** @global */
+globalThis.scrapbook = scrapbook;
 
-}));
+/** @global */
+globalThis.core = core;
+
+/** @global */
+globalThis.capturer = capturer;
+
+/** @global */
+globalThis.editor = editor;
+
+export {
+  core,
+};

@@ -1,23 +1,12 @@
 /******************************************************************************
  * Script for folder.html.
- *
- * @requires scrapbook
- * @requires server
- * @requires BookTree
- * @module controller
  *****************************************************************************/
 
-(function (global, factory) {
-  // Browser globals
-  global.controller = factory(
-    global.isDebug,
-    global.scrapbook,
-    global.server,
-    global.BookTree,
-  );
-}(this, function (isDebug, scrapbook, server, BookTree) {
-
-'use strict';
+import {scrapbook} from "../core/common.mjs";
+import "../core/extension.mjs";
+import "../core/options-auto.mjs";
+import {server} from "./server.mjs";
+import {BookTree} from "./book-tree.mjs";
 
 const controller = {
   id: null,
@@ -80,6 +69,5 @@ document.addEventListener('DOMContentLoaded', (event) => {
   controller.init();
 });
 
-return controller;
-
-}));
+/** @global */
+globalThis.controller = controller;

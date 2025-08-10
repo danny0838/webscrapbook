@@ -1,19 +1,9 @@
 /******************************************************************************
  * Script for advanced.html.
- *
- * @requires scrapbook
- * @module advanced
  *****************************************************************************/
 
-(function (global, factory) {
-  // Browser globals
-  global.advanced = factory(
-    global.isDebug,
-    global.scrapbook,
-  );
-}(this, function (isDebug, scrapbook) {
-
-'use strict';
+import {scrapbook} from "../core/common.mjs";
+import "../core/extension.mjs";
 
 async function init() {
   const missionId = new URL(document.URL).searchParams.get('mid');
@@ -153,8 +143,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   init();
 });
 
-return {
+/** @global */
+globalThis.advanced = {
   capture,
 };
-
-}));

@@ -1,20 +1,10 @@
 /******************************************************************************
  * The background script for editor functionality
- *
- * @requires scrapbook
- * @module editor
  *****************************************************************************/
 
-(function (global, factory) {
-  // Browser globals
-  if (global.hasOwnProperty('editor')) { return; }
-  global.editor = factory(
-    global.isDebug,
-    global.scrapbook,
-  );
-}(this, function (isDebug, scrapbook) {
-
-'use strict';
+import {scrapbook} from "../core/common.mjs";
+import "../core/extension.mjs";
+import "../core/options-auto.mjs";
 
 const AUTO_EDIT_FILTER = {url: [{schemes: ["http", "https"]}]};
 
@@ -94,9 +84,7 @@ async function init() {
 
 init();
 
-return {
+export {
   toggleAutoEdit,
   registerActiveEditorTab,
 };
-
-}));
