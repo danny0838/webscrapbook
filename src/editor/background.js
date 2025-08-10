@@ -1,9 +1,8 @@
 /******************************************************************************
- *
  * The background script for editor functionality
  *
- * @require {Object} scrapbook
- * @public {Object} editor
+ * @requires scrapbook
+ * @module editor
  *****************************************************************************/
 
 (function (global, factory) {

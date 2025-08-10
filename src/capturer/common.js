@@ -1,10 +1,9 @@
 /******************************************************************************
- *
  * Common capture utilities shared among background and content scripts.
  *
- * @require {boolean} isDebug
- * @require {Object} scrapbook
- * @public {Object} capturer
+ * @external isDebug
+ * @requires scrapbook
+ * @module capturer
  *****************************************************************************/
 
 (function (global, factory) {

@@ -1,10 +1,9 @@
 /******************************************************************************
- *
  * Background script for capturer functionality.
  *
- * @require {Object} scrapbook
- * @require {Object} server
- * @public {Object} capturer
+ * @requires scrapbook
+ * @requires server
+ * @module capturer
  *****************************************************************************/
 
 (function (global, factory) {

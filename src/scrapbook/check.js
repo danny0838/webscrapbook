@@ -1,9 +1,8 @@
 /******************************************************************************
- *
  * Script for check.html
  *
- * @require {Object} scrapbook
- * @require {Object} server
+ * @requires scrapbook
+ * @requires server
  *****************************************************************************/
 
 (function (global, factory) {

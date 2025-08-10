@@ -1,10 +1,9 @@
 /******************************************************************************
- *
  * Script for itempicker.html.
  *
- * @require {Object} scrapbook
- * @require {Object} server
- * @public {Object} itempicker
+ * @requires scrapbook
+ * @requires server
+ * @module itempicker
  *****************************************************************************/
 
 (function (global, factory) {

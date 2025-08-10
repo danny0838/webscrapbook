@@ -1,10 +1,9 @@
 /******************************************************************************
- *
  * Script for load.html
  *
- * @require {Object} scrapbook
- * @require {Object} JSZip
- * @require {Object} Mime
+ * @requires scrapbook
+ * @requires JSZip
+ * @requires Mime
  *****************************************************************************/
 
 (function (global, factory) {

@@ -1,16 +1,15 @@
 /******************************************************************************
+ * Script of the main capturer (capturer.html).
  *
- * Background script of the main capturer (capturer.html).
- *
- * @require {boolean} isDebug
- * @require {Object} scrapbook
- * @require {Object} server
- * @require {Object} capturer
- * @require {Object} JSZip
- * @require {Object} Mime
- * @require {Object} MapWithDefault
- * @require {Object} Referrer
- * @extends capturer
+ * @external isDebug
+ * @requires scrapbook
+ * @requires server
+ * @requires capturer
+ * @requires JSZip
+ * @requires Mime
+ * @requires MapWithDefault
+ * @requires Referrer
+ * @modifies capturer
  *****************************************************************************/
 
 (function (global, factory) {

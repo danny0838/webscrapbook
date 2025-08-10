@@ -1,10 +1,13 @@
 /******************************************************************************
- *
  * Shared utilities for most background and content scripts.
  *
- * @require {Object} browser
- * @public {boolean} isDebug
- * @public {Object} scrapbook
+ * @external isDebug
+ * @external JSZip
+ * @external jsSHA
+ * @external Mime
+ * @external Strftime
+ * @requires browser
+ * @module scrapbook
  *****************************************************************************/
 
 // Polyfill for Chrome < 119 and Firefox < 121
@@ -3034,7 +3037,7 @@ dialog {
   /**
    * supported data types: HEX, TEXT, B64, BYTES, or ARRAYBUFFER
    *
-   * @require jsSHA
+   * @requires jsSHA
    */
   scrapbook.sha1 = function (data, type) {
     let shaObj = new jsSHA("SHA-1", type);
@@ -3566,6 +3569,10 @@ dialog {
     return xhr.response;
   };
 
+  /**
+   * @requires Mime
+   * @requires jsSHA
+   */
   scrapbook.dataUriToFile = function (dataUri, useFilename = true) {
     const regexFields = /^data:([^,]*?)(;base64)?,([^#]*)/i;
     const regexFieldValue = /^(.*?)=(.*?)$/;
@@ -4822,7 +4829,7 @@ dialog {
   /****************************************************************************
    * Zip utilities
    *
-   * @require JSZip
+   * @requires JSZip
    ***************************************************************************/
 
   scrapbook.isCompressible = function (mimetype) {

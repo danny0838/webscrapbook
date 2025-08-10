@@ -1,9 +1,8 @@
 /******************************************************************************
- *
  * The background script for viewer functionality
  *
- * @require {Object} scrapbook
- * @public {Object} viewer
+ * @requires scrapbook
+ * @module viewer
  *****************************************************************************/
 
 (function (global, factory) {

@@ -1,10 +1,9 @@
 /******************************************************************************
- *
  * Loads and updates options automatically
  *
- * @require {Object} scrapbook
- * @extends scrapbook
- * @public {Promise} scrapbook.loadOptionsAuto
+ * @requires scrapbook
+ * @modifies scrapbook
+ * @module loadOptionsAuto
  *****************************************************************************/
 
 (function (global, factory) {

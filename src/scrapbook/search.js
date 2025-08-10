@@ -1,11 +1,10 @@
 /******************************************************************************
- *
  * Script for search.html.
  *
- * @require {Object} scrapbook
- * @require {Object} server
- * @require {Class} CustomTree
- * @public {Object} search
+ * @requires scrapbook
+ * @requires server
+ * @requires CustomTree
+ * @module search
  *****************************************************************************/
 
 (function (global, factory) {

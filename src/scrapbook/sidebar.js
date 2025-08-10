@@ -1,11 +1,10 @@
 /******************************************************************************
- *
  * Scrapbook sidebar UI controller, for pages like sidebar.html and manage.html.
  *
- * @require {Object} scrapbook
- * @require {Object} server
- * @require {Class} Tree
- * @public {Object} sidebar
+ * @requires scrapbook
+ * @requires server
+ * @requires Tree
+ * @module sidebar
  *****************************************************************************/
 
 (function (global, factory) {

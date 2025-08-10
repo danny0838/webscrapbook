@@ -1,12 +1,11 @@
 /******************************************************************************
- *
  * Content script for editor functionality.
  *
- * @require {boolean} isDebug
- * @require {Object} scrapbook
- * @require {Class} Strftime
- * @require {Object} core
- * @public {Object} editor
+ * @external isDebug
+ * @requires scrapbook
+ * @requires Strftime
+ * @requires core
+ * @module editor
  *****************************************************************************/
 
 (function (global, factory) {

@@ -1,9 +1,8 @@
 /******************************************************************************
- *
  * Script for advanced.html.
  *
- * @require {Object} scrapbook
- * @public {Object} advanced
+ * @requires scrapbook
+ * @module advanced
  *****************************************************************************/
 
 (function (global, factory) {

@@ -1,9 +1,8 @@
 /******************************************************************************
- *
  * Script for cache.html
  *
- * @require {Object} scrapbook
- * @require {Object} server
+ * @requires scrapbook
+ * @requires server
  *****************************************************************************/
 
 (function (global, factory) {

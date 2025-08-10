@@ -1,9 +1,8 @@
 /******************************************************************************
- *
  * Shared utilities for most content scripts.
  *
- * @require {Object} scrapbook
- * @public {Object} core
+ * @requires scrapbook
+ * @module core
  *****************************************************************************/
 
 (function (global, factory) {

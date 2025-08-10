@@ -1,10 +1,9 @@
 /******************************************************************************
- *
  * Script for details.html.
  *
- * @require {Object} scrapbook
- * @require {Object} server
- * @public {Object} details
+ * @requires scrapbook
+ * @requires server
+ * @module details
  *****************************************************************************/
 
 (function (global, factory) {

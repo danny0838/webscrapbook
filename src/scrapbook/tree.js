@@ -1,10 +1,9 @@
 /******************************************************************************
- *
  * Tree UI controller class.
  *
- * @require {Object} scrapbook
- * @require {Object} server
- * @public {Class} Tree
+ * @requires scrapbook
+ * @requires server
+ * @module Tree
  *****************************************************************************/
 
 (function (global, factory) {

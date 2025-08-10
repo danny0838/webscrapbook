@@ -1,11 +1,10 @@
 /******************************************************************************
- *
  * CustomTree UI controller class.
  *
- * @require {Object} scrapbook
- * @require {Object} server
- * @require {Class} Tree
- * @public {Class} CustomTree
+ * @requires scrapbook
+ * @requires server
+ * @requires Tree
+ * @module CustomTree
  *****************************************************************************/
 
 (function (global, factory) {

@@ -1,10 +1,9 @@
 /******************************************************************************
- *
  * Script for postit-frame.html.
  *
- * @require {Object} scrapbook
- * @require {Object} server
- * @public {Object} editor
+ * @requires scrapbook
+ * @requires server
+ * @module editor
  *****************************************************************************/
 
 (function (global, factory) {

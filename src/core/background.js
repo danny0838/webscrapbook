@@ -1,13 +1,12 @@
 /******************************************************************************
- *
  * The background script for the main (auto-generated) background page.
  *
- * @require {Object} scrapbook
- * @require {Object} server
- * @require {Object} capturer
- * @require {Object} editor
- * @require {Object} viewer
- * @public {Object} background
+ * @requires scrapbook
+ * @requires server
+ * @requires capturer
+ * @requires editor
+ * @requires viewer
+ * @module background
  *****************************************************************************/
 
 (function (global, factory) {

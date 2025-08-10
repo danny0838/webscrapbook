@@ -1,9 +1,8 @@
 /******************************************************************************
- *
  * Script for batch.html.
  *
- * @require {Object} scrapbook
- * @public {Object} batch
+ * @requires scrapbook
+ * @module batch
  *****************************************************************************/
 
 (function (global, factory) {

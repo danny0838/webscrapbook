@@ -1,8 +1,7 @@
 /******************************************************************************
- *
  * Script for browserAction.html
  *
- * @require {Object} scrapbook
+ * @requires scrapbook
  *****************************************************************************/
 
 (function (global, factory) {

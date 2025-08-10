@@ -1,14 +1,13 @@
 /******************************************************************************
- *
  * BookTree UI controller class.
  *
  * This is bound to a scrapbook (a Book instance in server.js) and constructs
  * the DOM tree according to it.
  *
- * @require {Object} scrapbook
- * @require {Object} server
- * @require {Class} Tree
- * @public {Class} BookTree
+ * @requires scrapbook
+ * @requires server
+ * @requires Tree
+ * @module BookTree
  *****************************************************************************/
 
 (function (global, factory) {

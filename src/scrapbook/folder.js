@@ -1,11 +1,10 @@
 /******************************************************************************
+ * Script for folder.html.
  *
- * Script for postit.html.
- *
- * @require {Object} scrapbook
- * @require {Object} server
- * @require {Class} BookTree
- * @public {Object} controller
+ * @requires scrapbook
+ * @requires server
+ * @requires BookTree
+ * @module controller
  *****************************************************************************/
 
 (function (global, factory) {

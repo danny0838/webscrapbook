@@ -1,9 +1,8 @@
 /******************************************************************************
- *
  * Shared utilities for extension scripts.
  *
- * @require {Object} scrapbook
- * @extends scrapbook
+ * @requires scrapbook
+ * @modifies scrapbook
  *****************************************************************************/
 
 (function (global, factory) {

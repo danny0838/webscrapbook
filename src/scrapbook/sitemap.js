@@ -1,10 +1,9 @@
 /******************************************************************************
- *
  * Script for sitemap.html.
  *
- * @require {Object} scrapbook
- * @require {Object} server
- * @public {Object} sitemap
+ * @requires scrapbook
+ * @requires server
+ * @module sitemap
  *****************************************************************************/
 
 (function (global, factory) {

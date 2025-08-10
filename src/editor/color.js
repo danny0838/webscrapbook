@@ -1,8 +1,7 @@
 /******************************************************************************
- *
  * Shared script for modal dialog windows.
  *
- * @require {Object} scrapbook
+ * @requires scrapbook
  *****************************************************************************/
 
 (function (global, factory) {
