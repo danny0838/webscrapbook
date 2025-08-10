@@ -10,22 +10,20 @@
     // CommonJS
     module.exports = factory(
       require('./chai'),
-      require('../t/common'),
       require('../shared/core/common'),
     );
   } else if (typeof define === "function" && define.amd) {
     // AMD
-    define(['./chai', '../t/common', '../shared/core/common'], factory);
+    define(['./chai', '../shared/core/common'], factory);
   } else {
     // Browser globals
     global = typeof globalThis !== "undefined" ? globalThis : global || self;
     global.unittest = factory(
       global.chai,
-      global.utils,
       global.scrapbook,
     );
   }
-}(this, function (chai, utils, scrapbook) {
+}(this, function (chai, scrapbook) {
 
   'use strict';
 
