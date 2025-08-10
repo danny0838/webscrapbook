@@ -1,25 +1,10 @@
 /******************************************************************************
  * Content script for editor functionality.
- *
- * @external isDebug
- * @requires scrapbook
- * @requires Strftime
- * @requires core
- * @module editor
  *****************************************************************************/
 
-(function (global, factory) {
-  // Browser globals
-  if (global.hasOwnProperty('editor')) { return; }
-  global.editor = factory(
-    global.isDebug,
-    global.scrapbook,
-    global.Strftime,
-    global.core,
-  );
-}(this, function (isDebug, scrapbook, Strftime, core) {
-
-'use strict';
+import {scrapbook} from "../core/common.mjs";
+import {Strftime} from "../lib/strftime.mjs";
+import {core} from "../core/content.mjs";
 
 // https://mimesniff.spec.whatwg.org/
 const SCRIPT_TYPES = new Set([
@@ -3893,6 +3878,6 @@ window.addEventListener("blur", (event) => {
   }
 }, {capture: true, passive: true});
 
-return editor;
-
-}));
+export {
+  editor,
+};

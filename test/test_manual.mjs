@@ -1,21 +1,3 @@
-(function (global, factory) {
-  global = typeof globalThis !== "undefined" ? globalThis : global || self;
-  if (typeof exports === "object" && typeof module === "object") {
-    // CommonJS
-    module.exports = factory(global);
-  } else if (typeof define === "function" && define.amd) {
-    // AMD
-    define(() => {
-      return factory(global);
-    });
-  } else {
-    // Browser globals
-    factory(global);
-  }
-}(this, function (global) {
-
-'use strict';
-
 describe('Manual tests', function () {
   before(async function () {
     await checkTestServer();
@@ -109,5 +91,3 @@ describe('Manual tests', function () {
     });
   });
 });
-
-}));

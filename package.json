@@ -23,8 +23,10 @@
     "@eslint/compat": "^1.4.0",
     "@stylistic/eslint-plugin": "^4.2.0",
     "eslint": "^9.23.0",
+    "eslint-plugin-import": "^2.32.0",
     "glob": "^11.0.2",
     "globals": "^16.0.0",
+    "rollup": "^4.46.2",
     "web-ext": "^8.6.0"
   }
 }

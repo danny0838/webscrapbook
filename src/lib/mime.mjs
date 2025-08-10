@@ -6,22 +6,7 @@
  * https://opensource.org/licenses/MIT
  *****************************************************************************/
 
-(function (global, factory) {
-  if (typeof exports === "object" && typeof module === "object") {
-    // CommonJS
-    module.exports = factory();
-  } else if (typeof define === "function" && define.amd) {
-    // AMD
-    define(factory);
-  } else {
-    // Browser globals
-    global = typeof globalThis !== "undefined" ? globalThis : global || self;
-    global.Mime = factory();
-  }
-}(this, function () {
-
-'use strict';
-
+/* eslint-disable */
 /**
  * Map from mimetype to extension
  *
@@ -9370,6 +9355,7 @@ const db = {
     "compressible": true
   }
 };
+/* eslint-enable */
 
 /**
  * Reverse map from extension to mimetype
@@ -9431,7 +9417,7 @@ function extend(mime, {extensions = [], ...kwargs} = {}, {important, minor} = {}
  * Lookup a mime type based on extension
  */
 function lookup(path, fallback) {
-  const ext = path.replace(/.*[\.\/\\]/, '').toLowerCase();
+  const ext = path.replace(/.*[./\\]/, '').toLowerCase();
   return types[ext] || fallback || "application/octet-stream";
 }
 
@@ -9457,7 +9443,7 @@ function allExtensions(mimeType) {
   return [];
 }
 
-return {
+export {
   db,
   types,
   extend,
@@ -9465,4 +9451,3 @@ return {
   extension,
   allExtensions,
 };
-}));

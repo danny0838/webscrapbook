@@ -6,4 +6,8 @@
   npx rollup -c
   ```
 
-* `chai.js`: from [chai](https://github.com/chaijs/chai/blob/v4.5.0/chai.js) with `exports.version` fixed
+* `chai.mjs`: built from [chai](https://github.com/chaijs/chai/tree/v6.0.1) with:
+  ```
+  npm run install
+  npx esbuild --bundle --format=esm --keep-names --outfile=index.js lib/chai.js --target=chrome85,firefox79
+  ```

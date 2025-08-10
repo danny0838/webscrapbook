@@ -5,6 +5,7 @@ import {parseArgs} from 'node:util';
 
 import {globSync} from 'glob';
 import webExt from 'web-ext';
+import {rollup} from 'rollup';
 
 // Get the directory name in ESM
 const ROOT = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
@@ -30,7 +31,7 @@ function hardlink(src, dst) {
   fs.linkSync(src, dst);
 }
 
-function build(target) {
+async function build(target) {
   switch (target) {
     case 'firefox-mv3': {
       console.log('Building files for Firefox (MV3)...');
@@ -73,9 +74,34 @@ function build(target) {
       }
     }
   }
+
+  {
+    const bundle = await rollup({
+      input: path.join(srcDir, "lib/mime.mjs"),
+    });
+    await bundle.write({
+      file: path.join(srcDir, "lib/mime.js"),
+      format: 'iife',
+      name: "Mime",
+      sourcemap: true,
+      sourcemapExcludeSources: true,
+    });
+  }
+
+  {
+    const bundle = await rollup({
+      input: path.join(srcDir, "core/content.mjs"),
+    });
+    await bundle.write({
+      file: path.join(srcDir, "core/content.js"),
+      format: 'iife',
+      sourcemap: true,
+      sourcemapExcludeSources: true,
+    });
+  }
 }
 
-function buildTest(target) {
+async function buildTest(target) {
   switch (target) {
     case 'firefox-mv3': {
       console.log('Building test files for Firefox (MV3)...');
@@ -133,7 +159,7 @@ function buildTest(target) {
   }
 
   for (const src of globSync([
-    path.join(srcDir, '{core,capturer}', 'common.js'),
+    path.join(srcDir, '**', '*.mjs'),
     path.join(srcDir, 'lib', '**', '*.js'),
   ], {windowsPathsNoEscape: true})) {
     const subpath = path.relative(srcDir, src);
@@ -142,13 +168,13 @@ function buildTest(target) {
   }
 }
 
-function dev(target) {
-  build(target);
-  buildTest(target);
+async function dev(target) {
+  await build(target);
+  await buildTest(target);
 }
 
-function pack(target) {
-  build(target);
+async function pack(target) {
+  await build(target);
 
   const filename = `webscrapbook.${target.startsWith('firefox') ? 'xpi' : 'zip'}`;
   webExt.cmd.build({
@@ -164,7 +190,7 @@ function pack(target) {
   });
 }
 
-function main() {
+async function main() {
   const args = parseArgs({
     options: {
       help: {
@@ -199,15 +225,15 @@ Options:
 
   switch (args.values.mode) {
     case 'build': {
-      build(args.values.target);
+      await build(args.values.target);
       break;
     }
     case 'dev': {
-      dev(args.values.target);
+      await dev(args.values.target);
       break;
     }
     case 'pack': {
-      pack(args.values.target);
+      await pack(args.values.target);
       break;
     }
     default: {

@@ -10,22 +10,6 @@
  * https://opensource.org/licenses/MIT
  *****************************************************************************/
 
-(function (global, factory) {
-  if (typeof exports === "object" && typeof module === "object") {
-    // CommonJS
-    module.exports = factory();
-  } else if (typeof define === "function" && define.amd) {
-    // AMD
-    define(factory);
-  } else {
-    // Browser globals
-    global = typeof globalThis !== "undefined" ? globalThis : global || self;
-    global.Strftime = factory();
-  }
-}(this, function () {
-
-'use strict';
-
 const MAIN_PATTERN = /%([a-z%])/gi;
 const DAY_COUNT = [0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334];
 
@@ -406,6 +390,6 @@ class Strftime {
   }
 }
 
-return Strftime;
-
-}));
+export {
+  Strftime,
+};

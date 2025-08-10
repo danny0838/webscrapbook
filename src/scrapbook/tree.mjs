@@ -1,21 +1,8 @@
 /******************************************************************************
  * Tree UI controller class.
- *
- * @requires scrapbook
- * @requires server
- * @module Tree
  *****************************************************************************/
 
-(function (global, factory) {
-  // Browser globals
-  global.Tree = factory(
-    global.isDebug,
-    global.scrapbook,
-    global.server,
-  );
-}(this, function (isDebug, scrapbook, server) {
-
-'use strict';
+import {scrapbook} from "../core/common.mjs";
 
 const TREE_CLASS = 'tree';
 const TREE_CLASS_SELECTABLE = 'selectable';
@@ -974,6 +961,6 @@ class Tree {
   }
 }
 
-return Tree;
-
-}));
+export {
+  Tree,
+};

@@ -6,33 +6,12 @@
  * https://opensource.org/licenses/MIT
  *****************************************************************************/
 
-(function (global, factory) {
-  if (typeof exports === "object" && typeof module === "object") {
-    // CommonJS
-    module.exports = factory(
-      require('./chai'),
-      require('../shared/core/common'),
-    );
-  } else if (typeof define === "function" && define.amd) {
-    // AMD
-    define(['./chai', '../shared/core/common'], factory);
-  } else {
-    // Browser globals
-    global = typeof globalThis !== "undefined" ? globalThis : global || self;
-    global.unittest = factory(
-      global.chai,
-      global.scrapbook,
-    );
-  }
-}(this, function (chai, scrapbook) {
+import {assert, config as chaiConfig} from "./lib/chai.mjs";
+import {scrapbook} from "./shared/core/common.mjs";
 
-'use strict';
-
-Object.assign(chai.config, {
+Object.assign(chaiConfig, {
   truncateThreshold: 1024,
 });
-
-const {assert} = chai;
 
 /**
  * A jQuery-style extension of `describe` or `it` for chainable and conditional
@@ -470,7 +449,7 @@ var encodeText = (() => {
     const frame = document.createElement("iframe");
     frame.style.setProperty('display', 'none', 'important');
     {
-      const js = browser.runtime.getURL('lib/unittest-encoding.js');
+      const js = browser.runtime.getURL('unittest-encoding.js');
       const _str = escapeHtml(str);
 
       // run script in a document with specific charset to get the encoded text
@@ -575,7 +554,7 @@ function cssRegex(strings, ...args) {
   return new RegExp(results.join(''));
 }
 
-return {
+export {
   assert,
   MochaQuery,
   userAgent,
@@ -595,5 +574,3 @@ return {
   rawRegex,
   cssRegex,
 };
-
-}));

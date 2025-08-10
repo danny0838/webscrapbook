@@ -2,31 +2,20 @@
  * Script of the main capturer (capturer.html).
  *
  * @external isDebug
- * @requires scrapbook
- * @requires server
- * @requires capturer
- * @requires JSZip
- * @requires Mime
- * @requires MapWithDefault
- * @requires Referrer
  * @modifies capturer
  *****************************************************************************/
 
-(function (global, factory) {
-  // Browser globals
-  factory(
-    global.isDebug,
-    global.scrapbook,
-    global.server,
-    global.capturer,
-    global.JSZip,
-    global.Mime,
-    global.MapWithDefault,
-    global.Referrer,
-  );
-}(this, function (isDebug, scrapbook, server, capturer, JSZip, Mime, MapWithDefault, Referrer) {
+/* global JSZip */
+/* global Mime */
 
-'use strict';
+import {scrapbook} from "../core/common.mjs";
+import "../core/extension.mjs";
+import {server} from "../scrapbook/server.mjs";
+import {MapWithDefault} from "../lib/map-with-default.mjs";
+import {Referrer} from "../lib/referrer.mjs";
+import {capturer} from "./common.mjs";
+
+const isDebug = globalThis.isDebug;
 
 const REBUILD_LINK_ROLE_PATTERN = /^document(?:-[a-f0-9-]+)?$/;
 const REBUILD_LINK_SVG_HREF_ATTRS = ['href', 'xlink:href'];
@@ -4527,4 +4516,5 @@ const capturePromise = new Promise((resolve, reject) => {
   });
 });
 
-}));
+/** @global */
+globalThis.capturer = capturer;

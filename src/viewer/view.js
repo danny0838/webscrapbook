@@ -1,18 +1,8 @@
 /******************************************************************************
  * Script for view.html
- *
- * @requires scrapbook
  *****************************************************************************/
 
-(function (global, factory) {
-  // Browser globals
-  factory(
-    global.isDebug,
-    global.scrapbook,
-  );
-}(this, function (isDebug, scrapbook) {
-
-'use strict';
+import {scrapbook} from "../core/common.mjs";
 
 scrapbook.loadLanguages(document);
 
@@ -847,5 +837,3 @@ async function init() {
 }
 
 init();
-
-}));

@@ -1,27 +1,14 @@
 /******************************************************************************
  * Script for the background page.
- *
- * @requires scrapbook
- * @requires server
- * @requires capturer
- * @requires editor
- * @requires viewer
- * @module background
  *****************************************************************************/
 
-(function (global, factory) {
-  // Browser globals
-  global.background = factory(
-    global.isDebug,
-    global.scrapbook,
-    global.server,
-    global.capturer,
-    global.editor,
-    global.viewer,
-  );
-}(this, function (isDebug, scrapbook, server, capturer, editor, viewer) {
-
-'use strict';
+import {scrapbook} from "./common.mjs";
+import "./extension.mjs";
+import "./options-auto.mjs";
+import {server} from "../scrapbook/server.mjs";
+import * as capturer from "../capturer/background.mjs";
+import * as editor from "../editor/background.mjs";
+import * as viewer from "../viewer/background.mjs";
 
 /**
  * @type {Map<integer~windowId, integer~timestamp>}
@@ -1203,6 +1190,8 @@ async function init() {
 
 init();
 
-return background;
+/** @global */
+globalThis.scrapbook = scrapbook;
 
-}));
+/** @global */
+globalThis.background = background;

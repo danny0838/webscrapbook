@@ -1,22 +1,10 @@
 /******************************************************************************
  * Shared class for server related manipulation.
- *
- * @requires scrapbook
- * @requires Mime
- * @module server
  *****************************************************************************/
 
-(function (global, factory) {
-  // Browser globals
-  if (global.hasOwnProperty('server')) { return; }
-  global.server = factory(
-    global.isDebug,
-    global.scrapbook,
-    global.Mime,
-  );
-}(this, function (isDebug, scrapbook, Mime) {
+/* global Mime */
 
-'use strict';
+import {scrapbook} from "../core/common.mjs";
 
 // order is relevant
 const SPECIAL_ITEM_ID = new Set(['root', 'hidden', 'recycle']);
@@ -1332,6 +1320,4 @@ scrapbook.toc(${JSON.stringify(jsonData, null, 2).replace(/\u2028/g, '\\u2028').
   }
 }
 
-return new Server();
-
-}));
+export const server = new Server();

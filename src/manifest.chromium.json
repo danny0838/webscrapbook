@@ -31,12 +31,15 @@
     "file:///*"
   ],
   "background": {
-    "service_worker": "background.js"
+    "service_worker": "background.js",
+    "type": "module"
   },
   "web_accessible_resources": [
     {
       "resources": [
         "*.map",
+        "*.js",
+        "*.mjs",
         "resources/*",
         "scrapbook/sitemap.html",
         "viewer/load.html"
@@ -44,7 +47,7 @@
       "matches": [
         "<all_urls>"
       ],
-      "use_dynamic_url": true
+      "use_dynamic_url": false
     }
   ],
   "options_ui": {

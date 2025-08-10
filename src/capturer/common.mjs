@@ -2,40 +2,12 @@
  * Common capture utilities shared among background and content scripts.
  *
  * @external isDebug
- * @requires scrapbook
- * @module capturer
  *****************************************************************************/
 
-(function (global, factory) {
-  global = typeof globalThis !== "undefined" ? globalThis : global || self;
-  if (typeof exports === "object" && typeof module === "object") {
-    // CommonJS
-    module.exports = factory(
-      global.isDebug,
-      require('../core/common'),
-      require('../lib/map-with-default'),
-    );
-  } else if (typeof define === "function" && define.amd) {
-    // AMD
-    define(
-      ['../core/common', '../lib/map-with-default'],
-      (...args) => factory(
-        global.isDebug,
-        ...args,
-      ),
-    );
-  } else {
-    // Browser globals
-    if (global.hasOwnProperty('capturer')) { return; }
-    global.capturer = factory(
-      global.isDebug,
-      global.scrapbook,
-      global.MapWithDefault,
-    );
-  }
-}(this, function (isDebug, scrapbook, MapWithDefault) {
+import {scrapbook} from "../core/common.mjs";
+import {MapWithDefault} from "../lib/map-with-default.mjs";
 
-'use strict';
+const isDebug = globalThis.isDebug;
 
 // ref: https://html.spec.whatwg.org/#meta-referrer
 const META_REFERRER_POLICY = new Set([
@@ -6851,7 +6823,6 @@ class CaptureHelperHandler {
 
 capturer.CaptureHelperHandler = CaptureHelperHandler;
 
-
-return capturer;
-
-}));
+export {
+  capturer,
+};

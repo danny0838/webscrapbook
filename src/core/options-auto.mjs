@@ -1,21 +1,10 @@
 /******************************************************************************
  * Loads and updates options automatically
  *
- * @requires scrapbook
  * @modifies scrapbook
- * @module loadOptionsAuto
  *****************************************************************************/
 
-(function (global, factory) {
-  // Browser globals
-  if (global.hasOwnProperty('loadOptionsAuto')) { return; }
-  global.loadOptionsAuto = factory(
-    global.isDebug,
-    global.scrapbook,
-  );
-}(this, function (isDebug, scrapbook) {
-
-'use strict';
+import {scrapbook} from "./common.mjs";
 
 scrapbook.loadOptionsAuto = scrapbook.loadOptions();
 
@@ -33,7 +22,3 @@ browser.storage.onChanged.addListener((changes, areaName) => {
     }
   }
 });
-
-return scrapbook.loadOptionsAuto;
-
-}));

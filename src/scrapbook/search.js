@@ -1,23 +1,12 @@
 /******************************************************************************
  * Script for search.html.
- *
- * @requires scrapbook
- * @requires server
- * @requires CustomTree
- * @module search
  *****************************************************************************/
 
-(function (global, factory) {
-  // Browser globals
-  global.search = factory(
-    global.isDebug,
-    global.scrapbook,
-    global.server,
-    global.CustomTree,
-  );
-}(this, function (isDebug, scrapbook, server, CustomTree) {
-
-'use strict';
+import {scrapbook} from "../core/common.mjs";
+import "../core/extension.mjs";
+import "../core/options-auto.mjs";
+import {server} from "./server.mjs";
+import {CustomTree} from "./custom-tree.mjs";
 
 const TREE_CLASS = 'tree-search';
 
@@ -462,7 +451,5 @@ document.addEventListener('DOMContentLoaded', (event) => {
   search.init();
 });
 
-
-return search;
-
-}));
+/** @global */
+globalThis.search = search;

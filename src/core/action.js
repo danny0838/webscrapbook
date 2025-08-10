@@ -1,18 +1,10 @@
 /******************************************************************************
  * Script for browserAction.html
- *
- * @requires scrapbook
  *****************************************************************************/
 
-(function (global, factory) {
-  // Browser globals
-  factory(
-    global.isDebug,
-    global.scrapbook,
-  );
-}(this, function (isDebug, scrapbook) {
-
-'use strict';
+import {scrapbook} from "./common.mjs";
+import "./extension.mjs";
+import "./options-auto.mjs";
 
 document.addEventListener('DOMContentLoaded', async () => {
   async function selectTabFromDom(baseElem) {
@@ -316,5 +308,3 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
   document.getElementById("batchCaptureLinks").addEventListener('dragend', onCaptureCommandDragEnd);
 });
-
-}));

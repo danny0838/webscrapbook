@@ -1,36 +1,13 @@
-(function (global, factory) {
-  if (typeof exports === "object" && typeof module === "object") {
-    // CommonJS
-    module.exports = factory(
-      require('./lib/unittest'),
-      require('./shared/core/common'),
-    );
-  } else if (typeof define === "function" && define.amd) {
-    // AMD
-    define(
-      ['./lib/unittest', './shared/core/common'],
-      factory,
-    );
-  } else {
-    // Browser globals
-    global = typeof globalThis !== "undefined" ? globalThis : global || self;
-    factory(
-      global.unittest,
-      global.scrapbook,
-    );
-  }
-}(this, function (unittest, scrapbook) {
+import {MochaQuery as $, assert, encodeText, cssRegex} from "./unittest.mjs";
 
-'use strict';
-
-const {MochaQuery: $, assert, encodeText, cssRegex} = unittest;
+import {scrapbook} from "./shared/core/common.mjs";
 
 const $describe = $(describe);
 const $it = $(it);
 
 const r = String.raw;
 
-describe('core/common.js', function () {
+describe('core/common.mjs', function () {
   $describe.skipIf($.noExtensionBrowser)('scrapbook.cache', function () {
     const DB_NAME = "scrapbook";
 
@@ -3279,5 +3256,3 @@ div { image-background: var(${/(--sb(\d+)-2)/}); }`;
     });
   });
 });
-
-}));

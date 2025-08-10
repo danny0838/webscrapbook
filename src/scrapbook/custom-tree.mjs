@@ -1,23 +1,8 @@
 /******************************************************************************
  * CustomTree UI controller class.
- *
- * @requires scrapbook
- * @requires server
- * @requires Tree
- * @module CustomTree
  *****************************************************************************/
 
-(function (global, factory) {
-  // Browser globals
-  global.CustomTree = factory(
-    global.isDebug,
-    global.scrapbook,
-    global.server,
-    global.Tree,
-  );
-}(this, function (isDebug, scrapbook, server, Tree) {
-
-'use strict';
+import {Tree} from "./tree.mjs";
 
 class CustomTree extends Tree {
   rebuild() {
@@ -30,6 +15,6 @@ class CustomTree extends Tree {
   }
 }
 
-return CustomTree;
-
-}));
+export {
+  CustomTree,
+};

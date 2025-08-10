@@ -1,20 +1,9 @@
 /******************************************************************************
  * The background script for viewer functionality
- *
- * @requires scrapbook
- * @module viewer
  *****************************************************************************/
 
-(function (global, factory) {
-  // Browser globals
-  if (global.hasOwnProperty('viewer')) { return; }
-  global.viewer = factory(
-    global.isDebug,
-    global.scrapbook,
-  );
-}(this, function (isDebug, scrapbook) {
-
-'use strict';
+import {scrapbook} from "../core/common.mjs";
+import "../core/options-auto.mjs";
 
 const VIEWER_BEFORE_REQUEST_FILTER = {urls: ["file://*"], types: ["main_frame", "sub_frame"]};
 const VIEWER_BEFORE_REQUEST_EXTRA = ["blocking"];
@@ -153,8 +142,6 @@ async function init() {
 
 init();
 
-return {
+export {
   toggleViewerListeners,
 };
-
-}));
