@@ -3,24 +3,11 @@
  *
  * This is bound to a scrapbook (a Book instance in server.js) and constructs
  * the DOM tree according to it.
- *
- * @requires scrapbook
- * @requires server
- * @requires Tree
- * @module BookTree
  *****************************************************************************/
 
-(function (global, factory) {
-  // Browser globals
-  global.BookTree = factory(
-    global.isDebug,
-    global.scrapbook,
-    global.server,
-    global.Tree,
-  );
-}(this, function (isDebug, scrapbook, server, Tree) {
-
-'use strict';
+import {scrapbook} from "../core/common.mjs";
+import {server} from "./server.mjs";
+import {Tree} from "./tree.mjs";
 
 const TREE_CLASS = 'tree-book';
 
@@ -631,6 +618,6 @@ class BookTree extends Tree {
   }
 }
 
-return BookTree;
-
-}));
+export {
+  BookTree,
+};

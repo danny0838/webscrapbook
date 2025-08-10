@@ -3,17 +3,9 @@
  *****************************************************************************/
 
 (function (global, factory) {
-  if (typeof exports === "object" && typeof module === "object") {
-    // CommonJS
-    module.exports = factory();
-  } else if (typeof define === "function" && define.amd) {
-    // AMD
-    define(factory);
-  } else {
-    // Browser globals
-    global = typeof globalThis !== "undefined" ? globalThis : global || self;
-    global.utils = factory();
-  }
+  // Browser globals
+  global = typeof globalThis !== "undefined" ? globalThis : global || self;
+  global.utils = factory();
 }(this, function () {
 
 'use strict';

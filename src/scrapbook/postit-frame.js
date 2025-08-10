@@ -1,21 +1,11 @@
 /******************************************************************************
  * Script for postit-frame.html.
- *
- * @requires scrapbook
- * @requires server
- * @module editor
  *****************************************************************************/
 
-(function (global, factory) {
-  // Browser globals
-  global.editor = factory(
-    global.isDebug,
-    global.scrapbook,
-    global.server,
-  );
-}(this, function (isDebug, scrapbook, server) {
-
-'use strict';
+import {scrapbook} from "../core/common.mjs";
+import "../core/extension.mjs";
+import "../core/options-auto.mjs";
+import {server} from "./server.mjs";
 
 const editor = {
   id: null,
@@ -142,6 +132,5 @@ document.addEventListener('DOMContentLoaded', (event) => {
   editor.init();
 });
 
-return editor;
-
-}));
+/** @global */
+globalThis.editor = editor;

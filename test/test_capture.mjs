@@ -1,38 +1,11 @@
-(function (global, factory) {
-  global = typeof globalThis !== "undefined" ? globalThis : global || self;
-  if (typeof exports === "object" && typeof module === "object") {
-    // CommonJS
-    module.exports = factory(
-      global,
-      require('./lib/unittest'),
-      require('./shared/lib/jszip'),
-    );
-  } else if (typeof define === "function" && define.amd) {
-    // AMD
-    define(
-      ['./lib/unittest', './shared/lib/jszip'],
-      (...args) => {
-        return factory(global, ...args);
-      },
-    );
-  } else {
-    // Browser globals
-    factory(
-      global,
-      global.unittest,
-      global.JSZip,
-    );
-  }
-}(this, function (global, unittest, JSZip) {
+/* global JSZip */
 
-'use strict';
-
-const {
-  MochaQuery: $, assert,
+import {
+  MochaQuery as $, assert,
   userAgent,
   xhr, readFileAsText, readFileAsArrayBuffer, readFileAsDataURL, readFileAsDocument,
   getRulesFromCssText, getToken, escapeRegExp, regex, rawRegex, cssRegex,
-} = unittest;
+} from "./unittest.mjs";
 
 const $describe = $(describe);
 const $it = $(it);
@@ -3111,7 +3084,7 @@ p { background-image: url("about:blank"); }`);
             "capture.base": "blank",
             "capture.frame": "save",
           });
-          var blob = await global[func]({
+          var blob = await globalThis[func]({
             url: `${localhost}/capture_base_dynamic_frame/srcdoc_basic.html`,
             options,
           });
@@ -3156,7 +3129,7 @@ p { background-image: url("about:blank"); }`);
             "capture.base": "blank",
             "capture.frame": "link",
           });
-          var blob = await global[func]({
+          var blob = await globalThis[func]({
             url: `${localhost}/capture_base_dynamic_frame/srcdoc_basic.html`,
             options,
           });
@@ -3313,7 +3286,7 @@ p { background-image: url("about:blank"); }`);
             "capture.base": "blank",
             "capture.frame": "save",
           });
-          var blob = await global[func]({
+          var blob = await globalThis[func]({
             url: `${localhost}/capture_base_dynamic_frame/srcdoc_bad.html`,
             options,
           });
@@ -3346,7 +3319,7 @@ p { background-image: url("about:blank"); }`);
             "capture.base": "blank",
             "capture.frame": "link",
           });
-          var blob = await global[func]({
+          var blob = await globalThis[func]({
             url: `${localhost}/capture_base_dynamic_frame/srcdoc_bad.html`,
             options,
           });
@@ -5516,7 +5489,7 @@ div > ::slotted(*) { font-size: 1.2em; }`);
             var options = Object.assign({}, baseOptions, {
               "capture.style": "save",
             });
-            var blob = await global[func]({
+            var blob = await globalThis[func]({
               url: `${localhost}/capture_css_charset/basic/index.html`,
               options,
             });
@@ -19387,5 +19360,3 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
     });
   });
 });  // Capture tests
-
-}));

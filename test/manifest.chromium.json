@@ -6,7 +6,8 @@
   "author": "Danny Lin",
   "minimum_chrome_version": "102",
   "background": {
-    "service_worker": "background-sw.js"
+    "service_worker": "background-sw.js",
+    "type": "module"
   },
   "content_scripts": [
     {

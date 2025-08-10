@@ -1,22 +1,11 @@
 /******************************************************************************
  * Background script for capturer functionality.
- *
- * @requires scrapbook
- * @requires server
- * @module capturer
  *****************************************************************************/
 
-(function (global, factory) {
-  // Browser globals
-  if (global.hasOwnProperty('capturer')) { return; }
-  global.capturer = factory(
-    global.isDebug,
-    global.scrapbook,
-    global.server,
-  );
-}(this, function (isDebug, scrapbook, server) {
-
-'use strict';
+import {scrapbook} from "../core/common.mjs";
+import "../core/extension.mjs";
+import "../core/options-auto.mjs";
+import {server} from "../scrapbook/server.mjs";
 
 async function clearCapturerCaches() {
   const filter = {
@@ -613,11 +602,9 @@ async function init() {
 
 init();
 
-return {
+export {
   toggleNotifyPageCaptured,
   updateBadgeForAllTabs,
   configAutoCapture,
   toggleAutoCapture,
 };
-
-}));

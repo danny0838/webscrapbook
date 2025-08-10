@@ -1,4 +1,2 @@
-importScripts(
-  "shared/lib/browser-polyfill.js",
-  "background.js",
-);
+import "./shared/lib/browser-polyfill.js";
+import "./background.js";

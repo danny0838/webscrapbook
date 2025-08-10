@@ -1,5 +1,3 @@
-'use strict';
-
 // Polyfill for MV2
 if (typeof browser !== 'undefined') {
   if (browser?.browserAction && !browser?.action) {

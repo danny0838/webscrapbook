@@ -1,21 +1,11 @@
 /******************************************************************************
  * Script for details.html.
- *
- * @requires scrapbook
- * @requires server
- * @module details
  *****************************************************************************/
 
-(function (global, factory) {
-  // Browser globals
-  global.details = factory(
-    global.isDebug,
-    global.scrapbook,
-    global.server,
-  );
-}(this, function (isDebug, scrapbook, server) {
-
-'use strict';
+import {scrapbook} from "../core/common.mjs";
+import "../core/extension.mjs";
+import "../core/options-auto.mjs";
+import {server} from "../scrapbook/server.mjs";
 
 let gTaskInfo;
 let gIgnoreTitle;
@@ -638,10 +628,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   init();
 });
 
-return {
+/** @global */
+globalThis.details = {
   capture,
   pickItem,
   updateUi,
 };
-
-}));

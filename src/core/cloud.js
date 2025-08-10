@@ -1,18 +1,8 @@
 /******************************************************************************
  * Script for cloud.html
- *
- * @requires scrapbook
  *****************************************************************************/
 
-(function (global, factory) {
-  // Browser globals
-  factory(
-    global.isDebug,
-    global.scrapbook,
-  );
-}(this, function (isDebug, scrapbook) {
-
-'use strict';
+import {scrapbook} from "./common.mjs";
 
 function getTableKey(name, ts, size) {
   return JSON.stringify({table: "cloudFiles", ts, name, size});
@@ -203,5 +193,3 @@ window.addEventListener("DOMContentLoaded", async (event) => {
   // refresh table
   await refreshTable();
 });
-
-}));

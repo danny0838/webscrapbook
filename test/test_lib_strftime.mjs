@@ -1,31 +1,8 @@
-(function (global, factory) {
-  if (typeof exports === "object" && typeof module === "object") {
-    // CommonJS
-    module.exports = factory(
-      require('./lib/unittest'),
-      require('./shared/lib/strftime'),
-    );
-  } else if (typeof define === "function" && define.amd) {
-    // AMD
-    define(
-      ['./lib/unittest', './shared/lib/strftime'],
-      factory,
-    );
-  } else {
-    // Browser globals
-    global = typeof globalThis !== "undefined" ? globalThis : global || self;
-    factory(
-      global.unittest,
-      global.Strftime,
-    );
-  }
-}(this, function (unittest, Strftime) {
+import {MochaQuery as $, assert} from "./unittest.mjs";
 
-'use strict';
+import {Strftime} from "./shared/lib/strftime.mjs";
 
-const {MochaQuery: $, assert} = unittest;
-
-describe('lib/strftime.js', function () {
+describe('lib/strftime.mjs', function () {
   describe('Strftime.format', function () {
     it('isUtc = true', function () {
       var date = new Date(Date.UTC(2018, 1, 1, 0, 0, 0));
@@ -70,5 +47,3 @@ describe('lib/strftime.js', function () {
     });
   });
 });
-
-}));

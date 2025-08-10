@@ -2,13 +2,16 @@
  * Shared utilities for most background and content scripts.
  *
  * @external isDebug
- * @external JSZip
- * @external jsSHA
- * @external Mime
- * @external Strftime
  * @requires browser
- * @module scrapbook
  *****************************************************************************/
+
+/* global JSZip */
+/* global jsSHA */
+/* global Mime */
+
+import {Strftime} from "../lib/strftime.mjs";
+
+const isDebug = globalThis.isDebug ??= false;
 
 // Polyfill for Chrome < 119 and Firefox < 121
 if (typeof Promise.withResolvers === 'undefined') {
@@ -72,44 +75,6 @@ if (typeof browser !== 'undefined') {
     };
   }
 }
-
-(function (global, factory) {
-  global = typeof globalThis !== "undefined" ? globalThis : global || self;
-  if (typeof exports === "object" && typeof module === "object") {
-    // CommonJS
-    module.exports = factory(
-      global,
-      global.isDebug,
-      require('../lib/jszip'),
-      require('../lib/sha'),
-      require('../lib/mime'),
-      require('../lib/strftime'),
-    );
-  } else if (typeof define === "function" && define.amd) {
-    // AMD
-    define(
-      ['../lib/jszip', '../lib/sha', '../lib/mime', '../lib/strftime'],
-      (...args) => factory(
-        global,
-        global.isDebug,
-        ...args,
-      ),
-    );
-  } else {
-    // Browser globals
-    if (global.hasOwnProperty('scrapbook')) { return; }
-    global.scrapbook = factory(
-      global,
-      global.isDebug,
-      global.JSZip,
-      global.jsSHA,
-      global.Mime,
-      global.Strftime,
-    );
-  }
-}(this, function (global, isDebug, JSZip, jsSHA, Mime, Strftime) {
-
-'use strict';
 
 const BACKEND_MIN_VERSION = '2.6.0';
 
@@ -502,13 +467,7 @@ const CONTENT_SCRIPT_FILES = [
   "/lib/browser-polyfill.js",
   "/lib/mime.js",
   "/lib/sha.js",
-  "/lib/map-with-default.js",
-  "/lib/strftime.js",
-  "/core/common.js",
-  "/core/options-auto.js",
   "/core/content.js",
-  "/capturer/common.js",
-  "/editor/content.js",
 ];
 
 const HTTP_STATUS_TEXT = {
@@ -1453,16 +1412,21 @@ scrapbook.loadLanguages = function (...args) {
  */
 
 /**
- * Add a message listener, with optional filter and errorHandler.
+ * Add a message listener to receive commands.
  *
  * @param {Function} [filter]
  * @param {Function} [errorHandler]
+ * @param {Object} [target] - The target object to run command on.
  * @return {Function}
  */
-scrapbook.addMessageListener = function (filter, errorHandler = ex => {
-  console.error(ex);
-  throw ex;
-}) {
+scrapbook.addMessageListener = function (
+  filter,
+  errorHandler = ex => {
+    console.error(ex);
+    throw ex;
+  },
+  target = globalThis,
+) {
   const listener = (message, sender) => {
     if (filter && !filter(message, sender)) { return; }
 
@@ -1478,7 +1442,7 @@ scrapbook.addMessageListener = function (filter, errorHandler = ex => {
     const subCmd = parts.pop();
     const object = parts.reduce((object, part) => {
       return object[part];
-    }, global);
+    }, target);
 
     // thrown Error don't show here but cause the sender to receive an error
     if (!object || !subCmd || typeof object[subCmd] !== 'function') {
@@ -1950,7 +1914,7 @@ scrapbook.ItemInfoFormatter = class ItemInfoFormatter {
     if (!date) {
       return '';
     }
-    if (!Strftime || typeof key !== 'string') {
+    if (typeof key !== 'string') {
       return date.toLocaleString();
     }
 
@@ -4965,6 +4929,6 @@ scrapbook.getMaffIndexFiles = async function (zipObj) {
 };
 
 
-return scrapbook;
-
-}));
+export {
+  scrapbook,
+};

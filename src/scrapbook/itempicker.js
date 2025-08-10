@@ -1,23 +1,13 @@
 /******************************************************************************
  * Script for itempicker.html.
- *
- * @requires scrapbook
- * @requires server
- * @module itempicker
  *****************************************************************************/
 
-(function (global, factory) {
-  // Browser globals
-  global.itempicker = factory(
-    global.isDebug,
-    global.scrapbook,
-    global.dialog,
-    global.server,
-    global.BookTree,
-  );
-}(this, function (isDebug, scrapbook, dialog, server, BookTree) {
-
-'use strict';
+import {scrapbook} from "../core/common.mjs";
+import "../core/extension.mjs";
+import "../core/options-auto.mjs";
+import {dialog} from "../core/dialog.js";
+import {server} from "./server.mjs";
+import {BookTree} from "./book-tree.mjs";
 
 const dialogOnLoad = dialog.onLoad;
 
@@ -249,6 +239,5 @@ const itempicker = {
   },
 };
 
-return itempicker;
-
-}));
+/** @global */
+globalThis.itempicker = itempicker;

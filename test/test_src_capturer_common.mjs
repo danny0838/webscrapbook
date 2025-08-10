@@ -1,36 +1,13 @@
-(function (global, factory) {
-  if (typeof exports === "object" && typeof module === "object") {
-    // CommonJS
-    module.exports = factory(
-      require('./lib/unittest'),
-      require('./shared/capturer/common'),
-    );
-  } else if (typeof define === "function" && define.amd) {
-    // AMD
-    define(
-      ['./lib/unittest', './shared/capturer/common'],
-      factory,
-    );
-  } else {
-    // Browser globals
-    global = typeof globalThis !== "undefined" ? globalThis : global || self;
-    factory(
-      global.unittest,
-      global.capturer,
-    );
-  }
-}(this, function (unittest, capturer) {
+import {MochaQuery as $, assert, userAgent, getRulesFromCssText, cssRegex} from "./unittest.mjs";
 
-'use strict';
-
-const {MochaQuery: $, assert, userAgent, getRulesFromCssText, cssRegex} = unittest;
+import {capturer} from "./shared/capturer/common.mjs";
 
 const $describe = $(describe);
 const $it = $(it);
 
 const r = String.raw;
 
-describe('capturer/common.js', function () {
+describe('capturer/common.mjs', function () {
   describe('capturer.getRedirectedUrl', function () {
     it("use the redirected URL hash if it exists", function () {
       assert.strictEqual(
@@ -3049,5 +3026,3 @@ insertedText`);
     });
   });
 });
-
-}));

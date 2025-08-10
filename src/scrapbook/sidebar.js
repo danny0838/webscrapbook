@@ -1,23 +1,13 @@
 /******************************************************************************
  * Scrapbook sidebar UI controller, for pages like sidebar.html and manage.html.
- *
- * @requires scrapbook
- * @requires server
- * @requires Tree
- * @module sidebar
  *****************************************************************************/
 
-(function (global, factory) {
-  // Browser globals
-  global.sidebar = factory(
-    global.isDebug,
-    global.scrapbook,
-    global.server,
-    global.BookTree,
-  );
-}(this, function (isDebug, scrapbook, server, BookTree) {
-
-'use strict';
+import {scrapbook} from "../core/common.mjs";
+import "../core/extension.mjs";
+import "../core/options-auto.mjs";
+import {server} from "./server.mjs";
+import {Tree} from "./tree.mjs";
+import {BookTree} from "./book-tree.mjs";
 
 const customDataMap = new WeakMap();
 
@@ -3221,6 +3211,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 
-return sidebar;
+/** @global */
+globalThis.sidebar = sidebar;
 
-}));
+export {
+  sidebar,
+};

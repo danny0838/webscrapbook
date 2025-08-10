@@ -1,16 +1,8 @@
 /******************************************************************************
  * Shared script for modal dialog windows.
- *
- * @requires scrapbook
- * @module dialog
  *****************************************************************************/
 
-(function (global, factory) {
-  // Browser globals
-  global.dialog = factory(global.scrapbook);
-}(this, function (scrapbook) {
-
-'use strict';
+import {scrapbook} from "./common.mjs";
 
 const dialog = {
   resolve: () => {},
@@ -96,6 +88,9 @@ window.addEventListener('keydown', (event) => {
   dialog.onKeyDown(event);
 });
 
-return dialog;
+/** @global */
+globalThis.dialog = dialog;
 
-}));
+export {
+  dialog,
+};

@@ -1,31 +1,8 @@
-(function (global, factory) {
-  if (typeof exports === "object" && typeof module === "object") {
-    // CommonJS
-    module.exports = factory(
-      require('./lib/unittest'),
-      require('./shared/lib/map-with-default'),
-    );
-  } else if (typeof define === "function" && define.amd) {
-    // AMD
-    define(
-      ['./lib/unittest', './shared/lib/map-with-default'],
-      factory,
-    );
-  } else {
-    // Browser globals
-    global = typeof globalThis !== "undefined" ? globalThis : global || self;
-    factory(
-      global.unittest,
-      global.MapWithDefault,
-    );
-  }
-}(this, function (unittest, MapWithDefault) {
+import {MochaQuery as $, assert} from "./unittest.mjs";
 
-'use strict';
+import {MapWithDefault} from "./shared/lib/map-with-default.mjs";
 
-const {MochaQuery: $, assert} = unittest;
-
-describe('lib/map-with-default.js', function () {
+describe('lib/map-with-default.mjs', function () {
   describe('MapWithDefault', function () {
     it('factory function', function () {
       var myMap = new MapWithDefault(() => ({}));
@@ -51,5 +28,3 @@ describe('lib/map-with-default.js', function () {
     });
   });
 });
-
-}));
