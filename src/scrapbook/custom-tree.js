@@ -17,19 +17,19 @@
   );
 }(this, function (isDebug, scrapbook, server, Tree) {
 
-  'use strict';
+'use strict';
 
-  class CustomTree extends Tree {
-    rebuild() {
-      super.rebuild();
+class CustomTree extends Tree {
+  rebuild() {
+    super.rebuild();
 
-      const rootElem = this.treeElem.appendChild(document.createElement('div'));
-      rootElem.setAttribute('data-id', this.rootId);
-      rootElem.container = rootElem.appendChild(document.createElement('ul'));
-      rootElem.container.classList.add('container');
-    }
+    const rootElem = this.treeElem.appendChild(document.createElement('div'));
+    rootElem.setAttribute('data-id', this.rootId);
+    rootElem.container = rootElem.appendChild(document.createElement('ul'));
+    rootElem.container.classList.add('container');
   }
+}
 
-  return CustomTree;
+return CustomTree;
 
 }));

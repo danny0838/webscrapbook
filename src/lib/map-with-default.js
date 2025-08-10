@@ -21,21 +21,21 @@
   }
 }(this, function () {
 
-  'use strict';
+'use strict';
 
-  class MapWithDefault extends Map {
-    constructor(fn, entries) {
-      super(entries);
-      this.default = fn;
+class MapWithDefault extends Map {
+  constructor(fn, entries) {
+    super(entries);
+    this.default = fn;
+  }
+
+  get(key) {
+    if (!super.has(key)) {
+      super.set(key, this.default.call(this, key));
     }
+    return super.get(key);
+  }
+};
 
-    get(key) {
-      if (!super.has(key)) {
-        super.set(key, this.default.call(this, key));
-      }
-      return super.get(key);
-    }
-  };
-
-  return MapWithDefault;
+return MapWithDefault;
 }));

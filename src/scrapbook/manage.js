@@ -15,8 +15,8 @@
   );
 }(this, function (isDebug, scrapbook, sidebar) {
 
-  'use strict';
+'use strict';
 
-  sidebar.mode = "manage";
+sidebar.mode = "manage";
 
 }));
