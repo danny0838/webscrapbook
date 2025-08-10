@@ -10931,7 +10931,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
         var doc = await readFileAsDocument(indexBlob);
 
         var loader = doc.querySelector('script[data-scrapbook-elem="basic-loader"]');
-        assert(loader.textContent.trim().match(rawRegex`${'^'}(function () {${'.+'}})()${'$'}`));
+        assert(loader.textContent.trim().match(rawRegex`${'^'}(function${'\\s*'}()${'\\s*'}{${'.+'}})()${'$'}`));
 
         assert(!doc.querySelector('#c1').hasAttribute("data-scrapbook-canvas"));
         assert(doc.querySelector('#c2').getAttribute("data-scrapbook-canvas").match(rawRegex`${'^'}data:image/png;base64,`));
@@ -10950,7 +10950,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
         var doc = await readFileAsDocument(indexBlob);
 
         var loader = doc.querySelector('script[data-scrapbook-elem="basic-loader"]');
-        assert(loader.textContent.trim().match(rawRegex`${'^'}(function () {${'.+'}})()${'$'}`));
+        assert(loader.textContent.trim().match(rawRegex`${'^'}(function${'\\s*'}()${'\\s*'}{${'.+'}})()${'$'}`));
 
         var host = doc.querySelector('span');
         var frag = doc.createElement("template");
@@ -10990,7 +10990,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
         var doc = await readFileAsDocument(indexBlob);
 
         var loader = doc.querySelector('script[data-scrapbook-elem="basic-loader"]');
-        assert(loader.textContent.trim().match(rawRegex`${'^'}(function () {${'.+'}})()${'$'}`));
+        assert(loader.textContent.trim().match(rawRegex`${'^'}(function${'\\s*'}()${'\\s*'}{${'.+'}})()${'$'}`));
 
         var host = doc.querySelector('span');
         var frag = doc.createElement("template");
@@ -11029,7 +11029,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
         var doc = await readFileAsDocument(indexBlob);
 
         var loader = doc.querySelector('script[data-scrapbook-elem="basic-loader"]');
-        assert(loader.textContent.trim().match(rawRegex`${'^'}(function () {${'.+'}})()${'$'}`));
+        assert(loader.textContent.trim().match(rawRegex`${'^'}(function${'\\s*'}()${'\\s*'}{${'.+'}})()${'$'}`));
 
         var host = doc.querySelector('span');
         var frag = doc.createElement("template");
@@ -11057,7 +11057,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
         var doc = await readFileAsDocument(indexBlob);
 
         var loader = doc.querySelector('script[data-scrapbook-elem="basic-loader"]');
-        assert(loader.textContent.trim().match(rawRegex`${'^'}(function () {${'.+'}})()${'$'}`));
+        assert(loader.textContent.trim().match(rawRegex`${'^'}(function${'\\s*'}()${'\\s*'}{${'.+'}})()${'$'}`));
 
         assert(doc.querySelector('canvas').getAttribute("data-scrapbook-canvas").match(rawRegex`${'^'}data:image/png;base64,`));
       });
@@ -13247,7 +13247,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
         assert.strictEqual(shadow2.querySelector('img').getAttribute('src'), `blue.bmp`);
 
         var loader = doc.querySelector('script[data-scrapbook-elem="basic-loader"]');
-        assert(loader.textContent.trim().match(rawRegex`${'^'}(function () {${'.+'}})()${'$'}`));
+        assert(loader.textContent.trim().match(rawRegex`${'^'}(function${'\\s*'}()${'\\s*'}{${'.+'}})()${'$'}`));
 
         // check records
         assertNoRecord(host1);
@@ -13325,7 +13325,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
         assert.strictEqual(shadow2.querySelector('img').getAttribute('src'), `blue.bmp`);
 
         var loader = doc.querySelector('script[data-scrapbook-elem="basic-loader"]');
-        assert(loader.textContent.trim().match(rawRegex`${'^'}(function () {${'.+'}})()${'$'}`));
+        assert(loader.textContent.trim().match(rawRegex`${'^'}(function${'\\s*'}()${'\\s*'}{${'.+'}})()${'$'}`));
 
         // check records
         assertNoRecord(host1);
@@ -13370,7 +13370,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
         assert.strictEqual(shadow2.querySelector('img').getAttribute('src'), `blue.bmp`);
 
         var loader = doc.querySelector('script[data-scrapbook-elem="basic-loader"]');
-        assert(loader.textContent.trim().match(rawRegex`${'^'}(function () {${'.+'}})()${'$'}`));
+        assert(loader.textContent.trim().match(rawRegex`${'^'}(function${'\\s*'}()${'\\s*'}{${'.+'}})()${'$'}`));
 
         // check records
         assertNoRecord(host1);
@@ -13434,7 +13434,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
         assert.strictEqual(host1.getAttribute("data-scrapbook-shadowdom-slot-assignment"), "manual");
 
         var loader = doc.querySelector('script[data-scrapbook-elem="basic-loader"]');
-        assert(loader.textContent.trim().match(rawRegex`${'^'}(function () {${'.+'}})()${'$'}`));
+        assert(loader.textContent.trim().match(rawRegex`${'^'}(function${'\\s*'}()${'\\s*'}{${'.+'}})()${'$'}`));
 
         // check records
         assertNoRecord(host1);
@@ -13497,7 +13497,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
         assert.strictEqual(slots[0].getAttribute('data-scrapbook-slot-assigned'), "4,5");
 
         var loader = doc.querySelector('script[data-scrapbook-elem="basic-loader"]');
-        assert(loader.textContent.trim().match(rawRegex`${'^'}(function () {${'.+'}})()${'$'}`));
+        assert(loader.textContent.trim().match(rawRegex`${'^'}(function${'\\s*'}()${'\\s*'}{${'.+'}})()${'$'}`));
 
         assertNoRecord(host);
         assertNoRecord(shadow);
@@ -13532,7 +13532,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
         var shadow2 = frag.content;
 
         var loader = doc.querySelector('script[data-scrapbook-elem="basic-loader"]');
-        assert(loader.textContent.trim().match(rawRegex`${'^'}(function () {${'.+'}})()${'$'}`));
+        assert(loader.textContent.trim().match(rawRegex`${'^'}(function${'\\s*'}()${'\\s*'}{${'.+'}})()${'$'}`));
 
         assertNoRecord(host);
         assertNoRecord(host, {filter: {regexAttr: /^data-scrapbook-slot-/}});
@@ -13573,7 +13573,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
         assert.strictEqual(shadow1.querySelector('img').getAttribute('src'), `green.bmp`);
 
         var loader = doc.querySelector('script[data-scrapbook-elem="basic-loader"]');
-        assert(loader.textContent.trim().match(rawRegex`${'^'}(function () {${'.+'}})()${'$'}`));
+        assert(loader.textContent.trim().match(rawRegex`${'^'}(function${'\\s*'}()${'\\s*'}{${'.+'}})()${'$'}`));
       });
     });
 
@@ -13610,7 +13610,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
         assert.strictEqual(shadow1.querySelector('img').getAttribute('src'), `green.bmp`);
 
         var loader = doc.querySelector('script[data-scrapbook-elem="basic-loader"]');
-        assert(loader.textContent.trim().match(rawRegex`${'^'}(function () {${'.+'}})()${'$'}`));
+        assert(loader.textContent.trim().match(rawRegex`${'^'}(function${'\\s*'}()${'\\s*'}{${'.+'}})()${'$'}`));
       });
     });
 
@@ -13661,7 +13661,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
         var doc = await readFileAsDocument(indexBlob);
         var value = doc.querySelector(`script[data-scrapbook-elem="custom-elements-loader"]`).textContent.trim();
-        assert(value.match(rawRegex`${'^'}(function (names) {${'.+'}})(["custom-subelem","custom-elem"])${'$'}`));
+        assert(value.match(rawRegex`${'^'}(function${'\\s*'}(${'\\w+'})${'\\s*'}{${'.+'}})(["custom-subelem","custom-elem"])${'$'}`));
       });
 
       it('capture.script = remove', async function () {
@@ -13678,7 +13678,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
         var doc = await readFileAsDocument(indexBlob);
         var value = doc.querySelector(`script[data-scrapbook-elem="custom-elements-loader"]`).textContent.trim();
-        assert(value.match(rawRegex`${'^'}(function (names) {${'.+'}})(["custom-subelem","custom-elem"])${'$'}`));
+        assert(value.match(rawRegex`${'^'}(function${'\\s*'}(${'\\w+'})${'\\s*'}{${'.+'}})(["custom-subelem","custom-elem"])${'$'}`));
       });
     });
 
