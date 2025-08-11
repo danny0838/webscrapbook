@@ -1,5 +1,5 @@
 /******************************************************************************
- * The background script for the main (auto-generated) background page.
+ * Script for the background page.
  *
  * @requires scrapbook
  * @requires server
