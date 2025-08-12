@@ -92,6 +92,15 @@ export default [
   },
   {
     files: [
+      "src/lib/polyfill.js",
+      "src/lib/webext-polyfill.js",
+    ],
+    languageOptions: {
+      sourceType: "script",
+    },
+  },
+  {
+    files: [
       "test/**/*.js",
       "test/**/*.mjs",
     ],
