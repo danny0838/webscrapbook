@@ -99,19 +99,7 @@ export default [
       "@stylistic/eol-last": "off", // for some one-liner test files
     },
     languageOptions: {
-      globals: {
-        ...globals.mocha,
-        backend: false,
-        localhost: false,
-        localhost2: false,
-        checkBackendServer: false,
-        checkTestServer: false,
-        checkExtension: false,
-        capture: false,
-        captureHeadless: false,
-        openTestTab: false,
-        backendRequest: false,
-      },
+      globals: globals.mocha,
     },
   },
 ];

@@ -6,6 +6,11 @@ import {
   xhr, readFileAsText, readFileAsArrayBuffer, readFileAsDataURL, readFileAsDocument,
   getRulesFromCssText, getToken, escapeRegExp, regex, rawRegex, cssRegex,
 } from "./unittest.mjs";
+import {
+  checkBackendServer, checkTestServer, checkExtension,
+  backend, localhost, localhost2,
+  capture, captureHeadless, backendRequest,
+} from "./extension.mjs";
 
 const $describe = $(describe);
 const $it = $(it);
@@ -3078,13 +3083,13 @@ p { background-image: url("about:blank"); }`);
         }
       }
 
-      for (const func of ["capture", "captureHeadless"]) {
-        it(`frame (capture.frame = save) (${func})`, async function () {
+      for (const func of [capture, captureHeadless]) {
+        it(`frame (capture.frame = save) (${func.name})`, async function () {
           var options = Object.assign({}, baseOptions, {
             "capture.base": "blank",
             "capture.frame": "save",
           });
-          var blob = await globalThis[func]({
+          var blob = await func({
             url: `${localhost}/capture_base_dynamic_frame/srcdoc_basic.html`,
             options,
           });
@@ -3117,19 +3122,19 @@ p { background-image: url("about:blank"); }`);
           //   (iframe[referrerpolicy] not taken).
           // - e.g. Firefox 123: default referrer policy is no-referrer.
           // We only check for headless as the referrer is totally controlled by WSB.
-          if (func === "captureHeadless") {
+          if (func === captureHeadless) {
             var file = zip.file('link.py.css');
             var text = (await readFileAsText(await file.async('blob'))).trim();
             assert.strictEqual(text, `:root { --referrer: "${localhost}/" }`);
           }
         });
 
-        it(`frame (capture.frame = link) (${func})`, async function () {
+        it(`frame (capture.frame = link) (${func.name})`, async function () {
           var options = Object.assign({}, baseOptions, {
             "capture.base": "blank",
             "capture.frame": "link",
           });
-          var blob = await globalThis[func]({
+          var blob = await func({
             url: `${localhost}/capture_base_dynamic_frame/srcdoc_basic.html`,
             options,
           });
@@ -3151,7 +3156,7 @@ p { background-image: url("about:blank"); }`);
 </svg>`);
 
           // see above `URL after base, capture.frame = save` case
-          if (func === "captureHeadless") {
+          if (func === captureHeadless) {
             var frame = doc.querySelectorAll('iframe')[1];
             var srcdocBlob = new Blob([frame.getAttribute('srcdoc')], {type: "text/html"});
             var srcdoc = await readFileAsDocument(srcdocBlob);
@@ -3280,13 +3285,13 @@ p { background-image: url("about:blank"); }`);
         }
       }
 
-      for (const func of ["capture", "captureHeadless"]) {
-        it(`frame (capture.frame = save) (${func})`, async function () {
+      for (const func of [capture, captureHeadless]) {
+        it(`frame (capture.frame = save) (${func.name})`, async function () {
           var options = Object.assign({}, baseOptions, {
             "capture.base": "blank",
             "capture.frame": "save",
           });
-          var blob = await globalThis[func]({
+          var blob = await func({
             url: `${localhost}/capture_base_dynamic_frame/srcdoc_bad.html`,
             options,
           });
@@ -3307,19 +3312,19 @@ p { background-image: url("about:blank"); }`);
 </svg>`);
 
           // see above `URL after base, capture.frame = save` case
-          if (func === "captureHeadless") {
+          if (func === captureHeadless) {
             var file = zip.file('link.py.css');
             var text = (await readFileAsText(await file.async('blob'))).trim();
             assert.strictEqual(text, `:root { --referrer: "${localhost}/" }`);
           }
         });
 
-        it(`frame (capture.frame = link) (${func})`, async function () {
+        it(`frame (capture.frame = link) (${func.name})`, async function () {
           var options = Object.assign({}, baseOptions, {
             "capture.base": "blank",
             "capture.frame": "link",
           });
-          var blob = await globalThis[func]({
+          var blob = await func({
             url: `${localhost}/capture_base_dynamic_frame/srcdoc_bad.html`,
             options,
           });
@@ -3341,7 +3346,7 @@ p { background-image: url("about:blank"); }`);
 </svg>`);
 
           // see above `URL after base, capture.frame = save` case
-          if (func === "captureHeadless") {
+          if (func === captureHeadless) {
             var frame = doc.querySelectorAll('iframe')[1];
             var srcdocBlob = new Blob([frame.getAttribute('srcdoc')], {type: "text/html"});
             var srcdoc = await readFileAsDocument(srcdocBlob);
@@ -5483,13 +5488,13 @@ div > ::slotted(*) { font-size: 1.2em; }`);
       }
 
       describe('@charset', function () {
-        for (const func of ["capture", "captureHeadless"]) {
+        for (const func of [capture, captureHeadless]) {
           // captureHeadless doen't use dynamic CSS
-          it(`should use UTF-8 encoding and add BOM before \`@charset\` rule (${func})`, async function () {
+          it(`should use UTF-8 encoding and add BOM before \`@charset\` rule (${func.name})`, async function () {
             var options = Object.assign({}, baseOptions, {
               "capture.style": "save",
             });
-            var blob = await globalThis[func]({
+            var blob = await func({
               url: `${localhost}/capture_css_charset/basic/index.html`,
               options,
             });
