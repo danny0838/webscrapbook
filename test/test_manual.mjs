@@ -1,3 +1,9 @@
+import {
+  checkTestServer,
+  localhost,
+  openTestTab,
+} from "./extension.mjs";
+
 describe('Manual tests', function () {
   before(async function () {
     await checkTestServer();
