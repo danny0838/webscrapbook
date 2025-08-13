@@ -4,19 +4,9 @@
 
 import {scrapbook} from "../utils/common.mjs";
 import "../utils/options-auto.mjs";
+import {core} from "./core.mjs";
 import {capturer} from "../capturer/common.mjs";
 import {editor} from "../editor/content.mjs";
-
-const core = {};
-
-/**
- * Return true to confirm that content script is loaded.
- *
- * @type invokable
- */
-core.isScriptLoaded = async function (params) {
-  return true;
-};
 
 /**
  * Return frameId of the frame of this content script.
@@ -53,7 +43,3 @@ globalThis.capturer = capturer;
 
 /** @global */
 globalThis.editor = editor;
-
-export {
-  core,
-};
