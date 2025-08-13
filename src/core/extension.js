@@ -534,7 +534,7 @@
   };
 
   scrapbook.searchCaptures = async function ({tabs, newTab = true}) {
-    const url = new URL(browser.runtime.getURL(`scrapbook/searchCaptures.html`));
+    const url = new URL(browser.runtime.getURL(`scrapbook/search-captures.html`));
     for (const tab of tabs) {
       url.searchParams.append('q', tab.url);
     }
