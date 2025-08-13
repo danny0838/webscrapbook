@@ -453,7 +453,7 @@ if (typeof Promise.withResolvers === 'undefined') {
     "/lib/map-with-default.js",
     "/lib/strftime.js",
     "/core/common.js",
-    "/core/optionsAuto.js",
+    "/core/options-auto.js",
     "/core/content.js",
     "/capturer/common.js",
     "/editor/content.js",

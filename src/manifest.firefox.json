@@ -43,7 +43,7 @@
   "background": {
     "scripts": [
       "core/common.js",
-      "core/optionsAuto.js",
+      "core/options-auto.js",
       "core/extension.js",
       "scrapbook/server.js",
       "capturer/background.js",
