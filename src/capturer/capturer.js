@@ -1,20 +1,18 @@
 /******************************************************************************
  * Script of the main capturer (capturer.html).
  *
- * @external isDebug
  * @modifies capturer
  *****************************************************************************/
 
 /* global JSZip */
 /* global Mime */
 
+import {isDebug} from "../utils/debug.mjs";
 import {scrapbook} from "../utils/extension.mjs";
 import {server} from "../scrapbook/server.mjs";
 import {MapWithDefault} from "../lib/map-with-default.mjs";
 import {Referrer} from "../lib/referrer.mjs";
 import {capturer} from "./common.mjs";
-
-const isDebug = globalThis.isDebug;
 
 const REBUILD_LINK_ROLE_PATTERN = /^document(?:-[a-f0-9-]+)?$/;
 const REBUILD_LINK_SVG_HREF_ATTRS = ['href', 'xlink:href'];
