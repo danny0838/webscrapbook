@@ -1,7 +1,6 @@
 /******************************************************************************
  * Shared utilities for most background and content scripts.
  *
- * @external isDebug
  * @requires browser
  *****************************************************************************/
 
@@ -9,9 +8,8 @@
 /* global jsSHA */
 /* global Mime */
 
+import {isDebug} from "./debug.mjs";
 import {Strftime} from "../lib/strftime.mjs";
-
-const isDebug = globalThis.isDebug ??= false;
 
 // Polyfill for Chrome < 119 and Firefox < 121
 if (typeof Promise.withResolvers === 'undefined') {

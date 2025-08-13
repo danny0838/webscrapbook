@@ -1,13 +1,10 @@
 /******************************************************************************
  * Common capture utilities shared among background and content scripts.
- *
- * @external isDebug
  *****************************************************************************/
 
+import {isDebug} from "../utils/debug.mjs";
 import {scrapbook} from "../utils/common.mjs";
 import {MapWithDefault} from "../lib/map-with-default.mjs";
-
-const isDebug = globalThis.isDebug;
 
 // ref: https://html.spec.whatwg.org/#meta-referrer
 const META_REFERRER_POLICY = new Set([
