@@ -3551,7 +3551,7 @@ height: 100vh;`;
       }
 
       const result = await scrapbook.openModalWindow({
-        url: browser.runtime.getURL('editor/insertHtml.html'),
+        url: browser.runtime.getURL('editor/insert-html.html'),
         args: data,
         windowCreateData: {width: 600, height: 600},
       });
