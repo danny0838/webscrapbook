@@ -19,8 +19,8 @@
   "homepage_url": "https://github.com/danny0838/webscrapbook",
 
   "icons": {
-    "32": "core/scrapbook_32.png",
-    "128": "core/scrapbook_128.png"
+    "32": "resources/scrapbook-32.png",
+    "128": "resources/scrapbook-128.png"
   },
 
   "permissions": [
@@ -68,8 +68,8 @@
 
   "browser_action": {
     "default_icon": {
-      "32": "core/scrapbook_32.png",
-      "128": "core/scrapbook_128.png"
+      "32": "resources/scrapbook-32.png",
+      "128": "resources/scrapbook-128.png"
     },
     "default_title": "__MSG_ExtensionName__",
     "default_popup": "core/action.html"
@@ -79,8 +79,8 @@
     "default_title": "__MSG_ExtensionName__",
     "default_panel": "scrapbook/sidebar.html",
     "default_icon":  {
-      "32": "core/scrapbook_32.png",
-      "128": "core/scrapbook_128.png"
+      "32": "resources/scrapbook-32.png",
+      "128": "resources/scrapbook-128.png"
     },
     "open_at_install": false
   },
