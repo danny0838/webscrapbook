@@ -1175,8 +1175,8 @@ class { }`);
       });
 
       $(it).xfailIf(
-        userAgent.is('chromium') && userAgent.major < 101,
-        'var(...) is tidied in Chromium < 101 (possibly upper?)',
+        userAgent.is('chromium') && userAgent.major < 113,
+        'var(...) is tidied in Chromium < 113',
       )('browser syntax check/tidy for var()', function () {
         var rules = getRulesFromCssText(`p { color: var(  --myvar ); }`);
         assert.strictEqual(rules[0].cssText, `p { color: var(  --myvar ); }`);
