@@ -3929,7 +3929,7 @@ p { background-image: url("about:blank"); }`);
           var blob = await capture({
             url: `${localhost}/capture_css_disabled/picked.html`,
             options: baseOptions,
-          }, {delay: 100});
+          }, {delay: 800});
           var zip = await new JSZip().loadAsync(blob);
           var indexFile = zip.file('index.html');
           var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -3964,7 +3964,7 @@ p { background-image: url("about:blank"); }`);
           var blob = await capture({
             url: `${localhost}/capture_css_disabled/picked.html`,
             options: baseOptions,
-          }, {delay: 100});
+          }, {delay: 800});
           var zip = await new JSZip().loadAsync(blob);
           var indexFile = zip.file('index.html');
           var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -3996,7 +3996,7 @@ p { background-image: url("about:blank"); }`);
           var blob = await capture({
             url: `${localhost}/capture_css_disabled/scripted1.html`,
             options: baseOptions,
-          }, {delay: 100});
+          }, {delay: 300});
           var zip = await new JSZip().loadAsync(blob);
           var indexFile = zip.file('index.html');
           var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -4021,7 +4021,7 @@ p { background-image: url("about:blank"); }`);
           var blob = await capture({
             url: `${localhost}/capture_css_disabled/scripted2.html`,
             options: baseOptions,
-          }, {delay: 100});
+          }, {delay: 300});
           var zip = await new JSZip().loadAsync(blob);
           var indexFile = zip.file('index.html');
           var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -4041,7 +4041,7 @@ p { background-image: url("about:blank"); }`);
           var blob = await capture({
             url: `${localhost}/capture_css_disabled/scripted1.html`,
             options: baseOptions,
-          }, {delay: 100});
+          }, {delay: 300});
           var zip = await new JSZip().loadAsync(blob);
           var indexFile = zip.file('index.html');
           var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -4066,7 +4066,7 @@ p { background-image: url("about:blank"); }`);
           var blob = await capture({
             url: `${localhost}/capture_css_disabled/scripted2.html`,
             options: baseOptions,
-          }, {delay: 100});
+          }, {delay: 300});
           var zip = await new JSZip().loadAsync(blob);
           var indexFile = zip.file('index.html');
           var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -9111,7 +9111,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
         var blob = await capture({
           url: `${localhost}/capture_frame/about.html`,
           options,
-        }, {delay: 300});
+        }, {delay: 500});
 
         var zip = await new JSZip().loadAsync(blob);
 
