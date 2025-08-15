@@ -65,12 +65,25 @@ function buildTest(target) {
     }
   }
 
+  // mirror source files under the shared directory
+  const testSharedDir = path.join(testDir, 'shared');
+
+  for (const dst of globSync([
+    path.join(testSharedDir, '**'),
+  ], {windowsPathsNoEscape: true})) {
+    const subpath = path.relative(testSharedDir, dst);
+    const src = path.join(srcDir, subpath);
+    if (!fs.existsSync(src)) {
+      fs.unlinkSync(dst);
+    }
+  }
+
   for (const src of globSync([
     path.join(srcDir, '{core,capturer}', 'common.js'),
     path.join(srcDir, 'lib', '**', '*.js'),
   ], {windowsPathsNoEscape: true})) {
     const subpath = path.relative(srcDir, src);
-    const dst = path.join(testDir, 'shared', subpath);
+    const dst = path.join(testSharedDir, subpath);
     hardlink(src, dst);
   }
 }
