@@ -91,6 +91,7 @@ function pack(target) {
     filename,
     overwriteDest: true,
     ignoreFiles: [
+      '**/*.map',
       'manifest.chromium.json',
       'manifest.firefox.json',
     ],
