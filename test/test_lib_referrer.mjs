@@ -280,6 +280,18 @@ describe('lib/referrer.mjs', function () {
     });
   });
 
+  describe('Referrer.extensionProtocols', function () {
+    $it.skipIf($.noExtensionBrowser)('browser extension protocol (globalThis.browser)', function () {
+      const protocol = new URL(browser.runtime.getURL('')).protocol;
+      assert.deepEqual(Referrer.extensionProtocols, [protocol]);
+    });
+
+    $it.skipIf($.noExtensionChrome)('browser extension protocol (globalThis.chrome)', function () {
+      const protocol = new URL(chrome.runtime.getURL('')).protocol;
+      assert.deepEqual(Referrer.extensionProtocols, [protocol]);
+    });
+  });
+
   describe('Referrer.trustworthyProtocols', function () {
     it('basic', function () {
       assert.includeMembers(Referrer.trustworthyProtocols, ['https:', 'wss:', 'data:', 'file:']);

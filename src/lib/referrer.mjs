@@ -73,18 +73,27 @@ class Referrer {
     return value;
   }
 
+  static get extensionProtocols() {
+    const value = (() => {
+      const protocols = [];
+      if (typeof chrome !== "undefined" && chrome?.runtime?.getURL) {
+        protocols.push(new URL(chrome.runtime.getURL('')).protocol);
+      }
+      if (typeof browser !== "undefined" && browser?.runtime?.getURL) {
+        protocols.push(new URL(browser.runtime.getURL('')).protocol);
+      }
+      return [...new Set(protocols)];
+    })();
+    Object.defineProperty(Referrer, 'extensionProtocols', {value});
+    return value;
+  }
+
+  get extensionProtocols() {
+    return this.constructor.extensionProtocols;
+  }
+
   static get trustworthyProtocols() {
-    let value = ['data:', 'https:', 'wss:', 'file:'];
-
-    // browser extensions
-    try {
-      value.push(new URL(chrome.runtime.getURL('')).protocol);
-    } catch (ex) {}
-    try {
-      value.push(new URL(browser.runtime.getURL('')).protocol);
-    } catch (ex) {}
-
-    value = [...new Set(value)];
+    const value = ['data:', 'https:', 'wss:', 'file:', ...this.extensionProtocols];
     Object.defineProperty(Referrer, 'trustworthyProtocols', {value});
     return value;
   }
