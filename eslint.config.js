@@ -96,10 +96,29 @@ export default [
       "test/**/*.mjs",
     ],
     rules: {
-      "@stylistic/eol-last": "off", // for some one-liner test files
+      "import/no-unresolved": "warn", // prevent workflow failure when test/shared/* not generated
     },
+  },
+  {
+    files: [
+      "test/test.js",
+      "test/test_*.mjs",
+    ],
     languageOptions: {
       globals: globals.mocha,
+    },
+  },
+  {
+    files: [
+      "test/unittest-encoding.js",
+      "test/t/**/*.js",
+    ],
+    languageOptions: {
+      sourceType: "script",
+      globals: globals.browser,
+    },
+    rules: {
+      "@stylistic/eol-last": "off", // for some one-liner test files
     },
   },
 ];
