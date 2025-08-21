@@ -261,7 +261,7 @@ function renewServerUrlRequirement() {
 }
 
 async function openIndexer() {
-  const u = new URL(browser.runtime.getURL("scrapbook/cache.html"));
+  const u = new URL(browser.runtime.getURL("scrapbook/tools/cache.html"));
   const params = u.searchParams;
   if (getOptionFromDocument('indexer.fulltextCache')) {
     params.append('fulltext', 1);
@@ -281,7 +281,7 @@ async function openIndexer() {
 }
 
 async function openChecker() {
-  const u = new URL(browser.runtime.getURL("scrapbook/check.html"));
+  const u = new URL(browser.runtime.getURL("scrapbook/tools/check.html"));
   const params = u.searchParams;
   if (getOptionFromDocument('checker.resolveInvalidId')) {
     params.append('resolve_invalid_id', 1);

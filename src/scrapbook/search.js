@@ -387,7 +387,7 @@ const search = {
           }
 
           if (cacheOutdatedMessage) {
-            const u = new URL(browser.runtime.getURL('scrapbook/cache.html'));
+            const u = new URL(browser.runtime.getURL('scrapbook/tools/cache.html'));
             u.searchParams.append('book', book.id);
             u.searchParams.append('fulltext', 1);
 
