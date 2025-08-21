@@ -2,9 +2,9 @@
  * Script for check.html
  *****************************************************************************/
 
-import {scrapbook} from "../utils/common.mjs";
-import "../utils/options-auto.mjs";
-import {server} from "./server.mjs";
+import {scrapbook} from "../../utils/common.mjs";
+import "../../utils/options-auto.mjs";
+import {server} from "../server.mjs";
 
 let logger;
 
