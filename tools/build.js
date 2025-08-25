@@ -74,7 +74,7 @@ function buildTest(target) {
     const subpath = path.relative(testSharedDir, dst);
     const src = path.join(srcDir, subpath);
     if (!fs.existsSync(src)) {
-      fs.unlinkSync(dst);
+      fs.rmSync(dst, {force: true, recursive: true});
     }
   }
 
