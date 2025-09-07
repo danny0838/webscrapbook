@@ -1067,7 +1067,9 @@
       const span = document.createElement("span");
       span.classList.add(type);
       span.append(...msg);
-      document.getElementById("logger").append(span, '\n');
+      const logger = document.getElementById("logger");
+      logger.hidden = false;
+      logger.append(span, '\n');
     },
 
     log(...msg) {

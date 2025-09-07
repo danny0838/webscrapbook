@@ -121,6 +121,7 @@ body {
 /* logger */
 #logger {
   flex: 0 1 auto;
+  min-height: 1em;
   max-height: 200px;
   overflow: auto;
   overflow-wrap: break-word;
