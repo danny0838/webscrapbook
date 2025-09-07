@@ -2,7 +2,7 @@
  * Script for the background page.
  *****************************************************************************/
 
-import {scrapbook} from "../utils/extension.mjs";
+import {scrapbook, DEFAULT_OPTIONS} from "../utils/extension.mjs";
 import "../utils/options-auto.mjs";
 import {server} from "../scrapbook/server.mjs";
 import * as capturer from "../capturer/background.mjs";
@@ -540,7 +540,7 @@ function initInstallListener() {
 }
 
 function initStorageChangeListener() {
-  const toolbarOptions = Object.keys(scrapbook.DEFAULT_OPTIONS).filter(x => x.startsWith('ui.toolbar.'));
+  const toolbarOptions = Object.keys(DEFAULT_OPTIONS).filter(x => x.startsWith('ui.toolbar.'));
 
   // Run this after optionsAuto to make sure that scrapbook.options is
   // up-to-date when the listener is called.

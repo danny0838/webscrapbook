@@ -2,7 +2,7 @@
  * Shared class for server related manipulation.
  *****************************************************************************/
 
-import {scrapbook} from "../utils/common.mjs";
+import {scrapbook, BACKEND_MIN_VERSION} from "../utils/common.mjs";
 
 // order is relevant
 const SPECIAL_ITEM_ID = new Set(['root', 'hidden', 'recycle']);
@@ -342,8 +342,8 @@ class Server {
 
     // validate if the server version is compatible
     {
-      if (scrapbook.versionCompare(this._config.VERSION, scrapbook.BACKEND_MIN_VERSION) < 0) {
-        throw new Error(`Require server app version >= ${scrapbook.BACKEND_MIN_VERSION}.`);
+      if (scrapbook.versionCompare(this._config.VERSION, BACKEND_MIN_VERSION) < 0) {
+        throw new Error(`Require server app version >= ${BACKEND_MIN_VERSION}.`);
       }
 
       // if min extension version is set, validate it
@@ -1322,4 +1322,11 @@ scrapbook.toc(${JSON.stringify(jsonData, null, 2).replace(/\u2028/g, '\\u2028').
   }
 }
 
-export const server = new Server();
+const server = new Server();
+
+export {
+  RequestError,
+  Server,
+  Book,
+  server,
+};
