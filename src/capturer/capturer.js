@@ -2192,7 +2192,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
                 book: book.id,
                 cmd: 'update_item',
                 kwargs: {
-                  item: {id: item.id},
+                  item,
                 },
               }),
               auto_cache: JSON.stringify(scrapbook.autoCacheOptions()),
