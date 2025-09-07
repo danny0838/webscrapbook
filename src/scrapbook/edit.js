@@ -133,6 +133,10 @@
             });
           },
         });
+
+        await scrapbook.invokeExtensionScript({
+          cmd: "background.onServerTreeChange",
+        });
       } catch (ex) {
         console.error(ex);
         alert(`Unable to save document: ${ex.message}`);

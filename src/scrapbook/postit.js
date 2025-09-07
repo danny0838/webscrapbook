@@ -92,6 +92,10 @@
 
         const {title} = await book.savePostit(id, content);
 
+        await scrapbook.invokeExtensionScript({
+          cmd: "background.onServerTreeChange",
+        });
+
         // update document title
         document.title = title || '';
 
