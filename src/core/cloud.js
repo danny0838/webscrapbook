@@ -2,7 +2,7 @@
  * Script for cloud.html
  *****************************************************************************/
 
-import {scrapbook} from "../utils/common.mjs";
+import {scrapbook, DEFAULT_OPTIONS} from "../utils/common.mjs";
 
 function getTableKey(name, ts, size) {
   return JSON.stringify({table: "cloudFiles", ts, name, size});
@@ -85,11 +85,11 @@ async function applyEntry(tr) {
 
     const data = (await browser.storage.sync.get(key))[key];
     for (const key in data) {
-      if (data[key] === scrapbook.DEFAULT_OPTIONS[key]) {
+      if (data[key] === DEFAULT_OPTIONS[key]) {
         delete data[key];
       }
     }
-    const keysToRemove = Object.keys(scrapbook.DEFAULT_OPTIONS).filter(key => !(key in data));
+    const keysToRemove = Object.keys(DEFAULT_OPTIONS).filter(key => !(key in data));
 
     await browser.storage.local.set(data);
     await browser.storage.local.remove(keysToRemove);
@@ -120,7 +120,7 @@ async function store() {
     const data = await scrapbook.getOptions();
 
     // remove default options
-    for (const [key, value] of Object.entries(scrapbook.DEFAULT_OPTIONS)) {
+    for (const [key, value] of Object.entries(DEFAULT_OPTIONS)) {
       if (data[key] === value) { delete data[key]; }
     }
 

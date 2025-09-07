@@ -4,7 +4,7 @@
  * @modifies scrapbook
  *****************************************************************************/
 
-import {scrapbook} from "./common.mjs";
+import {scrapbook, DEFAULT_OPTIONS} from "./common.mjs";
 
 scrapbook.loadOptionsAuto = scrapbook.loadOptions();
 
@@ -18,7 +18,7 @@ browser.storage.onChanged.addListener((changes, areaName) => {
     } catch (ex) {}
 
     for (const key in changes) {
-      scrapbook.options[key] = 'newValue' in changes[key] ? changes[key].newValue : scrapbook.DEFAULT_OPTIONS[key];
+      scrapbook.options[key] = 'newValue' in changes[key] ? changes[key].newValue : DEFAULT_OPTIONS[key];
     }
   }
 });

@@ -2,7 +2,7 @@
  * Script for options.html
  *****************************************************************************/
 
-import {scrapbook} from "../utils/extension.mjs";
+import {scrapbook, BACKEND_MIN_VERSION, DEFAULT_OPTIONS} from "../utils/extension.mjs";
 
 const OPTION_PREFIX = "opt_";
 
@@ -63,8 +63,8 @@ function setOptionToDocument(key, value, includeHidden) {
 }
 
 function resetOptions(file) {
-  for (const key in scrapbook.DEFAULT_OPTIONS) {
-    setOptionToDocument(key, scrapbook.DEFAULT_OPTIONS[key], true);
+  for (const key in DEFAULT_OPTIONS) {
+    setOptionToDocument(key, DEFAULT_OPTIONS[key], true);
   }
 }
 
@@ -362,7 +362,7 @@ async function onSubmit(event) {
   const keys = {};
   const keysToRemove = [];
 
-  for (const key in scrapbook.DEFAULT_OPTIONS) {
+  for (const key in DEFAULT_OPTIONS) {
     const value = getOptionFromDocument(key);
 
     // Overwrite only keys with a defined value so that
@@ -375,7 +375,7 @@ async function onSubmit(event) {
 
     // Remove the key if the value is identical to the default, so that the
     // value will be updated if the default value changes in the future.
-    if (JSON.stringify(value) === JSON.stringify(scrapbook.DEFAULT_OPTIONS[key])) {
+    if (JSON.stringify(value) === JSON.stringify(DEFAULT_OPTIONS[key])) {
       keysToRemove.push(key);
       continue;
     }
@@ -442,7 +442,7 @@ function onTooltipClick(event) {
 window.addEventListener("DOMContentLoaded", async (event) => {
   // load languages
   scrapbook.loadLanguages(document);
-  document.getElementById("optionServerUrlTooltip").setAttribute('data-tooltip', scrapbook.lang('OptionServerUrlTooltip', [scrapbook.BACKEND_MIN_VERSION]));
+  document.getElementById("optionServerUrlTooltip").setAttribute('data-tooltip', scrapbook.lang('OptionServerUrlTooltip', [BACKEND_MIN_VERSION]));
 
   // load default options
   await initOptions();
