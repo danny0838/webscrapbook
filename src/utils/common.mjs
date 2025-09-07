@@ -535,10 +535,6 @@ const VALID_SHADOW_HOST_NAMES = new Set([
  * @namespace
  */
 const scrapbook = {
-  BACKEND_MIN_VERSION,
-  DEFAULT_OPTIONS,
-  ANNOTATION_CSS,
-
   /**
    * scrapbook.userAgent
    *
@@ -4409,5 +4405,8 @@ scrapbook.debounce = function (func, {
 
 
 export {
+  BACKEND_MIN_VERSION,
+  DEFAULT_OPTIONS,
+  ANNOTATION_CSS,
   scrapbook,
 };

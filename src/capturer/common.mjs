@@ -3,7 +3,7 @@
  *****************************************************************************/
 
 import {isDebug} from "../utils/debug.mjs";
-import {scrapbook} from "../utils/common.mjs";
+import {scrapbook, ANNOTATION_CSS} from "../utils/common.mjs";
 import {dataUriToFile} from "../utils/datauri.mjs";
 import {MapWithDefault} from "../lib/map-with-default.mjs";
 import {ItemInfoFormatter as _ItemInfoFormatter} from "../scrapbook/item-info-formatter.mjs";
@@ -4073,7 +4073,7 @@ capturer.preSaveProcess = async function (params) {
   if (rootNode.querySelector('[data-scrapbook-elem="linemarker"][title], [data-scrapbook-elem="sticky"]')) {
     const css = bodyNode.appendChild(doc.createElement("style"));
     css.setAttribute("data-scrapbook-elem", "annotation-css");
-    css.textContent = scrapbook.compressCode(scrapbook.ANNOTATION_CSS);
+    css.textContent = scrapbook.compressCode(ANNOTATION_CSS);
     const loader = bodyNode.appendChild(doc.createElement("script"));
     loader.setAttribute("data-scrapbook-elem", "annotation-loader");
     // Mobile support with showing title on long touch.
@@ -4522,8 +4522,6 @@ class CssSelectorTokenizer {
     return selectorText.length;
   }
 }
-
-capturer.CssSelectorTokenizer = CssSelectorTokenizer;
 
 
 /**
@@ -5627,8 +5625,6 @@ class DocumentCssHandler {
   }
 }
 
-capturer.DocumentCssHandler = DocumentCssHandler;
-
 
 /**
  * A class that calculates used CSS resources of a document.
@@ -5929,8 +5925,6 @@ class DocumentCssResourcesHandler {
     this.usedImageUrls[url] = true;
   }
 }
-
-capturer.DocumentCssResourcesHandler = DocumentCssResourcesHandler;
 
 
 /**
@@ -6677,8 +6671,11 @@ class CaptureHelperHandler {
   }
 }
 
-capturer.CaptureHelperHandler = CaptureHelperHandler;
-
 export {
   capturer,
+  ItemInfoFormatter,
+  CssSelectorTokenizer,
+  DocumentCssHandler,
+  DocumentCssResourcesHandler,
+  CaptureHelperHandler,
 };

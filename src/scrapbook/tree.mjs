@@ -962,5 +962,9 @@ class Tree {
 }
 
 export {
+  TREE_CLASS,
+  TREE_CLASS_SELECTABLE,
+  TREE_CLASS_KEYNAV,
+  ITEM_TYPE_ICON,
   Tree,
 };

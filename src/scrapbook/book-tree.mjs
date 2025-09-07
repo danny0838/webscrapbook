@@ -619,5 +619,7 @@ class BookTree extends Tree {
 }
 
 export {
+  TREE_CLASS,
+  TOGGLER_ICON,
   BookTree,
 };

@@ -1,6 +1,11 @@
 import {MochaQuery as $, assert, userAgent, getRulesFromCssText, cssRegex} from "./unittest.mjs";
 
-import {capturer} from "./shared/capturer/common.mjs";
+import {
+  capturer,
+  CssSelectorTokenizer,
+  DocumentCssHandler,
+  CaptureHelperHandler,
+} from "./shared/capturer/common.mjs";
 
 const $describe = $(describe);
 const $it = $(it);
@@ -315,9 +320,9 @@ describe('capturer/common.mjs', function () {
     });
   });
 
-  describe('capturer.CssSelectorTokenizer', function () {
-    describe('capturer.CssSelectorTokenizer.run', function () {
-      const tokenizer = new capturer.CssSelectorTokenizer();
+  describe('CssSelectorTokenizer', function () {
+    describe('CssSelectorTokenizer.run', function () {
+      const tokenizer = new CssSelectorTokenizer();
 
       it('basic selectors', function () {
         assert.deepEqual(tokenizer.run(''), []);
@@ -607,8 +612,8 @@ describe('capturer/common.mjs', function () {
       });
     });
 
-    describe('capturer.CssSelectorTokenizer.tokensToString', function () {
-      const tokenizer = new capturer.CssSelectorTokenizer();
+    describe('CssSelectorTokenizer.tokensToString', function () {
+      const tokenizer = new CssSelectorTokenizer();
 
       it('basic', function () {
         assert.deepEqual(tokenizer.tokensToString([
@@ -620,10 +625,10 @@ describe('capturer/common.mjs', function () {
     });
   });
 
-  describe('capturer.DocumentCssHandler', function () {
-    $describe.skipIf($.noBrowser)('capturer.DocumentCssHandler.getSelectorText', function () {
+  describe('DocumentCssHandler', function () {
+    $describe.skipIf($.noBrowser)('DocumentCssHandler.getSelectorText', function () {
       const getSelectorText = (...args) => {
-        return capturer.DocumentCssHandler.getSelectorText(...args);
+        return DocumentCssHandler.getSelectorText(...args);
       };
 
       it('basic', function () {
@@ -744,9 +749,9 @@ ul {
       });
     });
 
-    describe('capturer.DocumentCssHandler.getSelectorVerifier', function () {
+    describe('DocumentCssHandler.getSelectorVerifier', function () {
       const getSelectorVerifier = (...args) => {
-        return capturer.DocumentCssHandler.getSelectorVerifier(...args);
+        return DocumentCssHandler.getSelectorVerifier(...args);
       };
 
       const testGetSelectorVerifier = (selector1, selector2, validate = true) => {
@@ -897,9 +902,9 @@ ul {
       });
     });
 
-    $describe.skipIf($.noBrowser)('capturer.DocumentCssHandler.getRulesFromCssText', function () {
+    $describe.skipIf($.noBrowser)('DocumentCssHandler.getRulesFromCssText', function () {
       const getRulesFromCssText = (...args) => {
-        return capturer.DocumentCssHandler.getRulesFromCssText(...args);
+        return DocumentCssHandler.getRulesFromCssText(...args);
       };
 
       it('basic', function () {
@@ -1167,14 +1172,14 @@ class { }`);
     });
   });
 
-  $describe.skipIf($.noBrowser)('capturer.CaptureHelperHandler', function () {
+  $describe.skipIf($.noBrowser)('CaptureHelperHandler', function () {
     function makeHtmlDocument(html) {
       return new DOMParser().parseFromString(html, 'text/html');
     }
 
-    describe("capturer.CaptureHelperHandler.getOverwritingOptions", function () {
+    describe("CaptureHelperHandler.getOverwritingOptions", function () {
       it("do not include capture helper related options", function () {
-        var options = capturer.CaptureHelperHandler.getOverwritingOptions(
+        var options = CaptureHelperHandler.getOverwritingOptions(
           [
             {
               options: {
@@ -1194,7 +1199,7 @@ class { }`);
       });
 
       it("merge options in last-win manner", function () {
-        var options = capturer.CaptureHelperHandler.getOverwritingOptions(
+        var options = CaptureHelperHandler.getOverwritingOptions(
           [
             {
               options: {
@@ -1221,7 +1226,7 @@ class { }`);
       });
 
       it("skip helpers with truthy disabled property", function () {
-        var options = capturer.CaptureHelperHandler.getOverwritingOptions(
+        var options = CaptureHelperHandler.getOverwritingOptions(
           [
             {
               options: {
@@ -1253,7 +1258,7 @@ class { }`);
       });
 
       it("skip helpers whose pattern do not match document URL", function () {
-        var options = capturer.CaptureHelperHandler.getOverwritingOptions(
+        var options = CaptureHelperHandler.getOverwritingOptions(
           [
             {
               pattern: /unknown\.site/,
@@ -1279,7 +1284,7 @@ class { }`);
       });
 
       it("return empty object if docUrl is falsy", function () {
-        var options = capturer.CaptureHelperHandler.getOverwritingOptions(
+        var options = CaptureHelperHandler.getOverwritingOptions(
           [
             {
               options: {
@@ -1299,37 +1304,37 @@ class { }`);
       });
     });
 
-    describe("capturer.CaptureHelperHandler.parseRegexStr", function () {
+    describe("CaptureHelperHandler.parseRegexStr", function () {
       it("basic", function () {
-        var {source, flags} = capturer.CaptureHelperHandler.parseRegexStr(`/abc/def/`);
+        var {source, flags} = CaptureHelperHandler.parseRegexStr(`/abc/def/`);
         assert.deepEqual({source, flags}, {source: r`abc\/def`, flags: ``});
 
-        var {source, flags} = capturer.CaptureHelperHandler.parseRegexStr(`/abc/def/imguy`);
+        var {source, flags} = CaptureHelperHandler.parseRegexStr(`/abc/def/imguy`);
         assert.deepEqual({source, flags}, {source: r`abc\/def`, flags: `gimuy`});
       });
 
       it("return null for an invalid regex string", function () {
-        assert.strictEqual(capturer.CaptureHelperHandler.parseRegexStr(`abc/def`), null);
+        assert.strictEqual(CaptureHelperHandler.parseRegexStr(`abc/def`), null);
       });
     });
 
-    describe("capturer.CaptureHelperHandler.isCommand", function () {
+    describe("CaptureHelperHandler.isCommand", function () {
       it("basic", function () {
-        assert.strictEqual(capturer.CaptureHelperHandler.isCommand(["if", true, "yes", "no"]), true);
-        assert.strictEqual(capturer.CaptureHelperHandler.isCommand(["if"]), true);
+        assert.strictEqual(CaptureHelperHandler.isCommand(["if", true, "yes", "no"]), true);
+        assert.strictEqual(CaptureHelperHandler.isCommand(["if"]), true);
 
-        assert.strictEqual(capturer.CaptureHelperHandler.isCommand(null), false);
-        assert.strictEqual(capturer.CaptureHelperHandler.isCommand(0), false);
-        assert.strictEqual(capturer.CaptureHelperHandler.isCommand(1), false);
-        assert.strictEqual(capturer.CaptureHelperHandler.isCommand(""), false);
-        assert.strictEqual(capturer.CaptureHelperHandler.isCommand(`["if", true, "yes", "no"]`), false);
-        assert.strictEqual(capturer.CaptureHelperHandler.isCommand([]), false);
-        assert.strictEqual(capturer.CaptureHelperHandler.isCommand([1, 2, 3]), false);
-        assert.strictEqual(capturer.CaptureHelperHandler.isCommand({}), false);
+        assert.strictEqual(CaptureHelperHandler.isCommand(null), false);
+        assert.strictEqual(CaptureHelperHandler.isCommand(0), false);
+        assert.strictEqual(CaptureHelperHandler.isCommand(1), false);
+        assert.strictEqual(CaptureHelperHandler.isCommand(""), false);
+        assert.strictEqual(CaptureHelperHandler.isCommand(`["if", true, "yes", "no"]`), false);
+        assert.strictEqual(CaptureHelperHandler.isCommand([]), false);
+        assert.strictEqual(CaptureHelperHandler.isCommand([1, 2, 3]), false);
+        assert.strictEqual(CaptureHelperHandler.isCommand({}), false);
       });
     });
 
-    describe("capturer.CaptureHelperHandler.selectNodes", function () {
+    describe("CaptureHelperHandler.selectNodes", function () {
       function makeTestDoc() {
         return makeHtmlDocument(`\
 <body>
@@ -1357,14 +1362,14 @@ class { }`);
         it(".css", function () {
           var doc = makeTestDoc();
           var selector = {css: "div"};
-          removeElems(capturer.CaptureHelperHandler.selectNodes(doc, selector));
+          removeElems(CaptureHelperHandler.selectNodes(doc, selector));
           assert.strictEqual(doc.body.innerHTML.trim(), ``);
         });
 
         it(".xpath", function () {
           var doc = makeTestDoc();
           var selector = {xpath: "//div"};
-          removeElems(capturer.CaptureHelperHandler.selectNodes(doc, selector));
+          removeElems(CaptureHelperHandler.selectNodes(doc, selector));
           assert.strictEqual(doc.body.innerHTML.trim(), ``);
         });
 
@@ -1373,7 +1378,7 @@ class { }`);
             var doc = makeTestDoc();
             var selector = "self";
             var refNode = doc.querySelector('#target');
-            var result = capturer.CaptureHelperHandler.selectNodes(refNode, selector);
+            var result = CaptureHelperHandler.selectNodes(refNode, selector);
             assert.strictEqual(result.length, 1);
             assert.strictEqual(result[0], refNode);
           });
@@ -1382,7 +1387,7 @@ class { }`);
             var doc = makeTestDoc();
             var selector = "root";
             var refNode = doc.querySelector('#target');
-            var result = capturer.CaptureHelperHandler.selectNodes(refNode, selector);
+            var result = CaptureHelperHandler.selectNodes(refNode, selector);
             assert.strictEqual(result.length, 1);
             assert.strictEqual(result[0], doc);
           });
@@ -1391,7 +1396,7 @@ class { }`);
             var doc = makeTestDoc();
             var selector = {base: "parent"};
             var refNode = doc.querySelector('#target');
-            var result = capturer.CaptureHelperHandler.selectNodes(refNode, selector);
+            var result = CaptureHelperHandler.selectNodes(refNode, selector);
             assert.strictEqual(result.length, 1);
             assert.strictEqual(result[0], refNode.parentNode);
           });
@@ -1400,7 +1405,7 @@ class { }`);
             var doc = makeTestDoc();
             var selector = {base: "previousSibling"};
             var refNode = doc.querySelector('#target');
-            var result = capturer.CaptureHelperHandler.selectNodes(refNode, selector);
+            var result = CaptureHelperHandler.selectNodes(refNode, selector);
             assert.strictEqual(result.length, 1);
             assert.strictEqual(result[0], refNode.previousSibling);
           });
@@ -1409,7 +1414,7 @@ class { }`);
             var doc = makeTestDoc();
             var selector = {base: "nextSibling"};
             var refNode = doc.querySelector('#target');
-            var result = capturer.CaptureHelperHandler.selectNodes(refNode, selector);
+            var result = CaptureHelperHandler.selectNodes(refNode, selector);
             assert.strictEqual(result.length, 1);
             assert.strictEqual(result[0], refNode.nextSibling);
           });
@@ -1418,7 +1423,7 @@ class { }`);
             var doc = makeTestDoc();
             var selector = {base: "firstChild"};
             var refNode = doc.querySelector('#target');
-            var result = capturer.CaptureHelperHandler.selectNodes(refNode, selector);
+            var result = CaptureHelperHandler.selectNodes(refNode, selector);
             assert.strictEqual(result.length, 1);
             assert.strictEqual(result[0], refNode.firstChild);
           });
@@ -1427,7 +1432,7 @@ class { }`);
             var doc = makeTestDoc();
             var selector = {base: "lastChild"};
             var refNode = doc.querySelector('#target');
-            var result = capturer.CaptureHelperHandler.selectNodes(refNode, selector);
+            var result = CaptureHelperHandler.selectNodes(refNode, selector);
             assert.strictEqual(result.length, 1);
             assert.strictEqual(result[0], refNode.lastChild);
           });
@@ -1436,7 +1441,7 @@ class { }`);
             var doc = makeTestDoc();
             var selector = {base: "previousElementSibling"};
             var refNode = doc.querySelector('#target');
-            var result = capturer.CaptureHelperHandler.selectNodes(refNode, selector);
+            var result = CaptureHelperHandler.selectNodes(refNode, selector);
             assert.strictEqual(result.length, 1);
             assert.strictEqual(result[0], refNode.previousElementSibling);
           });
@@ -1445,7 +1450,7 @@ class { }`);
             var doc = makeTestDoc();
             var selector = {base: "nextElementSibling"};
             var refNode = doc.querySelector('#target');
-            var result = capturer.CaptureHelperHandler.selectNodes(refNode, selector);
+            var result = CaptureHelperHandler.selectNodes(refNode, selector);
             assert.strictEqual(result.length, 1);
             assert.strictEqual(result[0], refNode.nextElementSibling);
           });
@@ -1454,7 +1459,7 @@ class { }`);
             var doc = makeTestDoc();
             var selector = {base: "firstElementChild"};
             var refNode = doc.querySelector('#target');
-            var result = capturer.CaptureHelperHandler.selectNodes(refNode, selector);
+            var result = CaptureHelperHandler.selectNodes(refNode, selector);
             assert.strictEqual(result.length, 1);
             assert.strictEqual(result[0], refNode.firstElementChild);
           });
@@ -1463,7 +1468,7 @@ class { }`);
             var doc = makeTestDoc();
             var selector = {base: "lastElementChild"};
             var refNode = doc.querySelector('#target');
-            var result = capturer.CaptureHelperHandler.selectNodes(refNode, selector);
+            var result = CaptureHelperHandler.selectNodes(refNode, selector);
             assert.strictEqual(result.length, 1);
             assert.strictEqual(result[0], refNode.lastElementChild);
           });
@@ -1472,7 +1477,7 @@ class { }`);
             var doc = makeTestDoc();
             var selector = {base: "firstChild.nextSibling.nextSibling.nextSibling"};
             var refNode = doc.querySelector('#target');
-            var result = capturer.CaptureHelperHandler.selectNodes(refNode, selector);
+            var result = CaptureHelperHandler.selectNodes(refNode, selector);
             assert.strictEqual(result.length, 1);
             assert.strictEqual(result[0], refNode.firstChild.nextSibling.nextSibling.nextSibling);
           });
@@ -1480,7 +1485,7 @@ class { }`);
           it('with selector', function () {
             var doc = makeTestDoc();
             var selector = {base: "parent", css: "div"};
-            removeElems(capturer.CaptureHelperHandler.selectNodes(doc.querySelector('#target'), selector));
+            removeElems(CaptureHelperHandler.selectNodes(doc.querySelector('#target'), selector));
             assert.strictEqual(doc.body.innerHTML.trim(), `\
 <div id="parent-prev"></div>
 <div id="parent">
@@ -1498,14 +1503,14 @@ class { }`);
           var doc = makeTestDoc();
           var selector = "parent";
           var refNode = doc.querySelector('#target');
-          var result = capturer.CaptureHelperHandler.selectNodes(refNode, selector);
+          var result = CaptureHelperHandler.selectNodes(refNode, selector);
           assert.strictEqual(result.length, 1);
           assert.strictEqual(result[0], refNode.parentNode);
 
           var doc = makeTestDoc();
           var selector = "parent.firstChild.nextSibling";
           var refNode = doc.querySelector('#target');
-          var result = capturer.CaptureHelperHandler.selectNodes(refNode, selector);
+          var result = CaptureHelperHandler.selectNodes(refNode, selector);
           assert.strictEqual(result.length, 1);
           assert.strictEqual(result[0], refNode.parentNode.firstChild.nextSibling);
         });
@@ -1513,12 +1518,12 @@ class { }`);
         it('non-valid base should be treated as {css: ...}', function () {
           var doc = makeTestDoc();
           var selector = "div";
-          removeElems(capturer.CaptureHelperHandler.selectNodes(doc, selector));
+          removeElems(CaptureHelperHandler.selectNodes(doc, selector));
           assert.strictEqual(doc.body.innerHTML.trim(), ``);
 
           var doc = makeTestDoc();
           var selector = "body > div";
-          removeElems(capturer.CaptureHelperHandler.selectNodes(doc, selector));
+          removeElems(CaptureHelperHandler.selectNodes(doc, selector));
           assert.strictEqual(doc.body.innerHTML.trim(), ``);
         });
       });
@@ -1528,7 +1533,7 @@ class { }`);
           var doc = makeTestDoc();
           var selector;
           var refNode = doc.querySelector('#target');
-          var result = capturer.CaptureHelperHandler.selectNodes(refNode, selector);
+          var result = CaptureHelperHandler.selectNodes(refNode, selector);
           assert.strictEqual(result.length, 1);
           assert.strictEqual(result[0], refNode);
         });
@@ -1537,7 +1542,7 @@ class { }`);
           var doc = makeTestDoc();
           var selector = null;
           var refNode = doc.querySelector('#target');
-          var result = capturer.CaptureHelperHandler.selectNodes(refNode, selector);
+          var result = CaptureHelperHandler.selectNodes(refNode, selector);
           assert.strictEqual(result.length, 1);
           assert.strictEqual(result[0], refNode);
         });
@@ -1546,14 +1551,14 @@ class { }`);
           var doc = makeTestDoc();
           var selector = "";
           var refNode = doc.querySelector('#target');
-          var result = capturer.CaptureHelperHandler.selectNodes(refNode, selector);
+          var result = CaptureHelperHandler.selectNodes(refNode, selector);
           assert.strictEqual(result.length, 1);
           assert.strictEqual(result[0], refNode);
         });
       });
     });
 
-    describe("capturer.CaptureHelperHandler.runCommand", function () {
+    describe("CaptureHelperHandler.runCommand", function () {
       function makeTestDoc() {
         return makeHtmlDocument(`\
 <div id="target">target</div>
@@ -1562,7 +1567,7 @@ class { }`);
 
       describe("cmd_if", function () {
         it("basic", function () {
-          var helper = new capturer.CaptureHelperHandler();
+          var helper = new CaptureHelperHandler();
           var doc = makeTestDoc();
 
           var command = ["if", true, 1, 0];
@@ -1594,7 +1599,7 @@ class { }`);
         });
 
         it("resolve parameter commands", function () {
-          var helper = new capturer.CaptureHelperHandler();
+          var helper = new CaptureHelperHandler();
           var doc = makeTestDoc();
 
           var command = ["if", ["concat", "foo"], ["get_text", {css: "#target"}], ["get_text", {css: "#target2"}]];
@@ -1607,7 +1612,7 @@ class { }`);
 
       describe("cmd_equal", function () {
         it("equality", function () {
-          var helper = new capturer.CaptureHelperHandler();
+          var helper = new CaptureHelperHandler();
           var doc = makeTestDoc();
 
           var command = ["equal", "foo", "foo"];
@@ -1621,7 +1626,7 @@ class { }`);
         });
 
         it("strict equality", function () {
-          var helper = new capturer.CaptureHelperHandler();
+          var helper = new CaptureHelperHandler();
           var doc = makeTestDoc();
 
           var command = ["equal", "foo", "foo", true];
@@ -1635,7 +1640,7 @@ class { }`);
         });
 
         it("resolve parameter commands", function () {
-          var helper = new capturer.CaptureHelperHandler();
+          var helper = new CaptureHelperHandler();
           var doc = makeTestDoc();
 
           var command = ["equal", ["concat", "100"], ["if", true, 100], ["if", true, true]];
@@ -1645,7 +1650,7 @@ class { }`);
 
       describe("cmd_and", function () {
         it("return first falsy or last value", function () {
-          var helper = new capturer.CaptureHelperHandler();
+          var helper = new CaptureHelperHandler();
           var doc = makeTestDoc();
 
           var command = ["and", true];
@@ -1674,7 +1679,7 @@ class { }`);
         });
 
         it("resolve parameter commands", function () {
-          var helper = new capturer.CaptureHelperHandler();
+          var helper = new CaptureHelperHandler();
           var doc = makeTestDoc();
 
           var command = ["and", ["get_text", {css: "#target"}], ["get_text", {css: "#target2"}]];
@@ -1684,7 +1689,7 @@ class { }`);
 
       describe("cmd_or", function () {
         it("return first truthy or last value", function () {
-          var helper = new capturer.CaptureHelperHandler();
+          var helper = new CaptureHelperHandler();
           var doc = makeTestDoc();
 
           var command = ["or", true, 1, "foo", {}];
@@ -1713,7 +1718,7 @@ class { }`);
         });
 
         it("resolve parameter commands", function () {
-          var helper = new capturer.CaptureHelperHandler();
+          var helper = new CaptureHelperHandler();
           var doc = makeTestDoc();
 
           var command = ["or", ["get_text", {css: "#target"}], ["get_text", {css: "#target2"}]];
@@ -1723,7 +1728,7 @@ class { }`);
 
       describe("cmd_concat", function () {
         it("basic", function () {
-          var helper = new capturer.CaptureHelperHandler();
+          var helper = new CaptureHelperHandler();
           var doc = makeTestDoc();
 
           var command = ["concat", "foo"];
@@ -1737,7 +1742,7 @@ class { }`);
         });
 
         it('coerce truthy non-string value to string', function () {
-          var helper = new capturer.CaptureHelperHandler();
+          var helper = new CaptureHelperHandler();
           var doc = makeTestDoc();
 
           var command = ["concat", "foo", "bar", 1];
@@ -1748,7 +1753,7 @@ class { }`);
         });
 
         it('treat falsy value as empty string', function () {
-          var helper = new capturer.CaptureHelperHandler();
+          var helper = new CaptureHelperHandler();
           var doc = makeTestDoc();
 
           var command = ["concat", "foo", null, false, 0];
@@ -1756,7 +1761,7 @@ class { }`);
         });
 
         it("resolve parameter commands", function () {
-          var helper = new capturer.CaptureHelperHandler();
+          var helper = new CaptureHelperHandler();
           var doc = makeTestDoc();
 
           var command = ["concat", ["get_text", {css: "#target"}], ["get_text", {css: "#target2"}]];
@@ -1766,7 +1771,7 @@ class { }`);
 
       describe("cmd_slice", function () {
         it("basic", function () {
-          var helper = new capturer.CaptureHelperHandler();
+          var helper = new CaptureHelperHandler();
           var doc = makeTestDoc();
 
           var command = ["slice", "0123456", 1];
@@ -1786,7 +1791,7 @@ class { }`);
         });
 
         it("resolve parameter commands", function () {
-          var helper = new capturer.CaptureHelperHandler();
+          var helper = new CaptureHelperHandler();
           var doc = makeTestDoc();
 
           var command = ["slice", ["get_text", {css: "#target"}], ["if", true, 1], ["if", true, -1]];
@@ -1796,7 +1801,7 @@ class { }`);
 
       describe("cmd_upper", function () {
         it("basic", function () {
-          var helper = new capturer.CaptureHelperHandler();
+          var helper = new CaptureHelperHandler();
           var doc = makeTestDoc();
 
           var command = ["upper", "123ABCabc中文"];
@@ -1804,7 +1809,7 @@ class { }`);
         });
 
         it("resolve parameter commands", function () {
-          var helper = new capturer.CaptureHelperHandler();
+          var helper = new CaptureHelperHandler();
           var doc = makeTestDoc();
 
           var command = ["upper", ["get_text", {css: "#target"}]];
@@ -1814,7 +1819,7 @@ class { }`);
 
       describe("cmd_lower", function () {
         it("basic", function () {
-          var helper = new capturer.CaptureHelperHandler();
+          var helper = new CaptureHelperHandler();
           var doc = makeTestDoc();
 
           var command = ["lower", "123ABCabc中文"];
@@ -1822,7 +1827,7 @@ class { }`);
         });
 
         it("resolve parameter commands", function () {
-          var helper = new capturer.CaptureHelperHandler();
+          var helper = new CaptureHelperHandler();
           var doc = makeTestDoc();
 
           var command = ["lower", ["get_text", {css: "#target"}]];
@@ -1832,7 +1837,7 @@ class { }`);
 
       describe("cmd_encode_uri", function () {
         it("basic", function () {
-          var helper = new capturer.CaptureHelperHandler();
+          var helper = new CaptureHelperHandler();
           var doc = makeTestDoc();
 
           var command = ["encode_uri", " ;,/?#:@&=+$中"];
@@ -1843,7 +1848,7 @@ class { }`);
         });
 
         it("resolve parameter commands", function () {
-          var helper = new capturer.CaptureHelperHandler();
+          var helper = new CaptureHelperHandler();
           var doc = makeTestDoc();
 
           var command = ["encode_uri", ["concat", " ;,/?#:@&=+$中"], ["concat", " ;,/?#:@&=+$"]];
@@ -1853,7 +1858,7 @@ class { }`);
 
       describe("cmd_decode_uri", function () {
         it("basic", function () {
-          var helper = new capturer.CaptureHelperHandler();
+          var helper = new CaptureHelperHandler();
           var doc = makeTestDoc();
 
           var command = ["decode_uri", "%20%3B%2C%2F%3F%23%3A%40%26%3D%2B%24%E4%B8%AD"];
@@ -1861,7 +1866,7 @@ class { }`);
         });
 
         it("return original string if failed to decode", function () {
-          var helper = new capturer.CaptureHelperHandler();
+          var helper = new CaptureHelperHandler();
           var doc = makeTestDoc();
 
           var command = ["decode_uri", "%E4"];
@@ -1869,7 +1874,7 @@ class { }`);
         });
 
         it("resolve parameter commands", function () {
-          var helper = new capturer.CaptureHelperHandler();
+          var helper = new CaptureHelperHandler();
           var doc = makeTestDoc();
 
           var command = ["decode_uri", ["concat", "%20%3B%2C%2F%3F%23%3A%40%26%3D%2B%24%E4%B8%AD"]];
@@ -1879,7 +1884,7 @@ class { }`);
 
       describe("cmd_add", function () {
         it("basic", function () {
-          var helper = new capturer.CaptureHelperHandler();
+          var helper = new CaptureHelperHandler();
           var doc = makeTestDoc();
 
           var command = ["add", 100];
@@ -1893,7 +1898,7 @@ class { }`);
         });
 
         it("resolve parameter commands", function () {
-          var helper = new capturer.CaptureHelperHandler();
+          var helper = new CaptureHelperHandler();
           var doc = makeTestDoc();
 
           var command = ["add", ["if", true, 100], ["if", true, 10], ["if", true, 1]];
@@ -1903,7 +1908,7 @@ class { }`);
 
       describe("cmd_subtract", function () {
         it("basic", function () {
-          var helper = new capturer.CaptureHelperHandler();
+          var helper = new CaptureHelperHandler();
           var doc = makeTestDoc();
 
           var command = ["subtract", 100];
@@ -1917,7 +1922,7 @@ class { }`);
         });
 
         it("resolve parameter commands", function () {
-          var helper = new capturer.CaptureHelperHandler();
+          var helper = new CaptureHelperHandler();
           var doc = makeTestDoc();
 
           var command = ["subtract", ["if", true, 100], ["if", true, 10], ["if", true, 1]];
@@ -1927,7 +1932,7 @@ class { }`);
 
       describe("cmd_multiply", function () {
         it("basic", function () {
-          var helper = new capturer.CaptureHelperHandler();
+          var helper = new CaptureHelperHandler();
           var doc = makeTestDoc();
 
           var command = ["multiply", 100];
@@ -1941,7 +1946,7 @@ class { }`);
         });
 
         it("resolve parameter commands", function () {
-          var helper = new capturer.CaptureHelperHandler();
+          var helper = new CaptureHelperHandler();
           var doc = makeTestDoc();
 
           var command = ["multiply", ["if", true, 100], ["if", true, 10], ["if", true, 2]];
@@ -1951,7 +1956,7 @@ class { }`);
 
       describe("cmd_divide", function () {
         it("basic", function () {
-          var helper = new capturer.CaptureHelperHandler();
+          var helper = new CaptureHelperHandler();
           var doc = makeTestDoc();
 
           var command = ["divide", 100];
@@ -1968,7 +1973,7 @@ class { }`);
         });
 
         it("resolve parameter commands", function () {
-          var helper = new capturer.CaptureHelperHandler();
+          var helper = new CaptureHelperHandler();
           var doc = makeTestDoc();
 
           var command = ["divide", ["if", true, 100], ["if", true, 10], ["if", true, 2]];
@@ -1978,7 +1983,7 @@ class { }`);
 
       describe("cmd_mod", function () {
         it("basic", function () {
-          var helper = new capturer.CaptureHelperHandler();
+          var helper = new CaptureHelperHandler();
           var doc = makeTestDoc();
 
           var command = ["mod", 12];
@@ -1995,7 +2000,7 @@ class { }`);
         });
 
         it("resolve parameter commands", function () {
-          var helper = new capturer.CaptureHelperHandler();
+          var helper = new CaptureHelperHandler();
           var doc = makeTestDoc();
 
           var command = ["mod", ["if", true, 12], ["if", true, 8], ["if", true, 3]];
@@ -2005,7 +2010,7 @@ class { }`);
 
       describe("cmd_power", function () {
         it("basic", function () {
-          var helper = new capturer.CaptureHelperHandler();
+          var helper = new CaptureHelperHandler();
           var doc = makeTestDoc();
 
           var command = ["power", 2];
@@ -2019,7 +2024,7 @@ class { }`);
         });
 
         it("resolve parameter commands", function () {
-          var helper = new capturer.CaptureHelperHandler();
+          var helper = new CaptureHelperHandler();
           var doc = makeTestDoc();
 
           var command = ["power", ["if", true, 2], ["if", true, 3], ["if", true, 2]];
@@ -2029,7 +2034,7 @@ class { }`);
 
       describe("cmd_for", function () {
         it("basic", function () {
-          var helper = new capturer.CaptureHelperHandler();
+          var helper = new CaptureHelperHandler();
           var doc = makeTestDoc();
 
           var command = ["for", ["if", true, {css: "div"}],
@@ -2045,7 +2050,7 @@ class { }`);
 
       describe("cmd_match", function () {
         it("boolean", function () {
-          var helper = new capturer.CaptureHelperHandler();
+          var helper = new CaptureHelperHandler();
           var doc = makeTestDoc();
 
           var command = ["match", "text", "/TEXT/i"];
@@ -2059,7 +2064,7 @@ class { }`);
         });
 
         it("indexed capture group", function () {
-          var helper = new capturer.CaptureHelperHandler();
+          var helper = new CaptureHelperHandler();
           var doc = makeTestDoc();
 
           var command = ["match", "text", "/(te)(xt)/", 0];
@@ -2076,7 +2081,7 @@ class { }`);
         });
 
         it("named capture group", function () {
-          var helper = new capturer.CaptureHelperHandler();
+          var helper = new CaptureHelperHandler();
           var doc = makeTestDoc();
 
           var command = ["match", "text", "/(?<g>te)xt/", "g"];
@@ -2090,7 +2095,7 @@ class { }`);
         });
 
         it("resolve parameter commands", function () {
-          var helper = new capturer.CaptureHelperHandler();
+          var helper = new CaptureHelperHandler();
           var doc = makeTestDoc();
 
           var command = ["match", ["concat", "text"], ["concat", "/text/"], ["if", true, 0]];
@@ -2100,7 +2105,7 @@ class { }`);
 
       describe("cmd_replace", function () {
         it("basic", function () {
-          var helper = new capturer.CaptureHelperHandler();
+          var helper = new CaptureHelperHandler();
           var doc = makeTestDoc();
 
           var command = ["replace", "text content", "/(text) (content)/", "modified: $2, $1"];
@@ -2108,7 +2113,7 @@ class { }`);
         });
 
         it("treat missing replacement as an empty string", function () {
-          var helper = new capturer.CaptureHelperHandler();
+          var helper = new CaptureHelperHandler();
           var doc = makeTestDoc();
 
           var command = ["replace", "text content", "/(text) (content)/"];
@@ -2116,7 +2121,7 @@ class { }`);
         });
 
         it("resolve parameter commands", function () {
-          var helper = new capturer.CaptureHelperHandler();
+          var helper = new CaptureHelperHandler();
           var doc = makeTestDoc();
 
           var command = ["replace", ["concat", "text content"], ["concat", "/(text) (content)/"], ["concat", "modified: $2, $1"]];
@@ -2126,7 +2131,7 @@ class { }`);
 
       describe("cmd_has_node", function () {
         it("basic", function () {
-          var helper = new capturer.CaptureHelperHandler();
+          var helper = new CaptureHelperHandler();
           var doc = makeTestDoc();
 
           var command = ["has_node", {css: "#target"}];
@@ -2137,7 +2142,7 @@ class { }`);
         });
 
         it("resolve parameter commands", function () {
-          var helper = new capturer.CaptureHelperHandler();
+          var helper = new CaptureHelperHandler();
           var doc = makeTestDoc();
 
           var command = ["has_node", ["if", true, {css: "#target"}]];
@@ -2147,7 +2152,7 @@ class { }`);
 
       describe("cmd_has_attr", function () {
         it("basic", function () {
-          var helper = new capturer.CaptureHelperHandler();
+          var helper = new CaptureHelperHandler();
           var doc = makeTestDoc();
 
           var command = ["has_attr", {css: "#target"}, "id"];
@@ -2158,7 +2163,7 @@ class { }`);
         });
 
         it("resolve parameter commands", function () {
-          var helper = new capturer.CaptureHelperHandler();
+          var helper = new CaptureHelperHandler();
           var doc = makeTestDoc();
 
           var command = ["has_attr", ["if", true, {css: "#target"}], ["concat", "id"]];
@@ -2174,7 +2179,7 @@ class { }`);
         }
 
         it("basic", function () {
-          var helper = new capturer.CaptureHelperHandler();
+          var helper = new CaptureHelperHandler();
           var doc = makeTestDoc();
 
           var command = ["get_html", {css: "div"}];
@@ -2185,7 +2190,7 @@ class { }`);
         });
 
         it("resolve parameter commands", function () {
-          var helper = new capturer.CaptureHelperHandler();
+          var helper = new CaptureHelperHandler();
           var doc = makeTestDoc();
 
           var command = ["get_html", ["if", true, {css: "div"}], ["if", true, true]];
@@ -2201,7 +2206,7 @@ class { }`);
         }
 
         it("basic", function () {
-          var helper = new capturer.CaptureHelperHandler();
+          var helper = new CaptureHelperHandler();
           var doc = makeTestDoc();
 
           var command = ["get_text", {css: "div"}];
@@ -2209,7 +2214,7 @@ class { }`);
         });
 
         it("resolve parameter commands", function () {
-          var helper = new capturer.CaptureHelperHandler();
+          var helper = new CaptureHelperHandler();
           var doc = makeTestDoc();
 
           var command = ["get_text", ["if", true, {css: "div"}]];
@@ -2225,7 +2230,7 @@ class { }`);
         }
 
         it("basic", function () {
-          var helper = new capturer.CaptureHelperHandler();
+          var helper = new CaptureHelperHandler();
           var doc = makeTestDoc();
 
           var command = ["get_attr", {css: "img"}, "data-src"];
@@ -2233,7 +2238,7 @@ class { }`);
         });
 
         it("resolve parameter commands", function () {
-          var helper = new capturer.CaptureHelperHandler();
+          var helper = new CaptureHelperHandler();
           var doc = makeTestDoc();
 
           var command = ["get_attr", ["if", true, {css: "img"}], ["concat", "data-src"]];
@@ -2249,7 +2254,7 @@ class { }`);
         }
 
         it("basic", function () {
-          var helper = new capturer.CaptureHelperHandler();
+          var helper = new CaptureHelperHandler();
           var doc = makeTestDoc();
 
           var command = ["get_css", {css: "div"}, "color"];
@@ -2263,7 +2268,7 @@ class { }`);
         });
 
         it("resolve parameter commands", function () {
-          var helper = new capturer.CaptureHelperHandler();
+          var helper = new CaptureHelperHandler();
           var doc = makeTestDoc();
 
           var command = ["get_css", ["if", true, {css: "div"}], ["concat", "color"], ["if", true, true]];
@@ -2279,7 +2284,7 @@ class { }`);
         }
 
         it("basic", function () {
-          var helper = new capturer.CaptureHelperHandler();
+          var helper = new CaptureHelperHandler();
 
           var doc = makeTestDoc();
           var command = ["remove", {css: "b"}];
@@ -2290,7 +2295,7 @@ class { }`);
         });
 
         it("resolve parameter commands", function () {
-          var helper = new capturer.CaptureHelperHandler();
+          var helper = new CaptureHelperHandler();
 
           var doc = makeTestDoc();
           var command = ["remove", ["if", true, {css: "b"}]];
@@ -2309,7 +2314,7 @@ class { }`);
         }
 
         it("basic", function () {
-          var helper = new capturer.CaptureHelperHandler();
+          var helper = new CaptureHelperHandler();
 
           var doc = makeTestDoc();
           var command = ["unwrap", {css: "div"}];
@@ -2320,7 +2325,7 @@ class { }`);
         });
 
         it("resolve parameter commands", function () {
-          var helper = new capturer.CaptureHelperHandler();
+          var helper = new CaptureHelperHandler();
 
           var doc = makeTestDoc();
           var command = ["unwrap", ["if", true, {css: "div"}]];
@@ -2353,7 +2358,7 @@ class { }`);
         }
 
         it("basic", function () {
-          var helper = new capturer.CaptureHelperHandler();
+          var helper = new CaptureHelperHandler();
 
           var doc = makeTestDoc();
           var command = ["isolate", {css: ".target"}];
@@ -2373,7 +2378,7 @@ class { }`);
         });
 
         it("resolve parameter commands", function () {
-          var helper = new capturer.CaptureHelperHandler();
+          var helper = new CaptureHelperHandler();
 
           var doc = makeTestDoc();
           var command = ["isolate", ["if", true, {css: ".target"}]];
@@ -2401,7 +2406,7 @@ class { }`);
         }
 
         it("basic", function () {
-          var helper = new capturer.CaptureHelperHandler();
+          var helper = new CaptureHelperHandler();
 
           var doc = makeTestDoc();
           var command = ["html", {css: "div"}, "<em>text</em>"];
@@ -2419,7 +2424,7 @@ class { }`);
         });
 
         it("resolve parameter commands", function () {
-          var helper = new capturer.CaptureHelperHandler();
+          var helper = new CaptureHelperHandler();
 
           var doc = makeTestDoc();
           var command = ["html", ["if", true, {css: "div"}], ["concat", ["get_html", null, true], "<em>text</em>"], ["if", true, true]];
@@ -2438,7 +2443,7 @@ class { }`);
         }
 
         it("basic", function () {
-          var helper = new capturer.CaptureHelperHandler();
+          var helper = new CaptureHelperHandler();
 
           var doc = makeTestDoc();
           var command = ["text", {css: "div"}, "<em>text</em>"];
@@ -2449,7 +2454,7 @@ class { }`);
         });
 
         it("resolve parameter commands", function () {
-          var helper = new capturer.CaptureHelperHandler();
+          var helper = new CaptureHelperHandler();
 
           var doc = makeTestDoc();
           var command = ["text", ["if", true, {css: "div"}], ["concat", ["get_text"], "<em>text</em>"]];
@@ -2468,7 +2473,7 @@ class { }`);
         }
 
         it("name, value", function () {
-          var helper = new capturer.CaptureHelperHandler();
+          var helper = new CaptureHelperHandler();
 
           var doc = makeTestDoc();
           var command = ["attr", {css: "img"}, "data-src", "myimage.jpg"];
@@ -2486,7 +2491,7 @@ class { }`);
         });
 
         it("name, value (null)", function () {
-          var helper = new capturer.CaptureHelperHandler();
+          var helper = new CaptureHelperHandler();
 
           var doc = makeTestDoc();
           var command = ["attr", {css: "img"}, "data-src", null];
@@ -2497,7 +2502,7 @@ class { }`);
         });
 
         it("name, value (resolve parameter commands)", function () {
-          var helper = new capturer.CaptureHelperHandler();
+          var helper = new CaptureHelperHandler();
 
           var doc = makeTestDoc();
           var command = ["attr", ["if", true, {css: "img"}], ["concat", "src"], ["get_attr", null, "data-src"]];
@@ -2508,7 +2513,7 @@ class { }`);
         });
 
         it("Object", function () {
-          var helper = new capturer.CaptureHelperHandler();
+          var helper = new CaptureHelperHandler();
 
           var doc = makeTestDoc();
           var command = ["attr", {css: "img"}, {
@@ -2523,7 +2528,7 @@ class { }`);
         });
 
         it("Object (resolve parameter commands)", function () {
-          var helper = new capturer.CaptureHelperHandler();
+          var helper = new CaptureHelperHandler();
 
           var doc = makeTestDoc();
           var command = ["attr", ["if", true, {css: "img"}], ["if", true, {
@@ -2549,7 +2554,7 @@ class { }`);
         });
 
         it("Array", function () {
-          var helper = new capturer.CaptureHelperHandler();
+          var helper = new CaptureHelperHandler();
 
           var doc = makeTestDoc();
           var command = ["attr", {css: "img"}, [
@@ -2564,7 +2569,7 @@ class { }`);
         });
 
         it("Array (resolve parameter commands)", function () {
-          var helper = new capturer.CaptureHelperHandler();
+          var helper = new CaptureHelperHandler();
 
           var doc = makeTestDoc();
           var command = ["attr", ["if", true, {css: "img"}], ["if", true, [
@@ -2598,7 +2603,7 @@ class { }`);
         }
 
         it("name, value", function () {
-          var helper = new capturer.CaptureHelperHandler();
+          var helper = new CaptureHelperHandler();
 
           var doc = makeTestDoc();
           var command = ["css", {css: "div"}, "color", "red"];
@@ -2616,7 +2621,7 @@ class { }`);
         });
 
         it("name, value (null)", function () {
-          var helper = new capturer.CaptureHelperHandler();
+          var helper = new CaptureHelperHandler();
 
           var doc = makeTestDoc();
           var command = ["css", {css: "div"}, "color", null];
@@ -2627,7 +2632,7 @@ class { }`);
         });
 
         it("name, value, priority", function () {
-          var helper = new capturer.CaptureHelperHandler();
+          var helper = new CaptureHelperHandler();
 
           var doc = makeTestDoc();
           var command = ["css", {css: "div"}, "color", "red", "important"];
@@ -2638,7 +2643,7 @@ class { }`);
         });
 
         it("name, value, priority (resolve parameter commands)", function () {
-          var helper = new capturer.CaptureHelperHandler();
+          var helper = new CaptureHelperHandler();
 
           var doc = makeTestDoc();
           var command = ["css", ["if", true, {css: "div"}], ["concat", "color"], ["get_css", null, "color"], ["concat", "important"]];
@@ -2649,7 +2654,7 @@ class { }`);
         });
 
         it("Object", function () {
-          var helper = new capturer.CaptureHelperHandler();
+          var helper = new CaptureHelperHandler();
 
           var doc = makeTestDoc();
           var command = ["css", {css: "div"}, {
@@ -2663,7 +2668,7 @@ class { }`);
         });
 
         it("Object (resolve parameter commands)", function () {
-          var helper = new capturer.CaptureHelperHandler();
+          var helper = new CaptureHelperHandler();
 
           var doc = makeTestDoc();
           var command = ["css", ["if", true, {css: "div"}], ["if", true, {
@@ -2687,7 +2692,7 @@ class { }`);
         });
 
         it("Array", function () {
-          var helper = new capturer.CaptureHelperHandler();
+          var helper = new CaptureHelperHandler();
 
           var doc = makeTestDoc();
           var command = ["css", {css: "div"}, [
@@ -2702,7 +2707,7 @@ class { }`);
         });
 
         it("Array (resolve parameter commands)", function () {
-          var helper = new capturer.CaptureHelperHandler();
+          var helper = new CaptureHelperHandler();
 
           var doc = makeTestDoc();
           var command = ["css", ["if", true, {css: "div"}], ["if", true, [
@@ -2739,7 +2744,7 @@ class { }`);
         }
 
         it("mode = before", function () {
-          var helper = new capturer.CaptureHelperHandler();
+          var helper = new CaptureHelperHandler();
 
           var doc = makeTestDoc();
           var command = ["insert", {"css": ".target"}, "insertedText", "before"];
@@ -2750,7 +2755,7 @@ insertedText<div class="target"><div id="child-1"></div><div id="child-2"></div>
         });
 
         it("mode = after", function () {
-          var helper = new capturer.CaptureHelperHandler();
+          var helper = new CaptureHelperHandler();
 
           var doc = makeTestDoc();
           var command = ["insert", {"css": ".target"}, "insertedText", "after"];
@@ -2761,7 +2766,7 @@ insertedText<div class="target"><div id="child-1"></div><div id="child-2"></div>
         });
 
         it("mode = replace", function () {
-          var helper = new capturer.CaptureHelperHandler();
+          var helper = new CaptureHelperHandler();
 
           var doc = makeTestDoc();
           var command = ["insert", {"css": ".target"}, "insertedText", "replace"];
@@ -2772,7 +2777,7 @@ insertedText`);
         });
 
         it("mode = insert", function () {
-          var helper = new capturer.CaptureHelperHandler();
+          var helper = new CaptureHelperHandler();
 
           var doc = makeTestDoc();
           var command = ["insert", {"css": ".target"}, "insertedText", "insert", 0];
@@ -2804,7 +2809,7 @@ insertedText`);
         });
 
         it("mode = append", function () {
-          var helper = new capturer.CaptureHelperHandler();
+          var helper = new CaptureHelperHandler();
 
           var doc = makeTestDoc();
           var command = ["insert", {"css": ".target"}, "insertedText", "append"];
@@ -2815,7 +2820,7 @@ insertedText`);
         });
 
         it("mode missing or unknown (append by default)", function () {
-          var helper = new capturer.CaptureHelperHandler();
+          var helper = new CaptureHelperHandler();
 
           var doc = makeTestDoc();
           var command = ["insert", {"css": ".target"}, "insertedText"];
@@ -2833,7 +2838,7 @@ insertedText`);
         });
 
         it("nodeData as Object (virtual DOM)", function () {
-          var helper = new capturer.CaptureHelperHandler();
+          var helper = new CaptureHelperHandler();
 
           var doc = makeTestDoc();
           var command = ["insert", {"css": ".target"}, {
@@ -2877,7 +2882,7 @@ insertedText`);
         });
 
         it("nodeData as Object (selector)", function () {
-          var helper = new capturer.CaptureHelperHandler();
+          var helper = new CaptureHelperHandler();
 
           var doc = makeTestDoc();
           var command = ["insert", {"css": "#child-1"}, {
@@ -2900,7 +2905,7 @@ insertedText`);
         });
 
         it("resolve parameter commands", function () {
-          var helper = new capturer.CaptureHelperHandler();
+          var helper = new CaptureHelperHandler();
 
           var doc = makeTestDoc();
           var command = ["insert", ["if", true, {"css": ".target"}], ["if", true, "insertedText"], ["concat", "insert"], ["if", true, 1]];
@@ -2959,7 +2964,7 @@ insertedText`);
       });
     });
 
-    describe("capturer.CaptureHelperHandler.run", function () {
+    describe("CaptureHelperHandler.run", function () {
       it("skip helpers with disabled property", function () {
         var doc = makeHtmlDocument(`\
 <div class="exclude1"></div>
@@ -2983,7 +2988,7 @@ insertedText`);
             ],
           },
         ];
-        var helper = new capturer.CaptureHelperHandler({
+        var helper = new CaptureHelperHandler({
           helpers,
           rootNode: doc,
         });
@@ -3015,7 +3020,7 @@ insertedText`);
             ],
           },
         ];
-        var helper = new capturer.CaptureHelperHandler({
+        var helper = new CaptureHelperHandler({
           helpers,
           rootNode: doc,
           docUrl: 'http://example.com',

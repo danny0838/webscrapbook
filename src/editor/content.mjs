@@ -2,7 +2,7 @@
  * Content script for editor functionality.
  *****************************************************************************/
 
-import {scrapbook} from "../utils/common.mjs";
+import {scrapbook, ANNOTATION_CSS} from "../utils/common.mjs";
 import {Strftime} from "../lib/strftime.mjs";
 import {core} from "../content/core.mjs";
 
@@ -2392,7 +2392,7 @@ const annotator = editor.annotator = (function () {
       this.clearAnnotationCss();
       const css = document.createElement("style");
       css.setAttribute("data-scrapbook-elem", "annotation-css");
-      css.textContent = scrapbook.ANNOTATION_CSS;
+      css.textContent = ANNOTATION_CSS;
       document.documentElement.appendChild(css);
     },
 
