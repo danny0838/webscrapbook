@@ -7,6 +7,7 @@ import "../utils/options-auto.mjs";
 import {server} from "./server.mjs";
 import {Tree} from "./tree.mjs";
 import {BookTree} from "./book-tree.mjs";
+import {ItemInfoFormatter as _ItemInfoFormatter} from "./item-info-formatter.mjs";
 
 const customDataMap = new WeakMap();
 
@@ -3146,7 +3147,7 @@ Redirecting to file <a href="index.md">index.md</a>
   },
 };
 
-class ItemInfoFormatter extends scrapbook.ItemInfoFormatter {
+class ItemInfoFormatter extends _ItemInfoFormatter {
   constructor(item, {book, tree, itemElem} = {}) {
     super(item, {book});
     this.tree = tree;

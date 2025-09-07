@@ -6,6 +6,7 @@ import {isDebug} from "../utils/debug.mjs";
 import {scrapbook} from "../utils/common.mjs";
 import {dataUriToFile} from "../utils/datauri.mjs";
 import {MapWithDefault} from "../lib/map-with-default.mjs";
+import {ItemInfoFormatter as _ItemInfoFormatter} from "../scrapbook/item-info-formatter.mjs";
 
 // ref: https://html.spec.whatwg.org/#meta-referrer
 const META_REFERRER_POLICY = new Set([
@@ -4154,7 +4155,7 @@ capturer.retrieveSelectedLinks = async function ({
   return rv;
 };
 
-class ItemInfoFormatter extends scrapbook.ItemInfoFormatter {
+class ItemInfoFormatter extends _ItemInfoFormatter {
   format_uuid() {
     return scrapbook.getUuid();
   }
