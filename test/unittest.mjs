@@ -7,7 +7,7 @@
  *****************************************************************************/
 
 import {assert, config as chaiConfig} from "./lib/chai.mjs";
-import {scrapbook} from "./shared/core/common.mjs";
+import {scrapbook} from "./shared/utils/common.mjs";
 
 Object.assign(chaiConfig, {
   truncateThreshold: 1024,

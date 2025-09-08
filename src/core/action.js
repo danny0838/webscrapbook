@@ -2,8 +2,8 @@
  * Script for browserAction.html
  *****************************************************************************/
 
-import {scrapbook} from "./extension.mjs";
-import "./options-auto.mjs";
+import {scrapbook} from "../utils/extension.mjs";
+import "../utils/options-auto.mjs";
 
 document.addEventListener('DOMContentLoaded', async () => {
   async function selectTabFromDom(baseElem) {

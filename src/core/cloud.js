@@ -2,7 +2,7 @@
  * Script for cloud.html
  *****************************************************************************/
 
-import {scrapbook} from "./common.mjs";
+import {scrapbook} from "../utils/common.mjs";
 
 function getTableKey(name, ts, size) {
   return JSON.stringify({table: "cloudFiles", ts, name, size});

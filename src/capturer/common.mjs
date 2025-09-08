@@ -4,7 +4,7 @@
  * @external isDebug
  *****************************************************************************/
 
-import {scrapbook} from "../core/common.mjs";
+import {scrapbook} from "../utils/common.mjs";
 import {MapWithDefault} from "../lib/map-with-default.mjs";
 
 const isDebug = globalThis.isDebug;

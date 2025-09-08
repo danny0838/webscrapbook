@@ -2,7 +2,7 @@
  * Script for search.html.
  *****************************************************************************/
 
-import {scrapbook} from "../core/common.mjs";
+import {scrapbook} from "../utils/common.mjs";
 import {server} from "./server.mjs";
 import {CustomTree} from "./custom-tree.mjs";
 import {MapWithDefault} from "../lib/map-with-default.mjs";

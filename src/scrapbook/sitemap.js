@@ -2,8 +2,8 @@
  * Script for sitemap.html.
  *****************************************************************************/
 
-import {scrapbook} from "../core/extension.mjs";
-import "../core/options-auto.mjs";
+import {scrapbook} from "../utils/extension.mjs";
+import "../utils/options-auto.mjs";
 import {server} from "./server.mjs";
 
 const SITEMAP_DOCTYPE = new Set(["text/html", "application/xhtml+xml"]);

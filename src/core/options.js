@@ -2,7 +2,7 @@
  * Script for options.html
  *****************************************************************************/
 
-import {scrapbook} from "./extension.mjs";
+import {scrapbook} from "../utils/extension.mjs";
 
 const OPTION_PREFIX = "opt_";
 

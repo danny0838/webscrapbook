@@ -2,8 +2,8 @@
  * The background script for editor functionality
  *****************************************************************************/
 
-import {scrapbook} from "../core/extension.mjs";
-import "../core/options-auto.mjs";
+import {scrapbook} from "../utils/extension.mjs";
+import "../utils/options-auto.mjs";
 
 const AUTO_EDIT_FILTER = {url: [{schemes: ["http", "https"]}]};
 
