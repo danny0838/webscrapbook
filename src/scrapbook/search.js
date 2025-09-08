@@ -2,8 +2,8 @@
  * Script for search.html.
  *****************************************************************************/
 
-import {scrapbook} from "../core/extension.mjs";
-import "../core/options-auto.mjs";
+import {scrapbook} from "../utils/extension.mjs";
+import "../utils/options-auto.mjs";
 import {server} from "./server.mjs";
 import {CustomTree} from "./custom-tree.mjs";
 

@@ -2,7 +2,7 @@
  * Content script for editor functionality.
  *****************************************************************************/
 
-import {scrapbook} from "../core/common.mjs";
+import {scrapbook} from "../utils/common.mjs";
 import {Strftime} from "../lib/strftime.mjs";
 import {core} from "../core/content.mjs";
 

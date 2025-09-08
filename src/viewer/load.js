@@ -5,7 +5,7 @@
 /* global JSZip */
 /* global Mime */
 
-import {scrapbook} from "../core/common.mjs";
+import {scrapbook} from "../utils/common.mjs";
 
 /**
  * We usually get:

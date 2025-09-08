@@ -2,8 +2,8 @@
  * Script for the background page.
  *****************************************************************************/
 
-import {scrapbook} from "./extension.mjs";
-import "./options-auto.mjs";
+import {scrapbook} from "../utils/extension.mjs";
+import "../utils/options-auto.mjs";
 import {server} from "../scrapbook/server.mjs";
 import * as capturer from "../capturer/background.mjs";
 import * as editor from "../editor/background.mjs";

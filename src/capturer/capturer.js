@@ -8,7 +8,7 @@
 /* global JSZip */
 /* global Mime */
 
-import {scrapbook} from "../core/extension.mjs";
+import {scrapbook} from "../utils/extension.mjs";
 import {server} from "../scrapbook/server.mjs";
 import {MapWithDefault} from "../lib/map-with-default.mjs";
 import {Referrer} from "../lib/referrer.mjs";

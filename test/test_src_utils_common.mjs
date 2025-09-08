@@ -1,13 +1,13 @@
 import {MochaQuery as $, assert, encodeText, cssRegex} from "./unittest.mjs";
 
-import {scrapbook} from "./shared/core/common.mjs";
+import {scrapbook} from "./shared/utils/common.mjs";
 
 const $describe = $(describe);
 const $it = $(it);
 
 const r = String.raw;
 
-describe('core/common.mjs', function () {
+describe('utils/common.mjs', function () {
   $describe.skipIf($.noExtensionBrowser)('scrapbook.cache', function () {
     const DB_NAME = "scrapbook";
 
