@@ -4,7 +4,7 @@
 
 import {scrapbook} from "../utils/common.mjs";
 import {Strftime} from "../lib/strftime.mjs";
-import {core} from "../core/content.mjs";
+import {core} from "../content/index.mjs";
 
 // https://mimesniff.spec.whatwg.org/
 const SCRIPT_TYPES = new Set([

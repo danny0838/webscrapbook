@@ -403,7 +403,7 @@ const CONTENT_SCRIPT_FILES = [
   "/lib/browser-polyfill.js",
   "/lib/mime.js",
   "/lib/sha.js",
-  "/core/content.js",
+  "/content/index.js",
 ];
 
 const HTTP_STATUS_TEXT = {
