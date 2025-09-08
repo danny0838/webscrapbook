@@ -5,7 +5,7 @@
 import {scrapbook} from "../utils/common.mjs";
 import "../utils/options-auto.mjs";
 import {core} from "./core.mjs";
-import {capturer} from "../capturer/common.mjs";
+import {capturer} from "../capturer/content.mjs";
 import {editor} from "../editor/content.mjs";
 
 /**
