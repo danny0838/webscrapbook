@@ -90,10 +90,10 @@ async function build(target) {
 
   {
     const bundle = await rollup({
-      input: path.join(srcDir, "core/content.mjs"),
+      input: path.join(srcDir, "content/index.mjs"),
     });
     await bundle.write({
-      file: path.join(srcDir, "core/content.js"),
+      file: path.join(srcDir, "content/index.js"),
       format: 'iife',
       sourcemap: true,
       sourcemapExcludeSources: true,

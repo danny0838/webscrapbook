@@ -25,7 +25,7 @@ export default [
       "src/lib/jszip.js",
       "src/lib/mime.js",
       "src/lib/sha.js",
-      "src/core/content.js",
+      "src/content/index.js",
       "test/lib/**/*.js",
       "test/lib/**/*.mjs",
     ],
