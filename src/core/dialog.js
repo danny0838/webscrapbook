@@ -2,7 +2,7 @@
  * Shared script for modal dialog windows.
  *****************************************************************************/
 
-import {scrapbook} from "./common.mjs";
+import {scrapbook} from "../utils/common.mjs";
 
 const dialog = {
   resolve: () => {},

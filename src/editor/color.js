@@ -2,7 +2,7 @@
  * Shared script for modal dialog windows.
  *****************************************************************************/
 
-import {scrapbook} from "../core/common.mjs";
+import {scrapbook} from "../utils/common.mjs";
 import {dialog} from "../core/dialog.js";
 
 const dialogOnLoad = dialog.onLoad;

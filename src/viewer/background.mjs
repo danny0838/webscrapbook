@@ -2,8 +2,8 @@
  * The background script for viewer functionality
  *****************************************************************************/
 
-import {scrapbook} from "../core/common.mjs";
-import "../core/options-auto.mjs";
+import {scrapbook} from "../utils/common.mjs";
+import "../utils/options-auto.mjs";
 
 const VIEWER_BEFORE_REQUEST_FILTER = {urls: ["file://*"], types: ["main_frame", "sub_frame"]};
 const VIEWER_BEFORE_REQUEST_EXTRA = ["blocking"];

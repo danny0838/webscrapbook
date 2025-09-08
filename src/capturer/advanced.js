@@ -2,7 +2,7 @@
  * Script for advanced.html.
  *****************************************************************************/
 
-import {scrapbook} from "../core/extension.mjs";
+import {scrapbook} from "../utils/extension.mjs";
 
 async function init() {
   const missionId = new URL(document.URL).searchParams.get('mid');

@@ -2,8 +2,8 @@
  * Background script for capturer functionality.
  *****************************************************************************/
 
-import {scrapbook} from "../core/extension.mjs";
-import "../core/options-auto.mjs";
+import {scrapbook} from "../utils/extension.mjs";
+import "../utils/options-auto.mjs";
 import {server} from "../scrapbook/server.mjs";
 
 async function clearCapturerCaches() {

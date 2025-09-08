@@ -2,8 +2,8 @@
  * Script for postit-frame.html.
  *****************************************************************************/
 
-import {scrapbook} from "../core/extension.mjs";
-import "../core/options-auto.mjs";
+import {scrapbook} from "../utils/extension.mjs";
+import "../utils/options-auto.mjs";
 import {server} from "./server.mjs";
 
 const editor = {
