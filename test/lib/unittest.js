@@ -505,7 +505,7 @@
         const _str = escapeHtml(str);
 
         // run script in a document with specific charset to get the encoded text
-        // hadnel different CSP rule for Chromium and Gecko
+        // handle different CSP rule for Chromium and Gecko
         if (userAgent.is('chromium')) {
           frame.src = `data:text/html;charset=${encodeURIComponent(charset)},<script src="${js}" data-text="${encodeURIComponent(_str)}"></script>`;
         } else {
