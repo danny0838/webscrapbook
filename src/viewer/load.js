@@ -2,10 +2,9 @@
  * Script for load.html
  *****************************************************************************/
 
-/* global Mime */
-
 import {scrapbook} from "../utils/common.mjs";
 import {Zip, Maff} from "../utils/zip.mjs";
+import * as Mime from "../lib/mime.mjs";
 
 /**
  * We usually get:

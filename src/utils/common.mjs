@@ -4,11 +4,10 @@
  * @requires browser
  *****************************************************************************/
 
-/* global Mime */
-
 import "./polyfill.mjs";
 import {isDebug} from "./debug.mjs";
 import {sha1} from "./sha.mjs";
+import * as Mime from "../lib/mime.mjs";
 import {Strftime} from "../lib/strftime.mjs";
 
 const BACKEND_MIN_VERSION = '2.6.0';
@@ -3506,9 +3505,6 @@ scrapbook.readFileAsDocument = async function (blob) {
   return xhr.response;
 };
 
-/**
- * @requires Mime
- */
 scrapbook.dataUriToFile = function (dataUri, useFilename = true) {
   const regexFields = /^data:([^,]*?)(;base64)?,([^#]*)/i;
   const regexFieldValue = /^(.*?)=(.*?)$/;
