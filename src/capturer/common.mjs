@@ -4,6 +4,7 @@
 
 import {isDebug} from "../utils/debug.mjs";
 import {scrapbook} from "../utils/common.mjs";
+import {dataUriToFile} from "../utils/datauri.mjs";
 import {MapWithDefault} from "../lib/map-with-default.mjs";
 
 // ref: https://html.spec.whatwg.org/#meta-referrer
@@ -1232,7 +1233,7 @@ capturer.captureDocument = async function (params) {
                   frame.hasAttribute("srcdoc")) {
                 const captureFrameCallback = async (response) => {
                   isDebug && console.debug("captureFrameCallback", response);
-                  const file = scrapbook.dataUriToFile(response.url);
+                  const file = dataUriToFile(response.url);
                   const content = await scrapbook.readFileAsText(file);
                   captureRewriteAttr(frame, "srcdoc", content);
                   return response;
@@ -1322,7 +1323,7 @@ capturer.captureDocument = async function (params) {
                 if (response.url.startsWith('data:') &&
                     frame.nodeName.toLowerCase() === 'iframe' &&
                     options["capture.saveDataUriAsSrcdoc"]) {
-                  const file = scrapbook.dataUriToFile(response.url);
+                  const file = dataUriToFile(response.url);
                   const {type: mime, parameters: {charset}} = scrapbook.parseHeaderContentType(file.type);
                   if (mime === "text/html") {
                     // assume the charset is UTF-8 if not defined
