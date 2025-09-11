@@ -4,12 +4,11 @@
  * @modifies capturer
  *****************************************************************************/
 
-/* global Mime */
-
 import {isDebug} from "../utils/debug.mjs";
 import {scrapbook} from "../utils/extension.mjs";
 import {Zip} from "../utils/zip.mjs";
 import {sha1} from "../utils/sha.mjs";
+import * as Mime from "../lib/mime.mjs";
 import {server} from "../scrapbook/server.mjs";
 import {MapWithDefault} from "../lib/map-with-default.mjs";
 import {Referrer} from "../lib/referrer.mjs";

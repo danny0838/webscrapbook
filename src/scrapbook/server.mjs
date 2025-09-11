@@ -2,10 +2,9 @@
  * Shared class for server related manipulation.
  *****************************************************************************/
 
-/* global Mime */
-
 import {scrapbook} from "../utils/common.mjs";
 import {sha1} from "../utils/sha.mjs";
+import * as Mime from "../lib/mime.mjs";
 
 // order is relevant
 const SPECIAL_ITEM_ID = new Set(['root', 'hidden', 'recycle']);

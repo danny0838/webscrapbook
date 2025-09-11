@@ -77,19 +77,6 @@ async function build(target) {
 
   {
     const bundle = await rollup({
-      input: path.join(srcDir, "lib/mime.mjs"),
-    });
-    await bundle.write({
-      file: path.join(srcDir, "lib/mime.js"),
-      format: 'iife',
-      name: "Mime",
-      sourcemap: true,
-      sourcemapExcludeSources: true,
-    });
-  }
-
-  {
-    const bundle = await rollup({
       input: path.join(srcDir, "content/index.mjs"),
       external: [
         path.join(srcDir, "lib/sha.js"),
