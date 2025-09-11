@@ -6,6 +6,7 @@
 
 import {isDebug} from "../utils/debug.mjs";
 import {scrapbook} from "../utils/extension.mjs";
+import {dataUriToFile} from "../utils/datauri.mjs";
 import {Zip} from "../utils/zip.mjs";
 import {sha1} from "../utils/sha.mjs";
 import * as Mime from "../lib/mime.mjs";
@@ -586,7 +587,7 @@ capturer.fetch = async function (params) {
       try {
         // special handling for data URI
         if (scheme === "data") {
-          const file = scrapbook.dataUriToFile(sourceUrlMain);
+          const file = dataUriToFile(sourceUrlMain);
           if (!file) { throw new Error("Malformed data URL."); }
 
           // simulate headers from data URI parameters

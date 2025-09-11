@@ -3,6 +3,7 @@
  *****************************************************************************/
 
 import {scrapbook} from "../utils/common.mjs";
+import {dataUriToFile} from "../utils/datauri.mjs";
 import {sha1} from "../utils/sha.mjs";
 import * as Mime from "../lib/mime.mjs";
 
@@ -1259,7 +1260,7 @@ scrapbook.toc(${JSON.stringify(jsonData, null, 2).replace(/\u2028/g, '\\u2028').
 
     const getFavIcon = async (favIconUrl) => {
       if (favIconUrl.startsWith("data:")) {
-        return scrapbook.dataUriToFile(favIconUrl, false);
+        return dataUriToFile(favIconUrl, false);
       }
 
       const headers = {};
