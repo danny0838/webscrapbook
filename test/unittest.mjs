@@ -8,6 +8,7 @@
 
 import {assert, config as chaiConfig} from "./lib/chai.mjs";
 import {scrapbook} from "./shared/utils/common.mjs";
+import {sha1} from "./shared/utils/sha.mjs";
 
 Object.assign(chaiConfig, {
   truncateThreshold: 1024,
@@ -372,8 +373,6 @@ function readFileAsArrayBuffer(...args) { return scrapbook.readFileAsArrayBuffer
 function readFileAsDataURL(...args) { return scrapbook.readFileAsDataURL(...args); }
 
 function readFileAsDocument(...args) { return scrapbook.readFileAsDocument(...args); }
-
-function sha1(...args) { return scrapbook.sha1(...args); }
 
 function getToken(url, role) {
   let token = `${url}\t${role}`;

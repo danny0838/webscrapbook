@@ -9,6 +9,7 @@
 import {isDebug} from "../utils/debug.mjs";
 import {scrapbook} from "../utils/extension.mjs";
 import {Zip} from "../utils/zip.mjs";
+import {sha1} from "../utils/sha.mjs";
 import {server} from "../scrapbook/server.mjs";
 import {MapWithDefault} from "../lib/map-with-default.mjs";
 import {Referrer} from "../lib/referrer.mjs";
@@ -460,7 +461,7 @@ capturer.fetch = async function (params) {
 
   const getFetchToken = function (url, role) {
     let token = `${scrapbook.normalizeUrl(url)}\t${role}`;
-    token = scrapbook.sha1(token, "TEXT");
+    token = sha1(token, "TEXT");
     return token;
   };
 
@@ -2081,7 +2082,7 @@ capturer.resaveTab = async function ({
 
               let file;
               if (internalizePrefix) {
-                const sha = scrapbook.sha1(await scrapbook.readFileAsArrayBuffer(blob), 'ARRAYBUFFER');
+                const sha = sha1(await scrapbook.readFileAsArrayBuffer(blob), 'ARRAYBUFFER');
                 const ext = Mime.extension(blob.type) || 'bin';
                 file = new File([blob], sha + '.' + ext, {type: blob.type});
               } else {
@@ -2773,7 +2774,7 @@ capturer.getRegisterToken = function (url, role) {
     return null;
   }
   let token = `${url}\t${role}`;
-  token = scrapbook.sha1(token, "TEXT");
+  token = sha1(token, "TEXT");
   return token;
 };
 
