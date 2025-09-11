@@ -2,10 +2,10 @@
  * Script for load.html
  *****************************************************************************/
 
-/* global JSZip */
 /* global Mime */
 
 import {scrapbook} from "../utils/common.mjs";
+import {Zip, Maff} from "../utils/zip.mjs";
 
 /**
  * We usually get:
@@ -228,7 +228,7 @@ const viewer = {
       /* retrieve and store zip entries */
       const zip = await (async () => {
         try {
-          return await (new JSZip().loadAsync(zipFile));
+          return await Zip.loadAsync(zipFile);
         } catch (ex) {
           throw new Error(`ZIP file invalid or unsupported.`);
         }
@@ -237,7 +237,7 @@ const viewer = {
       for (const [inZipPath, zipObj] of Object.entries(zip.files)) {
         const data = new File([zipObj.dir ? "" : await zipObj.async("blob")], inZipPath.match(/([^/]+)\/?$/)[1], {
           type: zipObj.dir ? "inode/directory" : Mime.lookup(inZipPath),
-          lastModified: scrapbook.zipFixModifiedTime(zipObj.date),
+          lastModified: zipObj.date,
         });
 
         const key = {table: "pageCache", id: uuid, path: inZipPath};
@@ -249,7 +249,7 @@ const viewer = {
       switch (type) {
         case "maff": {
           try {
-            indexFiles = await scrapbook.getMaffIndexFiles(zip);
+            indexFiles = await Maff.getIndexFiles(zip);
           } catch (ex) {
             this.error(ex.message);
           }
