@@ -3,9 +3,6 @@
  *****************************************************************************/
 
 import {scrapbook} from "../utils/common.mjs";
-import {dataUriToFile} from "../utils/datauri.mjs";
-import {sha1} from "../utils/sha.mjs";
-import * as Mime from "../lib/mime.mjs";
 
 // order is relevant
 const SPECIAL_ITEM_ID = new Set(['root', 'hidden', 'recycle']);
@@ -1241,6 +1238,10 @@ scrapbook.toc(${JSON.stringify(jsonData, null, 2).replace(/\u2028/g, '\\u2028').
    * @throws {Error} When the favicon cannot be cached.
    */
   async cacheFavIcon({book, item, icon}) {
+    const {dataUriToFile} = await import("../utils/datauri.mjs");
+    const {sha1} = await import("../utils/sha.mjs");
+    const Mime = await import("../lib/mime.mjs");
+
     const getShaFile = (data) => {
       if (!data) { throw new Error(`Unable to fetch a file for this favicon URL.`); }
 
