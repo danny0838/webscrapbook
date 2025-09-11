@@ -6,8 +6,6 @@
 
 import "./polyfill.mjs";
 import {isDebug} from "./debug.mjs";
-import {sha1} from "./sha.mjs";
-import * as Mime from "../lib/mime.mjs";
 import {Strftime} from "../lib/strftime.mjs";
 
 const BACKEND_MIN_VERSION = '2.6.0';
@@ -3502,48 +3500,6 @@ scrapbook.readFileAsDocument = async function (blob) {
     responseType: "document",
   });
   return xhr.response;
-};
-
-scrapbook.dataUriToFile = function (dataUri, useFilename = true) {
-  const regexFields = /^data:([^,]*?)(;base64)?,([^#]*)/i;
-  const regexFieldValue = /^(.*?)=(.*?)$/;
-  const regexUtf8 = /[^\x00-\x7F]+/g;
-  const fnUtf8 = m => encodeURIComponent(m);
-  const fn = scrapbook.dataUriToFile = function (dataUri, useFilename = true) {
-    if (regexFields.test(dataUri)) {
-      const mediatype = RegExp.$1;
-      const base64 = !!RegExp.$2;
-
-      // browsers treat a non-ASCII char in an URL as a UTF-8 byte sequence
-      const data = RegExp.$3.replace(regexUtf8, fnUtf8);
-
-      const parts = mediatype.split(";");
-      const mime = parts.shift();
-      const parameters = {};
-      for (const part of parts) {
-        if (regexFieldValue.test(part)) {
-          parameters[RegExp.$1.toLowerCase()] = RegExp.$2;
-        }
-      }
-
-      const bstr = base64 ? atob(data) : unescape(data);
-      const ab = scrapbook.byteStringToArrayBuffer(bstr);
-
-      let filename;
-      if (useFilename && parameters.filename) {
-        filename = decodeURIComponent(parameters.filename);
-      } else {
-        let ext = parameters.filename && scrapbook.filenameParts(parameters.filename)[1] || Mime.extension(mime);
-        ext = ext ? ("." + ext) : "";
-        filename = sha1(ab, "ARRAYBUFFER") + ext;
-      }
-
-      const file = new File([ab], filename, {type: mediatype});
-      return file;
-    }
-    return null;
-  };
-  return fn(dataUri, useFilename);
 };
 
 /**
