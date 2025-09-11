@@ -1,5 +1,3 @@
-/* global JSZip */
-
 import {
   MochaQuery as $, assert,
   userAgent,
@@ -11,6 +9,7 @@ import {
   backend, localhost, localhost2,
   capture, captureHeadless, backendRequest,
 } from "./extension.mjs";
+import {Zip} from "./shared/utils/zip.mjs";
 
 const $describe = $(describe);
 const $it = $(it);
@@ -152,7 +151,7 @@ describe('Capture tests', function () {
         });
         assert.strictEqual(blob.type, "application/html+zip");
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         assert.exists(zip);
 
         var indexFile = zip.file('index.html');
@@ -198,7 +197,7 @@ describe('Capture tests', function () {
         });
         assert.strictEqual(blob.type, "application/x-maff");
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         assert.exists(zip);
         var topdir = Object.keys(zip.files)[0];
         assert.isTrue(zip.files[topdir].dir);
@@ -297,7 +296,7 @@ describe('Capture tests', function () {
         });
         assert.strictEqual(blob.type, "application/html+zip");
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         assert.exists(zip);
 
         var indexFile = zip.file('index.html');
@@ -349,7 +348,7 @@ describe('Capture tests', function () {
           options,
         });
         assert.strictEqual(blob.type, "application/x-maff");
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         assert.exists(zip);
         var topdir = Object.keys(zip.files)[0];
         assert.isTrue(zip.files[topdir].dir);
@@ -453,7 +452,7 @@ describe('Capture tests', function () {
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
 
         var indexFile = zip.file('index.html');
         assert.exists(indexFile);
@@ -482,7 +481,7 @@ describe('Capture tests', function () {
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         var topdir = Object.keys(zip.files)[0];
 
         var rdfFile = zip.file(topdir + 'index.rdf');
@@ -543,7 +542,7 @@ describe('Capture tests', function () {
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         var topdir = Object.keys(zip.files)[0];
 
         var rdfFile = zip.file(topdir + 'index.rdf');
@@ -578,7 +577,7 @@ describe('Capture tests', function () {
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         var topdir = Object.keys(zip.files)[0];
 
         var rdfFile = zip.file(topdir + 'index.rdf');
@@ -615,7 +614,7 @@ describe('Capture tests', function () {
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
 
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -631,7 +630,7 @@ describe('Capture tests', function () {
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         assert.lengthOf(Object.keys(zip.files), 1);
 
         var indexFile = zip.file('index.html');
@@ -650,7 +649,7 @@ describe('Capture tests', function () {
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         assert.lengthOf(Object.keys(zip.files), 1);
 
         var indexFile = zip.file('index.html');
@@ -708,7 +707,7 @@ describe('Capture tests', function () {
           options: baseOptions,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         for (const fn of EXPECTED_FILENAMES) {
           assert.exists(zip.file(fn));
         }
@@ -734,7 +733,7 @@ describe('Capture tests', function () {
           options: baseOptions,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         assert.exists(zip.file("index-1.json"));
         assert.exists(zip.file("index-1.dat"));
         assert.exists(zip.file("index-1.rdf"));
@@ -762,7 +761,7 @@ describe('Capture tests', function () {
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         assert.exists(zip.file('123ABCabc_中文_𠀀.bmp'));
         assert.exists(zip.file('123ABCabc_中文_𠀀-2.bmp'));
         assert.exists(zip.file('123ABCabc_中文_𠀀.css'));
@@ -792,7 +791,7 @@ p { background-image: url("123ABCabc_中文_𠀀.bmp"); }`);
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         assert.exists(zip.file('123ABCabc_%E4%B8%AD%E6%96%87_%F0%A0%80%80.bmp'));
         assert.exists(zip.file('123ABCabc_%E4%B8%AD%E6%96%87_%F0%A0%80%80-2.bmp'));
         assert.exists(zip.file('123ABCabc_%E4%B8%AD%E6%96%87_%F0%A0%80%80.css'));
@@ -826,7 +825,7 @@ p { background-image: url("123ABCabc_%25E4%25B8%25AD%25E6%2596%2587_%25F0%25A0%2
           options: baseOptions,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
         var doc = await readFileAsDocument(indexBlob);
@@ -844,7 +843,7 @@ p { background-image: url("123ABCabc_%25E4%25B8%25AD%25E6%2596%2587_%25F0%25A0%2
           options: baseOptions,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         assert.lengthOf(Object.keys(zip.files), 3);
         assert.exists(zip.file("index.html"));
         assert.exists(zip.file("abc.bmp"));
@@ -877,7 +876,7 @@ p { background-image: url("123ABCabc_%25E4%25B8%25AD%25E6%2596%2587_%25F0%25A0%2
           options: baseOptions,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
 
         // filename
         var savedFile = zip.file('file.bmp');
@@ -928,7 +927,7 @@ p { background-image: url("123ABCabc_%25E4%25B8%25AD%25E6%2596%2587_%25F0%25A0%2
           options: baseOptions,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
         var doc = await readFileAsDocument(indexBlob);
@@ -975,7 +974,7 @@ p { background-image: url("123ABCabc_%25E4%25B8%25AD%25E6%2596%2587_%25F0%25A0%2
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
         var doc = await readFileAsDocument(indexBlob);
@@ -1002,7 +1001,7 @@ p { background-image: url("123ABCabc_%25E4%25B8%25AD%25E6%2596%2587_%25F0%25A0%2
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
         var doc = await readFileAsDocument(indexBlob);
@@ -1025,7 +1024,7 @@ p { background-image: url("123ABCabc_%25E4%25B8%25AD%25E6%2596%2587_%25F0%25A0%2
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         assert.lengthOf(Object.keys(zip.files), 1);
 
         var indexFile = zip.file('index.html');
@@ -1050,7 +1049,7 @@ p { background-image: url("data:image/bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAE
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         assert.exists(zip.file('2206b4fb7241bdce17a71015c888e3de66c2b5c9.css'));
         assert.exists(zip.file('da39a3ee5e6b4b0d3255bfef95601890afd80709.woff'));
         assert.exists(zip.file('ecb6e0b0acec8b20d5f0360a52fe336a7a7cb475.bmp'));
@@ -1098,7 +1097,7 @@ p { background-image: url("data:image/bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAE
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         assert.exists(zip.file("index.rdf.css"));
         assert.exists(zip.file("index.dat.css"));
         assert.exists(zip.file("^metadata^.css"));
@@ -1168,7 +1167,7 @@ p { background-image: url("data:image/bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAE
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         assert.lengthOf(Object.keys(zip.files), 1);
 
         var indexFile = zip.file('index.html');
@@ -1191,7 +1190,7 @@ p { background-image: url("data:image/bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAE
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         assert.lengthOf(Object.keys(zip.files), 2); // main + link css
 
         var indexFile = zip.file('index.html');
@@ -1214,7 +1213,7 @@ p { background-image: url("data:image/bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAE
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         assert.lengthOf(Object.keys(zip.files), 1);
 
         var indexFile = zip.file('index.html');
@@ -1237,7 +1236,7 @@ p { background-image: url("data:image/bmp;filename=red.bmp;base64,Qk08AAAAAAAAAD
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         assert.exists(zip.file('null.css'));
         assert.exists(zip.file('null.woff'));
         assert.exists(zip.file('red.bmp'));
@@ -1268,7 +1267,7 @@ p { background-image: url("red.bmp"); }`);
           url: `${localhost}/capture_dataUri_frame_dynamic/index.html`,
           options,
         });
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         var indexFile = zip.file('index_1.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
         var doc = await readFileAsDocument(indexBlob);
@@ -1294,7 +1293,7 @@ p { background-image: url("red.bmp"); }`);
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         assert.lengthOf(Object.keys(zip.files), 2);  // index.html, index.json
 
         var indexFile = zip.file('index.html');
@@ -1338,7 +1337,7 @@ p { background-image: url("red.bmp"); }`);
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         assert.lengthOf(Object.keys(zip.files), 2);  // index.html, index.json
 
         var indexFile = zip.file('index.html');
@@ -1382,7 +1381,7 @@ p { background-image: url("red.bmp"); }`);
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
 
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -1428,7 +1427,7 @@ p { background-image: url("red.bmp"); }`);
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         assert.lengthOf(Object.keys(zip.files), 2);  // index.html, index.json
 
         var indexFile = zip.file('index.html');
@@ -1453,7 +1452,7 @@ p { background-image: url("red.bmp"); }`);
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         assert.exists(zip.file("red.bmp"));
         assert.exists(zip.file("file.txt"));
         assert.exists(zip.file("page.html"));
@@ -1480,7 +1479,7 @@ p { background-image: url("red.bmp"); }`);
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         assert.exists(zip.file("red.bmp"));
         assert.exists(zip.file("file.txt"));
         assert.exists(zip.file("page.html"));
@@ -1673,7 +1672,7 @@ data:text/css;charset=UTF-8;filename=link.css,%23external%20%7B%20background:%20
         options: baseOptions,
       }, {delay: 500});
 
-      var zip = await new JSZip().loadAsync(blob);
+      var zip = await Zip.loadAsync(blob);
 
       var indexFile = zip.file('index.html');
       var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -1723,7 +1722,7 @@ data:text/css;charset=UTF-8;filename=link.css,%23external%20%7B%20background:%20
         options: baseOptions,
       }, {delay: 1000});
 
-      var zip = await new JSZip().loadAsync(blob);
+      var zip = await Zip.loadAsync(blob);
 
       var indexFile = zip.file('index.html');
       var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -1743,7 +1742,7 @@ data:text/css;charset=UTF-8;filename=link.css,%23external%20%7B%20background:%20
         options: baseOptions,
       }, {delay: 500});
 
-      var zip = await new JSZip().loadAsync(blob);
+      var zip = await Zip.loadAsync(blob);
 
       var indexFile = zip.file('index.html');
       var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -1769,7 +1768,7 @@ data:text/css;charset=UTF-8;filename=link.css,%23external%20%7B%20background:%20
         url: `${localhost}/capture_about/basic.html`,
         options: baseOptions,
       });
-      var zip = await new JSZip().loadAsync(blob);
+      var zip = await Zip.loadAsync(blob);
 
       var indexFile = zip.file('index.html');
       var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -1798,7 +1797,7 @@ p { background-image: url("about:blank"); }`);
         options: baseOptions,
       });
 
-      var zip = await new JSZip().loadAsync(blob);
+      var zip = await Zip.loadAsync(blob);
 
       var indexFile = zip.file('index.html');
       var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -1836,7 +1835,7 @@ p { background-image: url("about:blank"); }`);
         options: baseOptions,
       });
 
-      var zip = await new JSZip().loadAsync(blob);
+      var zip = await Zip.loadAsync(blob);
 
       var indexFile = zip.file('index.html');
       var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -1874,7 +1873,7 @@ p { background-image: url("about:blank"); }`);
         options: baseOptions,
       });
 
-      var zip = await new JSZip().loadAsync(blob);
+      var zip = await Zip.loadAsync(blob);
 
       var indexFile = zip.file('index.html');
       var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -1912,7 +1911,7 @@ p { background-image: url("about:blank"); }`);
         options: baseOptions,
       });
 
-      var zip = await new JSZip().loadAsync(blob);
+      var zip = await Zip.loadAsync(blob);
 
       var indexFile = zip.file('index.html');
       var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -1951,7 +1950,7 @@ p { background-image: url("about:blank"); }`);
         options: baseOptions,
       });
 
-      var zip = await new JSZip().loadAsync(blob);
+      var zip = await Zip.loadAsync(blob);
 
       var indexFile = zip.file('index.xhtml');
       var indexBlob = new Blob([await indexFile.async('blob')], {type: "application/xhtml+xml"});
@@ -1990,7 +1989,7 @@ p { background-image: url("about:blank"); }`);
         options: baseOptions,
       });
 
-      var zip = await new JSZip().loadAsync(blob);
+      var zip = await Zip.loadAsync(blob);
 
       var indexFile = zip.file('index.html');
       var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -2025,7 +2024,7 @@ p { background-image: url("about:blank"); }`);
         options: baseOptions,
       });
 
-      var zip = await new JSZip().loadAsync(blob);
+      var zip = await Zip.loadAsync(blob);
 
       var indexFile = zip.file('index.xhtml');
       var indexBlob = new Blob([await indexFile.async('blob')], {type: "application/xhtml+xml"});
@@ -2124,7 +2123,7 @@ p { background-image: url("about:blank"); }`);
           options: baseOptions,
         }, {delay: 500});
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
 
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -2159,7 +2158,7 @@ p { background-image: url("about:blank"); }`);
           options: baseOptions,
         }, {delay: 100});
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
 
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -2193,7 +2192,7 @@ p { background-image: url("about:blank"); }`);
           options: baseOptions,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
 
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -2226,7 +2225,7 @@ p { background-image: url("about:blank"); }`);
           options: baseOptions,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         assert.notExists(zip.file("red.bmp"));
 
         var indexFile = zip.file('index.html');
@@ -2248,7 +2247,7 @@ p { background-image: url("about:blank"); }`);
           options: baseOptions,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         assert.notExists(zip.file("red.bmp"));
 
         var indexFile = zip.file('index.html');
@@ -2275,7 +2274,7 @@ p { background-image: url("about:blank"); }`);
           url: `${localhost}/capture_headless_metaRefresh/time-0.html`,
           options: baseOptions,
         });
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
         var doc = await readFileAsDocument(indexBlob);
@@ -2295,7 +2294,7 @@ p { background-image: url("about:blank"); }`);
           url: `${localhost}/capture_headless_metaRefresh/time-non-0.html`,
           options: baseOptions,
         });
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
         var doc = await readFileAsDocument(indexBlob);
@@ -2307,7 +2306,7 @@ p { background-image: url("about:blank"); }`);
           url: `${localhost}/capture_headless_metaRefresh/invalid.html`,
           options: baseOptions,
         });
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
         var doc = await readFileAsDocument(indexBlob);
@@ -2497,7 +2496,7 @@ p { background-image: url("about:blank"); }`);
           options: baseOptions,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
 
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -2522,7 +2521,7 @@ p { background-image: url("about:blank"); }`);
           options: baseOptions,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
 
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -2547,7 +2546,7 @@ p { background-image: url("about:blank"); }`);
           options: baseOptions,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
 
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -2567,7 +2566,7 @@ p { background-image: url("about:blank"); }`);
           options: baseOptions,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
 
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -2593,7 +2592,7 @@ p { background-image: url("about:blank"); }`);
           url: `${localhost}/capture_meta_refresh/basic.html`,
           options: baseOptions,
         });
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
         var doc = await readFileAsDocument(indexBlob);
@@ -2622,7 +2621,7 @@ p { background-image: url("about:blank"); }`);
           options: baseOptions,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
 
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -2645,7 +2644,7 @@ p { background-image: url("about:blank"); }`);
           options: baseOptions,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
 
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -2668,7 +2667,7 @@ p { background-image: url("about:blank"); }`);
           options: baseOptions,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
         var doc = await readFileAsDocument(indexBlob);
@@ -2681,7 +2680,7 @@ p { background-image: url("about:blank"); }`);
           options: baseOptions,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
         var doc = await readFileAsDocument(indexBlob);
@@ -2696,7 +2695,7 @@ p { background-image: url("about:blank"); }`);
           options: baseOptions,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
         var doc = await readFileAsDocument(indexBlob);
@@ -2723,7 +2722,7 @@ p { background-image: url("about:blank"); }`);
           options: baseOptions,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
         var doc = await readFileAsDocument(indexBlob);
@@ -2751,7 +2750,7 @@ p { background-image: url("about:blank"); }`);
           options: baseOptions,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
         var doc = await readFileAsDocument(indexBlob);
@@ -2781,7 +2780,7 @@ p { background-image: url("about:blank"); }`);
           url: `${localhost}/capture_meta_csp/csp.html`,
           options,
         });
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
         var doc = await readFileAsDocument(indexBlob);
@@ -2801,7 +2800,7 @@ p { background-image: url("about:blank"); }`);
           url: `${localhost}/capture_meta_csp/csp.html`,
           options,
         });
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
         var doc = await readFileAsDocument(indexBlob);
@@ -2821,7 +2820,7 @@ p { background-image: url("about:blank"); }`);
           options: baseOptions,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
         var doc = await readFileAsDocument(indexBlob);
@@ -2850,7 +2849,7 @@ p { background-image: url("about:blank"); }`);
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
 
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -2873,7 +2872,7 @@ p { background-image: url("about:blank"); }`);
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
 
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -2896,7 +2895,7 @@ p { background-image: url("about:blank"); }`);
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
 
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -2924,7 +2923,7 @@ p { background-image: url("about:blank"); }`);
           options: baseOptions,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         assert.exists(zip.file("green.bmp"));
         assert.exists(zip.file("yellow.bmp"));
 
@@ -2946,7 +2945,7 @@ p { background-image: url("about:blank"); }`);
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         assert.exists(zip.file("index-1.html"));
         assert.exists(zip.file("index-2.html"));
 
@@ -2973,7 +2972,7 @@ p { background-image: url("about:blank"); }`);
             options,
           });
 
-          var zip = await new JSZip().loadAsync(blob);
+          var zip = await Zip.loadAsync(blob);
 
           var indexFile = zip.file('index.html');
           var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -3032,7 +3031,7 @@ p { background-image: url("about:blank"); }`);
               url: `${localhost}/capture_base_dynamic_css/basic.html`,
               options,
             });
-            var zip = await new JSZip().loadAsync(blob);
+            var zip = await Zip.loadAsync(blob);
 
             var file = zip.file('link.py.css');
             var text = (await readFileAsText(await file.async('blob'))).trim();
@@ -3094,7 +3093,7 @@ p { background-image: url("about:blank"); }`);
             options,
           });
 
-          var zip = await new JSZip().loadAsync(blob);
+          var zip = await Zip.loadAsync(blob);
 
           var indexFile = zip.file('index_1.html');
           var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -3139,7 +3138,7 @@ p { background-image: url("about:blank"); }`);
             options,
           });
 
-          var zip = await new JSZip().loadAsync(blob);
+          var zip = await Zip.loadAsync(blob);
 
           var indexFile = zip.file('index.html');
           var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -3178,7 +3177,7 @@ p { background-image: url("about:blank"); }`);
             options,
           });
 
-          var zip = await new JSZip().loadAsync(blob);
+          var zip = await Zip.loadAsync(blob);
 
           var indexFile = zip.file('index.html');
           var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -3234,7 +3233,7 @@ p { background-image: url("about:blank"); }`);
               url: `${localhost}/capture_base_dynamic_css/bad.html`,
               options,
             });
-            var zip = await new JSZip().loadAsync(blob);
+            var zip = await Zip.loadAsync(blob);
 
             var file = zip.file('link.py.css');
             var text = (await readFileAsText(await file.async('blob'))).trim();
@@ -3296,7 +3295,7 @@ p { background-image: url("about:blank"); }`);
             options,
           });
 
-          var zip = await new JSZip().loadAsync(blob);
+          var zip = await Zip.loadAsync(blob);
 
           var indexFile = zip.file('index_1.html');
           var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -3329,7 +3328,7 @@ p { background-image: url("about:blank"); }`);
             options,
           });
 
-          var zip = await new JSZip().loadAsync(blob);
+          var zip = await Zip.loadAsync(blob);
 
           var indexFile = zip.file('index.html');
           var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -3372,7 +3371,7 @@ p { background-image: url("about:blank"); }`);
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
 
         var imgFile = zip.file('img.bmp');
         assert.exists(imgFile);
@@ -3394,7 +3393,7 @@ p { background-image: url("about:blank"); }`);
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
 
         var imgFile = zip.file('img.bmp');
         assert.exists(imgFile);
@@ -3420,7 +3419,7 @@ p { background-image: url("about:blank"); }`);
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         assert.exists(zip.file('red.bmp'));
 
         var indexFile = zip.file('index.html');
@@ -3440,7 +3439,7 @@ p { background-image: url("about:blank"); }`);
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         assert.lengthOf(Object.keys(zip.files), 1);
 
         var indexFile = zip.file('index.html');
@@ -3460,7 +3459,7 @@ p { background-image: url("about:blank"); }`);
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         assert.lengthOf(Object.keys(zip.files), 1);
 
         var indexFile = zip.file('index.html');
@@ -3480,7 +3479,7 @@ p { background-image: url("about:blank"); }`);
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         assert.lengthOf(Object.keys(zip.files), 1);
 
         var indexFile = zip.file('index.html');
@@ -3572,7 +3571,7 @@ p { background-image: url("about:blank"); }`);
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         assert.exists(zip.file('favicon.ico'));
 
         var indexFile = zip.file('index.html');
@@ -3614,7 +3613,7 @@ p { background-image: url("about:blank"); }`);
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         assert.exists(zip.file('red.bmp'));
         assert.notExists(zip.file('favicon.ico'));
 
@@ -3655,7 +3654,7 @@ p { background-image: url("about:blank"); }`);
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         assert.exists(zip.file('red.bmp'));
         assert.exists(zip.file('yellow.bmp'));
         assert.exists(zip.file('green.bmp'));
@@ -3680,7 +3679,7 @@ p { background-image: url("about:blank"); }`);
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         assert.exists(zip.file('red.bmp'));
         assert.exists(zip.file('yellow.bmp'));
         assert.notExists(zip.file('green.bmp'));
@@ -3705,7 +3704,7 @@ p { background-image: url("about:blank"); }`);
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         assert.exists(zip.file('red.bmp'));
         assert.notExists(zip.file('yellow.bmp'));
         assert.notExists(zip.file('green.bmp'));
@@ -3736,7 +3735,7 @@ p { background-image: url("about:blank"); }`);
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         assert.exists(zip.file("external.css"));
 
         var indexFile = zip.file('index.html');
@@ -3760,7 +3759,7 @@ p { background-image: url("about:blank"); }`);
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         assert.lengthOf(Object.keys(zip.files), 1);
 
         var indexFile = zip.file('index.html');
@@ -3780,7 +3779,7 @@ p { background-image: url("about:blank"); }`);
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         assert.lengthOf(Object.keys(zip.files), 1);
 
         var indexFile = zip.file('index.html');
@@ -3800,7 +3799,7 @@ p { background-image: url("about:blank"); }`);
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         assert.lengthOf(Object.keys(zip.files), 1);
 
         var indexFile = zip.file('index.html');
@@ -3828,7 +3827,7 @@ p { background-image: url("about:blank"); }`);
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         assert.exists(zip.file("green.bmp"));
         assert.notExists(zip.file("font.woff"));
         assert.notExists(zip.file("import.css"));
@@ -3851,7 +3850,7 @@ p { background-image: url("about:blank"); }`);
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         assert.lengthOf(Object.keys(zip.files), 1);
 
         var indexFile = zip.file('index.html');
@@ -3872,7 +3871,7 @@ p { background-image: url("about:blank"); }`);
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         assert.lengthOf(Object.keys(zip.files), 1);
 
         var indexFile = zip.file('index.html');
@@ -3897,7 +3896,7 @@ p { background-image: url("about:blank"); }`);
             url: `${localhost}/capture_css_disabled/default.html`,
             options: baseOptions,
           }, {delay: 100});
-          var zip = await new JSZip().loadAsync(blob);
+          var zip = await Zip.loadAsync(blob);
           var indexFile = zip.file('index.html');
           var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
           var doc = await readFileAsDocument(indexBlob);
@@ -3928,7 +3927,7 @@ p { background-image: url("about:blank"); }`);
             url: `${localhost}/capture_css_disabled/picked.html`,
             options: baseOptions,
           }, {delay: 800});
-          var zip = await new JSZip().loadAsync(blob);
+          var zip = await Zip.loadAsync(blob);
           var indexFile = zip.file('index.html');
           var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
           var doc = await readFileAsDocument(indexBlob);
@@ -3963,7 +3962,7 @@ p { background-image: url("about:blank"); }`);
             url: `${localhost}/capture_css_disabled/picked.html`,
             options: baseOptions,
           }, {delay: 800});
-          var zip = await new JSZip().loadAsync(blob);
+          var zip = await Zip.loadAsync(blob);
           var indexFile = zip.file('index.html');
           var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
           var doc = await readFileAsDocument(indexBlob);
@@ -3995,7 +3994,7 @@ p { background-image: url("about:blank"); }`);
             url: `${localhost}/capture_css_disabled/scripted1.html`,
             options: baseOptions,
           }, {delay: 300});
-          var zip = await new JSZip().loadAsync(blob);
+          var zip = await Zip.loadAsync(blob);
           var indexFile = zip.file('index.html');
           var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
           var doc = await readFileAsDocument(indexBlob);
@@ -4020,7 +4019,7 @@ p { background-image: url("about:blank"); }`);
             url: `${localhost}/capture_css_disabled/scripted2.html`,
             options: baseOptions,
           }, {delay: 300});
-          var zip = await new JSZip().loadAsync(blob);
+          var zip = await Zip.loadAsync(blob);
           var indexFile = zip.file('index.html');
           var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
           var doc = await readFileAsDocument(indexBlob);
@@ -4040,7 +4039,7 @@ p { background-image: url("about:blank"); }`);
             url: `${localhost}/capture_css_disabled/scripted1.html`,
             options: baseOptions,
           }, {delay: 300});
-          var zip = await new JSZip().loadAsync(blob);
+          var zip = await Zip.loadAsync(blob);
           var indexFile = zip.file('index.html');
           var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
           var doc = await readFileAsDocument(indexBlob);
@@ -4065,7 +4064,7 @@ p { background-image: url("about:blank"); }`);
             url: `${localhost}/capture_css_disabled/scripted2.html`,
             options: baseOptions,
           }, {delay: 300});
-          var zip = await new JSZip().loadAsync(blob);
+          var zip = await Zip.loadAsync(blob);
           var indexFile = zip.file('index.html');
           var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
           var doc = await readFileAsDocument(indexBlob);
@@ -4095,7 +4094,7 @@ p { background-image: url("about:blank"); }`);
             options,
           });
 
-          var zip = await new JSZip().loadAsync(blob);
+          var zip = await Zip.loadAsync(blob);
           assert.exists(zip.file("imported.css"));
           assert.exists(zip.file("sansation_light.woff"));
           assert.exists(zip.file("green.bmp"));
@@ -4166,7 +4165,7 @@ background: blue; background: url("green.bmp");`);
             options,
           });
 
-          var zip = await new JSZip().loadAsync(blob);
+          var zip = await Zip.loadAsync(blob);
           assert.exists(zip.file("imported.css"));
           assert.exists(zip.file("sansation_light.woff"));
           assert.exists(zip.file("green.bmp"));
@@ -4224,7 +4223,7 @@ svg|a text, text svg|a { fill: blue; text-decoration: underline; }`;
             options,
           });
 
-          var zip = await new JSZip().loadAsync(blob);
+          var zip = await Zip.loadAsync(blob);
           assert.exists(zip.file("imported.css"));
           assert.exists(zip.file("sansation_light.woff"));
           assert.exists(zip.file("green.bmp"));
@@ -4282,7 +4281,7 @@ svg|a text, text svg|a { fill: blue; text-decoration: underline; }`;
             options,
           });
 
-          var zip = await new JSZip().loadAsync(blob);
+          var zip = await Zip.loadAsync(blob);
           assert.lengthOf(Object.keys(zip.files), 1);
 
           var indexFile = zip.file('index.html');
@@ -4348,7 +4347,7 @@ background: blue; background: url(rewrite/green.bmp);`);
             url: `${localhost}/capture_css_rewriteCss_namespace/element.xhtml`,
             options,
           });
-          var zip = await new JSZip().loadAsync(blob);
+          var zip = await Zip.loadAsync(blob);
           var indexFile = zip.file('index.xhtml');
           var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
           var doc = await readFileAsDocument(indexBlob);
@@ -4386,7 +4385,7 @@ elem-4 { background-color: lime; }`);
             url: `${localhost}/capture_css_rewriteCss_namespace/attribute.xhtml`,
             options,
           });
-          var zip = await new JSZip().loadAsync(blob);
+          var zip = await Zip.loadAsync(blob);
           var indexFile = zip.file('index.xhtml');
           var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
           var doc = await readFileAsDocument(indexBlob);
@@ -4427,7 +4426,7 @@ elem-4 { background-color: lime; }`);
             options,
           });
 
-          var zip = await new JSZip().loadAsync(blob);
+          var zip = await Zip.loadAsync(blob);
 
           var indexFile = zip.file('index.html');
           var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -4461,7 +4460,7 @@ elem-4 { background-color: lime; }`);
             options,
           });
 
-          var zip = await new JSZip().loadAsync(blob);
+          var zip = await Zip.loadAsync(blob);
 
           var indexFile = zip.file('index.html');
           var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -4491,7 +4490,7 @@ elem-4 { background-color: lime; }`);
             options,
           });
 
-          var zip = await new JSZip().loadAsync(blob);
+          var zip = await Zip.loadAsync(blob);
 
           var indexFile = zip.file('index.html');
           var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -4521,7 +4520,7 @@ elem-4 { background-color: lime; }`);
             options,
           });
 
-          var zip = await new JSZip().loadAsync(blob);
+          var zip = await Zip.loadAsync(blob);
 
           var indexFile = zip.file('index.html');
           var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -4557,7 +4556,7 @@ elem-4 { background-color: lime; }`);
             options,
           });
 
-          var zip = await new JSZip().loadAsync(blob);
+          var zip = await Zip.loadAsync(blob);
 
           var indexFile = zip.file('index.html');
           var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -4582,7 +4581,7 @@ elem-4 { background-color: lime; }`);
             options,
           });
 
-          var zip = await new JSZip().loadAsync(blob);
+          var zip = await Zip.loadAsync(blob);
 
           var indexFile = zip.file('index.html');
           var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -4606,7 +4605,7 @@ elem-4 { background-color: lime; }`);
             options,
           });
 
-          var zip = await new JSZip().loadAsync(blob);
+          var zip = await Zip.loadAsync(blob);
 
           var indexFile = zip.file('index.html');
           var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -4630,7 +4629,7 @@ elem-4 { background-color: lime; }`);
             options,
           });
 
-          var zip = await new JSZip().loadAsync(blob);
+          var zip = await Zip.loadAsync(blob);
 
           var indexFile = zip.file('index.html');
           var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -4657,7 +4656,7 @@ elem-4 { background-color: lime; }`);
             options,
           });
 
-          var zip = await new JSZip().loadAsync(blob);
+          var zip = await Zip.loadAsync(blob);
 
           var indexFile = zip.file('index.html');
           var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -4696,7 +4695,7 @@ elem-4 { background-color: lime; }`);
             options,
           });
 
-          var zip = await new JSZip().loadAsync(blob);
+          var zip = await Zip.loadAsync(blob);
           assert.notExists(zip.file("green.bmp"));
           assert.notExists(zip.file("unsupported-1.bmp"));
           assert.notExists(zip.file("unsupported-2.bmp"));
@@ -4740,7 +4739,7 @@ elem-4 { background-color: lime; }`);
             options,
           });
 
-          var zip = await new JSZip().loadAsync(blob);
+          var zip = await Zip.loadAsync(blob);
 
           var indexFile = zip.file('index.html');
           var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -4783,7 +4782,7 @@ elem-4 { background-color: lime; }`);
             options,
           });
 
-          var zip = await new JSZip().loadAsync(blob);
+          var zip = await Zip.loadAsync(blob);
 
           var indexFile = zip.file('index.html');
           var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -4811,7 +4810,7 @@ elem-4 { background-color: lime; }`);
             url: `${localhost}/capture_css_rewriteCss_match_shadow/rewrite_host.html`,
             options,
           });
-          var zip = await new JSZip().loadAsync(blob);
+          var zip = await Zip.loadAsync(blob);
           var indexFile = zip.file('index.html');
           var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
           var doc = await readFileAsDocument(indexBlob);
@@ -4859,7 +4858,7 @@ elem-4 { background-color: lime; }`);
             url: `${localhost}/capture_css_rewriteCss_match_shadow/rewrite_host_context.html`,
             options,
           });
-          var zip = await new JSZip().loadAsync(blob);
+          var zip = await Zip.loadAsync(blob);
           var indexFile = zip.file('index.html');
           var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
           var doc = await readFileAsDocument(indexBlob);
@@ -4896,7 +4895,7 @@ elem-4 { background-color: lime; }`);
             url: `${localhost}/capture_css_rewriteCss_match_shadow/rewrite_slotted.html`,
             options,
           });
-          var zip = await new JSZip().loadAsync(blob);
+          var zip = await Zip.loadAsync(blob);
           var indexFile = zip.file('index.html');
           var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
           var doc = await readFileAsDocument(indexBlob);
@@ -4938,7 +4937,7 @@ div > ::slotted(*) { font-size: 1.2em; }`);
             url: `${localhost}/capture_css_rewriteCss_match_shadow/rewrite_part.html`,
             options,
           });
-          var zip = await new JSZip().loadAsync(blob);
+          var zip = await Zip.loadAsync(blob);
           var indexFile = zip.file('index.html');
           var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
           var doc = await readFileAsDocument(indexBlob);
@@ -4960,7 +4959,7 @@ div > ::slotted(*) { font-size: 1.2em; }`);
             options,
           });
 
-          var zip = await new JSZip().loadAsync(blob);
+          var zip = await Zip.loadAsync(blob);
 
           var cssFile = zip.file('linked.css');
           var cssText = (await readFileAsText(await cssFile.async('blob'))).trim();
@@ -4986,7 +4985,7 @@ div > ::slotted(*) { font-size: 1.2em; }`);
             options,
           });
 
-          var zip = await new JSZip().loadAsync(blob);
+          var zip = await Zip.loadAsync(blob);
 
           var cssFile = zip.file('linked.css');
           var cssText = (await readFileAsText(await cssFile.async('blob'))).trim();
@@ -5012,7 +5011,7 @@ div > ::slotted(*) { font-size: 1.2em; }`);
             options,
           });
 
-          var zip = await new JSZip().loadAsync(blob);
+          var zip = await Zip.loadAsync(blob);
 
           var cssFile = zip.file('linked.css');
           var cssText = (await readFileAsText(await cssFile.async('blob'))).trim();
@@ -5036,7 +5035,7 @@ div > ::slotted(*) { font-size: 1.2em; }`);
             options,
           });
 
-          var zip = await new JSZip().loadAsync(blob);
+          var zip = await Zip.loadAsync(blob);
 
           var cssFile = zip.file('linked.css');
           var cssText = (await readFileAsText(await cssFile.async('blob'))).trim();
@@ -5062,7 +5061,7 @@ div > ::slotted(*) { font-size: 1.2em; }`);
             options,
           });
 
-          var zip = await new JSZip().loadAsync(blob);
+          var zip = await Zip.loadAsync(blob);
           assert.exists(zip.file('case1.bmp'));
           assert.exists(zip.file('case1-1.bmp'));
           assert.exists(zip.file('case1-1-1.bmp'));
@@ -5118,7 +5117,7 @@ div > ::slotted(*) { font-size: 1.2em; }`);
             options,
           });
 
-          var zip = await new JSZip().loadAsync(blob);
+          var zip = await Zip.loadAsync(blob);
           assert.exists(zip.file('case1.bmp'));
           assert.exists(zip.file('case1-1.bmp'));
           assert.exists(zip.file('case1-1-1.bmp'));
@@ -5218,7 +5217,7 @@ div > ::slotted(*) { font-size: 1.2em; }`);
             options,
           });
 
-          var zip = await new JSZip().loadAsync(blob);
+          var zip = await Zip.loadAsync(blob);
           assert.exists(zip.file('case1.bmp'));
           assert.exists(zip.file('case1-1.bmp'));
           assert.exists(zip.file('case1-1-1.bmp'));
@@ -5310,7 +5309,7 @@ div > ::slotted(*) { font-size: 1.2em; }`);
             options,
           });
 
-          var zip = await new JSZip().loadAsync(blob);
+          var zip = await Zip.loadAsync(blob);
           assert.notExists(zip.file('case1.bmp'));
           assert.notExists(zip.file('case1-1.bmp'));
           assert.notExists(zip.file('case1-1-1.bmp'));
@@ -5373,7 +5372,7 @@ div > ::slotted(*) { font-size: 1.2em; }`);
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
 
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -5413,7 +5412,7 @@ div > ::slotted(*) { font-size: 1.2em; }`);
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
 
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -5453,7 +5452,7 @@ div > ::slotted(*) { font-size: 1.2em; }`);
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
 
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -5499,7 +5498,7 @@ div > ::slotted(*) { font-size: 1.2em; }`);
               options,
             });
 
-            var zip = await new JSZip().loadAsync(blob);
+            var zip = await Zip.loadAsync(blob);
 
             var file = zip.file('header_big5.py.css');
             var blob = new Blob([await file.async('blob')], {type: "text/css"});
@@ -5559,7 +5558,7 @@ div > ::slotted(*) { font-size: 1.2em; }`);
             options,
           });
 
-          var zip = await new JSZip().loadAsync(blob);
+          var zip = await Zip.loadAsync(blob);
 
           var file = zip.file('link.css');
           var blob = new Blob([await file.async('blob')], {type: "text/css"});
@@ -5597,7 +5596,7 @@ div > ::slotted(*) { font-size: 1.2em; }`);
             options,
           });
 
-          var zip = await new JSZip().loadAsync(blob);
+          var zip = await Zip.loadAsync(blob);
 
           var file = zip.file('link.css');
           var blob = new Blob([await file.async('blob')], {type: "text/css"});
@@ -5655,7 +5654,7 @@ div > ::slotted(*) { font-size: 1.2em; }`);
             options,
           });
 
-          var zip = await new JSZip().loadAsync(blob);
+          var zip = await Zip.loadAsync(blob);
 
           var indexFile = zip.file('index.html');
           var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -5686,7 +5685,7 @@ div > ::slotted(*) { font-size: 1.2em; }`);
             options,
           });
 
-          var zip = await new JSZip().loadAsync(blob);
+          var zip = await Zip.loadAsync(blob);
 
           var indexFile = zip.file('index.html');
           var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -5717,7 +5716,7 @@ div > ::slotted(*) { font-size: 1.2em; }`);
             options,
           });
 
-          var zip = await new JSZip().loadAsync(blob);
+          var zip = await Zip.loadAsync(blob);
 
           var indexFile = zip.file('index.html');
           var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -5736,7 +5735,7 @@ div > ::slotted(*) { font-size: 1.2em; }`);
             options,
           });
 
-          var zip = await new JSZip().loadAsync(blob);
+          var zip = await Zip.loadAsync(blob);
 
           var file = zip.file('link.css');
           var blob = new Blob([await file.async('blob')], {type: "text/css"});
@@ -5839,7 +5838,7 @@ div > ::slotted(*) { font-size: 1.2em; }`);
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
 
         // @TODO: HTTP Link header is supported by Firefox 66 but not by Chromium 73
         //        and WebScrapBook currently.
@@ -5869,7 +5868,7 @@ div > ::slotted(*) { font-size: 1.2em; }`);
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
 
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -5888,7 +5887,7 @@ div > ::slotted(*) { font-size: 1.2em; }`);
           options: baseOptions,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         assert.lengthOf(Object.keys(zip.files), 1);
 
         var indexFile = zip.file('index.html');
@@ -5906,7 +5905,7 @@ div > ::slotted(*) { font-size: 1.2em; }`);
           options: baseOptions,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         assert.exists(zip.file("index-1.html"));
 
         var indexFile = zip.file('index.html');
@@ -5929,7 +5928,7 @@ div > ::slotted(*) { font-size: 1.2em; }`);
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
 
         // style1.css
         var file = zip.file('style1.css');
@@ -6017,7 +6016,7 @@ body { color: red; }`);
           url: `${localhost}/capture_css_cross_origin/cross_origin.py`,
           options,
         });
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         assert.exists(zip.file('bg1.bmp'));
         assert.exists(zip.file('font1.woff'));
         assert.exists(zip.file('bg2.bmp'));
@@ -6057,7 +6056,7 @@ body { color: red; }`);
             url: `${localhost}/capture_css_dynamic/dynamic.html`,
             options,
           });
-          var zip = await new JSZip().loadAsync(blob);
+          var zip = await Zip.loadAsync(blob);
           assert.exists(zip.file('link.css'));
           assert.exists(zip.file('import.css'));
           assert.notExists(zip.file('internal-deleted.bmp'));
@@ -6092,7 +6091,7 @@ body { color: red; }`);
             url: `${localhost}/capture_css_dynamic/dynamic.html`,
             options,
           });
-          var zip = await new JSZip().loadAsync(blob);
+          var zip = await Zip.loadAsync(blob);
           assert.exists(zip.file('link.css'));
           assert.exists(zip.file('import.css'));
           assert.notExists(zip.file('internal-deleted.bmp'));
@@ -6129,7 +6128,7 @@ body { color: red; }`);
             url: `${localhost}/capture_css_dynamic_rename/dynamic.html`,
             options,
           });
-          var zip = await new JSZip().loadAsync(blob);
+          var zip = await Zip.loadAsync(blob);
           assert.exists(zip.file('link.css'));
           assert.exists(zip.file('link-1.css'));
           assert.exists(zip.file('link-2.css'));
@@ -6192,7 +6191,7 @@ body { color: red; }`);
             url: `${localhost}/capture_css_adopted/basic.html`,
             options,
           });
-          var zip = await new JSZip().loadAsync(blob);
+          var zip = await Zip.loadAsync(blob);
           assert.exists(zip.file('green.bmp'));
           assert.exists(zip.file('nonexist.bmp'));
 
@@ -6235,7 +6234,7 @@ body { color: red; }`);
             url: `${localhost}/capture_css_adopted/basic.html`,
             options,
           });
-          var zip = await new JSZip().loadAsync(blob);
+          var zip = await Zip.loadAsync(blob);
           assert.exists(zip.file('green.bmp'));
           assert.exists(zip.file('nonexist.bmp'));
 
@@ -6278,7 +6277,7 @@ body { color: red; }`);
             url: `${localhost}/capture_css_adopted/basic.html`,
             options,
           });
-          var zip = await new JSZip().loadAsync(blob);
+          var zip = await Zip.loadAsync(blob);
           assert.notExists(zip.file('green.bmp'));
           assert.notExists(zip.file('nonexist.bmp'));
 
@@ -6302,7 +6301,7 @@ body { color: red; }`);
             url: `${localhost}/capture_css_adopted/basic.html`,
             options,
           });
-          var zip = await new JSZip().loadAsync(blob);
+          var zip = await Zip.loadAsync(blob);
           assert.notExists(zip.file('green.bmp'));
           assert.notExists(zip.file('nonexist.bmp'));
 
@@ -6326,7 +6325,7 @@ body { color: red; }`);
             url: `${localhost}/capture_css_adopted/basic.html`,
             options,
           });
-          var zip = await new JSZip().loadAsync(blob);
+          var zip = await Zip.loadAsync(blob);
           assert.notExists(zip.file('green.bmp'));
           assert.notExists(zip.file('nonexist.bmp'));
 
@@ -6356,7 +6355,7 @@ body { color: red; }`);
             url: `${localhost}/capture_css_adopted/shadow.html`,
             options,
           });
-          var zip = await new JSZip().loadAsync(blob);
+          var zip = await Zip.loadAsync(blob);
           assert.exists(zip.file('image1-1.bmp'));
           assert.exists(zip.file('image1-2.bmp'));
           assert.exists(zip.file('image1-3.bmp'));
@@ -6434,7 +6433,7 @@ body { color: red; }`);
             url: `${localhost}/capture_css_adopted/shadow.html`,
             options,
           });
-          var zip = await new JSZip().loadAsync(blob);
+          var zip = await Zip.loadAsync(blob);
           assert.exists(zip.file('image1-1.bmp'));
           assert.exists(zip.file('image1-2.bmp'));
           assert.exists(zip.file('image1-3.bmp'));
@@ -6515,7 +6514,7 @@ body { color: red; }`);
             url: `${localhost}/capture_css_adopted/shadow.html`,
             options,
           });
-          var zip = await new JSZip().loadAsync(blob);
+          var zip = await Zip.loadAsync(blob);
           assert.exists(zip.file('image1-1.bmp'));
           assert.exists(zip.file('image1-2.bmp'));
           assert.exists(zip.file('image1-3.bmp'));
@@ -6596,7 +6595,7 @@ body { color: red; }`);
             url: `${localhost}/capture_css_adopted/shadow.html`,
             options,
           });
-          var zip = await new JSZip().loadAsync(blob);
+          var zip = await Zip.loadAsync(blob);
           assert.notExists(zip.file('image1-1.bmp'));
           assert.notExists(zip.file('image1-2.bmp'));
           assert.notExists(zip.file('image1-3.bmp'));
@@ -6677,7 +6676,7 @@ body { color: red; }`);
             url: `${localhost}/capture_css_adopted/shadow.html`,
             options,
           });
-          var zip = await new JSZip().loadAsync(blob);
+          var zip = await Zip.loadAsync(blob);
           assert.notExists(zip.file('image1-1.bmp'));
           assert.notExists(zip.file('image1-2.bmp'));
           assert.notExists(zip.file('image1-3.bmp'));
@@ -6724,7 +6723,7 @@ body { color: red; }`);
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         assert.exists(zip.file('link.css'));
         assert.exists(zip.file('import.css'));
         assert.exists(zip.file('red.bmp'));
@@ -6774,7 +6773,7 @@ body { color: red; }`);
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         assert.exists(zip.file('link.css'));
         assert.exists(zip.file('import.css'));
         assert.exists(zip.file('red.bmp'));
@@ -6824,7 +6823,7 @@ body { color: red; }`);
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         assert.lengthOf(Object.keys(zip.files), 3);
 
         var indexFile = zip.file('index.html');
@@ -6869,7 +6868,7 @@ body { color: red; }`);
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         assert.lengthOf(Object.keys(zip.files), 3);
 
         var indexFile = zip.file('index.html');
@@ -6918,7 +6917,7 @@ body { color: red; }`);
             url: `${localhost}/capture_imageBackground_used/basic/index.html`,
             options,
           });
-          var zip = await new JSZip().loadAsync(blob);
+          var zip = await Zip.loadAsync(blob);
           assert.exists(zip.file('internal.bmp'));
           assert.notExists(zip.file('internal-unused.bmp'));
           assert.notExists(zip.file('internal-noncaptured.bmp'));
@@ -6977,7 +6976,7 @@ body { color: red; }`);
             url: `${localhost}/capture_imageBackground_used/basic/index.html`,
             options,
           });
-          var zip = await new JSZip().loadAsync(blob);
+          var zip = await Zip.loadAsync(blob);
           assert.exists(zip.file('internal.bmp'));
           assert.exists(zip.file('internal-unused.bmp'));
           assert.exists(zip.file('internal-noncaptured.bmp'));
@@ -7037,7 +7036,7 @@ body { color: red; }`);
             options,
           });
 
-          var zip = await new JSZip().loadAsync(blob);
+          var zip = await Zip.loadAsync(blob);
           assert.exists(zip.file('green.bmp'));
 
           var indexFile = zip.file('index.html');
@@ -7060,7 +7059,7 @@ body { color: red; }`);
             options,
           });
 
-          var zip = await new JSZip().loadAsync(blob);
+          var zip = await Zip.loadAsync(blob);
           assert.exists(zip.file('green.bmp'));
           assert.exists(zip.file('yellow.bmp'));
           assert.exists(zip.file('blue.bmp'));
@@ -7093,7 +7092,7 @@ body { color: red; }`);
             url: `${localhost}/capture_imageBackground_used/keyframes/index.html`,
             options,
           });
-          var zip = await new JSZip().loadAsync(blob);
+          var zip = await Zip.loadAsync(blob);
           assert.exists(zip.file('internal-inline.bmp'));
           assert.exists(zip.file('internal-internal.bmp'));
           assert.exists(zip.file('internal-link.bmp'));
@@ -7268,7 +7267,7 @@ body { color: red; }`);
             url: `${localhost}/capture_imageBackground_used/keyframes/index.html`,
             options,
           });
-          var zip = await new JSZip().loadAsync(blob);
+          var zip = await Zip.loadAsync(blob);
           assert.exists(zip.file('internal-inline.bmp'));
           assert.exists(zip.file('internal-internal.bmp'));
           assert.exists(zip.file('internal-link.bmp'));
@@ -7444,7 +7443,7 @@ body { color: red; }`);
             options,
           });
 
-          var zip = await new JSZip().loadAsync(blob);
+          var zip = await Zip.loadAsync(blob);
           assert.exists(zip.file('keyframes-1.bmp'));
           assert.exists(zip.file('keyframes-2.bmp'));
           assert.exists(zip.file('keyframes-complex-1.bmp'));
@@ -7493,7 +7492,7 @@ body { color: red; }`);
             options,
           });
 
-          var zip = await new JSZip().loadAsync(blob);
+          var zip = await Zip.loadAsync(blob);
           assert.exists(zip.file('internal1.bmp'));
           assert.exists(zip.file('internal2.bmp'));
           assert.exists(zip.file('internal3.bmp'));
@@ -7613,7 +7612,7 @@ body { color: red; }`);
             options,
           });
 
-          var zip = await new JSZip().loadAsync(blob);
+          var zip = await Zip.loadAsync(blob);
           assert.exists(zip.file('internal.bmp'));
 
           var indexFile = zip.file('index.html');
@@ -7641,7 +7640,7 @@ body { color: red; }`);
             options,
           });
 
-          var zip = await new JSZip().loadAsync(blob);
+          var zip = await Zip.loadAsync(blob);
           assert.exists(zip.file('internal.bmp'));
           assert.exists(zip.file('shadow.bmp'));
 
@@ -7679,7 +7678,7 @@ body { color: red; }`);
             options,
           });
 
-          var zip = await new JSZip().loadAsync(blob);
+          var zip = await Zip.loadAsync(blob);
           assert.exists(zip.file('base.bmp'));
           assert.exists(zip.file('special.bmp'));
 
@@ -7709,7 +7708,7 @@ body { color: red; }`);
             options,
           });
 
-          var zip = await new JSZip().loadAsync(blob);
+          var zip = await Zip.loadAsync(blob);
           assert.exists(zip.file('green.bmp'));
 
           var indexFile = zip.file('index.html');
@@ -7739,7 +7738,7 @@ body { color: red; }`);
             options,
           });
 
-          var zip = await new JSZip().loadAsync(blob);
+          var zip = await Zip.loadAsync(blob);
           assert.exists(zip.file('doc.bmp'));
           assert.exists(zip.file('shadow.bmp'));
 
@@ -7780,7 +7779,7 @@ body { color: red; }`);
             options,
           });
 
-          var zip = await new JSZip().loadAsync(blob);
+          var zip = await Zip.loadAsync(blob);
           assert.exists(zip.file('var1.bmp'));
           assert.exists(zip.file('var2.bmp'));  // @FIXME
           assert.exists(zip.file('var3.bmp'));  // @FIXME
@@ -7857,7 +7856,7 @@ body { color: red; }`);
             options,
           });
 
-          var zip = await new JSZip().loadAsync(blob);
+          var zip = await Zip.loadAsync(blob);
           assert.exists(zip.file('case1.bmp'));
           assert.exists(zip.file('case1-1.bmp'));
           assert.exists(zip.file('case1-1-1.bmp'));
@@ -7907,7 +7906,7 @@ body { color: red; }`);
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         assert.exists(zip.file('sansation_light.woff'));
 
         var indexFile = zip.file('index.html');
@@ -7927,7 +7926,7 @@ body { color: red; }`);
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         assert.exists(zip.file('sansation_light.woff'));
 
         var indexFile = zip.file('index.html');
@@ -7947,7 +7946,7 @@ body { color: red; }`);
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         assert.lengthOf(Object.keys(zip.files), 1);
 
         var indexFile = zip.file('index.html');
@@ -7967,7 +7966,7 @@ body { color: red; }`);
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         assert.lengthOf(Object.keys(zip.files), 1);
 
         var indexFile = zip.file('index.html');
@@ -7992,7 +7991,7 @@ body { color: red; }`);
             options,
           });
 
-          var zip = await new JSZip().loadAsync(blob);
+          var zip = await Zip.loadAsync(blob);
           assert.exists(zip.file('internal.woff'));
           assert.exists(zip.file('link.woff'));
           assert.exists(zip.file('import.woff'));
@@ -8037,7 +8036,7 @@ body { color: red; }`);
             options,
           });
 
-          var zip = await new JSZip().loadAsync(blob);
+          var zip = await Zip.loadAsync(blob);
           assert.exists(zip.file('internal.woff'));
           assert.exists(zip.file('link.woff'));
           assert.exists(zip.file('import.woff'));
@@ -8082,7 +8081,7 @@ body { color: red; }`);
             options,
           });
 
-          var zip = await new JSZip().loadAsync(blob);
+          var zip = await Zip.loadAsync(blob);
           assert.exists(zip.file('identifier-1.woff'));
           assert.exists(zip.file('identifier-2.woff'));
           assert.exists(zip.file('string-1.woff'));
@@ -8135,7 +8134,7 @@ body { color: red; }`);
             url: `${localhost}/capture_font_used/unloaded/index.html`,
             options,
           });
-          var zip = await new JSZip().loadAsync(blob);
+          var zip = await Zip.loadAsync(blob);
           assert.exists(zip.file('alternative-1.woff'));
           assert.exists(zip.file('alternative-2.woff'));
           assert.exists(zip.file('alternative-3.woff'));
@@ -8181,7 +8180,7 @@ body { color: red; }`);
             options,
           });
 
-          var zip = await new JSZip().loadAsync(blob);
+          var zip = await Zip.loadAsync(blob);
           assert.exists(zip.file('internal1.woff'));
           assert.exists(zip.file('internal2.woff'));
           assert.exists(zip.file('internal3.woff'));
@@ -8237,7 +8236,7 @@ body { color: red; }`);
             options,
           });
 
-          var zip = await new JSZip().loadAsync(blob);
+          var zip = await Zip.loadAsync(blob);
           assert.exists(zip.file('internal.woff'));
 
           var indexFile = zip.file('index.html');
@@ -8258,7 +8257,7 @@ body { color: red; }`);
             options,
           });
 
-          var zip = await new JSZip().loadAsync(blob);
+          var zip = await Zip.loadAsync(blob);
           assert.exists(zip.file('internal.woff'));
           assert.exists(zip.file('shadow.woff'));
 
@@ -8290,7 +8289,7 @@ body { color: red; }`);
             options,
           });
 
-          var zip = await new JSZip().loadAsync(blob);
+          var zip = await Zip.loadAsync(blob);
           assert.exists(zip.file('var1.woff'));  // @FIXME
           assert.exists(zip.file('var2.woff'));  // @FIXME
           assert.exists(zip.file('var3.woff'));  // @FIXME
@@ -8352,7 +8351,7 @@ body { color: red; }`);
             options,
           });
 
-          var zip = await new JSZip().loadAsync(blob);
+          var zip = await Zip.loadAsync(blob);
           assert.exists(zip.file('file1.woff'));
           assert.exists(zip.file('file1-1.woff'));
           assert.exists(zip.file('file1-1-1.woff'));
@@ -8406,7 +8405,7 @@ body { color: red; }`);
             url: `${localhost}/capture_font_used/scripted/index.html`,
             options,
           }, {delay: 300});
-          var zip = await new JSZip().loadAsync(blob);
+          var zip = await Zip.loadAsync(blob);
           assert.exists(zip.file('scripted.woff'));
           assert.notExists(zip.file('removed.woff'));
         });
@@ -8425,7 +8424,7 @@ body { color: red; }`);
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         assert.exists(zip.file('script1.js'));
         assert.exists(zip.file('script2.js'));
 
@@ -8476,7 +8475,7 @@ body { color: red; }`);
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         assert.lengthOf(Object.keys(zip.files), 1);
 
         var indexFile = zip.file('index.html');
@@ -8526,7 +8525,7 @@ body { color: red; }`);
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         assert.lengthOf(Object.keys(zip.files), 1);
 
         var indexFile = zip.file('index.html');
@@ -8576,7 +8575,7 @@ body { color: red; }`);
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         assert.lengthOf(Object.keys(zip.files), 1);
 
         var indexFile = zip.file('index.html');
@@ -8624,7 +8623,7 @@ body { color: red; }`);
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         assert.exists(zip.file('red.bmp'));
 
         var indexFile = zip.file('index.html');
@@ -8644,7 +8643,7 @@ body { color: red; }`);
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         assert.exists(zip.file('red.bmp'));
 
         var indexFile = zip.file('index.html');
@@ -8664,7 +8663,7 @@ body { color: red; }`);
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
 
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -8683,7 +8682,7 @@ body { color: red; }`);
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
 
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -8708,7 +8707,7 @@ body { color: red; }`);
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
 
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -8764,7 +8763,7 @@ body { color: red; }`);
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
 
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -8818,7 +8817,7 @@ body { color: red; }`);
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         assert.lengthOf(Object.keys(zip.files), 1);
 
         var indexFile = zip.file('index.html');
@@ -8840,7 +8839,7 @@ body { color: red; }`);
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         assert.lengthOf(Object.keys(zip.files), 1);
 
         var indexFile = zip.file('index.html');
@@ -8862,7 +8861,7 @@ body { color: red; }`);
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         assert.lengthOf(Object.keys(zip.files), 1);
 
         var indexFile = zip.file('index.html');
@@ -8885,7 +8884,7 @@ body { color: red; }`);
           url: `${localhost}/capture_frame/sandboxed.html`,
           options,
         });
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
 
         // frame1.html
         var indexFile = zip.file('index_1.html');
@@ -8911,7 +8910,7 @@ body { color: red; }`);
           url: `${localhost}/capture_frame/sandboxed.html`,
           options,
         });
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
 
         // frame1.html
         var indexFile = zip.file('index_1.html');
@@ -8935,7 +8934,7 @@ body { color: red; }`);
           url: `${localhost}/capture_frame/sandboxed2.html`,
           options,
         }, {delay: 500});
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
 
         // frame1.html
         var indexFile = zip.file('index_1.html');
@@ -8966,7 +8965,7 @@ body { color: red; }`);
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
 
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -8997,7 +8996,7 @@ body { color: red; }`);
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
 
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -9025,7 +9024,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         assert.lengthOf(Object.keys(zip.files), 1);
 
         var indexFile = zip.file('index.html');
@@ -9048,7 +9047,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
 
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -9075,7 +9074,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         assert.lengthOf(Object.keys(zip.files), 1);
 
         var indexFile = zip.file('index.html');
@@ -9092,7 +9091,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
 
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -9123,7 +9122,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
           options,
         }, {delay: 500});
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
 
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -9166,7 +9165,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
                 options,
               });
 
-              var zip = await new JSZip().loadAsync(blob);
+              var zip = await Zip.loadAsync(blob);
 
               var indexFile = zip.file('index.html');
               var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -9187,7 +9186,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
                 options,
               });
 
-              var zip = await new JSZip().loadAsync(blob);
+              var zip = await Zip.loadAsync(blob);
 
               var indexFile = zip.file('index.html');
               var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -9211,7 +9210,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
                 options,
               });
 
-              var zip = await new JSZip().loadAsync(blob);
+              var zip = await Zip.loadAsync(blob);
 
               var indexFile = zip.file('index.html');
               var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -9227,7 +9226,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
                 options,
               });
 
-              var zip = await new JSZip().loadAsync(blob);
+              var zip = await Zip.loadAsync(blob);
 
               var indexFile = zip.file('index.html');
               var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -9247,7 +9246,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
                 options,
               });
 
-              var zip = await new JSZip().loadAsync(blob);
+              var zip = await Zip.loadAsync(blob);
 
               var indexFile = zip.file('index.html');
               var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -9263,7 +9262,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
                 options,
               });
 
-              var zip = await new JSZip().loadAsync(blob);
+              var zip = await Zip.loadAsync(blob);
 
               var indexFile = zip.file('index.html');
               var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -9286,7 +9285,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
                 options,
               });
 
-              var zip = await new JSZip().loadAsync(blob);
+              var zip = await Zip.loadAsync(blob);
 
               var indexFile = zip.file('index.html');
               var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -9310,7 +9309,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
                 options,
               });
 
-              var zip = await new JSZip().loadAsync(blob);
+              var zip = await Zip.loadAsync(blob);
 
               var indexFile = zip.file('index.html');
               var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -9336,7 +9335,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
         var doc = await readFileAsDocument(indexBlob);
@@ -9357,7 +9356,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
         var doc = await readFileAsDocument(indexBlob);
@@ -9385,7 +9384,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
         var doc = await readFileAsDocument(indexBlob);
@@ -9441,7 +9440,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
 
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -9479,7 +9478,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
 
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -9507,7 +9506,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
 
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -9538,7 +9537,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
 
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -9569,7 +9568,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
 
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -9597,7 +9596,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
 
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -9622,7 +9621,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
         var doc = await readFileAsDocument(indexBlob);
@@ -9817,7 +9816,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
 
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -9920,7 +9919,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
 
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -9988,7 +9987,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
         var doc = await readFileAsDocument(indexBlob);
@@ -10011,7 +10010,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
         var doc = await readFileAsDocument(indexBlob);
@@ -10036,7 +10035,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
         var doc = await readFileAsDocument(indexBlob);
@@ -10063,7 +10062,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
         var doc = await readFileAsDocument(indexBlob);
@@ -10142,7 +10141,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
           url: `${localhost}/capture_anchor/basic/basic.html`,
           options: baseOptions,
         });
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
         var doc = await readFileAsDocument(indexBlob);
@@ -10207,7 +10206,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
           url: `${localhost}/capture_anchor/partial_noncaptured/partial.html`,
           options: baseOptions,
         });
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
         var doc = await readFileAsDocument(indexBlob);
@@ -10229,7 +10228,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
           url: `${localhost}/capture_anchor/partial/partial.html`,
           options: baseOptions,
         });
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
         var doc = await readFileAsDocument(indexBlob);
@@ -10259,7 +10258,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
           url: `${localhost}/capture_anchor/srcdoc/srcdoc.html`,
           options,
         });
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
 
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -10295,7 +10294,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
           url: `${localhost}/capture_anchor/srcdoc/srcdoc.html`,
           options,
         });
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
 
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -10329,7 +10328,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
           url: `${localhost}/capture_anchor/base/base.html`,
           options: baseOptions,
         });
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
         var doc = await readFileAsDocument(indexBlob);
@@ -10358,7 +10357,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
           url: `${localhost}/capture_anchor/ping/ping.html`,
           options,
         });
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
         var doc = await readFileAsDocument(indexBlob);
@@ -10375,7 +10374,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
           url: `${localhost}/capture_anchor/ping/ping.html`,
           options,
         });
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
         var doc = await readFileAsDocument(indexBlob);
@@ -10397,7 +10396,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         assert.exists(zip.file('red.bmp'));
         assert.exists(zip.file('green.bmp'));
         assert.exists(zip.file('blue.bmp'));
@@ -10432,7 +10431,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         assert(Object.keys(zip.files).length > 1);
 
         var indexFile = zip.file('index.html');
@@ -10465,7 +10464,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         assert.exists(zip.file('red.bmp'));
         assert.exists(zip.file('green.bmp'));
         assert.exists(zip.file('blue.bmp'));
@@ -10500,7 +10499,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         assert.lengthOf(Object.keys(zip.files), 1);
 
         var indexFile = zip.file('index.html');
@@ -10532,7 +10531,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         assert.lengthOf(Object.keys(zip.files), 1);
 
         var indexFile = zip.file('index.html');
@@ -10564,7 +10563,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         assert.lengthOf(Object.keys(zip.files), 1);
 
         var indexFile = zip.file('index.html');
@@ -10590,7 +10589,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         assert.exists(zip.file('horse.ogg'));
         assert.exists(zip.file('horse.mp3'));
         assert.exists(zip.file('horse_en.vtt'));
@@ -10619,7 +10618,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         assert(Object.keys(zip.files).length > 1);
         assert.exists(zip.file('horse_en.vtt'));
         assert.exists(zip.file('horse_zh.vtt'));
@@ -10648,7 +10647,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         assert.exists(zip.file('horse.ogg'));
         assert.exists(zip.file('horse.mp3'));
         assert.exists(zip.file('horse_en.vtt'));
@@ -10677,7 +10676,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         assert.lengthOf(Object.keys(zip.files), 1);
 
         var indexFile = zip.file('index.html');
@@ -10703,7 +10702,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         assert.lengthOf(Object.keys(zip.files), 1);
 
         var indexFile = zip.file('index.html');
@@ -10729,7 +10728,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         assert.lengthOf(Object.keys(zip.files), 1);
 
         var indexFile = zip.file('index.html');
@@ -10759,7 +10758,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         assert.exists(zip.file('small.mp4'));
         assert.exists(zip.file('small.webm'));
         assert.exists(zip.file('small_en.vtt'));
@@ -10789,7 +10788,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         assert(Object.keys(zip.files).length > 1);
         assert.exists(zip.file('small_en.vtt'));
         assert.exists(zip.file('small_zh.vtt'));
@@ -10819,7 +10818,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         assert.exists(zip.file('small.mp4'));
         assert.exists(zip.file('small.webm'));
         assert.exists(zip.file('small_en.vtt'));
@@ -10849,7 +10848,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         assert.lengthOf(Object.keys(zip.files), 1);
 
         var indexFile = zip.file('index.html');
@@ -10876,7 +10875,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         assert.lengthOf(Object.keys(zip.files), 1);
 
         var indexFile = zip.file('index.html');
@@ -10903,7 +10902,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         assert.lengthOf(Object.keys(zip.files), 1);
 
         var indexFile = zip.file('index.html');
@@ -10934,7 +10933,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
 
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -10953,7 +10952,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
 
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -10977,7 +10976,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
 
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -10993,7 +10992,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
 
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -11016,7 +11015,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
 
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -11032,7 +11031,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
 
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -11060,7 +11059,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
 
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -11085,7 +11084,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         assert.exists(zip.file('helloworld.swf'));
 
         var indexFile = zip.file('index.html');
@@ -11104,7 +11103,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         assert.lengthOf(Object.keys(zip.files), 1);
 
         var indexFile = zip.file('index.html');
@@ -11123,7 +11122,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         assert.lengthOf(Object.keys(zip.files), 1);
 
         var indexFile = zip.file('index.html');
@@ -11142,7 +11141,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         assert.lengthOf(Object.keys(zip.files), 1);
 
         var indexFile = zip.file('index.html');
@@ -11165,7 +11164,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
 
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -11226,7 +11225,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
           url: `${localhost}/capture_embed_frame/about.html`,
           options,
         });
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
 
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -11252,7 +11251,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
 
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -11325,7 +11324,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         assert.exists(zip.file('demo.svg'));
         assert.exists(zip.file('green.bmp'));
         assert.exists(zip.file('demo2.svg'));
@@ -11352,7 +11351,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         assert.lengthOf(Object.keys(zip.files), 1);
 
         var indexFile = zip.file('index.html');
@@ -11375,7 +11374,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         assert.lengthOf(Object.keys(zip.files), 1);
 
         var indexFile = zip.file('index.html');
@@ -11398,7 +11397,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         assert.lengthOf(Object.keys(zip.files), 1);
 
         var indexFile = zip.file('index.html');
@@ -11420,7 +11419,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
 
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -11481,7 +11480,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
           url: `${localhost}/capture_object_frame/about.html`,
           options,
         });
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
 
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -11507,7 +11506,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
 
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -11577,7 +11576,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         assert.exists(zip.file('applet.class'));
         assert.exists(zip.file('applet.jar'));
         assert.exists(zip.file('applet2.class'));
@@ -11603,7 +11602,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         assert.lengthOf(Object.keys(zip.files), 1);
 
         var indexFile = zip.file('index.html');
@@ -11626,7 +11625,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         assert.lengthOf(Object.keys(zip.files), 1);
 
         var indexFile = zip.file('index.html');
@@ -11649,7 +11648,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         assert.lengthOf(Object.keys(zip.files), 1);
 
         var indexFile = zip.file('index.html');
@@ -11677,7 +11676,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
           options: baseOptions,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
         var doc = await readFileAsDocument(indexBlob);
@@ -11692,7 +11691,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
           options: baseOptions,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
         var doc = await readFileAsDocument(indexBlob);
@@ -11715,7 +11714,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
           url: `${localhost}/capture_form/form-status.html`,
           options,
         });
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
         var doc = await readFileAsDocument(indexBlob);
@@ -11769,7 +11768,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
           url: `${localhost}/capture_form/form-status.html`,
           options,
         });
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
         var doc = await readFileAsDocument(indexBlob);
@@ -11823,7 +11822,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
           url: `${localhost}/capture_form/form-status.html`,
           options,
         });
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
         var doc = await readFileAsDocument(indexBlob);
@@ -11877,7 +11876,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
           url: `${localhost}/capture_form/form-status.html`,
           options,
         });
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
         var doc = await readFileAsDocument(indexBlob);
@@ -11931,7 +11930,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
           url: `${localhost}/capture_form/form-status.html`,
           options,
         });
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
         var doc = await readFileAsDocument(indexBlob);
@@ -11985,7 +11984,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
           url: `${localhost}/capture_form/form-status.html`,
           options,
         });
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
         var doc = await readFileAsDocument(indexBlob);
@@ -12039,7 +12038,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
           url: `${localhost}/capture_form/form-status.html`,
           options,
         });
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
         var doc = await readFileAsDocument(indexBlob);
@@ -12080,7 +12079,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         assert.exists(zip.file("index.html"));
         assert.exists(zip.file("green.bmp"));
         assert.exists(zip.file("blue.bmp"));
@@ -12111,7 +12110,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         assert.exists(zip.file("index.html"));
         assert.exists(zip.file("index.svg"));
         assert.exists(zip.file("green.bmp"));
@@ -12143,7 +12142,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         assert.exists(zip.file("index.html"));
 
         var indexFile = zip.file('index.html');
@@ -12164,7 +12163,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
         options: baseOptions,
       });
 
-      var zip = await new JSZip().loadAsync(blob);
+      var zip = await Zip.loadAsync(blob);
       var indexFile = zip.file('index.html');
       var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
       var doc = await readFileAsDocument(indexBlob);
@@ -12195,7 +12194,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
         options,
       });
 
-      var zip = await new JSZip().loadAsync(blob);
+      var zip = await Zip.loadAsync(blob);
       var indexFile = zip.file('index.html');
       var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
       var doc = await readFileAsDocument(indexBlob);
@@ -12220,7 +12219,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
         options,
       });
 
-      var zip = await new JSZip().loadAsync(blob);
+      var zip = await Zip.loadAsync(blob);
       assert.exists(zip.file("index.html"));
       assert.notExists(zip.file("red.bmp"));
       assert.notExists(zip.file("blue.bmp"));
@@ -12246,7 +12245,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
         options,
       });
 
-      var zip = await new JSZip().loadAsync(blob);
+      var zip = await Zip.loadAsync(blob);
       assert.exists(zip.file("index.html"));
       assert.notExists(zip.file("red.bmp"));
 
@@ -12280,7 +12279,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
         options,
       });
 
-      var zip = await new JSZip().loadAsync(blob);
+      var zip = await Zip.loadAsync(blob);
       assert.exists(zip.file("index.html"));
       assert.exists(zip.file("red.bmp"));
 
@@ -12311,7 +12310,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
         options: baseOptions,
       });
 
-      var zip = await new JSZip().loadAsync(blob);
+      var zip = await Zip.loadAsync(blob);
       var indexFile = zip.file('index.html');
       var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
       var doc = await readFileAsDocument(indexBlob);
@@ -12332,7 +12331,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
         options,
       });
 
-      var zip = await new JSZip().loadAsync(blob);
+      var zip = await Zip.loadAsync(blob);
       var indexFile = zip.file('index.html');
       var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
       var doc = await readFileAsDocument(indexBlob);
@@ -12359,7 +12358,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
         options,
       });
 
-      var zip = await new JSZip().loadAsync(blob);
+      var zip = await Zip.loadAsync(blob);
       var indexFile = zip.file('index.html');
       var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
       var doc = await readFileAsDocument(indexBlob);
@@ -12380,7 +12379,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
         options,
       });
 
-      var zip = await new JSZip().loadAsync(blob);
+      var zip = await Zip.loadAsync(blob);
       var indexFile = zip.file('index.html');
       var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
       var doc = await readFileAsDocument(indexBlob);
@@ -12402,7 +12401,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
         options,
       });
 
-      var zip = await new JSZip().loadAsync(blob);
+      var zip = await Zip.loadAsync(blob);
       var indexFile = zip.file('index.html');
       var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
       var doc = await readFileAsDocument(indexBlob);
@@ -12427,7 +12426,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
         url: `${localhost}/capture_crossorigin/crossorigin.py`,
         options,
       });
-      var zip = await new JSZip().loadAsync(blob);
+      var zip = await Zip.loadAsync(blob);
       var indexFile = zip.file('index.html');
       var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
       var doc = await readFileAsDocument(indexBlob);
@@ -12454,7 +12453,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
         url: `${localhost}/capture_crossorigin/crossorigin.py`,
         options,
       });
-      var zip = await new JSZip().loadAsync(blob);
+      var zip = await Zip.loadAsync(blob);
       var indexFile = zip.file('index.html');
       var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
       var doc = await readFileAsDocument(indexBlob);
@@ -12481,7 +12480,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
         url: `${localhost}/capture_crossorigin/crossorigin.py`,
         options,
       });
-      var zip = await new JSZip().loadAsync(blob);
+      var zip = await Zip.loadAsync(blob);
       var indexFile = zip.file('index.html');
       var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
       var doc = await readFileAsDocument(indexBlob);
@@ -12507,7 +12506,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
         url: `${localhost}/capture_integrity/integrity.html`,
         options,
       });
-      var zip = await new JSZip().loadAsync(blob);
+      var zip = await Zip.loadAsync(blob);
       var indexFile = zip.file('index.html');
       var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
       var doc = await readFileAsDocument(indexBlob);
@@ -12525,7 +12524,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
         url: `${localhost}/capture_integrity/integrity.html`,
         options,
       });
-      var zip = await new JSZip().loadAsync(blob);
+      var zip = await Zip.loadAsync(blob);
       var indexFile = zip.file('index.html');
       var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
       var doc = await readFileAsDocument(indexBlob);
@@ -12543,7 +12542,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
         url: `${localhost}/capture_integrity/integrity.html`,
         options,
       });
-      var zip = await new JSZip().loadAsync(blob);
+      var zip = await Zip.loadAsync(blob);
       var indexFile = zip.file('index.html');
       var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
       var doc = await readFileAsDocument(indexBlob);
@@ -12563,7 +12562,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
           url: `${localhost}/capture_referrer/index.py`,
           options,
         });
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         var file = zip.file('referrer.py');
         var text = (await readFileAsText(await file.async('blob'))).trim();
         assert.strictEqual(text, "");
@@ -12580,7 +12579,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
           url: `${localhost}/capture_referrer/index.py`,
           options,
         });
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         var file = zip.file('referrer.py');
         var text = (await readFileAsText(await file.async('blob'))).trim();
         assert.strictEqual(text, `${localhost}/`);
@@ -12597,7 +12596,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
           url: `${localhost}/capture_referrer/index.py`,
           options,
         });
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         var file = zip.file('referrer.py');
         var text = (await readFileAsText(await file.async('blob'))).trim();
         assert.strictEqual(text, `${localhost}/capture_referrer/index.py`);
@@ -12614,7 +12613,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
           url: `${localhost}/capture_referrer/index.py`,
           options,
         });
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         var file = zip.file('referrer.py');
         var text = (await readFileAsText(await file.async('blob'))).trim();
         assert.strictEqual(text, `${localhost}/capture_referrer/index.py`);
@@ -12631,7 +12630,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
           url: `${localhost}/capture_referrer/index.py`,
           options,
         });
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         var file = zip.file('referrer.py');
         var text = (await readFileAsText(await file.async('blob'))).trim();
         assert.strictEqual(text, `${localhost}/capture_referrer/index.py`);
@@ -12648,7 +12647,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
           url: `${localhost}/capture_referrer/index.py`,
           options,
         });
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         var file = zip.file('referrer.py');
         var text = (await readFileAsText(await file.async('blob'))).trim();
         assert.strictEqual(text, `${localhost}/capture_referrer/index.py`);
@@ -12665,7 +12664,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
           url: `${localhost}/capture_referrer/index.py`,
           options,
         });
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         var file = zip.file('referrer.py');
         var text = (await readFileAsText(await file.async('blob'))).trim();
         assert.strictEqual(text, `${localhost}/`);
@@ -12682,7 +12681,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
           url: `${localhost}/capture_referrer/index.py`,
           options,
         });
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         var file = zip.file('referrer.py');
         var text = (await readFileAsText(await file.async('blob'))).trim();
         assert.strictEqual(text, `${localhost}/capture_referrer/index.py`);
@@ -12702,7 +12701,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
           url: `${localhost}/capture_referrer/index.py`,
           options,
         });
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         var file = zip.file('referrer.py');
         var text = (await readFileAsText(await file.async('blob'))).trim();
         assert.strictEqual(text, `${localhost}/capture_referrer/index.py`);
@@ -12720,7 +12719,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
           url: `${localhost}/capture_referrer/index.py`,
           options,
         });
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         var file = zip.file('referrer.py');
         var text = (await readFileAsText(await file.async('blob'))).trim();
         assert.strictEqual(text, `${localhost}/capture_referrer/referrer.py`);
@@ -12738,7 +12737,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
           url: `${localhost}/capture_referrer/index.py`,
           options,
         });
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         var file = zip.file('referrer.py');
         var text = (await readFileAsText(await file.async('blob'))).trim();
         assert.strictEqual(text, `${localhost}/`);
@@ -12759,7 +12758,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
           url: `${localhost}/capture_referrer_attr/index.html`,
           options,
         });
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
 
         var file = zip.file('favicon.py');
         var text = (await readFileAsText(await file.async('blob'))).trim();
@@ -12820,7 +12819,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
           url: `${localhost}/capture_referrer_attr/index.html`,
           options,
         });
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
 
         var file = zip.file('favicon.py');
         var text = (await readFileAsText(await file.async('blob'))).trim();
@@ -12883,7 +12882,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
           url: `${localhost}/capture_referrer_doc/index.html`,
           options,
         });
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
 
         var file = zip.file('style_import.py');
         var text = (await readFileAsText(await file.async('blob'))).trim();
@@ -13043,7 +13042,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
           url: `${localhost}/capture_referrer_doc/index.html`,
           options,
         });
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
 
         var file = zip.file('style_import.py');
         var text = (await readFileAsText(await file.async('blob'))).trim();
@@ -13128,7 +13127,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
           url: `${localhost}/capture_referrer_dynamic/index.html`,
           options,
         });
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
 
         var file = zip.file('css1.py');
         var text = (await readFileAsText(await file.async('blob'))).trim();
@@ -13153,7 +13152,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
           url: `${localhost}/capture_referrer_dynamic_shadow/index.html`,
           options,
         });
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
 
         var file = zip.file('css1.py');
         var text = (await readFileAsText(await file.async('blob'))).trim();
@@ -13180,7 +13179,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
             url: `${localhost}/capture_referrer_cross_origin/index.py`,
             options,
           });
-          var zip = await new JSZip().loadAsync(blob);
+          var zip = await Zip.loadAsync(blob);
 
           var file = zip.file('css_bg.py');
           var text = (await readFileAsText(await file.async('blob'))).trim();
@@ -13232,7 +13231,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         assert.exists(zip.file("index.html"));
         assert.exists(zip.file("green.bmp"));
         assert.exists(zip.file("blue.bmp"));
@@ -13273,7 +13272,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         assert.exists(zip.file("index.html"));
         assert.notExists(zip.file("green.bmp"));
         assert.notExists(zip.file("blue.bmp"));
@@ -13308,7 +13307,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         assert.exists(zip.file("index.html"));
         assert.exists(zip.file("green.bmp"));
         assert.exists(zip.file("blue.bmp"));
@@ -13353,7 +13352,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         assert.exists(zip.file("index.html"));
         assert.exists(zip.file("green.bmp"));
         assert.exists(zip.file("blue.bmp"));
@@ -13396,7 +13395,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         assert.exists(zip.file("index.html"));
         assert.notExists(zip.file("green.bmp"));
         assert.notExists(zip.file("blue.bmp"));
@@ -13428,7 +13427,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         assert.exists(zip.file("index.html"));
 
         var indexFile = zip.file('index.html');
@@ -13460,7 +13459,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
         var doc = await readFileAsDocument(indexBlob);
@@ -13518,7 +13517,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
         var doc = await readFileAsDocument(indexBlob);
@@ -13565,7 +13564,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         assert.exists(zip.file("index.html"));
         assert.exists(zip.file("green.bmp"));
 
@@ -13601,7 +13600,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         assert.exists(zip.file("index.html"));
         assert.exists(zip.file("green.bmp"));
 
@@ -13631,7 +13630,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
         var doc = await readFileAsDocument(indexBlob);
@@ -13647,7 +13646,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
         var doc = await readFileAsDocument(indexBlob);
@@ -13663,7 +13662,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
         var doc = await readFileAsDocument(indexBlob);
@@ -13680,7 +13679,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
         var doc = await readFileAsDocument(indexBlob);
@@ -13699,7 +13698,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
         var doc = await readFileAsDocument(indexBlob);
@@ -13721,7 +13720,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         assert.exists(zip.file("file.bmp"));
         assert.exists(zip.file("file.css"));
         assert.exists(zip.file("page.html"));
@@ -13776,7 +13775,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         assert.exists(zip.file("file.bmp"));
         assert.exists(zip.file("file.css"));
         assert.exists(zip.file("page.html"));
@@ -13831,7 +13830,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         assert.notExists(zip.file("file.bmp"));
         assert.notExists(zip.file("file.css"));
         assert.notExists(zip.file("page.html"));
@@ -13873,7 +13872,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         assert.exists(zip.file("file.bmp"));
         assert.exists(zip.file("file.css"));
         assert.notExists(zip.file("page.html"));
@@ -13897,7 +13896,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         assert.exists(zip.file("file.bmp"));
         assert.exists(zip.file("file.css"));
         assert.notExists(zip.file("page.html"));
@@ -13921,7 +13920,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         assert.exists(zip.file("file.bmp"));
         assert.exists(zip.file("file.css"));
         assert.notExists(zip.file("page.html"));
@@ -13945,7 +13944,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         assert.exists(zip.file("file.bmp"));
         assert.exists(zip.file("file.css"));
         assert.notExists(zip.file("page.html"));
@@ -13969,7 +13968,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         assert.exists(zip.file("file.bmp"));
         assert.exists(zip.file("file.css"));
         assert.notExists(zip.file("page.html"));
@@ -13993,7 +13992,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         assert.notExists(zip.file("file.bmp"));
         assert.notExists(zip.file("file.css"));
         assert.notExists(zip.file("page.html"));
@@ -14017,7 +14016,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         assert.exists(zip.file("file.bmp"));
         assert.exists(zip.file("file.css"));
         assert.notExists(zip.file("page.html"));
@@ -14041,7 +14040,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         assert.notExists(zip.file("file.bmp"));
         assert.notExists(zip.file("file.css"));
         assert.notExists(zip.file("page.html"));
@@ -14065,7 +14064,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         assert.exists(zip.file("file.bmp"));
         assert.exists(zip.file("file.css"));
         assert.exists(zip.file("page.html"));
@@ -14089,7 +14088,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         assert.notExists(zip.file("file.bmp"));
         assert.notExists(zip.file("file.css"));
         assert.notExists(zip.file("page.html"));
@@ -14113,7 +14112,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         assert.exists(zip.file("file.bmp"));
         assert.exists(zip.file("file.css"));
         assert.exists(zip.file("page.html"));
@@ -14137,7 +14136,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         assert.notExists(zip.file("file.bmp"));
         assert.notExists(zip.file("file.css"));
         assert.notExists(zip.file("page.html"));
@@ -14164,7 +14163,7 @@ mime:application/wsb.unknown`,
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         assert.exists(zip.file("file.bmp"));
         assert.notExists(zip.file("file.css"));
         assert.notExists(zip.file("page.html"));
@@ -14188,7 +14187,7 @@ mime:application/wsb.unknown`,
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         assert.notExists(zip.file("file.bmp"));
         assert.exists(zip.file("file.css"));
         assert.exists(zip.file("page.html"));
@@ -14212,7 +14211,7 @@ mime:application/wsb.unknown`,
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         assert.exists(zip.file("file.bmp"));
         assert.exists(zip.file("file.css"));
         assert.exists(zip.file("page.html"));
@@ -14236,7 +14235,7 @@ mime:application/wsb.unknown`,
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         assert.notExists(zip.file("file.bmp"));
         assert.notExists(zip.file("file.css"));
         assert.notExists(zip.file("page.html"));
@@ -14262,7 +14261,7 @@ mime:application/wsb.unknown`,
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
         var doc = await readFileAsDocument(indexBlob);
@@ -14283,7 +14282,7 @@ mime:application/wsb.unknown`,
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
         var doc = await readFileAsDocument(indexBlob);
@@ -14319,7 +14318,7 @@ ${localhost}/capture_downLink_file/redirect.pyr#bar`,
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         assert.notExists(zip.file("file.bmp"));
         assert.notExists(zip.file("file.css"));
         assert.notExists(zip.file("page.html"));
@@ -14348,7 +14347,7 @@ ${localhost}/capture_downLink_file/file.css`,
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         assert.exists(zip.file("file.bmp"));
         assert.notExists(zip.file("file.css"));
         assert.notExists(zip.file("page.html"));
@@ -14377,7 +14376,7 @@ ${localhost}/capture_downLink_file/file.css\tbar`,
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         assert.exists(zip.file("file.bmp"));
         assert.notExists(zip.file("file.css"));
         assert.notExists(zip.file("page.html"));
@@ -14410,7 +14409,7 @@ ${localhost}/capture_downLink_file/file.css\tbar`,
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         assert.exists(zip.file("file.bmp"));
         assert.exists(zip.file("file.css"));
         assert.notExists(zip.file("page.html"));
@@ -14435,7 +14434,7 @@ ${localhost}/capture_downLink_file/file.css\tbar`,
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         assert.lengthOf(Object.keys(zip.files), 1);
 
         var indexFile = zip.file('index.html');
@@ -14462,7 +14461,7 @@ ${localhost}/capture_downLink_file/file.css\tbar`,
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         assert.lengthOf(Object.keys(zip.files), 2);
 
         var indexFile = zip.file('index.html');
@@ -14528,7 +14527,7 @@ ${localhost}/capture_downLink_file/file.css\tbar`,
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
 
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -14654,7 +14653,7 @@ ${localhost}/capture_downLink_file/file.css\tbar`,
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
 
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -14801,7 +14800,7 @@ ${localhost}/capture_downLink_file/file.css\tbar`,
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
 
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -14973,7 +14972,7 @@ ${localhost}/capture_downLink_file/file.css\tbar`,
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         assert.hasAllKeys(zip.files, ['index.html', 'file.bmp']);
 
         var indexFile = zip.file('index.html');
@@ -14998,7 +14997,7 @@ ${localhost}/capture_downLink_file/file.css\tbar`,
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
 
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -15055,7 +15054,7 @@ ${localhost}/capture_downLink_file/file.css\tbar`,
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
 
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -15085,7 +15084,7 @@ ${localhost}/capture_downLink_file/file.css\tbar`,
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
 
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -15149,7 +15148,7 @@ ${localhost}/capture_downLink_indepth/linked2-1.html`,
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
 
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -15194,7 +15193,7 @@ ${localhost}/capture_downLink_indepth/linked2-1.html`,
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
 
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -15240,7 +15239,7 @@ ${localhost}/capture_downLink_indepth/linked2-1.html`,
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
 
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -15275,7 +15274,7 @@ ${localhost}/capture_downLink_indepth/linked2-1.html`,
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
 
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -15308,7 +15307,7 @@ ${localhost}/capture_downLink_indepth/linked2-1.html`,
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
 
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -15330,7 +15329,7 @@ ${localhost}/capture_downLink_indepth/linked2-1.html`,
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
 
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -15356,7 +15355,7 @@ ${localhost}/capture_downLink_indepth/linked2-1.html`,
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
 
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -15387,7 +15386,7 @@ ${localhost}/capture_downLink_indepth/linked2-1.html`,
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
 
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -15424,7 +15423,7 @@ ${localhost}/capture_downLink_indepth/linked2-1.html`,
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
 
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -15468,7 +15467,7 @@ ${localhost}/capture_downLink_indepth/linked2-1.html`,
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
 
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -15514,7 +15513,7 @@ ${localhost}/capture_downLink_indepth/linked2-1.html`,
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
 
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -15592,7 +15591,7 @@ ${localhost}/capture_downLink_indepth/linked2-1.html`,
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
 
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -15680,7 +15679,7 @@ ${localhost}/capture_downLink_indepth/linked2-1.html`,
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
 
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -15753,7 +15752,7 @@ ${localhost}/capture_downLink_indepth/linked2-1.html`,
           options,
         }, {delay: 500});
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
 
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -15829,7 +15828,7 @@ ${localhost}/capture_downLink_indepth/linked2-1.html`,
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
 
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -15895,7 +15894,7 @@ ${localhost}/capture_downLink_indepth/linked2-1.html`,
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
 
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -15968,7 +15967,7 @@ ${localhost}/capture_downLink_indepth/linked2-1.html`,
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         assert.notExists(zip.file('red.bmp'));
 
         var indexFile = zip.file('index.html');
@@ -16012,7 +16011,7 @@ ${localhost}/capture_downLink_indepth/linked2-1.html`,
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         assert.notExists(zip.file('attachment2.py'));
         assert.notExists(zip.file('attachment2-2.py'));
         assert.exists(zip.file('red.bmp'));
@@ -16065,7 +16064,7 @@ ${localhost}/capture_downLink_indepth/linked2-1.html`,
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         assert.exists(zip.file('red.bmp'));
 
         var indexFile = zip.file('index.html');
@@ -16143,7 +16142,7 @@ ${localhost}/capture_downLink_indepth_urlExtra/1-3.txt`,
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         assert.exists(zip.file('index.html'));
         assert.notExists(zip.file('index.json'));
         assert.notExists(zip.file('1-1.html'));
@@ -16162,7 +16161,7 @@ ${localhost}/capture_downLink_indepth_urlExtra/1-3.txt`,
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         assert.exists(zip.file('index.html'));
         assert.notExists(zip.file('index.json'));
         assert.notExists(zip.file('1-1.bmp'));
@@ -16191,7 +16190,7 @@ ${localhost}/capture_downLink_indepth_urlExtra/1-3.txt`,
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         assert.exists(zip.file('index.html'));
         assert.exists(zip.file('1-1.bmp'));
         assert.notExists(zip.file('1-2.html'));
@@ -16268,7 +16267,7 @@ ${localhost}/capture_downLink_indepth_urlExtra/1-3.txt`,
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         assert.exists(zip.file('index.html'));
         assert.exists(zip.file('1-1.bmp'));
         assert.notExists(zip.file('1-2.bmp'));
@@ -16367,7 +16366,7 @@ ${localhost}/capture_downLink_indepth_urlExtra/1-3.txt`,
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         assert.lengthOf(Object.keys(zip.files), 5);
 
         var indexFile = zip.file('index.html');
@@ -16450,7 +16449,7 @@ ${localhost}/capture_downLink_indepth_urlExtra/1-3.txt`,
         }, {delay: 500});
         var uuid = r`[\da-f]{8}-(?:[\da-f]{4}-){3}[\da-f]{12}`;
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
         var doc = await readFileAsDocument(indexBlob);
@@ -16488,7 +16487,7 @@ ${localhost}/capture_downLink_indepth_urlExtra/1-3.txt`,
         }, {delay: 500});
         var uuid = r`[\da-f]{8}-(?:[\da-f]{4}-){3}[\da-f]{12}`;
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
         var doc = await readFileAsDocument(indexBlob);
@@ -16542,7 +16541,7 @@ ${localhost}/capture_downLink_indepth_urlExtra/1-3.txt`,
           url: `${localhost}/capture_record/meta.html`,
           options,
         });
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
         var doc = await readFileAsDocument(indexBlob);
@@ -16559,7 +16558,7 @@ ${localhost}/capture_downLink_indepth_urlExtra/1-3.txt`,
           url: `${localhost}/capture_record/meta.html`,
           options,
         });
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
         var doc = await readFileAsDocument(indexBlob);
@@ -16575,7 +16574,7 @@ ${localhost}/capture_downLink_indepth_urlExtra/1-3.txt`,
           url: `${localhost}/capture_record/text.py`,
           options,
         });
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
         var doc = await readFileAsDocument(indexBlob);
@@ -16594,7 +16593,7 @@ ${localhost}/capture_downLink_indepth_urlExtra/1-3.txt`,
           url: `${localhost}/capture_record/text.py`,
           options,
         });
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
         var doc = await readFileAsDocument(indexBlob);
@@ -16640,7 +16639,7 @@ ${localhost}/capture_downLink_indepth_urlExtra/1-3.txt`,
           url: `${localhost}/capture_record/frame.html#abc`,
           options,
         });
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
         var doc = await readFileAsDocument(indexBlob);
@@ -16660,7 +16659,7 @@ ${localhost}/capture_downLink_indepth_urlExtra/1-3.txt`,
           url: `${localhost}/capture_record/frame.html#abc`,
           options,
         });
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
         var doc = await readFileAsDocument(indexBlob);
@@ -16680,7 +16679,7 @@ ${localhost}/capture_downLink_indepth_urlExtra/1-3.txt`,
           url: `${localhost}/capture_record/text.py#abc`,
           options,
         });
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
         var doc = await readFileAsDocument(indexBlob);
@@ -16695,7 +16694,7 @@ ${localhost}/capture_downLink_indepth_urlExtra/1-3.txt`,
           url: `${localhost}/capture_record/text.py#abc`,
           options,
         });
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
         var doc = await readFileAsDocument(indexBlob);
@@ -16725,7 +16724,7 @@ ${localhost}/capture_downLink_indepth_urlExtra/1-3.txt`,
           url: `${localhost}/capture_record/meta.pyr#abc`,
           options,
         });
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
         var doc = await readFileAsDocument(indexBlob);
@@ -16745,7 +16744,7 @@ ${localhost}/capture_downLink_indepth_urlExtra/1-3.txt`,
           url: `${localhost}/capture_record/meta.xhtml#abc`,
           options,
         });
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
 
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -16790,7 +16789,7 @@ ${localhost}/capture_downLink_indepth_urlExtra/1-3.txt`,
           url: `${localhost}/capture_record/nodes1.html`,
           options,
         });
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
         var doc = await readFileAsDocument(indexBlob);
@@ -16882,7 +16881,7 @@ ${localhost}/capture_downLink_indepth_urlExtra/1-3.txt`,
           url: `${localhost}/capture_record/nodes1.html`,
           options,
         });
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
         var doc = await readFileAsDocument(indexBlob);
@@ -16905,7 +16904,7 @@ ${localhost}/capture_downLink_indepth_urlExtra/1-3.txt`,
           url: `${localhost}/capture_record/nodes2.html`,
           options,
         });
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
         var doc = await readFileAsDocument(indexBlob);
@@ -16931,7 +16930,7 @@ ${localhost}/capture_downLink_indepth_urlExtra/1-3.txt`,
           url: `${localhost}/capture_record/nodes2.html`,
           options,
         });
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
         var doc = await readFileAsDocument(indexBlob);
@@ -16954,7 +16953,7 @@ ${localhost}/capture_downLink_indepth_urlExtra/1-3.txt`,
           url: `${localhost}/capture_record/nodes3.html`,
           options,
         });
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
         var doc = await readFileAsDocument(indexBlob);
@@ -16966,7 +16965,7 @@ ${localhost}/capture_downLink_indepth_urlExtra/1-3.txt`,
           url: `${localhost}/capture_record/nodes4.html`,
           options,
         });
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
         var doc = await readFileAsDocument(indexBlob);
@@ -16982,7 +16981,7 @@ ${localhost}/capture_downLink_indepth_urlExtra/1-3.txt`,
           url: `${localhost}/capture_record/nodes3.html`,
           options,
         });
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
         var doc = await readFileAsDocument(indexBlob);
@@ -16992,7 +16991,7 @@ ${localhost}/capture_downLink_indepth_urlExtra/1-3.txt`,
           url: `${localhost}/capture_record/nodes4.html`,
           options,
         });
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
         var doc = await readFileAsDocument(indexBlob);
@@ -17024,7 +17023,7 @@ ${localhost}/capture_downLink_indepth_urlExtra/1-3.txt`,
           url: `${localhost}/capture_record/attrs1.html`,
           options,
         });
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
         var doc = await readFileAsDocument(indexBlob);
@@ -17048,7 +17047,7 @@ ${localhost}/capture_downLink_indepth_urlExtra/1-3.txt`,
           url: `${localhost}/capture_record/attrs1.html`,
           options,
         });
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
         var doc = await readFileAsDocument(indexBlob);
@@ -17089,7 +17088,7 @@ ${localhost}/capture_downLink_indepth_urlExtra/1-3.txt`,
           url: `${localhost}/capture_record/attrs2.html`,
           options,
         });
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
         var doc = await readFileAsDocument(indexBlob);
@@ -17164,7 +17163,7 @@ p { background-image: /*scrapbook-orig-url="./null.bmp"*/url("null.bmp"); }`);
           url: `${localhost}/capture_record/attrs2.html`,
           options,
         });
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
         var doc = await readFileAsDocument(indexBlob);
@@ -17209,7 +17208,7 @@ p { background-image: url("null.bmp"); }`);
           url: `${localhost}/capture_record/attrs2.html`,
           options,
         });
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
         var doc = await readFileAsDocument(indexBlob);
@@ -17255,7 +17254,7 @@ p { background-image: /*scrapbook-orig-url="./null.bmp"*/url(""); }`);
           url: `${localhost}/capture_record/attrs2.html`,
           options,
         });
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
         var doc = await readFileAsDocument(indexBlob);
@@ -17286,7 +17285,7 @@ p { background-image: url(""); }`);
           url: `${localhost}/capture_record/attrs2.html`,
           options,
         });
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
         var doc = await readFileAsDocument(indexBlob);
@@ -17314,7 +17313,7 @@ p { background-image: url(""); }`);
           url: `${localhost}/capture_record/attrs2.html`,
           options,
         });
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
         var doc = await readFileAsDocument(indexBlob);
@@ -17336,7 +17335,7 @@ p { background-image: url(""); }`);
           url: `${localhost}/capture_record/attrs3.html`,
           options,
         });
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
         var doc = await readFileAsDocument(indexBlob);
@@ -17352,7 +17351,7 @@ p { background-image: url(""); }`);
           url: `${localhost}/capture_record/attrs3.html`,
           options,
         });
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
         var doc = await readFileAsDocument(indexBlob);
@@ -17392,7 +17391,7 @@ p { background-image: url(""); }`);
           url: `${localhost}/capture_linkUnsavedUri/error1.html`,
           options,
         });
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
         var doc = await readFileAsDocument(indexBlob);
@@ -17416,7 +17415,7 @@ p { background-image: url("urn:scrapbook:download:error:${localhost}/capture_lin
           url: `${localhost}/capture_linkUnsavedUri/error1.html`,
           options,
         });
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
         var doc = await readFileAsDocument(indexBlob);
@@ -17448,7 +17447,7 @@ p { background-image: url("${localhost}/capture_linkUnsavedUri/nonexist.bmp"); }
           url: `${localhost}/capture_linkUnsavedUri/error2.html`,
           options,
         });
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
         var doc = await readFileAsDocument(indexBlob);
@@ -17469,7 +17468,7 @@ p { background-image: url("${localhost}/capture_linkUnsavedUri/nonexist.bmp"); }
           url: `${localhost}/capture_linkUnsavedUri/error2.html`,
           options,
         });
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
         var doc = await readFileAsDocument(indexBlob);
@@ -17487,7 +17486,7 @@ p { background-image: url("${localhost}/capture_linkUnsavedUri/nonexist.bmp"); }
           url: `${localhost}/capture_linkUnsavedUri/error2.html`,
           options,
         });
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
         var doc = await readFileAsDocument(indexBlob);
@@ -17523,7 +17522,7 @@ p { background-image: url("${localhost}/capture_linkUnsavedUri/nonexist.bmp"); }
           url: `${localhost}/capture_linkUnsavedUri/error3.html`,
           options,
         });
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
         var doc = await readFileAsDocument(indexBlob);
@@ -17567,7 +17566,7 @@ p { background-image: url(""); }`);
           url: `${localhost}/capture_linkUnsavedUri/error4.html`,
           options,
         });
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
         var doc = await readFileAsDocument(indexBlob);
@@ -17611,7 +17610,7 @@ p { background-image: url("#123"); }`);
           url: `${localhost}/capture_linkUnsavedUri/error5.html`,
           options,
         });
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
         var doc = await readFileAsDocument(indexBlob);
@@ -17660,7 +17659,7 @@ p { background-image: url("nonexist.bmp"); }`);
           url: `${localhost}/capture_linkUnsavedUri/error6.html`,
           options,
         });
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
         var doc = await readFileAsDocument(indexBlob);
@@ -17705,7 +17704,7 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
           url: `${localhost}/capture_linkUnsavedUri/error7.html`,
           options,
         });
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
         var doc = await readFileAsDocument(indexBlob);
@@ -17727,7 +17726,7 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
         url: `${localhost}/capture_insertInfoBar/index.html`,
         options,
       });
-      var zip = await new JSZip().loadAsync(blob);
+      var zip = await Zip.loadAsync(blob);
       var indexFile = zip.file('index.html');
       var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
       var doc = await readFileAsDocument(indexBlob);
@@ -17742,7 +17741,7 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
         url: `${localhost}/capture_insertInfoBar/index.html`,
         options,
       });
-      var zip = await new JSZip().loadAsync(blob);
+      var zip = await Zip.loadAsync(blob);
       var indexFile = zip.file('index.html');
       var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
       var doc = await readFileAsDocument(indexBlob);
@@ -17770,7 +17769,7 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         assert.exists(zip.file('link.css'));
         assert.exists(zip.file('link2.css'));
         assert.exists(zip.file('img.bmp'));
@@ -17803,7 +17802,7 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         assert.exists(zip.file('link.css'));
         assert.notExists(zip.file('link2.css'));
         assert.exists(zip.file('img.bmp'));
@@ -17836,7 +17835,7 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         assert.exists(zip.file('link.css'));
         assert.notExists(zip.file('link2.css'));
         assert.exists(zip.file('img.bmp'));
@@ -17875,7 +17874,7 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         assert.exists(zip.file('index_1.html'));
         assert.exists(zip.file('index_2.html'));
 
@@ -17896,7 +17895,7 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         assert.exists(zip.file('index_1.html'));
         assert.exists(zip.file('index_2.html'));
 
@@ -17917,7 +17916,7 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         assert.exists(zip.file('index_1.html'));
         assert.exists(zip.file('index_2.html'));
 
@@ -17937,7 +17936,7 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         assert.exists(zip.file('index_1.html'));
         assert.exists(zip.file('index_2.html'));
 
@@ -17958,7 +17957,7 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         assert.exists(zip.file('index_1.html'));
         assert.notExists(zip.file('index_2.html'));
 
@@ -17979,7 +17978,7 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         assert.exists(zip.file('index_1.html'));
         assert.notExists(zip.file('index_2.html'));
 
@@ -18008,7 +18007,7 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
         var doc = await readFileAsDocument(indexBlob);
@@ -18029,7 +18028,7 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
         var doc = await readFileAsDocument(indexBlob);
@@ -18057,7 +18056,7 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
         var doc = await readFileAsDocument(indexBlob);
@@ -18076,7 +18075,7 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
         var doc = await readFileAsDocument(indexBlob);
@@ -18101,7 +18100,7 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
         var doc = await readFileAsDocument(indexBlob);
@@ -18119,7 +18118,7 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
         var doc = await readFileAsDocument(indexBlob);
@@ -18149,7 +18148,7 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         assert.exists(zip.file("index.html"));
         assert.notExists(zip.file("red.bmp"));
         assert.notExists(zip.file("green.bmp"));
@@ -18181,7 +18180,7 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         assert.exists(zip.file("index.html"));
         assert.notExists(zip.file("red.bmp"));
         assert.notExists(zip.file("green.bmp"));
@@ -18213,7 +18212,7 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         assert.exists(zip.file("index.html"));
         assert.notExists(zip.file("red.bmp"));
         assert.notExists(zip.file("green.bmp"));
@@ -18244,7 +18243,7 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         assert.exists(zip.file("index.html"));
         assert.exists(zip.file("red.bmp"));
         assert.exists(zip.file("green.bmp"));
@@ -18269,7 +18268,7 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         assert.exists(zip.file("index.html"));
         assert.exists(zip.file("red.bmp"));
         assert.exists(zip.file("green.bmp"));
@@ -18294,7 +18293,7 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         assert.exists(zip.file("index.html"));
         assert.exists(zip.file("red.bmp"));
         assert.exists(zip.file("green.bmp"));
@@ -18327,7 +18326,7 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
           options,
         });
 
-        var zip = await new JSZip().loadAsync(blob);
+        var zip = await Zip.loadAsync(blob);
         assert.exists(zip.file("index.html"));
         assert.exists(zip.file("green.bmp"));
         assert.notExists(zip.file("red.bmp"));
@@ -18359,7 +18358,7 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
             options,
           });
 
-          var zip = await new JSZip().loadAsync(blob);
+          var zip = await Zip.loadAsync(blob);
           assert.exists(zip.file("index.html"));
           assert.exists(zip.file("red.bmp"));
           assert.notExists(zip.file("green.bmp"));
@@ -18387,7 +18386,7 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
             options,
           });
 
-          var zip = await new JSZip().loadAsync(blob);
+          var zip = await Zip.loadAsync(blob);
           assert.exists(zip.file("index.html"));
           assert.exists(zip.file("red.bmp"));
           assert.exists(zip.file("green.bmp"));
@@ -18416,7 +18415,7 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
             options,
           });
 
-          var zip = await new JSZip().loadAsync(blob);
+          var zip = await Zip.loadAsync(blob);
           assert.exists(zip.file("index.html"));
           assert.exists(zip.file("red.bmp"));
           assert.notExists(zip.file("green.bmp"));
@@ -18445,7 +18444,7 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
             options,
           });
 
-          var zip = await new JSZip().loadAsync(blob);
+          var zip = await Zip.loadAsync(blob);
           assert.exists(zip.file("index.html"));
           assert.exists(zip.file("red.bmp"));
           assert.exists(zip.file("green.bmp"));
@@ -18474,7 +18473,7 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
             options,
           });
 
-          var zip = await new JSZip().loadAsync(blob);
+          var zip = await Zip.loadAsync(blob);
           assert.exists(zip.file("index.html"));
           assert.exists(zip.file("red.bmp"));
           assert.notExists(zip.file("green.bmp"));
@@ -18503,7 +18502,7 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
             options,
           });
 
-          var zip = await new JSZip().loadAsync(blob);
+          var zip = await Zip.loadAsync(blob);
           assert.exists(zip.file("index.html"));
           assert.exists(zip.file("red.bmp"));
           assert.exists(zip.file("green.bmp"));
@@ -18534,7 +18533,7 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
             options,
           });
 
-          var zip = await new JSZip().loadAsync(blob);
+          var zip = await Zip.loadAsync(blob);
           var indexFile = zip.file('index.html');
           var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
           var doc = await readFileAsDocument(indexBlob);
@@ -18559,7 +18558,7 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
             options,
           });
 
-          var zip = await new JSZip().loadAsync(blob);
+          var zip = await Zip.loadAsync(blob);
           var indexFile = zip.file('index.html');
           var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
           var doc = await readFileAsDocument(indexBlob);
@@ -18578,7 +18577,7 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
             options,
           });
 
-          var zip = await new JSZip().loadAsync(blob);
+          var zip = await Zip.loadAsync(blob);
           var indexFile = zip.file('index.html');
           var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
           var doc = await readFileAsDocument(indexBlob);
@@ -18605,7 +18604,7 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
             options,
           });
 
-          var zip = await new JSZip().loadAsync(blob);
+          var zip = await Zip.loadAsync(blob);
           var indexFile = zip.file('index.html');
           var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
           var doc = await readFileAsDocument(indexBlob);
@@ -18630,7 +18629,7 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
             options,
           });
 
-          var zip = await new JSZip().loadAsync(blob);
+          var zip = await Zip.loadAsync(blob);
           var indexFile = zip.file('index.html');
           var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
           var doc = await readFileAsDocument(indexBlob);

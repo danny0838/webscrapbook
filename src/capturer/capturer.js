@@ -4,11 +4,11 @@
  * @modifies capturer
  *****************************************************************************/
 
-/* global JSZip */
 /* global Mime */
 
 import {isDebug} from "../utils/debug.mjs";
 import {scrapbook} from "../utils/extension.mjs";
+import {Zip} from "../utils/zip.mjs";
 import {server} from "../scrapbook/server.mjs";
 import {MapWithDefault} from "../lib/map-with-default.mjs";
 import {Referrer} from "../lib/referrer.mjs";
@@ -403,11 +403,11 @@ capturer.loadFileCacheAsZip = async function ({timeId, options}) {
     }
   }
 
-  const zip = new JSZip();
+  const zip = new Zip();
   const {files} = capturer.captureInfo.get(timeId);
   for (const [filename, {path, url, blob}] of files) {
     if (!blob) { continue; }
-    scrapbook.zipAddFile(zip, path, blob, zipOptions);
+    zip.file(path, blob, zipOptions);
   }
   return zip;
 };
