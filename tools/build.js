@@ -91,10 +91,16 @@ async function build(target) {
   {
     const bundle = await rollup({
       input: path.join(srcDir, "content/index.mjs"),
+      external: [
+        path.join(srcDir, "lib/sha.js"),
+      ],
     });
     await bundle.write({
       file: path.join(srcDir, "content/index.js"),
       format: 'iife',
+      globals: {
+        [path.join(srcDir, "lib/sha.js")]: "jsSHA",
+      },
       sourcemap: true,
       sourcemapExcludeSources: true,
     });

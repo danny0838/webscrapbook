@@ -5,6 +5,7 @@
 /* global Mime */
 
 import {scrapbook} from "../utils/common.mjs";
+import {sha1} from "../utils/sha.mjs";
 
 // order is relevant
 const SPECIAL_ITEM_ID = new Set(['root', 'hidden', 'recycle']);
@@ -1253,7 +1254,7 @@ scrapbook.toc(${JSON.stringify(jsonData, null, 2).replace(/\u2028/g, '\\u2028').
       // if no extension, generate one according to mime
       if (!ext) { ext = Mime.extension(mime); }
 
-      const sha = scrapbook.sha1(ab, 'ARRAYBUFFER');
+      const sha = sha1(ab, 'ARRAYBUFFER');
       return new File([ab], `${sha}${ext ? '.' + ext : ''}`, {type: mime});
     };
 

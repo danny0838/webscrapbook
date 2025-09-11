@@ -4,11 +4,11 @@
  * @requires browser
  *****************************************************************************/
 
-/* global jsSHA */
 /* global Mime */
 
 import "./polyfill.mjs";
 import {isDebug} from "./debug.mjs";
+import {sha1} from "./sha.mjs";
 import {Strftime} from "../lib/strftime.mjs";
 
 const BACKEND_MIN_VERSION = '2.6.0';
@@ -2984,17 +2984,6 @@ scrapbook.utf8ToUnicode = function (bstr) {
 };
 
 /**
- * supported data types: HEX, TEXT, B64, BYTES, or ARRAYBUFFER
- *
- * @requires jsSHA
- */
-scrapbook.sha1 = function (data, type) {
-  let shaObj = new jsSHA("SHA-1", type);
-  shaObj.update(data);
-  return shaObj.getHash("HEX");
-};
-
-/**
  * Alt. 1:
  *
  * return new TextEncoder("utf-8").encode(bstr).buffer;
@@ -3519,7 +3508,6 @@ scrapbook.readFileAsDocument = async function (blob) {
 
 /**
  * @requires Mime
- * @requires jsSHA
  */
 scrapbook.dataUriToFile = function (dataUri, useFilename = true) {
   const regexFields = /^data:([^,]*?)(;base64)?,([^#]*)/i;
@@ -3552,7 +3540,7 @@ scrapbook.dataUriToFile = function (dataUri, useFilename = true) {
       } else {
         let ext = parameters.filename && scrapbook.filenameParts(parameters.filename)[1] || Mime.extension(mime);
         ext = ext ? ("." + ext) : "";
-        filename = scrapbook.sha1(ab, "ARRAYBUFFER") + ext;
+        filename = sha1(ab, "ARRAYBUFFER") + ext;
       }
 
       const file = new File([ab], filename, {type: mediatype});
