@@ -1428,15 +1428,7 @@ scrapbook.initContentScripts = async function (tabId, frameId) {
               injectImmediately: true,
               files: CONTENT_SCRIPT_FILES,
             });
-            await browser.scripting.executeScript({
-              target: {tabId, frameIds: [frameId]},
-              injectImmediately: true,
-              func: (frameId) => {
-                // eslint-disable-next-line no-undef
-                core.frameId = frameId;
-              },
-              args: [frameId],
-            });
+            await browser.tabs.sendMessage(tabId, {cmd: "core.init", args: {frameId}}, {frameId});
           } catch (ex) {
             // Chromium may fail to inject content script to some pages due to unclear reason.
             // Record the error and pass.
