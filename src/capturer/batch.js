@@ -2,8 +2,7 @@
  * Script for batch.html.
  *****************************************************************************/
 
-import {scrapbook} from "../core/common.mjs";
-import "../core/extension.mjs";
+import {scrapbook} from "../core/extension.mjs";
 
 let gTaskInfo;
 
