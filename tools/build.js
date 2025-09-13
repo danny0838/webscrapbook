@@ -79,6 +79,9 @@ async function build(target) {
     const bundle = await rollup({
       input: path.join(srcDir, "content/index.mjs"),
       external: [
+        path.join(srcDir, "lib/browser-polyfill.js"),
+        path.join(srcDir, "lib/polyfill.js"),
+        path.join(srcDir, "lib/webext-polyfill.js"),
         path.join(srcDir, "lib/sha.js"),
       ],
     });
@@ -86,6 +89,7 @@ async function build(target) {
       file: path.join(srcDir, "content/index.js"),
       format: 'iife',
       globals: {
+        [path.join(srcDir, "lib/browser-polyfill.js")]: "browser",
         [path.join(srcDir, "lib/sha.js")]: "jsSHA",
       },
       sourcemap: true,

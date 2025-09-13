@@ -397,6 +397,8 @@ const OPTION_PARSERS = {
 
 const CONTENT_SCRIPT_FILES = [
   "/lib/browser-polyfill.js",
+  "/lib/polyfill.js",
+  "/lib/webext-polyfill.js",
   "/lib/sha.js",
   "/content/index.js",
 ];

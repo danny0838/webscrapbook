@@ -1,10 +1,4 @@
-// Polyfill for MV2
-if (typeof browser !== 'undefined') {
-  if (browser?.browserAction && !browser?.action) {
-    browser.action = browser.browserAction;
-    browser.contextMenus.ContextType.ACTION = browser.contextMenus.ContextType.BROWSER_ACTION;
-  }
-}
+import "./shared/utils/polyfill.mjs";
 
 function initMenusListener() {
   const handlers = {
