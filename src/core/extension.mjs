@@ -534,3 +534,5 @@ scrapbook.searchCaptures = async function ({tabs, newTab = true}) {
     newTab,
   });
 };
+
+export * from "./common.mjs";

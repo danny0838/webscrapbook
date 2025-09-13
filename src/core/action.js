@@ -2,8 +2,7 @@
  * Script for browserAction.html
  *****************************************************************************/
 
-import {scrapbook} from "./common.mjs";
-import "./extension.mjs";
+import {scrapbook} from "./extension.mjs";
 import "./options-auto.mjs";
 
 document.addEventListener('DOMContentLoaded', async () => {
