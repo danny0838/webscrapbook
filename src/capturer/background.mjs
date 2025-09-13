@@ -2,8 +2,7 @@
  * Background script for capturer functionality.
  *****************************************************************************/
 
-import {scrapbook} from "../core/common.mjs";
-import "../core/extension.mjs";
+import {scrapbook} from "../core/extension.mjs";
 import "../core/options-auto.mjs";
 import {server} from "../scrapbook/server.mjs";
 

@@ -2,8 +2,7 @@
  * Script for itempicker.html.
  *****************************************************************************/
 
-import {scrapbook} from "../core/common.mjs";
-import "../core/extension.mjs";
+import {scrapbook} from "../core/extension.mjs";
 import "../core/options-auto.mjs";
 import {dialog} from "../core/dialog.js";
 import {server} from "./server.mjs";
