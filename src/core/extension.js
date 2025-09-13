@@ -1,5 +1,5 @@
 /******************************************************************************
- * Shared utilities for extension scripts.
+ * Shared utilities for extension page/background scripts.
  *
  * @requires scrapbook
  * @modifies scrapbook
