@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Test Capture Frame (sandboxed)</title>
+</head>
+<body>
+<iframe src="frames/frame1.html" sandbox="allow-same-origin"></iframe>
+</body>
+<script src="../common.js"></script>
+<script>
+document.querySelector('iframe').addEventListener('load', (event) => {
+  utils.loadIdlProperties(event.target.contentDocument);
+});
+</script>
+</html>

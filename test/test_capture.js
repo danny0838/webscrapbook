@@ -8890,7 +8890,7 @@ body { color: red; }`);
       $it.xfailIf(
         userAgent.is('firefox') && userAgent.major < 128,
         'content script cannot be injected into a sandboxed iframe in Firefox < 128',
-      )('basic', async function () {
+      )('allow-scripts', async function () {
         var options = Object.assign({}, baseOptions, {
           "capture.frame": "save",
           "capture.saveResourcesSequentially": true,
@@ -8916,7 +8916,7 @@ body { color: red; }`);
 
       $it.skipIf(
         !(userAgent.is('firefox') && userAgent.major < 128),
-      )('basic (Firefox <= 128)', async function () {
+      )('allow-scripts (Firefox <= 128)', async function () {
         var options = Object.assign({}, baseOptions, {
           "capture.frame": "save",
           "capture.saveResourcesSequentially": true,
@@ -8932,6 +8932,30 @@ body { color: red; }`);
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
         var doc = await readFileAsDocument(indexBlob);
         assert.strictEqual(doc.querySelector('p').textContent.trim(), `frame1 content`);
+        assert.strictEqual(doc.querySelector('img').getAttribute('src'), 'red.bmp');
+
+        var imgFile = zip.file('red.bmp');
+        assert.exists(imgFile);
+        var imgData = await imgFile.async('base64');
+        assert.strictEqual(imgData, 'Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAAD/AAAA');
+      });
+
+      it('allow-same-origin', async function () {
+        var options = Object.assign({}, baseOptions, {
+          "capture.frame": "save",
+          "capture.saveResourcesSequentially": true,
+        });
+        var blob = await capture({
+          url: `${localhost}/capture_frame/sandboxed2.html`,
+          options,
+        }, {delay: 500});
+        var zip = await new JSZip().loadAsync(blob);
+
+        // frame1.html
+        var indexFile = zip.file('index_1.html');
+        var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+        var doc = await readFileAsDocument(indexBlob);
+        assert.strictEqual(doc.querySelector('p').textContent.trim(), `frame1 content modified`);
         assert.strictEqual(doc.querySelector('img').getAttribute('src'), 'red.bmp');
 
         var imgFile = zip.file('red.bmp');
