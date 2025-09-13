@@ -135,7 +135,6 @@ capturer.error = function (...msg) {
  * - To invoke a content script method, provide details.tabId and
  *   optionally details.frameId.
  *
- * @override
  * @param {string} method - The capturer method to invoke.
  * @param {*} [args] - The arguments to pass to the capturer method.
  * @param {Object} [details] - Data to determine invocation behavior.
@@ -1471,7 +1470,6 @@ capturer.captureRemoteTab = async function ({
 };
 
 /**
- * @override
  * @param {Object} params
  * @param {string} params.url - may include hash
  * @param {string} [params.refUrl]
@@ -3195,7 +3193,6 @@ capturer.downLinkUrlFilter = function (url, options) {
 };
 
 /**
- * @override
  * @type invokable
  * @param {Object} params
  * @param {Object} params.data
@@ -3581,7 +3578,6 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
 };
 
 /**
- * @override
  * @type invokable
  * @param {Object} params
  * @param {string} params.url - may include hash
@@ -3656,7 +3652,6 @@ capturer.downloadFile = async function (params) {
 /**
  * Fetch a remote CSS and resolve its charset and text.
  *
- * @override
  * @type invokable
  * @param {Object} params
  * @param {string} params.url
