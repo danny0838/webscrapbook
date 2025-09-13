@@ -20,7 +20,7 @@
   "use strict";
 
   if (!(globalThis.chrome && globalThis.chrome.runtime && globalThis.chrome.runtime.id)) {
-    throw new Error("This script should only be loaded in a browser extension.");
+    return;
   }
   if (!(globalThis.browser && globalThis.browser.runtime && globalThis.browser.runtime.id)) {
     const CHROME_SEND_MESSAGE_CALLBACK_NO_RESPONSE_MESSAGE = "The message port closed before a response was received.";
