@@ -328,22 +328,7 @@ scrapbook.invokeCaptureEx = async function ({
   }
 
   // wait until tab loading complete
-  await new Promise((resolve, reject) => {
-    const listener = (tabId, changeInfo, t) => {
-      if (!(tabId === tab.id && changeInfo.status === 'complete')) { return; }
-      browser.tabs.onUpdated.removeListener(listener);
-      browser.tabs.onRemoved.removeListener(listener2);
-      resolve(t);
-    };
-    const listener2 = (tabId, removeInfo) => {
-      if (!(tabId === tab.id)) { return; }
-      browser.tabs.onUpdated.removeListener(listener);
-      browser.tabs.onRemoved.removeListener(listener2);
-      reject({message: `Tab removed before loading complete.`});
-    };
-    browser.tabs.onUpdated.addListener(listener);
-    browser.tabs.onRemoved.addListener(listener2);
-  });
+  await scrapbook.waitTabLoading(tab);
 
   // retrieve capture results
   const results = await scrapbook.invokeExtensionScript({
