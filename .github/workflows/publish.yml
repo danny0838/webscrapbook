@@ -24,9 +24,11 @@ jobs:
       version: ${{ steps.config.outputs.version }}
       tag_name: ${{ steps.config.outputs.tag_name }}
       ext_path_zip: ${{ steps.config.outputs.ext_path_zip }}
+      ext_path_zip2: ${{ steps.config.outputs.ext_path_zip2 }}
       ext_path_xpi: ${{ steps.config.outputs.ext_path_xpi }}
       artifact_dir: ${{ steps.config.outputs.artifact_dir }}
       artifact_zip: ${{ steps.config.outputs.artifact_zip }}
+      artifact_zip2: ${{ steps.config.outputs.artifact_zip2 }}
       artifact_xpi: ${{ steps.config.outputs.artifact_xpi }}
 
       publish_firefox: ${{ steps.config.outputs.publish_firefox }}
@@ -62,9 +64,11 @@ jobs:
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "tag_name=$VERSION" >> $GITHUB_OUTPUT
           echo "ext_path_zip=dist/webscrapbook.zip" >> $GITHUB_OUTPUT
+          echo "ext_path_zip2=dist/webscrapbook2.zip" >> $GITHUB_OUTPUT
           echo "ext_path_xpi=dist/webscrapbook.xpi" >> $GITHUB_OUTPUT
           echo "artifact_dir=dist" >> $GITHUB_OUTPUT
           echo "artifact_zip=webscrapbook-zip" >> $GITHUB_OUTPUT
+          echo "artifact_zip2=webscrapbook-zip2" >> $GITHUB_OUTPUT
           echo "artifact_xpi=webscrapbook-xpi" >> $GITHUB_OUTPUT
 
           echo "publish_firefox=$([ -z "${{ vars.FIREFOX_EXTENSION_CHANNEL }}" ] && echo '' || echo '1')" >> $GITHUB_OUTPUT
@@ -100,6 +104,11 @@ jobs:
       - name: Verify no code issue
         run: npm run lint
 
+      - name: Build MV2 extension for Edge
+        run: |
+          npm run pack:chromium2
+          mv ${{ steps.config.outputs.ext_path_zip }} ${{ steps.config.outputs.ext_path_zip2 }}
+
       - name: Build extension
         run: npm run pack
 
@@ -114,6 +123,12 @@ jobs:
         with:
           name: ${{ steps.config.outputs.artifact_zip }}
           path: ${{ steps.config.outputs.ext_path_zip }}
+
+      - name: Upload artifact (ZIP2)
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.config.outputs.artifact_zip2 }}
+          path: ${{ steps.config.outputs.ext_path_zip2 }}
 
       - name: Upload artifact (XPI)
         uses: actions/upload-artifact@v4
@@ -155,13 +170,13 @@ jobs:
       - name: Download artifact
         uses: actions/download-artifact@v4
         with:
-          name: ${{ needs.main.outputs.artifact_zip }}
+          name: ${{ needs.main.outputs.artifact_zip2 }}
           path: ${{ needs.main.outputs.artifact_dir }}
 
       - name: Upload to Microsoft Edge Add-ons
         uses: wdzeng/edge-addon@v2
         with:
-          zip-path: ${{ needs.main.outputs.ext_path_zip }}
+          zip-path: ${{ needs.main.outputs.ext_path_zip2 }}
           product-id: ${{ vars.EDGE_PRODUCT_ID }}
           client-id: ${{ secrets.EDGE_CLIENT_ID }}
           api-key: ${{ secrets.EDGE_API_KEY }}
