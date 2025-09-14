@@ -37,6 +37,7 @@ function build(target) {
       hardlink(path.join(srcDir, 'manifest.firefox.json'), path.join(srcDir, 'manifest.json'));
       break;
     }
+    case 'chromium':
     case 'chromium-mv3': {
       console.log('Building files for Chromium (MV3)...');
       hardlink(path.join(srcDir, 'manifest.chromium.json'), path.join(srcDir, 'manifest.json'));
@@ -48,7 +49,6 @@ function build(target) {
       hardlink(path.join(srcDir, 'manifest.firefox-mv2.json'), path.join(srcDir, 'manifest.json'));
       break;
     }
-    case 'chromium':
     case 'chromium-mv2': {
       console.log('Building files for Chromium (MV2)...');
       hardlink(path.join(srcDir, 'manifest.chromium-mv2.json'), path.join(srcDir, 'manifest.json'));
@@ -82,6 +82,7 @@ function buildTest(target) {
       hardlink(path.join(testDir, 'manifest.firefox.json'), path.join(testDir, 'manifest.json'));
       break;
     }
+    case 'chromium':
     case 'chromium-mv3': {
       console.log('Building test files for Chromium (MV3)...');
       hardlink(path.join(testDir, 'manifest.chromium.json'), path.join(testDir, 'manifest.json'));
@@ -93,7 +94,6 @@ function buildTest(target) {
       hardlink(path.join(testDir, 'manifest.firefox-mv2.json'), path.join(testDir, 'manifest.json'));
       break;
     }
-    case 'chromium':
     case 'chromium-mv2': {
       console.log('Building test files for Chromium (MV2)...');
       hardlink(path.join(testDir, 'manifest.chromium-mv2.json'), path.join(testDir, 'manifest.json'));
