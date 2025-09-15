@@ -5,18 +5,13 @@
   "version": "2.23.5",
   "author": "Danny Lin",
   "default_locale": "en",
-
   "minimum_chrome_version": "73",
-
   "homepage_url": "https://github.com/danny0838/webscrapbook",
-
   "incognito": "split",
-
   "icons": {
     "32": "resources/scrapbook-32.png",
     "128": "resources/scrapbook-128.png"
   },
-
   "permissions": [
     "contextMenus",
     "downloads",
@@ -31,7 +26,6 @@
     "https://*/*",
     "file:///*"
   ],
-
   "background": {
     "persistent": true,
     "scripts": [
@@ -46,20 +40,17 @@
       "core/background.js"
     ]
   },
-
   "web_accessible_resources": [
     "*.map",
     "resources/*",
     "scrapbook/sitemap.html",
     "viewer/load.html"
   ],
-
   "options_ui": {
     "chrome_style": true,
     "open_in_tab": true,
     "page": "core/options.html"
   },
-
   "browser_action": {
     "default_icon": {
       "32": "resources/scrapbook-32.png",
@@ -68,7 +59,6 @@
     "default_title": "__MSG_ExtensionName__",
     "default_popup": "core/action.html"
   },
-
   "commands": {
     "_execute_browser_action": {},
     "openScrapBook": {

@@ -38,12 +38,14 @@ jobs:
         env:
           TIMEZONE: ${{ vars.TIMEZONE || 'UTC' }}
         run: |
-          VERSION=$(jq -r '.version' './src/manifest.chromium.json')
-          VERSION_FX=$(jq -r '.version' './src/manifest.firefox.json')
-          if [ "$VERSION" != "$VERSION_FX" ]; then
-            echo "❌ Mismatching manifest versions"
-            exit 1
-          fi
+          VERSION=$(jq -r '.version' './package.json')
+          for file in src/manifest.*.json; do
+            VERSION2=$(jq -r '.version' "$file")
+            if [ "$VERSION" != "$VERSION2" ]; then
+              echo "❌ Mismatching manifest version: '$file'"
+              exit 1
+            fi
+          done
 
           EXPECTED_LINE="## [$VERSION] - $(TZ="$TIMEZONE" date +%Y-%m-%d)"
           if ! grep -Fxq "$EXPECTED_LINE" CHANGELOG.md; then

@@ -5,7 +5,6 @@
   "version": "2.23.5",
   "author": "Danny Lin",
   "default_locale": "en",
-
   "browser_specific_settings": {
     "gecko": {
       "id": "webscrapbook@danny0838.addons.mozilla.org",
@@ -15,14 +14,11 @@
       "strict_min_version": "113.0"
     }
   },
-
   "homepage_url": "https://github.com/danny0838/webscrapbook",
-
   "icons": {
     "32": "resources/scrapbook-32.png",
     "128": "resources/scrapbook-128.png"
   },
-
   "permissions": [
     "contextMenus",
     "downloads",
@@ -35,11 +31,9 @@
     "http://*/*",
     "https://*/*"
   ],
-
   "optional_permissions": [
     "geolocation"
   ],
-
   "background": {
     "scripts": [
       "core/common.js",
@@ -52,20 +46,17 @@
       "core/background.js"
     ]
   },
-
   "web_accessible_resources": [
     "*.map",
     "resources/*",
     "scrapbook/sitemap.html",
     "viewer/load.html"
   ],
-
   "options_ui": {
     "browser_style": true,
     "open_in_tab": true,
     "page": "core/options.html"
   },
-
   "browser_action": {
     "default_icon": {
       "32": "resources/scrapbook-32.png",
@@ -74,17 +65,15 @@
     "default_title": "__MSG_ExtensionName__",
     "default_popup": "core/action.html"
   },
-
   "sidebar_action": {
     "default_title": "__MSG_ExtensionName__",
     "default_panel": "scrapbook/sidebar.html",
-    "default_icon":  {
+    "default_icon": {
       "32": "resources/scrapbook-32.png",
       "128": "resources/scrapbook-128.png"
     },
     "open_at_install": false
   },
-
   "commands": {
     "_execute_browser_action": {},
     "_execute_sidebar_action": {},

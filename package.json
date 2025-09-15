@@ -1,4 +1,6 @@
 {
+  "name": "webscrapbook",
+  "version": "2.23.5",
   "type": "module",
   "scripts": {
     "lint": "eslint",
