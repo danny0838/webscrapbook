@@ -733,7 +733,6 @@ const scrapbook = {
     Object.defineProperty(this, 'userAgent', {value: flavor});
     return flavor;
   },
-
 };
 
 /****************************************************************************
@@ -845,6 +844,7 @@ scrapbook.autoCacheOptions = function () {
   if (createStaticSite) { rv.static_site = 1; }
   return rv;
 };
+
 
 /****************************************************************************
  * Cache system
