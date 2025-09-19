@@ -3,8 +3,9 @@
  *****************************************************************************/
 
 import {scrapbook} from "../utils/extension.mjs";
-import "../utils/options-auto.mjs";
 import {server} from "./server.mjs";
+
+scrapbook.loadOptionsAuto(); // async
 
 const editor = {
   id: null,
@@ -21,7 +22,7 @@ const editor = {
       const id = this.id = params.get('id');
       let bookId = this.bookId = params.get('bookId');
 
-      await scrapbook.loadOptionsAuto;
+      await scrapbook.loadOptionsAuto();
       await server.init();
 
       if (typeof bookId !== 'string') {

@@ -3,7 +3,8 @@
  *****************************************************************************/
 
 import {scrapbook} from "../utils/extension.mjs";
-import "../utils/options-auto.mjs";
+
+scrapbook.loadOptionsAuto(); // async
 
 const AUTO_EDIT_FILTER = {url: [{schemes: ["http", "https"]}]};
 
@@ -77,7 +78,7 @@ function registerActiveEditorTab(tabId, willEnable = true) {
 }
 
 async function init() {
-  await scrapbook.loadOptionsAuto;
+  await scrapbook.loadOptionsAuto();
   toggleAutoEdit();
 }
 

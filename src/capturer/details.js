@@ -3,8 +3,9 @@
  *****************************************************************************/
 
 import {scrapbook} from "../utils/extension.mjs";
-import "../utils/options-auto.mjs";
 import {server} from "../scrapbook/server.mjs";
+
+scrapbook.loadOptionsAuto(); // async
 
 let gTaskInfo;
 let gIgnoreTitle;
@@ -58,7 +59,7 @@ async function init() {
         gTaskInfo.tasks.some(task => task.recaptureInfo || task.mergeCaptureInfo)) {
       document.documentElement.classList.add('ui-saveTo-server');
 
-      await scrapbook.loadOptionsAuto;
+      await scrapbook.loadOptionsAuto();
       await server.init();
       if (gTaskInfo.bookId === null) {
         gTaskInfo.bookId = server.bookId;
