@@ -3,8 +3,9 @@
  *****************************************************************************/
 
 import {scrapbook} from "../utils/extension.mjs";
-import "../utils/options-auto.mjs";
 import {server} from "../scrapbook/server.mjs";
+
+scrapbook.loadOptionsAuto(); // async
 
 async function clearCapturerCaches() {
   const filter = {
@@ -593,7 +594,7 @@ async function init() {
   clearCapturerCaches(); // async
 
   allowFileAccess = await browser.extension.isAllowedFileSchemeAccess();
-  await scrapbook.loadOptionsAuto;
+  await scrapbook.loadOptionsAuto();
   toggleNotifyPageCaptured();
   configAutoCapture();
   toggleAutoCapture();

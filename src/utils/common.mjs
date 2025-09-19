@@ -621,6 +621,29 @@ scrapbook.loadOptions = async function () {
 };
 
 /**
+ * Register automatic options loading and return a singleton load result.
+ */
+scrapbook.loadOptionsAuto = async function () {
+  browser.storage.onChanged.addListener((changes, areaName) => {
+    // Cache keys are stored in storage.local and are valid JSON format.
+    // We only update when a config key is changed.
+    if (areaName === "local") {
+      try {
+        for (const key in changes) { JSON.parse(key); }
+        return;
+      } catch (ex) {}
+
+      for (const key in changes) {
+        scrapbook.options[key] = 'newValue' in changes[key] ? changes[key].newValue : DEFAULT_OPTIONS[key];
+      }
+    }
+  });
+  const p = scrapbook.getOptions();
+  const fn = scrapbook.loadOptionsAuto = () => p;
+  return scrapbook.options = await p;
+};
+
+/**
  * @param {string} key
  * @param {Object} [options]
  * @return {*|Promise<*>}

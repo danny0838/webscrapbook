@@ -3,8 +3,9 @@
  *****************************************************************************/
 
 import {scrapbook} from "../../utils/common.mjs";
-import "../../utils/options-auto.mjs";
 import {server} from "../server.mjs";
+
+scrapbook.loadOptionsAuto(); // async
 
 class ScrapbookTool {
   constructor(doc = document) {
@@ -41,7 +42,7 @@ class ScrapbookTool {
     }
 
     try {
-      await scrapbook.loadOptionsAuto;
+      await scrapbook.loadOptionsAuto();
       const query = this.getQuery(params);
       const onMessage = (info) => {
         this.log(info);

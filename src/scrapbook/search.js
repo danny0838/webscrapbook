@@ -3,9 +3,10 @@
  *****************************************************************************/
 
 import {scrapbook} from "../utils/extension.mjs";
-import "../utils/options-auto.mjs";
 import {server} from "./server.mjs";
 import {CustomTree} from "./custom-tree.mjs";
+
+scrapbook.loadOptionsAuto(); // async
 
 const TREE_CLASS = 'tree-search';
 

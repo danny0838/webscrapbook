@@ -3,7 +3,8 @@
  *****************************************************************************/
 
 import {scrapbook} from "../utils/extension.mjs";
-import "../utils/options-auto.mjs";
+
+scrapbook.loadOptionsAuto(); // async
 
 document.addEventListener('DOMContentLoaded', async () => {
   async function selectTabFromDom(baseElem) {
@@ -117,7 +118,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   // load languages
   scrapbook.loadLanguages(document);
 
-  await scrapbook.loadOptionsAuto;
+  await scrapbook.loadOptionsAuto();
 
   // this browserAction page (browserAction.html)
   const currentTab = await browser.tabs.getCurrent();

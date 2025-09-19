@@ -3,7 +3,8 @@
  *****************************************************************************/
 
 import {scrapbook} from "../utils/common.mjs";
-import "../utils/options-auto.mjs";
+
+scrapbook.loadOptionsAuto(); // async
 
 const VIEWER_BEFORE_REQUEST_FILTER = {urls: ["file://*"], types: ["main_frame", "sub_frame"]};
 const VIEWER_BEFORE_REQUEST_EXTRA = ["blocking"];
@@ -136,7 +137,7 @@ async function init() {
   clearViewerCaches(); // async
 
   allowFileAccess = await browser.extension.isAllowedFileSchemeAccess();
-  await scrapbook.loadOptionsAuto;
+  await scrapbook.loadOptionsAuto();
   toggleViewerListeners();
 }
 

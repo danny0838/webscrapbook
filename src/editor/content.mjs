@@ -116,7 +116,7 @@ editor.init = async function ({willActive = !editor.active, force = false} = {})
   // do checks
   editor.isScripted = editor.isDocumentScripted(document);
 
-  await scrapbook.loadOptionsAuto;
+  await scrapbook.loadOptionsAuto();
   editor.serverUrl = scrapbook.getOption("server.url");
   editor.inScrapBook = editor.serverUrl
       && document.URL.startsWith(editor.serverUrl)

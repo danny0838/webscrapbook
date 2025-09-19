@@ -3,8 +3,9 @@
  *****************************************************************************/
 
 import {scrapbook} from "../utils/extension.mjs";
-import "../utils/options-auto.mjs";
 import {server} from "./server.mjs";
+
+scrapbook.loadOptionsAuto(); // async
 
 const SITEMAP_DOCTYPE = new Set(["text/html", "application/xhtml+xml"]);
 
