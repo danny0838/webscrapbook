@@ -3,11 +3,12 @@
  *****************************************************************************/
 
 import {scrapbook, DEFAULT_OPTIONS} from "../utils/extension.mjs";
-import "../utils/options-auto.mjs";
 import {server} from "../scrapbook/server.mjs";
 import * as capturer from "../capturer/background.mjs";
 import * as editor from "../editor/background.mjs";
 import * as viewer from "../viewer/background.mjs";
+
+scrapbook.loadOptionsAuto(); // async
 
 /**
  * @type {Map<integer~windowId, integer~timestamp>}
@@ -532,7 +533,7 @@ function initInstallListener() {
     }
 
     if (!browser.runtime.getManifest().background.persistent) {
-      await scrapbook.loadOptionsAuto;
+      await scrapbook.loadOptionsAuto();
       updateAction();
       updateMenus();
     }
@@ -1178,7 +1179,7 @@ async function init() {
   initMenusListener();
   initInstallListener();
 
-  await scrapbook.loadOptionsAuto;
+  await scrapbook.loadOptionsAuto();
   updateBackgroundKeeper();
 
   if (browser.runtime.getManifest().background.persistent) {

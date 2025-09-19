@@ -3,10 +3,11 @@
  *****************************************************************************/
 
 import {scrapbook} from "../utils/extension.mjs";
-import "../utils/options-auto.mjs";
 import {dialog} from "../core/dialog.js";
 import {server} from "./server.mjs";
 import {BookTree} from "./book-tree.mjs";
+
+scrapbook.loadOptionsAuto(); // async
 
 const dialogOnLoad = dialog.onLoad;
 
@@ -45,7 +46,7 @@ const itempicker = {
 
       document.getElementById('relation').hidden = !withRelation;
 
-      await scrapbook.loadOptionsAuto;
+      await scrapbook.loadOptionsAuto();
       await server.init();
 
       if (typeof bookId !== 'string') {

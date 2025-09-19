@@ -3,11 +3,12 @@
  *****************************************************************************/
 
 import {scrapbook} from "../utils/extension.mjs";
-import "../utils/options-auto.mjs";
 import {server} from "./server.mjs";
 import {Tree} from "./tree.mjs";
 import {BookTree} from "./book-tree.mjs";
 import {ItemInfoFormatter as _ItemInfoFormatter} from "./item-info-formatter.mjs";
+
+scrapbook.loadOptionsAuto(); // async
 
 const customDataMap = new WeakMap();
 
@@ -84,7 +85,7 @@ const sidebar = {
     }
 
     // load config
-    await scrapbook.loadOptionsAuto;
+    await scrapbook.loadOptionsAuto();
 
     if (!scrapbook.hasServer()) {
       this.error(scrapbook.lang('ScrapBookErrorServerNotConfigured'));
