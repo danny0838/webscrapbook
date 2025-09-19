@@ -7,7 +7,7 @@
  *****************************************************************************/
 
 import {assert, config as chaiConfig} from "./lib/chai.mjs";
-import {scrapbook} from "./shared/utils/common.mjs";
+import * as scrapbook from "./shared/utils/common.mjs";
 import {sha1} from "./shared/utils/sha.mjs";
 
 Object.assign(chaiConfig, {

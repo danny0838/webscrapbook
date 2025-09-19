@@ -2,7 +2,7 @@
  * Tree UI controller class.
  *****************************************************************************/
 
-import {scrapbook} from "../utils/common.mjs";
+import * as scrapbook from "../utils/common.mjs";
 
 const TREE_CLASS = 'tree';
 const TREE_CLASS_SELECTABLE = 'selectable';

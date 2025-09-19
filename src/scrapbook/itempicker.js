@@ -2,7 +2,7 @@
  * Script for itempicker.html.
  *****************************************************************************/
 
-import {scrapbook} from "../utils/extension.mjs";
+import * as scrapbook from "../utils/extension.mjs";
 import {dialog} from "../core/dialog.js";
 import {server} from "./server.mjs";
 import {BookTree} from "./book-tree.mjs";

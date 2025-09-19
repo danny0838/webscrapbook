@@ -2,7 +2,8 @@
  * Shared class for server related manipulation.
  *****************************************************************************/
 
-import {scrapbook, BACKEND_MIN_VERSION} from "../utils/common.mjs";
+import {BACKEND_MIN_VERSION} from "../utils/common.mjs";
+import * as scrapbook from "../utils/common.mjs";
 
 // order is relevant
 const SPECIAL_ITEM_ID = new Set(['root', 'hidden', 'recycle']);

@@ -1,6 +1,6 @@
 import {MochaQuery as $, assert, encodeText, cssRegex} from "./unittest.mjs";
 
-import {scrapbook} from "./shared/utils/common.mjs";
+import * as scrapbook from "./shared/utils/common.mjs";
 
 const $describe = $(describe);
 const $it = $(it);

@@ -2,7 +2,7 @@
  * Shared script for a SSE-based scrapbook tool.
  *****************************************************************************/
 
-import {scrapbook} from "../../utils/common.mjs";
+import * as scrapbook from "../../utils/common.mjs";
 import {server} from "../server.mjs";
 
 scrapbook.loadOptionsAuto(); // async

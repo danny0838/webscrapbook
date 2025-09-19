@@ -2,7 +2,7 @@
  * Script for view.html
  *****************************************************************************/
 
-import {scrapbook} from "../utils/common.mjs";
+import * as scrapbook from "../utils/common.mjs";
 
 scrapbook.loadLanguages(document);
 

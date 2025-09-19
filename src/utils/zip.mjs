@@ -4,7 +4,7 @@
 
 /* global JSZip */
 
-import {scrapbook} from "./common.mjs";
+import * as scrapbook from "./common.mjs";
 import "../lib/jszip.js";
 
 // ensure module loaded (may be external when bundled)

@@ -2,7 +2,8 @@
  * Script for options.html
  *****************************************************************************/
 
-import {scrapbook, BACKEND_MIN_VERSION, DEFAULT_OPTIONS} from "../utils/extension.mjs";
+import {BACKEND_MIN_VERSION, DEFAULT_OPTIONS} from "../utils/extension.mjs";
+import * as scrapbook from "../utils/extension.mjs";
 
 const OPTION_PREFIX = "opt_";
 

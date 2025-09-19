@@ -3,7 +3,8 @@
  *****************************************************************************/
 
 import {isDebug} from "../utils/debug.mjs";
-import {scrapbook, ANNOTATION_CSS} from "../utils/common.mjs";
+import {ANNOTATION_CSS} from "../utils/common.mjs";
+import * as scrapbook from "../utils/common.mjs";
 import {dataUriToFile} from "../utils/datauri.mjs";
 import {MapWithDefault} from "../lib/map-with-default.mjs";
 import {ItemInfoFormatter as _ItemInfoFormatter} from "../scrapbook/item-info-formatter.mjs";

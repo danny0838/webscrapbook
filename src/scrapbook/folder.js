@@ -2,7 +2,7 @@
  * Script for folder.html.
  *****************************************************************************/
 
-import {scrapbook} from "../utils/extension.mjs";
+import * as scrapbook from "../utils/extension.mjs";
 import {server} from "./server.mjs";
 import {BookTree} from "./book-tree.mjs";
 

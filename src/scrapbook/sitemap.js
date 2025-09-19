@@ -2,7 +2,7 @@
  * Script for sitemap.html.
  *****************************************************************************/
 
-import {scrapbook} from "../utils/extension.mjs";
+import * as scrapbook from "../utils/extension.mjs";
 import {server} from "./server.mjs";
 
 scrapbook.loadOptionsAuto(); // async
