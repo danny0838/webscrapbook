@@ -170,321 +170,321 @@ editor.init = async function ({willActive = !editor.active, force = false} = {})
   shadow.innerHTML = (`\
 <style>
 :host {
-all: initial !important;
-position: absolute !important;
+  all: initial !important;
+  position: absolute !important;
 }
 
 #toolbar {
-position: fixed;
-inset: auto 0 0 0;
-z-index: 2147483647;
-display: block;
-box-sizing: border-box;
-height: 40px;
-border: 0 solid rgb(204, 204, 204);
-border-width: 1px 0 0 0;
-padding: 1px;
-background: rgba(240, 240, 240, 0.9);
-font-family: sans-serif;
-white-space: nowrap;
+  position: fixed;
+  inset: auto 0 0 0;
+  z-index: 2147483647;
+  display: block;
+  box-sizing: border-box;
+  height: 40px;
+  border: 0 solid rgb(204, 204, 204);
+  border-width: 1px 0 0 0;
+  padding: 1px;
+  background: rgba(240, 240, 240, 0.9);
+  font-family: sans-serif;
+  white-space: nowrap;
 }
 
 #toolbar.top {
-inset: 0 0 auto 0;
-border-width: 0 0 1px 0;
+  inset: 0 0 auto 0;
+  border-width: 0 0 1px 0;
 }
 
 #toolbar > div {
-display: inline-block;
+  display: inline-block;
 }
 
 #toolbar > div[hidden] {
-display: none;
+  display: none;
 }
 
 #toolbar > div > button {
-all: unset;
-user-select: none;
-display: inline-block;
-box-sizing: border-box;
-width: 36px;
-height: 36px;
-border: 1px solid transparent;
-background: center / 24px no-repeat transparent;
+  all: unset;
+  user-select: none;
+  display: inline-block;
+  box-sizing: border-box;
+  width: 36px;
+  height: 36px;
+  border: 1px solid transparent;
+  background: center / 24px no-repeat transparent;
 }
 
 #toolbar > div > button:enabled {
-cursor: pointer;
+  cursor: pointer;
 }
 
 #toolbar > div > button:enabled:hover,
 #toolbar > div > button:enabled:focus {
-border-color: #CCC;
-background-color: #FFF;
+  border-color: #CCC;
+  background-color: #FFF;
 }
 
 #toolbar > div > button:enabled:active {
-border-style: inset;
+  border-style: inset;
 }
 
 #toolbar > div > button:disabled {
-filter: grayscale(100%);
-opacity: 0.3;
+  filter: grayscale(100%);
+  opacity: 0.3;
 }
 
 #toolbar > div > button[checked] {
-box-shadow: 0px 0px 10px 0px #909090 inset;
+  box-shadow: 0px 0px 10px 0px #909090 inset;
 }
 
 #toolbar > div > button[hidden] {
-display: none;
+  display: none;
 }
 
 #toolbar #toolbar-locate > button {
-background-image: url("${browser.runtime.getURL("resources/edit-locate.svg")}");
+  background-image: url("${browser.runtime.getURL("resources/edit-locate.svg")}");
 }
 
 #toolbar #toolbar-marker > button {
-background-image: url("${browser.runtime.getURL("resources/edit-marker.png")}");
+  background-image: url("${browser.runtime.getURL("resources/edit-marker.png")}");
 }
 
 #toolbar #toolbar-annotation > button {
-background-image: url("${browser.runtime.getURL("resources/edit-annotation.png")}");
+  background-image: url("${browser.runtime.getURL("resources/edit-annotation.png")}");
 }
 
 #toolbar #toolbar-eraser > button {
-background-image: url("${browser.runtime.getURL("resources/edit-eraser.png")}");
+  background-image: url("${browser.runtime.getURL("resources/edit-eraser.png")}");
 }
 
 #toolbar #toolbar-domEraser > button {
-background-image: url("${browser.runtime.getURL("resources/edit-dom-eraser.png")}");
+  background-image: url("${browser.runtime.getURL("resources/edit-dom-eraser.png")}");
 }
 
 #toolbar #toolbar-htmlEditor > button {
-background-image: url("${browser.runtime.getURL("resources/edit-html.png")}");
+  background-image: url("${browser.runtime.getURL("resources/edit-html.png")}");
 }
 
 #toolbar #toolbar-undo > button {
-background-image: url("${browser.runtime.getURL("resources/edit-undo.png")}");
+  background-image: url("${browser.runtime.getURL("resources/edit-undo.png")}");
 }
 
 #toolbar #toolbar-save > button {
-background-image: url("${browser.runtime.getURL("resources/edit-save.png")}");
+  background-image: url("${browser.runtime.getURL("resources/edit-save.png")}");
 }
 
 #toolbar #toolbar-close {
-position: absolute;
-${scrapbook.lang('@@bidi_end_edge')}: 0;
+  position: absolute;
+  ${scrapbook.lang('@@bidi_end_edge')}: 0;
 }
 
 #toolbar #toolbar-close > button {
-background-image: url("${browser.runtime.getURL("resources/edit-exit.svg")}");
-opacity: 0.3;
+  background-image: url("${browser.runtime.getURL("resources/edit-exit.svg")}");
+  opacity: 0.3;
 }
 
 #toolbar #toolbar-close > button:enabled:hover,
 #toolbar #toolbar-close > button:enabled:focus {
-opacity: 1;
+  opacity: 1;
 }
 
 #toolbar > div > ul {
-all: unset;
-position: absolute;
-overflow: auto;
-box-sizing: border-box;
-list-style: none;
-bottom: 40px;
-border: 1px solid #999;
-border-radius: 2px;
-box-shadow: 0 0 4px 1px rgba(0, 0, 0, 0.3);
-padding: 1px;
-background: white;
-max-height: calc(100vh - 40px - ${editor.scrollbar.vWidth}px - 2px);
+  all: unset;
+  position: absolute;
+  overflow: auto;
+  box-sizing: border-box;
+  list-style: none;
+  bottom: 40px;
+  border: 1px solid #999;
+  border-radius: 2px;
+  box-shadow: 0 0 4px 1px rgba(0, 0, 0, 0.3);
+  padding: 1px;
+  background: white;
+  max-height: calc(100vh - 40px - ${editor.scrollbar.vWidth}px - 2px);
 }
 
 #toolbar.top > div > ul {
-top: 40px;
-bottom: auto;
+  top: 40px;
+  bottom: auto;
 }
 
 #toolbar > div > ul[hidden] {
-display: none;
+  display: none;
 }
 
 #toolbar > div > ul > li {
-all: unset;
-display: block;
+  all: unset;
+  display: block;
 }
 
 #toolbar > div > ul > li > button {
-all: unset;
-user-select: none;
-display: block;
-box-sizing: border-box;
-padding: 4px 8px;
-width: 100%;
-font-size: 14px;
-color: #333;
+  all: unset;
+  user-select: none;
+  display: block;
+  box-sizing: border-box;
+  padding: 4px 8px;
+  width: 100%;
+  font-size: 14px;
+  color: #333;
 }
 
 #toolbar > div > ul > li > button:enabled:focus {
-outline: 1px solid rgba(125, 162, 206, 0.8);
-background: linear-gradient(rgba(235, 244, 253, 0.3), rgba(196, 221, 252, 0.8));
+  outline: 1px solid rgba(125, 162, 206, 0.8);
+  background: linear-gradient(rgba(235, 244, 253, 0.3), rgba(196, 221, 252, 0.8));
 }
 
 #toolbar > div > ul > li > button:enabled:hover {
-background-color: rgba(202, 202, 202, 0.8);
+  background-color: rgba(202, 202, 202, 0.8);
 }
 
 #toolbar > div > ul > li > button:enabled:active {
-background-image: radial-gradient(rgba(0, 0, 0, 0.9), rgba(64, 64, 64, 0.9));
-color: #FFFFFF;
+  background-image: radial-gradient(rgba(0, 0, 0, 0.9), rgba(64, 64, 64, 0.9));
+  color: #FFFFFF;
 }
 
 #toolbar > div > ul > li > button:disabled {
-filter: grayscale(100%);
-opacity: 0.3;
+  filter: grayscale(100%);
+  opacity: 0.3;
 }
 
 #toolbar > div > ul > li > button[checked] {
-box-shadow: 0px 0px 10px 0px #909090 inset;
+  box-shadow: 0px 0px 10px 0px #909090 inset;
 }
 
 #toolbar > div > ul > hr {
-all: unset;
-display: block;
-border: 1px inset #EEE;
+  all: unset;
+  display: block;
+  border: 1px inset #EEE;
 }
 </style>
 <div id="toolbar" dir="${scrapbook.lang('@@bidi_dir')}">
-<div id="toolbar-locate" title="${scrapbook.lang('EditorButtonLocate')}">
-  <button></button>
-  <ul hidden="" title="">
-    <li><button id="toolbar-locate-viewSitemap">${scrapbook.lang('EditorButtonLocateViewSitemap')}</button></li>
-    <li><button id="toolbar-locate-viewDirectory">${scrapbook.lang('EditorButtonLocateViewDirectory')}</button></li>
-    <li><button id="toolbar-locate-viewSource">${scrapbook.lang('EditorButtonLocateViewSource')}</button></li>
-  </ul>
-</div>
-<div id="toolbar-marker" title="${scrapbook.lang('EditorButtonMarker')}">
-  <button></button>
-  <ul hidden="" title="">
-    <li><button><scrapbook-toolbar-samp data-scrapbook-elem="toolbar-samp">${scrapbook.lang('EditorButtonMarkerItem', [1])}</scrapbook-toolbar-samp></button></li>
-    <li><button><scrapbook-toolbar-samp data-scrapbook-elem="toolbar-samp">${scrapbook.lang('EditorButtonMarkerItem', [2])}</scrapbook-toolbar-samp></button></li>
-    <li><button><scrapbook-toolbar-samp data-scrapbook-elem="toolbar-samp">${scrapbook.lang('EditorButtonMarkerItem', [3])}</scrapbook-toolbar-samp></button></li>
-    <li><button><scrapbook-toolbar-samp data-scrapbook-elem="toolbar-samp">${scrapbook.lang('EditorButtonMarkerItem', [4])}</scrapbook-toolbar-samp></button></li>
-    <li><button><scrapbook-toolbar-samp data-scrapbook-elem="toolbar-samp">${scrapbook.lang('EditorButtonMarkerItem', [5])}</scrapbook-toolbar-samp></button></li>
-    <li><button><scrapbook-toolbar-samp data-scrapbook-elem="toolbar-samp">${scrapbook.lang('EditorButtonMarkerItem', [6])}</scrapbook-toolbar-samp></button></li>
-    <li><button><scrapbook-toolbar-samp data-scrapbook-elem="toolbar-samp">${scrapbook.lang('EditorButtonMarkerItem', [7])}</scrapbook-toolbar-samp></button></li>
-    <li><button><scrapbook-toolbar-samp data-scrapbook-elem="toolbar-samp">${scrapbook.lang('EditorButtonMarkerItem', [8])}</scrapbook-toolbar-samp></button></li>
-    <li><button><scrapbook-toolbar-samp data-scrapbook-elem="toolbar-samp">${scrapbook.lang('EditorButtonMarkerItem', [9])}</scrapbook-toolbar-samp></button></li>
-    <li><button><scrapbook-toolbar-samp data-scrapbook-elem="toolbar-samp">${scrapbook.lang('EditorButtonMarkerItem', [10])}</scrapbook-toolbar-samp></button></li>
-    <li><button><scrapbook-toolbar-samp data-scrapbook-elem="toolbar-samp">${scrapbook.lang('EditorButtonMarkerItem', [11])}</scrapbook-toolbar-samp></button></li>
-    <li><button><scrapbook-toolbar-samp data-scrapbook-elem="toolbar-samp">${scrapbook.lang('EditorButtonMarkerItem', [12])}</scrapbook-toolbar-samp></button></li>
-  </ul>
-</div>
-<div id="toolbar-annotation" title="${scrapbook.lang('EditorButtonAnnotation')}">
-  <button></button>
-  <ul hidden="" title="">
-    <li><button id="toolbar-annotation-view">${scrapbook.lang('EditorButtonAnnotationView')}</button></li>
-    <li><button id="toolbar-annotation-prev">${scrapbook.lang('EditorButtonAnnotationPrev')}</button></li>
-    <li><button id="toolbar-annotation-next">${scrapbook.lang('EditorButtonAnnotationNext')}</button></li>
-    <hr/>
-    <li><button id="toolbar-annotation-link">${scrapbook.lang('EditorButtonAnnotationLink')}</button></li>
-    <li><button id="toolbar-annotation-sticky">${scrapbook.lang('EditorButtonAnnotationSticky')}</button></li>
-    <li><button id="toolbar-annotation-sticky-richtext">${scrapbook.lang('EditorButtonAnnotationStickyRichText')}</button></li>
-  </ul>
-</div>
-<div id="toolbar-eraser" title="${scrapbook.lang('EditorButtonEraser')}">
-  <button></button>
-  <ul hidden="" title="">
-    <li><button id="toolbar-eraser-eraseSelection">${scrapbook.lang('EditorButtonEraserSelection')}</button></li>
-    <li><button id="toolbar-eraser-eraseSelector">${scrapbook.lang('EditorButtonEraserSelector')}...</button></li>
-    <li><button id="toolbar-eraser-eraseSelectorAll">${scrapbook.lang('EditorButtonEraserSelectorAll')}...</button></li>
-    <li><button id="toolbar-eraser-eraseXpath">${scrapbook.lang('EditorButtonEraserXpath')}...</button></li>
-    <li><button id="toolbar-eraser-eraseXpathAll">${scrapbook.lang('EditorButtonEraserXpathAll')}...</button></li>
-    <hr/>
-    <li><button id="toolbar-eraser-uneraseSelection">${scrapbook.lang('EditorButtonEraserRevertSelection')}</button></li>
-    <li><button id="toolbar-eraser-uneraseAll">${scrapbook.lang('EditorButtonEraserRevertAll')}</button></li>
-    <hr/>
-    <li><button id="toolbar-eraser-removeEditsSelected">${scrapbook.lang('EditorButtonRemoveEditsSelection')}</button></li>
-    <li><button id="toolbar-eraser-removeEditsAll">${scrapbook.lang('EditorButtonRemoveEditsAll')}</button></li>
-  </ul>
-</div>
-<div id="toolbar-domEraser" title="${scrapbook.lang('EditorButtonDOMEraser')}">
-  <button></button>
-  <ul hidden="" title="">
-    <li><button id="toolbar-domEraser-expand">${scrapbook.lang('EditorButtonDOMEraserExpand', ['W'])}</button></li>
-    <li><button id="toolbar-domEraser-shrink">${scrapbook.lang('EditorButtonDOMEraserShrink', ['N'])}</button></li>
-    <li><button id="toolbar-domEraser-erase">${scrapbook.lang('EditorButtonDOMEraserErase', ['R'])}</button></li>
-    <li><button id="toolbar-domEraser-isolate">${scrapbook.lang('EditorButtonDOMEraserIsolate', ['I'])}</button></li>
-  </ul>
-</div>
-<div id="toolbar-htmlEditor" title="${scrapbook.lang('EditorButtonHtmlEditor')}">
-  <button></button>
-  <ul hidden="" title="">
-    <li><button id="toolbar-htmlEditor-strong">${scrapbook.lang('EditorButtonHtmlEditorStrong')}</button></li>
-    <li><button id="toolbar-htmlEditor-em">${scrapbook.lang('EditorButtonHtmlEditorEm')}</button></li>
-    <li><button id="toolbar-htmlEditor-underline">${scrapbook.lang('EditorButtonHtmlEditorUnderline')}</button></li>
-    <li><button id="toolbar-htmlEditor-strike">${scrapbook.lang('EditorButtonHtmlEditorStrike')}</button></li>
-    <hr/>
-    <li><button id="toolbar-htmlEditor-superscript">${scrapbook.lang('EditorButtonHtmlEditorSuperscript')}</button></li>
-    <li><button id="toolbar-htmlEditor-subscript">${scrapbook.lang('EditorButtonHtmlEditorSubscript')}</button></li>
-    <hr/>
-    <li><button id="toolbar-htmlEditor-color">${scrapbook.lang('EditorButtonHtmlEditorColor')}...</button></li>
-    <hr/>
-    <li><button id="toolbar-htmlEditor-formatBlockP">${scrapbook.lang('EditorButtonHtmlEditorFormatBlockP')}</button></li>
-    <li><button id="toolbar-htmlEditor-formatBlockH1">${scrapbook.lang('EditorButtonHtmlEditorFormatBlockH', [1])}</button></li>
-    <li><button id="toolbar-htmlEditor-formatBlockH2">${scrapbook.lang('EditorButtonHtmlEditorFormatBlockH', [2])}</button></li>
-    <li><button id="toolbar-htmlEditor-formatBlockH3">${scrapbook.lang('EditorButtonHtmlEditorFormatBlockH', [3])}</button></li>
-    <li><button id="toolbar-htmlEditor-formatBlockH4">${scrapbook.lang('EditorButtonHtmlEditorFormatBlockH', [4])}</button></li>
-    <li><button id="toolbar-htmlEditor-formatBlockH5">${scrapbook.lang('EditorButtonHtmlEditorFormatBlockH', [5])}</button></li>
-    <li><button id="toolbar-htmlEditor-formatBlockH6">${scrapbook.lang('EditorButtonHtmlEditorFormatBlockH', [6])}</button></li>
-    <li><button id="toolbar-htmlEditor-formatBlockDiv">${scrapbook.lang('EditorButtonHtmlEditorFormatBlockDiv')}</button></li>
-    <li><button id="toolbar-htmlEditor-formatBlockPre">${scrapbook.lang('EditorButtonHtmlEditorFormatBlockPre')}</button></li>
-    <hr/>
-    <li><button id="toolbar-htmlEditor-listUnordered">${scrapbook.lang('EditorButtonHtmlEditorListUnordered')}</button></li>
-    <li><button id="toolbar-htmlEditor-listOrdered">${scrapbook.lang('EditorButtonHtmlEditorListOrdered')}</button></li>
-    <hr/>
-    <li><button id="toolbar-htmlEditor-outdent">${scrapbook.lang('EditorButtonHtmlEditorOutdent')}</button></li>
-    <li><button id="toolbar-htmlEditor-indent">${scrapbook.lang('EditorButtonHtmlEditorIndent')}</button></li>
-    <hr/>
-    <li><button id="toolbar-htmlEditor-justifyLeft">${scrapbook.lang('EditorButtonHtmlEditorJustifyLeft')}</button></li>
-    <li><button id="toolbar-htmlEditor-justifyCenter">${scrapbook.lang('EditorButtonHtmlEditorJustifyCenter')}</button></li>
-    <li><button id="toolbar-htmlEditor-justifyRight">${scrapbook.lang('EditorButtonHtmlEditorJustifyRight')}</button></li>
-    <li><button id="toolbar-htmlEditor-justifyFull">${scrapbook.lang('EditorButtonHtmlEditorJustifyFull')}</button></li>
-    <hr/>
-    <li><button id="toolbar-htmlEditor-createLink">${scrapbook.lang('EditorButtonHtmlEditorCreateLink')}...</button></li>
-    <li><button id="toolbar-htmlEditor-hr">${scrapbook.lang('EditorButtonHtmlEditorHr')}</button></li>
-    <li><button id="toolbar-htmlEditor-todo">${scrapbook.lang('EditorButtonHtmlEditorTodo')}</button></li>
-    <li><button id="toolbar-htmlEditor-insertDate">${scrapbook.lang('EditorButtonHtmlEditorInsertDate')}</button></li>
-    <li><button id="toolbar-htmlEditor-insertHtml">${scrapbook.lang('EditorButtonHtmlEditorInsertHtml')}...</button></li>
-    <hr/>
-    <li><button id="toolbar-htmlEditor-removeFormat">${scrapbook.lang('EditorButtonHtmlEditorRemoveFormat')}</button></li>
-    <li><button id="toolbar-htmlEditor-unlink">${scrapbook.lang('EditorButtonHtmlEditorUnlink')}</button></li>
-  </ul>
-</div>
-<div id="toolbar-undo" title="${scrapbook.lang('EditorButtonUndo')}">
-  <button></button>
-  <ul hidden="" title="">
-    <li><button id="toolbar-undo-toggle" checked="">${scrapbook.lang('EditorButtonUndoToggle')}</button></li>
-  </ul>
-</div>
-<div id="toolbar-save" title="${scrapbook.lang('EditorButtonSave')}">
-  <button></button>
-  <ul hidden="" title="">
-    <li><button id="toolbar-save-deleteErased">${scrapbook.lang('EditorButtonSaveDeleteErased')}</button></li>
-    <li><button id="toolbar-save-internalize">${scrapbook.lang('EditorButtonSaveInternalize')}</button></li>
-    <li><button id="toolbar-save-createSubPage">${scrapbook.lang('EditorButtonSaveCreateSubPage')}...</button></li>
-    <hr/>
-    <li><button id="toolbar-save-editTitle">${scrapbook.lang('EditorButtonSaveEditTitle')}...</button></li>
-    <li><button id="toolbar-save-setViewport">${scrapbook.lang('EditorButtonSaveSetViewport')}...</button></li>
-    <hr/>
-    <li><button id="toolbar-save-pinTop">${scrapbook.lang('EditorButtonSavePinTop')}</button></li>
-  </ul>
-</div>
-<div id="toolbar-close" title="${scrapbook.lang('EditorButtonClose')}">
-  <button></button>
-</div>
+  <div id="toolbar-locate" title="${scrapbook.lang('EditorButtonLocate')}">
+    <button></button>
+    <ul hidden="" title="">
+      <li><button id="toolbar-locate-viewSitemap">${scrapbook.lang('EditorButtonLocateViewSitemap')}</button></li>
+      <li><button id="toolbar-locate-viewDirectory">${scrapbook.lang('EditorButtonLocateViewDirectory')}</button></li>
+      <li><button id="toolbar-locate-viewSource">${scrapbook.lang('EditorButtonLocateViewSource')}</button></li>
+    </ul>
+  </div>
+  <div id="toolbar-marker" title="${scrapbook.lang('EditorButtonMarker')}">
+    <button></button>
+    <ul hidden="" title="">
+      <li><button><scrapbook-toolbar-samp data-scrapbook-elem="toolbar-samp">${scrapbook.lang('EditorButtonMarkerItem', [1])}</scrapbook-toolbar-samp></button></li>
+      <li><button><scrapbook-toolbar-samp data-scrapbook-elem="toolbar-samp">${scrapbook.lang('EditorButtonMarkerItem', [2])}</scrapbook-toolbar-samp></button></li>
+      <li><button><scrapbook-toolbar-samp data-scrapbook-elem="toolbar-samp">${scrapbook.lang('EditorButtonMarkerItem', [3])}</scrapbook-toolbar-samp></button></li>
+      <li><button><scrapbook-toolbar-samp data-scrapbook-elem="toolbar-samp">${scrapbook.lang('EditorButtonMarkerItem', [4])}</scrapbook-toolbar-samp></button></li>
+      <li><button><scrapbook-toolbar-samp data-scrapbook-elem="toolbar-samp">${scrapbook.lang('EditorButtonMarkerItem', [5])}</scrapbook-toolbar-samp></button></li>
+      <li><button><scrapbook-toolbar-samp data-scrapbook-elem="toolbar-samp">${scrapbook.lang('EditorButtonMarkerItem', [6])}</scrapbook-toolbar-samp></button></li>
+      <li><button><scrapbook-toolbar-samp data-scrapbook-elem="toolbar-samp">${scrapbook.lang('EditorButtonMarkerItem', [7])}</scrapbook-toolbar-samp></button></li>
+      <li><button><scrapbook-toolbar-samp data-scrapbook-elem="toolbar-samp">${scrapbook.lang('EditorButtonMarkerItem', [8])}</scrapbook-toolbar-samp></button></li>
+      <li><button><scrapbook-toolbar-samp data-scrapbook-elem="toolbar-samp">${scrapbook.lang('EditorButtonMarkerItem', [9])}</scrapbook-toolbar-samp></button></li>
+      <li><button><scrapbook-toolbar-samp data-scrapbook-elem="toolbar-samp">${scrapbook.lang('EditorButtonMarkerItem', [10])}</scrapbook-toolbar-samp></button></li>
+      <li><button><scrapbook-toolbar-samp data-scrapbook-elem="toolbar-samp">${scrapbook.lang('EditorButtonMarkerItem', [11])}</scrapbook-toolbar-samp></button></li>
+      <li><button><scrapbook-toolbar-samp data-scrapbook-elem="toolbar-samp">${scrapbook.lang('EditorButtonMarkerItem', [12])}</scrapbook-toolbar-samp></button></li>
+    </ul>
+  </div>
+  <div id="toolbar-annotation" title="${scrapbook.lang('EditorButtonAnnotation')}">
+    <button></button>
+    <ul hidden="" title="">
+      <li><button id="toolbar-annotation-view">${scrapbook.lang('EditorButtonAnnotationView')}</button></li>
+      <li><button id="toolbar-annotation-prev">${scrapbook.lang('EditorButtonAnnotationPrev')}</button></li>
+      <li><button id="toolbar-annotation-next">${scrapbook.lang('EditorButtonAnnotationNext')}</button></li>
+      <hr/>
+      <li><button id="toolbar-annotation-link">${scrapbook.lang('EditorButtonAnnotationLink')}</button></li>
+      <li><button id="toolbar-annotation-sticky">${scrapbook.lang('EditorButtonAnnotationSticky')}</button></li>
+      <li><button id="toolbar-annotation-sticky-richtext">${scrapbook.lang('EditorButtonAnnotationStickyRichText')}</button></li>
+    </ul>
+  </div>
+  <div id="toolbar-eraser" title="${scrapbook.lang('EditorButtonEraser')}">
+    <button></button>
+    <ul hidden="" title="">
+      <li><button id="toolbar-eraser-eraseSelection">${scrapbook.lang('EditorButtonEraserSelection')}</button></li>
+      <li><button id="toolbar-eraser-eraseSelector">${scrapbook.lang('EditorButtonEraserSelector')}...</button></li>
+      <li><button id="toolbar-eraser-eraseSelectorAll">${scrapbook.lang('EditorButtonEraserSelectorAll')}...</button></li>
+      <li><button id="toolbar-eraser-eraseXpath">${scrapbook.lang('EditorButtonEraserXpath')}...</button></li>
+      <li><button id="toolbar-eraser-eraseXpathAll">${scrapbook.lang('EditorButtonEraserXpathAll')}...</button></li>
+      <hr/>
+      <li><button id="toolbar-eraser-uneraseSelection">${scrapbook.lang('EditorButtonEraserRevertSelection')}</button></li>
+      <li><button id="toolbar-eraser-uneraseAll">${scrapbook.lang('EditorButtonEraserRevertAll')}</button></li>
+      <hr/>
+      <li><button id="toolbar-eraser-removeEditsSelected">${scrapbook.lang('EditorButtonRemoveEditsSelection')}</button></li>
+      <li><button id="toolbar-eraser-removeEditsAll">${scrapbook.lang('EditorButtonRemoveEditsAll')}</button></li>
+    </ul>
+  </div>
+  <div id="toolbar-domEraser" title="${scrapbook.lang('EditorButtonDOMEraser')}">
+    <button></button>
+    <ul hidden="" title="">
+      <li><button id="toolbar-domEraser-expand">${scrapbook.lang('EditorButtonDOMEraserExpand', ['W'])}</button></li>
+      <li><button id="toolbar-domEraser-shrink">${scrapbook.lang('EditorButtonDOMEraserShrink', ['N'])}</button></li>
+      <li><button id="toolbar-domEraser-erase">${scrapbook.lang('EditorButtonDOMEraserErase', ['R'])}</button></li>
+      <li><button id="toolbar-domEraser-isolate">${scrapbook.lang('EditorButtonDOMEraserIsolate', ['I'])}</button></li>
+    </ul>
+  </div>
+  <div id="toolbar-htmlEditor" title="${scrapbook.lang('EditorButtonHtmlEditor')}">
+    <button></button>
+    <ul hidden="" title="">
+      <li><button id="toolbar-htmlEditor-strong">${scrapbook.lang('EditorButtonHtmlEditorStrong')}</button></li>
+      <li><button id="toolbar-htmlEditor-em">${scrapbook.lang('EditorButtonHtmlEditorEm')}</button></li>
+      <li><button id="toolbar-htmlEditor-underline">${scrapbook.lang('EditorButtonHtmlEditorUnderline')}</button></li>
+      <li><button id="toolbar-htmlEditor-strike">${scrapbook.lang('EditorButtonHtmlEditorStrike')}</button></li>
+      <hr/>
+      <li><button id="toolbar-htmlEditor-superscript">${scrapbook.lang('EditorButtonHtmlEditorSuperscript')}</button></li>
+      <li><button id="toolbar-htmlEditor-subscript">${scrapbook.lang('EditorButtonHtmlEditorSubscript')}</button></li>
+      <hr/>
+      <li><button id="toolbar-htmlEditor-color">${scrapbook.lang('EditorButtonHtmlEditorColor')}...</button></li>
+      <hr/>
+      <li><button id="toolbar-htmlEditor-formatBlockP">${scrapbook.lang('EditorButtonHtmlEditorFormatBlockP')}</button></li>
+      <li><button id="toolbar-htmlEditor-formatBlockH1">${scrapbook.lang('EditorButtonHtmlEditorFormatBlockH', [1])}</button></li>
+      <li><button id="toolbar-htmlEditor-formatBlockH2">${scrapbook.lang('EditorButtonHtmlEditorFormatBlockH', [2])}</button></li>
+      <li><button id="toolbar-htmlEditor-formatBlockH3">${scrapbook.lang('EditorButtonHtmlEditorFormatBlockH', [3])}</button></li>
+      <li><button id="toolbar-htmlEditor-formatBlockH4">${scrapbook.lang('EditorButtonHtmlEditorFormatBlockH', [4])}</button></li>
+      <li><button id="toolbar-htmlEditor-formatBlockH5">${scrapbook.lang('EditorButtonHtmlEditorFormatBlockH', [5])}</button></li>
+      <li><button id="toolbar-htmlEditor-formatBlockH6">${scrapbook.lang('EditorButtonHtmlEditorFormatBlockH', [6])}</button></li>
+      <li><button id="toolbar-htmlEditor-formatBlockDiv">${scrapbook.lang('EditorButtonHtmlEditorFormatBlockDiv')}</button></li>
+      <li><button id="toolbar-htmlEditor-formatBlockPre">${scrapbook.lang('EditorButtonHtmlEditorFormatBlockPre')}</button></li>
+      <hr/>
+      <li><button id="toolbar-htmlEditor-listUnordered">${scrapbook.lang('EditorButtonHtmlEditorListUnordered')}</button></li>
+      <li><button id="toolbar-htmlEditor-listOrdered">${scrapbook.lang('EditorButtonHtmlEditorListOrdered')}</button></li>
+      <hr/>
+      <li><button id="toolbar-htmlEditor-outdent">${scrapbook.lang('EditorButtonHtmlEditorOutdent')}</button></li>
+      <li><button id="toolbar-htmlEditor-indent">${scrapbook.lang('EditorButtonHtmlEditorIndent')}</button></li>
+      <hr/>
+      <li><button id="toolbar-htmlEditor-justifyLeft">${scrapbook.lang('EditorButtonHtmlEditorJustifyLeft')}</button></li>
+      <li><button id="toolbar-htmlEditor-justifyCenter">${scrapbook.lang('EditorButtonHtmlEditorJustifyCenter')}</button></li>
+      <li><button id="toolbar-htmlEditor-justifyRight">${scrapbook.lang('EditorButtonHtmlEditorJustifyRight')}</button></li>
+      <li><button id="toolbar-htmlEditor-justifyFull">${scrapbook.lang('EditorButtonHtmlEditorJustifyFull')}</button></li>
+      <hr/>
+      <li><button id="toolbar-htmlEditor-createLink">${scrapbook.lang('EditorButtonHtmlEditorCreateLink')}...</button></li>
+      <li><button id="toolbar-htmlEditor-hr">${scrapbook.lang('EditorButtonHtmlEditorHr')}</button></li>
+      <li><button id="toolbar-htmlEditor-todo">${scrapbook.lang('EditorButtonHtmlEditorTodo')}</button></li>
+      <li><button id="toolbar-htmlEditor-insertDate">${scrapbook.lang('EditorButtonHtmlEditorInsertDate')}</button></li>
+      <li><button id="toolbar-htmlEditor-insertHtml">${scrapbook.lang('EditorButtonHtmlEditorInsertHtml')}...</button></li>
+      <hr/>
+      <li><button id="toolbar-htmlEditor-removeFormat">${scrapbook.lang('EditorButtonHtmlEditorRemoveFormat')}</button></li>
+      <li><button id="toolbar-htmlEditor-unlink">${scrapbook.lang('EditorButtonHtmlEditorUnlink')}</button></li>
+    </ul>
+  </div>
+  <div id="toolbar-undo" title="${scrapbook.lang('EditorButtonUndo')}">
+    <button></button>
+    <ul hidden="" title="">
+      <li><button id="toolbar-undo-toggle" checked="">${scrapbook.lang('EditorButtonUndoToggle')}</button></li>
+    </ul>
+  </div>
+  <div id="toolbar-save" title="${scrapbook.lang('EditorButtonSave')}">
+    <button></button>
+    <ul hidden="" title="">
+      <li><button id="toolbar-save-deleteErased">${scrapbook.lang('EditorButtonSaveDeleteErased')}</button></li>
+      <li><button id="toolbar-save-internalize">${scrapbook.lang('EditorButtonSaveInternalize')}</button></li>
+      <li><button id="toolbar-save-createSubPage">${scrapbook.lang('EditorButtonSaveCreateSubPage')}...</button></li>
+      <hr/>
+      <li><button id="toolbar-save-editTitle">${scrapbook.lang('EditorButtonSaveEditTitle')}...</button></li>
+      <li><button id="toolbar-save-setViewport">${scrapbook.lang('EditorButtonSaveSetViewport')}...</button></li>
+      <hr/>
+      <li><button id="toolbar-save-pinTop">${scrapbook.lang('EditorButtonSavePinTop')}</button></li>
+    </ul>
+  </div>
+  <div id="toolbar-close" title="${scrapbook.lang('EditorButtonClose')}">
+    <button></button>
+  </div>
 </div>
 `);
   const wrapper = editor.internalElement = shadow.getElementById('toolbar');
@@ -2565,85 +2565,85 @@ const annotator = editor.annotator = (function () {
       const styleElem = shadowRoot.appendChild(document.createElement('style'));
       styleElem.textContent = `\
 :host {
-padding: 0 !important;
-overflow: visible !important;
-cursor: inherit !important;
+  padding: 0 !important;
+  overflow: visible !important;
+  cursor: inherit !important;
 }
 :host > form {
-position: relative;
-width: 100%;
-height: 100%;
+  position: relative;
+  width: 100%;
+  height: 100%;
 }
 :host > form > header {
-position: absolute;
-display: flex;
-box-sizing: border-box;
-top: -1.25em;
-height: 1.25em;
-width: 100%;
-justify-content: flex-end;
-cursor: ${mainElem.classList.contains('relative') ? 'inherit' : 'move'};
+  position: absolute;
+  display: flex;
+  box-sizing: border-box;
+  top: -1.25em;
+  height: 1.25em;
+  width: 100%;
+  justify-content: flex-end;
+  cursor: ${mainElem.classList.contains('relative') ? 'inherit' : 'move'};
 }
 :host > form > header img {
-margin: .1em;
-width: 1em;
-height: 1em;
-cursor: pointer;
+  margin: .1em;
+  width: 1em;
+  height: 1em;
+  cursor: pointer;
 }
 :host > form > header button {
-margin: .125em;
-border: 0;
-padding: 0;
-width: 1em;
-height: 1em;
-cursor: pointer;
+  margin: .125em;
+  border: 0;
+  padding: 0;
+  width: 1em;
+  height: 1em;
+  cursor: pointer;
 }
 :host > form > header button.save {
-background: url("${browser.runtime.getURL("resources/edit-sticky-save.gif")}") center/contain;
+  background: url("${browser.runtime.getURL("resources/edit-sticky-save.gif")}") center/contain;
 }
 :host > form > header button.delete {
-background: url("${browser.runtime.getURL("resources/edit-sticky-delete.gif")}") center/contain;
+  background: url("${browser.runtime.getURL("resources/edit-sticky-delete.gif")}") center/contain;
 }
 :host > form > textarea,
 :host > form > article {
-box-sizing: border-box;
-border: none;
-padding: .25em;
-width: 100%;
-height: 100%;
-overflow: auto;
-background-color: transparent;
-resize: none;
-font: inherit;
+  box-sizing: border-box;
+  border: none;
+  padding: .25em;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background-color: transparent;
+  resize: none;
+  font: inherit;
 }
 :host > form > textarea:focus,
 :host > form > article:focus {
-outline: none;
+  outline: none;
 }
 :host > form > .resizer {
-position: absolute;
-box-sizing: border-box;
+  position: absolute;
+  box-sizing: border-box;
 }
 :host > form > .resizer.ns {
-right: 9px;
-bottom: -6px;
-left: -6px;
-height: 15px;
-cursor: ns-resize;
+  right: 9px;
+  bottom: -6px;
+  left: -6px;
+  height: 15px;
+  cursor: ns-resize;
 }
 :host > form > .resizer.ew {
-right: -6px;
-bottom: 9px;
-top: 0;
-width: 15px;
-cursor: ew-resize;
+  right: -6px;
+  bottom: 9px;
+  top: 0;
+  width: 15px;
+  cursor: ew-resize;
 }
 :host > form > .resizer.nwse {
-right: -6px;
-bottom: -6px;
-width: 15px;
-height: 15px;
-cursor: nwse-resize;
+  right: -6px;
+  bottom: -6px;
+  width: 15px;
+  height: 15px;
+  cursor: nwse-resize;
 }
 `;
 

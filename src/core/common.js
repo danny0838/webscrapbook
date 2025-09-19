@@ -608,40 +608,40 @@ const SCRAPBOOK_OBJECT_REMOVE_TYPE_UNCOMMENT = new Set(["erased"]);
 
 const ANNOTATION_CSS = `\
 [data-scrapbook-elem="linemarker"][title] {
-cursor: help;
+  cursor: help;
 }
 [data-scrapbook-elem="sticky"] {
-display: block;
-overflow: auto;
+  display: block;
+  overflow: auto;
 }
 [data-scrapbook-elem="sticky"].styled {
-position: absolute;
-z-index: 2147483647;
-opacity: .95;
-box-sizing: border-box;
-margin: 0;
-border: 1px solid #CCCCCC;
-border-top-width: 1.25em;
-border-radius: .25em;
-padding: .25em;
-min-width: 6em;
-min-height: 4em;
-background: #FAFFFA;
-box-shadow: .15em .15em .3em black;
-font: .875em/1.2 sans-serif;
-color: black;
-overflow-wrap: break-word;
-cursor: help;
+  position: absolute;
+  z-index: 2147483647;
+  opacity: .95;
+  box-sizing: border-box;
+  margin: 0;
+  border: 1px solid #CCCCCC;
+  border-top-width: 1.25em;
+  border-radius: .25em;
+  padding: .25em;
+  min-width: 6em;
+  min-height: 4em;
+  background: #FAFFFA;
+  box-shadow: .15em .15em .3em black;
+  font: .875em/1.2 sans-serif;
+  color: black;
+  overflow-wrap: break-word;
+  cursor: help;
 }
 [data-scrapbook-elem="sticky"].styled.relative {
-position: relative;
-margin: 16px auto;
+  position: relative;
+  margin: 16px auto;
 }
 [data-scrapbook-elem="sticky"].styled.plaintext {
-white-space: pre-wrap;
+  white-space: pre-wrap;
 }
 [data-scrapbook-elem="sticky"].dragging {
-opacity: .75;
+  opacity: .75;
 }
 `;
 
@@ -1641,17 +1641,17 @@ scrapbook.openModalWindow = async function (options) {
   const cssElem = shadow.appendChild(doc.createElement('style'));
   cssElem.textContent = `
 :host {
-all: initial !important;
-position: absolute !important;
+  all: initial !important;
+  position: absolute !important;
 }
 dialog {
-all: initial;
-position: fixed;
-inset: 0;
+  all: initial;
+  position: fixed;
+  inset: 0;
 }
 .mask {
-z-index: 2147483647;
-background: rgba(0, 0, 0, 0.4);
+  z-index: 2147483647;
+  background: rgba(0, 0, 0, 0.4);
 }
 `;
 
