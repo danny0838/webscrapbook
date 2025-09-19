@@ -2,7 +2,7 @@
  * The background script for viewer functionality
  *****************************************************************************/
 
-import {scrapbook} from "../utils/common.mjs";
+import * as scrapbook from "../utils/common.mjs";
 
 scrapbook.loadOptionsAuto(); // async
 

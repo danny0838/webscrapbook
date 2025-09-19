@@ -5,7 +5,7 @@
  *****************************************************************************/
 
 import {isDebug} from "../utils/debug.mjs";
-import {scrapbook} from "../utils/common.mjs";
+import * as scrapbook from "../utils/common.mjs";
 import {capturer} from "./common.mjs";
 
 /**

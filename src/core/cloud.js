@@ -2,7 +2,8 @@
  * Script for cloud.html
  *****************************************************************************/
 
-import {scrapbook, DEFAULT_OPTIONS} from "../utils/common.mjs";
+import {DEFAULT_OPTIONS} from "../utils/common.mjs";
+import * as scrapbook from "../utils/common.mjs";
 
 function getTableKey(name, ts, size) {
   return JSON.stringify({table: "cloudFiles", ts, name, size});

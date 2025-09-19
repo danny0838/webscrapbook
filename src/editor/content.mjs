@@ -2,7 +2,8 @@
  * Content script for editor functionality.
  *****************************************************************************/
 
-import {scrapbook, ANNOTATION_CSS} from "../utils/common.mjs";
+import {ANNOTATION_CSS} from "../utils/common.mjs";
+import * as scrapbook from "../utils/common.mjs";
 import {Strftime} from "../lib/strftime.mjs";
 import {core} from "../content/core.mjs";
 

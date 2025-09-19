@@ -2,7 +2,7 @@
  * Script for details.html.
  *****************************************************************************/
 
-import {scrapbook} from "../utils/extension.mjs";
+import * as scrapbook from "../utils/extension.mjs";
 import {server} from "../scrapbook/server.mjs";
 
 scrapbook.loadOptionsAuto(); // async

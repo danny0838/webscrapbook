@@ -2,7 +2,7 @@
  * Shared class for item info formatting.
  *****************************************************************************/
 
-import {scrapbook} from "../utils/common.mjs";
+import * as scrapbook from "../utils/common.mjs";
 import {Strftime} from "../lib/strftime.mjs";
 
 class ItemInfoFormatter {

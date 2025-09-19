@@ -5,7 +5,7 @@
  *****************************************************************************/
 
 import {isDebug} from "../utils/debug.mjs";
-import {scrapbook} from "../utils/extension.mjs";
+import * as scrapbook from "../utils/extension.mjs";
 import {dataUriToFile} from "../utils/datauri.mjs";
 import {Zip} from "../utils/zip.mjs";
 import {sha1} from "../utils/sha.mjs";

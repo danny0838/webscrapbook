@@ -2,7 +2,7 @@
  * Script for browserAction.html
  *****************************************************************************/
 
-import {scrapbook} from "../utils/extension.mjs";
+import * as scrapbook from "../utils/extension.mjs";
 
 scrapbook.loadOptionsAuto(); // async
 
