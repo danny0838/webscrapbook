@@ -16,7 +16,7 @@
  *   ref: https://crbug.com/444772033
  *****************************************************************************/
 
-import {scrapbook} from "./common.mjs";
+import * as scrapbook from "./common.mjs";
 import {sha1} from "./sha.mjs";
 import * as Mime from "../lib/mime.mjs";
 

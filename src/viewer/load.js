@@ -2,7 +2,7 @@
  * Script for load.html
  *****************************************************************************/
 
-import {scrapbook} from "../utils/common.mjs";
+import * as scrapbook from "../utils/common.mjs";
 import {Zip, Maff} from "../utils/zip.mjs";
 import * as Mime from "../lib/mime.mjs";
 

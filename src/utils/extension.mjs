@@ -1,10 +1,20 @@
 /******************************************************************************
  * Shared utilities for extension page/background scripts.
- *
- * @modifies scrapbook
  *****************************************************************************/
 
-import {scrapbook} from "./common.mjs";
+import {
+  userAgent,
+  getUuid,
+  normalizeUrl,
+  splitUrl,
+  getOption,
+  getOptions,
+  invokeExtensionScript,
+  initContentScripts,
+  invokeContentScript,
+  getScreenBounds,
+  cache,
+} from "./common.mjs";
 
 
 /****************************************************************************
@@ -18,19 +28,19 @@ import {scrapbook} from "./common.mjs";
  * @param {string} params.cmd - without prefix "background."
  * @return {*}
  */
-scrapbook.invokeBackgroundScript = function ({cmd, args}) {
+function invokeBackgroundScript({cmd, args}) {
   // if this is the background page
   if (globalThis.background) {
     return globalThis.background[cmd](args);
   }
 
-  return scrapbook.invokeExtensionScript({cmd: `background.${cmd}`, args});
-};
+  return invokeExtensionScript({cmd: `background.${cmd}`, args});
+}
 
 /**
  * Wait for a tab to load completely.
  */
-scrapbook.waitTabLoading = async function (tab) {
+async function waitTabLoading(tab) {
   const {promise, resolve, reject} = Promise.withResolvers();
   const listener = (tabId, changeInfo, t) => {
     if (!(tabId === tab.id && changeInfo.status === 'complete')) { return; }
@@ -48,63 +58,67 @@ scrapbook.waitTabLoading = async function (tab) {
     browser.tabs.onUpdated.removeListener(listener);
     browser.tabs.onRemoved.removeListener(listener2);
   }
-};
+}
 
 
 /****************************************************************************
  * ScrapBook utilities
  ***************************************************************************/
 
-scrapbook.checkPermissions = async function () {
+async function checkPermissions() {
   return {
     "webRequestBlocking": await browser.permissions.contains({permissions: ["webRequestBlocking"]}),
     "host": await browser.permissions.contains({origins: ["http://*/", "https://*/"]}),
   };
-};
+}
 
 /**
  * @return {Promise<Array>} The URL match patterns for content pages.
  */
-scrapbook.getContentPagePattern = async function () {
-  const p = (async () => [
-    "http://*/*",
-    "https://*/*",
-    ...(await browser.extension.isAllowedFileSchemeAccess() ? ["file:///*"] : []),
-  ])();
-  scrapbook.getContentPagePattern = () => p;
-  return p;
-};
+const getContentPagePattern = (() => {
+  let p;
+  const init = () => {
+    return p = (async () => [
+      "http://*/*",
+      "https://*/*",
+      ...(await browser.extension.isAllowedFileSchemeAccess() ? ["file:///*"] : []),
+    ])();
+  };
+  return function getContentPagePattern() {
+    return p || init();
+  };
+})();
 
 /**
  * @return {Promise<Array>}
  */
-scrapbook.getContentTabs = async function (filter = {currentWindow: true}) {
-  filter = Object.assign({}, filter, {url: await scrapbook.getContentPagePattern()});
+async function getContentTabs(filter = {currentWindow: true}) {
+  filter = Object.assign({}, filter, {url: await getContentPagePattern()});
   const tabs = await browser.tabs.query(filter);
 
   // Note that tab.hidden is only supported in Firefox >= 61. For other
   // browsers it's undefined.
   return tabs.filter(tab => !tab.hidden);
-};
+}
 
 /**
  * Query for highlighted ("selected") tabs
  */
-scrapbook.getHighlightedTabs = async function (filter = {currentWindow: true}) {
+async function getHighlightedTabs(filter = {currentWindow: true}) {
   // In Chromium mobile (e.g. Kiwi browser 98), all tabs.Tab have
   // .highlighted = true and sometimes all tabs.Tab have .active = false
   // (e.g. when at browser action page).
   // Query with {active: true} to get the real active tabs instead.
-  if (scrapbook.userAgent.is('chromium') && scrapbook.userAgent.is('mobile')) {
+  if (userAgent.is('chromium') && userAgent.is('mobile')) {
     filter = Object.assign({}, filter, {active: true});
   } else {
     filter = Object.assign({}, filter, {highlighted: true});
   }
 
   return await browser.tabs.query(Object.assign(filter, {
-    url: await scrapbook.getContentPagePattern(),
+    url: await getContentPagePattern(),
   }));
-};
+}
 
 /**
  * @param {string} url
@@ -112,14 +126,14 @@ scrapbook.getHighlightedTabs = async function (filter = {currentWindow: true}) {
  * @param {boolean} [inNormalWindow] - Open in a normal window only.
  * @return {Promise<Tab>}
  */
-scrapbook.visitLink = async function ({
+async function visitLink({
   url,
   newTab = false,
   inNormalWindow = false,
 }) {
   // If inNormalWindow, create/update a tab in the last focused window.
   if (inNormalWindow && browser.windows) {
-    const win = await scrapbook.invokeBackgroundScript({
+    const win = await invokeBackgroundScript({
       cmd: "getLastFocusedWindow",
       args: {windowTypes: ['normal'], populate: !newTab},
     });
@@ -150,16 +164,16 @@ scrapbook.visitLink = async function ({
   // focused window" when e.g. creating the second tab in a popup window in
   // Chromium).
   return await browser.tabs.create({url});
-};
+}
 
 /**
  * Wrapped browser.windows.create() with automatic compatibility handling.
  */
-scrapbook.createWindow = async function (createData) {
+async function createWindow(createData) {
   createData = Object.assign({}, createData);
   const updateDatas = [];
 
-  if (scrapbook.userAgent.is('gecko')) {
+  if (userAgent.is('gecko')) {
     let updateData = {};
 
     // Firefox < 86: `focused` in `createData` causes an error.
@@ -168,14 +182,14 @@ scrapbook.createWindow = async function (createData) {
     // https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/windows/create#browser_compatibility
     if (typeof createData.focused !== 'undefined') {
       updateData.focused = createData.focused;
-      if (scrapbook.userAgent.major < 86) {
+      if (userAgent.major < 86) {
         delete createData.focused;
       }
     }
 
     // Firefox < 109: ignores `left` and `top` in `createData` for popups.
     // https://bugzilla.mozilla.org/show_bug.cgi?id=1271047
-    if (scrapbook.userAgent.major < 109 && createData.type === 'popup') {
+    if (userAgent.major < 109 && createData.type === 'popup') {
       if (typeof createData.left !== 'undefined') {
         updateData.left = createData.left;
         delete createData.left;
@@ -212,7 +226,7 @@ scrapbook.createWindow = async function (createData) {
   }
 
   return winNew;
-};
+}
 
 /**
  * Simplified API to invoke a capture with an array of tasks.
@@ -220,9 +234,9 @@ scrapbook.createWindow = async function (createData) {
  * @param {Array} tasks
  * @return {Promise<(Window|Tab)>}
  */
-scrapbook.invokeCapture = async function (tasks) {
-  return await scrapbook.invokeCaptureEx({taskInfo: {tasks}, waitForResponse: false});
-};
+async function invokeCapture(tasks) {
+  return await invokeCaptureEx({taskInfo: {tasks}, waitForResponse: false});
+}
 
 /**
  * Advanced API to invoke a capture.
@@ -237,7 +251,7 @@ scrapbook.invokeCapture = async function (tasks) {
  * @param {boolean} [params.waitForResponse]
  * @return {Promise<(Object|Window|Tab)>}
  */
-scrapbook.invokeCaptureEx = async function ({
+async function invokeCaptureEx({
   taskInfo,
   dialog = null,
   uniquify,
@@ -247,15 +261,15 @@ scrapbook.invokeCaptureEx = async function ({
   waitForResponse = true,
 }) {
   if (dialog) {
-    const missionId = scrapbook.getUuid();
+    const missionId = getUuid();
     const key = {table: "batchCaptureMissionCache", id: missionId};
-    await scrapbook.cache.set(key, {
+    await cache.set(key, {
       taskInfo,
       uniquify,
       ignoreTitle,
     });
     const url = browser.runtime.getURL(`capturer/${dialog}.html`) + `?mid=${missionId}`;
-    return scrapbook.visitLink({url, newTab: true, inNormalWindow: true});
+    return visitLink({url, newTab: true, inNormalWindow: true});
   }
 
   if (uniquify || ignoreTitle) {
@@ -274,7 +288,7 @@ scrapbook.invokeCaptureEx = async function ({
           tabs.add(tabId);
         } else if (url) {
           try {
-            const normalizedUrl = scrapbook.normalizeUrl(url);
+            const normalizedUrl = normalizeUrl(url);
             if (urls.has(normalizedUrl)) {
               return false;
             }
@@ -295,16 +309,16 @@ scrapbook.invokeCaptureEx = async function ({
     }
   }
 
-  const missionId = scrapbook.getUuid();
+  const missionId = getUuid();
   const key = {table: "captureMissionCache", id: missionId};
-  await scrapbook.cache.set(key, taskInfo);
+  await cache.set(key, taskInfo);
   const url = browser.runtime.getURL("capturer/capturer.html") + `?mid=${missionId}`;
 
   // launch capturer
   let tab;
   if (browser.windows) {
     const win = await browser.windows.getCurrent();
-    ({tabs: [tab]} = await scrapbook.createWindow(Object.assign({
+    ({tabs: [tab]} = await createWindow(Object.assign({
       url,
       type: 'popup',
       width: 400,
@@ -326,10 +340,10 @@ scrapbook.invokeCaptureEx = async function ({
   }
 
   // wait until tab loading complete
-  await scrapbook.waitTabLoading(tab);
+  await waitTabLoading(tab);
 
   // retrieve capture results
-  const results = await scrapbook.invokeExtensionScript({
+  const results = await invokeExtensionScript({
     id: missionId,
     cmd: 'capturer.getMissionResult',
     args: {},
@@ -339,12 +353,12 @@ scrapbook.invokeCaptureEx = async function ({
     tab,
     results,
   };
-};
+}
 
 /**
  * Shortcut for invoking a general "capture as".
  */
-scrapbook.invokeCaptureAs = async function (taskInfo, {
+async function invokeCaptureAs(taskInfo, {
   ignoreTitle = false,
   uniquify = false,
 } = {}) {
@@ -357,35 +371,35 @@ scrapbook.invokeCaptureAs = async function (taskInfo, {
     delay: null,
     options: null,
   }, taskInfo);
-  taskInfo.options = Object.assign(await scrapbook.getOptions("capture", null), taskInfo.options);
-  return await scrapbook.invokeCaptureEx({
+  taskInfo.options = Object.assign(await getOptions("capture", null), taskInfo.options);
+  return await invokeCaptureEx({
     dialog: 'details',
     taskInfo,
     ignoreTitle,
     uniquify,
   });
-};
+}
 
 /**
  * Shortcut for invoking a general "batch capture as".
  */
-scrapbook.invokeCaptureBatch = async function (taskInfo) {
-  return await scrapbook.invokeCaptureEx({
+async function invokeCaptureBatch(taskInfo) {
+  return await invokeCaptureEx({
     dialog: 'batch',
     taskInfo,
     ignoreTitle: true,
     uniquify: true,
   });
-};
+}
 
 /**
  * Shortcut for invoking a general "batch capture links as".
  */
-scrapbook.invokeCaptureBatchLinks = async function (taskInfo) {
+async function invokeCaptureBatchLinks(taskInfo) {
   const subTasks = taskInfo.tasks.map(({tabId, frameId = 0, fullPage}) => {
-    return scrapbook.initContentScripts(tabId, frameId)
+    return initContentScripts(tabId, frameId)
       .then(() => {
-        return scrapbook.invokeContentScript({
+        return invokeContentScript({
           tabId,
           frameId,
           cmd: "capturer.retrieveSelectedLinks",
@@ -403,22 +417,22 @@ scrapbook.invokeCaptureBatchLinks = async function (taskInfo) {
   for (const subTaskList of await Promise.all(subTasks)) {
     tasks = tasks.concat(subTaskList);
   }
-  return await scrapbook.invokeCaptureBatch(Object.assign({}, taskInfo, {tasks}));
-};
+  return await invokeCaptureBatch(Object.assign({}, taskInfo, {tasks}));
+}
 
 /**
  * @param {boolean} [newTab] - Whether to open in a new tab.
  * @return {undefined|Tab}
  */
-scrapbook.openScrapBook = async function ({newTab = true} = {}) {
-  if (browser.sidebarAction && await scrapbook.getOption("scrapbook.useBrowserSidebars")) {
+async function openScrapBook({newTab = true} = {}) {
+  if (browser.sidebarAction && await getOption("scrapbook.useBrowserSidebars")) {
     // This can only be called in a user action handler.
     // https://developer.mozilla.org/docs/Mozilla/Add-ons/WebExtensions/User_actions
     return await browser.sidebarAction.open();
   }
 
   // Mobile browser (e.g. Kiwi) crashes when opening the side panel
-  if (browser.sidePanel && !scrapbook.userAgent.is('mobile') && await scrapbook.getOption("scrapbook.useBrowserSidebars")) {
+  if (browser.sidePanel && !userAgent.is('mobile') && await getOption("scrapbook.useBrowserSidebars")) {
     const {id: windowId} = await browser.windows.getCurrent({windowTypes: ['normal']});
     // This may only be called in response to a user action.
     // https://developer.chrome.com/docs/extensions/reference/api/sidePanel#method-open
@@ -428,7 +442,7 @@ scrapbook.openScrapBook = async function ({newTab = true} = {}) {
   const url = browser.runtime.getURL("scrapbook/sidebar.html");
 
   let sidebarTab = (await browser.tabs.query({}))
-      .filter(t => scrapbook.splitUrl(t.url)[0] === url)[0];
+      .filter(t => splitUrl(t.url)[0] === url)[0];
 
   openInSidebarWindow: {
     // Firefox Android does not support windows
@@ -457,7 +471,7 @@ scrapbook.openScrapBook = async function ({newTab = true} = {}) {
       height: screenHeight,
       left: screenLeft,
       top: screenTop,
-    } = await scrapbook.getScreenBounds(currentWindow);
+    } = await getScreenBounds(currentWindow);
     const left = screenLeft;
     const top = screenTop;
     const width = Math.max(Math.floor(screenWidth / 5 - 1), 200);
@@ -473,7 +487,7 @@ scrapbook.openScrapBook = async function ({newTab = true} = {}) {
         drawAttention: true,
       });
     } else {
-      sidebarWindow = await scrapbook.createWindow({
+      sidebarWindow = await createWindow({
         url,
         left,
         top,
@@ -511,28 +525,46 @@ scrapbook.openScrapBook = async function ({newTab = true} = {}) {
     return await browser.tabs.update(sidebarTab.id, {active: true});
   }
 
-  return await scrapbook.visitLink({url, newTab});
-};
+  return await visitLink({url, newTab});
+}
 
-scrapbook.editTab = async function ({tabId, frameId = 0, willActive, force}) {
-  await scrapbook.initContentScripts(tabId);
-  return await scrapbook.invokeContentScript({
+async function editTab({tabId, frameId = 0, willActive, force}) {
+  await initContentScripts(tabId);
+  return await invokeContentScript({
     tabId,
     frameId,
     cmd: "editor.init",
     args: {willActive, force},
   });
-};
+}
 
-scrapbook.searchCaptures = async function ({tabs, newTab = true}) {
+async function searchCaptures({tabs, newTab = true}) {
   const url = new URL(browser.runtime.getURL(`scrapbook/search-captures.html`));
   for (const tab of tabs) {
     url.searchParams.append('q', tab.url);
   }
-  return await scrapbook.visitLink({
+  return await visitLink({
     url: url.href,
     newTab,
   });
-};
+}
 
 export * from "./common.mjs";
+export {
+  invokeBackgroundScript,
+  waitTabLoading,
+  checkPermissions,
+  getContentPagePattern,
+  getContentTabs,
+  getHighlightedTabs,
+  visitLink,
+  createWindow,
+  invokeCapture,
+  invokeCaptureEx,
+  invokeCaptureAs,
+  invokeCaptureBatch,
+  invokeCaptureBatchLinks,
+  openScrapBook,
+  editTab,
+  searchCaptures,
+};

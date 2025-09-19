@@ -1,5 +1,5 @@
 /******************************************************************************
- * Shared utilities for most background and content scripts.
+ * Shared general utilities.
  *
  * @requires browser
  *****************************************************************************/
@@ -174,10 +174,10 @@ const DEFAULT_OPTIONS = {
 
 const OPTION_PARSERS = {
   "capture.saveFolder": (source) => {
-    return source.split(/[\\/]/).map(x => scrapbook.validateFilename(x)).join('/');
+    return source.split(/[\\/]/).map(x => validateFilename(x)).join('/');
   },
   "capture.saveFilename": (source) => {
-    return source.split(/[\\/]/).map(x => scrapbook.validateFilename(x)).join('/');
+    return source.split(/[\\/]/).map(x => validateFilename(x)).join('/');
   },
   "capture.downLink.file.extFilter": (...args) => {
     const PREFIX_MIME = 'mime:';
@@ -200,7 +200,7 @@ const OPTION_PARSERS = {
               throw new Error(`Line ${i + 1}: ${ex.message}`);
             }
           } else {
-            rv.mime.push(new RegExp(`^(?:${scrapbook.escapeRegExp(line)})$`, 'i'));
+            rv.mime.push(new RegExp(`^(?:${escapeRegExp(line)})$`, 'i'));
           }
           continue;
         }
@@ -214,7 +214,7 @@ const OPTION_PARSERS = {
         } else {
           const regex = line.split(REGEX_EXT_SEP)
             .filter(x => !!x)
-            .map(x => scrapbook.escapeRegExp(x))
+            .map(x => escapeRegExp(x))
             .join('|');
           rv.ext.push(new RegExp(`^(?:${regex})$`, 'i'));
         }
@@ -247,7 +247,7 @@ const OPTION_PARSERS = {
             throw new Error(`Line ${i + 1}: ${ex.message}`);
           }
         } else {
-          rule = scrapbook.splitUrlByAnchor(rule)[0];
+          rule = splitUrlByAnchor(rule)[0];
           rv.push(rule);
         }
       }
@@ -268,7 +268,7 @@ const OPTION_PARSERS = {
         let rule = line.split(REGEX_SPACES)[0];
         if (!rule) { continue; }
 
-        rule = scrapbook.splitUrlByAnchor(rule)[0];
+        rule = splitUrlByAnchor(rule)[0];
         rv.push(rule);
       }
       return rv;
@@ -530,125 +530,121 @@ const VALID_SHADOW_HOST_NAMES = new Set([
 ]);
 
 /**
- * @global
- * @namespace
+ * ref: source code of vAPI.webextFlavor of uBlock Origin
  */
-const scrapbook = {
-  /**
-   * scrapbook.userAgent
-   *
-   * ref: source code of vAPI.webextFlavor of uBlock Origin
-   */
-  get userAgent() {
-    const ua = navigator.userAgent;
-    const manifest = (() => {
-      try {
-        return browser.runtime.getManifest();
-      } catch (ex) {
-        // dummy object to prevent an error
-        return {};
-      }
-    })();
-
-    const soup = new Set(['webext']);
-    const flavor = {
-      major: 0,
-      soup: soup,
-      is: (value) => soup.has(value),
-    };
-
-    // Whether this extension is a dev build.
-    if (/^\d+\.\d+\.\d+\D/.test(manifest.version)) {
-      soup.add('devbuild');
+const userAgent = (() => {
+  const ua = navigator.userAgent;
+  const manifest = (() => {
+    try {
+      return browser.runtime.getManifest();
+    } catch (ex) {
+      // dummy object to prevent an error
+      return {};
     }
+  })();
 
-    if (/\bMobile\b/.test(ua)) {
-      soup.add('mobile');
-    }
+  const soup = new Set(['webext']);
+  const flavor = {
+    major: 0,
+    soup: soup,
+    is: (value) => soup.has(value),
+  };
 
-    // Synchronous -- order of tests is important
-    let match;
-    if ((match = /\bFirefox\/(\d+)/.exec(ua)) !== null) {
-      flavor.major = parseInt(match[1], 10) || 0;
-      soup.add('mozilla').add('firefox');
-    } else if ((match = /\bEdge\/(\d+)/.exec(ua)) !== null) {
-      flavor.major = parseInt(match[1], 10) || 0;
+  // Whether this extension is a dev build.
+  if (/^\d+\.\d+\.\d+\D/.test(manifest.version)) {
+    soup.add('devbuild');
+  }
+
+  if (/\bMobile\b/.test(ua)) {
+    soup.add('mobile');
+  }
+
+  // Synchronous -- order of tests is important
+  let match;
+  if ((match = /\bFirefox\/(\d+)/.exec(ua)) !== null) {
+    flavor.major = parseInt(match[1], 10) || 0;
+    soup.add('mozilla').add('firefox');
+  } else if ((match = /\bEdge\/(\d+)/.exec(ua)) !== null) {
+    flavor.major = parseInt(match[1], 10) || 0;
+    soup.add('microsoft').add('edge');
+  } else if ((match = /\bOPR\/(\d+)/.exec(ua)) !== null) {
+    const reEx = /\bChrom(?:e|ium)\/([\d.]+)/;
+    if (reEx.test(ua)) { match = reEx.exec(ua); }
+    flavor.major = parseInt(match[1], 10) || 0;
+    soup.add('opera').add('chromium');
+  } else if ((match = /\bChromium\/(\d+)/.exec(ua)) !== null) {
+    flavor.major = parseInt(match[1], 10) || 0;
+    soup.add('chromium');
+  } else if ((match = /\bChrome\/(\d+)/.exec(ua)) !== null) {
+    flavor.major = parseInt(match[1], 10) || 0;
+    soup.add('google').add('chromium');
+    if (/\bEdg\/([\d.]+)/.test(ua)) {
+      // Chromium based Edge
       soup.add('microsoft').add('edge');
-    } else if ((match = /\bOPR\/(\d+)/.exec(ua)) !== null) {
-      const reEx = /\bChrom(?:e|ium)\/([\d.]+)/;
-      if (reEx.test(ua)) { match = reEx.exec(ua); }
-      flavor.major = parseInt(match[1], 10) || 0;
-      soup.add('opera').add('chromium');
-    } else if ((match = /\bChromium\/(\d+)/.exec(ua)) !== null) {
-      flavor.major = parseInt(match[1], 10) || 0;
-      soup.add('chromium');
-    } else if ((match = /\bChrome\/(\d+)/.exec(ua)) !== null) {
-      flavor.major = parseInt(match[1], 10) || 0;
-      soup.add('google').add('chromium');
-      if (/\bEdg\/([\d.]+)/.test(ua)) {
-        // Chromium based Edge
-        soup.add('microsoft').add('edge');
-      }
-    } else if ((match = /\bSafari\/(\d+)/.exec(ua)) !== null) {
-      flavor.major = parseInt(match[1], 10) || 0;
-      soup.add('apple').add('safari');
-    } else if ((match = /\bNode\.js\/(\d+)/.exec(ua)) !== null) {
-      flavor.major = parseInt(match[1], 10) || 0;
-      soup.add('node.js');
     }
+  } else if ((match = /\bSafari\/(\d+)/.exec(ua)) !== null) {
+    flavor.major = parseInt(match[1], 10) || 0;
+    soup.add('apple').add('safari');
+  } else if ((match = /\bNode\.js\/(\d+)/.exec(ua)) !== null) {
+    flavor.major = parseInt(match[1], 10) || 0;
+    soup.add('node.js');
+  }
 
-    if (manifest.browser_specific_settings?.gecko) {
-      soup.add('gecko');
-    }
+  if (manifest.browser_specific_settings?.gecko) {
+    soup.add('gecko');
+  }
 
-    Object.defineProperty(this, 'userAgent', {value: flavor});
-    return flavor;
-  },
-};
+  return flavor;
+})();
 
 /****************************************************************************
  * Options
  ***************************************************************************/
 
-scrapbook.options = null;
+let _options = null;
 
 /**
- * Load all options and store in scrapbook.options for sync retrieval.
+ * Load all options and store in `_options` for sync retrieval.
  */
-scrapbook.loadOptions = async function () {
-  scrapbook.options = await scrapbook.getOptions();
-  return scrapbook.options;
-};
+async function loadOptions() {
+  _options = await getOptions();
+  return _options;
+}
 
 /**
  * Register automatic options loading and return a singleton load result.
  */
-scrapbook.loadOptionsAuto = async function () {
-  browser.storage.onChanged.addListener((changes, areaName) => {
-    // Cache keys are stored in storage.local and are valid JSON format.
-    // We only update when a config key is changed.
-    if (areaName === "local") {
-      try {
-        for (const key in changes) { JSON.parse(key); }
-        return;
-      } catch (ex) {}
+const loadOptionsAuto = (() => {
+  let p;
+  const init = async () => {
+    browser.storage.onChanged.addListener((changes, areaName) => {
+      // Cache keys are stored in storage.local and are valid JSON format.
+      // We only update when a config key is changed.
+      if (areaName === "local") {
+        try {
+          for (const key in changes) { JSON.parse(key); }
+          return;
+        } catch (ex) {}
 
-      for (const key in changes) {
-        scrapbook.options[key] = 'newValue' in changes[key] ? changes[key].newValue : DEFAULT_OPTIONS[key];
+        for (const key in changes) {
+          _options[key] = 'newValue' in changes[key] ? changes[key].newValue : DEFAULT_OPTIONS[key];
+        }
       }
-    }
-  });
-  const p = scrapbook.getOptions();
-  const fn = scrapbook.loadOptionsAuto = () => p;
-  return scrapbook.options = await p;
-};
+    });
+    p = getOptions();
+    return _options = await p;
+  };
+  return function loadOptionsAuto() {
+    return p || init();
+  };
+})();
 
 /**
  * @param {string} key
  * @param {Object} [options]
  * @return {*|Promise<*>}
  */
-scrapbook.getOption = function (key, options = scrapbook.options) {
+function getOption(key, options = _options) {
   if (options) {
     return options[key];
   }
@@ -656,27 +652,27 @@ scrapbook.getOption = function (key, options = scrapbook.options) {
   return browser.storage.local.get(args).then((response) => {
     return response[key];
   });
-};
+}
 
 /**
  * @param {string} key - The option name to parse
  * @param {*} [value] - An arbitarary value to feed to the parser. Read as
- *    scrapbook.getOption if not provided.
+ *    `getOption` if not provided.
  * @return {*|Promise<*>}
  */
-scrapbook.parseOption = function (key, value) {
+function parseOption(key, value) {
   const parser = OPTION_PARSERS[key] || (x => x);
   if (typeof value !== 'undefined') {
     return parser(value);
   }
-  value = scrapbook.getOption(key);
-  if (!scrapbook.isPromise(value)) {
+  value = getOption(key);
+  if (!isPromise(value)) {
     return parser(value);
   }
   return value.then((value) => {
     return parser(value);
   });
-};
+}
 
 /**
  * @param {null|string|string[]|Object} [keys] - Fallback to DEFAULT_OPTIONS
@@ -684,9 +680,9 @@ scrapbook.parseOption = function (key, value) {
  * @param {Object} [options]
  * @return {Object|Promise<Object>}
  */
-scrapbook.getOptions = function (keys = DEFAULT_OPTIONS, options = scrapbook.options) {
+function getOptions(keys = DEFAULT_OPTIONS, options = _options) {
   if (typeof keys === "string") {
-    const regex = new RegExp("^" + scrapbook.escapeRegExp(keys) + "(?:\\.|$)");
+    const regex = new RegExp("^" + escapeRegExp(keys) + "(?:\\.|$)");
     keys = {};
     for (const key in DEFAULT_OPTIONS) {
       if (regex.test(key)) {
@@ -711,25 +707,25 @@ scrapbook.getOptions = function (keys = DEFAULT_OPTIONS, options = scrapbook.opt
     return rv;
   }
   return browser.storage.local.get(keys);
-};
+}
 
 /**
  * @param {Object} keys
  */
-scrapbook.setOptions = async function (keys) {
+async function setOptions(keys) {
   return browser.storage.local.set(keys);
-};
+}
 
 /**
  * @param {string[]} keys
  */
-scrapbook.clearOptions = async function (keys) {
+async function clearOptions(keys) {
   return await browser.storage.local.remove(keys);
-};
+}
 
-scrapbook.autoCacheOptions = function () {
-  const fulltextCache = scrapbook.getOption("scrapbook.autoCache.fulltextCache");
-  const createStaticSite = scrapbook.getOption("scrapbook.autoCache.createStaticSite");
+function autoCacheOptions() {
+  const fulltextCache = getOption("scrapbook.autoCache.fulltextCache");
+  const createStaticSite = getOption("scrapbook.autoCache.createStaticSite");
   if (!(fulltextCache || createStaticSite)) {
     return null;
   }
@@ -737,7 +733,7 @@ scrapbook.autoCacheOptions = function () {
   if (fulltextCache) { rv.fulltext = 1; }
   if (createStaticSite) { rv.static_site = 1; }
   return rv;
-};
+}
 
 
 /****************************************************************************
@@ -777,20 +773,20 @@ scrapbook.autoCacheOptions = function () {
  * @param {*} obj
  * @return {*|serializedBlob|Promise<serializedBlob>}
  */
-scrapbook.serializeObject = function (...args) {
+const serializeObject = (() => {
   // Max JavaScript string is 256MiB UTF-16 chars in an older Browser.
   const BYTE_STRING_MAX = 32 * 1024 * 1024;
 
   const readBlobAsByteStrings = async (blob) => {
     const rv = [];
-    const u8ar = new Uint8Array(await scrapbook.readFileAsArrayBuffer(blob));
+    const u8ar = new Uint8Array(await readFileAsArrayBuffer(blob));
     for (let i = 0, I = u8ar.length; i < I; i += BYTE_STRING_MAX) {
-      rv.push(scrapbook.arrayBufferToByteString(u8ar.subarray(i, i + BYTE_STRING_MAX)));
+      rv.push(arrayBufferToByteString(u8ar.subarray(i, i + BYTE_STRING_MAX)));
     }
     return rv;
   };
 
-  const fn = scrapbook.serializeObject = (obj) => {
+  return function serializeObject(obj) {
     if (obj instanceof File) {
       return (async () => ({
         __type__: 'File',
@@ -808,9 +804,7 @@ scrapbook.serializeObject = function (...args) {
     }
     return obj;
   };
-
-  return fn(...args);
-};
+})();
 
 /**
  * Deserialize a serializedBlob.
@@ -820,12 +814,12 @@ scrapbook.serializeObject = function (...args) {
  * @param {serializedBlob|*} obj
  * @return {*|Promise<*>}
  */
-scrapbook.deserializeObject = function (obj) {
+function deserializeObject(obj) {
   switch (obj?.__type__) {
     case "File": {
       const {data, name, type, lastModified} = obj;
       return new File(
-        data.map(x => scrapbook.byteStringToArrayBuffer(x)),
+        data.map(x => byteStringToArrayBuffer(x)),
         name,
         {type, lastModified},
       );
@@ -833,15 +827,15 @@ scrapbook.deserializeObject = function (obj) {
     case "Blob": {
       const {data, type} = obj;
       return new Blob(
-        data.map(x => scrapbook.byteStringToArrayBuffer(x)),
+        data.map(x => byteStringToArrayBuffer(x)),
         {type},
       );
     }
   }
   return obj;
-};
+}
 
-scrapbook.cache = {
+const cache = {
   _current: 'auto',
 
   get current() {
@@ -858,9 +852,9 @@ scrapbook.cache = {
   async _serializeObject(obj) {
     const map = {};
     const objStr = JSON.stringify(obj, (key, value) => {
-      const valueNew = scrapbook.serializeObject(value);
+      const valueNew = serializeObject(value);
       if (valueNew !== value) {
-        const id = scrapbook.getUuid();
+        const id = getUuid();
         map[id] = valueNew;
         return id;
       }
@@ -884,9 +878,9 @@ scrapbook.cache = {
   async _deserializeObject(obj) {
     const map = {};
     const objStr = JSON.stringify(obj, (key, value) => {
-      const valueNew = scrapbook.deserializeObject(value);
+      const valueNew = deserializeObject(value);
       if (valueNew !== value) {
-        const id = scrapbook.getUuid();
+        const id = getUuid();
         map[id] = valueNew;
         return id;
       }
@@ -1010,19 +1004,19 @@ scrapbook.cache = {
       // In Chromium, a Blob cannot be stored in browser.storage,
       // fallback to an object containing byte string data.
       delete this._serializeObjectNeeded;
-      return this._serializeObjectNeeded = scrapbook.userAgent.is('chromium');
+      return this._serializeObjectNeeded = userAgent.is('chromium');
     },
 
     async _serializeObject(obj) {
       if (this._serializeObjectNeeded) {
-        return await scrapbook.cache._serializeObject(obj);
+        return await cache._serializeObject(obj);
       }
       return obj;
     },
 
     async _deserializeObject(obj) {
       if (this._serializeObjectNeeded) {
-        return await scrapbook.cache._deserializeObject(obj);
+        return await cache._deserializeObject(obj);
       }
       return obj;
     },
@@ -1052,7 +1046,7 @@ scrapbook.cache = {
       if (!keys) {
         const items = await browser.storage.local.get();
         for (const key in items) {
-          if (!scrapbook.cache._applyFilter(key, filter)) {
+          if (!cache._applyFilter(key, filter)) {
             delete items[key];
           }
         }
@@ -1060,7 +1054,7 @@ scrapbook.cache = {
       }
 
       const items = await browser.storage.local.get(
-        keys.filter(key => scrapbook.cache._applyFilter(key, filter)),
+        keys.filter(key => cache._applyFilter(key, filter)),
       );
       return await this._deserializeObject(items);
     },
@@ -1076,7 +1070,7 @@ scrapbook.cache = {
     async removeAll(filter) {
       const keys = [];
       for (const key of (await this._getKeys())) {
-        if (scrapbook.cache._applyFilter(key, filter)) {
+        if (cache._applyFilter(key, filter)) {
           keys.push(key);
         }
       }
@@ -1152,7 +1146,7 @@ scrapbook.cache = {
 
     async get(key) {
       if (await this._nosupport) {
-        return scrapbook.cache.storage.get(key);
+        return cache.storage.get(key);
       }
 
       return await this._transaction(async (objectStore) => {
@@ -1166,7 +1160,7 @@ scrapbook.cache = {
 
     async getAll(filter) {
       if (await this._nosupport) {
-        return scrapbook.cache.storage.getAll(filter);
+        return cache.storage.getAll(filter);
       }
 
       return await this._transaction(async (objectStore) => {
@@ -1178,7 +1172,7 @@ scrapbook.cache = {
               resolve(result);
               return;
             }
-            if (scrapbook.cache._applyFilter(cursor.key, filter)) {
+            if (cache._applyFilter(cursor.key, filter)) {
               result[cursor.key] = cursor.value;
             }
             cursor.continue();
@@ -1189,7 +1183,7 @@ scrapbook.cache = {
 
     async set(key, value) {
       if (await this._nosupport) {
-        return scrapbook.cache.storage.set(key, value);
+        return cache.storage.set(key, value);
       }
 
       return await this._transaction(async (objectStore) => {
@@ -1199,7 +1193,7 @@ scrapbook.cache = {
 
     async remove(key) {
       if (await this._nosupport) {
-        return scrapbook.cache.storage.remove(key);
+        return cache.storage.remove(key);
       }
 
       return await this._transaction(async (objectStore) => {
@@ -1209,7 +1203,7 @@ scrapbook.cache = {
 
     async removeAll(filter) {
       if (await this._nosupport) {
-        return scrapbook.cache.storage.removeAll(filter);
+        return cache.storage.removeAll(filter);
       }
 
       return await this._transaction(async (objectStore) => {
@@ -1220,7 +1214,7 @@ scrapbook.cache = {
               resolve();
               return;
             }
-            if (scrapbook.cache._applyFilter(cursor.key, filter)) {
+            if (cache._applyFilter(cursor.key, filter)) {
               cursor.delete();
             }
             cursor.continue();
@@ -1232,11 +1226,11 @@ scrapbook.cache = {
 
   sessionStorage: {
     async _serializeObject(obj) {
-      return await scrapbook.cache._serializeObject(obj);
+      return await cache._serializeObject(obj);
     },
 
     async _deserializeObject(obj) {
-      return await scrapbook.cache._deserializeObject(obj);
+      return await cache._deserializeObject(obj);
     },
 
     async get(key) {
@@ -1248,7 +1242,7 @@ scrapbook.cache = {
       const items = {};
       for (let i = 0, I = sessionStorage.length; i < I; i++) {
         const key = sessionStorage.key(i);
-        if (scrapbook.cache._applyFilter(key, filter)) {
+        if (cache._applyFilter(key, filter)) {
           items[key] = JSON.parse(sessionStorage.getItem(key));
         }
       }
@@ -1268,7 +1262,7 @@ scrapbook.cache = {
       // reverse the order to prevent an error due to index shift after removal
       for (let i = sessionStorage.length - 1; i >= 0; i--) {
         const key = sessionStorage.key(i);
-        if (scrapbook.cache._applyFilter(key, filter)) {
+        if (cache._applyFilter(key, filter)) {
           sessionStorage.removeItem(key);
         }
       }
@@ -1281,10 +1275,10 @@ scrapbook.cache = {
  * Lang
  ***************************************************************************/
 
-scrapbook.lang = function (...args) {
+const lang = (() => {
   const msgRegex = /__MSG_(.*?)__/g;
-  const msgReplacer = (m, k) => scrapbook.lang(k);
-  const fn = scrapbook.lang = (key, args) => {
+  const msgReplacer = (m, k) => lang(k);
+  return function lang(key, args) {
     const msg = browser.i18n.getMessage(key, args);
     if (msg) {
       // recursively replace __MSG_key__
@@ -1292,13 +1286,12 @@ scrapbook.lang = function (...args) {
     }
     return `__MSG_${key}__`;
   };
-  return fn(...args);
-};
+})();
 
-scrapbook.loadLanguages = function (...args) {
+const loadLanguages = (() => {
   const msgRegex = /__MSG_(.*?)__/g;
-  const msgReplacer = (m, k) => scrapbook.lang(k);
-  const fn = scrapbook.loadLanguages = (rootNode) => {
+  const msgReplacer = (m, k) => lang(k);
+  return function loadLanguages(rootNode) {
     const doc = rootNode.ownerDocument || rootNode;
     const walker = doc.createNodeIterator(rootNode, 5 /* NodeFilter.SHOW_ELEMENT | NodeFilter.SHOW_TEXT */);
 
@@ -1317,8 +1310,7 @@ scrapbook.loadLanguages = function (...args) {
       node = walker.nextNode();
     }
   };
-  return fn(...args);
-};
+})();
 
 
 /****************************************************************************
@@ -1352,7 +1344,7 @@ scrapbook.loadLanguages = function (...args) {
  * @param {Object} [target] - The target object to run command on.
  * @return {Function}
  */
-scrapbook.addMessageListener = function (
+function addMessageListener(
   filter,
   errorHandler = ex => {
     console.error(ex);
@@ -1390,7 +1382,7 @@ scrapbook.addMessageListener = function (
   };
   browser.runtime.onMessage.addListener(listener);
   return listener;
-};
+}
 
 /**
  * Init content scripts in the specified tab.
@@ -1399,7 +1391,7 @@ scrapbook.addMessageListener = function (
  * @param {integer} [frameId] - The frame ID to init content script.
  * @return {Promise<Object>}
  */
-scrapbook.initContentScripts = async function (tabId, frameId) {
+async function initContentScripts(tabId, frameId) {
   // Simply run executeScript for allFrames by checking for nonexistence of
   // the content script in the main frame has a potential leak causing only
   // partial frames have the content script loaded. E.g. the user ran this
@@ -1411,7 +1403,7 @@ scrapbook.initContentScripts = async function (tabId, frameId) {
       await browser.webNavigation.getFrame({tabId, frameId}).then(r => [Object.assign(r, {frameId})]) :
       await browser.webNavigation.getAllFrames({tabId});
   for (const {frameId, url} of frameIds) {
-    if (!scrapbook.isContentPage(url, allowFileAccess)) { continue; }
+    if (!isContentPage(url, allowFileAccess)) { continue; }
 
     // Send a test message to check whether content script is loaded.
     // If no content script, we get an error saying connection cannot be established.
@@ -1451,7 +1443,7 @@ scrapbook.initContentScripts = async function (tabId, frameId) {
     );
   }
   return await Promise.all(tasks);
-};
+}
 
 /**
  * A function that can be invoked through messaging.
@@ -1466,12 +1458,12 @@ scrapbook.initContentScripts = async function (tabId, frameId) {
  * @param {commandMessage} params
  * @return {Promise<*>}
  */
-scrapbook.invokeExtensionScript = async function ({id, cmd, args}) {
+async function invokeExtensionScript({id, cmd, args}) {
   isDebug && console.debug(cmd, "send to extension page", args);
   const response = await browser.runtime.sendMessage({id, cmd, args});
   isDebug && console.debug(cmd, "response from extension page", response);
   return response;
-};
+}
 
 /**
  * Invoke an invokable command in the content script.
@@ -1481,12 +1473,12 @@ scrapbook.invokeExtensionScript = async function ({id, cmd, args}) {
  * @param {integer} params.frameId
  * @return {Promise<*>}
  */
-scrapbook.invokeContentScript = async function ({tabId, frameId, cmd, args}) {
+async function invokeContentScript({tabId, frameId, cmd, args}) {
   isDebug && console.debug(cmd, "send to content script", `[${tabId}:${frameId}]`, args);
   const response = await browser.tabs.sendMessage(tabId, {cmd, args}, {frameId});
   isDebug && console.debug(cmd, "response from content script", `[${tabId}:${frameId}]`, response);
   return response;
-};
+}
 
 /**
  * Invoke an invokable command in a frame.
@@ -1495,7 +1487,7 @@ scrapbook.invokeContentScript = async function ({tabId, frameId, cmd, args}) {
  * @param {Window} params.frameWindow
  * @return {Promise<*>}
  */
-scrapbook.invokeFrameScript = async function ({frameWindow, cmd, args}) {
+async function invokeFrameScript({frameWindow, cmd, args}) {
   const frameId = await new Promise((resolve, reject) => {
     const extension = browser.runtime.getURL('');
     const channel = new MessageChannel();
@@ -1513,14 +1505,14 @@ scrapbook.invokeFrameScript = async function ({frameWindow, cmd, args}) {
   });
 
   if (frameId) {
-    return await scrapbook.invokeExtensionScript({
+    return await invokeExtensionScript({
       cmd: "background.invokeFrameScript",
       args: {frameId, cmd, args},
     });
   }
-};
+}
 
-scrapbook.openModalWindow = async function (options) {
+async function openModalWindow(options) {
   const doc = window.document;
 
   if (!doc) {
@@ -1575,10 +1567,10 @@ dialog {
     dialog.classList.add('mask');
   }
 
-  const id = scrapbook.getUuid();
+  const id = getUuid();
 
   // launch modal window/tab
-  scrapbook.invokeExtensionScript({
+  invokeExtensionScript({
     cmd: 'background.openModalWindow',
     args: {...options, id},
   }).then(resolve, reject);
@@ -1587,7 +1579,7 @@ dialog {
     return await promise;
   } catch (ex) {
     // close the dialog window/tab if interrupted
-    scrapbook.invokeExtensionScript({
+    invokeExtensionScript({
       cmd: 'background.openModalWindow.close',
       args: {id},
     }).catch(() => {});
@@ -1596,7 +1588,7 @@ dialog {
     observer.disconnect();
     host.remove();
   }
-};
+}
 
 
 /****************************************************************************
@@ -1612,16 +1604,16 @@ dialog {
  *
  * see also: validateFilename
  */
-scrapbook.escapeFilename = function (filename) {
+function escapeFilename(filename) {
   return filename.replace(/\\/g, '/').replace(/[ %#]+/g, m => encodeURIComponent(m));
-};
+}
 
 /**
  * Escapes the given filename (may contain '/') string to be used in a canonical URI
  */
-scrapbook.quote = function (filename) {
+function quote(filename) {
   return filename.replace(/[^/]+/g, m => encodeURIComponent(m));
-};
+}
 
 /**
  * Transliterates the given string to be a safe filename
@@ -1631,7 +1623,7 @@ scrapbook.quote = function (filename) {
  * @param {string} filename
  * @param {boolean} [forceAscii] - also escapes all non-ASCII chars
  */
-scrapbook.validateFilename = function (filename, forceAscii) {
+function validateFilename(filename, forceAscii) {
   let fn = filename
       // common restrictions
       // - collapse document spaces
@@ -1655,7 +1647,7 @@ scrapbook.validateFilename = function (filename, forceAscii) {
   }
   fn = fn || "_"; // prevent empty filename
   return fn;
-};
+}
 
 /**
  * Returns the ScrapBook ID from a given Date object
@@ -1663,7 +1655,7 @@ scrapbook.validateFilename = function (filename, forceAscii) {
  * @param  {Date} [date] - Given day, or now if not provided.
  * @return {?string} The ScrapBook ID.
  */
-scrapbook.dateToId = function (date) {
+function dateToId(date) {
   const dt = date || new Date();
   if (Number.isNaN(dt.valueOf())) { return null; }
   const year = dt.getUTCFullYear();
@@ -1676,16 +1668,16 @@ scrapbook.dateToId = function (date) {
       dt.getUTCMinutes().toString().padStart(2, '0') +
       dt.getUTCSeconds().toString().padStart(2, '0') +
       dt.getUTCMilliseconds().toString().padStart(3, '0');
-};
+}
 
 /**
  * @param {Date} id - Given ScrapBook ID
  * @return {?Date}
  */
-scrapbook.idToDate = function (...args) {
+const idToDate = (() => {
   const DT_MAX = new Date('9999-12-31T23:59:59.999Z').valueOf();
   const DT_MIN = new Date('0000-01-01T00:00:00.000Z').valueOf();
-  const fn = scrapbook.idToDate = (id) => {
+  return function idToDate(id) {
     const m = id.match(/^(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})(\d{3})$/);
     if (!m) { return null; }
     const dt = new Date();
@@ -1700,8 +1692,7 @@ scrapbook.idToDate = function (...args) {
     else if (dt.valueOf() < DT_MIN) { dt.setTime(DT_MIN); }
     return dt;
   };
-  return fn(...args);
-};
+})();
 
 /**
  * Returns the legacy ScrapBook ID from a given Date object
@@ -1712,7 +1703,7 @@ scrapbook.idToDate = function (...args) {
  * @param {Date} [date] - Given day, or now if not provided.
  * @return {?string} The ScrapBook ID.
  */
-scrapbook.dateToIdOld = function (date) {
+function dateToIdOld(date) {
   const dt = date || new Date();
   if (Number.isNaN(dt.valueOf())) { return null; }
   const year = dt.getFullYear();
@@ -1724,14 +1715,14 @@ scrapbook.dateToIdOld = function (date) {
       dt.getHours().toString().padStart(2, '0') +
       dt.getMinutes().toString().padStart(2, '0') +
       dt.getSeconds().toString().padStart(2, '0');
-};
+}
 
 /**
- * @deprecated See scrapbook.dateToIdOld for details.
+ * @deprecated See `dateToIdOld` for details.
  * @param {Date} id - Given ScrapBook ID
  * @return {?Date}
  */
-scrapbook.idToDateOld = function (...args) {
+const idToDateOld = (() => {
   const DT_MAX = (() => {
     const dt = new Date('9999-12-31T23:59:59.999Z');
     return dt.valueOf() + dt.getTimezoneOffset() * 60 * 1000;
@@ -1740,7 +1731,7 @@ scrapbook.idToDateOld = function (...args) {
     const dt = new Date('0000-01-01T00:00:00.000Z');
     return dt.valueOf() + dt.getTimezoneOffset() * 60 * 1000;
   })();
-  const fn = scrapbook.idToDateOld = (id) => {
+  return function idToDateOld(id) {
     const m = id.match(/^(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})$/);
     if (!m) { return null; }
     const dt = new Date();
@@ -1755,23 +1746,20 @@ scrapbook.idToDateOld = function (...args) {
     else if (dt.valueOf() < DT_MIN) { dt.setTime(DT_MIN); }
     return dt;
   };
-  return fn(...args);
-};
+})();
 
 /**
  * @param {string} url
  * @param {boolean} [allowFileAccess] - Optional for better accuracy.
  * @return {string} Whether the page url is allowed for content scripts.
  */
-scrapbook.isContentPage = function (...args) {
+const isContentPage = (() => {
   const FILTER = new RegExp(`^https?:`);
   const FILTER_FILE = new RegExp(`^(?:https?|file):`);
-  const isContentPage = (url, allowFileAccess = !scrapbook.userAgent.is('gecko')) => {
+  return function isContentPage(url, allowFileAccess = !userAgent.is('gecko')) {
     return (allowFileAccess ? FILTER_FILE : FILTER).test(url);
   };
-  scrapbook.isContentPage = isContentPage;
-  return isContentPage(...args);
-};
+})();
 
 
 /****************************************************************************
@@ -1832,7 +1820,7 @@ scrapbook.isContentPage = function (...args) {
  *
  * @return {false|string} Scrapbook object type of the element; or false.
  */
-scrapbook.getScrapbookObjectType = function (node) {
+function getScrapbookObjectType(node) {
   if (node.nodeType === 8) {
     const m = node.nodeValue.match(/^scrapbook-(.*?)(?:-\d+)?=/);
     if (m) {
@@ -1847,7 +1835,7 @@ scrapbook.getScrapbookObjectType = function (node) {
   if (type) { return type; }
 
   return false;
-};
+}
 
 /**
  * @return {integer} Scrapbook object remove type of the element.
@@ -1857,29 +1845,29 @@ scrapbook.getScrapbookObjectType = function (node) {
  *    2: should unwrap
  *    3: should uncomment
  */
-scrapbook.getScrapBookObjectRemoveType = function (node) {
-  let type = scrapbook.getScrapbookObjectType(node);
+function getScrapBookObjectRemoveType(node) {
+  let type = getScrapbookObjectType(node);
   if (!type) { return -1; }
   if (SCRAPBOOK_OBJECT_REMOVE_TYPE_REMOVE.has(type)) { return 1; }
   if (SCRAPBOOK_OBJECT_REMOVE_TYPE_UNWRAP.has(type)) { return 2; }
   if (SCRAPBOOK_OBJECT_REMOVE_TYPE_UNCOMMENT.has(type)) { return 3; }
   return 0;
-};
+}
 
 /**
  * @return {Element[]} Related elements having the shared ID; or the
  *   original element.
  */
-scrapbook.getScrapBookObjectElems = function (node) {
+function getScrapBookObjectElems(node) {
   let id = node.getAttribute("data-scrapbook-id");
   if (id) {
     return node.ownerDocument.querySelectorAll(`[data-scrapbook-id="${CSS.escape(id)}"]`);
   }
 
   return [node];
-};
+}
 
-scrapbook.getShadowRoot = function (elem) {
+function getShadowRoot(elem) {
   if (elem.openOrClosedShadowRoot) {
     // Firefox >= 63
     // This API can return the native closed shadowRoot of an element like
@@ -1895,9 +1883,9 @@ scrapbook.getShadowRoot = function (elem) {
     } catch (ex) {}
   }
   return elem.shadowRoot;
-};
+}
 
-scrapbook.getAdoptedStyleSheets = function* (docOrShadowRoot) {
+function* getAdoptedStyleSheets(docOrShadowRoot) {
   try {
     yield* docOrShadowRoot.adoptedStyleSheets;
   } catch (ex) {
@@ -1925,7 +1913,7 @@ scrapbook.getAdoptedStyleSheets = function* (docOrShadowRoot) {
       console.error(ex);
     }
   }
-};
+}
 
 /**
  * Clone a document and generate relation mapping.
@@ -1936,7 +1924,7 @@ scrapbook.getAdoptedStyleSheets = function* (docOrShadowRoot) {
  * @param {Map|WeakMap} [options.clonedNodeMap]
  * @return {Document} The cloned document.
  */
-scrapbook.cloneDocument = function (doc, {
+function cloneDocument(doc, {
   origNodeMap,
   clonedNodeMap,
 } = {}) {
@@ -1951,7 +1939,7 @@ scrapbook.cloneDocument = function (doc, {
   origNodeMap?.set(newDoc, doc);
   clonedNodeMap?.set(doc, newDoc);
   return newDoc;
-};
+}
 
 /**
  * Clone a node and generate relation mapping.
@@ -1965,12 +1953,12 @@ scrapbook.cloneDocument = function (doc, {
  * @param {boolean} [options.includeShadowDom]
  * @return {Node} The cloned node.
  */
-scrapbook.cloneNode = function (...args) {
+const cloneNode = (() => {
   const cloneShadowDom = (node, newNode, options = {}) => {
-    const shadowRoot = scrapbook.getShadowRoot(node);
+    const shadowRoot = getShadowRoot(node);
     if (!shadowRoot) { return; }
     const {origNodeMap, clonedNodeMap, includeShadowDom} = options;
-    let newShadowRoot = scrapbook.getShadowRoot(newNode);
+    let newShadowRoot = getShadowRoot(newNode);
     if (newShadowRoot) {
       // shadowRoot already cloned (when shadowRoot.clonable = true)
       // map the shadowRoot and descendant nodes
@@ -1996,12 +1984,12 @@ scrapbook.cloneNode = function (...args) {
       origNodeMap?.set(newShadowRoot, shadowRoot);
       clonedNodeMap?.set(shadowRoot, newShadowRoot);
       for (const node of shadowRoot.childNodes) {
-        newShadowRoot.appendChild(scrapbook.cloneNode(node, true, options));
+        newShadowRoot.appendChild(cloneNode(node, true, options));
       }
     }
   };
 
-  const cloneNode = (node, deep = false, options = {}) => {
+  return function cloneNode(node, deep = false, options = {}) {
     const {
       newDoc = node.ownerDocument,
       origNodeMap,
@@ -2031,16 +2019,13 @@ scrapbook.cloneNode = function (...args) {
 
     return newNode;
   };
-
-  scrapbook.cloneNode = cloneNode;
-  return cloneNode(...args);
-};
+})();
 
 /**
  * Convert dynamic information into representable HTML attributes for an
  * element.
  */
-scrapbook.htmlifyElem = function (elem, options = {}) {
+function htmlifyElem(elem, options = {}) {
   // handle adoptedStyleSheet if supported by the browser
   // @TODO: merge shared constructed stylesheets among shadow roots
   if ('adoptedStyleSheets' in document && elem instanceof ShadowRoot) {
@@ -2050,7 +2035,7 @@ scrapbook.htmlifyElem = function (elem, options = {}) {
     host.removeAttribute("data-scrapbook-adoptedstylesheets");
 
     const ids = [];
-    for (const css of scrapbook.getAdoptedStyleSheets(elem)) {
+    for (const css of getAdoptedStyleSheets(elem)) {
       let id = adoptedStyleSheetMap.get(css);
       if (typeof id === 'undefined') {
         id = adoptedStyleSheetMap.size;
@@ -2111,7 +2096,7 @@ scrapbook.htmlifyElem = function (elem, options = {}) {
     case "canvas": {
       try {
         const data = elem.toDataURL();
-        if (data !== scrapbook.getBlankCanvasData(elem)) {
+        if (data !== getBlankCanvasData(elem)) {
           elem.setAttribute("data-scrapbook-canvas", data);
         }
       } catch (ex) {
@@ -2171,9 +2156,9 @@ scrapbook.htmlifyElem = function (elem, options = {}) {
     }
   }
 
-  const shadowRoot = scrapbook.getShadowRoot(elem);
+  const shadowRoot = getShadowRoot(elem);
   if (shadowRoot) {
-    scrapbook.htmlify(shadowRoot, options);
+    htmlify(shadowRoot, options);
     elem.setAttribute("data-scrapbook-shadowdom", shadowRoot.innerHTML);
     if (shadowRoot.mode !== 'open') {
       elem.setAttribute("data-scrapbook-shadowdom-mode", shadowRoot.mode);
@@ -2191,17 +2176,17 @@ scrapbook.htmlifyElem = function (elem, options = {}) {
       elem.setAttribute("data-scrapbook-shadowdom-slot-assignment", shadowRoot.slotAssignment);
     }
   }
-};
+}
 
 /**
  * Convert dynamic information into representable HTML attributes recursively.
  */
-scrapbook.htmlify = function (node, options = {}) {
-  scrapbook.htmlifyElem(node, options);
+function htmlify(node, options = {}) {
+  htmlifyElem(node, options);
   for (const elem of node.querySelectorAll('*')) {
-    scrapbook.htmlifyElem(elem, options);
+    htmlifyElem(elem, options);
   }
-};
+}
 
 /**
  * Reverse htmlify for an element.
@@ -2212,7 +2197,7 @@ scrapbook.htmlify = function (node, options = {}) {
  * @param {boolean} [options.form] - true to handle form elements.
  * @param {boolean} [options.shadowDom] - true to handle shadowDom.
  */
-scrapbook.unhtmlifyElem = function (elem, options = {}) {
+function unhtmlifyElem(elem, options = {}) {
   const {
     apply = true,
     canvas = true,
@@ -2370,7 +2355,7 @@ scrapbook.unhtmlifyElem = function (elem, options = {}) {
     }
   }
 
-  let shadowRoot = scrapbook.getShadowRoot(elem);
+  let shadowRoot = getShadowRoot(elem);
   if (shadowDom) {
     const html = elem.getAttribute('data-scrapbook-shadowdom');
     if (html !== null && apply && !shadowRoot) {
@@ -2396,33 +2381,33 @@ scrapbook.unhtmlifyElem = function (elem, options = {}) {
     elem.removeAttribute('data-scrapbook-shadowdom-slot-assignment');
   }
   if (shadowRoot) {
-    scrapbook.unhtmlify(shadowRoot, options);
+    unhtmlify(shadowRoot, options);
   }
-};
+}
 
 /**
  * Reverse htmlify recursively.
  */
-scrapbook.unhtmlify = function (node, options = {}) {
-  scrapbook.unhtmlifyElem(node, options);
+function unhtmlify(node, options = {}) {
+  unhtmlifyElem(node, options);
   for (const elem of node.querySelectorAll('*')) {
-    scrapbook.unhtmlifyElem(elem, options);
+    unhtmlifyElem(elem, options);
   }
-};
+}
 
 /**
  * Replace nodes in the range with a serialized HTML comment.
  */
-scrapbook.eraseRange = function (range, {
-  timeId = scrapbook.dateToId(),
+function eraseRange(range, {
+  timeId = dateToId(),
   mapWrapperToComment,
   mapCommentToWrapper,
 } = {}) {
   const doc = range.commonAncestorContainer.ownerDocument;
   const wrapper = doc.createElement('scrapbook-erased');
   range.surroundContents(wrapper);
-  scrapbook.htmlify(wrapper);
-  const comment = doc.createComment(`scrapbook-erased${timeId ? '-' + timeId : ''}=${scrapbook.escapeHtmlComment(wrapper.innerHTML)}`);
+  htmlify(wrapper);
+  const comment = doc.createComment(`scrapbook-erased${timeId ? '-' + timeId : ''}=${escapeHtmlComment(wrapper.innerHTML)}`);
   if (mapWrapperToComment) {
     mapWrapperToComment.set(wrapper, comment);
   }
@@ -2430,23 +2415,23 @@ scrapbook.eraseRange = function (range, {
     mapCommentToWrapper.set(comment, wrapper);
   }
   wrapper.replaceWith(comment);
-};
+}
 
 /**
  * Replace node with a serialized HTML comment.
  */
-scrapbook.eraseNode = function (node, options) {
+function eraseNode(node, options) {
   const range = node.ownerDocument.createRange();
   range.selectNode(node);
-  return scrapbook.eraseRange(range, options);
-};
+  return eraseRange(range, options);
+}
 
 /**
  * Replace a serialized HTML comment with the original nodes.
  *
  * @return {boolean} Whether the unerase is successful.
  */
-scrapbook.uneraseNode = function (node, {
+function uneraseNode(node, {
   mapCommentToWrapper,
   normalize = true,
 } = {}) {
@@ -2461,7 +2446,7 @@ scrapbook.uneraseNode = function (node, {
     while (child = wrapper.firstChild) {
       frag.appendChild(child);
     }
-    scrapbook.unhtmlify(frag, {apply: false});
+    unhtmlify(frag, {apply: false});
     node.replaceWith(frag);
     if (normalize) {
       parent.normalize();
@@ -2474,9 +2459,9 @@ scrapbook.uneraseNode = function (node, {
   if (m) {
     const doc = node.ownerDocument;
     const t = doc.createElement('template');
-    t.innerHTML = scrapbook.unescapeHtmlComment(m[1]);
+    t.innerHTML = unescapeHtmlComment(m[1]);
     const frag = doc.importNode(t.content, true);
-    scrapbook.unhtmlify(frag);
+    unhtmlify(frag);
     node.replaceWith(frag);
     if (normalize) {
       parent.normalize();
@@ -2485,7 +2470,7 @@ scrapbook.uneraseNode = function (node, {
   }
 
   return false;
-};
+}
 
 
 /****************************************************************************
@@ -2497,7 +2482,7 @@ scrapbook.uneraseNode = function (node, {
  *
  * @return {integer} 1: a > b; 0: a = b; -1: a < b
  */
-scrapbook.versionCompare = function (a, b) {
+function versionCompare(a, b) {
   // treat non-numerical characters as lower version
   // replacing them with a negative number based on charcode of each character
   function fix(s) {
@@ -2519,7 +2504,7 @@ scrapbook.versionCompare = function (a, b) {
     }
   }
   return 0;
-};
+}
 
 /**
  * Crops the given string
@@ -2528,7 +2513,7 @@ scrapbook.versionCompare = function (a, b) {
  * @param {integer} [byteLimit] - UTF-8 bytes limit, beyond which will be cropped. 0 means no crop.
  * @param {string} [ellipsis] - string for ellipsis
  */
-scrapbook.crop = function (str, charLimit, byteLimit, ellipsis = '...') {
+function crop(str, charLimit, byteLimit, ellipsis = '...') {
   if (charLimit) {
     if (str.length > charLimit) {
       let cutPos = charLimit - ellipsis.length;
@@ -2547,12 +2532,12 @@ scrapbook.crop = function (str, charLimit, byteLimit, ellipsis = '...') {
     }
   }
   if (byteLimit) {
-    let bytes = this.unicodeToUtf8(str);
+    let bytes = unicodeToUtf8(str);
     if (bytes.length > byteLimit) {
-      bytes = bytes.substring(0, byteLimit - this.unicodeToUtf8(ellipsis).length);
+      bytes = bytes.substring(0, byteLimit - unicodeToUtf8(ellipsis).length);
       while (true) {
         try {
-          return this.utf8ToUnicode(bytes) + ellipsis;
+          return utf8ToUnicode(bytes) + ellipsis;
         } catch (e) {
           // error if we cut a UTF-8 char sequence in the middle
         }
@@ -2561,14 +2546,14 @@ scrapbook.crop = function (str, charLimit, byteLimit, ellipsis = '...') {
     }
   }
   return str;
-};
+}
 
 /**
  * Revised from Jeff Ward and folk's version.
  *
  * @link http://stackoverflow.com/questions/105034/how-to-create-a-guid-uuid-in-javascript/21963136#21963136
  */
-scrapbook.getUuid = function () {
+const getUuid = (() => {
   /* eslint-disable @stylistic/no-multi-spaces */
   const lut = Array(256).fill().map((_, i) => (i < 16 ? '0' : '') + (i).toString(16));
   const formatUuid = ([d0, d1, d2, d3]) =>
@@ -2594,12 +2579,12 @@ scrapbook.getUuid = function () {
       Math.random() * 0x100000000 >>> 0,
     ]);
 
-  const uuid = () => formatUuid(getRandomValuesFunc());
-  scrapbook.getUuid = uuid;
-  return uuid();
-};
+  return function getUuid() {
+    return formatUuid(getRandomValuesFunc());
+  };
+})();
 
-scrapbook.escapeHtml = function (str, noDoubleQuotes, singleQuotes, spaces) {
+const escapeHtml = (() => {
   const regex = /[&<>"']| (?= )/g;
   const func = m => map[m];
   const map = {
@@ -2607,16 +2592,15 @@ scrapbook.escapeHtml = function (str, noDoubleQuotes, singleQuotes, spaces) {
     "<": "&lt;",
     ">": "&gt;",
   };
-  const fn = scrapbook.escapeHtml = function (str, noDoubleQuotes, singleQuotes, spaces) {
+  return function escapeHtml(str, noDoubleQuotes, singleQuotes, spaces) {
     map['"'] = noDoubleQuotes ? '"' : "&quot;";
     map["'"] = singleQuotes ? "&#39;" : "'";
     map[" "] = spaces ? "&nbsp;" : " ";
     return str.replace(regex, func);
   };
-  return fn(str, noDoubleQuotes, singleQuotes, spaces);
-};
+})();
 
-scrapbook.unescapeHtml = function (str) {
+const unescapeHtml = (() => {
   const regex = /&(?:(?:amp|lt|gt|quot|apos|nbsp)|#(?:(\d+)|x([0-9A-Fa-f]+)));/g;
   const func = (entity, dec, hex) => {
     if (dec) { return String.fromCharCode(parseInt(dec, 10)); }
@@ -2631,74 +2615,67 @@ scrapbook.unescapeHtml = function (str) {
     "&apos;": "'",
     "&nbsp;": " ",
   };
-  const fn = scrapbook.unescapeHtml = function (str) {
+  return function unescapeHtml(str) {
     return str.replace(regex, func);
   };
-  return fn(str);
-};
+})();
 
-scrapbook.escapeRegExp = function (str) {
+const escapeRegExp = (() => {
   // Don't escape "-" as it causes an error for a RegExp with unicode flag.
   // Escaping "-" allows the result be embedded in a character class.
   // Escaping "/" allows the result be embedded in a JS regex literal.
   const regex = /[/\\^$*+?.|()[\]{}]/g;
-  const fn = scrapbook.escapeRegExp = function (str) {
+  return function escapeRegExp(str) {
     return str.replace(regex, "\\$&");
   };
-  return fn(str);
-};
+})();
 
 /**
  * ref: https://developer.mozilla.org/docs/Web/HTML/Guides/Comments
  * ref: https://html.spec.whatwg.org/multipage/syntax.html#comments
  */
-scrapbook.escapeHtmlComment = function (str) {
+const escapeHtmlComment = (() => {
   const regex1 = /-([\u200B]*)(?=-)/g;
   const regex2 = /^([\u200B]*-?)>/;
   const regex3 = /<!([\u200B]*)-$/;
-  const fn = scrapbook.escapeHtmlComment = function (str) {
+  return function escapeHtmlComment(str) {
     return str.replace(regex1, "-\u200B$1")
               .replace(regex2, "\u200B$1>")
               .replace(regex3, "<!\u200B$1-");
   };
-  return fn(str);
-};
+})();
 
-scrapbook.unescapeHtmlComment = function (str) {
+const unescapeHtmlComment = (() => {
   const regex1 = /-[\u200B]([\u200B]*)-/g;
   const regex2 = /^[\u200B]([\u200B]*-?)>/;
   const regex3 = /<![\u200B]([\u200B]*)-$/;
-  const fn = scrapbook.unescapeHtmlComment = function (str) {
+  return function unescapeHtmlComment(str) {
     return str.replace(regex1, "-$1-")
               .replace(regex2, "$1>")
               .replace(regex3, "<!$1-");
   };
-  return fn(str);
-};
+})();
 
-scrapbook.escapeQuotes = function (str) {
+const escapeQuotes = (() => {
   const regex = /[\\"]/g;
-  const fn = scrapbook.escapeQuotes = function (str) {
+  return function escapeQuotes(str) {
     return str.replace(regex, "\\$&");
   };
-  return fn(str);
-};
+})();
 
-scrapbook.unescapeQuotes = function (str) {
+const unescapeQuotes = (() => {
   const regex = /\\(.)/g;
-  const fn = scrapbook.unescapeQuotes = function (str) {
+  return function unescapeQuotes(str) {
     return str.replace(regex, "$1");
   };
-  return fn(str);
-};
+})();
 
-scrapbook.escapeCssComment = function (str) {
+const escapeCssComment = (() => {
   const regex = /\*\//g;
-  const fn = scrapbook.escapeCssComment = function (str) {
+  return function escapeCssComment(str) {
     return str.replace(regex, "*\u200B/");
   };
-  return fn(str);
-};
+})();
 
 /**
  * @param {string} str - The string to unescape.
@@ -2706,7 +2683,7 @@ scrapbook.escapeCssComment = function (str) {
  * @param {Object} [options.stripNewline] - Strip escaped newline.
  * @return {string} The unescaped CSS string.
  */
-scrapbook.unescapeCss = function (...args) {
+const unescapeCss = (() => {
   const replaceRegex = /\\(?:([0-9A-Fa-f]{1,6}) ?|((\r\n?|[\n\f])|[\s\S]))/gu;
   const replaceFunc = (m, u, c, nl) => {
     if (u) {
@@ -2720,32 +2697,30 @@ scrapbook.unescapeCss = function (...args) {
     return c;
   };
   let replaceOptions;
-  const fn = scrapbook.unescapeCss = function (str, options = {}) {
+  return function unescapeCss(str, options = {}) {
     replaceOptions = options;
     return str.replace(replaceRegex, replaceFunc);
   };
-  return fn(...args);
-};
+})();
 
-scrapbook.quoteXPath = function (str) {
+function quoteXPath(str) {
   const parts = str.split('"');
   return parts.length > 1 ?
       ('concat("' + parts.join(`",'"',"`) + '")') :
       `"${str}"`;
-};
+}
 
 /**
  * A URL containing standalone "%"s, e.g. "http://example.com/50%",
  * causes a "Malformed URI sequence" error on decodeURIComponent.
  */
-scrapbook.decodeURIComponent = function (uri) {
+const decodeURIComponent2 = (() => {
   const regex = /(%[0-9A-F]{2})+/gi;
   const func = m => decodeURIComponent(m);
-  const fn = scrapbook.decodeURIComponent = function (uri) {
+  return function decodeURIComponent2(uri) {
     return uri.replace(regex, func);
   };
-  return fn(uri);
-};
+})();
 
 /**
  * This forces UTF-8 charset.
@@ -2753,32 +2728,31 @@ scrapbook.decodeURIComponent = function (uri) {
  * Chars need encoding adopted from: https://github.com/nicktimko/svgenc
  * Also encodes control chars and " " for safety in srcset.
  */
-scrapbook.unicodeToDataUri = function (str, mime) {
+const unicodeToDataUri = (() => {
   const regex = /[\x00-\x1F\x7F "'#%<>[\]^`{|}]+/g;
   const func = m => encodeURIComponent(m);
-  const fn = scrapbook.unicodeToDataUri = (str, mime) => {
+  return function unicodeToDataUri(str, mime) {
     return `data:${(mime || "")};charset=UTF-8,${str.replace(regex, func)}`;
   };
-  return fn(str, mime);
-};
+})();
 
-scrapbook.byteStringToDataUri = function (str, mime, charset) {
+function byteStringToDataUri(str, mime, charset) {
   return `data:${mime || ""}${charset ? ";charset=" + encodeURIComponent(charset) : ""},${escape(str)}`;
-};
+}
 
 /**
  * Convert a JavaScript string (UTF-16BE) into a UTF-8 byte string.
  */
-scrapbook.unicodeToUtf8 = function (str) {
+function unicodeToUtf8(str) {
   return unescape(encodeURIComponent(str));
-};
+}
 
 /**
  * Convert a UTF-8 byte string into a JavaScript string (UTF-16BE).
  */
-scrapbook.utf8ToUnicode = function (bstr) {
+function utf8ToUnicode(bstr) {
   return decodeURIComponent(escape(bstr));
-};
+}
 
 /**
  * Alt. 1:
@@ -2793,11 +2767,11 @@ scrapbook.utf8ToUnicode = function (bstr) {
  *
  * Straightforward, but slow (1/28 of current version).
  */
-scrapbook.byteStringToArrayBuffer = function (bstr) {
+function byteStringToArrayBuffer(bstr) {
   let n = bstr.length, u8ar = new Uint8Array(n);
   while (n--) { u8ar[n] = bstr.charCodeAt(n); }
   return u8ar.buffer;
-};
+}
 
 /**
  * Alt. 1:
@@ -2813,13 +2787,13 @@ scrapbook.byteStringToArrayBuffer = function (bstr) {
  * Simpler, but passing a very large array to function.apply causes a
  * "Maximum call stack size exceeded" error.
  */
-scrapbook.arrayBufferToByteString = function (ab) {
+function arrayBufferToByteString(ab) {
   let u8ar = new Uint8Array(ab), bstr = "", CHUNK_SIZE = 65535;
   for (let i = 0, I = u8ar.length; i < I; i += CHUNK_SIZE) {
     bstr += String.fromCharCode.apply(null, u8ar.subarray(i, i + CHUNK_SIZE));
   }
   return bstr;
-};
+}
 
 
 /****************************************************************************
@@ -2831,28 +2805,26 @@ scrapbook.arrayBufferToByteString = function (ab) {
  *
  * Usually used for HTML parsing.
  */
-scrapbook.trim = function (str) {
+const trim = (() => {
   const regexLeading = new RegExp(`^[${ASCII_WHITESPACE}]+`);
   const regexTrailing = new RegExp(`[${ASCII_WHITESPACE}]+$`);
-  const trim = scrapbook.trim = (str) => {
+  return function trim(str) {
     return (str || '').replace(regexLeading, '').replace(regexTrailing, '');
   };
-  return trim(str);
-};
+})();
 
 /**
  * Split by ASCII whitespaces and discard empty components.
  *
  * Usually used for HTML parsing.
  */
-scrapbook.split = function (str) {
+const split = (() => {
   const regex = new RegExp(`[${ASCII_WHITESPACE}]+`);
   const filter = x => !!x;
-  const split = scrapbook.split = (str) => {
+  return function split(str) {
     return (str || '').split(regex).filter(filter);
   };
-  return split(str);
-};
+})();
 
 /**
  * Ensure normalizeUrl(url1) === normalizeUrl(url2)
@@ -2863,7 +2835,7 @@ scrapbook.split = function (str) {
  * - Decode unreserved chars [0-9A-Za-z\-_.~] in search and hash.
  * - e.g. normalizeUrl("http://abc/def:中!%") === normalizeUrl("http://ab%63/def%3A%E4%B8%AD%21%25")
  */
-scrapbook.normalizeUrl = function (url) {
+const normalizeUrl = (() => {
   // ref: https://url.spec.whatwg.org/#percent-encoded-bytes
   // reserved = :/?#[]@!$&'()*+,;=
   const percentEncodingRegex = /%(?:[0-9A-F]{2}(?:%[0-9A-F]{2})*)?/gi;
@@ -2884,7 +2856,7 @@ scrapbook.normalizeUrl = function (url) {
     return `%${m.charCodeAt(0).toString(16).toUpperCase()}`;
   };
 
-  const fn = scrapbook.normalizeUrl = (url) => {
+  return function normalizeUrl(url) {
     const u = new URL(url);
     try {
       u.pathname = fixPathnameReplace(u.pathname);
@@ -2899,26 +2871,24 @@ scrapbook.normalizeUrl = function (url) {
     }
     return u.href;
   };
-  return fn(url);
-};
+})();
 
-scrapbook.isUrlAbsolute = function (url) {
+const isUrlAbsolute = (() => {
   const regex = /^[a-z][a-z0-9+.-]*:/i;
-  const isUrlAbsolute = scrapbook.isUrlAbsolute = function (url) {
+  return function isUrlAbsolute(url) {
     return regex.test(url || "");
   };
-  return isUrlAbsolute(url);
-};
+})();
 
-scrapbook.getRelativeUrl = function (targetUrl, baseUrl) {
+function getRelativeUrl(targetUrl, baseUrl) {
   let targetUrlObj;
   let baseUrlObj;
-  if (scrapbook.isUrlAbsolute(targetUrl) && scrapbook.isUrlAbsolute(baseUrl)) {
+  if (isUrlAbsolute(targetUrl) && isUrlAbsolute(baseUrl)) {
     targetUrlObj = new URL(targetUrl);
     baseUrlObj = new URL(baseUrl);
-  } else if (scrapbook.isUrlAbsolute(targetUrl)) {
+  } else if (isUrlAbsolute(targetUrl)) {
     return new URL(targetUrl).href;
-  } else if (scrapbook.isUrlAbsolute(baseUrl)) {
+  } else if (isUrlAbsolute(baseUrl)) {
     // this should not happen
     throw new Error("Unable to get a relative URL from an absolute URL to a non-absolute URL");
   } else if (targetUrl.startsWith('//') && baseUrl.startsWith('//')) {
@@ -2984,55 +2954,55 @@ scrapbook.getRelativeUrl = function (targetUrl, baseUrl) {
   }
 
   return '';
-};
+}
 
-scrapbook.urlToFilename = function (url) {
-  let name = scrapbook.filepathParts(new URL(url).pathname)[1];
+function urlToFilename(url) {
+  let name = filepathParts(new URL(url).pathname)[1];
 
   // decode %xx%xx%xx only if it's correctly UTF-8 encoded
   // @TODO: decode using a specified charset
   try {
-    name = scrapbook.decodeURIComponent(name);
+    name = decodeURIComponent2(name);
   } catch (ex) {}
   return name;
-};
+}
 
-scrapbook.splitUrl = function (url) {
+function splitUrl(url) {
   let name = url, search = "", hash = "", pos;
   pos = name.indexOf("#");
   if (pos !== -1) { hash = name.slice(pos); name = name.slice(0, pos); }
   pos = name.indexOf("?");
   if (pos !== -1) { search = name.slice(pos); name = name.slice(0, pos); }
   return [name, search, hash];
-};
+}
 
-scrapbook.splitUrlByAnchor = function (url) {
-  let [name, search, hash] = scrapbook.splitUrl(url);
+function splitUrlByAnchor(url) {
+  let [name, search, hash] = splitUrl(url);
   return [name + search, hash];
-};
+}
 
-scrapbook.filepathParts = function (filepath) {
+function filepathParts(filepath) {
   let pos = Math.max(filepath.lastIndexOf("/"), filepath.lastIndexOf("\\"));
   if (pos != -1) {
     return [filepath.slice(0, pos), filepath.slice(pos + 1, filepath.length)];
   }
   return ["", filepath];
-};
+}
 
-scrapbook.filenameParts = function (filename) {
+function filenameParts(filename) {
   let pos = filename.lastIndexOf(".");
   if (pos != -1) {
     return [filename.substring(0, pos), filename.substring(pos + 1, filename.length)];
   }
   return [filename, ""];
-};
+}
 
-scrapbook.splitXmlAttribute = function (attr) {
+function splitXmlAttribute(attr) {
   let ns = "", name = attr, pos;
   pos = name.indexOf(":");
   if (pos !== -1) { ns = name.slice(0, pos); name = name.slice(pos + 1); }
   return [ns, name];
-};
+}
 
 
 /****************************************************************************
@@ -3047,7 +3017,7 @@ scrapbook.splitXmlAttribute = function (attr) {
  * @memberof scrapbook
  * @return {{type: string, parameters: {}}}
  */
-scrapbook.parseHeaderContentType = function (string) {
+const parseHeaderContentType = (() => {
   const pOWS = "[\\t ]*";
   const pToken = "[!#$%&'*+.0-9A-Z^_`a-z|~-]+";
   const pQuotedString = '(?:"[^"]*(?:\\.[^"]*)*")';
@@ -3055,7 +3025,7 @@ scrapbook.parseHeaderContentType = function (string) {
   const regexContentType = new RegExp(`^(${pToken}/${pToken})`);
   const regexParameter = new RegExp(`^${pOWS};${pOWS}(${pToken})=([^\t ;"]*(?:${pQuotedString}[^\t ;"]*)*)`);
 
-  const fn = scrapbook.parseHeaderContentType = function (string) {
+  return function parseHeaderContentType(string) {
     const result = {type: "", parameters: {}};
 
     if (typeof string !== 'string') {
@@ -3079,7 +3049,7 @@ scrapbook.parseHeaderContentType = function (string) {
 
         if (value.startsWith('"')) {
           // any valid value with leading '"' must be ".*"
-          value = scrapbook.unescapeQuotes(value.slice(1, -1));
+          value = unescapeQuotes(value.slice(1, -1));
         }
 
         result.parameters[field] = value;
@@ -3088,8 +3058,7 @@ scrapbook.parseHeaderContentType = function (string) {
 
     return result;
   };
-  return fn(string);
-};
+})();
 
 /**
  * Parse Content-Disposition string from the HTTP Header
@@ -3101,7 +3070,7 @@ scrapbook.parseHeaderContentType = function (string) {
  * @param {string} string - The string to parse, not including "Content-Disposition: "
  * @return {{type: string, parameters: {}}}
  */
-scrapbook.parseHeaderContentDisposition = function (string) {
+const parseHeaderContentDisposition = (() => {
   const pOWS = "[\\t ]*";
   const pToken = "[!#$%&'*+.0-9A-Z^_`a-z|~-]+";
   const pQuotedString = '(?:"[^"]*(?:\\.[^"]*)*")';
@@ -3110,7 +3079,7 @@ scrapbook.parseHeaderContentDisposition = function (string) {
   const regexDispExtParam = new RegExp(`^${pOWS};${pOWS}(?:(${pToken})${pOWS}=${pOWS}([^\\t ;"]*(?:${pQuotedString}[^\\t ;"]*)*))`);
   const regexExtValue = /^([^']*)'([^']*)'([^']*)$/;
 
-  const fn = scrapbook.parseHeaderContentDisposition = function (string) {
+  return function parseHeaderContentDisposition(string) {
     const result = {type: "inline", parameters: {}};
 
     if (typeof string !== 'string') {
@@ -3153,7 +3122,7 @@ scrapbook.parseHeaderContentDisposition = function (string) {
           } else {
             if (value.startsWith('"')) {
               // any valid value with leading '"' must be ".*"
-              value = scrapbook.unescapeQuotes(value.slice(1, -1));
+              value = unescapeQuotes(value.slice(1, -1));
             }
           }
 
@@ -3174,8 +3143,7 @@ scrapbook.parseHeaderContentDisposition = function (string) {
 
     return result;
   };
-  return fn(string);
-};
+})();
 
 /**
  * Parse Refresh string from the HTTP Header
@@ -3185,7 +3153,7 @@ scrapbook.parseHeaderContentDisposition = function (string) {
  * @memberof scrapbook
  * @return {{time: (integer|undefined), url: (string|undefined)}}
  */
-scrapbook.parseHeaderRefresh = function (string) {
+const parseHeaderRefresh = (() => {
   const regex = new RegExp([
     '^',
     String.raw`[${ASCII_WHITESPACE}]*`,
@@ -3198,7 +3166,7 @@ scrapbook.parseHeaderRefresh = function (string) {
       String.raw`(?:"([^"]*)(?="|$)|'([^']*)(?='|$)|(.*)$)`,  // capture 2, 3, 4
     ')?',
   ].join(''), 'i');
-  const fn = scrapbook.parseHeaderRefresh = function (string) {
+  return function parseHeaderRefresh(string) {
     const result = {time: undefined, url: undefined};
 
     if (typeof string !== 'string') {
@@ -3208,13 +3176,12 @@ scrapbook.parseHeaderRefresh = function (string) {
     const m = string.match(regex);
     if (m) {
       result.time = parseInt(m[1] || 0, 10);
-      result.url = scrapbook.trim(m[2] || m[3] || m[4] || "");
+      result.url = trim(m[2] || m[3] || m[4] || "");
     }
 
     return result;
   };
-  return fn(string);
-};
+})();
 
 
 /****************************************************************************
@@ -3224,20 +3191,19 @@ scrapbook.parseHeaderRefresh = function (string) {
 /**
  * A simple tool to compress code (CSS or JavaScript)
  */
-scrapbook.compressCode = function (code) {
+const compressCode = (() => {
   const regex = new RegExp(`[${ASCII_WHITESPACE}]+`, "g");
-  const fn = scrapbook.compressCode = function (code) {
+  return function compressCode(code) {
     return code.toString().replace(regex, " ");
   };
-  return fn(code);
-};
+})();
 
 /**
  * A shortcut to compress javascript code
  */
-scrapbook.compressJsFunc = function (func) {
-  return scrapbook.compressCode(func.toString());
-};
+function compressJsFunc(func) {
+  return compressCode(func.toString());
+}
 
 
 /****************************************************************************
@@ -3248,7 +3214,7 @@ scrapbook.compressJsFunc = function (func) {
  * @param {Blob} blob - The Blob of File object to be read.
  * @return {Promise<ArrayBuffer>}
  */
-scrapbook.readFileAsArrayBuffer = async function (blob) {
+async function readFileAsArrayBuffer(blob) {
   const event = await new Promise((resolve, reject) => {
     let reader = new FileReader();
     reader.onload = resolve;
@@ -3256,13 +3222,13 @@ scrapbook.readFileAsArrayBuffer = async function (blob) {
     reader.readAsArrayBuffer(blob);
   });
   return event.target.result;
-};
+}
 
 /**
  * @param {Blob} blob - The Blob of File object to be read.
  * @return {Promise<string>}
  */
-scrapbook.readFileAsDataURL = async function (blob) {
+async function readFileAsDataURL(blob) {
   const event = await new Promise((resolve, reject) => {
     let reader = new FileReader();
     reader.onload = resolve;
@@ -3270,14 +3236,14 @@ scrapbook.readFileAsDataURL = async function (blob) {
     reader.readAsDataURL(blob);
   });
   return event.target.result;
-};
+}
 
 /**
  * @param {Blob} blob - The Blob of File object to be read.
  * @param {string|false} [charset] - Read as UTF-8 if undefined and as byte string if falsy.
  * @return {Promise<string>}
  */
-scrapbook.readFileAsText = async function (blob, charset = "UTF-8") {
+async function readFileAsText(blob, charset = "UTF-8") {
   if (charset) {
     const event = await new Promise((resolve, reject) => {
       let reader = new FileReader();
@@ -3287,26 +3253,26 @@ scrapbook.readFileAsText = async function (blob, charset = "UTF-8") {
     });
     return event.target.result;
   }
-  const ab = await scrapbook.readFileAsArrayBuffer(blob);
-  return scrapbook.arrayBufferToByteString(ab);
-};
+  const ab = await readFileAsArrayBuffer(blob);
+  return arrayBufferToByteString(ab);
+}
 
 /**
  * @param {Blob} blob - The Blob of File object to be read.
  * @return {Promise<Document>}
  */
-scrapbook.readFileAsDocument = async function (blob) {
-  const xhr = await scrapbook.xhr({
+async function readFileAsDocument(blob) {
+  const {response} = await xhr({
     url: URL.createObjectURL(blob),
     responseType: "document",
   });
-  return xhr.response;
-};
+  return response;
+}
 
 /**
  * Assume non-text for undefined types.
  */
-scrapbook.mimeIsText = function (mime) {
+const mimeIsText = (() => {
   const map = new Set([
     "application/ecmascript",
     "application/javascript",
@@ -3314,7 +3280,7 @@ scrapbook.mimeIsText = function (mime) {
     "application/xml",
     "application/sql",
   ]);
-  const fn = scrapbook.mimeIsText = (mime) => {
+  return function mimeIsText(mime) {
     if (mime.startsWith("text/") || mime.endsWith("+xml") || mime.endsWith("+json")) {
       return true;
     } else if (mime.endsWith("+zip")) {
@@ -3322,15 +3288,14 @@ scrapbook.mimeIsText = function (mime) {
     }
     return map.has(mime);
   };
-  return fn(mime);
-};
+})();
 
 
 /****************************************************************************
  * HTML DOM related utilities
  ***************************************************************************/
 
-scrapbook.documentToString = function (doc, pretty = false) {
+function documentToString(doc, pretty = false) {
   if (!doc) { return ""; }
   let afterHtml = false;
   return Array.prototype.reduce.call(doc.childNodes, (str, node) => {
@@ -3366,7 +3331,7 @@ scrapbook.documentToString = function (doc, pretty = false) {
 
     return str;
   }, '');
-};
+}
 
 /**
  * Read charset and text of a CSS file.
@@ -3395,16 +3360,16 @@ scrapbook.documentToString = function (doc, pretty = false) {
  * @param {?string} [envCharset]
  * @return {{text: string, charset: ?string}}
  */
-scrapbook.parseCssFile = async function (...args) {
+const parseCssFile = (() => {
   // @charset must be exactly this pattern according to the spec:
   // https://developer.mozilla.org/en-US/docs/Web/CSS/@charset#examples
   // https://drafts.csswg.org/css2/#charset%E2%91%A0
   const regexAtCharset = new RegExp(`^@charset "([\x00-\x21\x23-\x7F]*)";`);
 
-  const fn = scrapbook.parseCssFile = async function (data, headerCharset, envCharset) {
+  return async function parseCssFile(data, headerCharset, envCharset) {
     let charset = null;
 
-    let bom = await scrapbook.readFileAsText(data.slice(0, 3), false);
+    let bom = await readFileAsText(data.slice(0, 3), false);
     if (bom.startsWith("\xEF\xBB\xBF")) {
       charset = "UTF-8";
     } else if (bom.startsWith("\xFE\xFF")) {
@@ -3423,7 +3388,7 @@ scrapbook.parseCssFile = async function (...args) {
 
     let bytes;
     if (!charset) {
-      bytes = await scrapbook.readFileAsText(data.slice(0, 1024), false);
+      bytes = await readFileAsText(data.slice(0, 1024), false);
       const m = regexAtCharset.exec(bytes);
       if (m) {
         let _charset = m[1];
@@ -3443,7 +3408,7 @@ scrapbook.parseCssFile = async function (...args) {
 
     if (charset) {
       if (bom) { data = data.slice(bom.length); }
-      let text = await scrapbook.readFileAsText(data, charset);
+      let text = await readFileAsText(data, charset);
 
       // Add a BOM to inactivate the @charset rule
       if (regexAtCharset.test(text)) {
@@ -3454,12 +3419,10 @@ scrapbook.parseCssFile = async function (...args) {
     }
 
     if (bom) { bytes = bytes.slice(bom.length); }
-    bytes += await scrapbook.readFileAsText(data.slice(1024), false);
+    bytes += await readFileAsText(data.slice(1024), false);
     return {text: bytes, charset: null};
   };
-
-  return await fn(...args);
-};
+})();
 
 /**
  * The function that rewrites the CSS text.
@@ -3477,8 +3440,8 @@ scrapbook.parseCssFile = async function (...args) {
  * @param {rewriteCssFileRewriter} rewriter
  * @return {Promise<Blob>} The rewritten CSS file blob.
  */
-scrapbook.rewriteCssFile = async function (data, charset, rewriter) {
-  const {text: cssText, charset: cssCharset} = await scrapbook.parseCssFile(data, charset);
+async function rewriteCssFile(data, charset, rewriter) {
+  const {text: cssText, charset: cssCharset} = await parseCssFile(data, charset);
 
   const rewrittenText = await rewriter(cssText);
 
@@ -3486,11 +3449,11 @@ scrapbook.rewriteCssFile = async function (data, charset, rewriter) {
   if (cssCharset) {
     blob = new Blob([rewrittenText], {type: "text/css;charset=UTF-8"});
   } else {
-    let ab = scrapbook.byteStringToArrayBuffer(rewrittenText);
+    let ab = byteStringToArrayBuffer(rewrittenText);
     blob = new Blob([ab], {type: "text/css"});
   }
   return blob;
-};
+}
 
 /**
  * The function that rewrites each URL into a new URL.
@@ -3514,7 +3477,7 @@ scrapbook.rewriteCssFile = async function (data, charset, rewriter) {
  * @param {rewriteCssTextRewriter} options.rewriteBackgroundUrl
  * @param {Object} [options.resourceMap] - A Map to group same resources.
  */
-scrapbook.rewriteCssText = function (cssText, options) {
+const rewriteCssText = (() => {
   const r = String.raw;
   const NL = r`\r\n\f`;  // newline
 
@@ -3552,7 +3515,7 @@ scrapbook.rewriteCssText = function (cssText, options) {
     return str.replace(REGEX_ESCAPE_CSS_STRING, FUNC_ESCAPE_CSS_STRING);
   };
 
-  const fn = scrapbook.rewriteCssText = function (cssText, options = {}) {
+  return function rewriteCssText(cssText, options = {}) {
     let mapUrlPromise;
 
     const handleRewrittenData = function (data, prefix, postfix, noResMap) {
@@ -3561,7 +3524,7 @@ scrapbook.rewriteCssText = function (cssText, options) {
       if (!recordUrl || url === recordUrl) {
         record = "";
       } else {
-        record = '/*scrapbook-orig-url="' + scrapbook.escapeCssComment(recordUrl) + '"*/';
+        record = '/*scrapbook-orig-url="' + escapeCssComment(recordUrl) + '"*/';
       }
 
       if (resourceMap && !noResMap) {
@@ -3583,9 +3546,9 @@ scrapbook.rewriteCssText = function (cssText, options) {
     };
 
     const handleRewritten = function (data, prefix, postfix, noResMap) {
-      if (scrapbook.isPromise(data)) {
+      if (isPromise(data)) {
         if (!mapUrlPromise) { mapUrlPromise = new Map(); }
-        const key = scrapbook.getUuid();
+        const key = getUuid();
         mapUrlPromise.set(key, data.then(r => {
           mapUrlPromise.set(key, handleRewrittenData(r, prefix, postfix, noResMap));
         }));
@@ -3598,14 +3561,14 @@ scrapbook.rewriteCssText = function (cssText, options) {
       return text.replace(REGEX_PARSE_URL, (m, pre, url, post) => {
         let rewritten;
         if (url.startsWith('"') && url.endsWith('"')) {
-          const u = scrapbook.unescapeCss(url.slice(1, -1), {stripNewline: true});
+          const u = unescapeCss(url.slice(1, -1), {stripNewline: true});
           rewritten = callback(u);
         } else if (url.startsWith("'") && url.endsWith("'")) {
-          const u = scrapbook.unescapeCss(url.slice(1, -1), {stripNewline: true});
+          const u = unescapeCss(url.slice(1, -1), {stripNewline: true});
           rewritten = callback(u);
         } else {
           if (!REGEX_URL_TOKEN.test(url)) { return m; }
-          const u = scrapbook.unescapeCss(url);
+          const u = unescapeCss(url);
           rewritten = callback(u);
         }
 
@@ -3620,10 +3583,10 @@ scrapbook.rewriteCssText = function (cssText, options) {
         if (im2) {
           let rewritten;
           if (im2.startsWith('"') && im2.endsWith('"')) {
-            const u = scrapbook.unescapeCss(im2.slice(1, -1), {stripNewline: true});
+            const u = unescapeCss(im2.slice(1, -1), {stripNewline: true});
             rewritten = handleRewritten(rewriteImportUrl(u), '', '', true);
           } else if (im2.startsWith("'") && im2.endsWith("'")) {
-            const u = scrapbook.unescapeCss(im2.slice(1, -1), {stripNewline: true});
+            const u = unescapeCss(im2.slice(1, -1), {stripNewline: true});
             rewritten = handleRewritten(rewriteImportUrl(u), '', '', true);
           } else {
             rewritten = parseUrl(im2, rewriteImportUrl, true);
@@ -3653,8 +3616,7 @@ scrapbook.rewriteCssText = function (cssText, options) {
       });
     });
   };
-  return fn(cssText, options);
-};
+})();
 
 /**
  * The function that rewrites each URL into a new URL.
@@ -3669,7 +3631,7 @@ scrapbook.rewriteCssText = function (cssText, options) {
  * @param {rewriteSrcsetRewriter} rewriter
  * @return {string|Promise<string>} The rewritten URL.
  */
-scrapbook.rewriteSrcset = function (srcset, rewriter) {
+const rewriteSrcset = (() => {
   const KEY_PREFIX = "urn:scrapbook:str:";
   const REGEX_SRCSET = new RegExp(
     [
@@ -3681,13 +3643,13 @@ scrapbook.rewriteSrcset = function (srcset, rewriter) {
   );
   const REGEX_UUID = new RegExp(KEY_PREFIX + "([0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12})", 'g');
 
-  const fn = scrapbook.rewriteSrcset = function (srcset, rewriter) {
+  return function rewriteSrcset(srcset, rewriter) {
     let mapUrlPromise;
     const response = srcset.replace(REGEX_SRCSET, (m, m1, m2, m3) => {
       let replacement = rewriter(m2);
-      if (scrapbook.isPromise(replacement)) {
+      if (isPromise(replacement)) {
         if (!mapUrlPromise) { mapUrlPromise = new Map(); }
-        const key = scrapbook.getUuid();
+        const key = getUuid();
         mapUrlPromise.set(key, replacement.then(r => {
           mapUrlPromise.set(key, r);
         }));
@@ -3709,8 +3671,7 @@ scrapbook.rewriteSrcset = function (srcset, rewriter) {
       });
     });
   };
-  return fn(srcset, rewriter);
-};
+})();
 
 /**
  * The function that rewrites each URL into a new URL.
@@ -3727,17 +3688,17 @@ scrapbook.rewriteSrcset = function (srcset, rewriter) {
  * @param {rewriteUrlsRewriter} rewriter
  * @return {string|Promise<string>} The rewritten URL.
  */
-scrapbook.rewriteUrls = function (...args) {
+const rewriteUrls = (() => {
   const KEY_PREFIX = "urn:scrapbook:str:";
   const REGEX_UUID = new RegExp(KEY_PREFIX + "([0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12})", 'g');
 
-  const fn = scrapbook.rewriteUrls = function (urls, rewriter) {
+  return function rewriteUrls(urls, rewriter) {
     let mapUrlPromise;
-    const response = scrapbook.split(urls).map(url => {
+    const response = split(urls).map(url => {
       let replacement = rewriter(url);
-      if (scrapbook.isPromise(replacement)) {
+      if (isPromise(replacement)) {
         if (!mapUrlPromise) { mapUrlPromise = new Map(); }
-        const key = scrapbook.getUuid();
+        const key = getUuid();
         mapUrlPromise.set(key, replacement.then(r => {
           mapUrlPromise.set(key, r);
         }));
@@ -3759,13 +3720,12 @@ scrapbook.rewriteUrls = function (...args) {
       });
     });
   };
-  return fn(...args);
-};
+})();
 
 /**
  * Get all accessible descendant frames.
  */
-scrapbook.flattenFrames = function (doc) {
+function flattenFrames(doc) {
   let result = [doc];
   for (const frameElem of doc.querySelectorAll('frame[src], iframe[src]')) {
     let doc;
@@ -3776,10 +3736,10 @@ scrapbook.flattenFrames = function (doc) {
       // failed to get frame document, prabably cross-origin
       continue;
     }
-    result = result.concat(scrapbook.flattenFrames(doc));
+    result = result.concat(flattenFrames(doc));
   }
   return result;
-};
+}
 
 
 /**
@@ -3787,7 +3747,7 @@ scrapbook.flattenFrames = function (doc) {
  *
  * @return {{width: integer, height: integer, scrollX: integer, scrollY: integer}}
  */
-scrapbook.getViewport = function (win) {
+function getViewport(win) {
   const doc = win.document;
   const isQuirkMode = doc.compatMode == "BackCompat";
   return {
@@ -3796,14 +3756,14 @@ scrapbook.getViewport = function (win) {
     width: (isQuirkMode ? doc.body : doc.documentElement).clientWidth,
     height: (isQuirkMode ? doc.body : doc.documentElement).clientHeight,
   };
-};
+}
 
 /**
  * Get appropriate offset for absolute positioning.
  *
  * @return {{left: integer, top: integer}}
  */
-scrapbook.getAnchoredPosition = function (elem, {clientX, clientY}, viewport) {
+function getAnchoredPosition(elem, {clientX, clientY}, viewport) {
   const win = elem.ownerDocument.defaultView;
 
   // The innermost ancestor element that is relatively positioned.
@@ -3828,7 +3788,7 @@ scrapbook.getAnchoredPosition = function (elem, {clientX, clientY}, viewport) {
     deltaX = ancestorRect.left + parseFloat(ancestorStyle.getPropertyValue('border-left-width'));
     deltaY = ancestorRect.top + parseFloat(ancestorStyle.getPropertyValue('border-top-width'));
   } else {
-    viewport = viewport || scrapbook.getViewport(win);
+    viewport = viewport || getViewport(win);
     deltaX = -viewport.scrollX;
     deltaY = -viewport.scrollY;
   }
@@ -3837,7 +3797,7 @@ scrapbook.getAnchoredPosition = function (elem, {clientX, clientY}, viewport) {
     left: clientX - deltaX,
     top: clientY - deltaY,
   };
-};
+}
 
 /**
  * Get primary meta refresh target URL.
@@ -3851,7 +3811,7 @@ scrapbook.getAnchoredPosition = function (elem, {clientX, clientY}, viewport) {
  * @param {boolean} [includeNoscript] - Also consider meta refresh in <noscript>.
  * @return {string|undefined} Absolute URL of the meta refresh target.
  */
-scrapbook.getMetaRefreshTarget = function (doc, baseUrl = doc.URL,
+function getMetaRefreshTarget(doc, baseUrl = doc.URL,
   includeDelayedRefresh = false, includeNoscript = false,
 ) {
   let lastMetaRefreshTime = Infinity;
@@ -3865,7 +3825,7 @@ scrapbook.getMetaRefreshTarget = function (doc, baseUrl = doc.URL,
       continue;
     }
 
-    const metaRefresh = scrapbook.parseHeaderRefresh(elem.getAttribute("content"));
+    const metaRefresh = parseHeaderRefresh(elem.getAttribute("content"));
     if (typeof metaRefresh.time === 'undefined') {
       continue;
     }
@@ -3882,7 +3842,7 @@ scrapbook.getMetaRefreshTarget = function (doc, baseUrl = doc.URL,
     lastMetaRefreshUrl = new URL(metaRefresh.url, baseUrl).href;
   }
   return lastMetaRefreshUrl;
-};
+}
 
 /**
  * Cross-platform way to get an appropriate selection.
@@ -3904,14 +3864,14 @@ scrapbook.getMetaRefreshTarget = function (doc, baseUrl = doc.URL,
  *   - A selection across a shadowRoot is not allowed and will at last be
  *     reduced to reside only in a root node.
  */
-scrapbook.getSelection = function (rootNode = document) {
+function getSelection(rootNode = document) {
   let sel = rootNode.getSelection();
 
   getDeepSelection: {
     if (!sel) {
       break getDeepSelection;
     }
-    if (!scrapbook.userAgent.is('chromium')) {
+    if (!userAgent.is('chromium')) {
       break getDeepSelection;
     }
     if (!sel.isCollapsed || sel.type === 'None') {
@@ -3921,18 +3881,18 @@ scrapbook.getSelection = function (rootNode = document) {
     if (!host) {
       break getDeepSelection;
     }
-    const shadowRoot = scrapbook.getShadowRoot(host);
+    const shadowRoot = getShadowRoot(host);
     if (!shadowRoot) {
       break getDeepSelection;
     }
-    const selDeep = scrapbook.getSelection(shadowRoot);
+    const selDeep = getSelection(shadowRoot);
     if (selDeep?.type !== 'None') {
       sel = selDeep;
     }
   }
 
   return sel;
-};
+}
 
 /**
  * Get nodes in the selected range(s).
@@ -3944,8 +3904,8 @@ scrapbook.getSelection = function (rootNode = document) {
  * @param {boolean} [params.fuzzy] - Include partially selected nodes.
  * @return {Node[]} Nodes in the selected range(s).
  */
-scrapbook.getSelectedNodes = function ({query = document, whatToShow = -1, nodeFilter, fuzzy = false}) {
-  const ranges = query.nodeType ? scrapbook.getSelectionRanges(query) :
+function getSelectedNodes({query = document, whatToShow = -1, nodeFilter, fuzzy = false}) {
+  const ranges = query.nodeType ? getSelectionRanges(query) :
       Array.isArray(query) ? query : [query];
   const result = new Set();
   for (let range of ranges) {
@@ -3992,14 +3952,14 @@ scrapbook.getSelectedNodes = function ({query = document, whatToShow = -1, nodeF
     }
   }
   return Array.from(result);
-};
+}
 
 /**
  * @param {Document|ShadowRoot|Selection} [query]
  * @return {Range[]} The selected ranges.
  */
-scrapbook.getSelectionRanges = function (query = document) {
-  const sel = query.nodeType ? scrapbook.getSelection(query) : query;
+function getSelectionRanges(query = document) {
+  const sel = query.nodeType ? getSelection(query) : query;
   const result = [];
   if (sel) {
     for (let i = 0; i < sel.rangeCount; i++) {
@@ -4007,21 +3967,21 @@ scrapbook.getSelectionRanges = function (query = document) {
     }
   }
   return result;
-};
+}
 
 /**
- * See scrapbook.getSafeRanges() for details.
+ * See `getSafeRanges()` for details.
  */
-scrapbook.getSafeSelectionRanges = function (query) {
+function getSafeSelectionRanges(query) {
   const CHUNK_SIZE = 32767;
-  return scrapbook.getSelectionRanges(query).reduce((result, range) => {
-    const ranges = scrapbook.getSafeRanges(range);
+  return getSelectionRanges(query).reduce((result, range) => {
+    const ranges = getSafeRanges(range);
     for (let i = 0, I = ranges.length; i < I; i += CHUNK_SIZE) {
       result.push.apply(result, ranges.slice(i, i + CHUNK_SIZE));
     }
     return result;
   }, []);
-};
+}
 
 /**
  * Get splitted selection range parts which do not cross an element boundary.
@@ -4029,7 +3989,7 @@ scrapbook.getSafeSelectionRanges = function (query) {
  * Revised from:
  * https://stackoverflow.com/a/12823606/1667884
  */
-scrapbook.getSafeRanges = (dangerous) => {
+function getSafeRanges(dangerous) {
   const ca = dangerous.commonAncestorContainer;
   const doc = ca.ownerDocument;
 
@@ -4097,12 +4057,12 @@ scrapbook.getSafeRanges = (dangerous) => {
   rs.push(xm);
 
   return rs.concat(re);
-};
+}
 
 /**
  * Remove the node while keeping all children.
  */
-scrapbook.unwrapNode = function (node, normalize = true) {
+function unwrapNode(node, normalize = true) {
   const parent = node.parentNode;
   if (!parent) { return; }
   const frag = node.ownerDocument.createDocumentFragment();
@@ -4114,19 +4074,19 @@ scrapbook.unwrapNode = function (node, normalize = true) {
   if (normalize) {
     parent.normalize();
   }
-};
+}
 
 /**
  * Get data URL of a blank canvas.
  */
-scrapbook.getBlankCanvasData = function (canvas) {
+function getBlankCanvasData(canvas) {
   const blank = document.createElement('canvas');
   blank.width = canvas.width;
   blank.height = canvas.height;
   return blank.toDataURL();
-};
+}
 
-scrapbook.getOffsetInSource = function (root, node, offset) {
+function getOffsetInSource(root, node, offset) {
   let pos = 0;
   let tmpParent = node.parentNode;
   let tmpSibling = node.previousSibling;
@@ -4182,7 +4142,7 @@ scrapbook.getOffsetInSource = function (root, node, offset) {
     span.textContent = content;
     return span.innerHTML.length;
   }
-};
+}
 
 
 /****************************************************************************
@@ -4206,7 +4166,7 @@ scrapbook.getOffsetInSource = function (root, node, offset) {
  * @param {function} [params.onreadystatechange]
  * @param {boolean} [params.allowAnyStatus] - whether to allow non-2xx response
  */
-scrapbook.xhr = async function (params = {}) {
+async function xhr(params = {}) {
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();
 
@@ -4257,7 +4217,7 @@ scrapbook.xhr = async function (params = {}) {
 
     xhr.send(params.formData);
   });
-};
+}
 
 /**
  * Check for whether a server backend is set
@@ -4265,44 +4225,43 @@ scrapbook.xhr = async function (params = {}) {
  * @param {Object} [options]
  * @return {boolean|Promise<boolean>}
  */
-scrapbook.hasServer = function (...args) {
+const hasServer = (() => {
   const reHttp = /^https?:/;
-  const fn = scrapbook.hasServer = (options = scrapbook.options) => {
+  return function hasServer(options = _options) {
     if (options) {
       return reHttp.test(options["server.url"]);
     }
-    return scrapbook.getOption("server.url").then((option) => {
+    return getOption("server.url").then((option) => {
       return reHttp.test(option);
     });
   };
-  return fn(...args);
-};
+})();
 
 
 /****************************************************************************
  * Promise utilities
  ***************************************************************************/
 
-scrapbook.delay = async function (ms) {
+async function delay(ms) {
   return new Promise((resolve, reject) => {
     setTimeout(resolve, ms);
   });
-};
+}
 
-scrapbook.isPromise = function (object) {
+function isPromise(object) {
   return object && typeof object.then === 'function';
-};
+}
 
 
 /****************************************************************************
  * Miscellaneous utilities
  ***************************************************************************/
 
-scrapbook.getScreenBounds = async function (refWindow, {
-  defaultLeft = scrapbook.getOption("ui.screen.left"),
-  defaultTop = scrapbook.getOption("ui.screen.top"),
-  defaultWidth = scrapbook.getOption("ui.screen.width"),
-  defaultHeight = scrapbook.getOption("ui.screen.height"),
+async function getScreenBounds(refWindow, {
+  defaultLeft = getOption("ui.screen.left"),
+  defaultTop = getOption("ui.screen.top"),
+  defaultWidth = getOption("ui.screen.width"),
+  defaultHeight = getOption("ui.screen.height"),
 } = {}) {
   // supported by Chromium
   if (browser.system?.display) {
@@ -4352,30 +4311,30 @@ scrapbook.getScreenBounds = async function (refWindow, {
     top: defaultTop,
     left: defaultLeft,
   };
-};
+}
 
 /**
  * A simple modal window prompt for multi-line input.
  */
-scrapbook.prompt = async function (message = '', defaultValue = '') {
-  const result = await scrapbook.openModalWindow({
+async function promptWindow(message = '', defaultValue = '') {
+  const result = await openModalWindow({
     url: browser.runtime.getURL('core/prompt.html'),
     args: {message, defaultValue},
   });
   return result?.input;
-};
+}
 
-scrapbook.getGeoLocation = async function (options) {
+async function getGeoLocation(options) {
   return await new Promise((resolve, reject) => {
     navigator.geolocation.getCurrentPosition(resolve, reject, Object.assign({
-      timeout: scrapbook.getOption("geolocation.timeout"),
-      maximumAge: scrapbook.getOption("geolocation.maximumAge"),
-      enableHighAccuracy: scrapbook.getOption("geolocation.enableHighAccuracy"),
+      timeout: getOption("geolocation.timeout"),
+      maximumAge: getOption("geolocation.maximumAge"),
+      enableHighAccuracy: getOption("geolocation.enableHighAccuracy"),
     }, options));
-  }).then(r => scrapbook.validateGeoLocation(r.coords));
-};
+  }).then(r => validateGeoLocation(r.coords));
+}
 
-scrapbook.validateGeoLocation = function (obj) {
+function validateGeoLocation(obj) {
   if (!(typeof obj === 'object' && !Array.isArray(obj) && obj !== null)) {
     throw new Error('Must be a JSON object.');
   }
@@ -4399,9 +4358,9 @@ scrapbook.validateGeoLocation = function (obj) {
     }
     return result;
   }, {});
-};
+}
 
-scrapbook.debounce = function (func, {
+function debounce(func, {
   delay = 300,
   withFlusher = false,
   withCancler = false,
@@ -4423,12 +4382,121 @@ scrapbook.debounce = function (func, {
     };
   }
   return fn;
-};
+}
 
 
 export {
   BACKEND_MIN_VERSION,
   DEFAULT_OPTIONS,
   ANNOTATION_CSS,
-  scrapbook,
+  userAgent,
+  loadOptions,
+  loadOptionsAuto,
+  getOption,
+  parseOption,
+  getOptions,
+  setOptions,
+  clearOptions,
+  autoCacheOptions,
+  serializeObject,
+  deserializeObject,
+  cache,
+  lang,
+  loadLanguages,
+  addMessageListener,
+  initContentScripts,
+  invokeExtensionScript,
+  invokeContentScript,
+  invokeFrameScript,
+  openModalWindow,
+  escapeFilename,
+  quote,
+  validateFilename,
+  dateToId,
+  idToDate,
+  dateToIdOld,
+  idToDateOld,
+  isContentPage,
+  getScrapbookObjectType,
+  getScrapBookObjectRemoveType,
+  getScrapBookObjectElems,
+  getShadowRoot,
+  getAdoptedStyleSheets,
+  cloneDocument,
+  cloneNode,
+  htmlifyElem,
+  htmlify,
+  unhtmlifyElem,
+  unhtmlify,
+  eraseRange,
+  eraseNode,
+  uneraseNode,
+  versionCompare,
+  crop,
+  getUuid,
+  escapeHtml,
+  unescapeHtml,
+  escapeRegExp,
+  escapeHtmlComment,
+  unescapeHtmlComment,
+  escapeQuotes,
+  unescapeQuotes,
+  escapeCssComment,
+  unescapeCss,
+  quoteXPath,
+  decodeURIComponent2 as decodeURIComponent,
+  unicodeToDataUri,
+  byteStringToDataUri,
+  unicodeToUtf8,
+  utf8ToUnicode,
+  byteStringToArrayBuffer,
+  arrayBufferToByteString,
+  trim,
+  split,
+  normalizeUrl,
+  isUrlAbsolute,
+  getRelativeUrl,
+  urlToFilename,
+  splitUrl,
+  splitUrlByAnchor,
+  filepathParts,
+  filenameParts,
+  splitXmlAttribute,
+  parseHeaderContentType,
+  parseHeaderContentDisposition,
+  parseHeaderRefresh,
+  compressCode,
+  compressJsFunc,
+  readFileAsArrayBuffer,
+  readFileAsDataURL,
+  readFileAsText,
+  readFileAsDocument,
+  mimeIsText,
+  documentToString,
+  parseCssFile,
+  rewriteCssFile,
+  rewriteCssText,
+  rewriteSrcset,
+  rewriteUrls,
+  flattenFrames,
+  getViewport,
+  getAnchoredPosition,
+  getMetaRefreshTarget,
+  getSelection,
+  getSelectedNodes,
+  getSelectionRanges,
+  getSafeSelectionRanges,
+  getSafeRanges,
+  unwrapNode,
+  getBlankCanvasData,
+  getOffsetInSource,
+  xhr,
+  hasServer,
+  delay,
+  isPromise,
+  getScreenBounds,
+  promptWindow as prompt,
+  getGeoLocation,
+  validateGeoLocation,
+  debounce,
 };

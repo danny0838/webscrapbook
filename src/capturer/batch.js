@@ -2,7 +2,7 @@
  * Script for batch.html.
  *****************************************************************************/
 
-import {scrapbook} from "../utils/extension.mjs";
+import * as scrapbook from "../utils/extension.mjs";
 
 let gTaskInfo;
 

@@ -2,7 +2,7 @@
  * Script for cache.html
  *****************************************************************************/
 
-import {scrapbook} from "../../utils/common.mjs";
+import * as scrapbook from "../../utils/common.mjs";
 import {ScrapbookTool} from "./tool.mjs";
 
 class Tool extends ScrapbookTool {

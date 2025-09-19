@@ -2,7 +2,7 @@
  * The background script for editor functionality
  *****************************************************************************/
 
-import {scrapbook} from "../utils/extension.mjs";
+import * as scrapbook from "../utils/extension.mjs";
 
 scrapbook.loadOptionsAuto(); // async
 

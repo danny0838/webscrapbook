@@ -5,7 +5,7 @@
  * the DOM tree according to it.
  *****************************************************************************/
 
-import {scrapbook} from "../utils/common.mjs";
+import * as scrapbook from "../utils/common.mjs";
 import {server} from "./server.mjs";
 import {Tree} from "./tree.mjs";
 

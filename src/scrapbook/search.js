@@ -2,7 +2,7 @@
  * Script for search.html.
  *****************************************************************************/
 
-import {scrapbook} from "../utils/extension.mjs";
+import * as scrapbook from "../utils/extension.mjs";
 import {server} from "./server.mjs";
 import {CustomTree} from "./custom-tree.mjs";
 

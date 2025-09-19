@@ -2,7 +2,7 @@
  * Shared utilities for most content scripts.
  *****************************************************************************/
 
-import {scrapbook} from "../utils/common.mjs";
+import * as scrapbook from "../utils/common.mjs";
 import {core} from "./core.mjs";
 import {capturer} from "../capturer/content.mjs";
 import {editor} from "../editor/content.mjs";
