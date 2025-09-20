@@ -2,13 +2,13 @@
  * Scrapbook sidebar UI controller, for pages like sidebar.html and manage.html.
  *****************************************************************************/
 
-import * as scrapbook from "../utils/extension.mjs";
+import * as utils from "../utils/extension.mjs";
 import {server} from "./server.mjs";
 import {Tree} from "./tree.mjs";
 import {BookTree} from "./book-tree.mjs";
 import {ItemInfoFormatter as _ItemInfoFormatter} from "./item-info-formatter.mjs";
 
-scrapbook.loadOptionsAuto(); // async
+utils.loadOptionsAuto(); // async
 
 const customDataMap = new WeakMap();
 
@@ -85,10 +85,10 @@ const sidebar = {
     }
 
     // load config
-    await scrapbook.loadOptionsAuto();
+    await utils.loadOptionsAuto();
 
-    if (!scrapbook.hasServer()) {
-      this.error(scrapbook.lang('ScrapBookErrorServerNotConfigured'));
+    if (!utils.hasServer()) {
+      this.error(utils.lang('ScrapBookErrorServerNotConfigured'));
       return;
     }
 
@@ -97,7 +97,7 @@ const sidebar = {
       await server.init();
     } catch (ex) {
       console.error(ex);
-      this.error(scrapbook.lang('ScrapBookErrorServerInit', [ex.message]));
+      this.error(utils.lang('ScrapBookErrorServerInit', [ex.message]));
 
       // For authentication failure, show alternative login link if user and
       // password not configured.
@@ -105,7 +105,7 @@ const sidebar = {
         const a = document.createElement('a');
         a.href = location.href;
         a.target = 'login';
-        a.textContent = scrapbook.lang('WarnSidebarLoginPromptMissing');
+        a.textContent = utils.lang('WarnSidebarLoginPromptMissing');
         this.error(a);
       }
 
@@ -149,7 +149,7 @@ const sidebar = {
           let requireUpdateBooks = true;
 
           if (!initial) {
-            await scrapbook.cache.set({table: "scrapbookServer", key: "currentScrapbook"}, bookId, 'storage');
+            await utils.cache.set({table: "scrapbookServer", key: "currentScrapbook"}, bookId, 'storage');
 
             await this.savePostit();
             await this.uneditPostit();
@@ -163,10 +163,10 @@ const sidebar = {
           this.book = server.books[bookId];
 
           if (!this.book) {
-            this.warn(scrapbook.lang('ScrapBookErrorBookNotExist', [bookId]));
+            this.warn(utils.lang('ScrapBookErrorBookNotExist', [bookId]));
             bookId = this.bookId = '';
             this.book = server.books[bookId];
-            await scrapbook.cache.set({table: "scrapbookServer", key: "currentScrapbook"}, bookId, 'storage');
+            await utils.cache.set({table: "scrapbookServer", key: "currentScrapbook"}, bookId, 'storage');
           }
 
           // update book selector
@@ -193,9 +193,9 @@ const sidebar = {
 
         // refresh UI
         if (this.rootId === 'root') {
-          document.title = scrapbook.lang('SidebarTitle', [server.config.app.name, this.book.name]);
+          document.title = utils.lang('SidebarTitle', [server.config.app.name, this.book.name]);
         } else {
-          document.title = scrapbook.lang('SidebarTitleWithRoot', [server.config.app.name, this.book.name, this.rootId]);
+          document.title = utils.lang('SidebarTitleWithRoot', [server.config.app.name, this.book.name, this.rootId]);
         }
 
         const isLocal = server.config.app.is_local;
@@ -268,7 +268,7 @@ const sidebar = {
             throw new Error(`specified root item "${rootId}" does not exist.`);
           }
         } else {
-          this.log(scrapbook.lang('ScrapBookNoTree'));
+          this.log(utils.lang('ScrapBookNoTree'));
         }
 
         this.tree.init({
@@ -293,7 +293,7 @@ const sidebar = {
         await this.tree.rebuild();
       } catch (ex) {
         console.error(ex);
-        throw new Error(scrapbook.lang('ScrapBookErrorInitTree', [ex.message]));
+        throw new Error(utils.lang('ScrapBookErrorInitTree', [ex.message]));
       }
     });
 
@@ -434,7 +434,7 @@ const sidebar = {
 
   onSearchButtonClick(event) {
     event.preventDefault();
-    const newTab = event.shiftKey || event.ctrlKey || scrapbook.getOption("scrapbook.sidebarSearchInNewTab");
+    const newTab = event.shiftKey || event.ctrlKey || utils.getOption("scrapbook.sidebarSearchInNewTab");
     const url = new URL(browser.runtime.getURL(`scrapbook/search.html`));
     url.searchParams.set('id', this.bookId);
     if (this.rootId !== 'root') { url.searchParams.set('root', this.rootId); }
@@ -661,8 +661,8 @@ const sidebar = {
       targetIndex += 1;
     }
 
-    if (event.clipboardData.types.includes('application/scrapbook.items+json')) {
-      const data = JSON.parse(event.clipboardData.getData('application/scrapbook.items+json'));
+    if (event.clipboardData.types.includes('application/utils.items+json')) {
+      const data = JSON.parse(event.clipboardData.getData('application/utils.items+json'));
       if (!data.items) {
         return;
       }
@@ -720,7 +720,7 @@ const sidebar = {
 
     // special handling for postit
     if (itemElem.getAttribute('data-type') === 'postit') {
-      if (scrapbook.getOption("scrapbook.sidebarEditPostitInNewTab")) {
+      if (utils.getOption("scrapbook.sidebarEditPostitInNewTab")) {
         await this.openLink(anchorElem.href, true);
       } else {
         await this.editPostit(itemElem.getAttribute('data-id'));
@@ -730,11 +730,11 @@ const sidebar = {
 
     // special handling for note
     if (itemElem.getAttribute('data-type') === 'note') {
-      await this.openLink(anchorElem.href, scrapbook.getOption("scrapbook.sidebarEditNoteInNewTab"));
+      await this.openLink(anchorElem.href, utils.getOption("scrapbook.sidebarEditNoteInNewTab"));
       return;
     }
 
-    await this.openLink(anchorElem.href, scrapbook.getOption("scrapbook.sidebarOpenInNewTab"));
+    await this.openLink(anchorElem.href, utils.getOption("scrapbook.sidebarOpenInNewTab"));
   },
 
   onTreeItemDragOver(event, {
@@ -753,7 +753,7 @@ const sidebar = {
       return;
     }
 
-    if (event.dataTransfer.types.includes('application/scrapbook.items+json')) {
+    if (event.dataTransfer.types.includes('application/utils.items+json')) {
       if (isOnItem || !lastDraggedElems) {
         if (!lastDraggedElems) {
           // dragged from a different window
@@ -781,7 +781,7 @@ const sidebar = {
       return;
     }
 
-    if (event.dataTransfer.types.includes('application/scrapbook.command+json') && this.rootId !== 'recycle') {
+    if (event.dataTransfer.types.includes('application/utils.command+json') && this.rootId !== 'recycle') {
       event.dataTransfer.dropEffect = 'copy';
       return;
     }
@@ -820,9 +820,9 @@ const sidebar = {
       return;
     }
 
-    if (event.dataTransfer.types.includes('application/scrapbook.items+json')) {
+    if (event.dataTransfer.types.includes('application/utils.items+json')) {
       if (isOnItem || !lastDraggedElems) {
-        const data = JSON.parse(event.dataTransfer.getData('application/scrapbook.items+json'));
+        const data = JSON.parse(event.dataTransfer.getData('application/utils.items+json'));
         if (!data.items) {
           return;
         }
@@ -880,11 +880,11 @@ const sidebar = {
       return;
     }
 
-    if (event.dataTransfer.types.includes('application/scrapbook.command+json') && this.rootId !== 'recycle') {
-      const data = JSON.parse(event.dataTransfer.getData('application/scrapbook.command+json'));
+    if (event.dataTransfer.types.includes('application/utils.command+json') && this.rootId !== 'recycle') {
+      const data = JSON.parse(event.dataTransfer.getData('application/utils.command+json'));
       const targetTab = await browser.tabs.get(data.tabId);
       const windowId = targetTab.windowId;
-      const tabs = data.forAllTabs ? await scrapbook.getContentTabs({windowId}) : await scrapbook.getHighlightedTabs({windowId});
+      const tabs = data.forAllTabs ? await utils.getContentTabs({windowId}) : await utils.getHighlightedTabs({windowId});
       const mode = event.altKey ? 'bookmark' :
           event.shiftKey ? (data.mode === 'source' ? 'tab' : 'source') :
           data.mode;
@@ -904,19 +904,19 @@ const sidebar = {
       };
       switch (data.cmd) {
         case 'capture': {
-          event.ctrlKey ? await scrapbook.invokeCaptureAs(taskInfo) : await scrapbook.invokeCaptureEx({taskInfo});
+          event.ctrlKey ? await utils.invokeCaptureAs(taskInfo) : await utils.invokeCaptureEx({taskInfo});
           break;
         }
         case 'captureAs': {
-          await scrapbook.invokeCaptureAs(taskInfo);
+          await utils.invokeCaptureAs(taskInfo);
           break;
         }
         case 'batchCapture': {
-          await scrapbook.invokeCaptureBatch(taskInfo);
+          await utils.invokeCaptureBatch(taskInfo);
           break;
         }
         case 'batchCaptureLinks': {
-          await scrapbook.invokeCaptureBatchLinks(taskInfo);
+          await utils.invokeCaptureBatchLinks(taskInfo);
           break;
         }
       }
@@ -938,14 +938,14 @@ const sidebar = {
         index: targetIndex,
         mode,
         delay: null,
-        options: Object.assign(scrapbook.getOptions("capture"), {
+        options: Object.assign(utils.getOptions("capture"), {
           "capture.saveTo": "server",
         }),
       };
       if (event.ctrlKey) {
-        await scrapbook.invokeCaptureAs(taskInfo);
+        await utils.invokeCaptureAs(taskInfo);
       } else {
-        await scrapbook.invokeCaptureEx({taskInfo});
+        await utils.invokeCaptureEx({taskInfo});
       }
       return;
     }
@@ -978,7 +978,7 @@ const sidebar = {
   },
 
   onServerTreeChange() {
-    if (!scrapbook.getOption("scrapbook.autoRebuildSidebars")) {
+    if (!utils.getOption("scrapbook.autoRebuildSidebars")) {
       return;
     }
 
@@ -1153,8 +1153,8 @@ const sidebar = {
     menuElem.hidden = false;
 
     const {clientX = 0, clientY = 0} = pos;
-    const viewport = scrapbook.getViewport(window);
-    const anchorPos = scrapbook.getAnchoredPosition(menuElem, {
+    const viewport = utils.getViewport(window);
+    const anchorPos = utils.getAnchoredPosition(menuElem, {
       clientX: Math.min(Math.max(clientX, 0), viewport.width - menuElem.offsetWidth),
       clientY: Math.min(Math.max(clientY, 0), viewport.height - menuElem.offsetHeight),
     }, viewport);
@@ -1305,8 +1305,8 @@ const sidebar = {
     menuElem.hidden = false;
 
     const {clientX = 0, clientY = 0} = pos;
-    const viewport = scrapbook.getViewport(window);
-    const anchorPos = scrapbook.getAnchoredPosition(menuElem, {
+    const viewport = utils.getViewport(window);
+    const anchorPos = utils.getAnchoredPosition(menuElem, {
       clientX: Math.min(Math.max(clientX, 0), viewport.width - menuElem.offsetWidth),
       clientY: Math.min(Math.max(clientY, 0), viewport.height - menuElem.offsetHeight),
     }, viewport);
@@ -1422,7 +1422,7 @@ const sidebar = {
     // Explicitly check for a mobile browser since a Chromium-based Android
     // browser (e.g. Kiwi Browser) may support browser.windows, but actually
     // no visible multi-window.
-    if (scrapbook.userAgent.is('mobile') || !browser.windows) {
+    if (utils.userAgent.is('mobile') || !browser.windows) {
       const a = document.createElement('a');
       a.href = url;
       a.target = newTab ? '_blank' : 'scrapbook';
@@ -1430,7 +1430,7 @@ const sidebar = {
       return;
     }
 
-    return await scrapbook.visitLink({
+    return await utils.visitLink({
       url,
       newTab,
       inNormalWindow: true,
@@ -1438,7 +1438,7 @@ const sidebar = {
   },
 
   async pickItem({bookId, recentItemsKey = 'scrapbookLastPickedItems', withRelation = true}) {
-    const result = await scrapbook.openModalWindow({
+    const result = await utils.openModalWindow({
       url: browser.runtime.getURL("scrapbook/itempicker.html"),
       args: {
         bookId,
@@ -1561,7 +1561,7 @@ const sidebar = {
       callback: async (sourceBook, {backupTs}) => {
         // validate if the dragging source is up to date
         if (treeLastModified !== sourceBook.treeLastModified) {
-          this.warn(scrapbook.lang('ScrapBookErrorSourceTreeOutdated'));
+          this.warn(utils.lang('ScrapBookErrorSourceTreeOutdated'));
           return;
         }
 
@@ -1605,7 +1605,7 @@ const sidebar = {
             recursively,
           },
         }),
-        auto_cache: JSON.stringify(scrapbook.autoCacheOptions()),
+        auto_cache: JSON.stringify(utils.autoCacheOptions()),
       },
       method: 'POST',
       format: 'json',
@@ -1629,11 +1629,11 @@ const sidebar = {
 
             let filename = file.name;
             if (filename === 'index.html') { filename = 'index-1.html'; }
-            filename = scrapbook.validateFilename(filename, scrapbook.getOption("capture.saveAsciiFilename"));
+            filename = utils.validateFilename(filename, utils.getOption("capture.saveAsciiFilename"));
 
             // upload file
             {
-              const target = book.dataUrl + scrapbook.escapeFilename(newItem.id + '/' + filename);
+              const target = book.dataUrl + utils.escapeFilename(newItem.id + '/' + filename);
               await server.request({
                 url: target + '?a=save',
                 method: "POST",
@@ -1648,20 +1648,20 @@ const sidebar = {
             // upload index.html
             {
               const title = newItem.title;
-              const url = scrapbook.escapeFilename(filename);
+              const url = utils.escapeFilename(filename);
               const html = `<!DOCTYPE html>
 <html data-scrapbook-type="file">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="refresh" content="0; url=${scrapbook.escapeHtml(url)}">
-${title ? '<title>' + scrapbook.escapeHtml(title, false) + '</title>\n' : ''}</head>
+<meta http-equiv="refresh" content="0; url=${utils.escapeHtml(url)}">
+${title ? '<title>' + utils.escapeHtml(title, false) + '</title>\n' : ''}</head>
 <body>
-Redirecting to file <a href="${scrapbook.escapeHtml(url)}">${scrapbook.escapeHtml(filename, false)}</a>
+Redirecting to file <a href="${utils.escapeHtml(url)}">${utils.escapeHtml(filename, false)}</a>
 </body>
 </html>
 `;
               const file = new File([html], 'index.html', {type: 'text/html'});
-              const target = book.dataUrl + scrapbook.escapeFilename(newItem.id + '/index.html');
+              const target = book.dataUrl + utils.escapeFilename(newItem.id + '/index.html');
               await server.request({
                 url: target + '?a=save',
                 method: "POST",
@@ -1696,7 +1696,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(url)}">${scrapbook.escapeHtm
                 target_index: targetIndex,
               },
             }),
-            auto_cache: JSON.stringify(scrapbook.autoCacheOptions()),
+            auto_cache: JSON.stringify(utils.autoCacheOptions()),
           },
           method: 'POST',
           format: 'json',
@@ -1714,7 +1714,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(url)}">${scrapbook.escapeHtm
       callback: async (book) => {
         // clear dir if exists
         {
-          const target = book.treeUrl + scrapbook.escapeFilename('exports');
+          const target = book.treeUrl + utils.escapeFilename('exports');
           const json = await server.request({
             url: target,
             query: {
@@ -1740,8 +1740,8 @@ Redirecting to file <a href="${scrapbook.escapeHtml(url)}">${scrapbook.escapeHtm
         // upload files
         for (const file of files) {
           try {
-            const filename = scrapbook.validateFilename(file.name);
-            const target = book.treeUrl + scrapbook.escapeFilename('exports/' + filename);
+            const filename = utils.validateFilename(file.name);
+            const target = book.treeUrl + utils.escapeFilename('exports/' + filename);
             await server.request({
               url: target,
               query: {
@@ -1767,8 +1767,8 @@ Redirecting to file <a href="${scrapbook.escapeHtml(url)}">${scrapbook.escapeHtm
             book: book.id,
             target: targetId,
             index: targetIndex,
-            rebuild: scrapbook.getOption("scrapbook.import.rebuildFolders") ? 1 : '',
-            resolve: scrapbook.getOption("scrapbook.import.resolveItemUsedNew") ? 'new' : 'skip',
+            rebuild: utils.getOption("scrapbook.import.rebuildFolders") ? 1 : '',
+            resolve: utils.getOption("scrapbook.import.resolveItemUsedNew") ? 'new' : 'skip',
             lock: '',
           },
           onMessage: (info) => {
@@ -1817,7 +1817,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(url)}">${scrapbook.escapeHtm
                 items,
               },
             }),
-            auto_cache: JSON.stringify(scrapbook.autoCacheOptions()),
+            auto_cache: JSON.stringify(utils.autoCacheOptions()),
           },
           method: 'POST',
           format: 'json',
@@ -1869,7 +1869,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(url)}">${scrapbook.escapeHtm
           metaViewportNode.setAttribute('content', 'width=device-width');
         }
         title = doc.body.textContent.replace(/\s+/g, ' ');
-        content = scrapbook.documentToString(doc);
+        content = utils.documentToString(doc);
         break;
       }
       default: {
@@ -1882,14 +1882,14 @@ Redirecting to file <a href="${scrapbook.escapeHtml(url)}">${scrapbook.escapeHtm
 </head>
 <body>
 <pre style="white-space: pre-wrap;">
-${scrapbook.escapeHtml(content)}
+${utils.escapeHtml(content)}
 </pre>
 </body>
 </html>`;
         break;
       }
     }
-    title = scrapbook.crop(title, 150, 180);
+    title = utils.crop(title, 150, 180);
 
     // create new item
     const newItem = this.book.addItem({
@@ -1899,7 +1899,7 @@ ${scrapbook.escapeHtml(content)}
     newItem.index = newItem.id + '/index.html';
 
     // create file
-    let target = this.book.dataUrl + scrapbook.escapeFilename(newItem.index);
+    let target = this.book.dataUrl + utils.escapeFilename(newItem.index);
 
     // upload data
     await this.book.transaction({
@@ -1984,7 +1984,7 @@ ${scrapbook.escapeHtml(content)}
 
   commands: {
     async index({modifiers}) {
-      const newTab = modifiers.shiftKey || modifiers.ctrlKey || scrapbook.getOption("scrapbook.sidebarOpenInNewTab");
+      const newTab = modifiers.shiftKey || modifiers.ctrlKey || utils.getOption("scrapbook.sidebarOpenInNewTab");
       await this.openLink(this.book.indexUrl, newTab);
     },
 
@@ -2006,7 +2006,7 @@ ${scrapbook.escapeHtml(content)}
     },
 
     async view_text({itemElems, modifiers}) {
-      const newTab = modifiers.shiftKey || modifiers.ctrlKey || scrapbook.getOption("scrapbook.sidebarViewTextInNewTab");
+      const newTab = modifiers.shiftKey || modifiers.ctrlKey || utils.getOption("scrapbook.sidebarViewTextInNewTab");
       for (const elem of itemElems) {
         const id = elem.getAttribute('data-id');
         const item = this.book.meta[id];
@@ -2041,11 +2041,11 @@ ${scrapbook.escapeHtml(content)}
         const item = this.book.meta[id];
         if (!item.index) { continue; }
 
-        let target = this.book.dataUrl + scrapbook.escapeFilename(item.index);
+        let target = this.book.dataUrl + utils.escapeFilename(item.index);
         if (target.endsWith('/index.html')) {
           const redirectedTarget = await server.getMetaRefreshTarget(target);
           if (redirectedTarget) {
-            target = scrapbook.splitUrlByAnchor(redirectedTarget)[0];
+            target = utils.splitUrlByAnchor(redirectedTarget)[0];
           }
         }
 
@@ -2058,7 +2058,7 @@ ${scrapbook.escapeHtml(content)}
     },
 
     async source({itemElems, modifiers}) {
-      let newTab = modifiers.shiftKey || modifiers.ctrlKey || scrapbook.getOption("scrapbook.sidebarSourceInNewTab");
+      let newTab = modifiers.shiftKey || modifiers.ctrlKey || utils.getOption("scrapbook.sidebarSourceInNewTab");
       for (const elem of itemElems) {
         const id = elem.getAttribute('data-id');
         const item = this.book.meta[id];
@@ -2084,7 +2084,7 @@ ${scrapbook.escapeHtml(content)}
     },
 
     async search_in({itemElems, modifiers}) {
-      const newTab = modifiers.shiftKey || modifiers.ctrlKey || scrapbook.getOption("scrapbook.sidebarSearchInNewTab");
+      const newTab = modifiers.shiftKey || modifiers.ctrlKey || utils.getOption("scrapbook.sidebarSearchInNewTab");
       const urlObj = new URL(browser.runtime.getURL("scrapbook/search.html"));
       urlObj.searchParams.set('id', this.bookId);
       for (const elem of itemElems) {
@@ -2098,7 +2098,7 @@ ${scrapbook.escapeHtml(content)}
     async sort({itemElems}) {
       const frag = document.importNode(document.getElementById('tpl-sort').content, true);
       const dialog = frag.children[0];
-      scrapbook.loadLanguages(dialog);
+      utils.loadLanguages(dialog);
 
       if (!await this.showDialog(dialog)) {
         return;
@@ -2184,13 +2184,13 @@ ${scrapbook.escapeHtml(content)}
           itemElems = Array.from(elems);
         }
 
-        const plainFormat = scrapbook.getOption("scrapbook.copyItemInfoFormatPlain");
+        const plainFormat = utils.getOption("scrapbook.copyItemInfoFormatPlain");
         const plainText = itemElems.map((itemElem) => {
           const item = this.book.meta[itemElem.getAttribute('data-id')];
           return ItemInfoFormatter.format(item, plainFormat, {book: this.book, tree: this.tree, itemElem});
         }).join('\r\n');
 
-        const htmlFormat = scrapbook.getOption("scrapbook.copyItemInfoFormatHtml");
+        const htmlFormat = utils.getOption("scrapbook.copyItemInfoFormatHtml");
         const htmlText = htmlFormat ? itemElems.map((itemElem) => {
           const item = this.book.meta[itemElem.getAttribute('data-id')];
           return ItemInfoFormatter.format(item, htmlFormat, {book: this.book, tree: this.tree, itemElem});
@@ -2211,16 +2211,16 @@ ${scrapbook.escapeHtml(content)}
 
       const frag = document.importNode(document.getElementById('tpl-meta').content, true);
       const dialog = frag.children[0];
-      scrapbook.loadLanguages(dialog);
+      utils.loadLanguages(dialog);
 
       // show dialog
       {
         const editDate = (elem) => {
           const id = elem.getAttribute('data-id');
           if (id) {
-            const date = scrapbook.idToDate(id);
+            const date = utils.idToDate(id);
             date.setTime(date.valueOf() - date.getTimezoneOffset() * 60 * 1000);
-            elem.value = scrapbook.dateToId(date);
+            elem.value = utils.dateToId(date);
           } else {
             elem.value = '';
           }
@@ -2230,21 +2230,21 @@ ${scrapbook.escapeHtml(content)}
           if (!elem.hasAttribute('data-editing')) { return; }
 
           if (elem.value) {
-            const date = scrapbook.idToDate(elem.value.substring(0, 17).padEnd(17, '0'));
+            const date = utils.idToDate(elem.value.substring(0, 17).padEnd(17, '0'));
 
             // if new date is valid, re-convert to ID;
             // otherwise revert to previous value
             if (date) {
               date.setTime(date.valueOf() + date.getTimezoneOffset() * 60 * 1000);
-              elem.setAttribute('data-id', scrapbook.dateToId(date));
+              elem.setAttribute('data-id', utils.dateToId(date));
               elem.value = date.toLocaleString();
             } else {
               const id = elem.getAttribute('data-id');
-              elem.value = id ? scrapbook.idToDate(id).toLocaleString() : '';
+              elem.value = id ? utils.idToDate(id).toLocaleString() : '';
             }
           } else {
             const date = new Date();
-            elem.setAttribute('data-id', scrapbook.dateToId(date));
+            elem.setAttribute('data-id', utils.dateToId(date));
             elem.value = date.toLocaleString();
           }
 
@@ -2262,7 +2262,7 @@ ${scrapbook.escapeHtml(content)}
           if (value) {
             try {
               const obj = JSON.parse(value);
-              scrapbook.validateGeoLocation(obj);
+              utils.validateGeoLocation(obj);
             } catch (ex) {
               validity = ex.message;
             }
@@ -2279,7 +2279,7 @@ ${scrapbook.escapeHtml(content)}
             const value = elem.value;
             if (value) {
               const c = JSON.parse(value);
-              const url = scrapbook.getOption("geolocation.mapUrl")
+              const url = utils.getOption("geolocation.mapUrl")
                   .replace(/%(\w*)%/g, (_, key) => Number.isFinite(c[key]) ? c[key] : '');
               await this.openLink(url, true);
             }
@@ -2297,12 +2297,12 @@ ${scrapbook.escapeHtml(content)}
             } catch (ex) {
               // Optional geolocation permission for extension not supported
               // (Chromium). Prompt for origin-based permission instead.
-              return await scrapbook.getGeoLocation();
+              return await utils.getGeoLocation();
             }
             // Firefox: Get from the background page as extension geolocation
             // permission is only honored by it. Throws an error if not
             // granted.
-            return await scrapbook.invokeExtensionScript({
+            return await utils.invokeExtensionScript({
               cmd: "background.getGeoLocation",
             });
           })().catch(ex => {
@@ -2318,7 +2318,7 @@ ${scrapbook.escapeHtml(content)}
 
         dialog.querySelector('[name="id"]').value = id || "";
         dialog.querySelector('[name="parent"]').value = item.parent || "";
-        dialog.querySelector('[name="recycled"]').value = item.recycled ? scrapbook.idToDate(item.recycled).toLocaleString() : "";
+        dialog.querySelector('[name="recycled"]').value = item.recycled ? utils.idToDate(item.recycled).toLocaleString() : "";
         dialog.querySelector('[name="title"]').value = item.title || "";
         dialog.querySelector('[name="index"]').value = item.index || "";
         dialog.querySelector('[name="source"]').value = item.source || "";
@@ -2331,13 +2331,13 @@ ${scrapbook.escapeHtml(content)}
 
         let elem;
         elem = dialog.querySelector('[name="create"]');
-        elem.value = item.create ? scrapbook.idToDate(item.create).toLocaleString() : "";
+        elem.value = item.create ? utils.idToDate(item.create).toLocaleString() : "";
         elem.setAttribute('data-id', item.create || "");
         elem.addEventListener('focus', onDateFocus);
         elem.addEventListener('blur', onDateBlur);
 
         elem = dialog.querySelector('[name="modify"]');
-        elem.value = item.modify ? scrapbook.idToDate(item.modify).toLocaleString() : "";
+        elem.value = item.modify ? utils.idToDate(item.modify).toLocaleString() : "";
         elem.setAttribute('data-id', item.modify || "");
         elem.addEventListener('focus', onDateFocus);
         elem.addEventListener('blur', onDateBlur);
@@ -2398,7 +2398,7 @@ ${scrapbook.escapeHtml(content)}
           if (value) {
             try {
               const obj = JSON.parse(value);
-              return scrapbook.validateGeoLocation(obj);
+              return utils.validateGeoLocation(obj);
             } catch (ex) {
               return item.location;
             }
@@ -2464,8 +2464,8 @@ ${scrapbook.escapeHtml(content)}
       {
         const frag = document.importNode(document.getElementById('tpl-mkfolder').content, true);
         const dialog = frag.children[0];
-        scrapbook.loadLanguages(dialog);
-        dialog['title'].value = scrapbook.lang('ScrapBookNewFolderName');
+        utils.loadLanguages(dialog);
+        dialog['title'].value = utils.lang('ScrapBookNewFolderName');
 
         dialog.addEventListener('dialogShow', (event) => {
           dialog.querySelector('[name="title"]').select();
@@ -2639,7 +2639,7 @@ ${scrapbook.escapeHtml(content)}
         return;
       }
 
-      if (newTab || scrapbook.getOption("scrapbook.sidebarEditPostitInNewTab")) {
+      if (newTab || utils.getOption("scrapbook.sidebarEditPostitInNewTab")) {
         const u = new URL(browser.runtime.getURL("scrapbook/postit.html"));
         u.searchParams.append('id', newItem.id);
         u.searchParams.append('bookId', this.book.id);
@@ -2673,8 +2673,8 @@ ${scrapbook.escapeHtml(content)}
       {
         const frag = document.importNode(document.getElementById('tpl-mknote').content, true);
         const dialog = frag.children[0];
-        scrapbook.loadLanguages(dialog);
-        dialog['title'].value = scrapbook.lang('ScrapBookNewNoteName');
+        utils.loadLanguages(dialog);
+        dialog['title'].value = utils.lang('ScrapBookNewNoteName');
 
         dialog.addEventListener('dialogShow', (event) => {
           dialog.querySelector('[name="title"]').select();
@@ -2726,7 +2726,7 @@ ${scrapbook.escapeHtml(content)}
                   ext: type === 'markdown' ? '.md' : '.html',
                 },
               })],
-              ['auto_cache', JSON.stringify(scrapbook.autoCacheOptions())],
+              ['auto_cache', JSON.stringify(utils.autoCacheOptions())],
             ],
             method: 'POST',
             format: 'json',
@@ -2735,7 +2735,7 @@ ${scrapbook.escapeHtml(content)}
 
           // create index redirect for markdown
           if (type === 'markdown') {
-            const target = this.book.dataUrl + scrapbook.escapeFilename(newItem.id + '/index.html');
+            const target = this.book.dataUrl + utils.escapeFilename(newItem.id + '/index.html');
             const content = `<!DOCTYPE html>
 <html data-scrapbook-type="note">
 <head>
@@ -2769,8 +2769,8 @@ Redirecting to file <a href="index.md">index.md</a>
 
       switch (type) {
         case 'html': {
-          const target = this.book.dataUrl + scrapbook.escapeFilename(newItem.index);
-          await this.openLink(target, newTab || scrapbook.getOption("scrapbook.sidebarEditNoteInNewTab"));
+          const target = this.book.dataUrl + utils.escapeFilename(newItem.index);
+          await this.openLink(target, newTab || utils.getOption("scrapbook.sidebarEditNoteInNewTab"));
           break;
         }
 
@@ -2778,7 +2778,7 @@ Redirecting to file <a href="index.md">index.md</a>
           const u = new URL(browser.runtime.getURL("scrapbook/edit.html"));
           u.searchParams.set('id', newItem.id);
           u.searchParams.set('bookId', this.bookId);
-          await this.openLink(u.href, newTab || scrapbook.getOption("scrapbook.sidebarEditNoteInNewTab"));
+          await this.openLink(u.href, newTab || utils.getOption("scrapbook.sidebarEditNoteInNewTab"));
           break;
         }
       }
@@ -2827,7 +2827,7 @@ Redirecting to file <a href="index.md">index.md</a>
     async edit({itemElems: [itemElem], modifiers}) {
       if (!itemElem) { return; }
 
-      const newTab = modifiers.shiftKey || modifiers.ctrlKey || scrapbook.getOption("scrapbook.sidebarEditNoteInNewTab");
+      const newTab = modifiers.shiftKey || modifiers.ctrlKey || utils.getOption("scrapbook.sidebarEditNoteInNewTab");
       const id = itemElem.getAttribute('data-id');
       const urlObj = new URL(browser.runtime.getURL("scrapbook/edit.html"));
       urlObj.searchParams.set('id', id);
@@ -2848,7 +2848,7 @@ Redirecting to file <a href="index.md">index.md</a>
         }
 
         const url = item.source;
-        if (!scrapbook.isContentPage(url, false)) {
+        if (!utils.isContentPage(url, false)) {
           continue;
         }
 
@@ -2862,7 +2862,7 @@ Redirecting to file <a href="index.md">index.md</a>
         });
       }
 
-      await scrapbook.invokeCaptureAs({tasks});
+      await utils.invokeCaptureAs({tasks});
     },
 
     async move_up({itemElems: [itemElem]}) {
@@ -2892,7 +2892,7 @@ Redirecting to file <a href="index.md">index.md</a>
       {
         const frag = document.importNode(document.getElementById('tpl-move-into').content, true);
         const dialog = frag.children[0];
-        scrapbook.loadLanguages(dialog);
+        utils.loadLanguages(dialog);
 
         // disable link mode for recycling bin
         if (this.rootId === 'recycle') {
@@ -2951,7 +2951,7 @@ Redirecting to file <a href="index.md">index.md</a>
       {
         const frag = document.importNode(document.getElementById('tpl-copy-into').content, true);
         const dialog = frag.children[0];
-        scrapbook.loadLanguages(dialog);
+        utils.loadLanguages(dialog);
 
         const bookSelector = dialog.querySelector('[name="book"]');
         for (const key of Object.keys(server.books).sort()) {
@@ -3018,8 +3018,8 @@ Redirecting to file <a href="index.md">index.md</a>
           u.search = new URLSearchParams({
             a: 'export',
             book: book.id,
-            recursive: scrapbook.getOption("scrapbook.export.recursive") ? 1 : '',
-            singleton: !scrapbook.getOption("scrapbook.export.nonSingleton") ? 1 : '',
+            recursive: utils.getOption("scrapbook.export.recursive") ? 1 : '',
+            singleton: !utils.getOption("scrapbook.export.nonSingleton") ? 1 : '',
           });
           const form = document.createElement('form');
           form.method = 'POST';
@@ -3047,7 +3047,7 @@ Redirecting to file <a href="index.md">index.md</a>
 
       // delete instead if Shift is hold
       if (modifiers.shiftKey) {
-        if (!confirm(scrapbook.lang('ScrapBookCommandDeleteConfirm', [itemElems.length]))) {
+        if (!confirm(utils.lang('ScrapBookCommandDeleteConfirm', [itemElems.length]))) {
           return;
         }
         await this.deleteItems(itemElems);
@@ -3182,7 +3182,7 @@ class ItemInfoFormatter extends _ItemInfoFormatter {
   }
 }
 
-scrapbook.addMessageListener((message, sender) => {
+utils.addMessageListener((message, sender) => {
   if (!message.cmd.startsWith("sidebar.")) { return false; }
   if (message.id && message.id !== sidebar.sidebarWindowId) { return false; }
   return true;
@@ -3206,7 +3206,7 @@ if (browser.sidebarAction && browser.windows) {
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
-  scrapbook.loadLanguages(document);
+  utils.loadLanguages(document);
 
   await sidebar.init();
 });

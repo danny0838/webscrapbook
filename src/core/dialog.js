@@ -2,7 +2,7 @@
  * Shared script for modal dialog windows.
  *****************************************************************************/
 
-import * as scrapbook from "../utils/common.mjs";
+import * as utils from "../utils/common.mjs";
 
 const dialog = {
   resolve: () => {},
@@ -30,7 +30,7 @@ const dialog = {
   },
 
   onLoad(event) {
-    scrapbook.loadLanguages(document);
+    utils.loadLanguages(document);
 
     document.querySelector('form').addEventListener('submit', (event) => {
       event.preventDefault();
@@ -75,7 +75,7 @@ const dialog = {
   },
 };
 
-scrapbook.addMessageListener((message, sender) => {
+utils.addMessageListener((message, sender) => {
   if (!message.cmd.startsWith("dialog.")) { return false; }
   return true;
 });

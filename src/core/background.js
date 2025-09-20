@@ -3,13 +3,13 @@
  *****************************************************************************/
 
 import {DEFAULT_OPTIONS} from "../utils/extension.mjs";
-import * as scrapbook from "../utils/extension.mjs";
+import * as utils from "../utils/extension.mjs";
 import {server} from "../scrapbook/server.mjs";
 import * as capturer from "../capturer/background.mjs";
 import * as editor from "../editor/background.mjs";
 import * as viewer from "../viewer/background.mjs";
 
-scrapbook.loadOptionsAuto(); // async
+utils.loadOptionsAuto(); // async
 
 /**
  * @type {Map<integer~windowId, integer~timestamp>}
@@ -24,7 +24,7 @@ const capturedUrls = new Map();
 const background = {
   commands: {
     async openScrapBook() {
-      return await scrapbook.openScrapBook();
+      return await utils.openScrapBook();
     },
 
     async openOptions() {
@@ -32,30 +32,30 @@ const background = {
     },
 
     async openViewer() {
-      return await scrapbook.visitLink({
+      return await utils.visitLink({
         url: browser.runtime.getURL("viewer/load.html"),
         newTab: true,
       });
     },
 
     async openSearch() {
-      return await scrapbook.visitLink({
+      return await utils.visitLink({
         url: browser.runtime.getURL("scrapbook/search.html"),
         newTab: true,
       });
     },
 
     async searchCaptures() {
-      const tabs = await scrapbook.getHighlightedTabs();
-      return scrapbook.searchCaptures({
+      const tabs = await utils.getHighlightedTabs();
+      return utils.searchCaptures({
         tabs,
         newTab: true,
       });
     },
 
     async captureTab() {
-      const tabs = await scrapbook.getHighlightedTabs();
-      return await scrapbook.invokeCapture(
+      const tabs = await utils.getHighlightedTabs();
+      return await utils.invokeCapture(
         tabs.map(tab => ({
           tabId: tab.id,
           url: tab.url,
@@ -65,8 +65,8 @@ const background = {
     },
 
     async captureTabSource() {
-      const tabs = await scrapbook.getHighlightedTabs();
-      return await scrapbook.invokeCapture(
+      const tabs = await utils.getHighlightedTabs();
+      return await utils.invokeCapture(
         tabs.map(tab => ({
           tabId: tab.id,
           url: tab.url,
@@ -77,8 +77,8 @@ const background = {
     },
 
     async captureTabBookmark() {
-      const tabs = await scrapbook.getHighlightedTabs();
-      return await scrapbook.invokeCapture(
+      const tabs = await utils.getHighlightedTabs();
+      return await utils.invokeCapture(
         tabs.map(tab => ({
           tabId: tab.id,
           url: tab.url,
@@ -89,8 +89,8 @@ const background = {
     },
 
     async captureTabAs() {
-      const tabs = await scrapbook.getHighlightedTabs();
-      return await scrapbook.invokeCaptureAs({
+      const tabs = await utils.getHighlightedTabs();
+      return await utils.invokeCaptureAs({
         tasks: tabs.map(tab => ({
           tabId: tab.id,
           url: tab.url,
@@ -100,8 +100,8 @@ const background = {
     },
 
     async batchCapture() {
-      const tabs = await scrapbook.getContentTabs();
-      return await scrapbook.invokeCaptureBatch({
+      const tabs = await utils.getContentTabs();
+      return await utils.invokeCaptureBatch({
         tasks: tabs.map(tab => ({
           tabId: tab.id,
           url: tab.url,
@@ -111,8 +111,8 @@ const background = {
     },
 
     async batchCaptureLinks() {
-      const tabs = await scrapbook.getHighlightedTabs();
-      return await scrapbook.invokeCaptureBatchLinks({
+      const tabs = await utils.getHighlightedTabs();
+      return await utils.invokeCaptureBatchLinks({
         tasks: tabs.map(tab => ({
           tabId: tab.id,
           url: tab.url,
@@ -123,7 +123,7 @@ const background = {
 
     async editTab() {
       const [tab] = await browser.tabs.query({active: true, currentWindow: true});
-      return await scrapbook.editTab({
+      return await utils.editTab({
         tabId: tab.id,
         force: true,
       });
@@ -169,7 +169,7 @@ background.getLastFocusedWindow = async function ({
  */
 background.invokeFrameScript = async function ({frameId, cmd, args}, sender) {
   const tabId = sender.tab.id;
-  return await scrapbook.invokeContentScript({
+  return await utils.invokeContentScript({
     tabId, frameId, cmd, args,
   });
 };
@@ -204,13 +204,13 @@ background.locateItem = async function (params, sender) {
     }
 
     // pass windowId to restrict response to the current window sidebar
-    return await scrapbook.invokeExtensionScript({id: (await browser.windows.getCurrent()).id, cmd, args});
+    return await utils.invokeExtensionScript({id: (await browser.windows.getCurrent()).id, cmd, args});
   }
 
-  if (browser.sidePanel && !scrapbook.userAgent.is('mobile')) {
+  if (browser.sidePanel && !utils.userAgent.is('mobile')) {
     // pass windowId to restrict response to the current window sidebar
     try {
-      return await scrapbook.invokeExtensionScript({id: (await browser.windows.getCurrent()).id, cmd, args});
+      return await utils.invokeExtensionScript({id: (await browser.windows.getCurrent()).id, cmd, args});
     } catch (ex) {
       console.error('Unable to locate item: %o', ex);
       return false;
@@ -218,14 +218,14 @@ background.locateItem = async function (params, sender) {
   }
 
   const sidebarTab = (await browser.tabs.query({}))
-      .filter(t => scrapbook.splitUrl(t.url)[0] === sidebarUrl)[0];
+      .filter(t => utils.splitUrl(t.url)[0] === sidebarUrl)[0];
 
   if (!sidebarTab) {
     return false;
   }
 
   const tabId = sidebarTab.id;
-  const result = await scrapbook.invokeContentScript({tabId, frameId: 0, cmd, args});
+  const result = await utils.invokeContentScript({tabId, frameId: 0, cmd, args});
 
   if (result) {
     if (browser.windows && sidebarTab.windowId) {
@@ -249,7 +249,7 @@ background.locateItem = async function (params, sender) {
  */
 background.captureCurrentTab = async function (params = {}, sender) {
   const task = Object.assign({tabId: sender.tab.id}, params);
-  return await scrapbook.invokeCapture([task]);
+  return await utils.invokeCapture([task]);
 };
 
 /**
@@ -301,7 +301,7 @@ background.createSubPage = async function ({url, title}, sender) {
   }
 
   // generate subpage
-  const base = scrapbook.getRelativeUrl(url, book.dataUrl);
+  const base = utils.getRelativeUrl(url, book.dataUrl);
   await server.request({
     query: {
       a: 'query',
@@ -341,7 +341,7 @@ background.registerActiveEditorTab = async function ({willEnable = true} = {}, s
 background.invokeEditorCommand = async function ({cmd, args, frameId = -1, frameIdExcept = -1}, sender) {
   const tabId = sender.tab.id;
   if (frameId !== -1) {
-    const response = await scrapbook.invokeContentScript({
+    const response = await utils.invokeContentScript({
       tabId, frameId, cmd, args,
     });
     await browser.scripting.executeScript({
@@ -354,21 +354,21 @@ background.invokeEditorCommand = async function ({cmd, args, frameId = -1, frame
     return response;
   } else if (frameIdExcept !== -1) {
     const tasks = Array.prototype.map.call(
-      await scrapbook.initContentScripts(tabId),
+      await utils.initContentScripts(tabId),
       async ({tabId, frameId, error, injected}) => {
         if (error) { return undefined; }
         if (frameId === frameIdExcept) { return undefined; }
-        return await scrapbook.invokeContentScript({
+        return await utils.invokeContentScript({
           tabId, frameId, cmd, args,
         });
       });
     return Promise.all(tasks);
   } else {
     const tasks = Array.prototype.map.call(
-      await scrapbook.initContentScripts(tabId),
+      await utils.initContentScripts(tabId),
       async ({tabId, frameId, error, injected}) => {
         if (error) { return undefined; }
-        return await scrapbook.invokeContentScript({
+        return await utils.invokeContentScript({
           tabId, frameId, cmd, args,
         });
       });
@@ -404,7 +404,7 @@ background.openModalWindow = async function ({
   (async () => {
     if (browser.windows) {
       const win = await browser.windows.getCurrent();
-      ({tabs: [tab]} = await scrapbook.createWindow({
+      ({tabs: [tab]} = await utils.createWindow({
         url,
         type: 'popup',
         width: 600,
@@ -420,7 +420,7 @@ background.openModalWindow = async function ({
     }
 
     try {
-      await scrapbook.waitTabLoading(tab);
+      await utils.waitTabLoading(tab);
     } catch (ex) {
       console.error(ex);
       resolve(null);
@@ -432,7 +432,7 @@ background.openModalWindow = async function ({
     }
 
     try {
-      const result = await scrapbook.invokeContentScript({
+      const result = await utils.invokeContentScript({
         tabId: tab.id,
         frameId: 0,
         cmd: 'dialog.init',
@@ -485,14 +485,14 @@ background.onServerTreeChange = async function (params = {}, sender) {
   const args = {};
 
   if (browser.sidebarAction || browser.sidePanel) {
-    tasks.push(scrapbook.invokeExtensionScript({cmd, args}).catch(errorHandler));
+    tasks.push(utils.invokeExtensionScript({cmd, args}).catch(errorHandler));
   }
 
   const sidebarTabs = (await browser.tabs.query({}))
-      .filter(t => sidebarUrls.includes(scrapbook.splitUrl(t.url)[0]));
+      .filter(t => sidebarUrls.includes(utils.splitUrl(t.url)[0]));
 
   for (const tab of sidebarTabs) {
-    tasks.push(scrapbook.invokeContentScript({tabId: tab.id, frameId: 0, cmd, args}).catch(errorHandler));
+    tasks.push(utils.invokeContentScript({tabId: tab.id, frameId: 0, cmd, args}).catch(errorHandler));
   }
 
   return await Promise.all(tasks);
@@ -512,18 +512,18 @@ background.onCaptureEnd = async function (params, sender) {
  * @param {Object} [options]
  */
 background.getGeoLocation = async function (options) {
-  return scrapbook.getGeoLocation(options);
+  return utils.getGeoLocation(options);
 };
 
 function initInstallListener() {
   browser.runtime.onInstalled.addListener(async (details) => {
     const {reason, previousVersion} = details;
 
-    if (reason === "update" && scrapbook.versionCompare(previousVersion, "2.17") === -1) {
+    if (reason === "update" && utils.versionCompare(previousVersion, "2.17") === -1) {
       console.warn("Migrating options from `storage.sync` to `storage.local` for < 2.17");
       try {
         let options = await browser.storage.sync.get();
-        options = scrapbook.getOptions(null, options);
+        options = utils.getOptions(null, options);
         await browser.storage.local.set(options);
         const keys = Object.keys(options).filter(k => options[k] !== undefined);
         await browser.storage.sync.remove(keys);
@@ -534,7 +534,7 @@ function initInstallListener() {
     }
 
     if (!browser.runtime.getManifest().background.persistent) {
-      await scrapbook.loadOptionsAuto();
+      await utils.loadOptionsAuto();
       updateAction();
       updateMenus();
     }
@@ -544,7 +544,7 @@ function initInstallListener() {
 function initStorageChangeListener() {
   const toolbarOptions = Object.keys(DEFAULT_OPTIONS).filter(x => x.startsWith('ui.toolbar.'));
 
-  // Run this after optionsAuto to make sure that scrapbook.options is
+  // Run this after optionsAuto to make sure that utils.options is
   // up-to-date when the listener is called.
   browser.storage.onChanged.addListener((changes, areaName) => {
     if ("runtime.backgroundKeeperInterval" in changes) {
@@ -598,7 +598,7 @@ function updateAction(...args) {
       browser.action.onClicked.removeListener(action);
     }
 
-    const buttons = scrapbook.getOptions("ui.toolbar");
+    const buttons = utils.getOptions("ui.toolbar");
     const activeButtons = Object.entries(buttons).filter(x => x[1]);
     if (activeButtons.length === 0) {
       // if no button is activated, fallback to open option
@@ -624,30 +624,30 @@ async function updateMenus() {
 
   await browser.contextMenus.removeAll();
 
-  const willShow = scrapbook.getOption("ui.showContextMenu");
+  const willShow = utils.getOption("ui.showContextMenu");
   if (!willShow) { return; }
 
-  const hasServer = scrapbook.hasServer();
-  const urlMatch = await scrapbook.getContentPagePattern();
+  const hasServer = utils.hasServer();
+  const urlMatch = await utils.getContentPagePattern();
 
   action: {
     browser.contextMenus.create({
       id: "captureTabAsOnAction",
-      title: scrapbook.lang("CaptureTabAs") + '...',
+      title: utils.lang("CaptureTabAs") + '...',
       contexts: [browser.contextMenus.ContextType.ACTION],
       documentUrlPatterns: urlMatch,
     });
 
     browser.contextMenus.create({
       id: "editTabOnAction",
-      title: scrapbook.lang("EditTab"),
+      title: utils.lang("EditTab"),
       contexts: [browser.contextMenus.ContextType.ACTION],
       documentUrlPatterns: urlMatch,
     });
 
     browser.contextMenus.create({
       id: "searchCaptures",
-      title: scrapbook.lang("searchCaptures"),
+      title: utils.lang("searchCaptures"),
       contexts: [browser.contextMenus.ContextType.ACTION],
       documentUrlPatterns: urlMatch,
       enabled: hasServer,
@@ -655,7 +655,7 @@ async function updateMenus() {
 
     browser.contextMenus.create({
       id: "openScrapBook",
-      title: scrapbook.lang("openScrapBook"),
+      title: utils.lang("openScrapBook"),
       contexts: [browser.contextMenus.ContextType.ACTION],
       documentUrlPatterns: urlMatch,
       enabled: hasServer,
@@ -663,7 +663,7 @@ async function updateMenus() {
 
     browser.contextMenus.create({
       id: "openViewer",
-      title: scrapbook.lang("openViewer") + '...',
+      title: utils.lang("openViewer") + '...',
       contexts: [browser.contextMenus.ContextType.ACTION],
       documentUrlPatterns: urlMatch,
     });
@@ -673,35 +673,35 @@ async function updateMenus() {
   if (browser.contextMenus.ContextType.TAB) {
     browser.contextMenus.create({
       id: "captureTab",
-      title: scrapbook.lang("CaptureTab"),
+      title: utils.lang("CaptureTab"),
       contexts: ["tab"],
       documentUrlPatterns: urlMatch,
     });
 
     browser.contextMenus.create({
       id: "captureTabSource",
-      title: scrapbook.lang("CaptureTabSource"),
+      title: utils.lang("CaptureTabSource"),
       contexts: ["tab"],
       documentUrlPatterns: urlMatch,
     });
 
     browser.contextMenus.create({
       id: "captureTabBookmark",
-      title: scrapbook.lang("CaptureTabBookmark"),
+      title: utils.lang("CaptureTabBookmark"),
       contexts: ["tab"],
       documentUrlPatterns: urlMatch,
     });
 
     browser.contextMenus.create({
       id: "captureTabAs",
-      title: scrapbook.lang("CaptureTabAs") + '...',
+      title: utils.lang("CaptureTabAs") + '...',
       contexts: ["tab"],
       documentUrlPatterns: urlMatch,
     });
 
     browser.contextMenus.create({
       id: "editTab",
-      title: scrapbook.lang("EditTab"),
+      title: utils.lang("EditTab"),
       contexts: ["tab"],
       documentUrlPatterns: urlMatch,
     });
@@ -709,126 +709,126 @@ async function updateMenus() {
 
   browser.contextMenus.create({
     id: "capturePage",
-    title: scrapbook.lang("CapturePage"),
+    title: utils.lang("CapturePage"),
     contexts: ["page"],
     documentUrlPatterns: urlMatch,
   });
 
   browser.contextMenus.create({
     id: "capturePageSource",
-    title: scrapbook.lang("CapturePageSource"),
+    title: utils.lang("CapturePageSource"),
     contexts: ["page"],
     documentUrlPatterns: urlMatch,
   });
 
   browser.contextMenus.create({
     id: "capturePageBookmark",
-    title: scrapbook.lang("CapturePageBookmark"),
+    title: utils.lang("CapturePageBookmark"),
     contexts: ["page"],
     documentUrlPatterns: urlMatch,
   });
 
   browser.contextMenus.create({
     id: "capturePageAs",
-    title: scrapbook.lang("CapturePageAs") + '...',
+    title: utils.lang("CapturePageAs") + '...',
     contexts: ["page"],
     documentUrlPatterns: urlMatch,
   });
 
   browser.contextMenus.create({
     id: "editPage",
-    title: scrapbook.lang("EditPage"),
+    title: utils.lang("EditPage"),
     contexts: ["page"],
     documentUrlPatterns: urlMatch,
   });
 
   browser.contextMenus.create({
     id: "captureFrame",
-    title: scrapbook.lang("CaptureFrame"),
+    title: utils.lang("CaptureFrame"),
     contexts: ["frame"],
     documentUrlPatterns: urlMatch,
   });
 
   browser.contextMenus.create({
     id: "captureFrameSource",
-    title: scrapbook.lang("CaptureFrameSource"),
+    title: utils.lang("CaptureFrameSource"),
     contexts: ["frame"],
     documentUrlPatterns: urlMatch,
   });
 
   browser.contextMenus.create({
     id: "captureFrameBookmark",
-    title: scrapbook.lang("CaptureFrameBookmark"),
+    title: utils.lang("CaptureFrameBookmark"),
     contexts: ["frame"],
     documentUrlPatterns: urlMatch,
   });
 
   browser.contextMenus.create({
     id: "captureFrameAs",
-    title: scrapbook.lang("CaptureFrameAs") + '...',
+    title: utils.lang("CaptureFrameAs") + '...',
     contexts: ["frame"],
     documentUrlPatterns: urlMatch,
   });
 
   browser.contextMenus.create({
     id: "captureSelection",
-    title: scrapbook.lang("CaptureSelection"),
+    title: utils.lang("CaptureSelection"),
     contexts: ["selection"],
     documentUrlPatterns: urlMatch,
   });
 
   browser.contextMenus.create({
     id: "captureSelectionAs",
-    title: scrapbook.lang("CaptureSelectionAs") + '...',
+    title: utils.lang("CaptureSelectionAs") + '...',
     contexts: ["selection"],
     documentUrlPatterns: urlMatch,
   });
 
   browser.contextMenus.create({
     id: "batchCaptureLinks",
-    title: scrapbook.lang("BatchCaptureLinks") + '...',
+    title: utils.lang("BatchCaptureLinks") + '...',
     contexts: ["selection"],
     documentUrlPatterns: urlMatch,
   });
 
   browser.contextMenus.create({
     id: "captureLink",
-    title: scrapbook.lang("CaptureLink"),
+    title: utils.lang("CaptureLink"),
     contexts: ["link"],
     targetUrlPatterns: urlMatch,
   });
 
   browser.contextMenus.create({
     id: "captureLinkSource",
-    title: scrapbook.lang("CaptureLinkSource"),
+    title: utils.lang("CaptureLinkSource"),
     contexts: ["link"],
     targetUrlPatterns: urlMatch,
   });
 
   browser.contextMenus.create({
     id: "captureLinkBookmark",
-    title: scrapbook.lang("CaptureLinkBookmark"),
+    title: utils.lang("CaptureLinkBookmark"),
     contexts: ["link"],
     targetUrlPatterns: urlMatch,
   });
 
   browser.contextMenus.create({
     id: "captureLinkAs",
-    title: scrapbook.lang("CaptureLinkAs") + '...',
+    title: utils.lang("CaptureLinkAs") + '...',
     contexts: ["link"],
     targetUrlPatterns: urlMatch,
   });
 
   browser.contextMenus.create({
     id: "captureMedia",
-    title: scrapbook.lang("CaptureMedia"),
+    title: utils.lang("CaptureMedia"),
     contexts: ["image", "audio", "video"],
     targetUrlPatterns: urlMatch,
   });
 
   browser.contextMenus.create({
     id: "captureMediaAs",
-    title: scrapbook.lang("CaptureMediaAs") + '...',
+    title: utils.lang("CaptureMediaAs") + '...',
     contexts: ["image", "audio", "video"],
     targetUrlPatterns: urlMatch,
   });
@@ -875,35 +875,35 @@ function initMenusListener() {
     },
 
     editTab(info, tab) {
-      return scrapbook.editTab({
+      return utils.editTab({
         tabId: tab.id,
         force: true,
       });
     },
 
     capturePage(info, tab) {
-      return scrapbook.invokeCapture([{
+      return utils.invokeCapture([{
         tabId: tab.id,
         fullPage: true,
       }]);
     },
 
     capturePageSource(info, tab) {
-      return scrapbook.invokeCapture([{
+      return utils.invokeCapture([{
         tabId: tab.id,
         mode: "source",
       }]);
     },
 
     capturePageBookmark(info, tab) {
-      return scrapbook.invokeCapture([{
+      return utils.invokeCapture([{
         tabId: tab.id,
         mode: "bookmark",
       }]);
     },
 
     capturePageAs(info, tab) {
-      return scrapbook.invokeCaptureAs({
+      return utils.invokeCaptureAs({
         tasks: [{
           tabId: tab.id,
           fullPage: true,
@@ -918,7 +918,7 @@ function initMenusListener() {
     },
 
     captureFrame(info, tab) {
-      return scrapbook.invokeCapture([{
+      return utils.invokeCapture([{
         tabId: tab.id,
         frameId: info.frameId,
         fullPage: true,
@@ -926,21 +926,21 @@ function initMenusListener() {
     },
 
     captureFrameSource(info, tab) {
-      return scrapbook.invokeCapture([{
+      return utils.invokeCapture([{
         url: info.frameUrl,
         mode: "source",
       }]);
     },
 
     captureFrameBookmark(info, tab) {
-      return scrapbook.invokeCapture([{
+      return utils.invokeCapture([{
         url: info.frameUrl,
         mode: "bookmark",
       }]);
     },
 
     captureFrameAs(info, tab) {
-      return scrapbook.invokeCaptureAs({
+      return utils.invokeCaptureAs({
         tasks: [{
           tabId: tab.id,
           frameId: info.frameId,
@@ -952,7 +952,7 @@ function initMenusListener() {
     },
 
     captureSelection(info, tab) {
-      return scrapbook.invokeCapture([{
+      return utils.invokeCapture([{
         tabId: tab.id,
         frameId: info.frameId,
         fullPage: false,
@@ -960,7 +960,7 @@ function initMenusListener() {
     },
 
     captureSelectionAs(info, tab) {
-      return scrapbook.invokeCaptureAs({
+      return utils.invokeCaptureAs({
         tasks: [{
           tabId: tab.id,
           frameId: info.frameId,
@@ -971,7 +971,7 @@ function initMenusListener() {
     },
 
     batchCaptureLinks(info, tab) {
-      return scrapbook.invokeCaptureBatchLinks({
+      return utils.invokeCaptureBatchLinks({
         tasks: [{
           tabId: tab.id,
           frameId: info.frameId,
@@ -980,28 +980,28 @@ function initMenusListener() {
     },
 
     captureLink(info, tab) {
-      return scrapbook.invokeCapture([{
+      return utils.invokeCapture([{
         url: info.linkUrl,
         mode: "tab",
       }]);
     },
 
     captureLinkSource(info, tab) {
-      return scrapbook.invokeCapture([{
+      return utils.invokeCapture([{
         url: info.linkUrl,
         mode: "source",
       }]);
     },
 
     captureLinkBookmark(info, tab) {
-      return scrapbook.invokeCapture([{
+      return utils.invokeCapture([{
         url: info.linkUrl,
         mode: "bookmark",
       }]);
     },
 
     captureLinkAs(info, tab) {
-      return scrapbook.invokeCaptureAs({
+      return utils.invokeCaptureAs({
         tasks: [{
           url: info.linkUrl,
           title: info.linkText,
@@ -1010,7 +1010,7 @@ function initMenusListener() {
     },
 
     captureMedia(info, tab) {
-      return scrapbook.invokeCapture([{
+      return utils.invokeCapture([{
         url: info.srcUrl,
         refUrl: info.pageUrl,
         mode: "source",
@@ -1018,7 +1018,7 @@ function initMenusListener() {
     },
 
     captureMediaAs(info, tab) {
-      return scrapbook.invokeCaptureAs({
+      return utils.invokeCaptureAs({
         tasks: [{
           url: info.srcUrl,
           refUrl: info.pageUrl,
@@ -1101,7 +1101,7 @@ function initBeforeSendHeadersListener() {
 }
 
 function initMessageListener() {
-  scrapbook.addMessageListener((message, sender) => {
+  utils.addMessageListener((message, sender) => {
     if (!message.cmd.startsWith("background.")) { return false; }
     return true;
   });
@@ -1118,11 +1118,11 @@ function initExternalMessageListener() {
         break;
       }
       case "invokeCapture": {
-        result = scrapbook.invokeCapture(args);
+        result = utils.invokeCapture(args);
         break;
       }
       case "invokeCaptureEx": {
-        result = scrapbook.invokeCaptureEx(args);
+        result = utils.invokeCaptureEx(args);
         break;
       }
       default: {
@@ -1155,7 +1155,7 @@ function updateBackgroundKeeper(...args) {
       timer = null;
     }
 
-    const interval = scrapbook.getOption("runtime.backgroundKeeperInterval");
+    const interval = utils.getOption("runtime.backgroundKeeperInterval");
     if (interval > 0) {
       // Keep the service worker alive to prevent memory cache reset,
       // especially `capturedUrls`, which bounds to a "browser session".
@@ -1180,7 +1180,7 @@ async function init() {
   initMenusListener();
   initInstallListener();
 
-  await scrapbook.loadOptionsAuto();
+  await utils.loadOptionsAuto();
   updateBackgroundKeeper();
 
   if (browser.runtime.getManifest().background.persistent) {
@@ -1192,7 +1192,7 @@ async function init() {
 init();
 
 /** @global */
-globalThis.scrapbook = scrapbook;
+globalThis.utils = utils;
 
 /** @global */
 globalThis.background = background;

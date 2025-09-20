@@ -7,7 +7,7 @@
  *****************************************************************************/
 
 import {assert, config as chaiConfig} from "./lib/chai.mjs";
-import * as scrapbook from "./shared/utils/common.mjs";
+import * as utils from "./shared/utils/common.mjs";
 import {sha1} from "./shared/utils/sha.mjs";
 
 Object.assign(chaiConfig, {
@@ -358,21 +358,21 @@ Object.defineProperties(MochaQuery, Object.getOwnPropertyDescriptors({
   },
 }));
 
-var {userAgent} = scrapbook;
+var {userAgent} = utils;
 
-function delay(...args) { return scrapbook.delay(...args); }
+function delay(...args) { return utils.delay(...args); }
 
-function deserializeObject(...args) { return scrapbook.deserializeObject(...args); }
+function deserializeObject(...args) { return utils.deserializeObject(...args); }
 
-function xhr(...args) { return scrapbook.xhr(...args); }
+function xhr(...args) { return utils.xhr(...args); }
 
-function readFileAsText(...args) { return scrapbook.readFileAsText(...args); }
+function readFileAsText(...args) { return utils.readFileAsText(...args); }
 
-function readFileAsArrayBuffer(...args) { return scrapbook.readFileAsArrayBuffer(...args); }
+function readFileAsArrayBuffer(...args) { return utils.readFileAsArrayBuffer(...args); }
 
-function readFileAsDataURL(...args) { return scrapbook.readFileAsDataURL(...args); }
+function readFileAsDataURL(...args) { return utils.readFileAsDataURL(...args); }
 
-function readFileAsDocument(...args) { return scrapbook.readFileAsDocument(...args); }
+function readFileAsDocument(...args) { return utils.readFileAsDocument(...args); }
 
 function getToken(url, role) {
   let token = `${url}\t${role}`;
@@ -493,7 +493,7 @@ function getRulesFromCssText(cssText) {
   return styleElem.sheet.cssRules;
 }
 
-function escapeRegExp(...args) { return scrapbook.escapeRegExp(...args); }
+function escapeRegExp(...args) { return utils.escapeRegExp(...args); }
 
 /**
  * A RegExp with raw string.

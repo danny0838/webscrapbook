@@ -2,10 +2,10 @@
  * Script for sitemap.html.
  *****************************************************************************/
 
-import * as scrapbook from "../utils/extension.mjs";
+import * as utils from "../utils/extension.mjs";
 import {server} from "./server.mjs";
 
-scrapbook.loadOptionsAuto(); // async
+utils.loadOptionsAuto(); // async
 
 const SITEMAP_DOCTYPE = new Set(["text/html", "application/xhtml+xml"]);
 
@@ -17,7 +17,7 @@ const sitemap = {
       let id = this.id = params.get('id');
       let bookId = this.bookId = params.get('bookId');
 
-      await scrapbook.loadOptions();
+      await utils.loadOptions();
       await server.init();
 
       if (typeof bookId !== 'string') {
@@ -51,7 +51,7 @@ const sitemap = {
         throw new Error(`Item "${id}" does not exist.`);
       }
 
-      document.title = scrapbook.lang('SiteMapTitle', [item.id]);
+      document.title = utils.lang('SiteMapTitle', [item.id]);
 
       const indexUrl = await book.getItemIndexUrl(item, {checkMetaRefresh: false});
       const indexPages = new Set(['']);
@@ -106,10 +106,10 @@ const sitemap = {
     const queue = [];
 
     const checkInterlinkingUrl = (url) => {
-      if (scrapbook.isUrlAbsolute(url)) {
+      if (utils.isUrlAbsolute(url)) {
         return false;
       }
-      const [urlMain, urlHash] = scrapbook.splitUrlByAnchor(url);
+      const [urlMain, urlHash] = utils.splitUrlByAnchor(url);
       if (urlMain.startsWith('/')
         || urlMain.startsWith('./')
         || urlMain.startsWith('../')
@@ -127,12 +127,12 @@ const sitemap = {
       title = null,
       parent = wrapper,
     } = {}) => {
-      const [urlMain] = scrapbook.splitUrlByAnchor(url);
+      const [urlMain] = utils.splitUrlByAnchor(url);
       if (pages.has(urlMain)) { return; }
       pages.add(urlMain);
 
       if (!label) {
-        label = scrapbook.urlToFilename(url);
+        label = utils.urlToFilename(url);
       }
 
       const li = parent.appendChild(document.createElement('li'));
@@ -148,7 +148,7 @@ const sitemap = {
 
     const loadPageMap = async (elem) => {
       const url = elem.href;
-      const doc = await scrapbook.xhr({
+      const doc = await utils.xhr({
         url,
         responseType: 'document',
       }).then(xhr => xhr.response).catch(ex => {
@@ -191,7 +191,7 @@ const sitemap = {
     const loadLinks = (doc, items) => {
       // meta refresh doesn't work in a shadowroot
       for (const elem of doc.querySelectorAll('meta[http-equiv="refresh" i][content]')) {
-        const {time, url} = scrapbook.parseHeaderRefresh(elem.getAttribute("content"));
+        const {time, url} = utils.parseHeaderRefresh(elem.getAttribute("content"));
         if (!checkInterlinkingUrl(url)) { continue; }
         items.push({
           url: new URL(url, doc.URL).href,
@@ -283,7 +283,7 @@ const sitemap = {
     };
 
     for (const indexPage of indexPages) {
-      const url = new URL(scrapbook.quote(indexPage), indexUrl).href;
+      const url = new URL(utils.quote(indexPage), indexUrl).href;
       const anchor = addPage(url, {
         label: indexPage,
         parent: wrapper,
@@ -315,7 +315,7 @@ const sitemap = {
 };
 
 document.addEventListener('DOMContentLoaded', (event) => {
-  scrapbook.loadLanguages(document);
+  utils.loadLanguages(document);
 
   sitemap.init();
 });

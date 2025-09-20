@@ -2,9 +2,9 @@
  * The background script for viewer functionality
  *****************************************************************************/
 
-import * as scrapbook from "../utils/common.mjs";
+import * as utils from "../utils/common.mjs";
 
-scrapbook.loadOptionsAuto(); // async
+utils.loadOptionsAuto(); // async
 
 const VIEWER_BEFORE_REQUEST_FILTER = {urls: ["file://*"], types: ["main_frame", "sub_frame"]};
 const VIEWER_BEFORE_REQUEST_EXTRA = ["blocking"];
@@ -14,15 +14,15 @@ const VIEWER_HEADERS_RECEIVED_EXTRA = ["blocking", "responseHeaders"];
 let allowFileAccess;
 
 function redirectUrl(tabId, type, url, filename, mime) {
-  if (mime === "application/html+zip" && scrapbook.getOption("viewer.viewHtz")) {
+  if (mime === "application/html+zip" && utils.getOption("viewer.viewHtz")) {
     // redirect
-  } else if (mime === "application/x-maff" && scrapbook.getOption("viewer.viewMaff")) {
+  } else if (mime === "application/x-maff" && utils.getOption("viewer.viewMaff")) {
     // redirect
   } else if (mime === "application/octet-stream" || mime === "application/zip" || !mime) {
     const pathname = (filename || url.pathname).toLowerCase();
-    if (pathname.endsWith(".htz") && scrapbook.getOption("viewer.viewHtz")) {
+    if (pathname.endsWith(".htz") && utils.getOption("viewer.viewHtz")) {
       // redirect
-    } else if (pathname.endsWith(".maff") && scrapbook.getOption("viewer.viewMaff")) {
+    } else if (pathname.endsWith(".maff") && utils.getOption("viewer.viewMaff")) {
       // redirect
     } else {
       return; // no redirect
@@ -39,24 +39,24 @@ function redirectUrl(tabId, type, url, filename, mime) {
 
   if (type === "sub_frame") {
     // Chromium < 119: an extension page in a frame cannot access IndexedDB.
-    if (scrapbook.userAgent.is('chromium') && scrapbook.userAgent.major < 119) {
+    if (utils.userAgent.is('chromium') && utils.userAgent.major < 119) {
       const html = `<!DOCTYPE html>
-<html dir="${scrapbook.lang('@@bidi_dir')}">
+<html dir="${utils.lang('@@bidi_dir')}">
 <head>
 <meta charset="UTF-8">
 <style>
 a {
-background: ${scrapbook.lang('@@bidi_start_edge')}/1em url("${scrapbook.escapeHtml(browser.runtime.getURL("core/scrapbook_128.png"))}") no-repeat;
+background: ${utils.lang('@@bidi_start_edge')}/1em url("${utils.escapeHtml(browser.runtime.getURL("core/scrapbook_128.png"))}") no-repeat;
 padding-inline-start: 1em;
 }
 </style>
 </head>
 <body>
-<a href="${scrapbook.escapeHtml(newUrl, false)}" target="_blank">View HTML archive</a>
+<a href="${utils.escapeHtml(newUrl, false)}" target="_blank">View HTML archive</a>
 </body>
 </html>
 `;
-      const dataUrl = scrapbook.unicodeToDataUri(html, "text/html");
+      const dataUrl = utils.unicodeToDataUri(html, "text/html");
       return {redirectUrl: dataUrl};
     }
   }
@@ -75,15 +75,15 @@ function onHeadersReceived(details) {
   for (const header of headers) {
     switch (header.name.toLowerCase()) {
       case "content-type": {
-        const contentType = scrapbook.parseHeaderContentType(header.value);
+        const contentType = utils.parseHeaderContentType(header.value);
         mime = contentType.type;
         break;
       }
       case "content-disposition": {
-        const contentDisposition = scrapbook.parseHeaderContentDisposition(header.value);
+        const contentDisposition = utils.parseHeaderContentDisposition(header.value);
 
         // do not launch viewer if the file is marked to be downloaded
-        if (contentDisposition.type !== "inline" && !scrapbook.getOption("viewer.viewAttachments")) {
+        if (contentDisposition.type !== "inline" && !utils.getOption("viewer.viewAttachments")) {
           return;
         }
 
@@ -99,7 +99,7 @@ function onHeadersReceived(details) {
 function toggleViewerListeners() {
   browser.webRequest.onBeforeRequest.removeListener(onBeforeRequest);
   browser.webRequest.onHeadersReceived.removeListener(onHeadersReceived);
-  if (scrapbook.getOption("viewer.viewHtz") || scrapbook.getOption("viewer.viewMaff")) {
+  if (utils.getOption("viewer.viewHtz") || utils.getOption("viewer.viewMaff")) {
     if (allowFileAccess) {
       browser.webRequest.onBeforeRequest.addListener(onBeforeRequest, VIEWER_BEFORE_REQUEST_FILTER, VIEWER_BEFORE_REQUEST_EXTRA);
     }
@@ -129,15 +129,15 @@ async function clearViewerCaches() {
     includes: {table: 'pageCache'},
     excludes: {id: usedIds},
   };
-  await scrapbook.cache.removeAll(filter, 'indexedDB');
-  await scrapbook.cache.removeAll(filter, 'storage');
+  await utils.cache.removeAll(filter, 'indexedDB');
+  await utils.cache.removeAll(filter, 'storage');
 }
 
 async function init() {
   clearViewerCaches(); // async
 
   allowFileAccess = await browser.extension.isAllowedFileSchemeAccess();
-  await scrapbook.loadOptionsAuto();
+  await utils.loadOptionsAuto();
   toggleViewerListeners();
 }
 

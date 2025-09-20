@@ -5,7 +5,7 @@
  *****************************************************************************/
 
 import {isDebug} from "../utils/debug.mjs";
-import * as scrapbook from "../utils/common.mjs";
+import * as utils from "../utils/common.mjs";
 import {capturer} from "./common.mjs";
 
 /**
@@ -30,7 +30,7 @@ capturer.invoke = async function (method, args, details = {}) {
   if (frameWindow) {
     // to frame
     const cmd = "capturer." + method;
-    return await scrapbook.invokeFrameScript({frameWindow, cmd, args});
+    return await utils.invokeFrameScript({frameWindow, cmd, args});
   } else {
     // to capturer.html page
     const id = missionId || args?.settings?.missionId;
@@ -38,7 +38,7 @@ capturer.invoke = async function (method, args, details = {}) {
       throw new Error(`missionId is required to invoke from a content script.`);
     }
     const cmd = "capturer." + method;
-    return await scrapbook.invokeExtensionScript({id, cmd, args});
+    return await utils.invokeExtensionScript({id, cmd, args});
   }
 };
 
@@ -56,9 +56,9 @@ capturer.downloadFile = async function (params) {
 
   // In Firefox, the background script cannot download a blob URI in a
   // content page, pass the blob object as overrideBlob to workaround that.
-  if (url.startsWith('blob:') && scrapbook.userAgent.is('gecko')) {
+  if (url.startsWith('blob:') && utils.userAgent.is('gecko')) {
     try {
-      const xhr = await scrapbook.xhr({
+      const xhr = await utils.xhr({
         url,
         responseType: 'blob',
         allowAnyStatus: true,
@@ -87,9 +87,9 @@ capturer.fetchCss = async function (params) {
 
   // In Firefox, the background script cannot download a blob URI in a
   // content page, pass the blob object as overrideBlob to workaround that.
-  if (url.startsWith('blob:') && scrapbook.userAgent.is('gecko')) {
+  if (url.startsWith('blob:') && utils.userAgent.is('gecko')) {
     try {
-      const xhr = await scrapbook.xhr({
+      const xhr = await utils.xhr({
         url,
         responseType: 'blob',
         allowAnyStatus: true,
@@ -118,9 +118,9 @@ capturer.captureUrl = async function (params) {
 
   // In Firefox, the background script cannot download a blob URI in a
   // content page, pass the blob object as overrideBlob to workaround that.
-  if (url.startsWith('blob:') && scrapbook.userAgent.is('gecko')) {
+  if (url.startsWith('blob:') && utils.userAgent.is('gecko')) {
     try {
-      const xhr = await scrapbook.xhr({
+      const xhr = await utils.xhr({
         url,
         responseType: 'blob',
         allowAnyStatus: true,
