@@ -4,7 +4,7 @@
 
 /* global JSZip */
 
-import * as utils from "./common.mjs";
+import {readFileAsDocument} from "./common.mjs";
 import "../lib/jszip.js";
 
 // ensure module loaded (may be external when bundled)
@@ -184,7 +184,7 @@ class Maff {
           try {
             const ab = await zipRdfFile.async('arraybuffer');
             const file = new File([ab], 'index.rdf', {type: "application/rdf+xml"});
-            doc = await utils.readFileAsDocument(file);
+            doc = await readFileAsDocument(file);
           } catch (ex) {
             throw new Error(`Unable to load 'index.rdf'.`);
           }
