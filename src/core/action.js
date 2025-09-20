@@ -2,9 +2,9 @@
  * Script for browserAction.html
  *****************************************************************************/
 
-import * as scrapbook from "../utils/extension.mjs";
+import * as utils from "../utils/extension.mjs";
 
-scrapbook.loadOptionsAuto(); // async
+utils.loadOptionsAuto(); // async
 
 document.addEventListener('DOMContentLoaded', async () => {
   async function selectTabFromDom(baseElem) {
@@ -16,7 +16,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       selector.className = "selector";
       baseElem.parentNode.insertBefore(selector, baseElem.nextSibling);
     }
-    const tabs = await scrapbook.getContentTabs();
+    const tabs = await utils.getContentTabs();
     return await new Promise((resolve, reject) => {
       for (const tab of tabs) {
         const elem = document.createElement("button");
@@ -45,8 +45,8 @@ document.addEventListener('DOMContentLoaded', async () => {
    * @param {captureCommandParams} params
    */
   async function onCaptureCommandClick(event, params) {
-    const tabs = params.forAllTabs ? await scrapbook.getContentTabs() :
-        targetTab ? await scrapbook.getHighlightedTabs() :
+    const tabs = params.forAllTabs ? await utils.getContentTabs() :
+        targetTab ? await utils.getHighlightedTabs() :
         [await selectTabFromDom(event.currentTarget)];
     const mode = event.altKey ? 'bookmark' :
         event.shiftKey ? (params.mode === 'source' ? 'tab' : 'source') :
@@ -61,19 +61,19 @@ document.addEventListener('DOMContentLoaded', async () => {
     };
     switch (params.cmd) {
       case 'capture': {
-        event.ctrlKey ? await scrapbook.invokeCaptureAs(taskInfo) : await scrapbook.invokeCaptureEx({taskInfo});
+        event.ctrlKey ? await utils.invokeCaptureAs(taskInfo) : await utils.invokeCaptureEx({taskInfo});
         break;
       }
       case 'captureAs': {
-        await scrapbook.invokeCaptureAs(taskInfo);
+        await utils.invokeCaptureAs(taskInfo);
         break;
       }
       case 'batchCapture': {
-        await scrapbook.invokeCaptureBatch(taskInfo);
+        await utils.invokeCaptureBatch(taskInfo);
         break;
       }
       case 'batchCaptureLinks': {
-        await scrapbook.invokeCaptureBatchLinks(taskInfo);
+        await utils.invokeCaptureBatchLinks(taskInfo);
         break;
       }
     }
@@ -85,7 +85,7 @@ document.addEventListener('DOMContentLoaded', async () => {
    */
   function onCaptureCommandDragStart(event, params) {
     event.dataTransfer.setData(
-      'application/scrapbook.command+json',
+      'application/utils.command+json',
       JSON.stringify(Object.assign({
         tabId: targetTab.id,
       }, params)),
@@ -106,7 +106,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   async function autoClose() {
-    if (scrapbook.getOption("ui.autoCloseBrowserAction")) {
+    if (utils.getOption("ui.autoCloseBrowserAction")) {
       if (isPrompt) {
         window.close();
       } else {
@@ -116,9 +116,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   // load languages
-  scrapbook.loadLanguages(document);
+  utils.loadLanguages(document);
 
-  await scrapbook.loadOptionsAuto();
+  await utils.loadOptionsAuto();
 
   // this browserAction page (browserAction.html)
   const currentTab = await browser.tabs.getCurrent();
@@ -138,14 +138,14 @@ document.addEventListener('DOMContentLoaded', async () => {
   const allowFileAccess = await browser.extension.isAllowedFileSchemeAccess();
 
   // show commands as configured
-  for (const [option, shown] of Object.entries(scrapbook.getOptions("ui.toolbar"))) {
+  for (const [option, shown] of Object.entries(utils.getOptions("ui.toolbar"))) {
     const id = option[15].toLowerCase() + option.slice(16);
     const elem = document.getElementById(id);
     elem.hidden = !shown;
   }
 
   // disable backend server related options if not configured
-  if (!scrapbook.hasServer()) {
+  if (!utils.hasServer()) {
     document.getElementById("searchCaptures").disabled = true;
     document.getElementById("openScrapBook").disabled = true;
   }
@@ -161,7 +161,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // disable tab-specific commands if the active tab is not a valid content page
     // (drag-and-drop will be ignored when the element is disabled)
-    if (!scrapbook.isContentPage(targetTab.url, allowFileAccess)) {
+    if (!utils.isContentPage(targetTab.url, allowFileAccess)) {
       document.getElementById("captureTab").disabled = true;
       document.getElementById("captureTabSource").disabled = true;
       document.getElementById("captureTabBookmark").disabled = true;
@@ -220,7 +220,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   document.getElementById("editTab").addEventListener('click', async (event) => {
     const tab = targetTab || await selectTabFromDom(event.currentTarget);
-    await scrapbook.editTab({
+    await utils.editTab({
       tabId: tab.id,
       force: true,
     });
@@ -234,9 +234,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   document.getElementById("searchCaptures").addEventListener('click', async (event) => {
     const tabs = targetTab ?
-        await scrapbook.getHighlightedTabs() :
+        await utils.getHighlightedTabs() :
         [await selectTabFromDom(event.currentTarget)];
-    await scrapbook.searchCaptures({
+    await utils.searchCaptures({
       tabs,
       newTab: true,
     });
@@ -244,12 +244,12 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
 
   document.getElementById("openScrapBook").addEventListener('click', async (event) => {
-    await scrapbook.openScrapBook({newTab: true});
+    await utils.openScrapBook({newTab: true});
     autoClose();
   });
 
   document.getElementById("openViewer").addEventListener('click', async (event) => {
-    await scrapbook.visitLink({
+    await utils.visitLink({
       url: browser.runtime.getURL("viewer/load.html"),
       newTab: true,
     });

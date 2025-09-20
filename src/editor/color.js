@@ -2,7 +2,7 @@
  * Shared script for modal dialog windows.
  *****************************************************************************/
 
-import * as scrapbook from "../utils/common.mjs";
+import * as utils from "../utils/common.mjs";
 import {dialog} from "../core/dialog.js";
 
 const dialogOnLoad = dialog.onLoad;
@@ -30,7 +30,7 @@ Object.assign(dialog, {
     }
 
     for (const elem of document.querySelectorAll('input[type="text"]')) {
-      const debounced = scrapbook.debounce(onInputText, {withCancler: true});
+      const debounced = utils.debounce(onInputText, {withCancler: true});
       fieldControllers.set(elem, debounced);
       elem.addEventListener('input', (event) => {
         event.currentTarget.setCustomValidity('');
@@ -66,7 +66,7 @@ function validateColorText(elem) {
     sample.style.color = elem.value;
 
     if (!sample.style.color) {
-      elem.setCustomValidity(scrapbook.lang('ErrorEditorButtonHtmlEditorColorInvalid'));
+      elem.setCustomValidity(utils.lang('ErrorEditorButtonHtmlEditorColorInvalid'));
       target.value = '#000000';
       return;
     }

@@ -2,7 +2,7 @@
  * Script for search.html.
  *****************************************************************************/
 
-import * as scrapbook from "../utils/common.mjs";
+import * as utils from "../utils/common.mjs";
 import {server} from "./server.mjs";
 import {CustomTree} from "./custom-tree.mjs";
 import {MapWithDefault} from "../lib/map-with-default.mjs";
@@ -39,7 +39,7 @@ class SearchTree extends CustomTree {
     a.addEventListener('click', search.onClickLocate);
     var img = a.appendChild(document.createElement('img'));
     img.src = browser.runtime.getURL("resources/edit-locate.svg");
-    img.title = scrapbook.lang('SearchLocateTitle');
+    img.title = utils.lang('SearchLocateTitle');
     img.alt = "";
   }
 }
@@ -47,7 +47,7 @@ class SearchTree extends CustomTree {
 const search = {
   async init() {
     try {
-      await scrapbook.loadOptions();
+      await utils.loadOptions();
 
       // parse URL params
       const urlParams = new URL(document.URL).searchParams;
@@ -98,7 +98,7 @@ const search = {
       this.showResults(results);
     } catch (ex) {
       console.error(ex);
-      this.addMsg(scrapbook.lang('ErrorSearch', [ex.message]), 'error');
+      this.addMsg(utils.lang('ErrorSearch', [ex.message]), 'error');
     }
   },
 
@@ -113,25 +113,25 @@ const search = {
     for (const url of urls) {
       let u;
       try {
-        u = new URL(scrapbook.normalizeUrl(url));
+        u = new URL(utils.normalizeUrl(url));
       } catch (ex) {
         throw new Error(`Failed to handle URL "${url}": ${ex.message}`);
       }
       u.hash = '';
-      urlCheckFullList.push(scrapbook.escapeRegExp(u.href));
+      urlCheckFullList.push(utils.escapeRegExp(u.href));
       u.search = '';
-      urlCheckPathList.push(scrapbook.escapeRegExp(u.href));
-      urlCheckOriginList.push(scrapbook.escapeRegExp(u.origin));
+      urlCheckPathList.push(utils.escapeRegExp(u.href));
+      urlCheckOriginList.push(utils.escapeRegExp(u.origin));
 
       const hostname = u.hostname;
       if (hostname.startsWith('[') && hostname.endsWith(']')) {
         // IPv6
-        urlCheckSimilarList.push(scrapbook.escapeRegExp(hostname));
+        urlCheckSimilarList.push(utils.escapeRegExp(hostname));
       } else if (REGEX_IPv4.test(hostname)) {
         // IPv4
-        urlCheckSimilarList.push(scrapbook.escapeRegExp(hostname));
+        urlCheckSimilarList.push(utils.escapeRegExp(hostname));
       } else {
-        urlCheckSimilarDomainList.push(scrapbook.escapeRegExp(hostname.replace(/^www\./, '')));
+        urlCheckSimilarDomainList.push(utils.escapeRegExp(hostname.replace(/^www\./, '')));
       }
     }
 
@@ -209,7 +209,7 @@ const search = {
     });
 
     if (!results.length) {
-      this.addMsg(scrapbook.lang('SearchCapturesNotFound'));
+      this.addMsg(utils.lang('SearchCapturesNotFound'));
     }
 
     for (const result of results) {
@@ -222,7 +222,7 @@ const search = {
       if (!wrappers.has(matchType)) { continue; }
 
       const matchTypeCap = matchType[0].toUpperCase() + matchType.slice(1);
-      this.addMsg(scrapbook.lang('SearchCapturesFound' + matchTypeCap));
+      this.addMsg(utils.lang('SearchCapturesFound' + matchTypeCap));
 
       const trees = wrappers.get(matchType);
       for (const bookId of [...trees.keys()].sort()) {
@@ -253,20 +253,20 @@ const search = {
     const elem = event.currentTarget;
     const bookId = elem.closest('[data-book-id]').getAttribute('data-book-id');
     const id = elem.closest('[data-id]').getAttribute('data-id');
-    const response = await scrapbook.invokeExtensionScript({
+    const response = await utils.invokeExtensionScript({
       cmd: "background.locateItem",
       args: {bookId, id},
     });
     if (response === false) {
-      alert(scrapbook.lang("ErrorLocateSidebarNotOpened"));
+      alert(utils.lang("ErrorLocateSidebarNotOpened"));
     } else if (response === null) {
-      alert(scrapbook.lang("ErrorLocateNotFound"));
+      alert(utils.lang("ErrorLocateNotFound"));
     }
   },
 };
 
 document.addEventListener('DOMContentLoaded', (event) => {
-  scrapbook.loadLanguages(document);
+  utils.loadLanguages(document);
 
   document.getElementById('searchForm').addEventListener('submit', (event) => {
     event.preventDefault();

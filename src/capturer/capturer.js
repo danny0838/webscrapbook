@@ -5,7 +5,7 @@
  *****************************************************************************/
 
 import {isDebug} from "../utils/debug.mjs";
-import * as scrapbook from "../utils/extension.mjs";
+import * as utils from "../utils/extension.mjs";
 import {dataUriToFile} from "../utils/datauri.mjs";
 import {Zip} from "../utils/zip.mjs";
 import {sha1} from "../utils/sha.mjs";
@@ -20,7 +20,7 @@ const REBUILD_LINK_SVG_HREF_ATTRS = ['href', 'xlink:href'];
 
 // missionId is fixed to this page, to identify the capture mission
 // generate a unique one, if not otherwise set
-capturer.missionId = scrapbook.getUuid();
+capturer.missionId = utils.getUuid();
 
 /**
  * @typedef {Object} missionCaptureInfoFilesEntry
@@ -147,7 +147,7 @@ capturer.invoke = async function (method, args, details = {}) {
   const {tabId, frameId = 0} = details;
   if (Number.isInteger(tabId)) {
     const cmd = "capturer." + method;
-    return await scrapbook.invokeContentScript({tabId, frameId, cmd, args});
+    return await utils.invokeContentScript({tabId, frameId, cmd, args});
   } else {
     // capturer.html call self
     return await capturer[method](args);
@@ -162,7 +162,7 @@ capturer.invoke = async function (method, args, details = {}) {
  * - Ext4: filename <= 255 (UTF-8) bytes; fullpath <= 4096 (UTF-8) bytes
  *
  * @param {string} timeId
- * @param {string} filename - A validated filename (via scrapbook.validateFilename).
+ * @param {string} filename - A validated filename (via utils.validateFilename).
  * @param {captureOptions} params.options
  * @return {string} The uniquified filename.
  */
@@ -170,8 +170,8 @@ capturer.getUniqueFilename = function (timeId, filename, options) {
   const {files} = capturer.captureInfo.get(timeId);
 
   let newFilename = filename || "untitled";
-  let [newFilenameBase, newFilenameExt] = scrapbook.filenameParts(newFilename);
-  newFilenameBase = scrapbook.crop(newFilenameBase, options["capture.saveFilenameMaxLenUtf16"], options["capture.saveFilenameMaxLenUtf8"], "");
+  let [newFilenameBase, newFilenameExt] = utils.filenameParts(newFilename);
+  newFilenameBase = utils.crop(newFilenameBase, options["capture.saveFilenameMaxLenUtf16"], options["capture.saveFilenameMaxLenUtf8"], "");
   newFilenameExt = newFilenameExt ? "." + newFilenameExt : "";
   newFilename = newFilenameBase + newFilenameExt;
   let newFilenameCI = newFilename.toLowerCase();
@@ -198,22 +198,22 @@ capturer.getAvailableSaveFilename = async function (params) {
 
   const {filename, isFile, options} = params;
 
-  const [dir, base] = scrapbook.filepathParts(filename);
+  const [dir, base] = utils.filepathParts(filename);
 
   if (options["capture.saveOverwrite"]) {
     return base;
   }
 
-  const [basename, ext] = isFile ? scrapbook.filenameParts(base) : [base, ""];
+  const [basename, ext] = isFile ? utils.filenameParts(base) : [base, ""];
 
   let isFilenameTaken;
   switch (options["capture.saveTo"]) {
     case "server": {
       await server.init();
       const prefix = server.books[server.bookId].dataUrl +
-          scrapbook.escapeFilename(dir ? dir + '/' : '');
+          utils.escapeFilename(dir ? dir + '/' : '');
       isFilenameTaken = async (path) => {
-        const target = prefix + scrapbook.escapeFilename(path);
+        const target = prefix + utils.escapeFilename(path);
         const info = await server.request({
           url: target,
           format: 'json',
@@ -288,8 +288,8 @@ capturer.getAvailableSaveFilename = async function (params) {
             return true;
           }
 
-          const [, newBasename] = scrapbook.filepathParts(item.filename);
-          const [, oldBasename] = scrapbook.filepathParts(filename);
+          const [, newBasename] = utils.filepathParts(item.filename);
+          const [, oldBasename] = utils.filepathParts(filename);
           if (newBasename === oldBasename) {
             await browser.downloads.erase({id: item.id});
             return false;
@@ -310,7 +310,7 @@ capturer.getAvailableSaveFilename = async function (params) {
                   throw ex;
                 }
                 console.error(`Failed to remove downloaded file "${filename}" (tried ${tried}): ${ex.message}`);
-                await scrapbook.delay(retryDelay);
+                await utils.delay(retryDelay);
               }
             }
           }
@@ -323,7 +323,7 @@ capturer.getAvailableSaveFilename = async function (params) {
           // 2. The browser API cannot return the correct downloaded path
           //    (e.g. on Kiwi Browser), in which case the test will never pass.
           // Fail early for either case.
-          if (!newBasename.startsWith(scrapbook.filenameParts(oldBasename)[0])) {
+          if (!newBasename.startsWith(utils.filenameParts(oldBasename)[0])) {
             throw new Error(`Unable to download to the folder.`);
           }
 
@@ -335,7 +335,7 @@ capturer.getAvailableSaveFilename = async function (params) {
       break;
     }
     default: {
-      return scrapbook.filepathParts(filename)[1];
+      return utils.filepathParts(filename)[1];
     }
   }
 
@@ -349,12 +349,12 @@ capturer.getAvailableSaveFilename = async function (params) {
 capturer.saveFileCache = async function ({timeId, path, blob}) {
   if (capturer.captureInfo.get(timeId).useDiskCache) {
     const key = {table: "pageCache", id: timeId, path};
-    await scrapbook.cache.set(key, blob, 'indexedDB');
-    blob = await scrapbook.cache.get(key, 'indexedDB');
+    await utils.cache.set(key, blob, 'indexedDB');
+    blob = await utils.cache.get(key, 'indexedDB');
   }
 
   const {files} = capturer.captureInfo.get(timeId);
-  const filename = scrapbook.filepathParts(path)[1].toLowerCase();
+  const filename = utils.filepathParts(path)[1].toLowerCase();
   Object.assign(files.get(filename), {
     path,
     blob,
@@ -420,7 +420,7 @@ capturer.clearFileCache = async function ({timeId}) {
       id: timeId,
     },
   };
-  await scrapbook.cache.removeAll(filter, 'indexedDB');
+  await utils.cache.removeAll(filter, 'indexedDB');
 };
 
 /**
@@ -460,7 +460,7 @@ capturer.fetch = async function (params) {
   }
 
   const getFetchToken = function (url, role) {
-    let token = `${scrapbook.normalizeUrl(url)}\t${role}`;
+    let token = `${utils.normalizeUrl(url)}\t${role}`;
     token = sha1(token, "TEXT");
     return token;
   };
@@ -496,8 +496,8 @@ capturer.fetch = async function (params) {
 
   const setCache = async (id, token, data) => {
     const key = {table: "fetchCache", id, token};
-    await scrapbook.cache.set(key, data, 'indexedDB');
-    return await scrapbook.cache.get(key, 'indexedDB');
+    await utils.cache.set(key, data, 'indexedDB');
+    return await utils.cache.get(key, 'indexedDB');
   };
 
   const fetch = capturer.fetch = async function (params) {
@@ -513,7 +513,7 @@ capturer.fetch = async function (params) {
       settings: {timeId},
       options,
     } = params;
-    const [sourceUrlMain, sourceUrlHash] = scrapbook.splitUrlByAnchor(sourceUrl);
+    const [sourceUrlMain, sourceUrlHash] = utils.splitUrlByAnchor(sourceUrl);
 
     let headers = {};
     let response = {
@@ -538,7 +538,7 @@ capturer.fetch = async function (params) {
 
     // fail out if sourceUrl is relative,
     // or it will be treated as relative to this extension page.
-    if (!scrapbook.isUrlAbsolute(sourceUrlMain)) {
+    if (!utils.isUrlAbsolute(sourceUrlMain)) {
       return Object.assign(response, {
         error: {
           name: 'URIError',
@@ -593,7 +593,7 @@ capturer.fetch = async function (params) {
           // simulate headers from data URI parameters
           headers.filename = file.name;
           headers.contentLength = file.size;
-          const contentType = scrapbook.parseHeaderContentType(file.type);
+          const contentType = utils.parseHeaderContentType(file.type);
           headers.contentType = contentType.type;
           headers.charset = contentType.parameters.charset;
 
@@ -621,7 +621,7 @@ capturer.fetch = async function (params) {
           overrideUrl = URL.createObjectURL(overrideBlob);
         }
 
-        const xhr = await scrapbook.xhr({
+        const xhr = await utils.xhr({
           url: overrideUrl || sourceUrlMain,
           responseType: 'blob',
           allowAnyStatus: true,
@@ -639,7 +639,7 @@ capturer.fetch = async function (params) {
             // treat as if no redirect when overrideUrl is used
             if (!overrideUrl) {
               // xhr.responseURL must be valid; otherwise the onerror event of the XHR will be triggered
-              const [responseUrlMain, responseUrlHash] = scrapbook.splitUrlByAnchor(xhr.responseURL);
+              const [responseUrlMain, responseUrlHash] = utils.splitUrlByAnchor(xhr.responseURL);
               if (responseUrlMain !== sourceUrlMain) {
                 const responseFetchToken = getFetchToken(responseUrlMain, fetchRole);
                 const responseFetchPrevious = fetchMap.get(responseFetchToken);
@@ -664,13 +664,13 @@ capturer.fetch = async function (params) {
             if (sourceUrl.startsWith("http:") || sourceUrl.startsWith("https:") || sourceUrl.startsWith("blob:")) {
               const headerContentType = xhr.getResponseHeader("Content-Type");
               if (headerContentType) {
-                const contentType = scrapbook.parseHeaderContentType(headerContentType);
+                const contentType = utils.parseHeaderContentType(headerContentType);
                 headers.contentType = contentType.type;
                 headers.charset = contentType.parameters.charset;
               }
               const headerContentDisposition = xhr.getResponseHeader("Content-Disposition");
               if (headerContentDisposition) {
-                const contentDisposition = scrapbook.parseHeaderContentDisposition(headerContentDisposition);
+                const contentDisposition = utils.parseHeaderContentDisposition(headerContentDisposition);
                 headers.isAttachment = (contentDisposition.type !== "inline");
                 headers.filename = contentDisposition.parameters.filename;
               }
@@ -822,7 +822,7 @@ capturer.resolveRedirects = async function (params) {
 
   const {refPolicy, checkMetaRefresh = true, settings, options} = params;
   let {url: sourceUrl, refUrl, overrideBlob, isAttachment} = params;
-  let [sourceUrlMain, sourceUrlHash] = scrapbook.splitUrlByAnchor(sourceUrl);
+  let [sourceUrlMain, sourceUrlHash] = utils.splitUrlByAnchor(sourceUrl);
 
   const ignoreSizeLimit = settings.isMainPage && settings.isMainFrame;
   const metaRefreshChain = [];
@@ -855,7 +855,7 @@ capturer.resolveRedirects = async function (params) {
         break;
       }
 
-      doc = await scrapbook.readFileAsDocument(fetchResponse.blob);
+      doc = await utils.readFileAsDocument(fetchResponse.blob);
 
       if (!doc) {
         break;
@@ -865,7 +865,7 @@ capturer.resolveRedirects = async function (params) {
         break;
       }
 
-      const metaRefreshTarget = scrapbook.getMetaRefreshTarget(doc, fetchResponse.url);
+      const metaRefreshTarget = utils.getMetaRefreshTarget(doc, fetchResponse.url);
 
       if (!metaRefreshTarget) {
         break;
@@ -880,10 +880,10 @@ capturer.resolveRedirects = async function (params) {
       overrideBlob = null;
 
       // meta refresh will replace the original hash
-      [sourceUrlMain, sourceUrlHash] = scrapbook.splitUrlByAnchor(metaRefreshTarget);
+      [sourceUrlMain, sourceUrlHash] = utils.splitUrlByAnchor(metaRefreshTarget);
     }
     sourceUrl = capturer.getRedirectedUrl(fetchResponse.url, sourceUrlHash);
-    [sourceUrlMain, sourceUrlHash] = scrapbook.splitUrlByAnchor(sourceUrl);
+    [sourceUrlMain, sourceUrlHash] = utils.splitUrlByAnchor(sourceUrl);
   } catch (ex) {
     error = ex;
   }
@@ -920,7 +920,7 @@ capturer.addItemToServer = async function ({item, parentId, index}) {
     icon = await book.cacheFavIcon({item, icon});
   } catch (ex) {
     console.warn(ex);
-    capturer.warn(scrapbook.lang("ErrorFileDownloadError", [icon, ex.message]));
+    capturer.warn(utils.lang("ErrorFileDownloadError", [icon, ex.message]));
   }
 
   // lock tree before loading to avoid a conflict due to parallel captures
@@ -961,7 +961,7 @@ capturer.addItemToServer = async function ({item, parentId, index}) {
               target_index: index,
             },
           }),
-          auto_cache: JSON.stringify(scrapbook.autoCacheOptions()),
+          auto_cache: JSON.stringify(utils.autoCacheOptions()),
         },
       });
     },
@@ -1037,7 +1037,7 @@ capturer.runTasks = async function ({
   mode: baseMode, options: baseOptions,
 }) {
   delay = parseFloat(delay) || 5;
-  baseOptions = Object.assign(await scrapbook.getOptions("capture"), baseOptions);
+  baseOptions = Object.assign(await utils.getOptions("capture"), baseOptions);
 
   const results = [];
 
@@ -1115,7 +1115,7 @@ capturer.runTasks = async function ({
     results.push(result);
 
     // short delay before next task
-    await scrapbook.delay(delay);
+    await utils.delay(delay);
   }
 
   return results;
@@ -1146,7 +1146,7 @@ capturer.captureGeneral = async function ({
   url, refUrl,
   mode,
   settings: {
-    timeId = scrapbook.dateToId(),
+    timeId = utils.dateToId(),
     documentName = 'index',
     indexFilename,
     fullPage,
@@ -1165,7 +1165,7 @@ capturer.captureGeneral = async function ({
   if (options["capture.helpersEnabled"]) {
     if (options["capture.helpers"]) {
       try {
-        const helpers = scrapbook.parseOption("capture.helpers", options["capture.helpers"]);
+        const helpers = utils.parseOption("capture.helpers", options["capture.helpers"]);
 
         // apply overriding options
         const docUrl = await (async () => {
@@ -1215,7 +1215,7 @@ capturer.captureGeneral = async function ({
   // determine bookId at the start of a capture
   if (options["capture.saveTo"] === 'server') {
     if (bookId === null) {
-      bookId = (await scrapbook.cache.get({table: "scrapbookServer", key: "currentScrapbook"}, 'storage')) || "";
+      bookId = (await utils.cache.get({table: "scrapbookServer", key: "currentScrapbook"}, 'storage')) || "";
     }
     await server.init();
     server.bookId = bookId;
@@ -1271,7 +1271,7 @@ capturer.captureGeneral = async function ({
           title: response.title,
           type: response.type,
           create: response.timeId,
-          source: scrapbook.normalizeUrl(response.sourceUrl),
+          source: utils.normalizeUrl(response.sourceUrl),
           icon: response.favIconUrl,
           comment: typeof comment === 'string' ? comment : undefined,
           charset: response.charset,
@@ -1281,9 +1281,9 @@ capturer.captureGeneral = async function ({
       });
     }
 
-    await scrapbook.invokeExtensionScript({
+    await utils.invokeExtensionScript({
       cmd: "background.onCaptureEnd",
-      args: {urls: [scrapbook.normalizeUrl(response.sourceUrl)]},
+      args: {urls: [utils.normalizeUrl(response.sourceUrl)]},
     });
 
     // preserve info if error out
@@ -1350,13 +1350,13 @@ capturer.captureTab = async function ({
   // throw error for a discarded tab
   // note that tab.discarded is undefined in older Firefox version
   if (discarded === true) {
-    throw new Error(scrapbook.lang("ErrorTabDiscarded"));
+    throw new Error(utils.lang("ErrorTabDiscarded"));
   }
 
-  (await scrapbook.initContentScripts(tabId)).forEach(({tabId, frameId, url, error, injected}) => {
+  (await utils.initContentScripts(tabId)).forEach(({tabId, frameId, url, error, injected}) => {
     if (error) {
       const source = `[${tabId}:${frameId}] ${url}`;
-      capturer.error(scrapbook.lang("ErrorContentScriptExecute", [source, error.message]));
+      capturer.error(utils.lang("ErrorContentScriptExecute", [source, error.message]));
     }
   });
 
@@ -1436,18 +1436,18 @@ capturer.captureRemoteTab = async function ({
   capturer.log(`Launching remote tab ...`);
 
   const tab = await browser.tabs.create({url, active: false});
-  await scrapbook.waitTabLoading(tab);
+  await utils.waitTabLoading(tab);
 
   const delay = options["capture.remoteTabDelay"];
   if (delay > 0) {
     capturer.log(`Waiting for ${delay} ms...`);
-    await scrapbook.delay(delay);
+    await utils.delay(delay);
   }
 
-  (await scrapbook.initContentScripts(tab.id)).forEach(({tabId, frameId, url, error, injected}) => {
+  (await utils.initContentScripts(tab.id)).forEach(({tabId, frameId, url, error, injected}) => {
     if (error) {
       const source = `[${tabId}:${frameId}] ${url}`;
-      capturer.error(scrapbook.lang("ErrorContentScriptExecute", [source, error.message]));
+      capturer.error(utils.lang("ErrorContentScriptExecute", [source, error.message]));
     }
   });
 
@@ -1501,7 +1501,7 @@ capturer.captureUrl = async function (params) {
   } = params;
   let {refUrl, overrideBlob, isAttachment} = params;
   const {timeId, depth} = settings;
-  const [sourceUrlMain, sourceUrlHash] = scrapbook.splitUrlByAnchor(sourceUrl);
+  const [sourceUrlMain, sourceUrlHash] = utils.splitUrlByAnchor(sourceUrl);
 
   let downLinkDoc = downLink && parseInt(options["capture.downLink.doc.depth"], 10) >= 0 && options["capture.saveAs"] !== "singleHtml";
   let downLinkFile = downLink && ["header", "url"].includes(options["capture.downLink.file.mode"]);
@@ -1523,8 +1523,8 @@ capturer.captureUrl = async function (params) {
 
     // apply extension filter when checking URL
     if (downLinkFileValid && options["capture.downLink.file.mode"] === "url") {
-      const filename = scrapbook.urlToFilename(sourceUrl);
-      const [, ext] = scrapbook.filenameParts(filename);
+      const filename = utils.urlToFilename(sourceUrl);
+      const [, ext] = utils.filenameParts(filename);
       if (!capturer.downLinkFileExtFilter(ext, options)) {
         downLinkFileValid = false;
       }
@@ -1565,7 +1565,7 @@ capturer.captureUrl = async function (params) {
   }
   ({refUrl, isAttachment} = redirectInfo);
   const {fetchResponse: {headers}, url, doc} = redirectInfo;
-  const [urlMain, urlHash] = scrapbook.splitUrlByAnchor(url);
+  const [urlMain, urlHash] = utils.splitUrlByAnchor(url);
 
   if (downLink) {
     if (downLinkDoc && doc) {
@@ -1595,10 +1595,10 @@ capturer.captureUrl = async function (params) {
         if (mime) {
           ext = Mime.extension(mime);
         } else if (headers.filename) {
-          [, ext] = scrapbook.filenameParts(headers.filename);
+          [, ext] = utils.filenameParts(headers.filename);
         } else {
-          const filename = scrapbook.urlToFilename(urlMain);
-          [, ext] = scrapbook.filenameParts(filename);
+          const filename = utils.urlToFilename(urlMain);
+          [, ext] = utils.filenameParts(filename);
         }
 
         if (!(capturer.downLinkFileMimeFilter(mime, options) || capturer.downLinkFileExtFilter(ext, options))) {
@@ -1691,7 +1691,7 @@ capturer.captureBookmark = async function (params) {
 
   const {refPolicy, settings, options} = params;
   let {url: sourceUrl, refUrl} = params;
-  let [sourceUrlMain, sourceUrlHash] = scrapbook.splitUrlByAnchor(sourceUrl);
+  let [sourceUrlMain, sourceUrlHash] = utils.splitUrlByAnchor(sourceUrl);
 
   const redirectInfo = await capturer.resolveRedirects({
     url: sourceUrl,
@@ -1705,7 +1705,7 @@ capturer.captureBookmark = async function (params) {
   }
   const {doc} = redirectInfo;
   ({url: sourceUrl, refUrl} = redirectInfo);
-  [sourceUrlMain, sourceUrlHash] = scrapbook.splitUrlByAnchor(sourceUrl);
+  [sourceUrlMain, sourceUrlHash] = utils.splitUrlByAnchor(sourceUrl);
 
   const {timeId} = settings;
   let {title, favIconUrl} = settings;
@@ -1756,7 +1756,7 @@ capturer.captureBookmark = async function (params) {
   // fetch favicon as data URL
   if (favIconUrl && !favIconUrl.startsWith('data:')) {
     try {
-      const [favIconUrlMain, favIconUrlHash] = scrapbook.splitUrlByAnchor(favIconUrl);
+      const [favIconUrlMain, favIconUrlHash] = utils.splitUrlByAnchor(favIconUrl);
       const fetchResponse = await capturer.fetch({
         url: favIconUrlMain,
         refUrl: sourceUrl,
@@ -1769,7 +1769,7 @@ capturer.captureBookmark = async function (params) {
         throw new Error(fetchResponse.error.message);
       }
 
-      favIconUrl = await scrapbook.readFileAsDataURL(fetchResponse.blob);
+      favIconUrl = await utils.readFileAsDataURL(fetchResponse.blob);
     } catch (ex) {
       console.error(ex);
     }
@@ -1796,23 +1796,23 @@ capturer.captureBookmark = async function (params) {
   const html = (() => {
     const url = sourceUrl.startsWith("data:") ? "data:" : sourceUrl;
     const meta = params.options["capture.recordDocumentMeta"] ?
-        ' data-scrapbook-source="' + scrapbook.escapeHtml(scrapbook.normalizeUrl(url)) + '"' +
-        ' data-scrapbook-create="' + scrapbook.escapeHtml(timeId) + '"' +
+        ' data-scrapbook-source="' + utils.escapeHtml(utils.normalizeUrl(url)) + '"' +
+        ' data-scrapbook-create="' + utils.escapeHtml(timeId) + '"' +
         ' data-scrapbook-type="bookmark"' :
         "";
-    const titleElem = title ? `<title>${scrapbook.escapeHtml(title, false)}</title>\n` : "";
+    const titleElem = title ? `<title>${utils.escapeHtml(title, false)}</title>\n` : "";
     const favIconElem = (favIconUrl && !["blank", "remove", "link"].includes(options["capture.favicon"])) ?
-        `<link rel="shortcut icon" href="${scrapbook.escapeHtml(favIconUrl)}">\n` :
+        `<link rel="shortcut icon" href="${utils.escapeHtml(favIconUrl)}">\n` :
         "";
     return `\
 <!DOCTYPE html>
 <html${meta}>
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="refresh" content="0; url=${scrapbook.escapeHtml(sourceUrl)}">
+<meta http-equiv="refresh" content="0; url=${utils.escapeHtml(sourceUrl)}">
 ${titleElem}${favIconElem}</head>
 <body>
-Bookmark for <a href="${scrapbook.escapeHtml(sourceUrl)}">${scrapbook.escapeHtml(sourceUrl, false)}</a>
+Bookmark for <a href="${utils.escapeHtml(sourceUrl)}">${utils.escapeHtml(sourceUrl, false)}</a>
 </body>
 </html>`;
   })();
@@ -1820,7 +1820,7 @@ Bookmark for <a href="${scrapbook.escapeHtml(sourceUrl)}">${scrapbook.escapeHtml
 
   settings.type = settings.type || 'bookmark';
   settings.indexFilename = settings.indexFilename || await capturer.formatIndexFilename({
-    title: title || scrapbook.filenameParts(scrapbook.urlToFilename(sourceUrl))[0] || "untitled",
+    title: title || utils.filenameParts(utils.urlToFilename(sourceUrl))[0] || "untitled",
     sourceUrl,
     isFolder: false,
     settings,
@@ -1875,7 +1875,7 @@ capturer.captureFile = async function (params) {
   isDebug && console.debug("call: captureFile", params);
 
   const {url: sourceUrl, refUrl, refPolicy, charset, settings, options} = params;
-  const [sourceUrlMain, sourceUrlHash] = scrapbook.splitUrlByAnchor(sourceUrl);
+  const [sourceUrlMain, sourceUrlHash] = utils.splitUrlByAnchor(sourceUrl);
   const {timeId, isMainPage, isMainFrame, documentName, title} = settings;
 
   let response = await capturer.downloadFile({
@@ -1907,21 +1907,21 @@ capturer.captureFile = async function (params) {
   const html = (() => {
     const url = sourceUrl.startsWith("data:") ? "data:" : sourceUrl;
     const meta = params.options["capture.recordDocumentMeta"] ?
-        ' data-scrapbook-source="' + scrapbook.escapeHtml(scrapbook.normalizeUrl(url)) + '"' +
-        ' data-scrapbook-create="' + scrapbook.escapeHtml(timeId) + '"' +
+        ' data-scrapbook-source="' + utils.escapeHtml(utils.normalizeUrl(url)) + '"' +
+        ' data-scrapbook-create="' + utils.escapeHtml(timeId) + '"' +
         ' data-scrapbook-type="file"' +
         (charset ? ' data-scrapbook-charset="' + charset + '"' : "") :
         "";
-    const titleElem = title ? `<title>${scrapbook.escapeHtml(title, false)}</title>\n` : "";
+    const titleElem = title ? `<title>${utils.escapeHtml(title, false)}</title>\n` : "";
     return `\
 <!DOCTYPE html>
 <html${meta}>
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="refresh" content="0; url=${scrapbook.escapeHtml(response.url)}">
+<meta http-equiv="refresh" content="0; url=${utils.escapeHtml(response.url)}">
 ${titleElem}</head>
 <body>
-Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.escapeHtml(response.filename, false)}</a>
+Redirecting to file <a href="${utils.escapeHtml(response.url)}">${utils.escapeHtml(response.filename, false)}</a>
 </body>
 </html>`;
   })();
@@ -1929,7 +1929,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
 
   settings.type = settings.type || 'file';
   settings.indexFilename = settings.indexFilename || await capturer.formatIndexFilename({
-    title: title || scrapbook.urlToFilename(sourceUrl) || "untitled",
+    title: title || utils.urlToFilename(sourceUrl) || "untitled",
     sourceUrl,
     isFolder: options["capture.saveAs"] === "folder",
     settings,
@@ -1989,12 +1989,12 @@ capturer.resaveTab = async function ({
   // throw error for a discarded tab
   // note that tab.discarded is undefined in older Firefox version
   if (discarded === true) {
-    throw new Error(scrapbook.lang("ErrorTabDiscarded"));
+    throw new Error(utils.lang("ErrorTabDiscarded"));
   }
 
-  const mime = Mime.lookup(scrapbook.urlToFilename(url));
+  const mime = Mime.lookup(utils.urlToFilename(url));
   if (!["text/html", "application/xhtml+xml"].includes(mime)) {
-    throw new Error(scrapbook.lang("ErrorSaveNonHtml", [url]));
+    throw new Error(utils.lang("ErrorSaveNonHtml", [url]));
   }
 
   await server.init();
@@ -2002,7 +2002,7 @@ capturer.resaveTab = async function ({
   const book = server.books[bookId];
 
   if (!url.startsWith(book.dataUrl)) {
-    throw new Error(scrapbook.lang("ErrorSaveNotUnderDataDir", [url]));
+    throw new Error(utils.lang("ErrorSaveNotUnderDataDir", [url]));
   }
 
   await book.transaction({
@@ -2011,7 +2011,7 @@ capturer.resaveTab = async function ({
       await book.loadMeta(updated);
       const item = await book.findItemFromUrl(url);
       if (item?.locked) {
-        throw new Error(scrapbook.lang("ErrorSaveLockedItem"));
+        throw new Error(utils.lang("ErrorSaveLockedItem"));
       }
 
       const isMainDocument = book.isItemIndexUrl(item, url);
@@ -2022,14 +2022,14 @@ capturer.resaveTab = async function ({
           const index = item.index;
           const indexCI = index.toLowerCase();
           if (index.endsWith('/index.html')) {
-            internalizePrefix = scrapbook.normalizeUrl(book.dataUrl + scrapbook.escapeFilename(index.slice(0, -10)));
+            internalizePrefix = utils.normalizeUrl(book.dataUrl + utils.escapeFilename(index.slice(0, -10)));
           } else if (indexCI.endsWith('.htz')) {
-            internalizePrefix = scrapbook.normalizeUrl(book.dataUrl + scrapbook.escapeFilename(item.index + '!/'));
+            internalizePrefix = utils.normalizeUrl(book.dataUrl + utils.escapeFilename(item.index + '!/'));
           } else if (indexCI.endsWith('.maff')) {
             // Trust only the subdirectory in the current URL, as it is
             // possible that */index.html be redirected to another page.
-            const base = scrapbook.normalizeUrl(book.dataUrl + scrapbook.escapeFilename(item.index + '!/'));
-            const urlN = scrapbook.normalizeUrl(url);
+            const base = utils.normalizeUrl(book.dataUrl + utils.escapeFilename(item.index + '!/'));
+            const urlN = utils.normalizeUrl(url);
             if (urlN.startsWith(base)) {
               const m = urlN.slice(base.length).match(/^[^/]+\//);
               if (m) {
@@ -2040,10 +2040,10 @@ capturer.resaveTab = async function ({
         }
       }
 
-      (await scrapbook.initContentScripts(tabId)).forEach(({tabId, frameId, url, error, injected}) => {
+      (await utils.initContentScripts(tabId)).forEach(({tabId, frameId, url, error, injected}) => {
         if (error) {
           const source = `[${tabId}:${frameId}] ${url}`;
-          capturer.error(scrapbook.lang("ErrorContentScriptExecute", [source, error.message]));
+          capturer.error(utils.lang("ErrorContentScriptExecute", [source, error.message]));
         }
       });
 
@@ -2051,7 +2051,7 @@ capturer.resaveTab = async function ({
         internalize,
         isMainPage: isMainDocument,
         item,
-        options: Object.assign(await scrapbook.getOptions("capture"), options),
+        options: Object.assign(await utils.getOptions("capture"), options),
       };
 
       isDebug && console.debug("(main) send", source, message);
@@ -2064,8 +2064,8 @@ capturer.resaveTab = async function ({
         const allowFileAccess = await browser.extension.isAllowedFileSchemeAccess();
         for (const [fileUrl, data] of Object.entries(response)) {
           const fetchResource = async (url) => {
-            const fullUrl = scrapbook.normalizeUrl(capturer.resolveRelativeUrl(url, fileUrl));
-            if (!scrapbook.isContentPage(fullUrl, allowFileAccess)) { return null; }
+            const fullUrl = utils.normalizeUrl(capturer.resolveRelativeUrl(url, fileUrl));
+            if (!utils.isContentPage(fullUrl, allowFileAccess)) { return null; }
             if (fullUrl.startsWith(internalizePrefix)) { return null; }
 
             const file = resourceMap.get(fullUrl);
@@ -2074,7 +2074,7 @@ capturer.resaveTab = async function ({
             resourceMap.set(fullUrl, null);
 
             try {
-              const xhr = await scrapbook.xhr({
+              const xhr = await utils.xhr({
                 url: fullUrl,
                 responseType: 'blob',
               });
@@ -2082,17 +2082,17 @@ capturer.resaveTab = async function ({
 
               let file;
               if (internalizePrefix) {
-                const sha = sha1(await scrapbook.readFileAsArrayBuffer(blob), 'ARRAYBUFFER');
+                const sha = sha1(await utils.readFileAsArrayBuffer(blob), 'ARRAYBUFFER');
                 const ext = Mime.extension(blob.type) || 'bin';
                 file = new File([blob], sha + '.' + ext, {type: blob.type});
               } else {
-                file = await scrapbook.readFileAsDataURL(blob);
+                file = await utils.readFileAsDataURL(blob);
               }
               resourceMap.set(fullUrl, file);
               return file;
             } catch (ex) {
               console.error(ex);
-              capturer.warn(`Unable to internalize resource "${scrapbook.crop(url, 256)}": ${ex.message}`);
+              capturer.warn(`Unable to internalize resource "${utils.crop(url, 256)}": ${ex.message}`);
             }
           };
 
@@ -2106,25 +2106,25 @@ capturer.resaveTab = async function ({
       // documents
       for (const [fileUrl, data] of Object.entries(response)) {
         try {
-          const target = scrapbook.splitUrl(fileUrl)[0];
+          const target = utils.splitUrl(fileUrl)[0];
 
           // only save files under dataDir
           if (!fileUrl.startsWith(book.dataUrl)) {
-            throw new Error(scrapbook.lang("ErrorSaveNotUnderDataDir", [target]));
+            throw new Error(utils.lang("ErrorSaveNotUnderDataDir", [target]));
           }
 
           let {blob} = data;
           blob = await capturer.loadBlobCache(blob);
-          const {parameters: {charset}} = scrapbook.parseHeaderContentType(blob.type);
+          const {parameters: {charset}} = utils.parseHeaderContentType(blob.type);
 
           // forbid non-UTF-8 for data safety
           if (!['UTF-8', 'UTF8'].includes(charset.toUpperCase())) {
-            throw new Error(scrapbook.lang("ErrorSaveNonUTF8", [target]));
+            throw new Error(utils.lang("ErrorSaveNonUTF8", [target]));
           }
 
           // save document
           try {
-            let content = await scrapbook.readFileAsText(blob);
+            let content = await utils.readFileAsText(blob);
 
             // replace resource URLs
             content = content.replace(/urn:scrapbook:url:([0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12})/g, (match, key) => {
@@ -2132,16 +2132,16 @@ capturer.resaveTab = async function ({
                 const file = data.resources[key].file;
 
                 if (!file) {
-                  return scrapbook.escapeHtml(data.resources[key].url);
+                  return utils.escapeHtml(data.resources[key].url);
                 }
 
                 if (typeof file === 'string') {
-                  return scrapbook.escapeHtml(file);
+                  return utils.escapeHtml(file);
                 }
 
                 const resUrl = internalizePrefix + file.name;
-                const u = scrapbook.getRelativeUrl(resUrl, fileUrl);
-                return scrapbook.escapeHtml(u);
+                const u = utils.getRelativeUrl(resUrl, fileUrl);
+                return utils.escapeHtml(u);
               }
               return match;
             });
@@ -2158,7 +2158,7 @@ capturer.resaveTab = async function ({
             capturer.log(`Updated ${target}`);
           } catch (ex) {
             console.error(ex);
-            throw new Error(scrapbook.lang("ErrorSaveUploadFailure", [target, ex.message]));
+            throw new Error(utils.lang("ErrorSaveUploadFailure", [target, ex.message]));
           }
 
           // update item for main document
@@ -2195,7 +2195,7 @@ capturer.resaveTab = async function ({
           });
         }
 
-        capturer.log(`Internalized resource: ${scrapbook.crop(target, 256)}`);
+        capturer.log(`Internalized resource: ${utils.crop(target, 256)}`);
       }
 
       // update item
@@ -2214,7 +2214,7 @@ capturer.resaveTab = async function ({
                 item,
               },
             }),
-            auto_cache: JSON.stringify(scrapbook.autoCacheOptions()),
+            auto_cache: JSON.stringify(utils.autoCacheOptions()),
           },
           method: 'POST',
           format: 'json',
@@ -2222,13 +2222,13 @@ capturer.resaveTab = async function ({
         });
       } else {
         if (!book.config.no_tree) {
-          capturer.warn(scrapbook.lang("ErrorSaveUnknownItem"));
+          capturer.warn(utils.lang("ErrorSaveUnknownItem"));
         }
       }
     },
   });
 
-  await scrapbook.invokeExtensionScript({
+  await utils.invokeExtensionScript({
     cmd: "background.onServerTreeChange",
   });
 
@@ -2248,7 +2248,7 @@ capturer.recapture = async function ({
   url, refUrl,
   mode,
   settings: {
-    timeId = scrapbook.dateToId(),
+    timeId = utils.dateToId(),
     fullPage,
     title,
     favIconUrl,
@@ -2275,7 +2275,7 @@ capturer.recapture = async function ({
         throw new Error(`Recapture reference item invalid: "${itemId}".`);
       }
       if (item.locked) {
-        throw new Error(scrapbook.lang("ErrorSaveLockedItem"));
+        throw new Error(utils.lang("ErrorSaveLockedItem"));
       }
 
       // record original index
@@ -2300,7 +2300,7 @@ capturer.recapture = async function ({
       item.index = (result.targetDir ? result.targetDir + '/' : '') + result.filename;
       item.type = result.type;
       item.modify = timeId;
-      item.source = scrapbook.normalizeUrl(result.sourceUrl);
+      item.source = utils.normalizeUrl(result.sourceUrl);
       item.icon = result.favIconUrl;
 
       try {
@@ -2310,7 +2310,7 @@ capturer.recapture = async function ({
         });
       } catch (ex) {
         console.warn(ex);
-        capturer.warn(scrapbook.lang("ErrorFileDownloadError", [item.icon, ex.message]));
+        capturer.warn(utils.lang("ErrorFileDownloadError", [item.icon, ex.message]));
       }
 
       // attempt to migrate annotations
@@ -2324,8 +2324,8 @@ capturer.recapture = async function ({
 
         let oldDoc;
         try {
-          oldDoc = (await scrapbook.xhr({
-            url: book.dataUrl + scrapbook.escapeFilename(oldIndex),
+          oldDoc = (await utils.xhr({
+            url: book.dataUrl + utils.escapeFilename(oldIndex),
             responseType: 'document',
           })).response;
         } catch (ex) {
@@ -2334,8 +2334,8 @@ capturer.recapture = async function ({
           break migrateAnnotations;
         }
 
-        const newXhr = await scrapbook.xhr({
-          url: book.dataUrl + scrapbook.escapeFilename(item.index),
+        const newXhr = await utils.xhr({
+          url: book.dataUrl + utils.escapeFilename(item.index),
           responseType: 'document',
         });
         const newIndexUrl = newXhr.responseURL;
@@ -2360,7 +2360,7 @@ capturer.recapture = async function ({
           }
 
           if (elem.id) {
-            return `//*[@id=${scrapbook.quoteXPath(elem.id)}]`;
+            return `//*[@id=${utils.quoteXPath(elem.id)}]`;
           }
 
           const tag = elem.nodeName.toLowerCase();
@@ -2388,7 +2388,7 @@ capturer.recapture = async function ({
               '[data-scrapbook-elem="custom"]',
               '[data-scrapbook-elem="custom-wrapper"]',
             ].join(', '))) {
-          const removeType = scrapbook.getScrapBookObjectRemoveType(elem);
+          const removeType = utils.getScrapBookObjectRemoveType(elem);
           if (![1, 2].includes(removeType)) { continue; }
           annotations.set(elem, {
             elemPath: getXPath(elem, oldRootNode),
@@ -2446,7 +2446,7 @@ capturer.recapture = async function ({
               const startCheck = text.slice(0, 3);
               const endCheck = text.slice(-3);
 
-              scrapbook.unwrapNode(elem);
+              utils.unwrapNode(elem);
 
               Object.assign(annotation, {
                 startContainerPath: getXPath(startContainer, oldRootNode),
@@ -2525,7 +2525,7 @@ capturer.recapture = async function ({
           insertInfoBar: !!newDoc.querySelector('script[data-scrapbook-elem="infobar-loader"]'),
         });
 
-        const content = scrapbook.documentToString(newDoc, options["capture.prettyPrint"]);
+        const content = utils.documentToString(newDoc, options["capture.prettyPrint"]);
         const blob = new Blob([content], {type: "text/html"});
         await server.request({
           url: newIndexUrl + '?a=save',
@@ -2553,7 +2553,7 @@ capturer.recapture = async function ({
               item,
             },
           }),
-          auto_cache: JSON.stringify(scrapbook.autoCacheOptions()),
+          auto_cache: JSON.stringify(utils.autoCacheOptions()),
         },
         method: 'POST',
         format: 'json',
@@ -2566,7 +2566,7 @@ capturer.recapture = async function ({
         if (index.endsWith('/index.html')) {
           index = index.slice(0, -11);
         }
-        const target = book.dataUrl + scrapbook.escapeFilename(index);
+        const target = book.dataUrl + utils.escapeFilename(index);
 
         if (options["capture.backupForRecapture"]) {
           const anchor = document.createElement('a');
@@ -2581,7 +2581,7 @@ capturer.recapture = async function ({
           }).then(r => r.json());
           if (book.backupUrl) {
             anchor.href = book.backupUrl + response.data + '/' +
-              (book.dataUrl + scrapbook.quote(oldIndex)).slice(server.serverRoot.length);
+              (book.dataUrl + utils.quote(oldIndex)).slice(server.serverRoot.length);
           }
         } else {
           capturer.log(`Deleting old data files "${index}"...`);
@@ -2608,7 +2608,7 @@ capturer.recapture = async function ({
     },
   });
 
-  await scrapbook.invokeExtensionScript({
+  await utils.invokeExtensionScript({
     cmd: "background.onServerTreeChange",
   });
 
@@ -2658,7 +2658,7 @@ capturer.mergeCapture = async function ({
         throw new Error(`Merge capture supports only site items.`);
       }
       if (item.locked) {
-        throw new Error(scrapbook.lang("ErrorSaveLockedItem"));
+        throw new Error(utils.lang("ErrorSaveLockedItem"));
       }
 
       const timeId = item.id;
@@ -2673,7 +2673,7 @@ capturer.mergeCapture = async function ({
       try {
         indexUrl = (await server.request({
           method: 'HEAD',
-          url: book.dataUrl + scrapbook.escapeFilename(item.index),
+          url: book.dataUrl + utils.escapeFilename(item.index),
         })).url;
       } catch (ex) {
         throw new Error(`Unable to locate index file for item "${itemId}".`);
@@ -2741,7 +2741,7 @@ capturer.mergeCapture = async function ({
               item: {id: item.id},
             },
           }),
-          auto_cache: JSON.stringify(scrapbook.autoCacheOptions()),
+          auto_cache: JSON.stringify(utils.autoCacheOptions()),
         },
         method: 'POST',
         format: 'json',
@@ -2754,7 +2754,7 @@ capturer.mergeCapture = async function ({
     },
   });
 
-  await scrapbook.invokeExtensionScript({
+  await utils.invokeExtensionScript({
     cmd: "background.onServerTreeChange",
   });
 
@@ -2768,7 +2768,7 @@ capturer.mergeCapture = async function ({
  */
 capturer.getRegisterToken = function (url, role) {
   try {
-    url = scrapbook.normalizeUrl(url);
+    url = utils.normalizeUrl(url);
   } catch (ex) {
     // invalid URL
     return null;
@@ -2816,7 +2816,7 @@ capturer.registerDocument = async function (params) {
   const getDocumentFileName = (params) => {
     const {url: sourceUrl, mime, headers = {}, settings, options} = params;
 
-    let documentFileName = headers.filename || scrapbook.urlToFilename(sourceUrl);
+    let documentFileName = headers.filename || utils.urlToFilename(sourceUrl);
 
     // fix extension
     const fn = documentFileName.toLowerCase();
@@ -2829,7 +2829,7 @@ capturer.registerDocument = async function (params) {
     }
     documentFileName += "." + getExtFromMime(mime);
 
-    documentFileName = scrapbook.validateFilename(documentFileName, options["capture.saveAsciiFilename"]);
+    documentFileName = utils.validateFilename(documentFileName, options["capture.saveAsciiFilename"]);
 
     return documentFileName;
   };
@@ -2838,7 +2838,7 @@ capturer.registerDocument = async function (params) {
     isDebug && console.debug("call: registerDocument", params);
 
     const {docUrl: sourceUrl, mime, role, settings, options} = params;
-    const [sourceUrlMain, sourceUrlHash] = scrapbook.splitUrlByAnchor(sourceUrl);
+    const [sourceUrlMain, sourceUrlHash] = utils.splitUrlByAnchor(sourceUrl);
 
     const {timeId, isMainPage, isMainFrame, documentName} = settings;
     const {filenameMap, files} = capturer.captureInfo.get(timeId);
@@ -2867,10 +2867,10 @@ capturer.registerDocument = async function (params) {
 
       let documentFileName;
       if (documentName && ((isMainPage && isMainFrame) || options["capture.frameRename"])) {
-        let documentNameBase = scrapbook.validateFilename(documentName, options["capture.saveAsciiFilename"]);
+        let documentNameBase = utils.validateFilename(documentName, options["capture.saveAsciiFilename"]);
 
         // see capturer.getUniqueFilename for filename limitation
-        documentNameBase = scrapbook.crop(documentNameBase, options["capture.saveFilenameMaxLenUtf16"], options["capture.saveFilenameMaxLenUtf8"], "");
+        documentNameBase = utils.crop(documentNameBase, options["capture.saveFilenameMaxLenUtf16"], options["capture.saveFilenameMaxLenUtf8"], "");
 
         let newDocumentName = documentNameBase;
         let newDocumentNameCI = newDocumentName.toLowerCase();
@@ -2897,7 +2897,7 @@ capturer.registerDocument = async function (params) {
         documentFileName = capturer.getUniqueFilename(settings.timeId, documentFileName, options);
       }
 
-      response = {filename: documentFileName, url: scrapbook.escapeFilename(documentFileName)};
+      response = {filename: documentFileName, url: utils.escapeFilename(documentFileName)};
 
       // update registry
       filenameMap.set(token, response);
@@ -2914,7 +2914,7 @@ capturer.registerDocument = async function (params) {
         options,
       });
 
-      response = {filename: documentFileName, url: scrapbook.escapeFilename(documentFileName)};
+      response = {filename: documentFileName, url: utils.escapeFilename(documentFileName)};
     }
 
     return response;
@@ -2976,7 +2976,7 @@ capturer.registerFile = async function (params) {
     const {url: sourceUrl, headers = {}, settings, options} = params;
 
     // use the filename if it has been defined by header Content-Disposition
-    let filename = headers.filename || scrapbook.urlToFilename(sourceUrl);
+    let filename = headers.filename || utils.urlToFilename(sourceUrl);
 
     // if header Content-Type (MIME) is defined:
     // 1. If the file has no extension, assign one according to MIME,
@@ -2994,7 +2994,7 @@ capturer.registerFile = async function (params) {
     // http://maf.mozdev.org/maff-specification.html
     if (headers.contentType) {
       const mime = headers.contentType;
-      let [base, ext] = scrapbook.filenameParts(filename);
+      let [base, ext] = utils.filenameParts(filename);
       if ((!ext && !MIMES_NO_EXT_OK.has(mime)) ||
           (MIMES_NEED_MATCH.has(mime) && !Mime.allExtensions(mime).includes(ext.toLowerCase()))) {
         ext = Mime.extension(mime);
@@ -3004,7 +3004,7 @@ capturer.registerFile = async function (params) {
       }
     }
 
-    filename = scrapbook.validateFilename(filename, options["capture.saveAsciiFilename"]);
+    filename = utils.validateFilename(filename, options["capture.saveAsciiFilename"]);
 
     return filename;
   };
@@ -3013,7 +3013,7 @@ capturer.registerFile = async function (params) {
     isDebug && console.debug("call: registerFile", params);
 
     const {url: sourceUrl, role, settings, options} = params;
-    const [sourceUrlMain, sourceUrlHash] = scrapbook.splitUrlByAnchor(sourceUrl);
+    const [sourceUrlMain, sourceUrlHash] = utils.splitUrlByAnchor(sourceUrl);
 
     const {timeId} = settings;
     const {filenameMap, files} = capturer.captureInfo.get(timeId);
@@ -3049,7 +3049,7 @@ capturer.registerFile = async function (params) {
 
       filename = capturer.getUniqueFilename(settings.timeId, filename, options);
 
-      response = {filename, url: scrapbook.escapeFilename(filename)};
+      response = {filename, url: utils.escapeFilename(filename)};
 
       // update registry
       filenameMap.set(token, response);
@@ -3065,7 +3065,7 @@ capturer.registerFile = async function (params) {
         options,
       });
 
-      response = {filename, url: scrapbook.escapeFilename(filename)};
+      response = {filename, url: utils.escapeFilename(filename)};
     }
 
     return response;
@@ -3082,7 +3082,7 @@ capturer.downLinkFileExtFilter = function (ext, options) {
     if (filterText !== options["capture.downLink.file.extFilter"]) {
       filterText = options["capture.downLink.file.extFilter"];
       try {
-        filters = scrapbook.parseOption("capture.downLink.file.extFilter", filterText).ext;
+        filters = utils.parseOption("capture.downLink.file.extFilter", filterText).ext;
       } catch (ex) {
         capturer.warn(`Ignored invalid capture.downLink.file.extFilter: ${ex.message}`);
         filters = [];
@@ -3108,7 +3108,7 @@ capturer.downLinkFileMimeFilter = function (mime, options) {
     if (filterText !== options["capture.downLink.file.extFilter"]) {
       filterText = options["capture.downLink.file.extFilter"];
       try {
-        filters = scrapbook.parseOption("capture.downLink.file.extFilter", filterText).mime;
+        filters = utils.parseOption("capture.downLink.file.extFilter", filterText).mime;
       } catch (ex) {
         capturer.warn(`Ignored invalid capture.downLink.file.extFilter: ${ex.message}`);
         filters = [];
@@ -3134,7 +3134,7 @@ capturer.downLinkDocUrlFilter = function (url, options) {
     if (filterText !== options["capture.downLink.doc.urlFilter"]) {
       filterText = options["capture.downLink.doc.urlFilter"];
       try {
-        filters = scrapbook.parseOption("capture.downLink.doc.urlFilter", filterText);
+        filters = utils.parseOption("capture.downLink.doc.urlFilter", filterText);
       } catch (ex) {
         capturer.warn(`Ignored invalid capture.downLink.doc.urlFilter: ${ex.message}`);
         filters = [];
@@ -3142,7 +3142,7 @@ capturer.downLinkDocUrlFilter = function (url, options) {
     }
 
     // match the URL without hash
-    const matchUrl = scrapbook.splitUrlByAnchor(url)[0];
+    const matchUrl = utils.splitUrlByAnchor(url)[0];
 
     // match everything if no filters
     if (!filters.length) {
@@ -3170,7 +3170,7 @@ capturer.downLinkUrlFilter = function (url, options) {
     if (filterText !== options["capture.downLink.urlFilter"]) {
       filterText = options["capture.downLink.urlFilter"];
       try {
-        filters = scrapbook.parseOption("capture.downLink.urlFilter", filterText);
+        filters = utils.parseOption("capture.downLink.urlFilter", filterText);
       } catch (ex) {
         capturer.warn(`Ignored invalid capture.downLink.urlFilter: ${ex.message}`);
         filters = [];
@@ -3178,7 +3178,7 @@ capturer.downLinkUrlFilter = function (url, options) {
     }
 
     // match the URL without hash
-    const matchUrl = scrapbook.splitUrlByAnchor(url)[0];
+    const matchUrl = utils.splitUrlByAnchor(url)[0];
 
     return filters.some((filter) => {
       // plain text rule must match full URL
@@ -3263,16 +3263,16 @@ capturer.saveMainDocument = async function (params) {
   isDebug && console.debug("call: saveMainDocument", params);
 
   const {data = {}, sourceUrl, documentFileName, settings, options} = params;
-  const [sourceUrlMain, sourceUrlHash] = scrapbook.splitUrlByAnchor(sourceUrl);
+  const [sourceUrlMain, sourceUrlHash] = utils.splitUrlByAnchor(sourceUrl);
   const {timeId, type: itemType} = settings;
 
   const addIndexHtml = async (path, target, title) => {
     const meta = options["capture.recordDocumentMeta"] ?
-        ' data-scrapbook-source="' + scrapbook.escapeHtml(scrapbook.normalizeUrl(sourceUrl)) + '"' +
-        ' data-scrapbook-create="' + scrapbook.escapeHtml(timeId) + '"' +
-        (settings.title ? ' data-scrapbook-title="' + scrapbook.escapeHtml(settings.title) + '"' : "") +
-        (settings.favIconUrl ? ' data-scrapbook-icon="' + scrapbook.escapeHtml(settings.favIconUrl) + '"' : "") +
-        (itemType ? ' data-scrapbook-type="' + scrapbook.escapeHtml(itemType) + '"' : "") :
+        ' data-scrapbook-source="' + utils.escapeHtml(utils.normalizeUrl(sourceUrl)) + '"' +
+        ' data-scrapbook-create="' + utils.escapeHtml(timeId) + '"' +
+        (settings.title ? ' data-scrapbook-title="' + utils.escapeHtml(settings.title) + '"' : "") +
+        (settings.favIconUrl ? ' data-scrapbook-icon="' + utils.escapeHtml(settings.favIconUrl) + '"' : "") +
+        (itemType ? ' data-scrapbook-type="' + utils.escapeHtml(itemType) + '"' : "") :
         "";
 
     const html = `\
@@ -3280,10 +3280,10 @@ capturer.saveMainDocument = async function (params) {
 <html${meta}>
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="refresh" content="0; url=${scrapbook.escapeHtml(target)}">
-${title ? '<title>' + scrapbook.escapeHtml(title, false) + '</title>\n' : ''}</head>
+<meta http-equiv="refresh" content="0; url=${utils.escapeHtml(target)}">
+${title ? '<title>' + utils.escapeHtml(title, false) + '</title>\n' : ''}</head>
 <body>
-Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(target, false)}</a>
+Redirecting to <a href="${utils.escapeHtml(target)}">${utils.escapeHtml(target, false)}</a>
 </body>
 </html>`;
     await capturer.saveFileCache({
@@ -3308,11 +3308,11 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
           sourceUrl,
         });
         capturer.log(`Saved to "${downloadItem.filename}"`);
-        filename = scrapbook.filepathParts(downloadItem.filename)[1];
+        filename = utils.filepathParts(downloadItem.filename)[1];
         break;
       }
       case 'server': {
-        [targetDir, filename] = scrapbook.filepathParts(filename);
+        [targetDir, filename] = utils.filepathParts(filename);
         filename = await capturer.saveBlobToServer({
           timeId,
           blob,
@@ -3326,7 +3326,7 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
       }
       case 'folder':
       default: {
-        [targetDir, filename] = scrapbook.filepathParts(options["capture.saveFolder"] + "/" + filename);
+        [targetDir, filename] = utils.filepathParts(options["capture.saveFolder"] + "/" + filename);
         const downloadItem = await capturer.saveBlob({
           timeId,
           blob,
@@ -3340,7 +3340,7 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
           options,
         });
         capturer.log(`Saved to "${downloadItem.filename}"`);
-        filename = scrapbook.filepathParts(downloadItem.filename)[1];
+        filename = utils.filepathParts(downloadItem.filename)[1];
         break;
       }
     }
@@ -3371,7 +3371,7 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
             } catch (ex) {
               // show message for individual saving error
               console.error(ex);
-              capturer.error(scrapbook.lang("ErrorFileSaveError", [sourceUrl, path, ex.message]));
+              capturer.error(utils.lang("ErrorFileSaveError", [sourceUrl, path, ex.message]));
             }
           }
         };
@@ -3411,7 +3411,7 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
           } catch (ex) {
             // show message for individual saving error
             console.error(ex);
-            capturer.error(scrapbook.lang("ErrorFileSaveError", [sourceUrl, path, ex.message]));
+            capturer.error(utils.lang("ErrorFileSaveError", [sourceUrl, path, ex.message]));
             return {filename: targetDir + "/" + path, error: {message: ex.message}};
           }
         };
@@ -3428,7 +3428,7 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
           throw new Error(`Unable to save index.html`);
         }
         capturer.log(`Saved to "${downloadItem.filename}"`);
-        filename = scrapbook.filepathParts(downloadItem.filename)[1];
+        filename = utils.filepathParts(downloadItem.filename)[1];
         break;
       }
     }
@@ -3454,11 +3454,11 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
 
   // save captured data to files
   capturer.log(`Saving data...`);
-  const title = data.title || scrapbook.urlToFilename(sourceUrl);
+  const title = data.title || utils.urlToFilename(sourceUrl);
   let saveAs = options["capture.saveAs"];
   let targetDir;
   let filename;
-  let [basename, ext] = scrapbook.filenameParts(documentFileName);
+  let [basename, ext] = utils.filenameParts(documentFileName);
 
   // special handling for bookmark (as a special case of singleHtml)
   if (itemType === 'bookmark') {
@@ -3513,9 +3513,9 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
          xmlns:NC="http://home.netscape.com/NC-rdf#"
          xmlns:RDF="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
 <RDF:Description RDF:about="urn:root">
-<MAF:originalurl RDF:resource="${scrapbook.escapeHtml(sourceUrl)}"/>
-<MAF:title RDF:resource="${scrapbook.escapeHtml(data.title || '')}"/>
-<MAF:archivetime RDF:resource="${scrapbook.escapeHtml(scrapbook.idToDate(timeId).toUTCString())}"/>
+<MAF:originalurl RDF:resource="${utils.escapeHtml(sourceUrl)}"/>
+<MAF:title RDF:resource="${utils.escapeHtml(data.title || '')}"/>
+<MAF:archivetime RDF:resource="${utils.escapeHtml(utils.idToDate(timeId).toUTCString())}"/>
 <MAF:indexfilename RDF:resource="${documentFileName}"/>
 <MAF:charset RDF:resource="UTF-8"/>
 </RDF:Description>
@@ -3550,7 +3550,7 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
       }
 
       getTargetDirName: {
-        const dir = scrapbook.filepathParts(settings.indexFilename)[0];
+        const dir = utils.filepathParts(settings.indexFilename)[0];
         const newFilename = await capturer.invoke("getAvailableSaveFilename", {
           filename: settings.indexFilename,
           options,
@@ -3573,7 +3573,7 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
     sourceUrl,
     targetDir,
     filename,
-    url: scrapbook.escapeFilename(documentFileName),
+    url: utils.escapeFilename(documentFileName),
     favIconUrl: data.favIconUrl,
   };
 };
@@ -3593,7 +3593,7 @@ capturer.downloadFile = async function (params) {
   isDebug && console.debug("call: downloadFile", params);
 
   const {url: sourceUrl, refUrl, refPolicy, overrideBlob, settings, options} = params;
-  const [sourceUrlMain, sourceUrlHash] = scrapbook.splitUrlByAnchor(sourceUrl);
+  const [sourceUrlMain, sourceUrlHash] = utils.splitUrlByAnchor(sourceUrl);
   const {timeId} = settings;
 
   // special handling for data URI
@@ -3630,7 +3630,7 @@ capturer.downloadFile = async function (params) {
   }
 
   let blob = fetchResponse.blob;
-  const {parameters: {charset}} = scrapbook.parseHeaderContentType(fetchResponse.headers.contentType);
+  const {parameters: {charset}} = utils.parseHeaderContentType(fetchResponse.headers.contentType);
   if (charset) {
     blob = new Blob([blob], {type: `${blob.type};charset=${charset}`});
   }
@@ -3668,7 +3668,7 @@ capturer.fetchCss = async function (params) {
   isDebug && console.debug("call: fetchCss", params);
 
   const {url: sourceUrl, refUrl, refPolicy, envCharset, overrideBlob, settings, options} = params;
-  const [sourceUrlMain, sourceUrlHash] = scrapbook.splitUrlByAnchor(sourceUrl);
+  const [sourceUrlMain, sourceUrlHash] = utils.splitUrlByAnchor(sourceUrl);
   const {timeId} = settings;
 
   const fetchResponse = await capturer.fetch({
@@ -3684,7 +3684,7 @@ capturer.fetchCss = async function (params) {
     throw new Error(fetchResponse.error.message);
   }
 
-  return await scrapbook.parseCssFile(fetchResponse.blob, fetchResponse.headers.charset, envCharset);
+  return await utils.parseCssFile(fetchResponse.blob, fetchResponse.headers.charset, envCharset);
 };
 
 /**
@@ -3706,19 +3706,19 @@ capturer.fetchCss = async function (params) {
  */
 capturer.downloadBlob = async function (params) {
   const makeDataUri = async (blob, filename) => {
-    const {type: mime, parameters: {charset}} = scrapbook.parseHeaderContentType(blob.type);
+    const {type: mime, parameters: {charset}} = utils.parseHeaderContentType(blob.type);
 
     let dataUri;
-    if (charset || scrapbook.mimeIsText(mime)) {
+    if (charset || utils.mimeIsText(mime)) {
       if (charset && /utf-?8/i.test(charset)) {
-        const str = await scrapbook.readFileAsText(blob, "UTF-8");
-        dataUri = scrapbook.unicodeToDataUri(str, mime);
+        const str = await utils.readFileAsText(blob, "UTF-8");
+        dataUri = utils.unicodeToDataUri(str, mime);
       } else {
-        const str = await scrapbook.readFileAsText(blob, false);
-        dataUri = scrapbook.byteStringToDataUri(str, mime, charset);
+        const str = await utils.readFileAsText(blob, false);
+        dataUri = utils.byteStringToDataUri(str, mime, charset);
       }
     } else {
-      dataUri = await scrapbook.readFileAsDataURL(blob);
+      dataUri = await utils.readFileAsDataURL(blob);
       if (dataUri === "data:") {
         // Chromium returns "data:" if the blob is zero byte. Add the mimetype.
         dataUri = `data:${mime};base64,`;
@@ -3737,7 +3737,7 @@ capturer.downloadBlob = async function (params) {
 
     const {filename, sourceUrl, settings, options} = params;
     let {blob} = params;
-    const [sourceUrlMain, sourceUrlHash] = scrapbook.splitUrlByAnchor(sourceUrl);
+    const [sourceUrlMain, sourceUrlHash] = utils.splitUrlByAnchor(sourceUrl);
     const {timeId} = settings;
 
     blob = await capturer.loadBlobCache(blob);
@@ -3762,7 +3762,7 @@ capturer.downloadBlob = async function (params) {
           url: sourceUrlMain,
           blob,
         });
-        return {filename, url: scrapbook.escapeFilename(filename)};
+        return {filename, url: utils.escapeFilename(filename)};
       }
 
       case "maff": {
@@ -3772,7 +3772,7 @@ capturer.downloadBlob = async function (params) {
           url: sourceUrlMain,
           blob,
         });
-        return {filename, url: scrapbook.escapeFilename(filename)};
+        return {filename, url: utils.escapeFilename(filename)};
       }
 
       case "folder":
@@ -3783,7 +3783,7 @@ capturer.downloadBlob = async function (params) {
           url: sourceUrlMain,
           blob,
         });
-        return {filename, url: scrapbook.escapeFilename(filename)};
+        return {filename, url: utils.escapeFilename(filename)};
       }
     }
   };
@@ -3884,7 +3884,7 @@ capturer.saveUrl = async function (params) {
   };
 
   // Firefox Android gets an error if saveAs = true
-  if (scrapbook.userAgent.is('gecko') && scrapbook.userAgent.is('mobile')) {
+  if (utils.userAgent.is('gecko') && utils.userAgent.is('mobile')) {
     delete downloadParams.saveAs;
   }
 
@@ -3930,7 +3930,7 @@ capturer.saveBlobToServer = async function (params) {
   });
 
   const target = server.books[server.bookId].dataUrl +
-    scrapbook.escapeFilename((directory ? directory + '/' : '') + newFilename);
+    utils.escapeFilename((directory ? directory + '/' : '') + newFilename);
 
   try {
     const retryCount = options["capture.serverUploadRetryCount"];
@@ -3951,7 +3951,7 @@ capturer.saveBlobToServer = async function (params) {
       } catch (ex) {
         if (tried++ < retryCount) {
           console.error(`Upload failed for "${target}" (tried ${tried}): ${ex.message}`);
-          await scrapbook.delay(retryDelay);
+          await utils.delay(retryDelay);
         } else {
           throw ex;
         }
@@ -4018,7 +4018,7 @@ capturer.captureLinkedPages = async function (params) {
 
     if (delay > 0) {
       capturer.log(`Waiting for ${delay} ms...`);
-      await scrapbook.delay(delay);
+      await utils.delay(delay);
     }
   }
 };
@@ -4031,16 +4031,16 @@ capturer.captureLinkedPages = async function (params) {
 capturer.rebuildLinks = async function (params) {
   const rewriteUrl = (url, filenameMap, redirects) => {
     // assume a non-absolute URL to be already mapped
-    if (!scrapbook.isUrlAbsolute(url)) {
+    if (!utils.isUrlAbsolute(url)) {
       return null;
     }
 
-    let [urlMain, urlHash] = scrapbook.splitUrlByAnchor(url);
+    let [urlMain, urlHash] = utils.splitUrlByAnchor(url);
 
     // handle possible redirect
     const redirectedUrl = redirects.get(urlMain);
     if (redirectedUrl) {
-      [urlMain, urlHash] = scrapbook.splitUrlByAnchor(capturer.getRedirectedUrl(redirectedUrl, urlHash));
+      [urlMain, urlHash] = utils.splitUrlByAnchor(capturer.getRedirectedUrl(redirectedUrl, urlHash));
     }
 
     const token = capturer.getRegisterToken(urlMain, 'document');
@@ -4062,7 +4062,7 @@ capturer.rebuildLinks = async function (params) {
   };
 
   const rewriteMetaRefresh = (elem, filenameMap, redirects) => {
-    const {time, url} = scrapbook.parseHeaderRefresh(elem.getAttribute("content"));
+    const {time, url} = utils.parseHeaderRefresh(elem.getAttribute("content"));
     if (!url) { return; }
     const newUrl = rewriteUrl(url, filenameMap, redirects);
     if (!newUrl) { return; }
@@ -4130,7 +4130,7 @@ capturer.rebuildLinks = async function (params) {
         continue;
       }
 
-      const doc = await scrapbook.readFileAsDocument(blob);
+      const doc = await utils.readFileAsDocument(blob);
       if (!doc) {
         capturer.warn(`Failed to rebuild links for file ${filename}: corrupted document.`);
         continue;
@@ -4138,7 +4138,7 @@ capturer.rebuildLinks = async function (params) {
 
       processRootNode(doc.documentElement, filenameMap, redirects);
 
-      const content = scrapbook.documentToString(doc, options["capture.prettyPrint"]);
+      const content = utils.documentToString(doc, options["capture.prettyPrint"]);
       await capturer.saveFileCache({
         timeId,
         path,
@@ -4213,7 +4213,7 @@ capturer.loadSiteMap = async function (...args) {
   const loadFilenameMap = ({token, path, info}) => {
     info.filenameMap.set(token, {
       filename: path,
-      url: scrapbook.escapeFilename(path),
+      url: utils.escapeFilename(path),
     });
   };
 
@@ -4223,7 +4223,7 @@ capturer.loadSiteMap = async function (...args) {
       return;
     }
 
-    const fileUrl = new URL(scrapbook.escapeFilename(path), indexUrl).href;
+    const fileUrl = new URL(utils.escapeFilename(path), indexUrl).href;
     try {
       const response = await server.request({
         url: fileUrl,
@@ -4351,7 +4351,7 @@ capturer.loadSiteMap = async function (...args) {
  * Events handling
  ***************************************************************************/
 
-scrapbook.addMessageListener((message, sender) => {
+utils.addMessageListener((message, sender) => {
   if (!message.cmd.startsWith("capturer.")) { return false; }
   if (message.id !== capturer.missionId) { return false; }
   return true;
@@ -4372,7 +4372,7 @@ browser.downloads.onCreated.addListener((downloadItem) => {
   //
   // We wait until the user clicks save (or cancel in Chromium) to resolve
   // the Promise (and then the window may close).
-  if (scrapbook.userAgent.is('gecko')) {
+  if (utils.userAgent.is('gecko')) {
     downloadHooks.get(url).onComplete(downloadItem);
   } else {
     downloadHooks.set(id, downloadHooks.get(url));
@@ -4426,20 +4426,20 @@ const capturePromise = new Promise((resolve, reject) => {
   const missionId = capturer.missionId = s.get('mid');
 
   const closeWindow = async () => {
-    await scrapbook.delay(1000);
+    await utils.delay(1000);
 
     const tab = await browser.tabs.getCurrent();
     return await browser.tabs.remove(tab.id);
   };
 
   document.addEventListener("DOMContentLoaded", async function () {
-    scrapbook.loadLanguages(document);
+    utils.loadLanguages(document);
 
     capturer.logger = document.getElementById('logger');
 
-    await scrapbook.loadOptions();
+    await utils.loadOptions();
 
-    let autoClose = scrapbook.getOption("ui.autoCloseCaptureDialog");
+    let autoClose = utils.getOption("ui.autoCloseCaptureDialog");
 
     let results;
     runTasks: {
@@ -4449,8 +4449,8 @@ const capturePromise = new Promise((resolve, reject) => {
       }
 
       const key = {table: "captureMissionCache", id: missionId};
-      const taskInfo = await scrapbook.cache.get(key);
-      await scrapbook.cache.remove(key);
+      const taskInfo = await utils.cache.get(key);
+      await utils.cache.remove(key);
       if (!taskInfo || !taskInfo.tasks) {
         capturer.error(`Error: missing task data for mission "${missionId}".`);
         break runTasks;

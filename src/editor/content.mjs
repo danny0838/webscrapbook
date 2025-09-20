@@ -3,7 +3,7 @@
  *****************************************************************************/
 
 import {ANNOTATION_CSS} from "../utils/common.mjs";
-import * as scrapbook from "../utils/common.mjs";
+import * as utils from "../utils/common.mjs";
 import {Strftime} from "../lib/strftime.mjs";
 import {core} from "../content/core.mjs";
 
@@ -117,8 +117,8 @@ editor.init = async function ({willActive = !editor.active, force = false} = {})
   // do checks
   editor.isScripted = editor.isDocumentScripted(document);
 
-  await scrapbook.loadOptionsAuto();
-  editor.serverUrl = scrapbook.getOption("server.url");
+  await utils.loadOptionsAuto();
+  editor.serverUrl = utils.getOption("server.url");
   editor.inScrapBook = editor.serverUrl
       && document.URL.startsWith(editor.serverUrl)
       && !document.location.search;
@@ -126,7 +126,7 @@ editor.init = async function ({willActive = !editor.active, force = false} = {})
   // more accurately check whether the current document is really under dataDir of a book
   if (editor.inScrapBook) {
     try {
-      const bookId = await scrapbook.invokeExtensionScript({
+      const bookId = await utils.invokeExtensionScript({
         cmd: "background.findBookIdFromUrl",
         args: {url: document.URL},
       });
@@ -260,7 +260,7 @@ editor.init = async function ({willActive = !editor.active, force = false} = {})
 
 #toolbar #toolbar-close {
   position: absolute;
-  ${scrapbook.lang('@@bidi_end_edge')}: 0;
+  ${utils.lang('@@bidi_end_edge')}: 0;
 }
 
 #toolbar #toolbar-close > button {
@@ -342,133 +342,133 @@ editor.init = async function ({willActive = !editor.active, force = false} = {})
   border: 1px inset #EEE;
 }
 </style>
-<div id="toolbar" dir="${scrapbook.lang('@@bidi_dir')}">
-  <div id="toolbar-locate" title="${scrapbook.lang('EditorButtonLocate')}">
+<div id="toolbar" dir="${utils.lang('@@bidi_dir')}">
+  <div id="toolbar-locate" title="${utils.lang('EditorButtonLocate')}">
     <button></button>
     <ul hidden="" title="">
-      <li><button id="toolbar-locate-viewSitemap">${scrapbook.lang('EditorButtonLocateViewSitemap')}</button></li>
-      <li><button id="toolbar-locate-viewDirectory">${scrapbook.lang('EditorButtonLocateViewDirectory')}</button></li>
-      <li><button id="toolbar-locate-viewSource">${scrapbook.lang('EditorButtonLocateViewSource')}</button></li>
+      <li><button id="toolbar-locate-viewSitemap">${utils.lang('EditorButtonLocateViewSitemap')}</button></li>
+      <li><button id="toolbar-locate-viewDirectory">${utils.lang('EditorButtonLocateViewDirectory')}</button></li>
+      <li><button id="toolbar-locate-viewSource">${utils.lang('EditorButtonLocateViewSource')}</button></li>
     </ul>
   </div>
-  <div id="toolbar-marker" title="${scrapbook.lang('EditorButtonMarker')}">
+  <div id="toolbar-marker" title="${utils.lang('EditorButtonMarker')}">
     <button></button>
     <ul hidden="" title="">
-      <li><button><scrapbook-toolbar-samp data-scrapbook-elem="toolbar-samp">${scrapbook.lang('EditorButtonMarkerItem', [1])}</scrapbook-toolbar-samp></button></li>
-      <li><button><scrapbook-toolbar-samp data-scrapbook-elem="toolbar-samp">${scrapbook.lang('EditorButtonMarkerItem', [2])}</scrapbook-toolbar-samp></button></li>
-      <li><button><scrapbook-toolbar-samp data-scrapbook-elem="toolbar-samp">${scrapbook.lang('EditorButtonMarkerItem', [3])}</scrapbook-toolbar-samp></button></li>
-      <li><button><scrapbook-toolbar-samp data-scrapbook-elem="toolbar-samp">${scrapbook.lang('EditorButtonMarkerItem', [4])}</scrapbook-toolbar-samp></button></li>
-      <li><button><scrapbook-toolbar-samp data-scrapbook-elem="toolbar-samp">${scrapbook.lang('EditorButtonMarkerItem', [5])}</scrapbook-toolbar-samp></button></li>
-      <li><button><scrapbook-toolbar-samp data-scrapbook-elem="toolbar-samp">${scrapbook.lang('EditorButtonMarkerItem', [6])}</scrapbook-toolbar-samp></button></li>
-      <li><button><scrapbook-toolbar-samp data-scrapbook-elem="toolbar-samp">${scrapbook.lang('EditorButtonMarkerItem', [7])}</scrapbook-toolbar-samp></button></li>
-      <li><button><scrapbook-toolbar-samp data-scrapbook-elem="toolbar-samp">${scrapbook.lang('EditorButtonMarkerItem', [8])}</scrapbook-toolbar-samp></button></li>
-      <li><button><scrapbook-toolbar-samp data-scrapbook-elem="toolbar-samp">${scrapbook.lang('EditorButtonMarkerItem', [9])}</scrapbook-toolbar-samp></button></li>
-      <li><button><scrapbook-toolbar-samp data-scrapbook-elem="toolbar-samp">${scrapbook.lang('EditorButtonMarkerItem', [10])}</scrapbook-toolbar-samp></button></li>
-      <li><button><scrapbook-toolbar-samp data-scrapbook-elem="toolbar-samp">${scrapbook.lang('EditorButtonMarkerItem', [11])}</scrapbook-toolbar-samp></button></li>
-      <li><button><scrapbook-toolbar-samp data-scrapbook-elem="toolbar-samp">${scrapbook.lang('EditorButtonMarkerItem', [12])}</scrapbook-toolbar-samp></button></li>
+      <li><button><scrapbook-toolbar-samp data-scrapbook-elem="toolbar-samp">${utils.lang('EditorButtonMarkerItem', [1])}</scrapbook-toolbar-samp></button></li>
+      <li><button><scrapbook-toolbar-samp data-scrapbook-elem="toolbar-samp">${utils.lang('EditorButtonMarkerItem', [2])}</scrapbook-toolbar-samp></button></li>
+      <li><button><scrapbook-toolbar-samp data-scrapbook-elem="toolbar-samp">${utils.lang('EditorButtonMarkerItem', [3])}</scrapbook-toolbar-samp></button></li>
+      <li><button><scrapbook-toolbar-samp data-scrapbook-elem="toolbar-samp">${utils.lang('EditorButtonMarkerItem', [4])}</scrapbook-toolbar-samp></button></li>
+      <li><button><scrapbook-toolbar-samp data-scrapbook-elem="toolbar-samp">${utils.lang('EditorButtonMarkerItem', [5])}</scrapbook-toolbar-samp></button></li>
+      <li><button><scrapbook-toolbar-samp data-scrapbook-elem="toolbar-samp">${utils.lang('EditorButtonMarkerItem', [6])}</scrapbook-toolbar-samp></button></li>
+      <li><button><scrapbook-toolbar-samp data-scrapbook-elem="toolbar-samp">${utils.lang('EditorButtonMarkerItem', [7])}</scrapbook-toolbar-samp></button></li>
+      <li><button><scrapbook-toolbar-samp data-scrapbook-elem="toolbar-samp">${utils.lang('EditorButtonMarkerItem', [8])}</scrapbook-toolbar-samp></button></li>
+      <li><button><scrapbook-toolbar-samp data-scrapbook-elem="toolbar-samp">${utils.lang('EditorButtonMarkerItem', [9])}</scrapbook-toolbar-samp></button></li>
+      <li><button><scrapbook-toolbar-samp data-scrapbook-elem="toolbar-samp">${utils.lang('EditorButtonMarkerItem', [10])}</scrapbook-toolbar-samp></button></li>
+      <li><button><scrapbook-toolbar-samp data-scrapbook-elem="toolbar-samp">${utils.lang('EditorButtonMarkerItem', [11])}</scrapbook-toolbar-samp></button></li>
+      <li><button><scrapbook-toolbar-samp data-scrapbook-elem="toolbar-samp">${utils.lang('EditorButtonMarkerItem', [12])}</scrapbook-toolbar-samp></button></li>
     </ul>
   </div>
-  <div id="toolbar-annotation" title="${scrapbook.lang('EditorButtonAnnotation')}">
+  <div id="toolbar-annotation" title="${utils.lang('EditorButtonAnnotation')}">
     <button></button>
     <ul hidden="" title="">
-      <li><button id="toolbar-annotation-view">${scrapbook.lang('EditorButtonAnnotationView')}</button></li>
-      <li><button id="toolbar-annotation-prev">${scrapbook.lang('EditorButtonAnnotationPrev')}</button></li>
-      <li><button id="toolbar-annotation-next">${scrapbook.lang('EditorButtonAnnotationNext')}</button></li>
+      <li><button id="toolbar-annotation-view">${utils.lang('EditorButtonAnnotationView')}</button></li>
+      <li><button id="toolbar-annotation-prev">${utils.lang('EditorButtonAnnotationPrev')}</button></li>
+      <li><button id="toolbar-annotation-next">${utils.lang('EditorButtonAnnotationNext')}</button></li>
       <hr/>
-      <li><button id="toolbar-annotation-link">${scrapbook.lang('EditorButtonAnnotationLink')}</button></li>
-      <li><button id="toolbar-annotation-sticky">${scrapbook.lang('EditorButtonAnnotationSticky')}</button></li>
-      <li><button id="toolbar-annotation-sticky-richtext">${scrapbook.lang('EditorButtonAnnotationStickyRichText')}</button></li>
+      <li><button id="toolbar-annotation-link">${utils.lang('EditorButtonAnnotationLink')}</button></li>
+      <li><button id="toolbar-annotation-sticky">${utils.lang('EditorButtonAnnotationSticky')}</button></li>
+      <li><button id="toolbar-annotation-sticky-richtext">${utils.lang('EditorButtonAnnotationStickyRichText')}</button></li>
     </ul>
   </div>
-  <div id="toolbar-eraser" title="${scrapbook.lang('EditorButtonEraser')}">
+  <div id="toolbar-eraser" title="${utils.lang('EditorButtonEraser')}">
     <button></button>
     <ul hidden="" title="">
-      <li><button id="toolbar-eraser-eraseSelection">${scrapbook.lang('EditorButtonEraserSelection')}</button></li>
-      <li><button id="toolbar-eraser-eraseSelector">${scrapbook.lang('EditorButtonEraserSelector')}...</button></li>
-      <li><button id="toolbar-eraser-eraseSelectorAll">${scrapbook.lang('EditorButtonEraserSelectorAll')}...</button></li>
-      <li><button id="toolbar-eraser-eraseXpath">${scrapbook.lang('EditorButtonEraserXpath')}...</button></li>
-      <li><button id="toolbar-eraser-eraseXpathAll">${scrapbook.lang('EditorButtonEraserXpathAll')}...</button></li>
+      <li><button id="toolbar-eraser-eraseSelection">${utils.lang('EditorButtonEraserSelection')}</button></li>
+      <li><button id="toolbar-eraser-eraseSelector">${utils.lang('EditorButtonEraserSelector')}...</button></li>
+      <li><button id="toolbar-eraser-eraseSelectorAll">${utils.lang('EditorButtonEraserSelectorAll')}...</button></li>
+      <li><button id="toolbar-eraser-eraseXpath">${utils.lang('EditorButtonEraserXpath')}...</button></li>
+      <li><button id="toolbar-eraser-eraseXpathAll">${utils.lang('EditorButtonEraserXpathAll')}...</button></li>
       <hr/>
-      <li><button id="toolbar-eraser-uneraseSelection">${scrapbook.lang('EditorButtonEraserRevertSelection')}</button></li>
-      <li><button id="toolbar-eraser-uneraseAll">${scrapbook.lang('EditorButtonEraserRevertAll')}</button></li>
+      <li><button id="toolbar-eraser-uneraseSelection">${utils.lang('EditorButtonEraserRevertSelection')}</button></li>
+      <li><button id="toolbar-eraser-uneraseAll">${utils.lang('EditorButtonEraserRevertAll')}</button></li>
       <hr/>
-      <li><button id="toolbar-eraser-removeEditsSelected">${scrapbook.lang('EditorButtonRemoveEditsSelection')}</button></li>
-      <li><button id="toolbar-eraser-removeEditsAll">${scrapbook.lang('EditorButtonRemoveEditsAll')}</button></li>
+      <li><button id="toolbar-eraser-removeEditsSelected">${utils.lang('EditorButtonRemoveEditsSelection')}</button></li>
+      <li><button id="toolbar-eraser-removeEditsAll">${utils.lang('EditorButtonRemoveEditsAll')}</button></li>
     </ul>
   </div>
-  <div id="toolbar-domEraser" title="${scrapbook.lang('EditorButtonDOMEraser')}">
+  <div id="toolbar-domEraser" title="${utils.lang('EditorButtonDOMEraser')}">
     <button></button>
     <ul hidden="" title="">
-      <li><button id="toolbar-domEraser-expand">${scrapbook.lang('EditorButtonDOMEraserExpand', ['W'])}</button></li>
-      <li><button id="toolbar-domEraser-shrink">${scrapbook.lang('EditorButtonDOMEraserShrink', ['N'])}</button></li>
-      <li><button id="toolbar-domEraser-erase">${scrapbook.lang('EditorButtonDOMEraserErase', ['R'])}</button></li>
-      <li><button id="toolbar-domEraser-isolate">${scrapbook.lang('EditorButtonDOMEraserIsolate', ['I'])}</button></li>
+      <li><button id="toolbar-domEraser-expand">${utils.lang('EditorButtonDOMEraserExpand', ['W'])}</button></li>
+      <li><button id="toolbar-domEraser-shrink">${utils.lang('EditorButtonDOMEraserShrink', ['N'])}</button></li>
+      <li><button id="toolbar-domEraser-erase">${utils.lang('EditorButtonDOMEraserErase', ['R'])}</button></li>
+      <li><button id="toolbar-domEraser-isolate">${utils.lang('EditorButtonDOMEraserIsolate', ['I'])}</button></li>
     </ul>
   </div>
-  <div id="toolbar-htmlEditor" title="${scrapbook.lang('EditorButtonHtmlEditor')}">
+  <div id="toolbar-htmlEditor" title="${utils.lang('EditorButtonHtmlEditor')}">
     <button></button>
     <ul hidden="" title="">
-      <li><button id="toolbar-htmlEditor-strong">${scrapbook.lang('EditorButtonHtmlEditorStrong')}</button></li>
-      <li><button id="toolbar-htmlEditor-em">${scrapbook.lang('EditorButtonHtmlEditorEm')}</button></li>
-      <li><button id="toolbar-htmlEditor-underline">${scrapbook.lang('EditorButtonHtmlEditorUnderline')}</button></li>
-      <li><button id="toolbar-htmlEditor-strike">${scrapbook.lang('EditorButtonHtmlEditorStrike')}</button></li>
+      <li><button id="toolbar-htmlEditor-strong">${utils.lang('EditorButtonHtmlEditorStrong')}</button></li>
+      <li><button id="toolbar-htmlEditor-em">${utils.lang('EditorButtonHtmlEditorEm')}</button></li>
+      <li><button id="toolbar-htmlEditor-underline">${utils.lang('EditorButtonHtmlEditorUnderline')}</button></li>
+      <li><button id="toolbar-htmlEditor-strike">${utils.lang('EditorButtonHtmlEditorStrike')}</button></li>
       <hr/>
-      <li><button id="toolbar-htmlEditor-superscript">${scrapbook.lang('EditorButtonHtmlEditorSuperscript')}</button></li>
-      <li><button id="toolbar-htmlEditor-subscript">${scrapbook.lang('EditorButtonHtmlEditorSubscript')}</button></li>
+      <li><button id="toolbar-htmlEditor-superscript">${utils.lang('EditorButtonHtmlEditorSuperscript')}</button></li>
+      <li><button id="toolbar-htmlEditor-subscript">${utils.lang('EditorButtonHtmlEditorSubscript')}</button></li>
       <hr/>
-      <li><button id="toolbar-htmlEditor-color">${scrapbook.lang('EditorButtonHtmlEditorColor')}...</button></li>
+      <li><button id="toolbar-htmlEditor-color">${utils.lang('EditorButtonHtmlEditorColor')}...</button></li>
       <hr/>
-      <li><button id="toolbar-htmlEditor-formatBlockP">${scrapbook.lang('EditorButtonHtmlEditorFormatBlockP')}</button></li>
-      <li><button id="toolbar-htmlEditor-formatBlockH1">${scrapbook.lang('EditorButtonHtmlEditorFormatBlockH', [1])}</button></li>
-      <li><button id="toolbar-htmlEditor-formatBlockH2">${scrapbook.lang('EditorButtonHtmlEditorFormatBlockH', [2])}</button></li>
-      <li><button id="toolbar-htmlEditor-formatBlockH3">${scrapbook.lang('EditorButtonHtmlEditorFormatBlockH', [3])}</button></li>
-      <li><button id="toolbar-htmlEditor-formatBlockH4">${scrapbook.lang('EditorButtonHtmlEditorFormatBlockH', [4])}</button></li>
-      <li><button id="toolbar-htmlEditor-formatBlockH5">${scrapbook.lang('EditorButtonHtmlEditorFormatBlockH', [5])}</button></li>
-      <li><button id="toolbar-htmlEditor-formatBlockH6">${scrapbook.lang('EditorButtonHtmlEditorFormatBlockH', [6])}</button></li>
-      <li><button id="toolbar-htmlEditor-formatBlockDiv">${scrapbook.lang('EditorButtonHtmlEditorFormatBlockDiv')}</button></li>
-      <li><button id="toolbar-htmlEditor-formatBlockPre">${scrapbook.lang('EditorButtonHtmlEditorFormatBlockPre')}</button></li>
+      <li><button id="toolbar-htmlEditor-formatBlockP">${utils.lang('EditorButtonHtmlEditorFormatBlockP')}</button></li>
+      <li><button id="toolbar-htmlEditor-formatBlockH1">${utils.lang('EditorButtonHtmlEditorFormatBlockH', [1])}</button></li>
+      <li><button id="toolbar-htmlEditor-formatBlockH2">${utils.lang('EditorButtonHtmlEditorFormatBlockH', [2])}</button></li>
+      <li><button id="toolbar-htmlEditor-formatBlockH3">${utils.lang('EditorButtonHtmlEditorFormatBlockH', [3])}</button></li>
+      <li><button id="toolbar-htmlEditor-formatBlockH4">${utils.lang('EditorButtonHtmlEditorFormatBlockH', [4])}</button></li>
+      <li><button id="toolbar-htmlEditor-formatBlockH5">${utils.lang('EditorButtonHtmlEditorFormatBlockH', [5])}</button></li>
+      <li><button id="toolbar-htmlEditor-formatBlockH6">${utils.lang('EditorButtonHtmlEditorFormatBlockH', [6])}</button></li>
+      <li><button id="toolbar-htmlEditor-formatBlockDiv">${utils.lang('EditorButtonHtmlEditorFormatBlockDiv')}</button></li>
+      <li><button id="toolbar-htmlEditor-formatBlockPre">${utils.lang('EditorButtonHtmlEditorFormatBlockPre')}</button></li>
       <hr/>
-      <li><button id="toolbar-htmlEditor-listUnordered">${scrapbook.lang('EditorButtonHtmlEditorListUnordered')}</button></li>
-      <li><button id="toolbar-htmlEditor-listOrdered">${scrapbook.lang('EditorButtonHtmlEditorListOrdered')}</button></li>
+      <li><button id="toolbar-htmlEditor-listUnordered">${utils.lang('EditorButtonHtmlEditorListUnordered')}</button></li>
+      <li><button id="toolbar-htmlEditor-listOrdered">${utils.lang('EditorButtonHtmlEditorListOrdered')}</button></li>
       <hr/>
-      <li><button id="toolbar-htmlEditor-outdent">${scrapbook.lang('EditorButtonHtmlEditorOutdent')}</button></li>
-      <li><button id="toolbar-htmlEditor-indent">${scrapbook.lang('EditorButtonHtmlEditorIndent')}</button></li>
+      <li><button id="toolbar-htmlEditor-outdent">${utils.lang('EditorButtonHtmlEditorOutdent')}</button></li>
+      <li><button id="toolbar-htmlEditor-indent">${utils.lang('EditorButtonHtmlEditorIndent')}</button></li>
       <hr/>
-      <li><button id="toolbar-htmlEditor-justifyLeft">${scrapbook.lang('EditorButtonHtmlEditorJustifyLeft')}</button></li>
-      <li><button id="toolbar-htmlEditor-justifyCenter">${scrapbook.lang('EditorButtonHtmlEditorJustifyCenter')}</button></li>
-      <li><button id="toolbar-htmlEditor-justifyRight">${scrapbook.lang('EditorButtonHtmlEditorJustifyRight')}</button></li>
-      <li><button id="toolbar-htmlEditor-justifyFull">${scrapbook.lang('EditorButtonHtmlEditorJustifyFull')}</button></li>
+      <li><button id="toolbar-htmlEditor-justifyLeft">${utils.lang('EditorButtonHtmlEditorJustifyLeft')}</button></li>
+      <li><button id="toolbar-htmlEditor-justifyCenter">${utils.lang('EditorButtonHtmlEditorJustifyCenter')}</button></li>
+      <li><button id="toolbar-htmlEditor-justifyRight">${utils.lang('EditorButtonHtmlEditorJustifyRight')}</button></li>
+      <li><button id="toolbar-htmlEditor-justifyFull">${utils.lang('EditorButtonHtmlEditorJustifyFull')}</button></li>
       <hr/>
-      <li><button id="toolbar-htmlEditor-createLink">${scrapbook.lang('EditorButtonHtmlEditorCreateLink')}...</button></li>
-      <li><button id="toolbar-htmlEditor-hr">${scrapbook.lang('EditorButtonHtmlEditorHr')}</button></li>
-      <li><button id="toolbar-htmlEditor-todo">${scrapbook.lang('EditorButtonHtmlEditorTodo')}</button></li>
-      <li><button id="toolbar-htmlEditor-insertDate">${scrapbook.lang('EditorButtonHtmlEditorInsertDate')}</button></li>
-      <li><button id="toolbar-htmlEditor-insertHtml">${scrapbook.lang('EditorButtonHtmlEditorInsertHtml')}...</button></li>
+      <li><button id="toolbar-htmlEditor-createLink">${utils.lang('EditorButtonHtmlEditorCreateLink')}...</button></li>
+      <li><button id="toolbar-htmlEditor-hr">${utils.lang('EditorButtonHtmlEditorHr')}</button></li>
+      <li><button id="toolbar-htmlEditor-todo">${utils.lang('EditorButtonHtmlEditorTodo')}</button></li>
+      <li><button id="toolbar-htmlEditor-insertDate">${utils.lang('EditorButtonHtmlEditorInsertDate')}</button></li>
+      <li><button id="toolbar-htmlEditor-insertHtml">${utils.lang('EditorButtonHtmlEditorInsertHtml')}...</button></li>
       <hr/>
-      <li><button id="toolbar-htmlEditor-removeFormat">${scrapbook.lang('EditorButtonHtmlEditorRemoveFormat')}</button></li>
-      <li><button id="toolbar-htmlEditor-unlink">${scrapbook.lang('EditorButtonHtmlEditorUnlink')}</button></li>
+      <li><button id="toolbar-htmlEditor-removeFormat">${utils.lang('EditorButtonHtmlEditorRemoveFormat')}</button></li>
+      <li><button id="toolbar-htmlEditor-unlink">${utils.lang('EditorButtonHtmlEditorUnlink')}</button></li>
     </ul>
   </div>
-  <div id="toolbar-undo" title="${scrapbook.lang('EditorButtonUndo')}">
+  <div id="toolbar-undo" title="${utils.lang('EditorButtonUndo')}">
     <button></button>
     <ul hidden="" title="">
-      <li><button id="toolbar-undo-toggle" checked="">${scrapbook.lang('EditorButtonUndoToggle')}</button></li>
+      <li><button id="toolbar-undo-toggle" checked="">${utils.lang('EditorButtonUndoToggle')}</button></li>
     </ul>
   </div>
-  <div id="toolbar-save" title="${scrapbook.lang('EditorButtonSave')}">
+  <div id="toolbar-save" title="${utils.lang('EditorButtonSave')}">
     <button></button>
     <ul hidden="" title="">
-      <li><button id="toolbar-save-deleteErased">${scrapbook.lang('EditorButtonSaveDeleteErased')}</button></li>
-      <li><button id="toolbar-save-internalize">${scrapbook.lang('EditorButtonSaveInternalize')}</button></li>
-      <li><button id="toolbar-save-createSubPage">${scrapbook.lang('EditorButtonSaveCreateSubPage')}...</button></li>
+      <li><button id="toolbar-save-deleteErased">${utils.lang('EditorButtonSaveDeleteErased')}</button></li>
+      <li><button id="toolbar-save-internalize">${utils.lang('EditorButtonSaveInternalize')}</button></li>
+      <li><button id="toolbar-save-createSubPage">${utils.lang('EditorButtonSaveCreateSubPage')}...</button></li>
       <hr/>
-      <li><button id="toolbar-save-editTitle">${scrapbook.lang('EditorButtonSaveEditTitle')}...</button></li>
-      <li><button id="toolbar-save-setViewport">${scrapbook.lang('EditorButtonSaveSetViewport')}...</button></li>
+      <li><button id="toolbar-save-editTitle">${utils.lang('EditorButtonSaveEditTitle')}...</button></li>
+      <li><button id="toolbar-save-setViewport">${utils.lang('EditorButtonSaveSetViewport')}...</button></li>
       <hr/>
-      <li><button id="toolbar-save-pinTop">${scrapbook.lang('EditorButtonSavePinTop')}</button></li>
+      <li><button id="toolbar-save-pinTop">${utils.lang('EditorButtonSavePinTop')}</button></li>
     </ul>
   </div>
-  <div id="toolbar-close" title="${scrapbook.lang('EditorButtonClose')}">
+  <div id="toolbar-close" title="${utils.lang('EditorButtonClose')}">
     <button></button>
   </div>
 </div>
@@ -533,7 +533,7 @@ editor.init = async function ({willActive = !editor.active, force = false} = {})
     elem.addEventListener("click", (event) => {
       const elem = event.currentTarget;
       const idx = Array.prototype.indexOf.call(wrapper.querySelectorAll('#toolbar-marker ul button'), elem);
-      scrapbook.cache.set(editor.getStatusKey('lineMarkerSelected'), idx, 'storage'); // async
+      utils.cache.set(editor.getStatusKey('lineMarkerSelected'), idx, 'storage'); // async
       editor.lineMarker(elem.querySelector('scrapbook-toolbar-samp').getAttribute('style'));
     }, {passive: true});
   }
@@ -912,7 +912,7 @@ editor.lineMarkerInternal = function ({tagName = 'span', attrs = {}} = {}) {
     hElem.setAttribute(name, value);
   }
 
-  for (const range of scrapbook.getSelectionRanges()) {
+  for (const range of utils.getSelectionRanges()) {
     // tweak the range
     if (range.startContainer.nodeType === Node.TEXT_NODE) {
       let startNode = range.startContainer;
@@ -929,7 +929,7 @@ editor.lineMarkerInternal = function ({tagName = 'span', attrs = {}} = {}) {
       }
     }
 
-    const selectedNodes = scrapbook.getSelectedNodes({
+    const selectedNodes = utils.getSelectedNodes({
       query: [range],
       whatToShow: NodeFilter.SHOW_ELEMENT + NodeFilter.SHOW_TEXT,
 
@@ -942,7 +942,7 @@ editor.lineMarkerInternal = function ({tagName = 'span', attrs = {}} = {}) {
     let firstWrapper = null;
     let lastWrapper = null;
     for (const node of selectedNodes.reverse()) {
-      if (node.nodeType === 3 && !scrapbook.trim(node.nodeValue)) {
+      if (node.nodeType === 3 && !utils.trim(node.nodeValue)) {
         continue;
       }
 
@@ -982,7 +982,7 @@ function getAnnotationElems({
   );
   let elem;
   while (elem = nodeIterator.nextNode()) {
-    if (!(scrapbook.getScrapBookObjectRemoveType(elem) > 0)) {
+    if (!(utils.getScrapBookObjectRemoveType(elem) > 0)) {
       continue;
     }
 
@@ -1013,7 +1013,7 @@ function getAnnotationRange(elem) {
   if (id !== null) {
     const otherRange = document.createRange();
     for (const elem of document.querySelectorAll(`[data-scrapbook-id="${CSS.escape(id)}"]`)) {
-      if (!(scrapbook.getScrapBookObjectRemoveType(elem) > 0)) {
+      if (!(utils.getScrapBookObjectRemoveType(elem) > 0)) {
         continue;
       }
 
@@ -1080,7 +1080,7 @@ function getCurrentAnnotationIndexValidRange(sel) {
 }
 
 function getAnnotationsSummary(annotationElems) {
-  const sel = scrapbook.getSelection();
+  const sel = utils.getSelection();
   const currentIndex = getCurrentAnnotationIndex(annotationElems, sel);
   const currentElem = annotationElems[currentIndex];
 
@@ -1161,7 +1161,7 @@ editor.highlightAnnotation = function ({elem, id, sel}) {
     elem = document.querySelector(`[data-scrapbook-id="${CSS.escape(id)}"]`);
   }
   if (!sel) {
-    sel = scrapbook.getSelection();
+    sel = utils.getSelection();
   }
 
   const range = getAnnotationRange(elem);
@@ -1176,7 +1176,7 @@ editor.highlightAnnotation = function ({elem, id, sel}) {
 editor.viewAnnotationsInternal = async function () {
   const annotationElems = getAnnotationElems({includeHidden: true});
   const annotations = getAnnotationsSummary(annotationElems);
-  await scrapbook.openModalWindow({
+  await utils.openModalWindow({
     url: browser.runtime.getURL('editor/annotations.html'),
     args: {
       annotations,
@@ -1197,7 +1197,7 @@ editor.locateAnnotationInternal = function ({offset = 0} = {}) {
   }
 
   // find current annotation index
-  const sel = scrapbook.getSelection();
+  const sel = utils.getSelection();
   let index = getCurrentAnnotationIndex(annotationElems, sel);
   index = offset > 0 ? Math.floor(index) : Math.ceil(index);
 
@@ -1217,8 +1217,8 @@ editor.eraseNodesInternal = function () {
   editor.addHistory();
 
   // reverse the order as a range may be altered when changing a node before it
-  const timeId = scrapbook.dateToId();
-  for (const range of scrapbook.getSafeSelectionRanges().reverse()) {
+  const timeId = utils.dateToId();
+  for (const range of utils.getSafeSelectionRanges().reverse()) {
     if (!range.collapsed && !(range.commonAncestorContainer.getRootNode() instanceof ShadowRoot)) {
       editor.eraseRange(range, timeId);
     }
@@ -1231,7 +1231,7 @@ editor.eraseNodesInternal = function () {
 editor.eraseSelectorInternal = function ({selector}) {
   editor.addHistory();
 
-  const timeId = scrapbook.dateToId();
+  const timeId = utils.dateToId();
   const elems = document.querySelectorAll(selector);
 
   // handle descendant node first as it may be altered when handling ancestor
@@ -1248,7 +1248,7 @@ editor.eraseSelectorInternal = function ({selector}) {
 editor.eraseXpathInternal = function ({selector}) {
   editor.addHistory();
 
-  const timeId = scrapbook.dateToId();
+  const timeId = utils.dateToId();
   const evaluator = document.evaluate(selector, document, null);
   const elems = [];
   let nextElem;
@@ -1271,7 +1271,7 @@ editor.uneraseNodesInternal = function () {
   editor.addHistory();
 
   // get selected element nodes with tweaks for boundary selection cases
-  const selectedNodes = scrapbook.getSelectedNodes({
+  const selectedNodes = utils.getSelectedNodes({
     whatToShow: NodeFilter.SHOW_COMMENT,
   });
 
@@ -1319,7 +1319,7 @@ editor.removeEditsInternal = function () {
   editor.addHistory();
 
   // get selected element nodes with tweaks for boundary selection cases
-  const selectedNodes = scrapbook.getSelectedNodes({
+  const selectedNodes = utils.getSelectedNodes({
     whatToShow: NodeFilter.SHOW_ELEMENT,
     fuzzy: true,
   });
@@ -1371,7 +1371,7 @@ editor.deleteErasedInternal = function () {
   const nodeIterator = document.createNodeIterator(
     document.documentElement,
     NodeFilter.SHOW_COMMENT,
-    node => scrapbook.getScrapBookObjectRemoveType(node) ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT,
+    node => utils.getScrapBookObjectRemoveType(node) ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT,
   );
   let node;
   while (node = nodeIterator.nextNode()) {
@@ -1388,7 +1388,7 @@ editor.deleteErasedInternal = function () {
  * @type invokable
  */
 editor.editTitleInternal = function () {
-  let title = prompt(scrapbook.lang('EditorButtonSaveEditTitlePrompt'), document.title);
+  let title = prompt(utils.lang('EditorButtonSaveEditTitlePrompt'), document.title);
   if (title === null) { return; }
   document.title = title;
 };
@@ -1400,9 +1400,9 @@ editor.setViewportInternal = function () {
   let viewportElem = document.querySelector('meta[name="viewport"i]');
   let viewportDeclaration = viewportElem ? viewportElem.getAttribute('content') : 'width=device-width, initial-scale=1.0';
   if (viewportElem) {
-    viewportDeclaration = prompt(scrapbook.lang('EditorButtonSaveSetViewportPromptModify'), viewportDeclaration);
+    viewportDeclaration = prompt(utils.lang('EditorButtonSaveSetViewportPromptModify'), viewportDeclaration);
   } else {
-    viewportDeclaration = prompt(scrapbook.lang('EditorButtonSaveSetViewportPromptCreate'), viewportDeclaration);
+    viewportDeclaration = prompt(utils.lang('EditorButtonSaveSetViewportPromptCreate'), viewportDeclaration);
   }
 
   // cancel
@@ -1436,28 +1436,28 @@ editor.setViewportInternal = function () {
  ***************************************************************************/
 
 editor.locate = async function () {
-  const response = await scrapbook.invokeExtensionScript({
+  const response = await utils.invokeExtensionScript({
     cmd: "background.locateItem",
     args: {url: document.URL},
   });
   if (response === false) {
-    alert(scrapbook.lang("ErrorLocateSidebarNotOpened"));
+    alert(utils.lang("ErrorLocateSidebarNotOpened"));
   } else if (response === null) {
-    alert(scrapbook.lang("ErrorLocateNotFound"));
+    alert(utils.lang("ErrorLocateNotFound"));
   }
   return response;
 };
 
 editor.lineMarker = async function (style) {
   const args = {
-    tagName: scrapbook.getOption("editor.useNativeTags") ? 'span' : 'scrapbook-linemarker',
+    tagName: utils.getOption("editor.useNativeTags") ? 'span' : 'scrapbook-linemarker',
     attrs: {
-      'data-scrapbook-id': scrapbook.dateToId(),
+      'data-scrapbook-id': utils.dateToId(),
       'data-scrapbook-elem': 'linemarker',
       'style': style,
     },
   };
-  return await scrapbook.invokeExtensionScript({
+  return await utils.invokeExtensionScript({
     cmd: "background.invokeEditorCommand",
     args: {
       frameId: await editor.getFocusedFrameId(),
@@ -1468,7 +1468,7 @@ editor.lineMarker = async function (style) {
 };
 
 editor.viewAnnotations = async function () {
-  return await scrapbook.invokeExtensionScript({
+  return await utils.invokeExtensionScript({
     cmd: "background.invokeEditorCommand",
     args: {
       frameId: await editor.getFocusedFrameId(),
@@ -1482,7 +1482,7 @@ editor.locateAnnotation = async function (offset) {
   const args = {
     offset,
   };
-  return await scrapbook.invokeExtensionScript({
+  return await utils.invokeExtensionScript({
     cmd: "background.invokeEditorCommand",
     args: {
       frameId,
@@ -1494,17 +1494,17 @@ editor.locateAnnotation = async function (offset) {
 
 editor.createLink = async function () {
   const frameId = await editor.getFocusedFrameId();
-  const url = prompt(scrapbook.lang('EditorButtonAnnotationLinkPrompt'));
+  const url = prompt(utils.lang('EditorButtonAnnotationLinkPrompt'));
   if (!url) { return; }
   const args = {
     tagName: 'a',
     attrs: {
-      'data-scrapbook-id': scrapbook.dateToId(),
+      'data-scrapbook-id': utils.dateToId(),
       'data-scrapbook-elem': 'link-url',
       'href': url,
     },
   };
-  return await scrapbook.invokeExtensionScript({
+  return await utils.invokeExtensionScript({
     cmd: "background.invokeEditorCommand",
     args: {
       frameId,
@@ -1515,7 +1515,7 @@ editor.createLink = async function () {
 };
 
 editor.createSticky = async function (richText, refNode) {
-  return await scrapbook.invokeExtensionScript({
+  return await utils.invokeExtensionScript({
     cmd: "background.invokeEditorCommand",
     args: {
       frameId: await editor.getFocusedFrameId(),
@@ -1529,7 +1529,7 @@ editor.createSticky = async function (richText, refNode) {
 };
 
 editor.eraseNodes = async function () {
-  return await scrapbook.invokeExtensionScript({
+  return await utils.invokeExtensionScript({
     cmd: "background.invokeEditorCommand",
     args: {
       frameId: await editor.getFocusedFrameId(),
@@ -1541,7 +1541,7 @@ editor.eraseNodes = async function () {
 
 editor.eraseSelector = async function (allFrames = false) {
   const frameId = allFrames ? undefined : await editor.getFocusedFrameId();
-  const selector = prompt(scrapbook.lang('EditorButtonEraserSelectorPrompt'));
+  const selector = prompt(utils.lang('EditorButtonEraserSelectorPrompt'));
 
   if (!selector) {
     return;
@@ -1550,11 +1550,11 @@ editor.eraseSelector = async function (allFrames = false) {
   try {
     document.querySelector(selector);
   } catch (ex) {
-    alert(scrapbook.lang('ErrorEditorButtonEraserSelectorInvalid', [selector]));
+    alert(utils.lang('ErrorEditorButtonEraserSelectorInvalid', [selector]));
     return;
   }
 
-  return await scrapbook.invokeExtensionScript({
+  return await utils.invokeExtensionScript({
     cmd: "background.invokeEditorCommand",
     args: {
       frameId,
@@ -1566,7 +1566,7 @@ editor.eraseSelector = async function (allFrames = false) {
 
 editor.eraseXpath = async function (allFrames = false) {
   const frameId = allFrames ? undefined : await editor.getFocusedFrameId();
-  const selector = prompt(scrapbook.lang('EditorButtonEraserXpathPrompt'));
+  const selector = prompt(utils.lang('EditorButtonEraserXpathPrompt'));
 
   if (!selector) {
     return;
@@ -1576,11 +1576,11 @@ editor.eraseXpath = async function (allFrames = false) {
   try {
     document.evaluate(selector, document, null);
   } catch (ex) {
-    alert(scrapbook.lang('ErrorEditorButtonEraserXpathInvalid', [selector]));
+    alert(utils.lang('ErrorEditorButtonEraserXpathInvalid', [selector]));
     return;
   }
 
-  return await scrapbook.invokeExtensionScript({
+  return await utils.invokeExtensionScript({
     cmd: "background.invokeEditorCommand",
     args: {
       frameId,
@@ -1591,7 +1591,7 @@ editor.eraseXpath = async function (allFrames = false) {
 };
 
 editor.uneraseNodes = async function () {
-  return await scrapbook.invokeExtensionScript({
+  return await utils.invokeExtensionScript({
     cmd: "background.invokeEditorCommand",
     args: {
       frameId: await editor.getFocusedFrameId(),
@@ -1602,7 +1602,7 @@ editor.uneraseNodes = async function () {
 };
 
 editor.uneraseAllNodes = async function () {
-  return await scrapbook.invokeExtensionScript({
+  return await utils.invokeExtensionScript({
     cmd: "background.invokeEditorCommand",
     args: {
       cmd: "editor.uneraseAllNodesInternal",
@@ -1612,7 +1612,7 @@ editor.uneraseAllNodes = async function () {
 };
 
 editor.removeEdits = async function () {
-  return await scrapbook.invokeExtensionScript({
+  return await utils.invokeExtensionScript({
     cmd: "background.invokeEditorCommand",
     args: {
       frameId: await editor.getFocusedFrameId(),
@@ -1623,7 +1623,7 @@ editor.removeEdits = async function () {
 };
 
 editor.removeAllEdits = async function () {
-  return await scrapbook.invokeExtensionScript({
+  return await utils.invokeExtensionScript({
     cmd: "background.invokeEditorCommand",
     args: {
       cmd: "editor.removeAllEditsInternal",
@@ -1633,7 +1633,7 @@ editor.removeAllEdits = async function () {
 };
 
 editor.toggleAnnotator = async function (willActive) {
-  return await scrapbook.invokeExtensionScript({
+  return await utils.invokeExtensionScript({
     cmd: "background.invokeEditorCommand",
     args: {
       cmd: "editor.annotator.toggle",
@@ -1679,7 +1679,7 @@ editor.toggleDomEraser = async function (willActive, ignoreAnnotator = false) {
     await editor.toggleAnnotator(false);
   }
 
-  await scrapbook.invokeExtensionScript({
+  await utils.invokeExtensionScript({
     cmd: "background.invokeEditorCommand",
     args: {
       cmd: "editor.domEraser.toggle",
@@ -1727,7 +1727,7 @@ editor.toggleHtmlEditor = async function (willActive, ignoreAnnotator = false) {
     await editor.toggleAnnotator(false);
   }
 
-  await scrapbook.invokeExtensionScript({
+  await utils.invokeExtensionScript({
     cmd: "background.invokeEditorCommand",
     args: {
       cmd: "editor.htmlEditor.toggle",
@@ -1761,7 +1761,7 @@ editor.toggleMutationHandler = async function (willActive) {
     editElem.removeAttribute("checked");
   }
 
-  await scrapbook.invokeExtensionScript({
+  await utils.invokeExtensionScript({
     cmd: "background.invokeEditorCommand",
     args: {
       cmd: "editor.mutationHandler.toggle",
@@ -1771,7 +1771,7 @@ editor.toggleMutationHandler = async function (willActive) {
 };
 
 editor.undo = async function () {
-  return await scrapbook.invokeExtensionScript({
+  return await utils.invokeExtensionScript({
     cmd: "background.invokeEditorCommand",
     args: {
       frameId: await editor.getFocusedFrameId(),
@@ -1787,38 +1787,38 @@ editor.save = async function (params = {}) {
   if (editor.inScrapBook) {
     // prompt a confirm if this page is scripted
     if (editor.isScripted) {
-      if (!confirm(scrapbook.lang("EditConfirmScriptedDocument"))) {
+      if (!confirm(utils.lang("EditConfirmScriptedDocument"))) {
         return;
       }
     }
 
-    await scrapbook.invokeExtensionScript({
+    await utils.invokeExtensionScript({
       cmd: "background.invokeEditorCommand",
       args: {
         cmd: "editor.annotator.saveAll",
         args: {},
       },
     });
-    return await scrapbook.invokeExtensionScript({
+    return await utils.invokeExtensionScript({
       cmd: "background.captureCurrentTab",
       args: {mode: params.internalize ? "internalize" : "resave"},
     });
   } else {
-    await scrapbook.invokeExtensionScript({
+    await utils.invokeExtensionScript({
       cmd: "background.invokeEditorCommand",
       args: {
         cmd: "editor.annotator.saveAll",
         args: {},
       },
     });
-    return await scrapbook.invokeExtensionScript({
+    return await utils.invokeExtensionScript({
       cmd: "background.captureCurrentTab",
     });
   }
 };
 
 editor.deleteErased = async function () {
-  return await scrapbook.invokeExtensionScript({
+  return await utils.invokeExtensionScript({
     cmd: "background.invokeEditorCommand",
     args: {
       cmd: "editor.deleteErasedInternal",
@@ -1828,11 +1828,11 @@ editor.deleteErased = async function () {
 };
 
 editor.createSubPage = async function () {
-  const title = prompt(scrapbook.lang('EditorButtonSaveCreateSubPagePrompt'));
+  const title = prompt(utils.lang('EditorButtonSaveCreateSubPagePrompt'));
   if (!title) { return; }
 
   try {
-    await scrapbook.invokeExtensionScript({
+    await utils.invokeExtensionScript({
       cmd: "background.createSubPage",
       args: {
         url: location.href,
@@ -1846,7 +1846,7 @@ editor.createSubPage = async function () {
 };
 
 editor.editTitle = async function () {
-  return await scrapbook.invokeExtensionScript({
+  return await utils.invokeExtensionScript({
     cmd: "background.invokeEditorCommand",
     args: {
       frameId: await editor.getFocusedFrameId(),
@@ -1857,7 +1857,7 @@ editor.editTitle = async function () {
 };
 
 editor.setViewport = async function () {
-  return await scrapbook.invokeExtensionScript({
+  return await utils.invokeExtensionScript({
     cmd: "background.invokeEditorCommand",
     args: {
       frameId: await editor.getFocusedFrameId(),
@@ -1896,13 +1896,13 @@ editor.open = async function () {
 
   document.documentElement.setAttribute('data-scrapbook-toolbar-active', '');
   document.documentElement.appendChild(editor.element);
-  await scrapbook.invokeExtensionScript({
+  await utils.invokeExtensionScript({
     cmd: "background.registerActiveEditorTab",
     args: {
       willEnable: true,
     },
   });
-  await scrapbook.invokeExtensionScript({
+  await utils.invokeExtensionScript({
     cmd: "background.invokeEditorCommand",
     args: {
       cmd: "editor.openInternal",
@@ -1922,13 +1922,13 @@ editor.close = async function () {
     elem.remove();
   }
 
-  await scrapbook.invokeExtensionScript({
+  await utils.invokeExtensionScript({
     cmd: "background.registerActiveEditorTab",
     args: {
       willEnable: false,
     },
   });
-  await scrapbook.invokeExtensionScript({
+  await utils.invokeExtensionScript({
     cmd: "background.invokeEditorCommand",
     args: {
       cmd: "editor.closeInternal",
@@ -2018,7 +2018,7 @@ editor.showContextMenu = function (elem, pos = {}) {
     const toolbarButtonWidth = 36;
     const toolbarHeight = 40;
     const {clientX = 0, clientY = 0} = pos;
-    const viewport = scrapbook.getViewport(window);
+    const viewport = utils.getViewport(window);
 
     // reposition to leftmost to get correct offsetWidth
     elem.style.setProperty('left', 0 + 'px');
@@ -2029,8 +2029,8 @@ editor.showContextMenu = function (elem, pos = {}) {
 
   // Focus on the context menu element for focusout event to work when the user
   // clicks outside.
-  const sel = scrapbook.getSelection();
-  const ranges = scrapbook.getSelectionRanges(sel);
+  const sel = utils.getSelection();
+  const ranges = utils.getSelectionRanges(sel);
   const wasCollapsed = sel.isCollapsed;
 
   if (!elem.hasAttribute('tabindex')) {
@@ -2053,12 +2053,12 @@ editor.showContextMenu = function (elem, pos = {}) {
  * @return {boolean} Whether the document has a working script.
  */
 editor.isDocumentScripted = function (doc) {
-  for (const fdoc of scrapbook.flattenFrames(doc)) {
+  for (const fdoc of utils.flattenFrames(doc)) {
     for (const elem of fdoc.querySelectorAll("*")) {
       // check <script> elements
       if (elem.nodeName.toLowerCase() === 'script') {
         if (SCRIPT_TYPES.has(elem.type.toLowerCase()) &&
-            !ALLOWED_SCRAPBOOK_SCRIPTS.has(scrapbook.getScrapbookObjectType(elem))) {
+            !ALLOWED_SCRAPBOOK_SCRIPTS.has(utils.getScrapbookObjectType(elem))) {
           if (elem.src) {
             return true;
           } else if (!/^\s*(?:(?:\/\*[^*]*(?:\*(?!\/)[^*]*)*\*\/|\/\/.*)\s*)*$/.test(elem.textContent)) {
@@ -2084,7 +2084,7 @@ editor.getStatusKey = function (key) {
 
 editor.updateLineMarkers = async function () {
   for (const [i, elem] of editor.internalElement.querySelectorAll('#toolbar-marker ul scrapbook-toolbar-samp').entries()) {
-    const style = scrapbook.getOption(`editor.lineMarker.style.${i + 1}`);
+    const style = utils.getOption(`editor.lineMarker.style.${i + 1}`);
     elem.setAttribute('style', style);
     elem.title = style;
   }
@@ -2093,15 +2093,15 @@ editor.updateLineMarkers = async function () {
   for (const elem of buttons) {
     elem.removeAttribute('checked');
   }
-  let idx = await scrapbook.cache.get(editor.getStatusKey('lineMarkerSelected'), 'storage');
+  let idx = await utils.cache.get(editor.getStatusKey('lineMarkerSelected'), 'storage');
   idx = Math.min(parseInt(idx, 10) || 0, buttons.length - 1);
   buttons[idx].setAttribute('checked', '');
 };
 
 editor.updateHtmlEditorMenu = function () {
   const elem = editor.internalElement.querySelector('#toolbar-htmlEditor-insertDate');
-  const format = scrapbook.getOption("editor.insertDateFormat");
-  const isUtc = scrapbook.getOption("editor.insertDateFormatIsUtc");
+  const format = utils.getOption("editor.insertDateFormat");
+  const isUtc = utils.getOption("editor.insertDateFormatIsUtc");
   const sample = Strftime.format(format, {isUtc});
   elem.title = format + '\n' + sample;
 };
@@ -2111,7 +2111,7 @@ editor.getFocusedFrameId = async function () {
     return 0;
   }
 
-  const arr = await scrapbook.invokeExtensionScript({
+  const arr = await utils.invokeExtensionScript({
     cmd: "background.invokeEditorCommand",
     args: {
       cmd: "editor.getFocusedFrameIdInternal",
@@ -2133,12 +2133,12 @@ editor.getFocusedFrameId = async function () {
   return 0;
 };
 
-editor.eraseRange = function (range, timeId = scrapbook.dateToId()) {
-  scrapbook.eraseRange(range, {timeId, mapCommentToWrapper: editor.erasedContents});
+editor.eraseRange = function (range, timeId = utils.dateToId()) {
+  utils.eraseRange(range, {timeId, mapCommentToWrapper: editor.erasedContents});
 };
 
-editor.eraseNode = function (node, timeId = scrapbook.dateToId()) {
-  scrapbook.eraseNode(node, {timeId, mapCommentToWrapper: editor.erasedContents});
+editor.eraseNode = function (node, timeId = utils.dateToId()) {
+  utils.eraseNode(node, {timeId, mapCommentToWrapper: editor.erasedContents});
 };
 
 /**
@@ -2154,22 +2154,22 @@ editor.removeScrapBookObject = function (node) {
     // not an element or a dead object, skip
     return -1;
   }
-  let type = scrapbook.getScrapBookObjectRemoveType(node);
+  let type = utils.getScrapBookObjectRemoveType(node);
   switch (type) {
     case 1: {
-      for (const part of scrapbook.getScrapBookObjectElems(node)) {
+      for (const part of utils.getScrapBookObjectElems(node)) {
         part.remove();
       }
       break;
     }
     case 2: {
-      for (const part of scrapbook.getScrapBookObjectElems(node)) {
-        scrapbook.unwrapNode(part);
+      for (const part of utils.getScrapBookObjectElems(node)) {
+        utils.unwrapNode(part);
       }
       break;
     }
     case 3: {
-      const unerased = scrapbook.uneraseNode(node, {
+      const unerased = utils.uneraseNode(node, {
         mapCommentToWrapper: editor.erasedContents,
       });
       if (!unerased) {
@@ -2207,7 +2207,7 @@ const annotator = editor.annotator = (function () {
     }
 
     let target = event.target;
-    let objectType = scrapbook.getScrapbookObjectType(target);
+    let objectType = utils.getScrapbookObjectType(target);
     switch (objectType) {
       case 'sticky': {
         if (target.shadowRoot) {
@@ -2258,11 +2258,11 @@ const annotator = editor.annotator = (function () {
 
   const onClick = (event) => {
     let target = event.target;
-    let objectType = scrapbook.getScrapbookObjectType(target);
+    let objectType = utils.getScrapbookObjectType(target);
     while (!objectType) {
       target = target.parentNode;
       if (!target) { return; }
-      objectType = scrapbook.getScrapbookObjectType(target);
+      objectType = utils.getScrapbookObjectType(target);
     }
     switch (objectType) {
       case 'linemarker':
@@ -2270,7 +2270,7 @@ const annotator = editor.annotator = (function () {
         // A click event fires when mouse down and up in the same element,
         // including a selection. Exclude selection as the user probably
         // doesn't want a popup when he makes a selection.
-        if (scrapbook.getSelection().type === 'Range') { break; }
+        if (utils.getSelection().type === 'Range') { break; }
 
         event.preventDefault();
 
@@ -2279,7 +2279,7 @@ const annotator = editor.annotator = (function () {
       }
 
       case 'sticky': {
-        if (scrapbook.getSelection().type === 'Range') { break; }
+        if (utils.getSelection().type === 'Range') { break; }
         if (target.shadowRoot) { break; }
 
         event.preventDefault();
@@ -2336,7 +2336,7 @@ const annotator = editor.annotator = (function () {
         mainElem.style.width = clientX - rect.left + 'px';
       }
     } else {
-      const pos = scrapbook.getAnchoredPosition(mainElem, {
+      const pos = utils.getAnchoredPosition(mainElem, {
         clientX: Math.max(clientX - draggingData.deltaX, 0),
         clientY: Math.max(clientY - draggingData.deltaY, 0),
       });
@@ -2419,7 +2419,7 @@ const annotator = editor.annotator = (function () {
       // this is unexpected
       if (elem.shadowRoot) { return; }
 
-      const content = await scrapbook.prompt(scrapbook.lang('EditorEditAnnotation'), elem.title);
+      const content = await utils.prompt(utils.lang('EditorEditAnnotation'), elem.title);
 
       if (content == null) {
         return;
@@ -2430,11 +2430,11 @@ const annotator = editor.annotator = (function () {
       // Retrieve element ID. Generate a new one if none.
       let id = elem.getAttribute('data-scrapbook-id');
       if (!id) {
-        id = scrapbook.dateToId();
+        id = utils.dateToId();
         elem.setAttribute('data-scrapbook-id', id);
       }
 
-      for (const part of scrapbook.getScrapBookObjectElems(elem)) {
+      for (const part of utils.getScrapBookObjectElems(elem)) {
         if (content.trim()) {
           part.setAttribute('title', content);
         } else {
@@ -2453,18 +2453,18 @@ const annotator = editor.annotator = (function () {
     createSticky({richText, refNode} = {}) {
       editor.addHistory();
 
-      const useNativeTags = scrapbook.getOption("editor.useNativeTags");
+      const useNativeTags = utils.getOption("editor.useNativeTags");
       const mainElem = document.createElement(useNativeTags ? 'div' : 'scrapbook-sticky');
-      mainElem.setAttribute('data-scrapbook-id', scrapbook.dateToId());
+      mainElem.setAttribute('data-scrapbook-id', utils.dateToId());
       mainElem.setAttribute('data-scrapbook-elem', 'sticky');
-      mainElem.dir = scrapbook.lang('@@bidi_dir');
+      mainElem.dir = utils.lang('@@bidi_dir');
       mainElem.classList.add('styled');
       if (!richText) {
         mainElem.classList.add('plaintext');
       }
 
       if (!refNode && refNode !== false) {
-        const sel = scrapbook.getSelection();
+        const sel = utils.getSelection();
         if (sel.type === 'Range') {
           refNode = sel.anchorNode;
         }
@@ -2510,7 +2510,7 @@ const annotator = editor.annotator = (function () {
         // if it's before a (relative) sticky note, move it to be after
         let nextNode;
         while ((nextNode = refNode.nextSibling)
-            && scrapbook.getScrapbookObjectType(nextNode) === "sticky") {
+            && utils.getScrapbookObjectType(nextNode) === "sticky") {
           refNode = refNode.nextSibling;
         }
 
@@ -2523,7 +2523,7 @@ const annotator = editor.annotator = (function () {
 
       if (!mainElem.classList.contains('styled')) {
         const attr = mainElem.classList.contains('plaintext') ? 'textContent' : 'innerHTML';
-        const content = await scrapbook.prompt(scrapbook.lang('EditorEditAnnotation'), mainElem[attr]);
+        const content = await utils.prompt(utils.lang('EditorEditAnnotation'), mainElem[attr]);
         if (content === null) {
           return;
         }
@@ -2661,12 +2661,12 @@ const annotator = editor.annotator = (function () {
 
       const saveElem = headerElem.appendChild(document.createElement('button'));
       saveElem.classList.add('save');
-      saveElem.title = scrapbook.lang('EditorStickySave', ['Alt+S']);
+      saveElem.title = utils.lang('EditorStickySave', ['Alt+S']);
       saveElem.addEventListener('click', (event) => { this.saveSticky(mainElem); });
 
       const deleteElem = headerElem.appendChild(document.createElement('button'));
       deleteElem.classList.add('delete');
-      deleteElem.title = scrapbook.lang('EditorStickyDelete');
+      deleteElem.title = utils.lang('EditorStickyDelete');
       deleteElem.addEventListener('click', (event) => { this.deleteSticky(mainElem); });
 
       const resizerElemNS = formElem.appendChild(document.createElement('div'));
@@ -2868,7 +2868,7 @@ const domEraser = editor.domEraser = (function () {
 
       // remove tooltip in other frames
       (async () => {
-        scrapbook.invokeExtensionScript({
+        utils.invokeExtensionScript({
           cmd: "background.invokeEditorCommand",
           args: {
             cmd: "editor.domEraser.clearTarget",
@@ -2886,7 +2886,7 @@ const domEraser = editor.domEraser = (function () {
 
       let outlineStyle;
       let labelBody;
-      if (scrapbook.getScrapBookObjectRemoveType(elem) <= 0) {
+      if (utils.getScrapBookObjectRemoveType(elem) <= 0) {
         const id = elem.id;
         const classText = Array.from(elem.classList.values()).map(x => '.' + x).join(''); // elements like svg doesn't support .className property
         outlineStyle = '2px solid red';
@@ -2902,13 +2902,13 @@ const domEraser = editor.domEraser = (function () {
         }
       } else {
         outlineStyle = '2px dashed blue';
-        labelBody = document.createTextNode(scrapbook.lang("EditorButtonDOMEraserRemoveEdit"));
+        labelBody = document.createTextNode(utils.lang("EditorButtonDOMEraserRemoveEdit"));
       }
 
       mutationHandler.addIgnoreStartPoint();
 
       // outline
-      for (const elem of scrapbook.getScrapBookObjectElems(lastTarget)) {
+      for (const elem of utils.getScrapBookObjectElems(lastTarget)) {
         // elements like math doesn't implement the .style property and could throw an error
         if (elem.style) {
           mapMarkedNodes.set(elem, {
@@ -2940,14 +2940,14 @@ const domEraser = editor.domEraser = (function () {
       document.body.appendChild(labelElem);
 
       const boundingRect = elem.getBoundingClientRect();
-      const viewport = scrapbook.getViewport(window);
+      const viewport = utils.getViewport(window);
       const toolbarHeight = editor.internalElement ? editor.internalElement.offsetHeight : 0;
       const availX = viewport.width - labelElem.offsetWidth;
       const availY = viewport.height - toolbarHeight - labelElem.offsetHeight;
       let x = boundingRect.left;
       let y = boundingRect.top - labelElem.offsetHeight;
       if (y < 0 && boundingRect.bottom <= availY) { y = boundingRect.bottom; }
-      const anchorPos = scrapbook.getAnchoredPosition(labelElem, {
+      const anchorPos = utils.getAnchoredPosition(labelElem, {
         clientX: Math.min(Math.max(x, 0), availX),
         clientY: Math.min(Math.max(y, 0), availY),
       }, viewport);
@@ -3029,7 +3029,7 @@ const domEraser = editor.domEraser = (function () {
       domEraser.clearTarget();
       editor.addHistory();
 
-      const timeId = scrapbook.dateToId();
+      const timeId = utils.dateToId();
       while (!elem.matches(SKIP_NODES)) {
         const parent = elem.parentNode;
         if (!parent) { break; }
@@ -3071,7 +3071,7 @@ const htmlEditor = editor.htmlEditor = {
   },
 
   async strong() {
-    return await scrapbook.invokeExtensionScript({
+    return await utils.invokeExtensionScript({
       cmd: "background.invokeEditorCommand",
       args: {
         frameId: await editor.getFocusedFrameId(),
@@ -3085,7 +3085,7 @@ const htmlEditor = editor.htmlEditor = {
   },
 
   async em() {
-    return await scrapbook.invokeExtensionScript({
+    return await utils.invokeExtensionScript({
       cmd: "background.invokeEditorCommand",
       args: {
         frameId: await editor.getFocusedFrameId(),
@@ -3099,7 +3099,7 @@ const htmlEditor = editor.htmlEditor = {
   },
 
   async underline() {
-    return await scrapbook.invokeExtensionScript({
+    return await utils.invokeExtensionScript({
       cmd: "background.invokeEditorCommand",
       args: {
         frameId: await editor.getFocusedFrameId(),
@@ -3113,7 +3113,7 @@ const htmlEditor = editor.htmlEditor = {
   },
 
   async strike() {
-    return await scrapbook.invokeExtensionScript({
+    return await utils.invokeExtensionScript({
       cmd: "background.invokeEditorCommand",
       args: {
         frameId: await editor.getFocusedFrameId(),
@@ -3127,7 +3127,7 @@ const htmlEditor = editor.htmlEditor = {
   },
 
   async superscript() {
-    return await scrapbook.invokeExtensionScript({
+    return await utils.invokeExtensionScript({
       cmd: "background.invokeEditorCommand",
       args: {
         frameId: await editor.getFocusedFrameId(),
@@ -3141,7 +3141,7 @@ const htmlEditor = editor.htmlEditor = {
   },
 
   async subscript() {
-    return await scrapbook.invokeExtensionScript({
+    return await utils.invokeExtensionScript({
       cmd: "background.invokeEditorCommand",
       args: {
         frameId: await editor.getFocusedFrameId(),
@@ -3156,7 +3156,7 @@ const htmlEditor = editor.htmlEditor = {
 
   async color() {
     const frameId = await editor.getFocusedFrameId();
-    return await scrapbook.invokeExtensionScript({
+    return await utils.invokeExtensionScript({
       cmd: "background.invokeEditorCommand",
       args: {
         frameId,
@@ -3166,12 +3166,12 @@ const htmlEditor = editor.htmlEditor = {
   },
 
   async _color() {
-    const sel = scrapbook.getSelection();
+    const sel = utils.getSelection();
 
     // backup current selection ranges
-    const ranges = scrapbook.getSelectionRanges(sel);
+    const ranges = utils.getSelectionRanges(sel);
 
-    const result = await scrapbook.openModalWindow({
+    const result = await utils.openModalWindow({
       url: browser.runtime.getURL('editor/color.html'),
       windowCreateData: {width: 400, height: 200},
     });
@@ -3190,7 +3190,7 @@ const htmlEditor = editor.htmlEditor = {
   },
 
   async formatBlockP() {
-    return await scrapbook.invokeExtensionScript({
+    return await utils.invokeExtensionScript({
       cmd: "background.invokeEditorCommand",
       args: {
         frameId: await editor.getFocusedFrameId(),
@@ -3204,7 +3204,7 @@ const htmlEditor = editor.htmlEditor = {
   },
 
   async formatBlockH1() {
-    return await scrapbook.invokeExtensionScript({
+    return await utils.invokeExtensionScript({
       cmd: "background.invokeEditorCommand",
       args: {
         frameId: await editor.getFocusedFrameId(),
@@ -3218,7 +3218,7 @@ const htmlEditor = editor.htmlEditor = {
   },
 
   async formatBlockH2() {
-    return await scrapbook.invokeExtensionScript({
+    return await utils.invokeExtensionScript({
       cmd: "background.invokeEditorCommand",
       args: {
         frameId: await editor.getFocusedFrameId(),
@@ -3232,7 +3232,7 @@ const htmlEditor = editor.htmlEditor = {
   },
 
   async formatBlockH3() {
-    return await scrapbook.invokeExtensionScript({
+    return await utils.invokeExtensionScript({
       cmd: "background.invokeEditorCommand",
       args: {
         frameId: await editor.getFocusedFrameId(),
@@ -3246,7 +3246,7 @@ const htmlEditor = editor.htmlEditor = {
   },
 
   async formatBlockH4() {
-    return await scrapbook.invokeExtensionScript({
+    return await utils.invokeExtensionScript({
       cmd: "background.invokeEditorCommand",
       args: {
         frameId: await editor.getFocusedFrameId(),
@@ -3260,7 +3260,7 @@ const htmlEditor = editor.htmlEditor = {
   },
 
   async formatBlockH5() {
-    return await scrapbook.invokeExtensionScript({
+    return await utils.invokeExtensionScript({
       cmd: "background.invokeEditorCommand",
       args: {
         frameId: await editor.getFocusedFrameId(),
@@ -3274,7 +3274,7 @@ const htmlEditor = editor.htmlEditor = {
   },
 
   async formatBlockH6() {
-    return await scrapbook.invokeExtensionScript({
+    return await utils.invokeExtensionScript({
       cmd: "background.invokeEditorCommand",
       args: {
         frameId: await editor.getFocusedFrameId(),
@@ -3288,7 +3288,7 @@ const htmlEditor = editor.htmlEditor = {
   },
 
   async formatBlockDiv() {
-    return await scrapbook.invokeExtensionScript({
+    return await utils.invokeExtensionScript({
       cmd: "background.invokeEditorCommand",
       args: {
         frameId: await editor.getFocusedFrameId(),
@@ -3302,7 +3302,7 @@ const htmlEditor = editor.htmlEditor = {
   },
 
   async formatBlockPre() {
-    return await scrapbook.invokeExtensionScript({
+    return await utils.invokeExtensionScript({
       cmd: "background.invokeEditorCommand",
       args: {
         frameId: await editor.getFocusedFrameId(),
@@ -3316,7 +3316,7 @@ const htmlEditor = editor.htmlEditor = {
   },
 
   async listUnordered() {
-    return await scrapbook.invokeExtensionScript({
+    return await utils.invokeExtensionScript({
       cmd: "background.invokeEditorCommand",
       args: {
         frameId: await editor.getFocusedFrameId(),
@@ -3330,7 +3330,7 @@ const htmlEditor = editor.htmlEditor = {
   },
 
   async listOrdered() {
-    return await scrapbook.invokeExtensionScript({
+    return await utils.invokeExtensionScript({
       cmd: "background.invokeEditorCommand",
       args: {
         frameId: await editor.getFocusedFrameId(),
@@ -3344,7 +3344,7 @@ const htmlEditor = editor.htmlEditor = {
   },
 
   async outdent() {
-    return await scrapbook.invokeExtensionScript({
+    return await utils.invokeExtensionScript({
       cmd: "background.invokeEditorCommand",
       args: {
         frameId: await editor.getFocusedFrameId(),
@@ -3358,7 +3358,7 @@ const htmlEditor = editor.htmlEditor = {
   },
 
   async indent() {
-    return await scrapbook.invokeExtensionScript({
+    return await utils.invokeExtensionScript({
       cmd: "background.invokeEditorCommand",
       args: {
         frameId: await editor.getFocusedFrameId(),
@@ -3372,7 +3372,7 @@ const htmlEditor = editor.htmlEditor = {
   },
 
   async justifyLeft() {
-    return await scrapbook.invokeExtensionScript({
+    return await utils.invokeExtensionScript({
       cmd: "background.invokeEditorCommand",
       args: {
         frameId: await editor.getFocusedFrameId(),
@@ -3386,7 +3386,7 @@ const htmlEditor = editor.htmlEditor = {
   },
 
   async justifyCenter() {
-    return await scrapbook.invokeExtensionScript({
+    return await utils.invokeExtensionScript({
       cmd: "background.invokeEditorCommand",
       args: {
         frameId: await editor.getFocusedFrameId(),
@@ -3400,7 +3400,7 @@ const htmlEditor = editor.htmlEditor = {
   },
 
   async justifyRight() {
-    return await scrapbook.invokeExtensionScript({
+    return await utils.invokeExtensionScript({
       cmd: "background.invokeEditorCommand",
       args: {
         frameId: await editor.getFocusedFrameId(),
@@ -3414,7 +3414,7 @@ const htmlEditor = editor.htmlEditor = {
   },
 
   async justifyFull() {
-    return await scrapbook.invokeExtensionScript({
+    return await utils.invokeExtensionScript({
       cmd: "background.invokeEditorCommand",
       args: {
         frameId: await editor.getFocusedFrameId(),
@@ -3429,9 +3429,9 @@ const htmlEditor = editor.htmlEditor = {
 
   async createLink() {
     const frameId = await editor.getFocusedFrameId();
-    const url = prompt(scrapbook.lang('EditorButtonHtmlEditorCreateLinkPrompt'));
+    const url = prompt(utils.lang('EditorButtonHtmlEditorCreateLinkPrompt'));
     if (!url) { return; }
-    return await scrapbook.invokeExtensionScript({
+    return await utils.invokeExtensionScript({
       cmd: "background.invokeEditorCommand",
       args: {
         frameId,
@@ -3446,7 +3446,7 @@ const htmlEditor = editor.htmlEditor = {
   },
 
   async hr() {
-    return await scrapbook.invokeExtensionScript({
+    return await utils.invokeExtensionScript({
       cmd: "background.invokeEditorCommand",
       args: {
         frameId: await editor.getFocusedFrameId(),
@@ -3460,7 +3460,7 @@ const htmlEditor = editor.htmlEditor = {
   },
 
   async todo() {
-    return await scrapbook.invokeExtensionScript({
+    return await utils.invokeExtensionScript({
       cmd: "background.invokeEditorCommand",
       args: {
         frameId: await editor.getFocusedFrameId(),
@@ -3474,10 +3474,10 @@ const htmlEditor = editor.htmlEditor = {
   },
 
   async insertDate() {
-    const format = scrapbook.getOption("editor.insertDateFormat");
-    const isUtc = scrapbook.getOption("editor.insertDateFormatIsUtc");
+    const format = utils.getOption("editor.insertDateFormat");
+    const isUtc = utils.getOption("editor.insertDateFormatIsUtc");
     const dateStr = Strftime.format(format, {isUtc});
-    return await scrapbook.invokeExtensionScript({
+    return await utils.invokeExtensionScript({
       cmd: "background.invokeEditorCommand",
       args: {
         frameId: await editor.getFocusedFrameId(),
@@ -3494,7 +3494,7 @@ const htmlEditor = editor.htmlEditor = {
   async insertHtml() {
     const frameId = await editor.getFocusedFrameId();
 
-    return await scrapbook.invokeExtensionScript({
+    return await utils.invokeExtensionScript({
       cmd: "background.invokeEditorCommand",
       args: {
         frameId,
@@ -3504,10 +3504,10 @@ const htmlEditor = editor.htmlEditor = {
   },
 
   async _insertHtml() {
-    const sel = scrapbook.getSelection();
+    const sel = utils.getSelection();
 
     // backup current selection ranges
-    const ranges = scrapbook.getSelectionRanges(sel);
+    const ranges = utils.getSelectionRanges(sel);
 
     const collapsed = ranges[0].collapsed;
 
@@ -3527,8 +3527,8 @@ const htmlEditor = editor.htmlEditor = {
       const source = ac.outerHTML;
       const sourceInner = ac.innerHTML;
       const istart = source.lastIndexOf(sourceInner, source.lastIndexOf('<'));
-      const start = scrapbook.getOffsetInSource(ac, range.startContainer, range.startOffset);
-      const end = scrapbook.getOffsetInSource(ac, range.endContainer, range.endOffset);
+      const start = utils.getOffsetInSource(ac, range.startContainer, range.startOffset);
+      const end = utils.getOffsetInSource(ac, range.endContainer, range.endOffset);
       const iend = istart + sourceInner.length;
       data.preTag = source.substring(0, istart);
       data.preContext = source.substring(istart, start);
@@ -3537,7 +3537,7 @@ const htmlEditor = editor.htmlEditor = {
       data.postTag = source.substring(iend);
     }
 
-    const result = await scrapbook.openModalWindow({
+    const result = await utils.openModalWindow({
       url: browser.runtime.getURL('editor/insert-html.html'),
       args: data,
       windowCreateData: {width: 600, height: 600},
@@ -3583,7 +3583,7 @@ const htmlEditor = editor.htmlEditor = {
   },
 
   async removeFormat() {
-    return await scrapbook.invokeExtensionScript({
+    return await utils.invokeExtensionScript({
       cmd: "background.invokeEditorCommand",
       args: {
         frameId: await editor.getFocusedFrameId(),
@@ -3597,7 +3597,7 @@ const htmlEditor = editor.htmlEditor = {
   },
 
   async unlink() {
-    return await scrapbook.invokeExtensionScript({
+    return await utils.invokeExtensionScript({
       cmd: "background.invokeEditorCommand",
       args: {
         frameId: await editor.getFocusedFrameId(),

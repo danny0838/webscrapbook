@@ -2,9 +2,9 @@
  * The background script for editor functionality
  *****************************************************************************/
 
-import * as scrapbook from "../utils/extension.mjs";
+import * as utils from "../utils/extension.mjs";
 
-scrapbook.loadOptionsAuto(); // async
+utils.loadOptionsAuto(); // async
 
 const AUTO_EDIT_FILTER = {url: [{schemes: ["http", "https"]}]};
 
@@ -20,14 +20,14 @@ function onDomContentLoaded(details) {
 
     // a frame in an active editor is loaded, run init script for it
     return Promise.all([
-      scrapbook.invokeContentScript({
+      utils.invokeContentScript({
         tabId,
         frameId: 0,
         cmd: "editor.getStatus",
       }),
-      scrapbook.initContentScripts(tabId, frameId),
+      utils.initContentScripts(tabId, frameId),
     ]).then(([status, initResults]) => {
-      return scrapbook.invokeContentScript({
+      return utils.invokeContentScript({
         tabId,
         frameId,
         cmd: "editor.initFrame",
@@ -39,10 +39,10 @@ function onDomContentLoaded(details) {
   // the main frame is reloaded, mark it as inactive
   activeEditorTabIds.delete(tabId);
 
-  const [urlMain, urlSearch, urlHash] = scrapbook.splitUrl(url);
+  const [urlMain, urlSearch, urlHash] = utils.splitUrl(url);
 
   // skip URLs not in the backend server
-  if (!urlMain.startsWith(scrapbook.getOption("server.url"))) {
+  if (!urlMain.startsWith(utils.getOption("server.url"))) {
     return;
   }
 
@@ -56,7 +56,7 @@ function onDomContentLoaded(details) {
     return;
   }
 
-  return scrapbook.editTab({
+  return utils.editTab({
     tabId,
     willActive: true,
   });
@@ -64,7 +64,7 @@ function onDomContentLoaded(details) {
 
 function toggleAutoEdit() {
   browser.webNavigation.onDOMContentLoaded.removeListener(onDomContentLoaded);
-  if (scrapbook.getOption("editor.autoInit") && scrapbook.hasServer()) {
+  if (utils.getOption("editor.autoInit") && utils.hasServer()) {
     browser.webNavigation.onDOMContentLoaded.addListener(onDomContentLoaded, AUTO_EDIT_FILTER);
   }
 }
@@ -78,7 +78,7 @@ function registerActiveEditorTab(tabId, willEnable = true) {
 }
 
 async function init() {
-  await scrapbook.loadOptionsAuto();
+  await utils.loadOptionsAuto();
   toggleAutoEdit();
 }
 

@@ -16,7 +16,7 @@
  *   ref: https://crbug.com/444772033
  *****************************************************************************/
 
-import * as scrapbook from "./common.mjs";
+import * as utils from "./common.mjs";
 import {sha1} from "./sha.mjs";
 import * as Mime from "../lib/mime.mjs";
 
@@ -43,13 +43,13 @@ function dataUriToFile(dataUri, useFilename = true) {
     }
 
     const bstr = base64 ? atob(data) : unescape(data);
-    const ab = scrapbook.byteStringToArrayBuffer(bstr);
+    const ab = utils.byteStringToArrayBuffer(bstr);
 
     let filename;
     if (useFilename && parameters.filename) {
       filename = decodeURIComponent(parameters.filename);
     } else {
-      let ext = parameters.filename && scrapbook.filenameParts(parameters.filename)[1] || Mime.extension(mime);
+      let ext = parameters.filename && utils.filenameParts(parameters.filename)[1] || Mime.extension(mime);
       ext = ext ? ("." + ext) : "";
       filename = sha1(ab, "ARRAYBUFFER") + ext;
     }

@@ -2,7 +2,7 @@
  * Script for batch.html.
  *****************************************************************************/
 
-import * as scrapbook from "../utils/extension.mjs";
+import * as utils from "../utils/extension.mjs";
 
 let gTaskInfo;
 
@@ -13,8 +13,8 @@ async function init() {
   const key = {table: "batchCaptureMissionCache", id: missionId};
   let data;
   try {
-    data = await scrapbook.cache.get(key);
-    await scrapbook.cache.remove(key);
+    data = await utils.cache.get(key);
+    await utils.cache.remove(key);
     if (!data) { throw new Error(`Missing data for mission "${missionId}".`); }
     gTaskInfo = data.taskInfo;
   } catch (ex) {
@@ -34,7 +34,7 @@ async function init() {
 }
 
 async function capture({dialog = null, taskInfo, ignoreTitle, uniquify}) {
-  await scrapbook.invokeCaptureEx({dialog, taskInfo, ignoreTitle, uniquify, waitForResponse: false});
+  await utils.invokeCaptureEx({dialog, taskInfo, ignoreTitle, uniquify, waitForResponse: false});
 }
 
 function parseInputText(inputText) {
@@ -77,7 +77,7 @@ function stringifyTasks(taskInfo) {
           return lines;
         }
         if (task.title) {
-          line += ' ' + scrapbook.split(task.title).join(' ');
+          line += ' ' + utils.split(task.title).join(' ');
         }
         lines.push(line);
         return lines;
@@ -148,7 +148,7 @@ function onTooltipClick(event) {
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
-  scrapbook.loadLanguages(document);
+  utils.loadLanguages(document);
 
   document.getElementById('btn-capture').addEventListener('click', onCaptureClick);
   document.getElementById('btn-abort').addEventListener('click', onAbortClick);

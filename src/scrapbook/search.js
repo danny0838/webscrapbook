@@ -2,11 +2,11 @@
  * Script for search.html.
  *****************************************************************************/
 
-import * as scrapbook from "../utils/extension.mjs";
+import * as utils from "../utils/extension.mjs";
 import {server} from "./server.mjs";
 import {CustomTree} from "./custom-tree.mjs";
 
-scrapbook.loadOptionsAuto(); // async
+utils.loadOptionsAuto(); // async
 
 const TREE_CLASS = 'tree-search';
 
@@ -86,7 +86,7 @@ class SearchTree extends CustomTree {
     var img = a.appendChild(document.createElement('img'));
     img.draggable = false;
     img.src = browser.runtime.getURL("resources/edit-locate.svg");
-    img.title = scrapbook.lang('SearchLocateTitle');
+    img.title = utils.lang('SearchLocateTitle');
     img.alt = "";
 
     // add context to details if exists
@@ -131,12 +131,12 @@ const search = {
 
   async init() {
     try {
-      await scrapbook.loadOptions();
+      await utils.loadOptions();
 
       // load conf from options
-      this.defaultSearch = scrapbook.getOption("scrapbook.defaultSearch");
-      this.fulltextCacheUpdateThreshold = scrapbook.getOption('scrapbook.fulltextCacheUpdateThreshold');
-      this.searchSse = scrapbook.getOption("scrapbook.searchSse");
+      this.defaultSearch = utils.getOption("scrapbook.defaultSearch");
+      this.fulltextCacheUpdateThreshold = utils.getOption('scrapbook.fulltextCacheUpdateThreshold');
+      this.searchSse = utils.getOption("scrapbook.searchSse");
 
       await server.init();
 
@@ -193,9 +193,9 @@ const search = {
       {
         const bookName = book ? usedBooks.map(x => x.name).join(' | ') : '';
         if (!searchWithRootIds) {
-          document.title = scrapbook.lang('SearchTitle', bookName);
+          document.title = utils.lang('SearchTitle', bookName);
         } else {
-          document.title = scrapbook.lang('SearchTitleWithRoot', [bookName, rootIds.join(' | ')]);
+          document.title = utils.lang('SearchTitleWithRoot', [bookName, rootIds.join(' | ')]);
         }
       }
 
@@ -254,17 +254,17 @@ const search = {
         u.searchParams.set('a', 'search');
         u.searchParams.set('q', queryStr);
 
-        const commentLength = scrapbook.getOption("scrapbook.searchCommentLength");
+        const commentLength = utils.getOption("scrapbook.searchCommentLength");
         if (Number.isInteger(commentLength)) {
           u.searchParams.set('comment', commentLength);
         }
 
-        const sourceLength = scrapbook.getOption("scrapbook.searchSourceLength");
+        const sourceLength = utils.getOption("scrapbook.searchSourceLength");
         if (Number.isInteger(sourceLength)) {
           u.searchParams.set('source', sourceLength);
         }
 
-        const contextLength = scrapbook.getOption("scrapbook.searchContextLength");
+        const contextLength = utils.getOption("scrapbook.searchContextLength");
         if (Number.isInteger(contextLength)) {
           u.searchParams.set('fulltext', contextLength);
         }
@@ -280,7 +280,7 @@ const search = {
           url,
           onMessage: (info) => {
             if (['error', 'critical'].includes(info.type)) {
-              this.addMsg(scrapbook.lang('ErrorSearch', [info.msg]), {type: 'error', wrapper});
+              this.addMsg(utils.lang('ErrorSearch', [info.msg]), {type: 'error', wrapper});
               error = true;
               return;
             }
@@ -301,7 +301,7 @@ const search = {
             await this.showResults(results, {book, wrapper});
           }
         } else {
-          this.addMsg(scrapbook.lang('SearchNotFound'), {wrapper});
+          this.addMsg(utils.lang('SearchNotFound'), {wrapper});
         }
       } else {
         const response = await server.request({
@@ -319,17 +319,17 @@ const search = {
           await this.showResults(results, {book, wrapper});
         }
         if (!found) {
-          this.addMsg(scrapbook.lang('SearchNotFound'), {wrapper});
+          this.addMsg(utils.lang('SearchNotFound'), {wrapper});
         }
       }
     } catch (ex) {
       console.error(ex);
-      this.addMsg(scrapbook.lang('ErrorSearch', [ex.message]), {type: 'error', wrapper});
+      this.addMsg(utils.lang('ErrorSearch', [ex.message]), {type: 'error', wrapper});
     }
   },
 
   showResults(results, {book, wrapper}) {
-    this.addMsg(scrapbook.lang('SearchFound', [book.name, results.length]), {wrapper});
+    this.addMsg(utils.lang('SearchFound', [book.name, results.length]), {wrapper});
 
     const treeElem = document.createElement("div");
     const tree = new SearchTree({treeElem});
@@ -372,11 +372,11 @@ const search = {
         cacheOutdatedWarning: {
           let cacheOutdatedMessage;
           if (fulltextMtime === -Infinity) {
-            cacheOutdatedMessage = scrapbook.lang('WarnSearchCacheMissing', [book.name]);
+            cacheOutdatedMessage = utils.lang('WarnSearchCacheMissing', [book.name]);
           } else if (metaMtime > fulltextMtime) {
             const threshold = this.fulltextCacheUpdateThreshold;
             if (typeof threshold === 'number' && Date.now() > fulltextMtime + threshold) {
-              cacheOutdatedMessage = scrapbook.lang('WarnSearchCacheOutdated', [book.name]);
+              cacheOutdatedMessage = utils.lang('WarnSearchCacheOutdated', [book.name]);
             }
           }
 
@@ -418,20 +418,20 @@ const search = {
     const elem = event.currentTarget;
     const bookId = elem.closest('[data-book-id]').getAttribute('data-book-id');
     const id = elem.closest('[data-id]').getAttribute('data-id');
-    const response = await scrapbook.invokeExtensionScript({
+    const response = await utils.invokeExtensionScript({
       cmd: "background.locateItem",
       args: {bookId, id},
     });
     if (response === false) {
-      alert(scrapbook.lang("ErrorLocateSidebarNotOpened"));
+      alert(utils.lang("ErrorLocateSidebarNotOpened"));
     } else if (response === null) {
-      alert(scrapbook.lang("ErrorLocateNotFound"));
+      alert(utils.lang("ErrorLocateNotFound"));
     }
   },
 };
 
 document.addEventListener('DOMContentLoaded', (event) => {
-  scrapbook.loadLanguages(document);
+  utils.loadLanguages(document);
 
   document.getElementById('searchForm').addEventListener('submit', (event) => {
     event.preventDefault();

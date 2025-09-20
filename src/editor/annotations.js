@@ -2,7 +2,7 @@
  * Shared script for modal dialog windows.
  *****************************************************************************/
 
-import * as scrapbook from "../utils/common.mjs";
+import * as utils from "../utils/common.mjs";
 import {dialog} from "../core/dialog.js";
 
 Object.assign(dialog, {
@@ -22,7 +22,7 @@ Object.assign(dialog, {
   },
 
   onLoad(event) {
-    scrapbook.loadLanguages(document);
+    utils.loadLanguages(document);
 
     document.querySelector('form').addEventListener('submit', (event) => {
       event.preventDefault();
@@ -137,7 +137,7 @@ const annotationViewer = {
 
   async locateAnnotation(elem) {
     const id = elem.dataset.id;
-    await scrapbook.invokeContentScript({
+    await utils.invokeContentScript({
       tabId: annotationViewer.tabId,
       frameId: annotationViewer.frameId,
       cmd: "editor.highlightAnnotation",

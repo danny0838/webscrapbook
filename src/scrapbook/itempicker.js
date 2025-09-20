@@ -2,12 +2,12 @@
  * Script for itempicker.html.
  *****************************************************************************/
 
-import * as scrapbook from "../utils/extension.mjs";
+import * as utils from "../utils/extension.mjs";
 import {dialog} from "../core/dialog.js";
 import {server} from "./server.mjs";
 import {BookTree} from "./book-tree.mjs";
 
-scrapbook.loadOptionsAuto(); // async
+utils.loadOptionsAuto(); // async
 
 const dialogOnLoad = dialog.onLoad;
 
@@ -46,7 +46,7 @@ const itempicker = {
 
       document.getElementById('relation').hidden = !withRelation;
 
-      await scrapbook.loadOptionsAuto();
+      await utils.loadOptionsAuto();
       await server.init();
 
       if (typeof bookId !== 'string') {
@@ -104,7 +104,7 @@ const itempicker = {
       serverRoot: server.serverRoot,
       bookId,
     };
-    const list = await scrapbook.cache.get(key);
+    const list = await utils.cache.get(key);
     if (!list?.length) { return; }
 
     const selector = document.getElementById('recent');
@@ -135,7 +135,7 @@ const itempicker = {
       bookId,
     };
 
-    let list = await scrapbook.cache.get(key);
+    let list = await utils.cache.get(key);
     list = new Set(list);
     list.delete(id);  // move to last if id already exists
     list.add(id);
@@ -151,12 +151,12 @@ const itempicker = {
     list = [...list];
 
     // truncate the list to last n items
-    const slicePos = list.length - scrapbook.getOption("scrapbook.itemPicker.recentItemsMax");
+    const slicePos = list.length - utils.getOption("scrapbook.itemPicker.recentItemsMax");
     if (slicePos > 0) {
       list = list.slice(slicePos);
     }
 
-    await scrapbook.cache.set(key, list);
+    await utils.cache.set(key, list);
   },
 
   selectRecentItem(id) {

@@ -2,10 +2,10 @@
  * Script for postit-frame.html.
  *****************************************************************************/
 
-import * as scrapbook from "../utils/extension.mjs";
+import * as utils from "../utils/extension.mjs";
 import {server} from "./server.mjs";
 
-scrapbook.loadOptionsAuto(); // async
+utils.loadOptionsAuto(); // async
 
 const editor = {
   id: null,
@@ -22,7 +22,7 @@ const editor = {
       const id = this.id = params.get('id');
       const bookId = this.bookId = params.get('bookId') || '';
 
-      await scrapbook.loadOptionsAuto();
+      await utils.loadOptionsAuto();
       await server.init();
 
       const book = server.books[bookId];
@@ -119,7 +119,7 @@ const editor = {
 };
 
 document.addEventListener('DOMContentLoaded', (event) => {
-  scrapbook.loadLanguages(document);
+  utils.loadLanguages(document);
 
   document.getElementById('btn-expand').addEventListener('click', (event) => {
     editor.expand();

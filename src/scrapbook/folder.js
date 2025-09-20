@@ -2,11 +2,11 @@
  * Script for folder.html.
  *****************************************************************************/
 
-import * as scrapbook from "../utils/extension.mjs";
+import * as utils from "../utils/extension.mjs";
 import {server} from "./server.mjs";
 import {BookTree} from "./book-tree.mjs";
 
-scrapbook.loadOptionsAuto(); // async
+utils.loadOptionsAuto(); // async
 
 const controller = {
   id: null,
@@ -19,7 +19,7 @@ const controller = {
       const id = this.id = params.get('id') || 'root';
       const bookId = this.bookId = params.get('bookId') || '';
 
-      await scrapbook.loadOptionsAuto();
+      await utils.loadOptionsAuto();
       await server.init();
 
       const book = server.books[bookId];
@@ -64,7 +64,7 @@ const controller = {
 };
 
 document.addEventListener('DOMContentLoaded', (event) => {
-  scrapbook.loadLanguages(document);
+  utils.loadLanguages(document);
 
   controller.init();
 });

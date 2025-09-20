@@ -2,7 +2,7 @@
  * Shared class for item info formatting.
  *****************************************************************************/
 
-import * as scrapbook from "../utils/common.mjs";
+import * as utils from "../utils/common.mjs";
 import {Strftime} from "../lib/strftime.mjs";
 
 class ItemInfoFormatter {
@@ -60,16 +60,16 @@ class ItemInfoFormatter {
         return text.replace(/[\r\n][\S\s]+$/, '');
       }
       case "collapse": {
-        return scrapbook.split(text).join(' ');
+        return utils.split(text).join(' ');
       }
       case "url": {
         return encodeURIComponent(text);
       }
       case "escape_html": {
-        return scrapbook.escapeHtml(text);
+        return utils.escapeHtml(text);
       }
       case "escape_html_space": {
-        return scrapbook.escapeHtml(text, undefined, undefined, true);
+        return utils.escapeHtml(text, undefined, undefined, true);
       }
       case "escape_css": {
         return CSS.escape(text);
@@ -82,7 +82,7 @@ class ItemInfoFormatter {
   }
 
   formatDate(id, key, mode) {
-    const date = scrapbook.idToDate(id);
+    const date = utils.idToDate(id);
     if (!date) {
       return '';
     }
@@ -121,13 +121,13 @@ class ItemInfoFormatter {
         if (item.source) {
           return new URL(item.source).href;
         } else if (book && item.index) {
-          return new URL(book.dataUrl + scrapbook.escapeFilename(item.index)).href;
+          return new URL(book.dataUrl + utils.escapeFilename(item.index)).href;
         }
         break;
       }
       default: {
         if (book && item.index) {
-          return new URL(book.dataUrl + scrapbook.escapeFilename(item.index)).href;
+          return new URL(book.dataUrl + utils.escapeFilename(item.index)).href;
         }
         break;
       }
@@ -142,7 +142,7 @@ class ItemInfoFormatter {
   format_id(keySub) {
     switch (keySub) {
       case 'legacy': {
-        return scrapbook.dateToIdOld(scrapbook.idToDate(this.item.id));
+        return utils.dateToIdOld(utils.idToDate(this.item.id));
       }
       default: {
         return this.item.id;
@@ -196,10 +196,10 @@ class ItemInfoFormatter {
         return u.hash.slice(1);
       }
       case "file": {
-        return scrapbook.urlToFilename(this.item.source);
+        return utils.urlToFilename(this.item.source);
       }
       case "page": {
-        return scrapbook.filenameParts(scrapbook.urlToFilename(this.item.source))[0];
+        return utils.filenameParts(utils.urlToFilename(this.item.source))[0];
       }
       default: {
         return this.item.source;

@@ -2,7 +2,7 @@
  * Script for advanced.html.
  *****************************************************************************/
 
-import * as scrapbook from "../utils/extension.mjs";
+import * as utils from "../utils/extension.mjs";
 
 async function init() {
   const missionId = new URL(document.URL).searchParams.get('mid');
@@ -11,8 +11,8 @@ async function init() {
   const key = {table: "batchCaptureMissionCache", id: missionId};
   let data;
   try {
-    data = await scrapbook.cache.get(key);
-    await scrapbook.cache.remove(key);
+    data = await utils.cache.get(key);
+    await utils.cache.remove(key);
     if (!data) { throw new Error(`Missing data for mission "${missionId}".`); }
   } catch (ex) {
     console.error(ex);
@@ -31,7 +31,7 @@ async function init() {
 }
 
 async function capture({taskInfo, ignoreTitle, uniquify}) {
-  await scrapbook.invokeCaptureEx({taskInfo, ignoreTitle, uniquify, waitForResponse: false});
+  await utils.invokeCaptureEx({taskInfo, ignoreTitle, uniquify, waitForResponse: false});
 }
 
 function parseInputText(inputText) {
@@ -129,7 +129,7 @@ function onTooltipClick(event) {
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
-  scrapbook.loadLanguages(document);
+  utils.loadLanguages(document);
 
   document.getElementById('tasks').addEventListener('change', onTasksChange);
   document.getElementById('btn-capture').addEventListener('click', onCaptureClick);

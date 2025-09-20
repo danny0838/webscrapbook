@@ -666,8 +666,8 @@ describe('Capture tests', function () {
   describe('filename', function () {
     describe('basic', function () {
       /**
-       * scrapbook.validateFilename
-       * scrapbook.escapeFilename
+       * utils.validateFilename
+       * utils.escapeFilename
        */
       it('should rewrite special chars and rename forbidden filenames', async function () {
         const EXPECTED_FILENAMES = [
@@ -2266,7 +2266,7 @@ p { background-image: url("about:blank"); }`);
 
     /**
      * capturer.captureUrl
-     * scrapbook.parseHeaderRefresh
+     * utils.parseHeaderRefresh
      */
     describe('should save refreshed target for zero-time meta refresh', function () {
       it('time = 0: should save the refreshed page', async function () {
@@ -5358,7 +5358,7 @@ div > ::slotted(*) { font-size: 1.2em; }`);
     });
 
     /**
-     * scrapbook.parseCssText
+     * utils.parseCssText
      */
     describe('CSS syntax parsing', function () {
       it('background', async function () {
@@ -5478,7 +5478,7 @@ div > ::slotted(*) { font-size: 1.2em; }`);
     });
 
     /**
-     * scrapbook.parseCssFile
+     * utils.parseCssFile
      */
     describe('charset handling', function () {
       async function hasBomUtf8(blob) {

@@ -2,7 +2,7 @@
  * Shared script for modal dialog windows.
  *****************************************************************************/
 
-import * as scrapbook from "../utils/common.mjs";
+import * as utils from "../utils/common.mjs";
 import {dialog} from "../core/dialog.js";
 
 Object.assign(dialog, {

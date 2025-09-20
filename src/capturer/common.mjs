@@ -4,7 +4,7 @@
 
 import {isDebug} from "../utils/debug.mjs";
 import {ANNOTATION_CSS} from "../utils/common.mjs";
-import * as scrapbook from "../utils/common.mjs";
+import * as utils from "../utils/common.mjs";
 import {dataUriToFile} from "../utils/datauri.mjs";
 import {MapWithDefault} from "../lib/map-with-default.mjs";
 import {ItemInfoFormatter as _ItemInfoFormatter} from "../scrapbook/item-info-formatter.mjs";
@@ -189,12 +189,12 @@ capturer.captureDocument = async function (params) {
     return capturer.downloadFile(params)
       .then(response => {
         return Object.assign({}, response, {
-          url: capturer.getRedirectedUrl(response.url, scrapbook.splitUrlByAnchor(url)[1]),
+          url: capturer.getRedirectedUrl(response.url, utils.splitUrlByAnchor(url)[1]),
         });
       })
       .catch((ex) => {
         console.error(ex);
-        warn(scrapbook.lang("ErrorFileDownloadError", [url, ex.message]));
+        warn(utils.lang("ErrorFileDownloadError", [url, ex.message]));
         return {url: capturer.getErrorUrl(url, options), error: {message: ex.message}};
       });
   };
@@ -204,7 +204,7 @@ capturer.captureDocument = async function (params) {
   // e.g. cloned iframes has no content, cloned canvas has no image,
   // and cloned form elements has no current status.
   const cloneNodeMapping = (node, deep = false) => {
-    return scrapbook.cloneNode(node, deep, {
+    return utils.cloneNode(node, deep, {
       newDoc,
       origNodeMap,
       clonedNodeMap,
@@ -226,7 +226,7 @@ capturer.captureDocument = async function (params) {
     if (!elem.parentNode) { return; }
 
     if (record) {
-      const comment = newDoc.createComment(`scrapbook-orig-node-${timeId}=${scrapbook.escapeHtmlComment(elem.outerHTML)}`);
+      const comment = newDoc.createComment(`scrapbook-orig-node-${timeId}=${utils.escapeHtmlComment(elem.outerHTML)}`);
       elem.parentNode.replaceChild(comment, elem);
     } else {
       elem.parentNode.removeChild(elem);
@@ -237,7 +237,7 @@ capturer.captureDocument = async function (params) {
   // if value is false/null/undefined, remove the attr
   // if value is true, set attr to "" iff attr not exist
   const captureRewriteAttr = (elem, attr, value, record = options["capture.recordRewrites"]) => {
-    const [ns, att] = scrapbook.splitXmlAttribute(attr);
+    const [ns, att] = utils.splitXmlAttribute(attr);
 
     if (elem.hasAttribute(attr)) {
       if (value === true) { return; }
@@ -313,7 +313,7 @@ capturer.captureDocument = async function (params) {
     const url = capturer.resolveRelativeUrl(relativeUrl, baseUrl, {skipLocal: false});
 
     // This link targets the current page
-    const [urlMain, urlHash] = scrapbook.splitUrlByAnchor(url);
+    const [urlMain, urlHash] = utils.splitUrlByAnchor(url);
     if (urlMain === metaDocUrl && !capturer.isAboutUrl(metaDocUrl)) {
       // @TODO: for iframe whose URL is about:blank or about:srcdoc,
       // this link should point to the captured page
@@ -326,7 +326,7 @@ capturer.captureDocument = async function (params) {
       // relink to the captured page only when the target node is included in the selected fragment.
       let hasLocalTarget = !selection;
       if (!hasLocalTarget) {
-        const targetId = CSS.escape(scrapbook.decodeURIComponent(urlHash.slice(1)));
+        const targetId = CSS.escape(utils.decodeURIComponent(urlHash.slice(1)));
         if (rootNode.querySelector(`#${targetId}, a[name="${targetId}"]`)) {
           hasLocalTarget = true;
         }
@@ -390,7 +390,7 @@ capturer.captureDocument = async function (params) {
           })
           .catch((ex) => {
             console.error(ex);
-            warn(scrapbook.lang("ErrorFileDownloadError", [url, ex.message]));
+            warn(utils.lang("ErrorFileDownloadError", [url, ex.message]));
             return {url: capturer.getErrorUrl(url, options), error: {message: ex.message}};
           });
 
@@ -428,7 +428,7 @@ capturer.captureDocument = async function (params) {
       case "save":
       default: {
         // skip further processing for non-absolute links
-        if (!scrapbook.isUrlAbsolute(url)) {
+        if (!utils.isUrlAbsolute(url)) {
           break;
         }
 
@@ -483,7 +483,7 @@ capturer.captureDocument = async function (params) {
     }
 
     // skip processing a special node
-    if (!REWRITABLE_SPECIAL_OBJECTS.has(scrapbook.getScrapbookObjectType(node))) {
+    if (!REWRITABLE_SPECIAL_OBJECTS.has(utils.getScrapbookObjectType(node))) {
       return node;
     }
 
@@ -634,7 +634,7 @@ capturer.captureDocument = async function (params) {
           // Update baseUrl for the first base[href].
           // Note: don't consider a <base> elem in a shadowRoot.
           if (!seenBaseElem && elem.getRootNode().nodeType !== 11) {
-            baseUrl = scrapbook.splitUrlByAnchor(newUrl)[0];
+            baseUrl = utils.splitUrlByAnchor(newUrl)[0];
             seenBaseElem = true;
           }
 
@@ -675,7 +675,7 @@ capturer.captureDocument = async function (params) {
           if (elem.matches('[http-equiv][content]')) {
             switch (elem.getAttribute("http-equiv").toLowerCase()) {
               case "content-type": {
-                const contentType = scrapbook.parseHeaderContentType(elem.getAttribute("content"));
+                const contentType = utils.parseHeaderContentType(elem.getAttribute("content"));
                 if (contentType.parameters.charset && !metaCharsetNode) {
                   // force UTF-8
                   metaCharsetNode = elem;
@@ -684,7 +684,7 @@ capturer.captureDocument = async function (params) {
                   for (const field in contentType.parameters) {
                     let v = contentType.parameters[field];
                     if (field === 'charset') { v = 'UTF-8'; }
-                    value += '; ' + field + '=' + (regexToken.test(v) ? v : '"' + scrapbook.escapeQuotes(v) + '"');
+                    value += '; ' + field + '=' + (regexToken.test(v) ? v : '"' + utils.escapeQuotes(v) + '"');
                   }
                   captureRewriteAttr(elem, "content", value);
                 }
@@ -692,7 +692,7 @@ capturer.captureDocument = async function (params) {
               }
               case "refresh": {
                 // rewrite meta refresh
-                const metaRefresh = scrapbook.parseHeaderRefresh(elem.getAttribute("content"));
+                const metaRefresh = utils.parseHeaderRefresh(elem.getAttribute("content"));
                 if (metaRefresh.url) {
                   const url = resolveLocalLink(metaRefresh.url, baseUrl);
                   captureRewriteAttr(elem, "content", metaRefresh.time + (url ? "; url=" + url : ""));
@@ -716,7 +716,7 @@ capturer.captureDocument = async function (params) {
                         })
                         .catch((ex) => {
                           console.error(ex);
-                          warn(scrapbook.lang("ErrorFileDownloadError", [url, ex.message]));
+                          warn(utils.lang("ErrorFileDownloadError", [url, ex.message]));
                           return {url: capturer.getErrorUrl(url, options), error: {message: ex.message}};
                         });
 
@@ -774,7 +774,7 @@ capturer.captureDocument = async function (params) {
           }
 
           if (elem.hasAttribute("imagesrcset")) {
-            const rewriteSrcset = scrapbook.rewriteSrcset(elem.getAttribute("imagesrcset"), (url) => {
+            const rewriteSrcset = utils.rewriteSrcset(elem.getAttribute("imagesrcset"), (url) => {
               return resolveRelativeUrl(url, baseUrl);
             });
             captureRewriteAttr(elem, "imagesrcset", rewriteSrcset);
@@ -798,7 +798,7 @@ capturer.captureDocument = async function (params) {
                   // Chromium has a bug that alternative stylesheets has disabled = false,
                   // but actually not enabled and cannot be enabled.
                   // https://bugs.chromium.org/p/chromium/issues/detail?id=965554
-                  if (!scrapbook.userAgent.is("chromium")) {
+                  if (!utils.userAgent.is("chromium")) {
                     // In Firefox, stylesheets with [rel~="alternate"]:not([title]) is
                     // disabled initially. Remove "alternate" to get it work.
                     if (elem.matches('[rel~="alternate"]')) {
@@ -1236,14 +1236,14 @@ capturer.captureDocument = async function (params) {
                 const captureFrameCallback = async (response) => {
                   isDebug && console.debug("captureFrameCallback", response);
                   const file = dataUriToFile(response.url);
-                  const content = await scrapbook.readFileAsText(file);
+                  const content = await utils.readFileAsText(file);
                   captureRewriteAttr(frame, "srcdoc", content);
                   return response;
                 };
 
                 const captureFrameErrorHandler = async (ex) => {
                   console.error(ex);
-                  warn(scrapbook.lang("ErrorFileDownloadError", [sourceUrl, ex.message]));
+                  warn(utils.lang("ErrorFileDownloadError", [sourceUrl, ex.message]));
                   // don't rewrite srcdoc if error
                 };
 
@@ -1326,10 +1326,10 @@ capturer.captureDocument = async function (params) {
                     frame.nodeName.toLowerCase() === 'iframe' &&
                     options["capture.saveDataUriAsSrcdoc"]) {
                   const file = dataUriToFile(response.url);
-                  const {type: mime, parameters: {charset}} = scrapbook.parseHeaderContentType(file.type);
+                  const {type: mime, parameters: {charset}} = utils.parseHeaderContentType(file.type);
                   if (mime === "text/html") {
                     // assume the charset is UTF-8 if not defined
-                    const content = await scrapbook.readFileAsText(file, charset || "UTF-8");
+                    const content = await utils.readFileAsText(file, charset || "UTF-8");
                     captureRewriteAttr(frame, "srcdoc", content);
                     captureRewriteAttr(frame, "src", null);
                     return response;
@@ -1345,7 +1345,7 @@ capturer.captureDocument = async function (params) {
 
               const captureFrameErrorHandler = async (ex) => {
                 console.error(ex);
-                warn(scrapbook.lang("ErrorFileDownloadError", [sourceUrl, ex.message]));
+                warn(utils.lang("ErrorFileDownloadError", [sourceUrl, ex.message]));
                 return {url: capturer.getErrorUrl(sourceUrl, options), error: {message: ex.message}};
               };
 
@@ -1431,7 +1431,7 @@ capturer.captureDocument = async function (params) {
                 // if the frame src is not absolute,
                 // skip further processing and keep current src
                 // (point to self, or not resolvable)
-                if (!scrapbook.isUrlAbsolute(sourceUrl)) {
+                if (!utils.isUrlAbsolute(sourceUrl)) {
                   return;
                 }
 
@@ -1456,13 +1456,13 @@ capturer.captureDocument = async function (params) {
                   });
                 }
 
-                const [sourceUrlMain, sourceUrlHash] = scrapbook.splitUrlByAnchor(sourceUrl);
+                const [sourceUrlMain, sourceUrlHash] = utils.splitUrlByAnchor(sourceUrl);
                 frameSettings.recurseChain.push(docUrl);
 
                 // check circular reference if saving as data URL
                 if (frameOptions["capture.saveAs"] === "singleHtml") {
                   if (frameSettings.recurseChain.includes(sourceUrlMain)) {
-                    warn(scrapbook.lang("WarnCaptureCircular", [refUrl, sourceUrlMain]));
+                    warn(utils.lang("WarnCaptureCircular", [refUrl, sourceUrlMain]));
                     captureRewriteAttr(frame, "src", `urn:scrapbook:download:circular:url:${sourceUrl}`);
                     return;
                   }
@@ -1487,7 +1487,7 @@ capturer.captureDocument = async function (params) {
           if (elem.hasAttribute("ping")) {
             switch (options["capture.ping"]) {
               case "link": {
-                const newUrls = scrapbook.rewriteUrls(elem.getAttribute("ping"), (url) => {
+                const newUrls = utils.rewriteUrls(elem.getAttribute("ping"), (url) => {
                   return resolveRelativeUrl(url, baseUrlFinal);
                 });
                 captureRewriteAttr(elem, "ping", newUrls);
@@ -1513,7 +1513,7 @@ capturer.captureDocument = async function (params) {
           }
 
           if (elem.hasAttribute("srcset")) {
-            const rewriteSrcset = scrapbook.rewriteSrcset(elem.getAttribute("srcset"), (url) => {
+            const rewriteSrcset = utils.rewriteSrcset(elem.getAttribute("srcset"), (url) => {
               return resolveRelativeUrl(url, baseUrl);
             });
             captureRewriteAttr(elem, "srcset", rewriteSrcset);
@@ -1578,7 +1578,7 @@ capturer.captureDocument = async function (params) {
 
               if (elem.hasAttribute("srcset")) {
                 tasks.push(async () => {
-                  const response = await scrapbook.rewriteSrcset(elem.getAttribute("srcset"), async (url) => {
+                  const response = await utils.rewriteSrcset(elem.getAttribute("srcset"), async (url) => {
                     return (await downloadFile({
                       url,
                       refUrl,
@@ -1602,7 +1602,7 @@ capturer.captureDocument = async function (params) {
         // images: picture
         case "picture": {
           for (const subElem of elem.querySelectorAll('source[srcset]')) {
-            const rewriteSrcset = scrapbook.rewriteSrcset(subElem.getAttribute("srcset"), (url) => {
+            const rewriteSrcset = utils.rewriteSrcset(subElem.getAttribute("srcset"), (url) => {
               return resolveRelativeUrl(url, baseUrl);
             });
             captureRewriteAttr(subElem, "srcset", rewriteSrcset);
@@ -1645,7 +1645,7 @@ capturer.captureDocument = async function (params) {
               const refPolicy = docRefPolicy;
               for (const subElem of elem.querySelectorAll('source[srcset]')) {
                 tasks.push(async () => {
-                  const response = await scrapbook.rewriteSrcset(subElem.getAttribute("srcset"), async (url) => {
+                  const response = await utils.rewriteSrcset(subElem.getAttribute("srcset"), async (url) => {
                     const newUrl = resolveRelativeUrl(url, baseUrl);
                     return (await downloadFile({
                       url: newUrl,
@@ -1953,7 +1953,7 @@ capturer.captureDocument = async function (params) {
 
                   // skip further processing and keep current src
                   // (point to self, or not resolvable)
-                  if (!scrapbook.isUrlAbsolute(sourceUrl)) {
+                  if (!utils.isUrlAbsolute(sourceUrl)) {
                     return;
                   }
 
@@ -1963,7 +1963,7 @@ capturer.captureDocument = async function (params) {
                     return;
                   }
 
-                  const [sourceUrlMain, sourceUrlHash] = scrapbook.splitUrlByAnchor(sourceUrl);
+                  const [sourceUrlMain, sourceUrlHash] = utils.splitUrlByAnchor(sourceUrl);
 
                   // headlessly capture
                   const embedSettings = Object.assign({}, settings, {
@@ -1990,7 +1990,7 @@ capturer.captureDocument = async function (params) {
                   // check circular reference if saving as data URL
                   if (embedOptions["capture.saveAs"] === "singleHtml") {
                     if (embedSettings.recurseChain.includes(sourceUrlMain)) {
-                      warn(scrapbook.lang("WarnCaptureCircular", [refUrl, sourceUrlMain]));
+                      warn(utils.lang("WarnCaptureCircular", [refUrl, sourceUrlMain]));
                       captureRewriteAttr(elem, "src", `urn:scrapbook:download:circular:url:${sourceUrl}`);
                       return;
                     }
@@ -2004,7 +2004,7 @@ capturer.captureDocument = async function (params) {
                     options: embedOptions,
                   }).catch((ex) => {
                     console.error(ex);
-                    warn(scrapbook.lang("ErrorFileDownloadError", [sourceUrl, ex.message]));
+                    warn(utils.lang("ErrorFileDownloadError", [sourceUrl, ex.message]));
                     return {url: capturer.getErrorUrl(sourceUrl, options), error: {message: ex.message}};
                   }).then((response) => {
                     captureRewriteAttr(elem, "src", response.url);
@@ -2042,7 +2042,7 @@ capturer.captureDocument = async function (params) {
           }
 
           if (elem.hasAttribute("archive")) {
-            const newUrls = scrapbook.rewriteUrls(elem.getAttribute("archive"), (url) => {
+            const newUrls = utils.rewriteUrls(elem.getAttribute("archive"), (url) => {
               return resolveRelativeUrl(url, objectBaseUrl);
             });
             captureRewriteAttr(elem, "archive", newUrls);
@@ -2075,7 +2075,7 @@ capturer.captureDocument = async function (params) {
 
                   // skip further processing and keep current src
                   // (point to self, or not resolvable)
-                  if (!scrapbook.isUrlAbsolute(sourceUrl)) {
+                  if (!utils.isUrlAbsolute(sourceUrl)) {
                     return;
                   }
 
@@ -2085,7 +2085,7 @@ capturer.captureDocument = async function (params) {
                     return;
                   }
 
-                  const [sourceUrlMain, sourceUrlHash] = scrapbook.splitUrlByAnchor(sourceUrl);
+                  const [sourceUrlMain, sourceUrlHash] = utils.splitUrlByAnchor(sourceUrl);
 
                   // headlessly capture
                   const objectSettings = Object.assign({}, settings, {
@@ -2112,7 +2112,7 @@ capturer.captureDocument = async function (params) {
                   // check circular reference if saving as data URL
                   if (objectOptions["capture.saveAs"] === "singleHtml") {
                     if (objectSettings.recurseChain.includes(sourceUrlMain)) {
-                      warn(scrapbook.lang("WarnCaptureCircular", [refUrl, sourceUrlMain]));
+                      warn(utils.lang("WarnCaptureCircular", [refUrl, sourceUrlMain]));
                       captureRewriteAttr(elem, "data", `urn:scrapbook:download:circular:url:${sourceUrl}`);
                       return;
                     }
@@ -2126,7 +2126,7 @@ capturer.captureDocument = async function (params) {
                     options: objectOptions,
                   }).catch(async (ex) => {
                     console.error(ex);
-                    warn(scrapbook.lang("ErrorFileDownloadError", [sourceUrl, ex.message]));
+                    warn(utils.lang("ErrorFileDownloadError", [sourceUrl, ex.message]));
                     return {url: capturer.getErrorUrl(sourceUrl, options), error: {message: ex.message}};
                   }).then(async (response) => {
                     captureRewriteAttr(elem, "data", response.url);
@@ -2138,7 +2138,7 @@ capturer.captureDocument = async function (params) {
               // plugins referenced by legacy archive are static and do not require rewriting
               if (elem.hasAttribute("archive")) {
                 tasks.push(async () => {
-                  const response = await scrapbook.rewriteUrls(elem.getAttribute("archive"), async (url) => {
+                  const response = await utils.rewriteUrls(elem.getAttribute("archive"), async (url) => {
                     return (await downloadFile({
                       url,
                       refUrl,
@@ -2251,7 +2251,7 @@ capturer.captureDocument = async function (params) {
 
               try {
                 const data = elemOrig.toDataURL();
-                if (data !== scrapbook.getBlankCanvasData(elemOrig)) {
+                if (data !== utils.getBlankCanvasData(elemOrig)) {
                   elem.setAttribute("data-scrapbook-canvas", data);
                   requireBasicLoader = true;
                 }
@@ -2558,7 +2558,7 @@ capturer.captureDocument = async function (params) {
 
       // handle shadow DOM
       if (options["capture.shadowDom"] === "save") {
-        const shadowRoot = scrapbook.getShadowRoot(elem);
+        const shadowRoot = utils.getShadowRoot(elem);
         if (shadowRoot) {
           const shadowRootOrig = origNodeMap.get(shadowRoot);
           cssTasks.push(() => { cssResourcesHandler.scopePush(shadowRootOrig); });
@@ -2693,7 +2693,7 @@ capturer.captureDocument = async function (params) {
     const baseUrlCurrent = baseUrl;
     const refPolicy = docRefPolicy;
     const infos = [];
-    for (const css of scrapbook.getAdoptedStyleSheets(docOrShadowRoot)) {
+    for (const css of utils.getAdoptedStyleSheets(docOrShadowRoot)) {
       let info = adoptedStyleSheetMap.get(css);
       if (info) {
         info.roots.push(root);
@@ -2728,8 +2728,8 @@ capturer.captureDocument = async function (params) {
   const isHeadless = !doc.defaultView;
 
   // determine docUrl, baseUrl, etc.
-  const [metaDocUrl, metaDocUrlHash] = scrapbook.splitUrlByAnchor(params.metaDocUrl || doc.URL);
-  const [docUrl, docUrlHash] = scrapbook.splitUrlByAnchor(params.docUrl || doc.URL);
+  const [metaDocUrl, metaDocUrlHash] = utils.splitUrlByAnchor(params.metaDocUrl || doc.URL);
+  const [docUrl, docUrlHash] = utils.splitUrlByAnchor(params.docUrl || doc.URL);
 
   // baseUrl: updates dynamically when the first base[href] is parsed.
   // baseUrlFallback: the initial baseUrl, used for resolving base elements.
@@ -2750,14 +2750,14 @@ capturer.captureDocument = async function (params) {
   // dynamic baseUrl for a bad document with an URL before base[href].
   //
   // ref: https://html.spec.whatwg.org/#dynamic-changes-to-base-urls
-  const baseUrlFallback = scrapbook.splitUrlByAnchor(params.baseUrl || docUrl)[0];
+  const baseUrlFallback = utils.splitUrlByAnchor(params.baseUrl || docUrl)[0];
   let baseUrl = baseUrlFallback;
   const baseUrlFinal = (() => {
     let base = baseUrlFallback;
     for (const elem of doc.querySelectorAll('base[href]')) {
       if (elem.closest('svg, math')) { continue; }
       base = new URL(elem.getAttribute('href'), baseUrlFallback).href;
-      base = scrapbook.splitUrlByAnchor(base)[0];
+      base = utils.splitUrlByAnchor(base)[0];
       break;
     }
     return base;
@@ -2777,7 +2777,7 @@ capturer.captureDocument = async function (params) {
         'document';
     }
     settings.indexFilename = settings.indexFilename || await capturer.formatIndexFilename({
-      title: settings.title || doc.title || scrapbook.filenameParts(scrapbook.urlToFilename(docUrl))[0] || "untitled",
+      title: settings.title || doc.title || utils.filenameParts(utils.urlToFilename(docUrl))[0] || "untitled",
       sourceUrl: docUrl,
       isFolder: options["capture.saveAs"] === "folder",
       settings,
@@ -2792,7 +2792,7 @@ capturer.captureDocument = async function (params) {
     mime,
     role: (options["capture.saveAs"] === "singleHtml" || (docUrl.startsWith("data:") && !options["capture.saveDataUriAsFile"])) ? undefined :
         (isMainFrame || (isHeadless && !capturer.isAboutUrl(metaDocUrl))) ? "document" :
-        `document-${scrapbook.getUuid()}`,
+        `document-${utils.getUuid()}`,
     settings,
     options,
   });
@@ -2810,7 +2810,7 @@ capturer.captureDocument = async function (params) {
 
   // group sub-frames with same filename
   if (isMainFrame) {
-    settings.documentName = scrapbook.filenameParts(documentFileName)[0];
+    settings.documentName = utils.filenameParts(documentFileName)[0];
   }
 
   // construct the cloned node tree
@@ -2822,10 +2822,10 @@ capturer.captureDocument = async function (params) {
   const customElementNames = new Set();
 
   // create a new document to replicate nodes via import
-  const newDoc = scrapbook.cloneDocument(doc, {origNodeMap, clonedNodeMap});
+  const newDoc = utils.cloneDocument(doc, {origNodeMap, clonedNodeMap});
 
   let rootNode, headNode;
-  let selection = settings.fullPage ? null : scrapbook.getSelection(doc);
+  let selection = settings.fullPage ? null : utils.getSelection(doc);
   {
     if (selection?.type !== 'Range') {
       selection = null;
@@ -2856,7 +2856,7 @@ capturer.captureDocument = async function (params) {
 
       // @FIXME: handle sparsely selected table cells
       let curRange, caNode, scNode, ecNode, lastTextNode;
-      for (curRange of scrapbook.getSelectionRanges(selection)) {
+      for (curRange of utils.getSelectionRanges(selection)) {
         // skip a collapsed range
         if (curRange.collapsed) {
           continue;
@@ -3047,7 +3047,7 @@ capturer.captureDocument = async function (params) {
   // options["capture.helpersEnabled"] is truthy, as validated in
   // `capturer.captureGeneral`.
   if (options["capture.helpersEnabled"]) {
-    const helpers = scrapbook.parseOption("capture.helpers", options["capture.helpers"]);
+    const helpers = utils.parseOption("capture.helpers", options["capture.helpers"]);
     const parser = new CaptureHelperHandler({
       helpers,
       rootNode,
@@ -3075,7 +3075,7 @@ capturer.captureDocument = async function (params) {
   const cssResourcesHandler = new DocumentCssResourcesHandler(cssHandler);
 
   // prepare favicon selector
-  const favIconSelector = scrapbook.split(options["capture.faviconAttrs"])
+  const favIconSelector = utils.split(options["capture.faviconAttrs"])
     .map(attr => `[rel~="${CSS.escape(attr)}"][href]`)
     .join(', ');
 
@@ -3096,7 +3096,7 @@ capturer.captureDocument = async function (params) {
         isMainPage: false,
         isMainFrame: true,
       });
-      const urls = scrapbook.parseOption("capture.downLink.urlExtra", options["capture.downLink.urlExtra"]);
+      const urls = utils.parseOption("capture.downLink.urlExtra", options["capture.downLink.urlExtra"]);
       for (const url of urls) {
         downLinkTasks.push(async () => {
           const response = await capturer.captureUrl({
@@ -3109,7 +3109,7 @@ capturer.captureDocument = async function (params) {
           })
           .catch((ex) => {
             console.error(ex);
-            warn(scrapbook.lang("ErrorFileDownloadError", [url, ex.message]));
+            warn(utils.lang("ErrorFileDownloadError", [url, ex.message]));
             return {url: capturer.getErrorUrl(url, options), error: {message: ex.message}};
           });
           return response;
@@ -3321,7 +3321,7 @@ capturer.captureDocument = async function (params) {
   if (customElementNames.size > 0 && !['save', 'link'].includes(options["capture.script"])) {
     const elem = newDoc.createElement('script');
     elem.setAttribute("data-scrapbook-elem", "custom-elements-loader");
-    elem.textContent = "(" + scrapbook.compressJsFunc(function (names) {
+    elem.textContent = "(" + utils.compressJsFunc(function (names) {
       if (!customElements) { return; }
       for (const name of names) {
         customElements.define(name, class CustomElement extends HTMLElement {});
@@ -3340,7 +3340,7 @@ capturer.captureDocument = async function (params) {
   });
 
   // save document
-  const content = scrapbook.documentToString(newDoc, options["capture.prettyPrint"]);
+  const content = utils.documentToString(newDoc, options["capture.prettyPrint"]);
   const blob = new Blob([content], {type: `${mime};charset=UTF-8`});
   const response = await capturer.saveDocument({
     sourceUrl: capturer.getRedirectedUrl(docUrl, docUrlHash),
@@ -3397,10 +3397,10 @@ capturer.retrieveDocumentContent = async function (params) {
   const {doc = document, internalize = false, isMainPage, item, options} = params;
 
   const data = {};
-  const docs = scrapbook.flattenFrames(doc);
+  const docs = utils.flattenFrames(doc);
   for (let i = 0, I = docs.length; i < I; i++) {
     const doc = docs[i];
-    const docUrl = scrapbook.normalizeUrl(scrapbook.splitUrl(doc.URL)[0]);
+    const docUrl = utils.normalizeUrl(utils.splitUrl(doc.URL)[0]);
     if (docUrl in data) { continue; }
 
     // skip non-HTML documents
@@ -3409,7 +3409,7 @@ capturer.retrieveDocumentContent = async function (params) {
     }
 
     const cloneNodeMapping = (node, deep = false) => {
-      return scrapbook.cloneNode(node, deep, {
+      return utils.cloneNode(node, deep, {
         newDoc,
         origNodeMap,
         clonedNodeMap,
@@ -3418,7 +3418,7 @@ capturer.retrieveDocumentContent = async function (params) {
     };
 
     const addResource = (url) => {
-      const uuid = scrapbook.getUuid();
+      const uuid = utils.getUuid();
       const key = "urn:scrapbook:url:" + uuid;
       resources[uuid] = url;
       return key;
@@ -3434,7 +3434,7 @@ capturer.retrieveDocumentContent = async function (params) {
         elem.removeAttribute("data-scrapbook-adoptedstylesheets");
 
         const ids = [];
-        for (const css of scrapbook.getAdoptedStyleSheets(docOrShadowRoot)) {
+        for (const css of utils.getAdoptedStyleSheets(docOrShadowRoot)) {
           let id = adoptedStyleSheetMap.get(css);
           if (typeof id === 'undefined') {
             id = adoptedStyleSheetMap.size;
@@ -3469,7 +3469,7 @@ capturer.retrieveDocumentContent = async function (params) {
             elem.setAttribute('src', addResource(elem.getAttribute('src')));
           }
           if (elem.hasAttribute("srcset")) {
-            elem.setAttribute("srcset", scrapbook.rewriteSrcset(elem.getAttribute("srcset"), url => addResource(url)));
+            elem.setAttribute("srcset", utils.rewriteSrcset(elem.getAttribute("srcset"), url => addResource(url)));
           }
         }
 
@@ -3499,7 +3499,7 @@ capturer.retrieveDocumentContent = async function (params) {
             elem.setAttribute('src', addResource(elem.getAttribute('src')));
           }
           if (elem.hasAttribute("srcset")) {
-            elem.setAttribute("srcset", scrapbook.rewriteSrcset(elem.getAttribute("srcset"), url => addResource(url)));
+            elem.setAttribute("srcset", utils.rewriteSrcset(elem.getAttribute("srcset"), url => addResource(url)));
           }
         }
 
@@ -3568,7 +3568,7 @@ capturer.retrieveDocumentContent = async function (params) {
         const titleNodes = [];
         const titleSrcNodes = [];
         for (const elem of rootNode.querySelectorAll("*")) {
-          switch (scrapbook.getScrapbookObjectType(elem)) {
+          switch (utils.getScrapbookObjectType(elem)) {
             case "title":
               titleNodes.push(elem);
               break;
@@ -3595,7 +3595,7 @@ capturer.retrieveDocumentContent = async function (params) {
         if (!elemOrig) { continue; }
         try {
           const data = elemOrig.toDataURL();
-          if (data !== scrapbook.getBlankCanvasData(elemOrig)) {
+          if (data !== utils.getBlankCanvasData(elemOrig)) {
             elem.setAttribute("data-scrapbook-canvas", data);
             requireBasicLoader = true;
           }
@@ -3660,7 +3660,7 @@ capturer.retrieveDocumentContent = async function (params) {
         elem.removeAttribute("data-scrapbook-shadowdom-delegates-focus");
         elem.removeAttribute("data-scrapbook-shadowdom-serializable");
         elem.removeAttribute("data-scrapbook-shadowdom-slot-assignment");
-        const shadowRoot = scrapbook.getShadowRoot(elem);
+        const shadowRoot = utils.getShadowRoot(elem);
         if (!shadowRoot) { continue; }
         processRootNode(shadowRoot);
         elem.setAttribute("data-scrapbook-shadowdom", shadowRoot.innerHTML);
@@ -3691,7 +3691,7 @@ capturer.retrieveDocumentContent = async function (params) {
     const adoptedStyleSheetMap = new Map();
 
     // create a new document to replicate nodes via import
-    const newDoc = scrapbook.cloneDocument(doc, {origNodeMap, clonedNodeMap});
+    const newDoc = utils.cloneDocument(doc, {origNodeMap, clonedNodeMap});
 
     for (const node of doc.childNodes) {
       newDoc.appendChild(cloneNodeMapping(node, true));
@@ -3745,7 +3745,7 @@ capturer.retrieveDocumentContent = async function (params) {
       insertInfoBar: options["capture.insertInfoBar"],
     });
 
-    const content = scrapbook.documentToString(newDoc, options["capture.prettyPrint"]);
+    const content = utils.documentToString(newDoc, options["capture.prettyPrint"]);
     let blob = new Blob([content], {type: `${mime};charset=${charset}`});
     blob = await capturer.saveBlobCache(blob);
 
@@ -3781,7 +3781,7 @@ capturer.preSaveProcess = async function (params) {
     const nodeIterator = doc.createNodeIterator(
       rootNode,
       NodeFilter.SHOW_COMMENT,
-      node => scrapbook.getScrapBookObjectRemoveType(node) === 3 ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT,
+      node => utils.getScrapBookObjectRemoveType(node) === 3 ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT,
     );
     let node;
     while (node = nodeIterator.nextNode()) {
@@ -3813,7 +3813,7 @@ capturer.preSaveProcess = async function (params) {
     // indeterminate checkbox: IE >= 6, getAttribute: IE >= 8
     // HTMLCanvasElement: Firefox >= 1.5, querySelectorAll: Firefox >= 3.5
     // getElementsByTagName is not implemented for DocumentFragment (shadow root)
-    loader.textContent = "(" + scrapbook.compressJsFunc(function () {
+    loader.textContent = "(" + utils.compressJsFunc(function () {
       var k1 = "data-scrapbook-shadowdom",
           k2 = "data-scrapbook-canvas",
           k3 = "data-scrapbook-input-indeterminate",
@@ -4000,9 +4000,9 @@ capturer.preSaveProcess = async function (params) {
         const itemSource = rootNode.getAttribute('data-scrapbook-source');
         const itemCreate = rootNode.getAttribute('data-scrapbook-create');
 
-        const url = scrapbook.normalizeUrl(itemSource);
+        const url = utils.normalizeUrl(itemSource);
         const domain = new URL(url).origin;
-        const date = scrapbook.idToDate(itemCreate).toString();
+        const date = utils.idToDate(itemCreate).toString();
         data = {url, domain, date};
       } catch (ex) {
         console.error(ex);
@@ -4014,7 +4014,7 @@ capturer.preSaveProcess = async function (params) {
 
       // This is compatible with IE5 (though position: fixed doesn't work in IE < 7).
       // setAttribute('style', ...) doesn't work for IE < 8
-      loader.textContent = ("(" + scrapbook.compressJsFunc(function () {
+      loader.textContent = ("(" + utils.compressJsFunc(function () {
         var d = document, b = d.body,
             i = d.createElement('scrapbook-infobar'),
             c = i.appendChild(d.createElement('span')),
@@ -4068,18 +4068,18 @@ capturer.preSaveProcess = async function (params) {
         c.onclick = function () { i.parentNode.removeChild(i); };
 
         b.appendChild(i);
-      }) + ")()").replace(/%([\w@]*)%/g, (_, key) => data[key] || scrapbook.lang(key) || '');
+      }) + ")()").replace(/%([\w@]*)%/g, (_, key) => data[key] || utils.lang(key) || '');
     }
   }
   if (rootNode.querySelector('[data-scrapbook-elem="linemarker"][title], [data-scrapbook-elem="sticky"]')) {
     const css = bodyNode.appendChild(doc.createElement("style"));
     css.setAttribute("data-scrapbook-elem", "annotation-css");
-    css.textContent = scrapbook.compressCode(ANNOTATION_CSS);
+    css.textContent = utils.compressCode(ANNOTATION_CSS);
     const loader = bodyNode.appendChild(doc.createElement("script"));
     loader.setAttribute("data-scrapbook-elem", "annotation-loader");
     // Mobile support with showing title on long touch.
     // Firefox >= 52, Chrome >= 22, Edge >= 12
-    loader.textContent = ("(" + scrapbook.compressJsFunc(function () {
+    loader.textContent = ("(" + utils.compressJsFunc(function () {
       var w = window, d = document, r = d.documentElement, e;
       d.addEventListener('click', function (E) {
         if (r.hasAttribute('data-scrapbook-toolbar-active')) { return; }
@@ -4100,7 +4100,7 @@ capturer.preSaveProcess = async function (params) {
           }
         }
       }, true);
-    }) + ")()").replace(/%(\w*)%/g, (_, key) => scrapbook.lang(key) || '');
+    }) + ")()").replace(/%(\w*)%/g, (_, key) => utils.lang(key) || '');
   }
 };
 
@@ -4122,14 +4122,14 @@ capturer.retrieveSelectedLinks = async function ({
     case 'all':
       break;
     default:
-      select = scrapbook.getSelection().type !== 'Range' ? 'all' : 'selected';
+      select = utils.getSelection().type !== 'Range' ? 'all' : 'selected';
       break;
   }
 
   let nodes;
   switch (select) {
     case 'selected': {
-      nodes = scrapbook.getSelectedNodes({
+      nodes = utils.getSelectedNodes({
         whatToShow: NodeFilter.SHOW_ELEMENT,
         nodeFilter: (node) => {
           return node.matches('a[href], area[href]');
@@ -4158,7 +4158,7 @@ capturer.retrieveSelectedLinks = async function ({
 
 class ItemInfoFormatter extends _ItemInfoFormatter {
   format_uuid() {
-    return scrapbook.getUuid();
+    return utils.getUuid();
   }
 }
 
@@ -4196,23 +4196,23 @@ capturer.formatIndexFilename = async function ({
   const formatter = new ItemInfoFormatter(item);
   let filename = template
     .split('/')
-    .map(x => scrapbook.validateFilename(formatter.format(x), saveAsciiFilename))
+    .map(x => utils.validateFilename(formatter.format(x), saveAsciiFilename))
     .join('/');
 
   // see capturer.getUniqueFilename for limitation details
-  filename = scrapbook.crop(filename, saveFilenameMaxLenUtf16, saveFilenameMaxLenUtf8, "");
+  filename = utils.crop(filename, saveFilenameMaxLenUtf16, saveFilenameMaxLenUtf8, "");
 
   // in case the cropped filename has invalid ending chars
   filename = filename
     .split('/')
-    .map(x => scrapbook.validateFilename(x))
+    .map(x => utils.validateFilename(x))
     .join('/');
 
   return filename;
 };
 
 capturer.getRedirectedUrl = function (redirectedUrl, sourceUrlHash) {
-  const [redirectedUrlMain, redirectedUrlHash] = scrapbook.splitUrlByAnchor(redirectedUrl);
+  const [redirectedUrlMain, redirectedUrlHash] = utils.splitUrlByAnchor(redirectedUrl);
 
   // Some browsers may encounter an error for a data URL with hash.
   if (redirectedUrl.startsWith('data:')) {
@@ -4303,18 +4303,18 @@ capturer.getErrorUrl = function (sourceUrl, options) {
 capturer.saveBlobCache = async function (blob, threshold = 32 * 1024 * 1024) {
   // Return the original Blob if the browser supports tramsmitting Blob
   // through message natively.
-  if (scrapbook.userAgent.is('gecko')) {
+  if (utils.userAgent.is('gecko')) {
     return blob;
   }
 
   // for a small Blob, simply serialize to an object
   if (blob.size < threshold) {
-    return await scrapbook.serializeObject(blob);
+    return await utils.serializeObject(blob);
   }
 
-  const uuid = scrapbook.getUuid();
+  const uuid = utils.getUuid();
   const key = {table: "blobCache", key: uuid};
-  await scrapbook.cache.set(key, blob, 'storage');
+  await utils.cache.set(key, blob, 'storage');
   return {__key__: uuid};
 };
 
@@ -4330,12 +4330,12 @@ capturer.loadBlobCache = async function (blob) {
   }
 
   if (blob.__type__) {
-    return await scrapbook.deserializeObject(blob);
+    return await utils.deserializeObject(blob);
   }
 
   const key = {table: "blobCache", key: blob.__key__};
-  const rv = await scrapbook.cache.get(key, 'storage');
-  await scrapbook.cache.remove(key, 'storage');
+  const rv = await utils.cache.get(key, 'storage');
+  await utils.cache.remove(key, 'storage');
   return rv;
 };
 
@@ -4591,7 +4591,7 @@ class DocumentCssHandler {
       // Chromium has a bug that the disabled property of every alternative
       // stylesheet is false, causing the same result:
       // https://bugs.chromium.org/p/chromium/issues/detail?id=965554
-      if (scrapbook.userAgent.is('chromium')) {
+      if (utils.userAgent.is('chromium')) {
         return arr.every(r => r.every(x => !x.disabled));
       }
 
@@ -4657,7 +4657,7 @@ class DocumentCssHandler {
           let hasAmp = false;
           for (let i = 0, I = tokens.length; i < I; i++) {
             const token = tokens[i];
-            if (!firstToken && !(!scrapbook.trim(token.value) && token.type === 'operator')) {
+            if (!firstToken && !(!utils.trim(token.value) && token.type === 'operator')) {
               firstToken = token;
             }
             if (token.value === '&' && token.type === 'operator') {
@@ -4984,7 +4984,7 @@ class DocumentCssHandler {
   async rewriteCssText({cssText, baseUrl, refUrl, refPolicy, envCharset, refCss = null, rootNode, isInline = false, settings, options}) {
     settings = Object.assign({}, this.settings, settings);
     settings = Object.assign(settings, {
-      recurseChain: [...settings.recurseChain, scrapbook.splitUrlByAnchor(refUrl)[0]],
+      recurseChain: [...settings.recurseChain, utils.splitUrlByAnchor(refUrl)[0]],
     });
     options = options ? Object.assign({}, this.options, options) : this.options;
 
@@ -4995,7 +4995,7 @@ class DocumentCssHandler {
       let valid = true;
 
       // do not fetch if the URL is not resolved
-      if (!scrapbook.isUrlAbsolute(url)) {
+      if (!utils.isUrlAbsolute(url)) {
         valid = false;
       }
 
@@ -5020,7 +5020,7 @@ class DocumentCssHandler {
         options,
       }).catch((ex) => {
         console.error(ex);
-        this.warn(scrapbook.lang("ErrorFileDownloadError", [url, ex.message]));
+        this.warn(utils.lang("ErrorFileDownloadError", [url, ex.message]));
         return {url: capturer.getErrorUrl(url, options), error: {message: ex.message}};
       });
       return response.url;
@@ -5125,7 +5125,7 @@ class DocumentCssHandler {
 
     const rewriteDummy = (x) => ({url: x, recordUrl: ''});
 
-    return await scrapbook.rewriteCssText(cssText, {
+    return await utils.rewriteCssText(cssText, {
       rewriteImportUrl: !isInline ? rewriteImportUrl : rewriteDummy,
       rewriteFontFaceUrl: !isInline ? rewriteFontFaceUrl : rewriteDummy,
       rewriteBackgroundUrl,
@@ -5408,7 +5408,7 @@ class DocumentCssHandler {
         });
       } catch (ex) {
         console.error(ex);
-        this.warn(scrapbook.lang("ErrorFileDownloadError", [sourceUrl, ex.message]));
+        this.warn(utils.lang("ErrorFileDownloadError", [sourceUrl, ex.message]));
         response = {url: capturer.getErrorUrl(sourceUrl, options), error: {message: ex.message}};
         await callback(elem, response);
         return;
@@ -5417,7 +5417,7 @@ class DocumentCssHandler {
       cssText = response.text;
       charset = response.charset;
 
-      isCircular = settings.recurseChain.includes(scrapbook.splitUrlByAnchor(sourceUrl)[0]);
+      isCircular = settings.recurseChain.includes(utils.splitUrlByAnchor(sourceUrl)[0]);
     }
 
     checkDynamicCss: {
@@ -5449,8 +5449,8 @@ class DocumentCssHandler {
       }
 
       // if charset is not known, force conversion to UTF-8
-      // scrapbook.utf8ToUnicode throws an error if cssText contains a UTF-8 invalid char
-      const cssTextUnicode = charset ? cssText : await scrapbook.readFileAsText(new Blob([scrapbook.byteStringToArrayBuffer(cssText)]));
+      // utils.utf8ToUnicode throws an error if cssText contains a UTF-8 invalid char
+      const cssTextUnicode = charset ? cssText : await utils.readFileAsText(new Blob([utils.byteStringToArrayBuffer(cssText)]));
 
       // rules from source CSS text
       const cssRulesSource = this.getRulesFromCssText(cssTextUnicode);
@@ -5496,7 +5496,7 @@ class DocumentCssHandler {
       const registry = await capturer.invoke("registerFile", {
         url: sourceUrl,
         role: options["capture.saveAs"] === "singleHtml" ? undefined :
-            isDynamic ? `css-${scrapbook.getUuid()}` :
+            isDynamic ? `css-${utils.getUuid()}` :
             envCharset ? `css-${envCharset.toLowerCase()}` : 'css',
         settings,
         options,
@@ -5506,7 +5506,7 @@ class DocumentCssHandler {
       if (isCircular && options["capture.saveAs"] === "singleHtml") {
         const target = sourceUrl;
         const source = settings.recurseChain[settings.recurseChain.length - 1];
-        this.warn(scrapbook.lang("WarnCaptureCircular", [source, target]));
+        this.warn(utils.lang("WarnCaptureCircular", [source, target]));
         await callback(elem, Object.assign({}, registry, {
           url: `urn:scrapbook:download:circular:url:${sourceUrl}`,
         }));
@@ -5516,7 +5516,7 @@ class DocumentCssHandler {
       // handle duplicated CSS
       if (registry.isDuplicate) {
         await callback(elem, Object.assign({}, registry, {
-          url: registry.url + scrapbook.splitUrlByAnchor(sourceUrl)[1],
+          url: registry.url + utils.splitUrlByAnchor(sourceUrl)[1],
         }));
         return;
       }
@@ -5605,7 +5605,7 @@ class DocumentCssHandler {
       // Save as byte string when charset is unknown so that the user can
       // convert the saved CSS file if the assumed charset is incorrect.
       let blob = new Blob(
-        [charset ? cssText : scrapbook.byteStringToArrayBuffer(cssText)],
+        [charset ? cssText : utils.byteStringToArrayBuffer(cssText)],
         {type: charset ? "text/css;charset=UTF-8" : "text/css"},
       );
       blob = await capturer.saveBlobCache(blob);
@@ -5620,7 +5620,7 @@ class DocumentCssHandler {
       });
 
       await callback(elem, Object.assign({}, response, {
-        url: response.url + scrapbook.splitUrlByAnchor(sourceUrl)[1],
+        url: response.url + utils.splitUrlByAnchor(sourceUrl)[1],
       }));
     }
   }
@@ -5865,7 +5865,7 @@ class DocumentCssResourcesHandler {
       let m;
       while (m = regex.exec(propText)) {
         let value = m[1] || m[0].slice(1, -1);
-        value = scrapbook.unescapeCss(value);
+        value = utils.unescapeCss(value);
         names.push(value);
       }
       return names;
@@ -5876,7 +5876,7 @@ class DocumentCssResourcesHandler {
 
   forEachUrl(cssText, baseUrl, callback = x => x) {
     // We pass only inline css text, which should not contain any at-rule
-    scrapbook.rewriteCssText(cssText, {
+    utils.rewriteCssText(cssText, {
       rewriteImportUrl(url) { return {url}; },
       rewriteFontFaceUrl(url) { return {url}; },
       rewriteBackgroundUrl(url) {
@@ -6071,7 +6071,7 @@ class CaptureHelperHandler {
       modifyRootNode: {
         let newRootNode = rootNode;
         for (const part of selector.base.split('.')) {
-          switch (scrapbook.trim(part)) {
+          switch (utils.trim(part)) {
             case 'root':
               newRootNode = newRootNode.getRootNode();
               break;
@@ -6197,7 +6197,7 @@ class CaptureHelperHandler {
         return doc.createTextNode(value || "");
       }
       case "#comment": {
-        return doc.createComment(scrapbook.escapeHtmlComment(value || ""));
+        return doc.createComment(utils.escapeHtmlComment(value || ""));
       }
       default: {
         const newElem = doc.createElement(tag);
@@ -6297,7 +6297,7 @@ class CaptureHelperHandler {
     text = String(this.resolve(text, rootNode) || "");
     safe = String(this.resolve(safe, rootNode) || "");
     if (safe) {
-      return text.replace(new RegExp(`[^${scrapbook.escapeRegExp(safe)}]+`, 'ug'), x => encodeURIComponent(x));
+      return text.replace(new RegExp(`[^${utils.escapeRegExp(safe)}]+`, 'ug'), x => encodeURIComponent(x));
     }
     return encodeURIComponent(text);
   }
@@ -6473,7 +6473,7 @@ class CaptureHelperHandler {
   cmd_unwrap(rootNode, selector) {
     const elems = this.selectNodes(rootNode, this.resolve(selector, rootNode));
     for (const elem of elems) {
-      scrapbook.unwrapNode(elem);
+      utils.unwrapNode(elem);
     }
   }
 
