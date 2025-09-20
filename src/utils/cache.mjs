@@ -113,7 +113,7 @@ async function readBlobAsByteStrings(
   // Max JavaScript string is 256MiB UTF-16 chars in an older Browser.
   // By default use the same value as `arrayBufferToByteString` chunk size to
   // prevent string concatenation.
-  maxByteString = 65535,
+  maxByteString = 124127,
 ) {
   const chunks = [];
   const totalSize = blob.size;

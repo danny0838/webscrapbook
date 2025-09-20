@@ -20,12 +20,12 @@ describe('lib/mime.js', function () {
         Object.assign(Mime.types, _types);
       });
 
-      it('no data', function () {
+      it('should generate an empty extensions list if no data is provided', function () {
         Mime.extend('my/mime');
         assert.deepEqual(Mime.db['my/mime'], {extensions: []});
       });
 
-      it('data with extensions', function () {
+      it('should add extensions to the last', function () {
         // add extensions
         Mime.extend('my/mime', {extensions: ['myext1', 'myext2']});
         assert.deepEqual(Mime.db['my/mime'], {extensions: ['myext1', 'myext2']});
@@ -41,7 +41,7 @@ describe('lib/mime.js', function () {
         assert.strictEqual(Mime.types['myext4'], 'my/mime');
       });
 
-      it('data with extensions (important = true)', function () {
+      it('should add extensions to the first when `important` is truthy', function () {
         // add extensions
         Mime.extend('my/mime', {extensions: ['myext1', 'myext2']});
         assert.deepEqual(Mime.db['my/mime'], {extensions: ['myext1', 'myext2']});
@@ -57,14 +57,14 @@ describe('lib/mime.js', function () {
         assert.strictEqual(Mime.types['myext4'], 'my/mime');
       });
 
-      it('data with extensions (minor = true)', function () {
+      it('should not add to reverse map if `minor` is truthy', function () {
         Mime.extend('my/mime', {extensions: ['myext1', 'myext2']}, {minor: true});
         assert.deepEqual(Mime.db['my/mime'], {extensions: ['myext1', 'myext2']});
         assert.notStrictEqual(Mime.types['myext1'], 'my/mime');
         assert.notStrictEqual(Mime.types['myext2'], 'my/mime');
       });
 
-      it('data with properties', function () {
+      it('should add data properties', function () {
         // add properties
         Mime.extend('my/mime', {source: 'foo', charset: 'ASCII', compressible: true});
         assert.deepEqual(Mime.db['my/mime'], {
@@ -87,35 +87,35 @@ describe('lib/mime.js', function () {
     });
 
     describe('.lookup()', function () {
-      it('pure extension', function () {
+      it('should work for pure extension', function () {
         assert.strictEqual(Mime.lookup('txt'), 'text/plain');
       });
 
-      it('extension with dot', function () {
+      it('should work for extension with dot', function () {
         assert.strictEqual(Mime.lookup('.txt'), 'text/plain');
       });
 
-      it('filename', function () {
+      it('should work for filename', function () {
         assert.strictEqual(Mime.lookup('myfile.txt'), 'text/plain');
       });
 
-      it('multi-dot filename (check last segment)', function () {
+      it('should work for multi-dot filename (check last segment)', function () {
         assert.strictEqual(Mime.lookup('myfile.1.2.ext.txt'), 'text/plain');
       });
 
-      it('POSIX path', function () {
+      it('should work for POSIX path', function () {
         assert.strictEqual(Mime.lookup('/home/myuser/myfile.txt'), 'text/plain');
       });
 
-      it('Windows path', function () {
+      it('should work for Windows path', function () {
         assert.strictEqual(Mime.lookup('C:\\Users\\MyUser\\myfile.txt'), 'text/plain');
       });
 
-      it('URL', function () {
+      it('should work for URL', function () {
         assert.strictEqual(Mime.lookup('http://example.com/myfile.txt'), 'text/plain');
       });
 
-      it('common types', function () {
+      it('should work for common types', function () {
         assert.strictEqual(Mime.lookup('htm'), 'text/html');
         assert.strictEqual(Mime.lookup('html'), 'text/html');
         assert.strictEqual(Mime.lookup('xht'), 'application/xhtml+xml');
@@ -134,20 +134,32 @@ describe('lib/mime.js', function () {
         assert.strictEqual(Mime.lookup('ogx'), 'application/ogg');
       });
 
-      it('extended types', function () {
+      it('should work for extended types', function () {
         assert.strictEqual(Mime.lookup('htz'), 'application/html+zip');
         assert.strictEqual(Mime.lookup('maff'), 'application/x-maff');
       });
     });
 
     describe('.extension()', function () {
-      it('basic', function () {
+      it('should return the preferred extension for the provided MIME type', function () {
         assert.strictEqual(Mime.extension('text/plain'), 'txt');
+      });
+
+      it('should return null for an unknown MIME type', function () {
+        assert.strictEqual(Mime.extension('unknown/type'), null);
       });
     });
 
     describe('.allExtensions()', function () {
-      it('common extensions', function () {
+      it('should return all extensions for the provided MIME type', function () {
+        assert.deepEqual(Mime.allExtensions('text/javascript'), ['js', 'mjs']);
+      });
+
+      it('should return [] for an unknown MIME type', function () {
+        assert.deepEqual(Mime.allExtensions('unknown/type'), []);
+      });
+
+      it('should work for common types', function () {
         var exts = Mime.allExtensions('text/html');
         assert.includeMembers(exts, ['html', 'htm']);
 
@@ -188,7 +200,7 @@ describe('lib/mime.js', function () {
         assert.includeMembers(exts, ['ogx', 'ogg']);
       });
 
-      it('extended extensions', function () {
+      it('should work for extended extensions', function () {
         var exts = Mime.allExtensions('application/html+zip');
         assert.includeMembers(exts, ['htz']);
 

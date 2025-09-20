@@ -5,7 +5,7 @@ import {Strftime} from "./shared/lib/strftime.mjs";
 describe('lib/strftime.js', function () {
   describe('Strftime', function () {
     describe('#format()', function () {
-      it('isUtc = true', function () {
+      it('should formt with UTC datetime when `isUtc` is truthy', function () {
         var date = new Date(Date.UTC(2018, 1, 1, 0, 0, 0));
         var formatter = new Strftime({date, isUtc: true});
         assert.strictEqual(formatter.format('%Y-%m-%dT%H:%M:%SZ'), '2018-02-01T00:00:00Z');
@@ -14,7 +14,7 @@ describe('lib/strftime.js', function () {
         assert.strictEqual(formatter.format('%z'), '+0000');
       });
 
-      it('isUtc = false', function () {
+      it('should formt with local datetime when `isUtc` is falsy', function () {
         var date = new Date(Date.UTC(2018, 0, 1, 0, 0, 0));
         var formatter = new Strftime({date});
         assert.strictEqual(formatter.format('%Y'), date.getFullYear().toString());
@@ -26,7 +26,7 @@ describe('lib/strftime.js', function () {
         assert.strictEqual(parseInt(formatter.format('%S'), 10), date.getSeconds());
       });
 
-      it('use current date if not provided', function () {
+      it('should use current datetime if `date` is not provided', function () {
         var dateNow = new Date();
         var formatter = new Strftime();
         var formatted = formatter.format('%Y-%m-%dT%H:%M:%S%z');
@@ -36,14 +36,14 @@ describe('lib/strftime.js', function () {
     });
 
     describe('.format()', function () {
-      it('basic', function () {
+      it('should format the provided string', function () {
         var dateNow = new Date();
         var formatted = Strftime.format('%Y-%m-%dT%H:%M:%S%z');
         var date = new Date(formatted);
         assert.closeTo(date.valueOf(), dateNow.valueOf(), 3000);
       });
 
-      it('isUtc = true', function () {
+      it('should format the provided string with options', function () {
         assert.strictEqual(Strftime.format('%z', {isUtc: true}), '+0000');
       });
     });

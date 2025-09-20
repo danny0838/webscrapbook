@@ -7,7 +7,7 @@ const $it = $(it);
 describe('lib/referrer.js', function () {
   describe('Referrer', function () {
     describe('#toString()', function () {
-      it('basic', function () {
+      it('should return the referrer URL string', function () {
         // no-referrer
         assert.strictEqual(new Referrer(
           "https://user:pw@example.com:8000/page?search=1#frag",
@@ -169,7 +169,7 @@ describe('lib/referrer.js', function () {
         ).toString(), "");
       });
 
-      it('spoof = true', function () {
+      it('should take target as source when `spoof` is truthy', function () {
         assert.strictEqual(new Referrer(
           "https://mozilla.org",
           "https://user:pw@example.com:8000/page?search=1#frag",
@@ -183,14 +183,93 @@ describe('lib/referrer.js', function () {
           true,
         ).toString(), "https://example.com:8000/");
       });
+
+      it('should return "" if source URL is empty or invalid', function () {
+        assert.strictEqual(new Referrer(
+          "",
+          "https://example.com/",
+        ).toString(), "");
+        assert.strictEqual(new Referrer(
+          "/relative-url",
+          "https://example.com/",
+        ).toString(), "");
+        assert.strictEqual(new Referrer(
+          "https://exa[mple.com/",
+          "https://example.com/",
+        ).toString(), "");
+      });
+
+      it('should return "" if target URL is empty or invalid', function () {
+        assert.strictEqual(new Referrer(
+          "https://example.com/",
+          "",
+        ).toString(), "");
+        assert.strictEqual(new Referrer(
+          "https://example.com/",
+          "/relative-url",
+        ).toString(), "");
+        assert.strictEqual(new Referrer(
+          "https://example.com/",
+          "https://exa[mple.com/",
+        ).toString(), "");
+      });
+    });
+
+    describe('#source (getter)', function () {
+      it('should return the source URL object', function () {
+        var source = new Referrer(
+          "https://user:pw@example.com:8000/page?search=1#frag",
+          "https://example.com/otherpage",
+        ).source;
+        assert.strictEqual(source.href, "https://user:pw@example.com:8000/page?search=1#frag");
+      });
+
+      it('should return null for an invalid source URL', function () {
+        var source = new Referrer(
+          "https://exa[mple.com/",
+          "https://example.com/otherpage",
+        ).source;
+        assert.isNull(source);
+      });
+
+      it('should return the target URL object if `spoof` is truthy', function () {
+        var source = new Referrer(
+          "https://example.com/page",
+          "https://user:pw@example.com:8000/otherpage?search=1#frag",
+          "",
+          true,
+        ).source;
+        assert.strictEqual(source.href, "https://user:pw@example.com:8000/otherpage?search=1#frag");
+      });
+    });
+
+    describe('#target (getter)', function () {
+      it('should return the target URL object', function () {
+        var target = new Referrer(
+          "https://example.com/page",
+          "https://user:pw@example.com:8000/otherpage?search=1#frag",
+        ).target;
+        assert.strictEqual(target.href, "https://user:pw@example.com:8000/otherpage?search=1#frag");
+      });
+
+      it('should return null for an invalid target URL', function () {
+        var target = new Referrer(
+          "https://example.com/page",
+          "https://exa[mple.com/",
+        ).target;
+        assert.isNull(target);
+      });
     });
 
     describe('#isSameOrigin (getter)', function () {
-      it('basic', function () {
+      it('should return true if source and target have same origin', function () {
         assert.strictEqual(new Referrer(
           "https://example.com/page",
           "https://example.com/otherpage",
         ).isSameOrigin, true);
+      });
+
+      it('should return false if source and target have different origin', function () {
         assert.strictEqual(new Referrer(
           "https://example.com/page",
           "https://example.com:8000/otherpage",
@@ -215,7 +294,7 @@ describe('lib/referrer.js', function () {
     });
 
     describe('#isDownGrade (getter)', function () {
-      it('HTTPS to ...', function () {
+      it('should return true for HTTPS to HTTP', function () {
         assert.strictEqual(new Referrer(
           "https://example.com/page",
           "https://example.com/otherpage",
@@ -230,7 +309,7 @@ describe('lib/referrer.js', function () {
         ).isDownGrade, true);
       });
 
-      it('HTTP to anywhere is not a downgrade', function () {
+      it('should return false for HTTP', function () {
         assert.strictEqual(new Referrer(
           "http://example.com/page",
           "http://example.com/otherpage",
@@ -245,7 +324,7 @@ describe('lib/referrer.js', function () {
         ).isDownGrade, false);
       });
 
-      it('HTTPS to a potentially trustworthy URL is not a downgrade', function () {
+      it('should return false for HTTPS to a potentially trustworthy URL', function () {
         assert.strictEqual(new Referrer(
           "https://example.com/page",
           "http://localhost/page",
@@ -282,28 +361,28 @@ describe('lib/referrer.js', function () {
     });
 
     describe('.extensionProtocols (getter)', function () {
-      $it.skipIf($.noExtensionBrowser)('browser extension protocol (globalThis.browser)', function () {
+      $it.skipIf($.noExtensionBrowser)('should return browser extension protocol (globalThis.browser)', function () {
         const protocol = new URL(browser.runtime.getURL('')).protocol;
         assert.deepEqual(Referrer.extensionProtocols, [protocol]);
       });
 
-      $it.skipIf($.noExtensionChrome)('browser extension protocol (globalThis.chrome)', function () {
+      $it.skipIf($.noExtensionChrome)('should return browser extension protocol (globalThis.chrome)', function () {
         const protocol = new URL(chrome.runtime.getURL('')).protocol;
         assert.deepEqual(Referrer.extensionProtocols, [protocol]);
       });
     });
 
     describe('.trustworthyProtocols (getter)', function () {
-      it('basic', function () {
+      it('should return trustworthy protocols', function () {
         assert.includeMembers(Referrer.trustworthyProtocols, ['https:', 'wss:', 'data:', 'file:']);
       });
 
-      $it.skipIf($.noExtensionBrowser)('browser extension protocol (globalThis.browser)', function () {
+      $it.skipIf($.noExtensionBrowser)('should include browser extension protocol (globalThis.browser)', function () {
         const protocol = new URL(browser.runtime.getURL('')).protocol;
         assert.includeMembers(Referrer.trustworthyProtocols, [protocol]);
       });
 
-      $it.skipIf($.noExtensionChrome)('browser extension protocol (globalThis.chrome)', function () {
+      $it.skipIf($.noExtensionChrome)('should include browser extension protocol (globalThis.chrome)', function () {
         const protocol = new URL(chrome.runtime.getURL('')).protocol;
         assert.includeMembers(Referrer.trustworthyProtocols, [protocol]);
       });

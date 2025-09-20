@@ -9410,7 +9410,7 @@ function extend(mime, {extensions = [], ...kwargs} = {}, {important, minor} = {}
     }
   }
 
-  Object.assign(target, {...kwargs});
+  Object.assign(target, kwargs);
 }
 
 /**
