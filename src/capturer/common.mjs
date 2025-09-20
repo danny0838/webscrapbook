@@ -5,7 +5,7 @@
 import {isDebug} from "../utils/debug.mjs";
 import {ANNOTATION_CSS} from "../utils/common.mjs";
 import * as utils from "../utils/common.mjs";
-import {Cache, serializeObject, deserializeObject} from "../utils/cache.mjs";
+import {StorageCache, serializeObject, deserializeObject} from "../utils/cache.mjs";
 import {dataUriToFile} from "../utils/datauri.mjs";
 import {MapWithDefault} from "../lib/map-with-default.mjs";
 import {ItemInfoFormatter as _ItemInfoFormatter} from "../scrapbook/item-info-formatter.mjs";
@@ -4315,7 +4315,7 @@ capturer.saveBlobCache = async function (blob, threshold = 32 * 1024 * 1024) {
 
   const uuid = utils.getUuid();
   const key = {table: "blobCache", key: uuid};
-  await Cache.set(key, blob, 'storage');
+  await StorageCache.set(key, blob);
   return {__key__: uuid};
 };
 
@@ -4335,8 +4335,8 @@ capturer.loadBlobCache = async function (blob) {
   }
 
   const key = {table: "blobCache", key: blob.__key__};
-  const rv = await Cache.get(key, 'storage');
-  await Cache.remove(key, 'storage');
+  const rv = await StorageCache.get(key);
+  await StorageCache.remove(key);
   return rv;
 };
 

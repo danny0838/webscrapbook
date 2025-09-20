@@ -3,7 +3,7 @@
  *****************************************************************************/
 
 import * as utils from "../utils/extension.mjs";
-import {Cache} from "../utils/cache.mjs";
+import {StorageCache} from "../utils/cache.mjs";
 import {server} from "./server.mjs";
 import {Tree} from "./tree.mjs";
 import {BookTree} from "./book-tree.mjs";
@@ -150,7 +150,7 @@ const sidebar = {
           let requireUpdateBooks = true;
 
           if (!initial) {
-            await Cache.set({table: "scrapbookServer", key: "currentScrapbook"}, bookId, 'storage');
+            await StorageCache.set({table: "scrapbookServer", key: "currentScrapbook"}, bookId);
 
             await this.savePostit();
             await this.uneditPostit();
@@ -167,7 +167,7 @@ const sidebar = {
             this.warn(utils.lang('ScrapBookErrorBookNotExist', [bookId]));
             bookId = this.bookId = '';
             this.book = server.books[bookId];
-            await Cache.set({table: "scrapbookServer", key: "currentScrapbook"}, bookId, 'storage');
+            await StorageCache.set({table: "scrapbookServer", key: "currentScrapbook"}, bookId);
           }
 
           // update book selector

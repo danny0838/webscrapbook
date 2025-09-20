@@ -4,7 +4,7 @@
 
 import {ANNOTATION_CSS} from "../utils/common.mjs";
 import * as utils from "../utils/common.mjs";
-import {Cache} from "../utils/cache.mjs";
+import {StorageCache} from "../utils/cache.mjs";
 import {Strftime} from "../lib/strftime.mjs";
 import {core} from "../content/core.mjs";
 
@@ -534,7 +534,7 @@ editor.init = async function ({willActive = !editor.active, force = false} = {})
     elem.addEventListener("click", (event) => {
       const elem = event.currentTarget;
       const idx = Array.prototype.indexOf.call(wrapper.querySelectorAll('#toolbar-marker ul button'), elem);
-      Cache.set(editor.getStatusKey('lineMarkerSelected'), idx, 'storage'); // async
+      StorageCache.set(editor.getStatusKey('lineMarkerSelected'), idx); // async
       editor.lineMarker(elem.querySelector('scrapbook-toolbar-samp').getAttribute('style'));
     }, {passive: true});
   }
@@ -2094,7 +2094,7 @@ editor.updateLineMarkers = async function () {
   for (const elem of buttons) {
     elem.removeAttribute('checked');
   }
-  let idx = await Cache.get(editor.getStatusKey('lineMarkerSelected'), 'storage');
+  let idx = await StorageCache.get(editor.getStatusKey('lineMarkerSelected'));
   idx = Math.min(parseInt(idx, 10) || 0, buttons.length - 1);
   buttons[idx].setAttribute('checked', '');
 };

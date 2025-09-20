@@ -3,7 +3,7 @@
  *****************************************************************************/
 
 import * as utils from "../utils/extension.mjs";
-import {Cache} from "../utils/cache.mjs";
+import {StorageCache, IdbCache} from "../utils/cache.mjs";
 import {server} from "../scrapbook/server.mjs";
 
 utils.loadOptionsAuto(); // async
@@ -14,8 +14,8 @@ async function clearCapturerCaches() {
       table: new Set(["captureMissionCache", "batchCaptureMissionCache", "fetchCache", "blobCache"]),
     },
   };
-  await Cache.removeAll(filter, 'indexedDB');
-  await Cache.removeAll(filter, 'storage');
+  await IdbCache.removeAll(filter);
+  await StorageCache.removeAll(filter);
 }
 
 

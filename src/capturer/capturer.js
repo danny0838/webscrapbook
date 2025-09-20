@@ -6,7 +6,7 @@
 
 import {isDebug} from "../utils/debug.mjs";
 import * as utils from "../utils/extension.mjs";
-import {Cache} from "../utils/cache.mjs";
+import {Cache, StorageCache, IdbCache} from "../utils/cache.mjs";
 import {dataUriToFile} from "../utils/datauri.mjs";
 import {Zip} from "../utils/zip.mjs";
 import {sha1} from "../utils/sha.mjs";
@@ -350,8 +350,8 @@ capturer.getAvailableSaveFilename = async function (params) {
 capturer.saveFileCache = async function ({timeId, path, blob}) {
   if (capturer.captureInfo.get(timeId).useDiskCache) {
     const key = {table: "pageCache", id: timeId, path};
-    await Cache.set(key, blob, 'indexedDB');
-    blob = await Cache.get(key, 'indexedDB');
+    await IdbCache.set(key, blob);
+    blob = await IdbCache.get(key);
   }
 
   const {files} = capturer.captureInfo.get(timeId);
@@ -421,7 +421,7 @@ capturer.clearFileCache = async function ({timeId}) {
       id: timeId,
     },
   };
-  await Cache.removeAll(filter, 'indexedDB');
+  await IdbCache.removeAll(filter);
 };
 
 /**
@@ -497,8 +497,8 @@ capturer.fetch = async function (params) {
 
   const setCache = async (id, token, data) => {
     const key = {table: "fetchCache", id, token};
-    await Cache.set(key, data, 'indexedDB');
-    return await Cache.get(key, 'indexedDB');
+    await IdbCache.set(key, data);
+    return await IdbCache.get(key);
   };
 
   const fetch = capturer.fetch = async function (params) {
@@ -1216,7 +1216,7 @@ capturer.captureGeneral = async function ({
   // determine bookId at the start of a capture
   if (options["capture.saveTo"] === 'server') {
     if (bookId === null) {
-      bookId = (await Cache.get({table: "scrapbookServer", key: "currentScrapbook"}, 'storage')) || "";
+      bookId = (await StorageCache.get({table: "scrapbookServer", key: "currentScrapbook"})) || "";
     }
     await server.init();
     server.bookId = bookId;
