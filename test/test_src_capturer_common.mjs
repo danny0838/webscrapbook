@@ -16,7 +16,7 @@ const r = String.raw;
 describe('capturer/common.mjs', function () {
   describe('capturer', function () {
     describe('.getRedirectedUrl()', function () {
-      it("use the redirected URL hash if it exists", function () {
+      it("should use the redirected URL hash if it exists", function () {
         assert.strictEqual(
           capturer.getRedirectedUrl("http://example.com/page#", ""),
           "http://example.com/page#",
@@ -51,7 +51,7 @@ describe('capturer/common.mjs', function () {
         );
       });
 
-      it("use the original URL hash if the redirected URL has no hash", function () {
+      it("should use the original URL hash if the redirected URL has no hash", function () {
         assert.strictEqual(
           capturer.getRedirectedUrl("http://example.com/page", ""),
           "http://example.com/page",
@@ -78,7 +78,7 @@ describe('capturer/common.mjs', function () {
         );
       });
 
-      it("don't include hash for data URL", function () {
+      it("should not include hash for data URL", function () {
         assert.strictEqual(
           capturer.getRedirectedUrl("data:text/html,foo#", ""),
           "data:text/html,foo",
@@ -99,7 +99,7 @@ describe('capturer/common.mjs', function () {
     });
 
     describe('.resolveRelativeUrl()', function () {
-      it("resolve a relative URL using the base URL", function () {
+      it("should resolve a relative URL using the base URL", function () {
         assert.strictEqual(
           capturer.resolveRelativeUrl("mypage.html", "http://example.com/"),
           "http://example.com/mypage.html",
@@ -122,14 +122,14 @@ describe('capturer/common.mjs', function () {
         );
       });
 
-      it("don't resolve an empty URL", function () {
+      it("should not resolve an empty URL", function () {
         assert.strictEqual(
           capturer.resolveRelativeUrl("", "http://example.com/"),
           "",
         );
       });
 
-      it("don't resolve a pure hash URL", function () {
+      it("should not resolve a pure hash URL", function () {
         assert.strictEqual(
           capturer.resolveRelativeUrl("#hash", "http://example.com/"),
           "#hash",
@@ -142,93 +142,34 @@ describe('capturer/common.mjs', function () {
     });
 
     describe('.isAboutUrl()', function () {
-      it("true for exactly about:srcdoc", function () {
-        assert.strictEqual(
-          capturer.isAboutUrl("about:srcdoc"),
-          true,
-        );
-        assert.strictEqual(
-          capturer.isAboutUrl("about:srcdoc/subdir"),
-          false,
-        );
-        assert.strictEqual(
-          capturer.isAboutUrl("about:srcdoc?"),
-          false,
-        );
-        assert.strictEqual(
-          capturer.isAboutUrl("about:srcdoc?id=123"),
-          false,
-        );
-        assert.strictEqual(
-          capturer.isAboutUrl("about:srcdoc#"),
-          false,
-        );
-        assert.strictEqual(
-          capturer.isAboutUrl("about:srcdoc#frag"),
-          false,
-        );
+      it("should return true for exactly about:srcdoc", function () {
+        assert.isTrue(capturer.isAboutUrl("about:srcdoc"));
+        assert.isFalse(capturer.isAboutUrl("about:srcdoc/subdir"));
+        assert.isFalse(capturer.isAboutUrl("about:srcdoc?"));
+        assert.isFalse(capturer.isAboutUrl("about:srcdoc?id=123"));
+        assert.isFalse(capturer.isAboutUrl("about:srcdoc#"));
+        assert.isFalse(capturer.isAboutUrl("about:srcdoc#frag"));
       });
 
-      it("true for about:blank", function () {
-        assert.strictEqual(
-          capturer.isAboutUrl("about:blank"),
-          true,
-        );
-        assert.strictEqual(
-          capturer.isAboutUrl("about:blank/subdir"),
-          false,
-        );
-        assert.strictEqual(
-          capturer.isAboutUrl("about:blank?"),
-          true,
-        );
-        assert.strictEqual(
-          capturer.isAboutUrl("about:blank?id=123"),
-          true,
-        );
-        assert.strictEqual(
-          capturer.isAboutUrl("about:blank#"),
-          true,
-        );
-        assert.strictEqual(
-          capturer.isAboutUrl("about:blank#frag"),
-          true,
-        );
+      it("should return true for about:blank (may contain search or hash)", function () {
+        assert.isTrue(capturer.isAboutUrl("about:blank"));
+        assert.isFalse(capturer.isAboutUrl("about:blank/subdir"));
+        assert.isTrue(capturer.isAboutUrl("about:blank?"));
+        assert.isTrue(capturer.isAboutUrl("about:blank?id=123"));
+        assert.isTrue(capturer.isAboutUrl("about:blank#"));
+        assert.isTrue(capturer.isAboutUrl("about:blank#frag"));
       });
 
-      it("false for other URLs", function () {
-        assert.strictEqual(
-          capturer.isAboutUrl("about:invalid"),
-          false,
-        );
-        assert.strictEqual(
-          capturer.isAboutUrl("about:newtab"),
-          false,
-        );
-        assert.strictEqual(
-          capturer.isAboutUrl("http://example.com/page"),
-          false,
-        );
-        assert.strictEqual(
-          capturer.isAboutUrl("https://example.com/page"),
-          false,
-        );
-        assert.strictEqual(
-          capturer.isAboutUrl("ws://example.com/page"),
-          false,
-        );
-        assert.strictEqual(
-          capturer.isAboutUrl("wss://example.com/page"),
-          false,
-        );
-        assert.strictEqual(
-          capturer.isAboutUrl("file:///foo/bar"),
-          false,
-        );
-        assert.strictEqual(
-          capturer.isAboutUrl("data:text/html,foo"),
-          false,
-        );
+      it("should return false for other URLs", function () {
+        assert.isFalse(capturer.isAboutUrl("about:invalid"));
+        assert.isFalse(capturer.isAboutUrl("about:newtab"));
+        assert.isFalse(capturer.isAboutUrl("http://example.com/page"));
+        assert.isFalse(capturer.isAboutUrl("https://example.com/page"));
+        assert.isFalse(capturer.isAboutUrl("ws://example.com/page"));
+        assert.isFalse(capturer.isAboutUrl("wss://example.com/page"));
+        assert.isFalse(capturer.isAboutUrl("file:///foo/bar"));
+        assert.isFalse(capturer.isAboutUrl("data:text/html,foo"));
+        assert.isFalse(capturer.isAboutUrl("blob:https://example.com/58eead10-e54d-4b72-9ae4-150381dcb68c"));
       });
     });
 
@@ -236,7 +177,7 @@ describe('capturer/common.mjs', function () {
       const optionsBasic = {};
       const optionsLinkUnsavedUri = {"capture.linkUnsavedUri": true};
 
-      it("rewrite http:, https:, file:, and about:", function () {
+      it("should rewrite http:, https:, file:, and about:", function () {
         assert.strictEqual(
           capturer.getErrorUrl("http://example.com/?id=123#456", optionsBasic),
           "urn:scrapbook:download:error:http://example.com/?id=123#456",
@@ -259,7 +200,7 @@ describe('capturer/common.mjs', function () {
         );
       });
 
-      it("strip details for data: and blob:", function () {
+      it("should strip details for data: and blob:", function () {
         assert.strictEqual(
           capturer.getErrorUrl("data:text/css,foo", optionsBasic),
           "urn:scrapbook:download:error:data:",
@@ -270,7 +211,7 @@ describe('capturer/common.mjs', function () {
         );
       });
 
-      it("don't rewrite other protocols", function () {
+      it("should not rewrite other protocols", function () {
         assert.strictEqual(
           capturer.getErrorUrl("ftp://example.com/file.png", optionsBasic),
           "ftp://example.com/file.png",
@@ -289,7 +230,7 @@ describe('capturer/common.mjs', function () {
         );
       });
 
-      it("don't rewrite if capture.linkUnsavedUri is truthy", function () {
+      it("should not rewrite if `capture.linkUnsavedUri` is truthy", function () {
         assert.strictEqual(
           capturer.getErrorUrl("http://example.com/?id=123#456", optionsLinkUnsavedUri),
           "http://example.com/?id=123#456",
@@ -327,7 +268,7 @@ describe('capturer/common.mjs', function () {
     describe('#run()', function () {
       const tokenizer = new CssSelectorTokenizer();
 
-      it('basic selectors', function () {
+      it('should correctly parse basic selectors', function () {
         assert.deepEqual(tokenizer.run(''), []);
         assert.deepEqual(tokenizer.run('body'), [
           {type: 'name', value: 'body', depth: 0},
@@ -356,7 +297,7 @@ describe('capturer/common.mjs', function () {
         ]);
       });
 
-      it('attribute selector ([attr="..."])', function () {
+      it('should correctly parse attribute selector ([attr="..."])', function () {
         // attr only
         assert.deepEqual(tokenizer.run('[myattr]'), [
           {type: 'selector', value: '[myattr]', depth: 0},
@@ -413,7 +354,7 @@ describe('capturer/common.mjs', function () {
         ]);
       });
 
-      it('descendant combinator (" ")', function () {
+      it('should correctly parse descendant combinator (" ")', function () {
         assert.deepEqual(tokenizer.run('div span'), [
           {type: 'name', value: 'div', depth: 0},
           {type: 'operator', value: ' ', depth: 0},
@@ -459,7 +400,7 @@ describe('capturer/common.mjs', function () {
         ]);
       });
 
-      it('other combinators', function () {
+      it('should correctly parse other combinators', function () {
         assert.deepEqual(tokenizer.run('div > span'), [
           {type: 'name', value: 'div', depth: 0},
           {type: 'operator', value: ' ', depth: 0},
@@ -490,7 +431,7 @@ describe('capturer/common.mjs', function () {
         ]);
       });
 
-      it('pseudo-class', function () {
+      it('should correctly parse pseudo-class', function () {
         // simple
         assert.deepEqual(tokenizer.run(':root'), [
           {type: 'operator', value: ':', depth: 0},
@@ -554,7 +495,7 @@ describe('capturer/common.mjs', function () {
         ]);
       });
 
-      it('pseudo-element', function () {
+      it('should correctly parse pseudo-element', function () {
         // simple
         assert.deepEqual(tokenizer.run('p::before'), [
           {type: 'name', value: 'p', depth: 0},
@@ -573,7 +514,7 @@ describe('capturer/common.mjs', function () {
         ]);
       });
 
-      it('namespaced type selector', function () {
+      it('should correctly parse namespaced type selector', function () {
         assert.deepEqual(tokenizer.run('|a'), [
           {type: 'operator', value: '|', depth: 0},
           {type: 'name', value: 'a', depth: 0},
@@ -595,7 +536,7 @@ describe('capturer/common.mjs', function () {
         ]);
       });
 
-      it('namespaced attribute selector', function () {
+      it('should correctly parse namespaced attribute selector', function () {
         assert.deepEqual(tokenizer.run('[|attr]'), [
           {type: 'selector', value: '[|attr]', depth: 0},
         ]);
@@ -618,7 +559,7 @@ describe('capturer/common.mjs', function () {
     describe('#tokensToString()', function () {
       const tokenizer = new CssSelectorTokenizer();
 
-      it('basic', function () {
+      it('should convert tokens to a CSS selector string', function () {
         assert.deepEqual(tokenizer.tokensToString([
           {type: 'name', value: 'div', depth: 0},
           {type: 'operator', value: ' ', depth: 0},
@@ -634,12 +575,12 @@ describe('capturer/common.mjs', function () {
         return DocumentCssHandler.getSelectorText(...args);
       };
 
-      it('basic', function () {
+      it('should return the selector string from a CSS declaration string', function () {
         var rules = getRulesFromCssText(`div, span { background-color: lime; }`);
         assert.strictEqual(getSelectorText(rules[0]), 'div, span');
       });
 
-      $it.skipIf($.noNestingCss)('prepend :is() wrapped parent selector text for a nested rule', function () {
+      $it.skipIf($.noNestingCss)('should prepend :is() wrapped parent selector text for a nested rule', function () {
         var rules = getRulesFromCssText(`\
 div, span {
   a {
@@ -651,7 +592,7 @@ div, span {
         assert.strictEqual(getSelectorText(rules[0].cssRules[0].cssRules[0]), ':is(:is(div, span) a) b');
       });
 
-      $it.skipIf($.noNestingCss)('prepend parent selector for all top-level selector list items', function () {
+      $it.skipIf($.noNestingCss)('should prepend parent selector for all top-level selector list items', function () {
         var rules = getRulesFromCssText(`\
 div {
   a, area {
@@ -665,7 +606,7 @@ div {
         assert(getSelectorText(rules[0].cssRules[0].cssRules[0]).match(regex));
       });
 
-      $it.skipIf($.noNestingCss)('replace "&" with :is() wrapped parent selector text for a nested rule', function () {
+      $it.skipIf($.noNestingCss)('should replace "&" with :is() wrapped parent selector text for a nested rule', function () {
         var rules = getRulesFromCssText(`\
 div, span {
   & .case1 {}
@@ -682,7 +623,7 @@ div, span {
         assert.strictEqual(getSelectorText(rules[0].cssRules[4]), ':is(div, span) .case5 :is(div, span) :is(div, span)');
       });
 
-      $it.skipIf($.noNestingCss)('prepend parent selector for top-level selector list items without "&"', function () {
+      $it.skipIf($.noNestingCss)('should prepend parent selector for top-level selector list items without "&"', function () {
         var rules = getRulesFromCssText(`\
 div {
   & .case1, .case2 {}
@@ -713,7 +654,7 @@ div {
         assert.strictEqual(getSelectorText(rules[0].cssRules[4]), ':is(.case1, .case2 :is(div))');
       });
 
-      $it.skipIf($.noNestingCss)('imply parent selector for a relative selector even if "&" exists', function () {
+      $it.skipIf($.noNestingCss)('should imply parent selector for a starting relative selector even if "&" exists', function () {
         var rules = getRulesFromCssText(`\
 ul {
   > li &, + li &, ~ li & {}
@@ -732,7 +673,7 @@ ul {
         assert(getSelectorText(rules[0].cssRules[0]).match(regex));
       });
 
-      $it.skipIf($.noNestingCss).skipIf($.noColumnCombinator)('imply parent selector for a starting column combinator even if "&" exists', function () {
+      $it.skipIf($.noNestingCss).skipIf($.noColumnCombinator)('should imply parent selector for a starting column combinator even if "&" exists', function () {
         var rules = getRulesFromCssText(`\
 .colcls {
   || td & {}
@@ -741,12 +682,12 @@ ul {
         assert(getSelectorText(rules[0].cssRules[0]).match(regex));
       });
 
-      $it.skipIf($.noNestingCss)('escaped "&" should not be rewritten', function () {
+      $it.skipIf($.noNestingCss)('should not rewrite escaped "&"', function () {
         var rules = getRulesFromCssText(r`blockquote { .my\&class {} }`);
         assert.strictEqual(getSelectorText(rules[0].cssRules[0]), r`:is(blockquote) .my\&class`);
       });
 
-      $it.skipIf($.noNestingCss)('"&" in [attr=""] should not be rewritten', function () {
+      $it.skipIf($.noNestingCss)('should not rewrite "&" in [attr=""]', function () {
         var rules = getRulesFromCssText(r`blockquote { [myattr="a & b"] {} }`);
         assert.strictEqual(getSelectorText(rules[0].cssRules[0]), r`:is(blockquote) [myattr="a & b"]`);
       });
@@ -773,13 +714,13 @@ ul {
         assert.strictEqual(getSelectorVerifier(selector1), selector2);
       };
 
-      it('general selectors', function () {
+      it('should return same value for general selectors', function () {
         testGetSelectorVerifier('*', '*');
         testGetSelectorVerifier('div#id, span.class', 'div#id, span.class');
         testGetSelectorVerifier('& body', '& body', false);
       });
 
-      it('common pseudo-classes', function () {
+      it('should remove common pseudo-classes that are highly context dependant', function () {
         testGetSelectorVerifier('a:hover', 'a');
         testGetSelectorVerifier('a:active', 'a');
         testGetSelectorVerifier('a:link', 'a');
@@ -811,7 +752,7 @@ ul {
         testGetSelectorVerifier('a:not([href]):not([target])', 'a');
       });
 
-      it('common pseudo-elements', function () {
+      it('should remove common pseudo-elements that are highly context dependant', function () {
         testGetSelectorVerifier('a::before', 'a');
         testGetSelectorVerifier('a::after', 'a');
         testGetSelectorVerifier('p::first-line', 'p');
@@ -821,11 +762,11 @@ ul {
         testGetSelectorVerifier('#nonexist::part(elem)', '#nonexist', false);
       });
 
-      it('combined pseudo-classes/elements', function () {
+      it('should remove combined common pseudo-classes/elements', function () {
         testGetSelectorVerifier('a:hover::before', 'a');
       });
 
-      it('pseudo-classes that are not guaranteed to work after rewritten', function () {
+      it('should return "" for shadow host related pseudo-classes', function () {
         testGetSelectorVerifier(':host', '');
         testGetSelectorVerifier(':host > div', '');
         testGetSelectorVerifier(':host(.class)', '');
@@ -834,7 +775,7 @@ ul {
         testGetSelectorVerifier(':host-context(.class) > div', '', false);
       });
 
-      it('allowed pseudo-classes', function () {
+      it('should keep certain special pseudo-classes', function () {
         testGetSelectorVerifier(':root', ':root');
         testGetSelectorVerifier(':scope', ':scope');
         testGetSelectorVerifier(':scope > body > div', ':scope > body > div');
@@ -854,12 +795,12 @@ ul {
         testGetSelectorVerifier('li:nth-last-of-type(3)', 'li:nth-last-of-type(3)');
       });
 
-      it('(...) inside an allowed pseudo should be recursively rewritten', function () {
+      it('should recursively rewrite `(...)` inside an allowed pseudo', function () {
         testGetSelectorVerifier(':is(:hover, a:active)', ':is(*, a)', false);
         testGetSelectorVerifier(':is(:is(:link, :visited), button:active)', ':is(:is(*, *), button)', false);
       });
 
-      it('namespace for type selector should be removed', function () {
+      it('should remove namespace for type selector', function () {
         testGetSelectorVerifier('svg|a span', 'a span', false);
         testGetSelectorVerifier('*|a span', 'a span');
         testGetSelectorVerifier('|a span', 'a span');
@@ -875,7 +816,7 @@ ul {
         testGetSelectorVerifier('p |*', 'p *');
       });
 
-      it('namespace for attribute selector should be *', function () {
+      it('should use `*` namespace for attribute selector', function () {
         testGetSelectorVerifier('[attr]', '[*|attr]');
         testGetSelectorVerifier('[attr=value]', '[*|attr=value]');
         testGetSelectorVerifier('[attr="value"]', '[*|attr="value"]');
@@ -899,7 +840,7 @@ ul {
         testGetSelectorVerifier('[svg|attr|="value"]', '[*|attr|="value"]', false);
       });
 
-      it('column combinator should not be treated as namespace', function () {
+      it('should not treat column combinator as namespace', function () {
         testGetSelectorVerifier('col||td', 'col||td', false);
         testGetSelectorVerifier('col || td', 'col || td', false);
       });
@@ -910,7 +851,7 @@ ul {
         return DocumentCssHandler.getRulesFromCssText(...args);
       };
 
-      it('basic', function () {
+      it('should return `CSSRuleList` from a CSS text', function () {
         var rules = getRulesFromCssText(`\
 @media screen and (min-width: 300px), print {
   body {
