@@ -3,6 +3,7 @@
  *****************************************************************************/
 
 import * as utils from "../utils/extension.mjs";
+import {Cache} from "../utils/cache.mjs";
 import {server} from "../scrapbook/server.mjs";
 
 utils.loadOptionsAuto(); // async
@@ -17,8 +18,8 @@ async function init() {
       const missionId = new URL(document.URL).searchParams.get('mid');
       if (!missionId) { throw new Error(`Missing mission ID.`); }
       const key = {table: "batchCaptureMissionCache", id: missionId};
-      const data = await utils.cache.get(key);
-      await utils.cache.remove(key);
+      const data = await Cache.get(key);
+      await Cache.remove(key);
       if (!data) { throw new Error(`Missing data for mission "${missionId}".`); }
       gTaskInfo = data.taskInfo;
       gTaskInfo.options = gTaskInfo.options || {};
@@ -196,7 +197,7 @@ function getDetailStatusKey() {
 }
 
 async function loadDetailStatus() {
-  const status = await utils.cache.get(getDetailStatusKey(), 'storage');
+  const status = await Cache.get(getDetailStatusKey(), 'storage');
   if (!status) { return; }
 
   for (const id in status) {
@@ -212,7 +213,7 @@ async function saveDetailStatus() {
   for (const elem of document.querySelectorAll('details')) {
     status[elem.id] = elem.open;
   }
-  await utils.cache.set(getDetailStatusKey(), status, 'storage');
+  await Cache.set(getDetailStatusKey(), status, 'storage');
 }
 
 function updateUi() {

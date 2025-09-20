@@ -6,6 +6,7 @@
  *****************************************************************************/
 
 import * as utils from "../utils/common.mjs";
+import {Cache} from "../utils/cache.mjs";
 import {server} from "./server.mjs";
 import {Tree} from "./tree.mjs";
 
@@ -196,12 +197,12 @@ class BookTree extends Tree {
     };
 
     try {
-      await utils.cache.set(key, data, this.cacheType);
+      await Cache.set(key, data, this.cacheType);
     } catch (ex) {
       if (ex.name === 'QuotaExceededError') {
         // In case the view status is too large (mostly for sessionStorage),
         // clear the data to prevent loading the old value.
-        await utils.cache.remove(key, this.cacheType);
+        await Cache.remove(key, this.cacheType);
         console.warn('Cleared stored view status as the latest value is too large to store.');
       } else {
         throw ex;
@@ -212,7 +213,7 @@ class BookTree extends Tree {
   async loadViewStatus() {
     try {
       const key = this.getViewStatusKey();
-      const data = await utils.cache.get(key, this.cacheType);
+      const data = await Cache.get(key, this.cacheType);
 
       if (!data) { return; }
 

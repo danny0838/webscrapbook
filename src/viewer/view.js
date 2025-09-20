@@ -3,6 +3,7 @@
  *****************************************************************************/
 
 import * as utils from "../utils/common.mjs";
+import {Cache} from "../utils/cache.mjs";
 
 utils.loadLanguages(document);
 
@@ -792,7 +793,7 @@ async function init() {
     const indexFile = viewerData.indexFile || "index.html";
 
     /* load zip content from previous cache */
-    const entries = Object.entries(await utils.cache.getAll({includes: key}, 'indexedDB'));
+    const entries = Object.entries(await Cache.getAll({includes: key}, 'indexedDB'));
 
     if (!entries.length) {
       throw new Error(`Archive '${id}' does not exist or has been cleared.`);
