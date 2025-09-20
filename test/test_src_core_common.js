@@ -23,7 +23,7 @@
 
 'use strict';
 
-const {MochaQuery: $, assert, userAgent, encodeText, cssRegex} = unittest;
+const {MochaQuery: $, assert, encodeText, cssRegex} = unittest;
 
 const $describe = $(describe);
 const $it = $(it);
@@ -2250,6 +2250,7 @@ describe('core/common.js', function () {
       // re-read as the original charset
       var {text: output, charset} = await scrapbook.parseCssFile(blob, charset);
 
+      assert.isNull(parsedCharset);
       assert.strictEqual(output, expected);
     }
 

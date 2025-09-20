@@ -29,7 +29,7 @@
 
 const {
   MochaQuery: $, assert,
-  userAgent, delay,
+  userAgent,
   xhr, readFileAsText, readFileAsArrayBuffer, readFileAsDataURL, readFileAsDocument,
   getRulesFromCssText, getToken, escapeRegExp, regex, rawRegex, cssRegex,
 } = unittest;
@@ -4963,9 +4963,6 @@ div > ::slotted(*) { font-size: 1.2em; }`);
           });
 
           var zip = await new JSZip().loadAsync(blob);
-          var indexFile = zip.file('index.html');
-          var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
-          var doc = await readFileAsDocument(indexBlob);
 
           var cssFile = zip.file('linked.css');
           var cssText = (await readFileAsText(await cssFile.async('blob'))).trim();
@@ -4992,9 +4989,6 @@ div > ::slotted(*) { font-size: 1.2em; }`);
           });
 
           var zip = await new JSZip().loadAsync(blob);
-          var indexFile = zip.file('index.html');
-          var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
-          var doc = await readFileAsDocument(indexBlob);
 
           var cssFile = zip.file('linked.css');
           var cssText = (await readFileAsText(await cssFile.async('blob'))).trim();
@@ -5021,9 +5015,6 @@ div > ::slotted(*) { font-size: 1.2em; }`);
           });
 
           var zip = await new JSZip().loadAsync(blob);
-          var indexFile = zip.file('index.html');
-          var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
-          var doc = await readFileAsDocument(indexBlob);
 
           var cssFile = zip.file('linked.css');
           var cssText = (await readFileAsText(await cssFile.async('blob'))).trim();
@@ -5048,9 +5039,6 @@ div > ::slotted(*) { font-size: 1.2em; }`);
           });
 
           var zip = await new JSZip().loadAsync(blob);
-          var indexFile = zip.file('index.html');
-          var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
-          var doc = await readFileAsDocument(indexBlob);
 
           var cssFile = zip.file('linked.css');
           var cssText = (await readFileAsText(await cssFile.async('blob'))).trim();
@@ -13168,9 +13156,6 @@ document.querySelector("p").textContent = "srcdoc content modified";
           options,
         });
         var zip = await new JSZip().loadAsync(blob);
-        var indexFile = zip.file('index.html');
-        var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
-        var doc = await readFileAsDocument(indexBlob);
 
         var file = zip.file('css1.py');
         var text = (await readFileAsText(await file.async('blob'))).trim();

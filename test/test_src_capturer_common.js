@@ -776,12 +776,12 @@ ul {
         if (validate && typeof document !== 'undefined' && document.querySelector) {
           try {
             selector1 && document.querySelector(selector1);
-          } catch (ex) {
+          } catch {
             throw new Error(`Invalid testing CSS selector: ${selector1}`);
           }
           try {
             selector2 && document.querySelector(selector2);
-          } catch (ex) {
+          } catch {
             throw new Error(`Invalid control CSS selector: ${selector2}`);
           }
         }
@@ -3010,7 +3010,7 @@ insertedText`);
           helpers,
           rootNode: doc,
         });
-        var result = helper.run();
+        assert.deepEqual(helper.run(), {errors: []});
         assert.strictEqual(doc.body.innerHTML.trim(), `<div class="exclude2"></div>`);
       });
 
@@ -3043,7 +3043,7 @@ insertedText`);
           rootNode: doc,
           docUrl: 'http://example.com',
         });
-        var result = helper.run();
+        assert.deepEqual(helper.run(), {errors: []});
         assert.strictEqual(doc.body.innerHTML.trim(), `<div class="exclude2"></div>`);
       });
     });
