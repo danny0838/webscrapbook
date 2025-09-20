@@ -3174,7 +3174,6 @@ scrapbook.split = function (str) {
   const regex = new RegExp(`[${ASCII_WHITESPACE}]+`);
   const filter = x => !!x;
   const split = scrapbook.split = (str) => {
-    const parts = (str || '').split(regex);
     return (str || '').split(regex).filter(filter);
   };
   return split(str);
