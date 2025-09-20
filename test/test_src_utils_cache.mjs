@@ -1,8 +1,11 @@
 import {MochaQuery as $, assert} from "./unittest.mjs";
 import sinon from "./lib/sinon-esm.js";
-import {readFileAsText} from "./shared/utils/common.mjs";
+import {unicodeToUtf8, byteStringToArrayBuffer, readFileAsText} from "./shared/utils/common.mjs";
 
-import {StorageCache, IdbCache, SessionCache} from "./shared/utils/cache.mjs";
+import {
+  serializeObject, deserializeObject,
+  BaseCache, StorageCache, IdbCache, SessionCache, Cache,
+} from "./shared/utils/cache.mjs";
 
 const $describe = $(describe);
 
@@ -159,6 +162,181 @@ async function cleanUp() {
 }
 
 describe('utils/cache.mjs', function () {
+  let sandbox;
+
+  beforeEach(function () {
+    sandbox = sinon.createSandbox();
+  });
+
+  afterEach(function () {
+    sandbox?.restore();
+  });
+
+  describe('serializeObject', function () {
+    it('should serialize Blob', async function () {
+      var text = 'foo bar 中文𠀀';
+      var blob = new Blob([text], {type: 'text/plain'});
+      assert.deepEqual(await serializeObject(blob), {
+        __type__: 'Blob',
+        type: 'text/plain',
+        data: [unicodeToUtf8(text)],
+      });
+
+      var bytes = atob('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQIW2Ng/M/wHwAEBQIAs+lPYAAAAABJRU5ErkJggg==');
+      var blob = new Blob([byteStringToArrayBuffer(bytes)], {type: 'image/bmp'});
+      assert.deepEqual(await serializeObject(blob), {
+        __type__: 'Blob',
+        type: 'image/bmp',
+        data: [bytes],
+      });
+    });
+
+    it('should serialize File', async function () {
+      var lastModified = Date.now();
+
+      var text = 'foo bar 中文𠀀';
+      var file = new File([text], 'test.txt', {type: 'text/plain', lastModified});
+      assert.deepEqual(await serializeObject(file), {
+        __type__: 'File',
+        name: 'test.txt',
+        type: 'text/plain',
+        lastModified,
+        data: [unicodeToUtf8(text)],
+      });
+
+      var bytes = atob('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQIW2Ng/M/wHwAEBQIAs+lPYAAAAABJRU5ErkJggg==');
+      var file = new File([byteStringToArrayBuffer(bytes)], 'image.bmp', {type: 'image/bmp', lastModified});
+      assert.deepEqual(await serializeObject(file), {
+        __type__: 'File',
+        name: 'image.bmp',
+        type: 'image/bmp',
+        lastModified,
+        data: [bytes],
+      });
+    });
+
+    it('should return the input for other types synchronously', function () {
+      assert.strictEqual(serializeObject(undefined), undefined);
+      assert.strictEqual(serializeObject(null), null);
+      assert.strictEqual(serializeObject(true), true);
+      assert.strictEqual(serializeObject(123), 123);
+      assert.strictEqual(serializeObject('foo'), 'foo');
+
+      var input = [123, 456];
+      assert.strictEqual(serializeObject(input), input);
+
+      var input = {a: 1, b: 2};
+      assert.strictEqual(serializeObject(input), input);
+    });
+  });
+
+  describe('deserializeObject', function () {
+    it('should deserialize Blob synchronously', function () {
+      var bytes = atob('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQIW2Ng/M/wHwAEBQIAs+lPYAAAAABJRU5ErkJggg==');
+      var blob = new Blob([byteStringToArrayBuffer(bytes)], {type: 'image/bmp'});
+      assert.deepEqual(deserializeObject({
+        __type__: 'Blob',
+        type: 'image/bmp',
+        data: [bytes],
+      }), blob);
+    });
+
+    it('should deserialize File synchronously', function () {
+      var lastModified = Date.now();
+
+      var bytes = atob('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQIW2Ng/M/wHwAEBQIAs+lPYAAAAABJRU5ErkJggg==');
+      var file = new File([byteStringToArrayBuffer(bytes)], 'image.bmp', {type: 'image/bmp', lastModified});
+      assert.deepEqual(deserializeObject({
+        __type__: 'File',
+        name: 'image.bmp',
+        type: 'image/bmp',
+        lastModified,
+        data: [bytes],
+      }), file);
+    });
+
+    it('should return the input for other types synchronously', function () {
+      assert.strictEqual(deserializeObject(undefined), undefined);
+      assert.strictEqual(deserializeObject(null), null);
+      assert.strictEqual(deserializeObject(true), true);
+      assert.strictEqual(deserializeObject(123), 123);
+      assert.strictEqual(deserializeObject('foo'), 'foo');
+
+      var input = [123, 456];
+      assert.strictEqual(deserializeObject(input), input);
+
+      var input = {a: 1, b: 2};
+      assert.strictEqual(deserializeObject(input), input);
+    });
+  });
+
+  $describe.skipIf($.noExtensionBrowser)('BaseCache', function () {
+    describe('_serializeObject', function () {
+      it('should serialize deep objects', async function () {
+        var blob = new Blob(['foo'], {type: 'text/plain'});
+        assert.deepEqual(
+          await BaseCache._serializeObject({
+            file1: blob,
+            subdir: [blob, 123],
+          }),
+          {
+            file1: {
+              __type__: 'Blob',
+              type: 'text/plain',
+              data: ['foo'],
+            },
+            subdir: [
+              {
+                __type__: 'Blob',
+                type: 'text/plain',
+                data: ['foo'],
+              },
+              123,
+            ],
+          },
+        );
+      });
+    });
+
+    describe('_deserializeObject', function () {
+      it('should deserialize deep objects', async function () {
+        var blob = new Blob(['foo'], {type: 'text/plain'});
+        assert.deepEqual(
+          await BaseCache._deserializeObject({
+            file1: {
+              __type__: 'Blob',
+              type: 'text/plain',
+              data: ['foo'],
+            },
+            subdir: [
+              {
+                __type__: 'Blob',
+                type: 'text/plain',
+                data: ['foo'],
+              },
+              123,
+            ],
+          }),
+          {
+            file1: blob,
+            subdir: [blob, 123],
+          },
+        );
+      });
+    });
+
+    describe('_getKeyStr', function () {
+      it('should return the original string when passing a string', function () {
+        assert.deepEqual(BaseCache._getKeyStr('foo bar'), 'foo bar');
+      });
+
+      it('should return the JSON string when passing an object', function () {
+        var obj = {a: 1, b: 2};
+        assert.deepEqual(BaseCache._getKeyStr(obj), JSON.stringify(obj));
+      });
+    });
+  });
+
   for (const cache of [StorageCache, IdbCache, SessionCache]) {
     $describe.skipIf($.noExtensionBrowser)(cache.name, function () {
       before(async function applyStubs() {
@@ -202,6 +380,62 @@ describe('utils/cache.mjs', function () {
             [JSON.stringify(key2)]: "value456-2",
           });
         });
+
+        switch (cache) {
+          case StorageCache: {
+            context('when `_serializeObjectNeeded` is truthy', function () {
+              it('should store serialized data', async function () {
+                const stub = sandbox.stub(StorageCache, "_serializeObjectNeeded").value(true);
+                const spy = sandbox.spy(BaseCache, "_serializeObject");
+
+                const key1 = {table: "test", id: "123"};
+                const blob = new Blob(['foo bar'], {type: 'text/plain'});
+                await cache.set(key1, blob);
+
+                assert.deepEqual(await browser.storage.local.get(null), {
+                  [JSON.stringify(key1)]: {__type__: 'Blob', type: 'text/plain', data: ['foo bar']},
+                });
+                sinon.assert.calledOnceWithExactly(spy, blob);
+              });
+            });
+
+            context('when `_serializeObjectNeeded` is falsy', function () {
+              it('should store the input data', async function () {
+                const stub = sandbox.stub(StorageCache, "_serializeObjectNeeded").value(false);
+                const spy = sandbox.spy(BaseCache, "_serializeObject");
+
+                const key1 = {table: "test", id: "123"};
+                const blob = new Blob(['foo bar'], {type: 'text/plain'});
+                await cache.set(key1, blob);
+
+                assert.deepEqual(await browser.storage.local.get(null), {
+                  [JSON.stringify(key1)]: blob,
+                });
+                sinon.assert.notCalled(spy);
+              });
+            });
+
+            break;
+          }
+          case SessionCache: {
+            it('should store jsonified serialized data', async function () {
+              const spy = sandbox.spy(BaseCache, "_serializeObject");
+
+              const key1 = {table: "test", id: "123"};
+              const blob = new Blob(['foo bar'], {type: 'text/plain'});
+              await cache.set(key1, blob);
+
+              assert.strictEqual(sessionStorage.length, 1);
+              assert.deepEqual(
+                sessionStorage.getItem(JSON.stringify(key1)),
+                JSON.stringify({__type__: 'Blob', type: 'text/plain', data: ['foo bar']}),
+              );
+              sinon.assert.calledOnceWithExactly(spy, blob);
+            });
+
+            break;
+          }
+        }
       });
 
       describe('get', function () {
@@ -549,4 +783,66 @@ describe('utils/cache.mjs', function () {
       });
     });
   }
+
+  $describe.skipIf($.noExtensionBrowser)('Cache', function () {
+    describe('set', function () {
+      for (const [STORAGE, cache] of Object.entries(Cache.caches)) {
+        it(`should call ${cache.name} method when passing "${STORAGE}"`, async function () {
+          const stub = sandbox.stub(cache, "set");
+
+          const key = {table: "test", id: "123"};
+          await Cache.set(key, "value123", STORAGE);
+          sinon.assert.calledOnceWithExactly(stub, key, "value123");
+        });
+      }
+    });
+
+    describe('get', function () {
+      for (const [STORAGE, cache] of Object.entries(Cache.caches)) {
+        it(`should call ${cache.name} method when passing "${STORAGE}"`, async function () {
+          const stub = sandbox.stub(cache, "get");
+
+          const key = {table: "test", id: "123"};
+          await Cache.get(key, STORAGE);
+          sinon.assert.calledOnceWithExactly(stub, key);
+        });
+      }
+    });
+
+    describe('getAll', function () {
+      for (const [STORAGE, cache] of Object.entries(Cache.caches)) {
+        it(`should call ${cache.name} method when passing "${STORAGE}"`, async function () {
+          const stub = sandbox.stub(cache, "getAll");
+
+          const filter = {};
+          await Cache.getAll(filter, STORAGE);
+          sinon.assert.calledOnceWithExactly(stub, filter);
+        });
+      }
+    });
+
+    describe('remove', function () {
+      for (const [STORAGE, cache] of Object.entries(Cache.caches)) {
+        it(`should call ${cache.name} method when passing "${STORAGE}"`, async function () {
+          const stub = sandbox.stub(cache, "remove");
+
+          const key = {table: "test", id: "123"};
+          await Cache.remove(key, STORAGE);
+          sinon.assert.calledOnceWithExactly(stub, key);
+        });
+      }
+    });
+
+    describe('removeAll', function () {
+      for (const [STORAGE, cache] of Object.entries(Cache.caches)) {
+        it(`should call ${cache.name} method when passing "${STORAGE}"`, async function () {
+          const stub = sandbox.stub(cache, "removeAll");
+
+          const filter = {};
+          await Cache.removeAll(filter, STORAGE);
+          sinon.assert.calledOnceWithExactly(stub, filter);
+        });
+      }
+    });
+  });
 });
