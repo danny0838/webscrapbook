@@ -3,6 +3,7 @@
  *****************************************************************************/
 
 import * as utils from "../utils/extension.mjs";
+import {Cache} from "../utils/cache.mjs";
 import {dialog} from "../core/dialog.js";
 import {server} from "./server.mjs";
 import {BookTree} from "./book-tree.mjs";
@@ -104,7 +105,7 @@ const itempicker = {
       serverRoot: server.serverRoot,
       bookId,
     };
-    const list = await utils.cache.get(key);
+    const list = await Cache.get(key);
     if (!list?.length) { return; }
 
     const selector = document.getElementById('recent');
@@ -135,7 +136,7 @@ const itempicker = {
       bookId,
     };
 
-    let list = await utils.cache.get(key);
+    let list = await Cache.get(key);
     list = new Set(list);
     list.delete(id);  // move to last if id already exists
     list.add(id);
@@ -156,7 +157,7 @@ const itempicker = {
       list = list.slice(slicePos);
     }
 
-    await utils.cache.set(key, list);
+    await Cache.set(key, list);
   },
 
   selectRecentItem(id) {

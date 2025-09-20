@@ -6,6 +6,7 @@
 
 import {isDebug} from "../utils/debug.mjs";
 import * as utils from "../utils/extension.mjs";
+import {Cache} from "../utils/cache.mjs";
 import {dataUriToFile} from "../utils/datauri.mjs";
 import {Zip} from "../utils/zip.mjs";
 import {sha1} from "../utils/sha.mjs";
@@ -349,8 +350,8 @@ capturer.getAvailableSaveFilename = async function (params) {
 capturer.saveFileCache = async function ({timeId, path, blob}) {
   if (capturer.captureInfo.get(timeId).useDiskCache) {
     const key = {table: "pageCache", id: timeId, path};
-    await utils.cache.set(key, blob, 'indexedDB');
-    blob = await utils.cache.get(key, 'indexedDB');
+    await Cache.set(key, blob, 'indexedDB');
+    blob = await Cache.get(key, 'indexedDB');
   }
 
   const {files} = capturer.captureInfo.get(timeId);
@@ -420,7 +421,7 @@ capturer.clearFileCache = async function ({timeId}) {
       id: timeId,
     },
   };
-  await utils.cache.removeAll(filter, 'indexedDB');
+  await Cache.removeAll(filter, 'indexedDB');
 };
 
 /**
@@ -496,8 +497,8 @@ capturer.fetch = async function (params) {
 
   const setCache = async (id, token, data) => {
     const key = {table: "fetchCache", id, token};
-    await utils.cache.set(key, data, 'indexedDB');
-    return await utils.cache.get(key, 'indexedDB');
+    await Cache.set(key, data, 'indexedDB');
+    return await Cache.get(key, 'indexedDB');
   };
 
   const fetch = capturer.fetch = async function (params) {
@@ -1215,7 +1216,7 @@ capturer.captureGeneral = async function ({
   // determine bookId at the start of a capture
   if (options["capture.saveTo"] === 'server') {
     if (bookId === null) {
-      bookId = (await utils.cache.get({table: "scrapbookServer", key: "currentScrapbook"}, 'storage')) || "";
+      bookId = (await Cache.get({table: "scrapbookServer", key: "currentScrapbook"}, 'storage')) || "";
     }
     await server.init();
     server.bookId = bookId;
@@ -4449,8 +4450,8 @@ const capturePromise = new Promise((resolve, reject) => {
       }
 
       const key = {table: "captureMissionCache", id: missionId};
-      const taskInfo = await utils.cache.get(key);
-      await utils.cache.remove(key);
+      const taskInfo = await Cache.get(key);
+      await Cache.remove(key);
       if (!taskInfo || !taskInfo.tasks) {
         capturer.error(`Error: missing task data for mission "${missionId}".`);
         break runTasks;

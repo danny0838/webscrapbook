@@ -3,6 +3,7 @@
  *****************************************************************************/
 
 import * as utils from "../utils/common.mjs";
+import {Cache} from "../utils/cache.mjs";
 
 utils.loadOptionsAuto(); // async
 
@@ -129,8 +130,8 @@ async function clearViewerCaches() {
     includes: {table: 'pageCache'},
     excludes: {id: usedIds},
   };
-  await utils.cache.removeAll(filter, 'indexedDB');
-  await utils.cache.removeAll(filter, 'storage');
+  await Cache.removeAll(filter, 'indexedDB');
+  await Cache.removeAll(filter, 'storage');
 }
 
 async function init() {
