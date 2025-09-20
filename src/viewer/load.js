@@ -3,7 +3,7 @@
  *****************************************************************************/
 
 import * as utils from "../utils/common.mjs";
-import {Cache} from "../utils/cache.mjs";
+import {IdbCache} from "../utils/cache.mjs";
 import {Zip, Maff} from "../utils/zip.mjs";
 import * as Mime from "../lib/mime.mjs";
 
@@ -241,7 +241,7 @@ const viewer = {
         });
 
         const key = {table: "pageCache", id: uuid, path: inZipPath};
-        await Cache.set(key, data, 'indexedDB');
+        await IdbCache.set(key, data);
       }
 
       /* Retrieve indexFiles */

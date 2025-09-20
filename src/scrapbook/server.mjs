@@ -4,7 +4,7 @@
 
 import {BACKEND_MIN_VERSION} from "../utils/common.mjs";
 import * as utils from "../utils/common.mjs";
-import {Cache} from "../utils/cache.mjs";
+import {StorageCache} from "../utils/cache.mjs";
 
 // order is relevant
 const SPECIAL_ITEM_ID = new Set(['root', 'hidden', 'recycle']);
@@ -260,7 +260,7 @@ class Server {
     }
 
     // record configs
-    this._bookId = (await Cache.get({table: "scrapbookServer", key: "currentScrapbook"}, 'storage')) || "";
+    this._bookId = (await StorageCache.get({table: "scrapbookServer", key: "currentScrapbook"})) || "";
 
     // load config from server
     {
