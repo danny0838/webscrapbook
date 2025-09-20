@@ -105,21 +105,8 @@ function deserializeObject(obj) {
   return obj;
 }
 
-const cache = {
-  _current: 'auto',
-
-  get current() {
-    if (this._current === 'auto') {
-      this._current = 'storage';
-    }
-    return this._current;
-  },
-
-  set current(value) {
-    this._current = value;
-  },
-
-  async _serializeObject(obj) {
+class BaseCache {
+  static async _serializeObject(obj) {
     const map = {};
     const objStr = JSON.stringify(obj, (key, value) => {
       const valueNew = serializeObject(value);
@@ -143,9 +130,9 @@ const cache = {
       }
       return value;
     });
-  },
+  }
 
-  async _deserializeObject(obj) {
+  static async _deserializeObject(obj) {
     const map = {};
     const objStr = JSON.stringify(obj, (key, value) => {
       const valueNew = deserializeObject(value);
@@ -169,7 +156,11 @@ const cache = {
       }
       return value;
     });
-  },
+  }
+
+  static _getKeyStr(key) {
+    return (typeof key === "string") ? key : JSON.stringify(key);
+  }
 
   /**
    * @typedef {Object} cacheFilter
@@ -181,7 +172,7 @@ const cache = {
    * @param {string} key
    * @param {cacheFilter} [filter]
    */
-  _applyFilter(key, filter) {
+  static _applyFilter(key, filter) {
     let obj;
     try {
       obj = JSON.parse(key);
@@ -229,319 +220,349 @@ const cache = {
       }
     }
     return true;
-  },
+  }
+}
 
-  /**
-   * @param {string|Object} key
-   */
-  async get(key, cache = this.current) {
-    const keyStr = (typeof key === "string") ? key : JSON.stringify(key);
-    return this[cache].get(keyStr);
-  },
+class StorageCache extends BaseCache {
+  static get _serializeObjectNeeded() {
+    // In Chromium, a Blob cannot be stored in browser.storage,
+    // fallback to an object containing byte string data.
+    delete this._serializeObjectNeeded;
+    return this._serializeObjectNeeded = userAgent.is('chromium');
+  }
 
-  /**
-   * @param {cacheFilter} filter
-   */
-  async getAll(filter, cache = this.current) {
-    return this[cache].getAll(filter);
-  },
+  static async _serializeObject(obj) {
+    if (this._serializeObjectNeeded) {
+      return await super._serializeObject(obj);
+    }
+    return obj;
+  }
 
-  /**
-   * @param {string|Object} key
-   */
-  async set(key, value, cache = this.current) {
-    const keyStr = (typeof key === "string") ? key : JSON.stringify(key);
-    return this[cache].set(keyStr, value);
-  },
+  static async _deserializeObject(obj) {
+    if (this._serializeObjectNeeded) {
+      return await super._deserializeObject(obj);
+    }
+    return obj;
+  }
 
-  /**
-   * @param {string|Object} key
-   */
-  async remove(key, cache = this.current) {
-    const keyStr = (typeof key === "string") ? key : JSON.stringify(key);
-    return this[cache].remove(keyStr);
-  },
-
-  /**
-   * @param {cacheFilter} filter
-   */
-  async removeAll(filter, cache = this.current) {
-    return this[cache].removeAll(filter);
-  },
-
-  storage: {
-    get _serializeObjectNeeded() {
-      // In Chromium, a Blob cannot be stored in browser.storage,
-      // fallback to an object containing byte string data.
-      delete this._serializeObjectNeeded;
-      return this._serializeObjectNeeded = userAgent.is('chromium');
-    },
-
-    async _serializeObject(obj) {
-      if (this._serializeObjectNeeded) {
-        return await cache._serializeObject(obj);
+  static async _getKeys(fallback = true) {
+    // Chromium < 130 and Firefox < 143
+    if (!browser.storage.local.getKeys) {
+      if (fallback) {
+        return Object.keys(await browser.storage.local.get());
       }
-      return obj;
-    },
 
-    async _deserializeObject(obj) {
-      if (this._serializeObjectNeeded) {
-        return await cache._deserializeObject(obj);
-      }
-      return obj;
-    },
+      return null;
+    }
 
-    async _getKeys(fallback = true) {
-      // Chromium < 130 and Firefox < 143
-      if (!browser.storage.local.getKeys) {
-        if (fallback) {
-          return Object.keys(await browser.storage.local.get());
+    return await browser.storage.local.getKeys();
+  }
+
+  static async get(key) {
+    key = this._getKeyStr(key);
+    const items = await browser.storage.local.get(key);
+    return await this._deserializeObject(items[key]);
+  }
+
+  static async getAll(filter) {
+    const keys = await this._getKeys(false);
+
+    // Chromium < 130 and Firefox < 143
+    if (!keys) {
+      const items = await browser.storage.local.get();
+      for (const key in items) {
+        if (!this._applyFilter(key, filter)) {
+          delete items[key];
         }
-
-        return null;
       }
-
-      return await browser.storage.local.getKeys();
-    },
-
-    async get(key) {
-      const items = await browser.storage.local.get(key);
-      return await this._deserializeObject(items[key]);
-    },
-
-    async getAll(filter) {
-      const keys = await this._getKeys(false);
-
-      // Chromium < 130 and Firefox < 143
-      if (!keys) {
-        const items = await browser.storage.local.get();
-        for (const key in items) {
-          if (!cache._applyFilter(key, filter)) {
-            delete items[key];
-          }
-        }
-        return await this._deserializeObject(items);
-      }
-
-      const items = await browser.storage.local.get(
-        keys.filter(key => cache._applyFilter(key, filter)),
-      );
       return await this._deserializeObject(items);
-    },
+    }
 
-    async set(key, value) {
-      return await browser.storage.local.set({[key]: await this._serializeObject(value)});
-    },
+    const items = await browser.storage.local.get(
+      keys.filter(key => this._applyFilter(key, filter)),
+    );
+    return await this._deserializeObject(items);
+  }
 
-    async remove(key) {
-      return await browser.storage.local.remove(key);
-    },
+  static async set(key, value) {
+    key = this._getKeyStr(key);
+    return await browser.storage.local.set({[key]: await this._serializeObject(value)});
+  }
 
-    async removeAll(filter) {
-      const keys = [];
-      for (const key of (await this._getKeys())) {
-        if (cache._applyFilter(key, filter)) {
-          keys.push(key);
-        }
+  static async remove(key) {
+    key = this._getKeyStr(key);
+    return await browser.storage.local.remove(key);
+  }
+
+  static async removeAll(filter) {
+    const keys = [];
+    for (const key of (await this._getKeys())) {
+      if (this._applyFilter(key, filter)) {
+        keys.push(key);
       }
-      return await browser.storage.local.remove(keys);
-    },
-  },
+    }
+    return await browser.storage.local.remove(keys);
+  }
+}
 
-  indexedDB: {
-    get _nosupport() {
-      // Firefox: `indexedDB.open` throws `InvalidStateError` in an extension
-      // tab in a private window.
-      // ref: https://bugzilla.mozilla.org/show_bug.cgi?id=1841806
-      const p = this._connect().then(
-        (db) => (db.close(), false),
-        (ex) => (ex.name === 'InvalidStateError'),
-      );
-      delete this._nosupport;
-      return this._nosupport = p;
-    },
+class IdbCache extends BaseCache {
+  static DB_NAME = "scrapbook";
 
-    async _connect() {
+  static get _nosupport() {
+    // Firefox: `indexedDB.open` throws `InvalidStateError` in an extension
+    // tab in a private window.
+    // ref: https://bugzilla.mozilla.org/show_bug.cgi?id=1841806
+    const p = this._connect().then(
+      (db) => (db.close(), false),
+      (ex) => (ex.name === 'InvalidStateError'),
+    );
+    delete this._nosupport;
+    return this._nosupport = p;
+  }
+
+  static async _connect() {
+    return await new Promise((resolve, reject) => {
+      const request = indexedDB.open(this.DB_NAME, 3);
+      request.onupgradeneeded = (event) => {
+        let db = event.target.result;
+        if (event.oldVersion === 1) {
+          db.deleteObjectStore("archiveZipFiles");
+        } else if (event.oldVersion === 2) {
+          db.deleteObjectStore("cache");
+        }
+        db.createObjectStore("cache");
+      };
+      request.onblocked = (event) => {
+        reject(new Error("Upgrade of the indexedDB is blocked by another connection."));
+      };
+      request.onsuccess = (event) => {
+        resolve(event.target.result);
+      };
+      request.onerror = (event) => {
+        reject(event.target.error);
+      };
+    });
+  }
+
+  static async _transaction(callback, mode, options) {
+    const db = await this._connect();
+    try {
+      const transaction = db.transaction("cache", mode, options);
+      const objectStore = transaction.objectStore("cache");
       return await new Promise((resolve, reject) => {
-        const request = indexedDB.open("scrapbook", 3);
-        request.onupgradeneeded = (event) => {
-          let db = event.target.result;
-          if (event.oldVersion === 1) {
-            db.deleteObjectStore("archiveZipFiles");
-          } else if (event.oldVersion === 2) {
-            db.deleteObjectStore("cache");
-          }
-          db.createObjectStore("cache");
+        // transaction is available from objectStore.transaction
+        const result = callback.call(this, objectStore);
+
+        transaction.oncomplete = (event) => {
+          resolve(result);
         };
-        request.onblocked = (event) => {
-          reject(new Error("Upgrade of the indexedDB is blocked by another connection."));
-        };
-        request.onsuccess = (event) => {
-          resolve(event.target.result);
-        };
-        request.onerror = (event) => {
+
+        transaction.onerror = (event) => {
+          // unhandled error for IDBRequest will bubble up to transaction error
           reject(event.target.error);
         };
+
+        // abort the transaction if there's an unexpected error
+        result.catch((ex) => {
+          reject(ex);
+          transaction.abort();
+        });
       });
-    },
+    } finally {
+      db.close();
+    }
+  }
 
-    async _transaction(callback, mode, options) {
-      const db = await this._connect();
-      try {
-        const transaction = db.transaction("cache", mode, options);
-        const objectStore = transaction.objectStore("cache");
-        return await new Promise((resolve, reject) => {
-          // transaction is available from objectStore.transaction
-          const result = callback.call(this, objectStore);
+  static async get(key) {
+    key = this._getKeyStr(key);
 
-          transaction.oncomplete = (event) => {
+    if (await this._nosupport) {
+      return StorageCache.get(key);
+    }
+
+    return await this._transaction(async (objectStore) => {
+      return await new Promise((resolve, reject) => {
+        objectStore.get(key).onsuccess = (event) => {
+          resolve(event.target.result);
+        };
+      });
+    }, "readonly");
+  }
+
+  static async getAll(filter) {
+    if (await this._nosupport) {
+      return StorageCache.getAll(filter);
+    }
+
+    return await this._transaction(async (objectStore) => {
+      const result = {};
+      return await new Promise((resolve, reject) => {
+        objectStore.openCursor().onsuccess = (event) => {
+          const cursor = event.target.result;
+          if (!cursor) {
             resolve(result);
-          };
+            return;
+          }
+          if (this._applyFilter(cursor.key, filter)) {
+            result[cursor.key] = cursor.value;
+          }
+          cursor.continue();
+        };
+      });
+    }, "readonly");
+  }
 
-          transaction.onerror = (event) => {
-            // unhandled error for IDBRequest will bubble up to transaction error
-            reject(event.target.error);
-          };
+  static async set(key, value) {
+    key = this._getKeyStr(key);
 
-          // abort the transaction if there's an unexpected error
-          result.catch((ex) => {
-            reject(ex);
-            transaction.abort();
-          });
-        });
-      } finally {
-        db.close();
+    if (await this._nosupport) {
+      return StorageCache.set(key, value);
+    }
+
+    return await this._transaction(async (objectStore) => {
+      objectStore.put(value, key);
+    }, "readwrite");
+  }
+
+  static async remove(key) {
+    key = this._getKeyStr(key);
+
+    if (await this._nosupport) {
+      return StorageCache.remove(key);
+    }
+
+    return await this._transaction(async (objectStore) => {
+      objectStore.delete(key);
+    }, "readwrite");
+  }
+
+  static async removeAll(filter) {
+    if (await this._nosupport) {
+      return StorageCache.removeAll(filter);
+    }
+
+    return await this._transaction(async (objectStore) => {
+      return await new Promise((resolve, reject) => {
+        objectStore.openCursor().onsuccess = (event) => {
+          const cursor = event.target.result;
+          if (!cursor) {
+            resolve();
+            return;
+          }
+          if (this._applyFilter(cursor.key, filter)) {
+            cursor.delete();
+          }
+          cursor.continue();
+        };
+      });
+    }, "readwrite");
+  }
+}
+
+class SessionCache extends BaseCache {
+  static async get(key) {
+    key = this._getKeyStr(key);
+
+    // @TODO: direct string to object deserialization?
+    return await this._deserializeObject(JSON.parse(sessionStorage.getItem(key)));
+  }
+
+  static async getAll(filter) {
+    const items = {};
+    for (let i = 0, I = sessionStorage.length; i < I; i++) {
+      const key = sessionStorage.key(i);
+      if (this._applyFilter(key, filter)) {
+        items[key] = JSON.parse(sessionStorage.getItem(key));
       }
-    },
+    }
+    return await this._deserializeObject(items);
+  }
 
-    async get(key) {
-      if (await this._nosupport) {
-        return cache.storage.get(key);
+  static async set(key, value) {
+    key = this._getKeyStr(key);
+
+    // @TODO: direct object to string serialization?
+    return sessionStorage.setItem(key, JSON.stringify(await this._serializeObject(value)));
+  }
+
+  static async remove(key) {
+    key = this._getKeyStr(key);
+    return sessionStorage.removeItem(key);
+  }
+
+  static async removeAll(filter) {
+    // reverse the order to prevent an error due to index shift after removal
+    for (let i = sessionStorage.length - 1; i >= 0; i--) {
+      const key = sessionStorage.key(i);
+      if (this._applyFilter(key, filter)) {
+        sessionStorage.removeItem(key);
       }
+    }
+  }
+}
 
-      return await this._transaction(async (objectStore) => {
-        return await new Promise((resolve, reject) => {
-          objectStore.get(key).onsuccess = (event) => {
-            resolve(event.target.result);
-          };
-        });
-      }, "readonly");
-    },
+class Cache {
+  static _current = 'auto';
 
-    async getAll(filter) {
-      if (await this._nosupport) {
-        return cache.storage.getAll(filter);
-      }
+  static caches = {
+    storage: StorageCache,
+    indexedDB: IdbCache,
+    sessionStorage: SessionCache,
+  };
 
-      return await this._transaction(async (objectStore) => {
-        const result = {};
-        return await new Promise((resolve, reject) => {
-          objectStore.openCursor().onsuccess = (event) => {
-            const cursor = event.target.result;
-            if (!cursor) {
-              resolve(result);
-              return;
-            }
-            if (cache._applyFilter(cursor.key, filter)) {
-              result[cursor.key] = cursor.value;
-            }
-            cursor.continue();
-          };
-        });
-      }, "readonly");
-    },
+  static get current() {
+    if (this._current === 'auto') {
+      this._current = 'storage';
+    }
+    return this._current;
+  }
 
-    async set(key, value) {
-      if (await this._nosupport) {
-        return cache.storage.set(key, value);
-      }
+  static set current(value) {
+    this._current = value;
+  }
 
-      return await this._transaction(async (objectStore) => {
-        objectStore.put(value, key);
-      }, "readwrite");
-    },
+  /**
+   * @param {string|Object} key
+   */
+  static async get(key, cache = this.current) {
+    return this.caches[cache].get(key);
+  }
 
-    async remove(key) {
-      if (await this._nosupport) {
-        return cache.storage.remove(key);
-      }
+  /**
+   * @param {cacheFilter} filter
+   */
+  static async getAll(filter, cache = this.current) {
+    return this.caches[cache].getAll(filter);
+  }
 
-      return await this._transaction(async (objectStore) => {
-        objectStore.delete(key);
-      }, "readwrite");
-    },
+  /**
+   * @param {string|Object} key
+   */
+  static async set(key, value, cache = this.current) {
+    return this.caches[cache].set(key, value);
+  }
 
-    async removeAll(filter) {
-      if (await this._nosupport) {
-        return cache.storage.removeAll(filter);
-      }
+  /**
+   * @param {string|Object} key
+   */
+  static async remove(key, cache = this.current) {
+    return this.caches[cache].remove(key);
+  }
 
-      return await this._transaction(async (objectStore) => {
-        return await new Promise((resolve, reject) => {
-          objectStore.openCursor().onsuccess = (event) => {
-            const cursor = event.target.result;
-            if (!cursor) {
-              resolve();
-              return;
-            }
-            if (cache._applyFilter(cursor.key, filter)) {
-              cursor.delete();
-            }
-            cursor.continue();
-          };
-        });
-      }, "readwrite");
-    },
-  },
-
-  sessionStorage: {
-    async _serializeObject(obj) {
-      return await cache._serializeObject(obj);
-    },
-
-    async _deserializeObject(obj) {
-      return await cache._deserializeObject(obj);
-    },
-
-    async get(key) {
-      // @TODO: direct string to object deserialization?
-      return await this._deserializeObject(JSON.parse(sessionStorage.getItem(key)));
-    },
-
-    async getAll(filter) {
-      const items = {};
-      for (let i = 0, I = sessionStorage.length; i < I; i++) {
-        const key = sessionStorage.key(i);
-        if (cache._applyFilter(key, filter)) {
-          items[key] = JSON.parse(sessionStorage.getItem(key));
-        }
-      }
-      return await this._deserializeObject(items);
-    },
-
-    async set(key, value) {
-      // @TODO: direct object to string serialization?
-      return sessionStorage.setItem(key, JSON.stringify(await this._serializeObject(value)));
-    },
-
-    async remove(key) {
-      return sessionStorage.removeItem(key);
-    },
-
-    async removeAll(filter) {
-      // reverse the order to prevent an error due to index shift after removal
-      for (let i = sessionStorage.length - 1; i >= 0; i--) {
-        const key = sessionStorage.key(i);
-        if (cache._applyFilter(key, filter)) {
-          sessionStorage.removeItem(key);
-        }
-      }
-    },
-  },
-};
+  /**
+   * @param {cacheFilter} filter
+   */
+  static async removeAll(filter, cache = this.current) {
+    return this.caches[cache].removeAll(filter);
+  }
+}
 
 export {
   serializeObject,
   deserializeObject,
-  cache as Cache,
+  BaseCache,
+  StorageCache,
+  IdbCache,
+  SessionCache,
+  Cache,
 };

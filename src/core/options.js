@@ -4,7 +4,7 @@
 
 import {BACKEND_MIN_VERSION, DEFAULT_OPTIONS} from "../utils/extension.mjs";
 import * as utils from "../utils/extension.mjs";
-import {Cache} from "../utils/cache.mjs";
+import {StorageCache} from "../utils/cache.mjs";
 
 const OPTION_PREFIX = "opt_";
 
@@ -113,7 +113,7 @@ function getDetailStatusKey() {
 }
 
 async function loadDetailStatus() {
-  const status = await Cache.get(getDetailStatusKey(), 'storage');
+  const status = await StorageCache.get(getDetailStatusKey());
   if (!status) { return; }
 
   for (const id in status) {
@@ -129,7 +129,7 @@ async function saveDetailStatus() {
   for (const elem of document.querySelectorAll('#optionsWrapper details[id]')) {
     status[elem.id] = elem.open;
   }
-  await Cache.set(getDetailStatusKey(), status, 'storage');
+  await StorageCache.set(getDetailStatusKey(), status);
 }
 
 async function refreshPermissions() {
