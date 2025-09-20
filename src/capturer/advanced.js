@@ -3,6 +3,7 @@
  *****************************************************************************/
 
 import * as utils from "../utils/extension.mjs";
+import {Cache} from "../utils/cache.mjs";
 
 async function init() {
   const missionId = new URL(document.URL).searchParams.get('mid');
@@ -11,8 +12,8 @@ async function init() {
   const key = {table: "batchCaptureMissionCache", id: missionId};
   let data;
   try {
-    data = await utils.cache.get(key);
-    await utils.cache.remove(key);
+    data = await Cache.get(key);
+    await Cache.remove(key);
     if (!data) { throw new Error(`Missing data for mission "${missionId}".`); }
   } catch (ex) {
     console.error(ex);

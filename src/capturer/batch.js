@@ -3,6 +3,7 @@
  *****************************************************************************/
 
 import * as utils from "../utils/extension.mjs";
+import {Cache} from "../utils/cache.mjs";
 
 let gTaskInfo;
 
@@ -13,8 +14,8 @@ async function init() {
   const key = {table: "batchCaptureMissionCache", id: missionId};
   let data;
   try {
-    data = await utils.cache.get(key);
-    await utils.cache.remove(key);
+    data = await Cache.get(key);
+    await Cache.remove(key);
     if (!data) { throw new Error(`Missing data for mission "${missionId}".`); }
     gTaskInfo = data.taskInfo;
   } catch (ex) {

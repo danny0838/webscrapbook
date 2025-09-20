@@ -13,8 +13,8 @@ import {
   initContentScripts,
   invokeContentScript,
   getScreenBounds,
-  cache,
 } from "./common.mjs";
+import {Cache} from "./cache.mjs";
 
 
 /****************************************************************************
@@ -263,7 +263,7 @@ async function invokeCaptureEx({
   if (dialog) {
     const missionId = getUuid();
     const key = {table: "batchCaptureMissionCache", id: missionId};
-    await cache.set(key, {
+    await Cache.set(key, {
       taskInfo,
       uniquify,
       ignoreTitle,
@@ -311,7 +311,7 @@ async function invokeCaptureEx({
 
   const missionId = getUuid();
   const key = {table: "captureMissionCache", id: missionId};
-  await cache.set(key, taskInfo);
+  await Cache.set(key, taskInfo);
   const url = browser.runtime.getURL("capturer/capturer.html") + `?mid=${missionId}`;
 
   // launch capturer

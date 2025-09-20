@@ -46,6 +46,7 @@ import {escapeRegExp} from "./shared/utils/common.mjs";
   await import('./test_lib_map-with-default.mjs');
   await import('./test_lib_strftime.mjs');
   await import('./test_src_utils_common.mjs');
+  await import('./test_src_utils_cache.mjs');
   await import('./test_src_utils_datauri.mjs');
   await import('./test_src_utils_zip.mjs');
   await import('./test_src_capturer_common.mjs');
