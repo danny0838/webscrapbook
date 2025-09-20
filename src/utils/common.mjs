@@ -534,14 +534,7 @@ const VALID_SHADOW_HOST_NAMES = new Set([
  */
 const userAgent = (() => {
   const ua = navigator.userAgent;
-  const manifest = (() => {
-    try {
-      return browser.runtime.getManifest();
-    } catch (ex) {
-      // dummy object to prevent an error
-      return {};
-    }
-  })();
+  const manifest = (typeof browser !== 'undefined' && browser.runtime?.getManifest?.() || {});
 
   const soup = new Set(['webext']);
   const flavor = {
@@ -1992,29 +1985,33 @@ function uneraseNode(node, {
  *
  * @return {integer} 1: a > b; 0: a = b; -1: a < b
  */
-function versionCompare(a, b) {
+const versionCompare = (() => {
+  const regex = /[^0-9.]/g;
+
   // treat non-numerical characters as lower version
   // replacing them with a negative number based on charcode of each character
-  function fix(s) {
+  const fix = (s) => {
     return "." + (s.toLowerCase().charCodeAt(0) - 2147483647) + ".";
-  }
+  };
 
-  a = ("" + a).replace(/[^0-9.]/g, fix).split('.');
-  b = ("" + b).replace(/[^0-9.]/g, fix).split('.');
-  const c = Math.max(a.length, b.length);
-  for (let i = 0; i < c; i++) {
-    // convert to integer with the most efficient way
-    a[i] = ~~a[i];
-    b[i] = ~~b[i];
+  return function versionCompare(a, b) {
+    a = ("" + a).replace(regex, fix).split('.');
+    b = ("" + b).replace(regex, fix).split('.');
+    const c = Math.max(a.length, b.length);
+    for (let i = 0; i < c; i++) {
+      // convert to integer with the most efficient way
+      a[i] = ~~a[i];
+      b[i] = ~~b[i];
 
-    if (a[i] > b[i]) {
-      return 1;
-    } else if (a[i] < b[i]) {
-      return -1;
+      if (a[i] > b[i]) {
+        return 1;
+      } else if (a[i] < b[i]) {
+        return -1;
+      }
     }
-  }
-  return 0;
-}
+    return 0;
+  };
+})();
 
 /**
  * Crops the given string
@@ -2064,6 +2061,11 @@ function crop(str, charLimit, byteLimit, ellipsis = '...') {
  * @link http://stackoverflow.com/questions/105034/how-to-create-a-guid-uuid-in-javascript/21963136#21963136
  */
 const getUuid = (() => {
+  // undefined in non-security context
+  if (crypto.randomUUID) {
+    return crypto.randomUUID.bind(crypto);
+  }
+
   /* eslint-disable @stylistic/no-multi-spaces */
   const lut = Array(256).fill().map((_, i) => (i < 16 ? '0' : '') + (i).toString(16));
   const formatUuid = ([d0, d1, d2, d3]) =>
@@ -2076,7 +2078,7 @@ const getUuid = (() => {
     lut[d3 >> 16 & 0xff]        + lut[d3 >> 24 & 0xff];
   /* eslint-enable @stylistic/no-multi-spaces */
 
-  const getRandomValuesFunc = crypto?.getRandomValues ?
+  const getRandomValuesFunc = crypto.getRandomValues ?
     () => {
       const dvals = new Uint32Array(4);
       crypto.getRandomValues(dvals);
@@ -2267,12 +2269,6 @@ function utf8ToUnicode(bstr) {
 /**
  * Alt. 1:
  *
- * return new TextEncoder("utf-8").encode(bstr).buffer;
- *
- * Faster, but not used due to potential error (see TextDecoder below).
- *
- * Alt. 2:
- *
  * return (new Uint8Array(Array.prototype.map.call(bstr, x => x.charCodeAt(0)))).buffer;
  *
  * Straightforward, but slow (1/28 of current version).
@@ -2286,9 +2282,10 @@ function byteStringToArrayBuffer(bstr) {
 /**
  * Alt. 1:
  *
- * return new TextDecoder("utf-8").decode(new Uint8Array(ab));
+ * return new TextDecoder("ISO-8859-1").decode(new Uint8Array(ab));
  *
- * Faster, but UTF-16 BOM are incorrectly converted to U+FFFD.
+ * Faster, but in browsers ISO-8859-1 is actually Windows-1252, and e.g. byte
+ * 0x80 is incorrectly converted into \u8364.
  *
  * Alt. 2:
  *
@@ -2296,13 +2293,19 @@ function byteStringToArrayBuffer(bstr) {
  *
  * Simpler, but passing a very large array to function.apply causes a
  * "Maximum call stack size exceeded" error.
+ *
+ * The max allowed length for `Function.prototype.apply()` is:
+ * - 65536 in older JavaScriptCore (ref: https://webkit.org/b/80797)
+ * - 124127 in Chromium 85~140
+ * - 500000 in Firefox 79~144
+ * - 125486 in Node.js 22.14
  */
-function arrayBufferToByteString(ab) {
-  let u8ar = new Uint8Array(ab), bstr = "", CHUNK_SIZE = 65535;
-  for (let i = 0, I = u8ar.length; i < I; i += CHUNK_SIZE) {
-    bstr += String.fromCharCode.apply(null, u8ar.subarray(i, i + CHUNK_SIZE));
+function arrayBufferToByteString(ab, maxApplyLength = 124127) {
+  const u8ar = new Uint8Array(ab), rv = [];
+  for (let i = 0, I = u8ar.length; i < I; i += maxApplyLength) {
+    rv.push(String.fromCharCode.apply(null, u8ar.subarray(i, i + maxApplyLength)));
   }
-  return bstr;
+  return rv.join('');
 }
 
 
@@ -2524,7 +2527,6 @@ function splitXmlAttribute(attr) {
  *
  * ref: https://tools.ietf.org/html/rfc7231#section-3.1.1.1
  *
- * @memberof scrapbook
  * @return {{type: string, parameters: {}}}
  */
 const parseHeaderContentType = (() => {
@@ -2576,7 +2578,6 @@ const parseHeaderContentType = (() => {
  * ref: https://github.com/jshttp/content-disposition/blob/master/index.js
  *      https://tools.ietf.org/html/rfc5987#section-3.2
  *
- * @memberof scrapbook
  * @param {string} string - The string to parse, not including "Content-Disposition: "
  * @return {{type: string, parameters: {}}}
  */
@@ -2660,7 +2661,6 @@ const parseHeaderContentDisposition = (() => {
  *
  * ref: https://html.spec.whatwg.org/multipage/semantics.html#attr-meta-http-equiv-refresh
  *
- * @memberof scrapbook
  * @return {{time: (integer|undefined), url: (string|undefined)}}
  */
 const parseHeaderRefresh = (() => {
@@ -2725,13 +2725,7 @@ function compressJsFunc(func) {
  * @return {Promise<ArrayBuffer>}
  */
 async function readFileAsArrayBuffer(blob) {
-  const event = await new Promise((resolve, reject) => {
-    let reader = new FileReader();
-    reader.onload = resolve;
-    reader.onerror = reject;
-    reader.readAsArrayBuffer(blob);
-  });
-  return event.target.result;
+  return await blob.arrayBuffer();
 }
 
 /**
@@ -3759,7 +3753,7 @@ async function delay(ms) {
 }
 
 function isPromise(object) {
-  return object && typeof object.then === 'function';
+  return typeof object?.then === 'function';
 }
 
 

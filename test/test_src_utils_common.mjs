@@ -3,6 +3,7 @@ import {
   encodeText, cssRegex,
   GREEN_BMP_B64,
 } from "./unittest.mjs";
+import sinon from "./lib/sinon-esm.js";
 
 import * as utils from "./shared/utils/common.mjs";
 
@@ -12,6 +13,16 @@ const $it = $(it);
 const r = String.raw;
 
 describe('utils/common.mjs', function () {
+  let sandbox;
+
+  beforeEach(function () {
+    sandbox = sinon.createSandbox();
+  });
+
+  afterEach(function () {
+    sandbox?.restore();
+  });
+
   describe('getDeepProp()', function () {
     it('should parse `parts` separated with "." when passing string', function () {
       var target = {prop: 123};
@@ -110,8 +121,48 @@ describe('utils/common.mjs', function () {
     });
   });
 
+  describe('versionCompare()', function () {
+    it('should return -1 / 0 / 1 when the first version is < / = / > the second version', function () {
+      assert.strictEqual(utils.versionCompare('1', '0'), 1);
+      assert.strictEqual(utils.versionCompare('1', '1'), 0);
+      assert.strictEqual(utils.versionCompare('1', '2'), -1);
+      assert.strictEqual(utils.versionCompare('1', '10'), -1);
+      assert.strictEqual(utils.versionCompare('2', '10'), -1);
+      assert.strictEqual(utils.versionCompare('10', '1'), 1);
+      assert.strictEqual(utils.versionCompare('10', '2'), 1);
+
+      assert.strictEqual(utils.versionCompare('1.1', '1.0'), 1);
+      assert.strictEqual(utils.versionCompare('1.1', '1.1'), 0);
+      assert.strictEqual(utils.versionCompare('1.1', '1.1.0'), 0);
+      assert.strictEqual(utils.versionCompare('1.1', '1.1.0.1'), -1);
+      assert.strictEqual(utils.versionCompare('1.1', '1.1.1'), -1);
+      assert.strictEqual(utils.versionCompare('1.1', '1.2'), -1);
+      assert.strictEqual(utils.versionCompare('1.1.0', '1.1'), 0);
+      assert.strictEqual(utils.versionCompare('1.1.0.1', '1.1'), 1);
+      assert.strictEqual(utils.versionCompare('1.1.1', '1.1'), 1);
+      assert.strictEqual(utils.versionCompare('1.2', '1.1'), 1);
+
+      assert.strictEqual(utils.versionCompare('1.1-alpha', '1.1-alpha'), 0);
+      assert.strictEqual(utils.versionCompare('1.1-alpha', '1.1-alpha.0'), 0);
+      assert.strictEqual(utils.versionCompare('1.1-alpha', '1.1-alpha.1'), -1);
+      assert.strictEqual(utils.versionCompare('1.1-alpha', '1.1-beta'), -1);
+      assert.strictEqual(utils.versionCompare('1.1-alpha', '1.1'), -1);
+      assert.strictEqual(utils.versionCompare('1.1-alpha.0', '1.1-alpha'), 0);
+      assert.strictEqual(utils.versionCompare('1.1-alpha.0', '1.1-alpha.0'), 0);
+      assert.strictEqual(utils.versionCompare('1.1-alpha.0', '1.1-alpha.1'), -1);
+      assert.strictEqual(utils.versionCompare('1.1-alpha.1', '1.1-alpha'), 1);
+      assert.strictEqual(utils.versionCompare('1.1-alpha.1', '1.1-alpha.0'), 1);
+      assert.strictEqual(utils.versionCompare('1.1-alpha.1', '1.1-alpha.1'), 0);
+      assert.strictEqual(utils.versionCompare('1.1-alpha.1', '1.1-beta'), -1);
+      assert.strictEqual(utils.versionCompare('1.1-beta', '1.1-alpha'), 1);
+      assert.strictEqual(utils.versionCompare('1.1-beta', '1.1-alpha.1'), 1);
+      assert.strictEqual(utils.versionCompare('1.1-beta', '1.1-pre'), -1);
+      assert.strictEqual(utils.versionCompare('1.1-pre', '1.1-beta'), 1);
+    });
+  });
+
   describe('escapeHtmlComment()', function () {
-    it('basic', function () {
+    it('should escape by inserting \u200B chars between a bad char sequence', function () {
       // starts with ">"
       assert.strictEqual(
         utils.escapeHtmlComment('> a'),
@@ -189,7 +240,7 @@ describe('utils/common.mjs', function () {
       assert.strictEqual(s, str, `"${escape(s)}" not equal to "${escape(str)}"`);
     }
 
-    it('basic', function () {
+    it('should unescape a comment text escaped with `escapeHtmlComment`', function () {
       // basic
       checkUnescape('<b>basic text</b>');
 
@@ -220,26 +271,28 @@ describe('utils/common.mjs', function () {
   });
 
   describe('escapeFilename()', function () {
-    it('basic', function () {
-      // escape " ", "%", "?", "#"
+    it('should escape " ", "%", "?", "#"', function () {
       assert.strictEqual(
         utils.escapeFilename('path 100% with space? and #frag'),
         'path%20100%25%20with%20space?%20and%20%23frag',
       );
+    });
 
-      // convert "\" to "/"
+    it('should convert "\\" to "/"', function () {
       assert.strictEqual(
         utils.escapeFilename(r`this\is\my\path`),
         'this/is/my/path',
       );
+    });
 
-      // keep non-ASCII chars
+    it('should keep non-ASCII chars', function () {
       assert.strictEqual(
         utils.escapeFilename('http://example.com/中文/路徑/文件.txt'),
         'http://example.com/中文/路徑/文件.txt',
       );
+    });
 
-      // keep special chars
+    it('should keep special chars', function () {
       assert.strictEqual(
         utils.escapeFilename("!\"$&'()*+,-./:;<=>?@[]^_`{|}~"),
         "!\"$&'()*+,-./:;<=>?@[]^_`{|}~",
@@ -248,7 +301,7 @@ describe('utils/common.mjs', function () {
   });
 
   describe('quote()', function () {
-    it('basic', function () {
+    it('should encode URI component chars except for "/"', function () {
       assert.strictEqual(
         utils.quote('中文/路徑/文件.txt'),
         '%E4%B8%AD%E6%96%87/%E8%B7%AF%E5%BE%91/%E6%96%87%E4%BB%B6.txt',
@@ -259,7 +312,7 @@ describe('utils/common.mjs', function () {
   describe('validateFilename()', function () {
     const chars = Array.from({length: 0xA0}).map((_, i) => String.fromCodePoint(i)).join('');
 
-    it('basic', function () {
+    it('should fix general invalid filename chars', function () {
       // general chars
       assert.strictEqual(
         utils.validateFilename(chars),
@@ -297,7 +350,7 @@ describe('utils/common.mjs', function () {
       );
     });
 
-    it("Windows restricts leading/trailing spaces and dots", function () {
+    it("should fix leading/trailing spaces and dots restricted in Windows", function () {
       assert.strictEqual(
         utils.validateFilename(' '),
         '_',
@@ -342,7 +395,7 @@ describe('utils/common.mjs', function () {
       );
     });
 
-    it('Windows special filenames', function () {
+    it('should fix special filenames in Windows', function () {
       assert.strictEqual(
         utils.validateFilename('con'),
         'con_',
@@ -401,7 +454,7 @@ describe('utils/common.mjs', function () {
       );
     });
 
-    it('force ASCII', function () {
+    it('should escape non-ASCII chars when `forceAscii` is truthy', function () {
       // general chars
       assert.strictEqual(
         utils.validateFilename(chars, true),
@@ -417,20 +470,20 @@ describe('utils/common.mjs', function () {
   });
 
   describe('dateToId()', function () {
-    it('basic', function () {
-      // create an ID from a Date object
+    it('should return an ID from the input Date', function () {
       assert.strictEqual(
         utils.dateToId(new Date(Date.UTC(2020, 0, 2, 3, 4, 5, 67))),
         '20200102030405067',
       );
+    });
 
-      // create an ID from now if no Date object is provided
+    it('should return an ID from now if no input Date', function () {
       var idNow = utils.dateToId(new Date());
       var id = utils.dateToId();
       assert.closeTo(Number(id), Number(idNow), 1000);
     });
 
-    it('round to nearest if date is too large or too small', function () {
+    it('should round to nearest if date is too large or too small', function () {
       assert.strictEqual(
         utils.dateToId(new Date(Date.UTC(10000, 0, 1, 0, 0, 0, 0))),
         '99991231235959999',
@@ -443,14 +496,14 @@ describe('utils/common.mjs', function () {
   });
 
   describe('idToDate()', function () {
-    it('basic', function () {
+    it('should return a Date from the input ID string', function () {
       assert.deepEqual(
         utils.idToDate('20200102030405067'),
         new Date("2020-01-02T03:04:05.067Z"),
       );
     });
 
-    it('return null for invalid ID string', function () {
+    it('should return null for invalid ID string', function () {
       assert.strictEqual(
         utils.idToDate('2020010203040506'),
         null,
@@ -465,7 +518,7 @@ describe('utils/common.mjs', function () {
       );
     });
 
-    it('round to nearest if date is too large or too small', function () {
+    it('should round to nearest if date is too large or too small', function () {
       assert.deepEqual(
         utils.idToDate('9'.repeat(17)),
         new Date("9999-12-31T23:59:59.999Z"),
@@ -478,20 +531,20 @@ describe('utils/common.mjs', function () {
   });
 
   describe('dateToIdOld()', function () {
-    it('basic', function () {
-      // create an ID from a Date object
+    it('should return an ID from the input Date', function () {
       assert.strictEqual(
         utils.dateToIdOld(new Date(2020, 0, 2, 3, 4, 5, 67)),
         '20200102030405',
       );
+    });
 
-      // create an ID from now if no Date object is provided
+    it('should return an ID from now if no input Date', function () {
       var idNow = utils.dateToIdOld(new Date());
       var id = utils.dateToIdOld();
       assert.closeTo(Number(id), Number(idNow), 1000);
     });
 
-    it('round to nearest if date is too large or too small', function () {
+    it('should round to nearest if date is too large or too small', function () {
       assert.strictEqual(
         utils.dateToIdOld(new Date(10000, 0, 1, 0, 0, 0, 0)),
         '99991231235959',
@@ -504,14 +557,14 @@ describe('utils/common.mjs', function () {
   });
 
   describe('idToDateOld()', function () {
-    it('basic', function () {
+    it('should return a Date from the input ID string', function () {
       assert.strictEqual(
         utils.idToDateOld('20200102030405').valueOf(),
         new Date(2020, 0, 2, 3, 4, 5).valueOf(),
       );
     });
 
-    it('return null for invalid ID string', function () {
+    it('should return null for invalid ID string', function () {
       assert.strictEqual(
         utils.idToDateOld('202001020304050'),
         null,
@@ -526,7 +579,7 @@ describe('utils/common.mjs', function () {
       );
     });
 
-    it('round to nearest if date is too large or too small', function () {
+    it('should round to nearest if date is too large or too small', function () {
       assert.strictEqual(
         utils.idToDateOld('9'.repeat(14)).valueOf(),
         new Date(9999, 11, 31, 23, 59, 59, 999).valueOf(),
@@ -542,7 +595,7 @@ describe('utils/common.mjs', function () {
   });
 
   describe('crop()', function () {
-    it('charLimit', function () {
+    it('should crop at `charLimit`', function () {
       var string = 'foo bar 中文𠀀字';
 
       // incomplete char should not appear
@@ -562,7 +615,7 @@ describe('utils/common.mjs', function () {
       assert.strictEqual(utils.crop(string), 'foo bar 中文𠀀字');
     });
 
-    it('byteLimit', function () {
+    it('should crop at `byteLimit`', function () {
       var string = 'foo bar 中文𠀀字';
 
       // incomplete char should not appear
@@ -590,7 +643,7 @@ describe('utils/common.mjs', function () {
       assert.strictEqual(utils.crop(string, 0), 'foo bar 中文𠀀字');
     });
 
-    it('charLimit and sizeLimit', function () {
+    it('should crop at the smaller of `charLimit` and `sizeLimit`', function () {
       var string = 'foo bar 中文𠀀字';
 
       // crop at the smaller limit
@@ -598,7 +651,7 @@ describe('utils/common.mjs', function () {
       assert.strictEqual(utils.crop(string, 12, 21), 'foo bar 中...');
     });
 
-    it('custom ellipsis', function () {
+    it('should honor custom ellipsis', function () {
       var string = 'foo bar 中文𠀀字';
 
       assert.strictEqual(utils.crop(string, 12, null, '…'), 'foo bar 中文…');
@@ -616,7 +669,7 @@ describe('utils/common.mjs', function () {
   });
 
   describe('unicodeToUtf8()', function () {
-    it('basic', function () {
+    it('should convert a unicode string into a UTF-8 byte string', function () {
       assert.strictEqual(utils.unicodeToUtf8('\u0000'), '\x00');
       assert.strictEqual(utils.unicodeToUtf8('\u0080'), '\xC2\x80');
       assert.strictEqual(utils.unicodeToUtf8('\u3000'), '\xE3\x80\x80');
@@ -627,7 +680,7 @@ describe('utils/common.mjs', function () {
   });
 
   describe('utf8ToUnicode()', function () {
-    it('basic', function () {
+    it('should convert a UTF-8 byte string into a unicode string', function () {
       assert.strictEqual(utils.utf8ToUnicode('\x00'), '\u0000');
       assert.strictEqual(utils.utf8ToUnicode('\xC2\x80'), '\u0080');
       assert.strictEqual(utils.utf8ToUnicode('\xE3\x80\x80'), '\u3000');
@@ -638,70 +691,96 @@ describe('utils/common.mjs', function () {
   });
 
   describe('byteStringToArrayBuffer()', function () {
-    it('basic', function () {
+    it('should convert each char to the corresponding byte', function () {
       // "一天" in Big5
       var buffer = utils.byteStringToArrayBuffer('\xA4\x40\xA4\xD1');
-      assert.deepEqual([...new Uint8Array(buffer)], [0xA4, 0x40, 0xA4, 0xD1]);
+      assert.deepEqual(new Uint8Array(buffer), new Uint8Array([0xA4, 0x40, 0xA4, 0xD1]));
 
       // "𠀀" in UTF-8 with BOM
       var buffer = utils.byteStringToArrayBuffer('\xEF\xBB\xBF\xF0\xA0\x80\x80');
-      assert.deepEqual([...new Uint8Array(buffer)], [0xEF, 0xBB, 0xBF, 0xF0, 0xA0, 0x80, 0x80]);
+      assert.deepEqual(new Uint8Array(buffer), new Uint8Array([0xEF, 0xBB, 0xBF, 0xF0, 0xA0, 0x80, 0x80]));
 
       // "𠀀" in UTF-16BE with BOM
       var buffer = utils.byteStringToArrayBuffer('\xFE\xFF\xD8\x40\xDC\x00');
-      assert.deepEqual([...new Uint8Array(buffer)], [0xFE, 0xFF, 0xD8, 0x40, 0xDC, 0x00]);
+      assert.deepEqual(new Uint8Array(buffer), new Uint8Array([0xFE, 0xFF, 0xD8, 0x40, 0xDC, 0x00]));
 
       // "𠀀" in UTF-16LE with BOM
       var buffer = utils.byteStringToArrayBuffer('\xFF\xFE\x40\xD8\x00\xDC');
-      assert.deepEqual([...new Uint8Array(buffer)], [0xFF, 0xFE, 0x40, 0xD8, 0x00, 0xDC]);
+      assert.deepEqual(new Uint8Array(buffer), new Uint8Array([0xFF, 0xFE, 0x40, 0xD8, 0x00, 0xDC]));
 
       // blob of green bmp
       var bstr = atob(GREEN_BMP_B64);
       var buffer = utils.byteStringToArrayBuffer(bstr);
       assert.deepEqual(
-        [...new Uint8Array(buffer)],
-        [66, 77, 60, 0, 0, 0, 0, 0, 0, 0, 54, 0, 0, 0, 40, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 32, 0, 0, 0, 0, 0, 6, 0, 0, 0, 18, 11, 0, 0, 18, 11, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 255, 0, 0, 0, 0],
+        new Uint8Array(buffer),
+        new Uint8Array([
+          66, 77, 60, 0, 0, 0, 0, 0, 0, 0, 54, 0, 0, 0, 40, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 32, 0,
+          0, 0, 0, 0, 6, 0, 0, 0, 18, 11, 0, 0, 18, 11, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 255, 0, 0, 0, 0,
+        ]),
       );
     });
   });
 
   describe('arrayBufferToByteString()', function () {
-    it('basic', function () {
+    it('should convert each byte in the buffer to the corresponding char', function () {
       // "一天" in Big5
-      var buffer = new Uint8Array([0xA4, 0x40, 0xA4, 0xD1]);
+      var buffer = new Uint8Array([0xA4, 0x40, 0xA4, 0xD1]).buffer;
       assert.strictEqual(utils.arrayBufferToByteString(buffer), '\xA4\x40\xA4\xD1');
 
       // "𠀀" in UTF-8 with BOM
-      var buffer = new Uint8Array([0xEF, 0xBB, 0xBF, 0xF0, 0xA0, 0x80, 0x80]);
+      var buffer = new Uint8Array([0xEF, 0xBB, 0xBF, 0xF0, 0xA0, 0x80, 0x80]).buffer;
       assert.strictEqual(utils.arrayBufferToByteString(buffer), '\xEF\xBB\xBF\xF0\xA0\x80\x80');
 
       // "𠀀" in UTF-16BE with BOM
-      var buffer = new Uint8Array([0xFE, 0xFF, 0xD8, 0x40, 0xDC, 0x00]);
+      var buffer = new Uint8Array([0xFE, 0xFF, 0xD8, 0x40, 0xDC, 0x00]).buffer;
       assert.strictEqual(utils.arrayBufferToByteString(buffer), '\xFE\xFF\xD8\x40\xDC\x00');
 
       // "𠀀" in UTF-16LE with BOM
-      var buffer = new Uint8Array([0xFF, 0xFE, 0x40, 0xD8, 0x00, 0xDC]);
+      var buffer = new Uint8Array([0xFF, 0xFE, 0x40, 0xD8, 0x00, 0xDC]).buffer;
       assert.strictEqual(utils.arrayBufferToByteString(buffer), '\xFF\xFE\x40\xD8\x00\xDC');
 
       // blob of green bmp
-      var buffer = new Uint8Array([66, 77, 60, 0, 0, 0, 0, 0, 0, 0, 54, 0, 0, 0, 40, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 32, 0, 0, 0, 0, 0, 6, 0, 0, 0, 18, 11, 0, 0, 18, 11, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 255, 0, 0, 0, 0]);
+      var buffer = new Uint8Array([66, 77, 60, 0, 0, 0, 0, 0, 0, 0, 54, 0, 0, 0, 40, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 32, 0, 0, 0, 0, 0, 6, 0, 0, 0, 18, 11, 0, 0, 18, 11, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 255, 0, 0, 0, 0]).buffer;
       assert.strictEqual(btoa(utils.arrayBufferToByteString(buffer)), GREEN_BMP_B64);
+    });
+
+    it('should safely call `String.fromCharCode.apply` in chunks for a rather large buffer', function () {
+      var spy = sandbox.spy(String.fromCharCode, 'apply');
+
+      var buffer = new Uint8Array(1e6).buffer;
+      assert.strictEqual(utils.arrayBufferToByteString(buffer), '\x00'.repeat(1e6));
+
+      sinon.assert.calledWithExactly(spy.getCall(0), null, new Uint8Array(124127));
+    });
+
+    it('should call `String.fromCharCode.apply` in chunks of size defined by `maxApplyLength`', function () {
+      var spy = sandbox.spy(String.fromCharCode, 'apply');
+
+      var buffer = new Uint8Array(100).buffer;
+      assert.strictEqual(utils.arrayBufferToByteString(buffer, 20), '\x00'.repeat(100));
+
+      sinon.assert.calledWithExactly(spy.getCall(0), null, new Uint8Array(20));
+      sinon.assert.calledWithExactly(spy.getCall(1), null, new Uint8Array(20));
+      sinon.assert.calledWithExactly(spy.getCall(2), null, new Uint8Array(20));
+      sinon.assert.calledWithExactly(spy.getCall(3), null, new Uint8Array(20));
+      sinon.assert.calledWithExactly(spy.getCall(4), null, new Uint8Array(20));
+      assert.isNull(spy.getCall(5));
     });
   });
 
   describe('trim()', function () {
-    it('basic', function () {
-      var strings = ['foo', 'bar', 'baz'];
+    const strings = ['foo', 'bar', 'baz'];
 
-      // individual ASCII white space
+    it('should remove leading and trailing ASCII white spaces', function () {
       for (const space of [' ', '\t', '\n', '\r', '\f']) {
         assert.strictEqual(utils.trim(space + strings.join(space)), strings.join(space));
         assert.strictEqual(utils.trim(strings.join(space) + space), strings.join(space));
         assert.strictEqual(utils.trim(space + strings.join(space) + space), strings.join(space));
         assert.strictEqual(utils.trim(space.repeat(3) + strings.join(space) + space.repeat(3)), strings.join(space));
       }
+    });
 
-      // non-ASCII-whitespaces should be ignored
+    it('should preserve non-ASCII white spaces', function () {
       for (const space of ['\u00A0', '\u2009', '\u200A', '\u200B', '\u3000', '\uFEFF']) {
         var s = space + strings.join(space);
         assert.strictEqual(utils.trim(s), s);
@@ -716,7 +795,7 @@ describe('utils/common.mjs', function () {
   });
 
   describe('split()', function () {
-    it('basic', function () {
+    it('should split the input string at ASCII white spaces', function () {
       var strings = ['foo', 'bar', 'baz'];
 
       // individual ASCII white space
@@ -733,7 +812,7 @@ describe('utils/common.mjs', function () {
       }
     });
 
-    it('discard empty starting or ending components', function () {
+    it('should discard empty starting or ending components', function () {
       // starting space
       assert.deepEqual(utils.split(' foo'), ['foo']);
 
@@ -743,7 +822,7 @@ describe('utils/common.mjs', function () {
   });
 
   describe('normalizeUrl()', function () {
-    it('encode chars that requires percent encoding with all upper case', function () {
+    it('should encode chars that requires percent encoding with all upper case', function () {
       assert.strictEqual(
         utils.normalizeUrl(`http://example.com/中文`),
         `http://example.com/%E4%B8%AD%E6%96%87`,
@@ -758,7 +837,7 @@ describe('utils/common.mjs', function () {
       );
     });
 
-    it('encode standalone "%"s', function () {
+    it('should encode standalone "%"s', function () {
       // standalone % => %25
       assert.strictEqual(
         utils.normalizeUrl(`http://example.com/?123%`),
@@ -772,7 +851,7 @@ describe('utils/common.mjs', function () {
       );
     });
 
-    it('decode over-encoded chars, such as [0-9a-z:!()+,;=], in pathname', function () {
+    it('should decode over-encoded chars, such as [0-9a-z:!()+,;=], in pathname', function () {
       assert.strictEqual(
         utils.normalizeUrl(`http://example.com/%70%61%67%65%3d%28%33%29`),
         `http://example.com/page=(3)`,
@@ -783,7 +862,7 @@ describe('utils/common.mjs', function () {
       );
     });
 
-    it('decode unreserved chars [0-9A-Za-z-_.~] in search and hash', function () {
+    it('should decode unreserved chars [0-9A-Za-z-_.~] in search and hash', function () {
       assert.strictEqual(
         utils.normalizeUrl(`http://example.com/?%70%61%67%65%2d%33=(5)`),
         `http://example.com/?page-3=(5)`,
@@ -803,7 +882,7 @@ describe('utils/common.mjs', function () {
       );
     });
 
-    it('empty search/hash is normalized as none', function () {
+    it('should reemove empty search/hash', function () {
       assert.strictEqual(
         utils.normalizeUrl(`http://example.com/?`),
         `http://example.com/`,
@@ -816,28 +895,28 @@ describe('utils/common.mjs', function () {
   });
 
   describe('isUrlAbsolute()', function () {
-    it('basic', function () {
-      // absolute URL cases
+    it('should return true for absolute URLs', function () {
       assert.strictEqual(utils.isUrlAbsolute(`http://example.com:8000/foo?bar=baz#frag`), true);
       assert.strictEqual(utils.isUrlAbsolute(`https://example.com/`), true);
       assert.strictEqual(utils.isUrlAbsolute(`file:///c/foo/bar`), true);
       assert.strictEqual(utils.isUrlAbsolute(`about:blank`), true);
+    });
 
-      // relative URL cases
+    it('should return false for relative URLs', function () {
       assert.strictEqual(utils.isUrlAbsolute(`image.png`), false);
       assert.strictEqual(utils.isUrlAbsolute(`中文.png`), false);
       assert.strictEqual(utils.isUrlAbsolute(`/image.png`), false);
       assert.strictEqual(utils.isUrlAbsolute(`//example.com/page`), false);
     });
 
-    it('do not throw for non-string', function () {
+    it('should not throw for non-string', function () {
       assert.strictEqual(utils.isUrlAbsolute(undefined), false);
       assert.strictEqual(utils.isUrlAbsolute(null), false);
     });
   });
 
   describe('getRelativeUrl()', function () {
-    it('absolute URLs', function () {
+    it('should return a relative URL when given absolute URLs', function () {
       // different since protocol
       assert.strictEqual(
         utils.getRelativeUrl(
@@ -986,7 +1065,7 @@ describe('utils/common.mjs', function () {
       );
     });
 
-    it('return original URL if input is absolute and base is relative', function () {
+    it('should return the original URL if input is absolute and base is relative', function () {
       assert.strictEqual(
         utils.getRelativeUrl(
           `http://example.com/page`,
@@ -996,7 +1075,7 @@ describe('utils/common.mjs', function () {
       );
     });
 
-    it('throw if input is realative and base is absolute', function () {
+    it('should throw if input is realative and base is absolute', function () {
       assert.throws(() => {
         utils.getRelativeUrl(
           `image.png`,
@@ -1005,7 +1084,7 @@ describe('utils/common.mjs', function () {
       });
     });
 
-    it('protocol-relative URLs', function () {
+    it('should return a relative URL when given protocol-relative URLs', function () {
       // different since host
       assert.strictEqual(
         utils.getRelativeUrl(
@@ -1025,7 +1104,7 @@ describe('utils/common.mjs', function () {
       );
     });
 
-    it('return original URL if input is protocol-relative and base is not', function () {
+    it('should return the original URL if input is protocol-relative and base is not', function () {
       assert.strictEqual(
         utils.getRelativeUrl(
           `//sub.example.com/page`,
@@ -1035,7 +1114,7 @@ describe('utils/common.mjs', function () {
       );
     });
 
-    it('throw if base is protocol-relative and input is not', function () {
+    it('should throw if base is protocol-relative and input is not', function () {
       assert.throws(() => {
         utils.getRelativeUrl(
           `/page`,
@@ -1051,7 +1130,7 @@ describe('utils/common.mjs', function () {
       });
     });
 
-    it('root-relative URLs', function () {
+    it('should return a relative URL when given root-relative URLs', function () {
       // different since path
       assert.strictEqual(
         utils.getRelativeUrl(
@@ -1062,7 +1141,7 @@ describe('utils/common.mjs', function () {
       );
     });
 
-    it('return original URL if input is root-relative and base is not', function () {
+    it('should return the original URL if input is root-relative and base is not', function () {
       assert.strictEqual(
         utils.getRelativeUrl(
           `/page`,
@@ -1072,7 +1151,7 @@ describe('utils/common.mjs', function () {
       );
     });
 
-    it('throw if base is root-relative and input is not', function () {
+    it('should throw if base is root-relative and input is not', function () {
       assert.throws(() => {
         utils.getRelativeUrl(
           `page`,
@@ -1081,7 +1160,7 @@ describe('utils/common.mjs', function () {
       });
     });
 
-    it('relative URLs (since path)', function () {
+    it('should return a relative URL when given relative URLs (since path)', function () {
       // different since path
       assert.strictEqual(
         utils.getRelativeUrl(
@@ -1205,7 +1284,7 @@ describe('utils/common.mjs', function () {
       );
     });
 
-    it('relative URLs (missing path or so)', function () {
+    it('should return the original URL when given relative URLs in some cases (missing path or so)', function () {
       // path and no path
       assert.strictEqual(
         utils.getRelativeUrl(
@@ -1262,8 +1341,24 @@ describe('utils/common.mjs', function () {
     });
   });
 
+  describe('splitXmlAttribute()', function () {
+    it('should return ["", value] for an attribute with no ":"', function () {
+      assert.deepEqual(
+        utils.splitXmlAttribute('myattr'),
+        ['', 'myattr'],
+      );
+    });
+
+    it('should return [prefix, value] for an attribute with a ":"', function () {
+      assert.deepEqual(
+        utils.splitXmlAttribute('myns:myattr'),
+        ['myns', 'myattr'],
+      );
+    });
+  });
+
   describe('parseHeaderContentType()', function () {
-    it('basic', function () {
+    it('should parse type', function () {
       assert.deepEqual(
         utils.parseHeaderContentType(`text/html`),
         {type: "text/html", parameters: {}},
@@ -1278,7 +1373,7 @@ describe('utils/common.mjs', function () {
       );
     });
 
-    it('invalid type', function () {
+    it('should discard invalid chars from the content type', function () {
       assert.deepEqual(
         utils.parseHeaderContentType(`noslash`),
         {type: "", parameters: {}},
@@ -1289,7 +1384,7 @@ describe('utils/common.mjs', function () {
       );
     });
 
-    it('parameters', function () {
+    it('should parse parameters', function () {
       assert.deepEqual(
         utils.parseHeaderContentType(`text/html;charset=utf-8`),
         {type: "text/html", parameters: {charset: "utf-8"}},
@@ -1300,14 +1395,14 @@ describe('utils/common.mjs', function () {
       );
     });
 
-    it('spaces around type and parameter should be ignored', function () {
+    it('should ignore spaces around type and parameter', function () {
       assert.deepEqual(
         utils.parseHeaderContentType(`text/html  ; charset=utf-8  `),
         {type: "text/html", parameters: {charset: "utf-8"}},
       );
     });
 
-    it('spaces around "=" are not allowed by the spec', function () {
+    it('should ignore a parameter with spaces around "=" (not allowed by the spec)', function () {
       assert.deepEqual(
         utils.parseHeaderContentType(`text/html; charset =utf-8`),
         {type: "text/html", parameters: {}},
@@ -1318,7 +1413,7 @@ describe('utils/common.mjs', function () {
       );
     });
 
-    it('quotes and escapes', function () {
+    it('should handle double quotes and escapes', function () {
       assert.deepEqual(
         utils.parseHeaderContentType(`text/html; charset="utf-8"`),
         {type: "text/html", parameters: {charset: "utf-8"}},
@@ -1327,15 +1422,16 @@ describe('utils/common.mjs', function () {
         utils.parseHeaderContentType(r`text/html; field=" my text\\value with \"quote\" "`),
         {type: "text/html", parameters: {field: r` my text\value with "quote" `}},
       );
+    });
 
-      // "'" not treated as a quote
+    it("should not treat `'` as quote", function () {
       assert.deepEqual(
         utils.parseHeaderContentType(`text/html; charset='utf-8'`),
         {type: "text/html", parameters: {charset: "'utf-8'"}},
       );
     });
 
-    it('type should be case-insensitive (lower case)', function () {
+    it('should treat type case-insensitively (lower case)', function () {
       assert.deepEqual(
         utils.parseHeaderContentType(`TEXT/HTML`),
         {type: "text/html", parameters: {}},
@@ -1346,14 +1442,14 @@ describe('utils/common.mjs', function () {
       );
     });
 
-    it('parameter name should be case-insensitive (lower case)', function () {
+    it('should treat parameter names case-insensitively (lower case)', function () {
       assert.deepEqual(
         utils.parseHeaderContentType(`text/html; CHARSET=utf-8; MyKey=myvalue`),
         {type: "text/html", parameters: {charset: "utf-8", mykey: "myvalue"}},
       );
     });
 
-    it('duplicated parameters are invalid (ignored)', function () {
+    it('should ignore duplicated parameters', function () {
       assert.deepEqual(
         utils.parseHeaderContentType(`text/html; charset=utf-8; charset=big5`),
         {type: "text/html", parameters: {charset: "utf-8"}},
@@ -1366,7 +1462,7 @@ describe('utils/common.mjs', function () {
   });
 
   describe('parseHeaderContentDisposition()', function () {
-    it('basic', function () {
+    it('should parse type and parameters', function () {
       assert.deepEqual(
         utils.parseHeaderContentDisposition(`attachment; filename=file.html`),
         {type: "attachment", parameters: {filename: "file.html"}},
@@ -1381,7 +1477,7 @@ describe('utils/common.mjs', function () {
       );
     });
 
-    it('spaces between parameters and between parname and value should be ignored', function () {
+    it('should ignore spaces between parameters and between parname and value', function () {
       assert.deepEqual(
         utils.parseHeaderContentDisposition(`attachment;filename=file.html`),
         {type: "attachment", parameters: {filename: "file.html"}},
@@ -1392,7 +1488,7 @@ describe('utils/common.mjs', function () {
       );
     });
 
-    it('quotes and escapes', function () {
+    it('should handle quotes and escapes', function () {
       assert.deepEqual(
         utils.parseHeaderContentDisposition(`inline; filename=" my file.jpg "`),
         {type: "inline", parameters: {filename: " my file.jpg "}},
@@ -1403,7 +1499,10 @@ describe('utils/common.mjs', function () {
       );
     });
 
-    it('ext-value as parname*', function () {
+    it('should handle ext-value as parname*', function () {
+      // suppress console output
+      sandbox.stub(console, 'error');
+
       // filename*
       assert.deepEqual(
         utils.parseHeaderContentDisposition(`inline; filename="US-$ rates"; filename*=iso-8859-1'en'%A3%20rates.bmp`),
@@ -1441,7 +1540,7 @@ describe('utils/common.mjs', function () {
       );
     });
 
-    it('type should be case-insensitive (lower case)', function () {
+    it('should treat type case-insensitively (lower case)', function () {
       assert.deepEqual(
         utils.parseHeaderContentDisposition(`ATTACHMENT; filename=file.html`),
         {type: "attachment", parameters: {filename: "file.html"}},
@@ -1453,7 +1552,7 @@ describe('utils/common.mjs', function () {
       );
     });
 
-    it('parameter name should be case-insensitive (lower case)', function () {
+    it('should treat parameter names case-insensitively (lower case)', function () {
       assert.deepEqual(
         utils.parseHeaderContentDisposition(`attachment; FILENAME=file.html`),
         {type: "attachment", parameters: {filename: "file.html"}},
@@ -1470,7 +1569,7 @@ describe('utils/common.mjs', function () {
       );
     });
 
-    it('duplicated parameters are invalid (ignored)', function () {
+    it('should ignore duplicated parameters', function () {
       assert.deepEqual(
         utils.parseHeaderContentDisposition(`attachment; filename=file.html; filename=file2.html; size=3; size=5`),
         {type: "attachment", parameters: {filename: "file.html", size: "3"}},
@@ -1483,7 +1582,7 @@ describe('utils/common.mjs', function () {
   });
 
   describe('parseHeaderRefresh()', function () {
-    it('basic', function () {
+    it('should return an object with time and url properties', function () {
       assert.deepEqual(utils.parseHeaderRefresh(``), {time: undefined, url: undefined});
       assert.deepEqual(utils.parseHeaderRefresh(` `), {time: undefined, url: undefined});
       assert.deepEqual(utils.parseHeaderRefresh(` ;`), {time: undefined, url: undefined});
@@ -1550,8 +1649,8 @@ describe('utils/common.mjs', function () {
     });
   });
 
-  $describe.skipIf($.noBrowser)('readFileAsArrayBuffer()', function () {
-    it('basic', async function () {
+  describe('readFileAsArrayBuffer()', function () {
+    it('should read the blob and return an array buffer', async function () {
       var blob = new Blob(["ABC123 中文 𠀀"], {type: "text/plain"});
       var ab = await utils.readFileAsArrayBuffer(blob);
       assert.deepEqual([...new Uint8Array(ab)], [65, 66, 67, 49, 50, 51, 32, 228, 184, 173, 230, 150, 135, 32, 240, 160, 128, 128]);
@@ -1559,7 +1658,7 @@ describe('utils/common.mjs', function () {
   });
 
   $describe.skipIf($.noBrowser)('readFileAsDataURL()', function () {
-    it('basic', async function () {
+    it('should read the blob and return a data URL', async function () {
       var greenBmp = atob(GREEN_BMP_B64);
       var ab = utils.byteStringToArrayBuffer(greenBmp);
       var blob = new Blob([ab], {type: "image/bmp"});
@@ -1569,19 +1668,19 @@ describe('utils/common.mjs', function () {
   });
 
   $describe.skipIf($.noBrowser)('readFileAsText()', function () {
-    it('return string in specified charset', async function () {
+    it('should return a string in the specified charset', async function () {
       var blob = new Blob(["ABC123 中文 𠀀"], {type: "text/plain"});
       var str = await await utils.readFileAsText(blob, 'UTF-8');
       assert.strictEqual(str, "ABC123 中文 𠀀");
     });
 
-    it('return string in UTF-8 if charset not specified', async function () {
+    it('should return a string in UTF-8 if charset not specified', async function () {
       var blob = new Blob(["ABC123 中文 𠀀"], {type: "text/plain"});
       var str = await await utils.readFileAsText(blob);
       assert.strictEqual(str, "ABC123 中文 𠀀");
     });
 
-    it('return byte string if charset is falsy', async function () {
+    it('should return a byte string if charset is falsy', async function () {
       var blob = new Blob(["ABC123 中文 𠀀"], {type: "text/plain"});
       var str = await await utils.readFileAsText(blob, false);
       assert.strictEqual(utils.utf8ToUnicode(str), "ABC123 中文 𠀀");
@@ -1589,7 +1688,7 @@ describe('utils/common.mjs', function () {
   });
 
   $describe.skipIf($.noBrowser)('readFileAsDocument()', function () {
-    it('basic', async function () {
+    it('should read the blob and return a document', async function () {
       var html = `<a href="http://example.com">ABC123 中文 𠀀</a>`;
       var blob = new Blob([html], {type: "text/html; charset=utf-8"});
       var doc = await utils.readFileAsDocument(blob);
@@ -1599,7 +1698,7 @@ describe('utils/common.mjs', function () {
   });
 
   describe('mimeIsText()', function () {
-    it('basic', function () {
+    it('should return true for a text MIME type', function () {
       // text/*
       assert.strictEqual(utils.mimeIsText('text/plain'), true);
       assert.strictEqual(utils.mimeIsText('text/html'), true);
@@ -1621,7 +1720,9 @@ describe('utils/common.mjs', function () {
       assert.strictEqual(utils.mimeIsText('application/json'), true);
       assert.strictEqual(utils.mimeIsText('application/xml'), true);
       assert.strictEqual(utils.mimeIsText('application/sql'), true);
+    });
 
+    it('should return false for a non-text MIME type', function () {
       // +zip are not text
       assert.strictEqual(utils.mimeIsText('application/epub+zip'), false);
 
@@ -1851,7 +1952,7 @@ describe('utils/common.mjs', function () {
   });
 
   $describe.skipIf($.noBrowser)('rewriteCssFile()', function () {
-    it('force UTF-8 if charset is known', async function () {
+    it('should force UTF-8 if charset is known', async function () {
       const rewriter = async css => `${css} /* rewritten */`;
 
       var data = new Blob([`div::after { content: "中文"; }`], {type: 'text/css'});
@@ -1860,7 +1961,7 @@ describe('utils/common.mjs', function () {
       assert.strictEqual(await utils.readFileAsText(result, 'UTF-8'), 'div::after { content: "中文"; } /* rewritten */');
     });
 
-    it('no charset if charset is unknown', async function () {
+    it('should contain no charset if charset is unknown', async function () {
       const rewriter = async css => `${css} /* rewritten */`;
 
       var data = new Blob([`div::after { content: "中文"; }`], {type: 'text/css'});
@@ -2612,7 +2713,7 @@ div { image-background: var(${/(--sb(\d+)-2)/}); }`;
   });
 
   describe('rewriteSrcset()', function () {
-    it('sync', function () {
+    it('should return synchronously for a synchronous rewriter', function () {
       const rewriter = url => `<${url}>`;
 
       var testCases = [
@@ -2678,7 +2779,7 @@ div { image-background: var(${/(--sb(\d+)-2)/}); }`;
       }
     });
 
-    it('async', async function () {
+    it('should return asynchronously for an asynchronous rewriter', async function () {
       const rewriter = async url => `<${url}>`;
 
       var testCases = [
@@ -2746,7 +2847,7 @@ div { image-background: var(${/(--sb(\d+)-2)/}); }`;
   });
 
   describe('rewriteUrls()', function () {
-    it('sync', function () {
+    it('should return synchronously for a synchronous rewriter', function () {
       const rewriter = url => `<${url}>`;
 
       var urls = [
@@ -2774,7 +2875,7 @@ div { image-background: var(${/(--sb(\d+)-2)/}); }`;
       }
     });
 
-    it('async', async function () {
+    it('should return asynchronously for an asynchronous rewriter', async function () {
       const rewriter = url => `<${url}>`;
 
       var urls = [
@@ -2800,6 +2901,62 @@ div { image-background: var(${/(--sb(\d+)-2)/}); }`;
         const expected = `<${input}>`;
         assert.strictEqual(await utils.rewriteUrls(input, rewriter), expected);
       }
+    });
+  });
+
+  $describe.skipIf($.noBrowser)('getMetaRefreshTarget()', function () {
+    it('should return the URL resolved with `baseUrl`', function () {
+      var doc = new DOMParser().parseFromString('<meta http-equiv="refresh" content="0; page.html?id=123">', 'text/html');
+      assert.strictEqual(utils.getMetaRefreshTarget(doc, 'https://example.org/'), 'https://example.org/page.html?id=123');
+    });
+
+    it('should return undefined when there is no meta refresh', function () {
+      var doc = new DOMParser().parseFromString('', 'text/html');
+      assert.strictEqual(utils.getMetaRefreshTarget(doc, 'https://example.org/'), undefined);
+    });
+
+    it('should return the last meta refresh URL when there are many', function () {
+      var doc = new DOMParser().parseFromString(`\
+<meta http-equiv="refresh" content="0; page1.html">\
+<meta http-equiv="refresh" content="0; page2.html">\
+<meta http-equiv="refresh" content="0; page3.html">\
+`, 'text/html');
+      assert.strictEqual(utils.getMetaRefreshTarget(doc, 'https://example.org/'), 'https://example.org/page3.html');
+    });
+
+    it('should return the URL resolved with altered base URL if there is a base[href]', function () {
+      var doc = new DOMParser().parseFromString(`
+<base target="_blank">
+<base href="./baseUrl/">
+<base href="./baseUrl2/">
+<meta http-equiv="refresh" content="0; page.html">
+`, 'text/html');
+      assert.strictEqual(utils.getMetaRefreshTarget(doc, 'https://example.org/'), 'https://example.org/baseUrl/page.html');
+    });
+
+    it('should skip a meta refresh if time is non-0', function () {
+      var doc = new DOMParser().parseFromString('<meta http-equiv="refresh" content="1; page1.html">', 'text/html');
+      assert.strictEqual(utils.getMetaRefreshTarget(doc, 'https://example.org/'), undefined);
+    });
+
+    it('should return the last meta refresh URL with least time when `includeDelayedRefresh` is truthy', function () {
+      var doc = new DOMParser().parseFromString(`\
+<meta http-equiv="refresh" content="1; page1.html">\
+<meta http-equiv="refresh" content="1; page2.html">\
+<meta http-equiv="refresh" content="2; page3.html">\
+<meta http-equiv="refresh" content="2; page4.html">\
+`, 'text/html');
+      assert.strictEqual(utils.getMetaRefreshTarget(doc, 'https://example.org/', true), 'https://example.org/page2.html');
+    });
+
+    it('should skip a meta refresh if in noscript', function () {
+      var doc = new DOMParser().parseFromString('<noscript><meta http-equiv="refresh" content="0; page.html"></noscript>', 'text/html');
+      assert.strictEqual(utils.getMetaRefreshTarget(doc, 'https://example.org/'), undefined);
+    });
+
+    it('should not skip a meta refresh in noscript when `includeNoscript` is truthy', function () {
+      var doc = new DOMParser().parseFromString('<noscript><meta http-equiv="refresh" content="0; page.html"></noscript>', 'text/html');
+      assert.strictEqual(utils.getMetaRefreshTarget(doc, 'https://example.org/', undefined, true), 'https://example.org/page.html');
     });
   });
 

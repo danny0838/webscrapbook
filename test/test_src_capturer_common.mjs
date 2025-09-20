@@ -16,7 +16,7 @@ const r = String.raw;
 describe('capturer/common.mjs', function () {
   describe('capturer', function () {
     describe('.getRedirectedUrl()', function () {
-      it("use the redirected URL hash if it exists", function () {
+      it("should use the redirected URL hash if it exists", function () {
         assert.strictEqual(
           capturer.getRedirectedUrl("http://example.com/page#", ""),
           "http://example.com/page#",
@@ -51,7 +51,7 @@ describe('capturer/common.mjs', function () {
         );
       });
 
-      it("use the original URL hash if the redirected URL has no hash", function () {
+      it("should use the original URL hash if the redirected URL has no hash", function () {
         assert.strictEqual(
           capturer.getRedirectedUrl("http://example.com/page", ""),
           "http://example.com/page",
@@ -78,7 +78,7 @@ describe('capturer/common.mjs', function () {
         );
       });
 
-      it("don't include hash for data URL", function () {
+      it("should not include hash for data URL", function () {
         assert.strictEqual(
           capturer.getRedirectedUrl("data:text/html,foo#", ""),
           "data:text/html,foo",
@@ -99,7 +99,7 @@ describe('capturer/common.mjs', function () {
     });
 
     describe('.resolveRelativeUrl()', function () {
-      it("resolve a relative URL using the base URL", function () {
+      it("should resolve a relative URL using the base URL", function () {
         assert.strictEqual(
           capturer.resolveRelativeUrl("mypage.html", "http://example.com/"),
           "http://example.com/mypage.html",
@@ -122,14 +122,14 @@ describe('capturer/common.mjs', function () {
         );
       });
 
-      it("don't resolve an empty URL", function () {
+      it("should not resolve an empty URL", function () {
         assert.strictEqual(
           capturer.resolveRelativeUrl("", "http://example.com/"),
           "",
         );
       });
 
-      it("don't resolve a pure hash URL", function () {
+      it("should not resolve a pure hash URL", function () {
         assert.strictEqual(
           capturer.resolveRelativeUrl("#hash", "http://example.com/"),
           "#hash",
@@ -142,93 +142,34 @@ describe('capturer/common.mjs', function () {
     });
 
     describe('.isAboutUrl()', function () {
-      it("true for exactly about:srcdoc", function () {
-        assert.strictEqual(
-          capturer.isAboutUrl("about:srcdoc"),
-          true,
-        );
-        assert.strictEqual(
-          capturer.isAboutUrl("about:srcdoc/subdir"),
-          false,
-        );
-        assert.strictEqual(
-          capturer.isAboutUrl("about:srcdoc?"),
-          false,
-        );
-        assert.strictEqual(
-          capturer.isAboutUrl("about:srcdoc?id=123"),
-          false,
-        );
-        assert.strictEqual(
-          capturer.isAboutUrl("about:srcdoc#"),
-          false,
-        );
-        assert.strictEqual(
-          capturer.isAboutUrl("about:srcdoc#frag"),
-          false,
-        );
+      it("should return true for exactly about:srcdoc", function () {
+        assert.isTrue(capturer.isAboutUrl("about:srcdoc"));
+        assert.isFalse(capturer.isAboutUrl("about:srcdoc/subdir"));
+        assert.isFalse(capturer.isAboutUrl("about:srcdoc?"));
+        assert.isFalse(capturer.isAboutUrl("about:srcdoc?id=123"));
+        assert.isFalse(capturer.isAboutUrl("about:srcdoc#"));
+        assert.isFalse(capturer.isAboutUrl("about:srcdoc#frag"));
       });
 
-      it("true for about:blank", function () {
-        assert.strictEqual(
-          capturer.isAboutUrl("about:blank"),
-          true,
-        );
-        assert.strictEqual(
-          capturer.isAboutUrl("about:blank/subdir"),
-          false,
-        );
-        assert.strictEqual(
-          capturer.isAboutUrl("about:blank?"),
-          true,
-        );
-        assert.strictEqual(
-          capturer.isAboutUrl("about:blank?id=123"),
-          true,
-        );
-        assert.strictEqual(
-          capturer.isAboutUrl("about:blank#"),
-          true,
-        );
-        assert.strictEqual(
-          capturer.isAboutUrl("about:blank#frag"),
-          true,
-        );
+      it("should return true for about:blank (may contain search or hash)", function () {
+        assert.isTrue(capturer.isAboutUrl("about:blank"));
+        assert.isFalse(capturer.isAboutUrl("about:blank/subdir"));
+        assert.isTrue(capturer.isAboutUrl("about:blank?"));
+        assert.isTrue(capturer.isAboutUrl("about:blank?id=123"));
+        assert.isTrue(capturer.isAboutUrl("about:blank#"));
+        assert.isTrue(capturer.isAboutUrl("about:blank#frag"));
       });
 
-      it("false for other URLs", function () {
-        assert.strictEqual(
-          capturer.isAboutUrl("about:invalid"),
-          false,
-        );
-        assert.strictEqual(
-          capturer.isAboutUrl("about:newtab"),
-          false,
-        );
-        assert.strictEqual(
-          capturer.isAboutUrl("http://example.com/page"),
-          false,
-        );
-        assert.strictEqual(
-          capturer.isAboutUrl("https://example.com/page"),
-          false,
-        );
-        assert.strictEqual(
-          capturer.isAboutUrl("ws://example.com/page"),
-          false,
-        );
-        assert.strictEqual(
-          capturer.isAboutUrl("wss://example.com/page"),
-          false,
-        );
-        assert.strictEqual(
-          capturer.isAboutUrl("file:///foo/bar"),
-          false,
-        );
-        assert.strictEqual(
-          capturer.isAboutUrl("data:text/html,foo"),
-          false,
-        );
+      it("should return false for other URLs", function () {
+        assert.isFalse(capturer.isAboutUrl("about:invalid"));
+        assert.isFalse(capturer.isAboutUrl("about:newtab"));
+        assert.isFalse(capturer.isAboutUrl("http://example.com/page"));
+        assert.isFalse(capturer.isAboutUrl("https://example.com/page"));
+        assert.isFalse(capturer.isAboutUrl("ws://example.com/page"));
+        assert.isFalse(capturer.isAboutUrl("wss://example.com/page"));
+        assert.isFalse(capturer.isAboutUrl("file:///foo/bar"));
+        assert.isFalse(capturer.isAboutUrl("data:text/html,foo"));
+        assert.isFalse(capturer.isAboutUrl("blob:https://example.com/58eead10-e54d-4b72-9ae4-150381dcb68c"));
       });
     });
 
@@ -236,7 +177,7 @@ describe('capturer/common.mjs', function () {
       const optionsBasic = {};
       const optionsLinkUnsavedUri = {"capture.linkUnsavedUri": true};
 
-      it("rewrite http:, https:, file:, and about:", function () {
+      it("should rewrite http:, https:, file:, and about:", function () {
         assert.strictEqual(
           capturer.getErrorUrl("http://example.com/?id=123#456", optionsBasic),
           "urn:scrapbook:download:error:http://example.com/?id=123#456",
@@ -259,7 +200,7 @@ describe('capturer/common.mjs', function () {
         );
       });
 
-      it("strip details for data: and blob:", function () {
+      it("should strip details for data: and blob:", function () {
         assert.strictEqual(
           capturer.getErrorUrl("data:text/css,foo", optionsBasic),
           "urn:scrapbook:download:error:data:",
@@ -270,7 +211,7 @@ describe('capturer/common.mjs', function () {
         );
       });
 
-      it("don't rewrite other protocols", function () {
+      it("should not rewrite other protocols", function () {
         assert.strictEqual(
           capturer.getErrorUrl("ftp://example.com/file.png", optionsBasic),
           "ftp://example.com/file.png",
@@ -289,7 +230,7 @@ describe('capturer/common.mjs', function () {
         );
       });
 
-      it("don't rewrite if capture.linkUnsavedUri is truthy", function () {
+      it("should not rewrite if `capture.linkUnsavedUri` is truthy", function () {
         assert.strictEqual(
           capturer.getErrorUrl("http://example.com/?id=123#456", optionsLinkUnsavedUri),
           "http://example.com/?id=123#456",
