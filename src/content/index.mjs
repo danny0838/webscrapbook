@@ -2,12 +2,12 @@
  * Shared utilities for most content scripts.
  *****************************************************************************/
 
-import * as scrapbook from "../utils/common.mjs";
+import * as utils from "../utils/common.mjs";
 import {core} from "./core.mjs";
 import {capturer} from "../capturer/content.mjs";
 import {editor} from "../editor/content.mjs";
 
-scrapbook.loadOptionsAuto(); // async
+utils.loadOptionsAuto(); // async
 
 /**
  * Return frameId of the frame of this content script.
@@ -31,10 +31,10 @@ window.addEventListener("message", async (event) => {
   event.ports[0].postMessage({frameId: core.frameId});
 }, false);
 
-scrapbook.addMessageListener();
+utils.addMessageListener();
 
 /** @global */
-globalThis.scrapbook = scrapbook;
+globalThis.utils = utils;
 
 /** @global */
 globalThis.core = core;

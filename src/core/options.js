@@ -3,12 +3,12 @@
  *****************************************************************************/
 
 import {BACKEND_MIN_VERSION, DEFAULT_OPTIONS} from "../utils/extension.mjs";
-import * as scrapbook from "../utils/extension.mjs";
+import * as utils from "../utils/extension.mjs";
 
 const OPTION_PREFIX = "opt_";
 
 async function initOptions() {
-  const options = await scrapbook.getOptions();
+  const options = await utils.getOptions();
   for (const key in options) {
     setOptionToDocument(key, options[key]);
   }
@@ -70,8 +70,8 @@ function resetOptions(file) {
 }
 
 async function exportOptions() {
-  const blob = new Blob([JSON.stringify(await scrapbook.getOptions(), null, 2)], {type: "application/json"});
-  const filename = `webscrapbook.options.${scrapbook.dateToId().slice(0, 8)}.json`;
+  const blob = new Blob([JSON.stringify(await utils.getOptions(), null, 2)], {type: "application/json"});
+  const filename = `webscrapbook.options.${utils.dateToId().slice(0, 8)}.json`;
   const elem = document.createElement('a');
   elem.download = filename;
   elem.href = URL.createObjectURL(blob);
@@ -82,13 +82,13 @@ async function exportOptions() {
 
 async function importOptions(file) {
   try {
-    const options = JSON.parse(await scrapbook.readFileAsText(file));
+    const options = JSON.parse(await utils.readFileAsText(file));
     for (const key in options) {
       setOptionToDocument(key, options[key], true);
     }
-    alert(scrapbook.lang("OptionsImportSuccess"));
+    alert(utils.lang("OptionsImportSuccess"));
   } catch (ex) {
-    alert(scrapbook.lang("ErrorImportOptions", [ex.message]));
+    alert(utils.lang("ErrorImportOptions", [ex.message]));
   }
 }
 
@@ -112,7 +112,7 @@ function getDetailStatusKey() {
 }
 
 async function loadDetailStatus() {
-  const status = await scrapbook.cache.get(getDetailStatusKey(), 'storage');
+  const status = await utils.cache.get(getDetailStatusKey(), 'storage');
   if (!status) { return; }
 
   for (const id in status) {
@@ -128,11 +128,11 @@ async function saveDetailStatus() {
   for (const elem of document.querySelectorAll('#optionsWrapper details[id]')) {
     status[elem.id] = elem.open;
   }
-  await scrapbook.cache.set(getDetailStatusKey(), status, 'storage');
+  await utils.cache.set(getDetailStatusKey(), status, 'storage');
 }
 
 async function refreshPermissions() {
-  const perms = await scrapbook.checkPermissions();
+  const perms = await utils.checkPermissions();
   for (const [perm, value] of Object.entries(perms)) {
     document.getElementById(`permissions_${perm}`).hidden = value;
   }
@@ -181,7 +181,7 @@ function verifySaveFolder() {
   const elem = document.getElementById("opt_capture.saveFolder");
   if (elem.value) {
     // make sure it's a valid path for browser.downloads.download
-    elem.value = scrapbook.parseOption("capture.saveFolder", elem.value);
+    elem.value = utils.parseOption("capture.saveFolder", elem.value);
   } else {
     elem.value = elem.placeholder;
   }
@@ -191,7 +191,7 @@ function verifySaveFilename() {
   const elem = document.getElementById("opt_capture.saveFilename");
   if (elem.value) {
     // make sure it's a valid path for browser.downloads.download
-    elem.value = scrapbook.parseOption("capture.saveFilename", elem.value);
+    elem.value = utils.parseOption("capture.saveFilename", elem.value);
   } else {
     elem.value = elem.placeholder;
   }
@@ -200,7 +200,7 @@ function verifySaveFilename() {
 function verifyDownLinkFileExtFilter() {
   const elem = document.getElementById("opt_capture.downLink.file.extFilter");
   try {
-    scrapbook.parseOption("capture.downLink.file.extFilter", elem.value);
+    utils.parseOption("capture.downLink.file.extFilter", elem.value);
     elem.setCustomValidity('');
   } catch (ex) {
     elem.setCustomValidity(ex.message);
@@ -210,7 +210,7 @@ function verifyDownLinkFileExtFilter() {
 function verifyDownLinkDocUrlFilter() {
   const elem = document.getElementById("opt_capture.downLink.doc.urlFilter");
   try {
-    scrapbook.parseOption("capture.downLink.doc.urlFilter", elem.value);
+    utils.parseOption("capture.downLink.doc.urlFilter", elem.value);
     elem.setCustomValidity('');
   } catch (ex) {
     elem.setCustomValidity(ex.message);
@@ -220,7 +220,7 @@ function verifyDownLinkDocUrlFilter() {
 function verifyDownLinkUrlFilter() {
   const elem = document.getElementById("opt_capture.downLink.urlFilter");
   try {
-    scrapbook.parseOption("capture.downLink.urlFilter", elem.value);
+    utils.parseOption("capture.downLink.urlFilter", elem.value);
     elem.setCustomValidity('');
   } catch (ex) {
     elem.setCustomValidity(ex.message);
@@ -234,7 +234,7 @@ function verifyCaptureHelpers() {
   elem.required = enabled;
 
   try {
-    scrapbook.parseOption("capture.helpers", elem.value);
+    utils.parseOption("capture.helpers", elem.value);
     elem.setCustomValidity('');
   } catch (ex) {
     elem.setCustomValidity(ex.message);
@@ -248,7 +248,7 @@ function verifyAutoCapture() {
   elem.required = enabled;
 
   try {
-    scrapbook.parseOption("autocapture.rules", elem.value);
+    utils.parseOption("autocapture.rules", elem.value);
     elem.setCustomValidity('');
   } catch (ex) {
     elem.setCustomValidity(ex.message);
@@ -275,7 +275,7 @@ async function openIndexer() {
   }
   params.append('backup', getOptionFromDocument('indexer.makeBackup') ? 1 : '');
 
-  return await scrapbook.visitLink({
+  return await utils.visitLink({
     url: u.href,
     newTab: true,
   });
@@ -319,7 +319,7 @@ async function openChecker() {
   }
   params.append('backup', getOptionFromDocument('checker.makeBackup') ? 1 : '');
 
-  return await scrapbook.visitLink({
+  return await utils.visitLink({
     url: u.href,
     newTab: true,
   });
@@ -384,8 +384,8 @@ async function onSubmit(event) {
     keys[key] = value;
   }
 
-  await scrapbook.setOptions(keys);
-  await scrapbook.clearOptions(keysToRemove);
+  await utils.setOptions(keys);
+  await utils.clearOptions(keysToRemove);
 
   return closeWindow();
 }
@@ -417,7 +417,7 @@ async function onImportInputChange(event) {
 async function onCloudClick(event) {
   event.preventDefault();
   const u = new URL(browser.runtime.getURL("core/cloud.html"));
-  return await scrapbook.visitLink({
+  return await utils.visitLink({
     url: u.href,
   });
 }
@@ -442,8 +442,8 @@ function onTooltipClick(event) {
 
 window.addEventListener("DOMContentLoaded", async (event) => {
   // load languages
-  scrapbook.loadLanguages(document);
-  document.getElementById("optionServerUrlTooltip").setAttribute('data-tooltip', scrapbook.lang('OptionServerUrlTooltip', [BACKEND_MIN_VERSION]));
+  utils.loadLanguages(document);
+  document.getElementById("optionServerUrlTooltip").setAttribute('data-tooltip', utils.lang('OptionServerUrlTooltip', [BACKEND_MIN_VERSION]));
 
   // load default options
   await initOptions();

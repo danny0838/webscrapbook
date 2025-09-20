@@ -3,7 +3,7 @@
  *****************************************************************************/
 
 import {DEFAULT_OPTIONS} from "../utils/common.mjs";
-import * as scrapbook from "../utils/common.mjs";
+import * as utils from "../utils/common.mjs";
 
 function getTableKey(name, ts, size) {
   return JSON.stringify({table: "cloudFiles", ts, name, size});
@@ -65,11 +65,11 @@ async function refreshTable() {
       const dl = td4.appendChild(document.createElement('input'));
       dl.type = 'button';
       dl.name = 'apply';
-      dl.value = scrapbook.lang('CloudFileActionApplyLabel');
+      dl.value = utils.lang('CloudFileActionApplyLabel');
       const del = td4.appendChild(document.createElement('input'));
       del.type = 'button';
       del.name = 'delete';
-      del.value = scrapbook.lang('CloudFileActionDeleteLabel');
+      del.value = utils.lang('CloudFileActionDeleteLabel');
     }
   } catch (ex) {
     console.error(ex);
@@ -94,7 +94,7 @@ async function applyEntry(tr) {
 
     await browser.storage.local.set(data);
     await browser.storage.local.remove(keysToRemove);
-    alert(scrapbook.lang("CloudFileActionApplySuccess"));
+    alert(utils.lang("CloudFileActionApplySuccess"));
   } catch (ex) {
     console.error(ex);
     alert(`Failed to apply entry: ${ex}`);
@@ -118,7 +118,7 @@ async function store() {
   try {
     const name = await getDeviceName();
     const ts = Date.now();
-    const data = await scrapbook.getOptions();
+    const data = await utils.getOptions();
 
     // remove default options
     for (const [key, value] of Object.entries(DEFAULT_OPTIONS)) {
@@ -138,7 +138,7 @@ async function store() {
 async function rename() {
   try {
     const defaultName = await getDeviceName();
-    const name = prompt(scrapbook.lang('CloudRenamePrompt'), defaultName);
+    const name = prompt(utils.lang('CloudRenamePrompt'), defaultName);
     if (name === null) { return; }
 
     await browser.storage.local.set({[getDeviceKey()]: name.trim()});
@@ -185,7 +185,7 @@ browser.storage.sync.onChanged.addListener(async (details) => {
 
 window.addEventListener("DOMContentLoaded", async (event) => {
   // load languages
-  scrapbook.loadLanguages(document);
+  utils.loadLanguages(document);
 
   document.querySelector("table").addEventListener("click", onTableClick);
   document.getElementById("store").addEventListener("click", onStoreClick);

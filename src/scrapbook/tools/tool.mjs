@@ -2,10 +2,10 @@
  * Shared script for a SSE-based scrapbook tool.
  *****************************************************************************/
 
-import * as scrapbook from "../../utils/common.mjs";
+import * as utils from "../../utils/common.mjs";
 import {server} from "../server.mjs";
 
-scrapbook.loadOptionsAuto(); // async
+utils.loadOptionsAuto(); // async
 
 class ScrapbookTool {
   constructor(doc = document) {
@@ -32,7 +32,7 @@ class ScrapbookTool {
   }
 
   async run() {
-    scrapbook.loadLanguages(this.doc);
+    utils.loadLanguages(this.doc);
     this.logger.textContent = '';
 
     const params = this.getParams();
@@ -42,7 +42,7 @@ class ScrapbookTool {
     }
 
     try {
-      await scrapbook.loadOptionsAuto();
+      await utils.loadOptionsAuto();
       const query = this.getQuery(params);
       const onMessage = (info) => {
         this.log(info);

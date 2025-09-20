@@ -2,7 +2,7 @@
  * Tree UI controller class.
  *****************************************************************************/
 
-import * as scrapbook from "../utils/common.mjs";
+import * as utils from "../utils/common.mjs";
 
 const TREE_CLASS = 'tree';
 const TREE_CLASS_SELECTABLE = 'selectable';
@@ -94,7 +94,7 @@ class Tree {
     // event.dataTransfer causing DnD not functioning well.
     // Disallow DnD to prevent a confusion.
     // https://bugs.chromium.org/p/chromium/issues/detail?id=1266859
-    if (scrapbook.userAgent.is('chromium') && scrapbook.userAgent.is('mobile')) {
+    if (utils.userAgent.is('chromium') && utils.userAgent.is('mobile')) {
       this.allowDrag = false;
     }
 
@@ -244,7 +244,7 @@ class Tree {
     const path = [];
     let cur = elem;
     while (this.treeElem.contains(cur)) {
-      path.unshift(`*[@data-id=${scrapbook.quoteXPath(cur.getAttribute('data-id'))}][${this.getXpathPos(cur)}]`);
+      path.unshift(`*[@data-id=${utils.quoteXPath(cur.getAttribute('data-id'))}][${this.getXpathPos(cur)}]`);
       cur = cur.parentElement.parentElement;
     }
 
@@ -347,14 +347,14 @@ class Tree {
           if (meta.source) {
             a.href = meta.source;
           } else if (meta.index) {
-            a.href = this.book.dataUrl + scrapbook.escapeFilename(meta.index);
+            a.href = this.book.dataUrl + utils.escapeFilename(meta.index);
           }
           break;
         }
         default: {
           if (meta.index) {
-            a.href = this.book.dataUrl + scrapbook.escapeFilename(meta.index)
-                + scrapbook.splitUrlByAnchor(meta.source || '')[1];
+            a.href = this.book.dataUrl + utils.escapeFilename(meta.index)
+                + utils.splitUrlByAnchor(meta.source || '')[1];
           }
           break;
         }
@@ -370,7 +370,7 @@ class Tree {
       if (meta.icon) {
         icon.src = /^(?:[a-z][a-z0-9+.-]*:|[/])/i.test(meta.icon || '') ?
             meta.icon :
-            (this.book.dataUrl + scrapbook.escapeFilename(meta.index || '')).replace(/[/][^/]+$/, '/') + meta.icon;
+            (this.book.dataUrl + utils.escapeFilename(meta.index || '')).replace(/[/][^/]+$/, '/') + meta.icon;
       } else {
         icon.src = ITEM_TYPE_ICON[meta.type] || ITEM_TYPE_ICON[''];
       }
@@ -696,7 +696,7 @@ class Tree {
 
     const cacheMap = new Map();
     event.clipboardData.setData(
-      'application/scrapbook.items+json',
+      'application/utils.items+json',
       JSON.stringify({
         src: this.book.server.serverRoot,
 
@@ -762,7 +762,7 @@ class Tree {
     // Firefox requires at least one data to get dragging work
     const cacheMap = new Map();
     event.dataTransfer.setData(
-      'application/scrapbook.items+json',
+      'application/utils.items+json',
       JSON.stringify({
         src: this.book.server.serverRoot,
 

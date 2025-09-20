@@ -2,7 +2,7 @@
  * Script for load.html
  *****************************************************************************/
 
-import * as scrapbook from "../utils/common.mjs";
+import * as utils from "../utils/common.mjs";
 import {Zip, Maff} from "../utils/zip.mjs";
 import * as Mime from "../lib/mime.mjs";
 
@@ -109,7 +109,7 @@ const viewer = {
       // dialog isn't shown as the main tab is immediately redirected. As a
       // result, the user has to tweak the popup blocker setting in prior to
       // see the popup. Use browser.tabs.create to workaround the issue.
-      if (scrapbook.userAgent.is('gecko')) {
+      if (utils.userAgent.is('gecko')) {
         try {
           return await browser.tabs.create({url, active: false});
         } catch (ex) {
@@ -148,10 +148,10 @@ const viewer = {
         const zipSourceUrlObj = new URL(zipSourceUrl);
         viewer.urlSearch = zipSourceUrlObj.search;
         viewer.urlHash = viewer.mainUrl.hash;
-        let filename = scrapbook.urlToFilename(zipSourceUrl);
+        let filename = utils.urlToFilename(zipSourceUrl);
 
         try {
-          const xhr = await scrapbook.xhr({
+          const xhr = await utils.xhr({
             url: zipSourceUrl,
             responseType: "blob",
           });
@@ -161,7 +161,7 @@ const viewer = {
           if (xhr.status !== 0) {
             try {
               const headerContentDisposition = xhr.getResponseHeader("Content-Disposition");
-              const contentDisposition = scrapbook.parseHeaderContentDisposition(headerContentDisposition);
+              const contentDisposition = utils.parseHeaderContentDisposition(headerContentDisposition);
               filename = contentDisposition.parameters.filename || filename;
             } catch (ex) {
               // error when parsing header
@@ -221,8 +221,8 @@ const viewer = {
   async processZipFile(zipFile) {
     this.log(`Loading: '${zipFile.name}'...`);
     try {
-      const uuid = scrapbook.getUuid();
-      const type = scrapbook.filenameParts(zipFile.name)[1].toLowerCase();
+      const uuid = utils.getUuid();
+      const type = utils.filenameParts(zipFile.name)[1].toLowerCase();
 
       /* retrieve and store zip entries */
       const zip = await (async () => {
@@ -240,7 +240,7 @@ const viewer = {
         });
 
         const key = {table: "pageCache", id: uuid, path: inZipPath};
-        await scrapbook.cache.set(key, data, 'indexedDB');
+        await utils.cache.set(key, data, 'indexedDB');
       }
 
       /* Retrieve indexFiles */
@@ -295,7 +295,7 @@ const viewer = {
 };
 
 document.addEventListener("DOMContentLoaded", async function () {
-  scrapbook.loadLanguages(document);
+  utils.loadLanguages(document);
 
   // init common elements and events
   viewer.dropmask = document.getElementById('dropmask');
@@ -303,6 +303,6 @@ document.addEventListener("DOMContentLoaded", async function () {
   viewer.filesSelector = document.getElementById('files-selector');
   viewer.logger = document.getElementById('logger');
 
-  await scrapbook.loadOptions();
+  await utils.loadOptions();
   await viewer.start();
 });

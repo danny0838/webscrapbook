@@ -3,7 +3,7 @@
  *****************************************************************************/
 
 import {BACKEND_MIN_VERSION} from "../utils/common.mjs";
-import * as scrapbook from "../utils/common.mjs";
+import * as utils from "../utils/common.mjs";
 
 // order is relevant
 const SPECIAL_ITEM_ID = new Set(['root', 'hidden', 'recycle']);
@@ -254,18 +254,18 @@ class Server {
       return false;
     }
 
-    if (!scrapbook.hasServer()) {
+    if (!utils.hasServer()) {
       throw new Error('Backend server address not configured.');
     }
 
     // record configs
-    this._bookId = (await scrapbook.cache.get({table: "scrapbookServer", key: "currentScrapbook"}, 'storage')) || "";
+    this._bookId = (await utils.cache.get({table: "scrapbookServer", key: "currentScrapbook"}, 'storage')) || "";
 
     // load config from server
     {
       let rootUrlObj;
       try {
-        rootUrlObj = new URL(await scrapbook.getOption("server.url"));
+        rootUrlObj = new URL(await utils.getOption("server.url"));
         if (!rootUrlObj.pathname.endsWith('/')) { rootUrlObj.pathname += '/'; }
         rootUrlObj.search = rootUrlObj.hash = '';
       } catch (ex) {
@@ -286,8 +286,8 @@ class Server {
         // Take user and password only when both are non-empty;
         // otherwise omit both fields for the browser to try the cached
         // auth credentials.
-        let user = await scrapbook.getOption("server.user");
-        let password = await scrapbook.getOption("server.password");
+        let user = await utils.getOption("server.user");
+        let password = await utils.getOption("server.password");
         if (!(user && password)) {
           user = password = null;
         }
@@ -296,7 +296,7 @@ class Server {
         // support a URL with user/password.
         let xhr;
         try {
-          xhr = await scrapbook.xhr({
+          xhr = await utils.xhr({
             url,
             user,
             password,
@@ -343,7 +343,7 @@ class Server {
 
     // validate if the server version is compatible
     {
-      if (scrapbook.versionCompare(this._config.VERSION, BACKEND_MIN_VERSION) < 0) {
+      if (utils.versionCompare(this._config.VERSION, BACKEND_MIN_VERSION) < 0) {
         throw new Error(`Require server app version >= ${BACKEND_MIN_VERSION}.`);
       }
 
@@ -357,7 +357,7 @@ class Server {
           console.error(ex);
         }
         if (version) {
-          if (scrapbook.versionCompare(version, this._config.WSB_EXTENSION_MIN_VERSION) < 0) {
+          if (utils.versionCompare(version, this._config.WSB_EXTENSION_MIN_VERSION) < 0) {
             throw new Error(`Server app requires extension version >= ${this._config.WSB_EXTENSION_MIN_VERSION}.`);
           }
         }
@@ -398,17 +398,17 @@ class Server {
       method: "GET",
     })
       .then(r => r.blob())
-      .then(b => scrapbook.readFileAsDocument(b));
+      .then(b => utils.readFileAsDocument(b));
 
     if (!doc) {
       return;
     }
 
-    return scrapbook.getMetaRefreshTarget(doc, refUrl);
+    return utils.getMetaRefreshTarget(doc, refUrl);
   }
 
   async findBookIdFromUrl(url) {
-    const u = scrapbook.splitUrl(url)[0];
+    const u = utils.splitUrl(url)[0];
     for (const [id, book] of Object.entries(this.books)) {
       if (u.startsWith(book.dataUrl)) {
         return id;
@@ -430,18 +430,18 @@ class Book {
     }
 
     this.topUrl = server.serverRoot +
-      (this.config.top_dir ? scrapbook.quote(this.config.top_dir) + '/' : '');
+      (this.config.top_dir ? utils.quote(this.config.top_dir) + '/' : '');
 
     this.dataUrl = this.topUrl +
-        (this.config.data_dir ? scrapbook.quote(this.config.data_dir) + '/' : '');
+        (this.config.data_dir ? utils.quote(this.config.data_dir) + '/' : '');
 
     this.treeUrl = this.topUrl +
-        (this.config.tree_dir ? scrapbook.quote(this.config.tree_dir) + '/' : '');
+        (this.config.tree_dir ? utils.quote(this.config.tree_dir) + '/' : '');
 
     {
       const backupDir = server.config.app.backup_dir;
       this.backupUrl = typeof backupDir === 'string' ?
-          server.serverRoot + (backupDir ? scrapbook.quote(backupDir) + '/' : '') :
+          server.serverRoot + (backupDir ? utils.quote(backupDir) + '/' : '') :
           null;
     }
 
@@ -855,7 +855,7 @@ class Book {
   async transaction({
     callback,
     mode,
-    autoBackup = scrapbook.getOption("scrapbook.transactionAutoBackup"),
+    autoBackup = utils.getOption("scrapbook.transactionAutoBackup"),
     autoBackupTs,
     autoBackupNote = 'transaction',
     timeout = 5,
@@ -892,7 +892,7 @@ class Book {
       switch (mode) {
         case 'validate': {
           if (!await this.validateTree()) {
-            throw new Error(scrapbook.lang('ScrapBookErrorServerTreeChanged'));
+            throw new Error(utils.lang('ScrapBookErrorServerTreeChanged'));
           }
           break;
         }
@@ -904,7 +904,7 @@ class Book {
 
       // auto backup
       if (await autoBackup) {
-        backupTs = autoBackupTs || scrapbook.dateToId();
+        backupTs = autoBackupTs || utils.dateToId();
 
         // Load tree files if not done yet.
         if (!this.treeFiles) {
@@ -975,7 +975,7 @@ class Book {
     return `/**
  * Feel free to edit this file, but keep data code valid JSON format.
  */
-scrapbook.meta(${JSON.stringify(jsonData, null, 2).replace(/\u2028/g, '\\u2028').replace(/\u2029/g, '\\u2029')})`;
+utils.meta(${JSON.stringify(jsonData, null, 2).replace(/\u2028/g, '\\u2028').replace(/\u2029/g, '\\u2029')})`;
   }
 
   generateTocFile(jsonData) {
@@ -983,16 +983,16 @@ scrapbook.meta(${JSON.stringify(jsonData, null, 2).replace(/\u2028/g, '\\u2028')
     return `/**
  * Feel free to edit this file, but keep data code valid JSON format.
  */
-scrapbook.toc(${JSON.stringify(jsonData, null, 2).replace(/\u2028/g, '\\u2028').replace(/\u2029/g, '\\u2029')})`;
+utils.toc(${JSON.stringify(jsonData, null, 2).replace(/\u2028/g, '\\u2028').replace(/\u2029/g, '\\u2029')})`;
   }
 
   generateId() {
     let d = new Date();
     let i = d.valueOf();
-    let id = scrapbook.dateToId(d);
+    let id = utils.dateToId(d);
     while (this.meta[id]) {
       d.setTime(++i);
-      id = scrapbook.dateToId(d);
+      id = utils.dateToId(d);
     }
     return id;
   }
@@ -1068,7 +1068,7 @@ scrapbook.toc(${JSON.stringify(jsonData, null, 2).replace(/\u2028/g, '\\u2028').
     const index = item.index;
     if (!index) { return; }
 
-    let target = this.dataUrl + scrapbook.escapeFilename(index);
+    let target = this.dataUrl + utils.escapeFilename(index);
 
     if (checkArchiveRedirect) {
       const response = await this.server.request({
@@ -1098,12 +1098,12 @@ scrapbook.toc(${JSON.stringify(jsonData, null, 2).replace(/\u2028/g, '\\u2028').
   isItemIndexUrl(item, url) {
     if (!(item?.index && url)) { return false; }
 
-    let u = scrapbook.normalizeUrl(scrapbook.splitUrl(this.dataUrl + scrapbook.escapeFilename(item.index))[0]);
-    let u1 = scrapbook.normalizeUrl(scrapbook.splitUrl(url)[0]);
+    let u = utils.normalizeUrl(utils.splitUrl(this.dataUrl + utils.escapeFilename(item.index))[0]);
+    let u1 = utils.normalizeUrl(utils.splitUrl(url)[0]);
 
     const p = u.toLowerCase();
     if (p.endsWith('.maff')) {
-      const regex = new RegExp('^' + scrapbook.escapeRegExp(u) + '!/[^/]*/index\\.html$');
+      const regex = new RegExp('^' + utils.escapeRegExp(u) + '!/[^/]*/index\\.html$');
       return regex.test(u1);
     }
     if (p.endsWith('.htz')) {
@@ -1118,10 +1118,10 @@ scrapbook.toc(${JSON.stringify(jsonData, null, 2).replace(/\u2028/g, '\\u2028').
 
     let matchedIndexUrl = ''; // last seen valid */index.html
     let matchedItem; // item for the above
-    const u = scrapbook.normalizeUrl(scrapbook.splitUrl(url)[0]);
+    const u = utils.normalizeUrl(utils.splitUrl(url)[0]);
     for (const [id, item] of Object.entries(this.meta)) {
       if (!item.index) { continue; }
-      const indexUrl = scrapbook.normalizeUrl(scrapbook.splitUrl(this.dataUrl + scrapbook.escapeFilename(item.index))[0]);
+      const indexUrl = utils.normalizeUrl(utils.splitUrl(this.dataUrl + utils.escapeFilename(item.index))[0]);
       // foo/page.html should not belong to an item with index foo/index.html
       // if an item with index foo/page.html exists.
       // record the longest match as the item candidate
@@ -1216,7 +1216,7 @@ scrapbook.toc(${JSON.stringify(jsonData, null, 2).replace(/\u2028/g, '\\u2028').
               cmd: 'save_item_postit',
               args: [id, text],
             }),
-            auto_cache: JSON.stringify(scrapbook.autoCacheOptions()),
+            auto_cache: JSON.stringify(utils.autoCacheOptions()),
             details: 1,
           },
           method: 'POST',
@@ -1266,7 +1266,7 @@ scrapbook.toc(${JSON.stringify(jsonData, null, 2).replace(/\u2028/g, '\\u2028').
       }
 
       const headers = {};
-      const xhr = await scrapbook.xhr({
+      const xhr = await utils.xhr({
         url: favIconUrl,
         responseType: 'blob',
         timeout: 5000,
@@ -1277,21 +1277,21 @@ scrapbook.toc(${JSON.stringify(jsonData, null, 2).replace(/\u2028/g, '\\u2028').
           // get headers
           const headerContentDisposition = xhr.getResponseHeader("Content-Disposition");
           if (headerContentDisposition) {
-            const contentDisposition = scrapbook.parseHeaderContentDisposition(headerContentDisposition);
+            const contentDisposition = utils.parseHeaderContentDisposition(headerContentDisposition);
             headers.filename = contentDisposition.parameters.filename;
           }
         },
       });
 
-      const [, ext] = scrapbook.filenameParts(headers.filename || scrapbook.urlToFilename(xhr.responseURL));
+      const [, ext] = utils.filenameParts(headers.filename || utils.urlToFilename(xhr.responseURL));
       const blob = xhr.response;
       const mime = blob.type;
 
-      const ab = await scrapbook.readFileAsArrayBuffer(blob);
+      const ab = await utils.readFileAsArrayBuffer(blob);
       return getShaFile({ab, mime, ext});
     };
 
-    if (!scrapbook.isUrlAbsolute(icon)) {
+    if (!utils.isUrlAbsolute(icon)) {
       return icon;
     }
 
@@ -1319,7 +1319,7 @@ scrapbook.toc(${JSON.stringify(jsonData, null, 2).replace(/\u2028/g, '\\u2028').
       });
     }
 
-    return scrapbook.getRelativeUrl(target, base);
+    return utils.getRelativeUrl(target, base);
   }
 }
 

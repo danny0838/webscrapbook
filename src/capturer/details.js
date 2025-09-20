@@ -2,10 +2,10 @@
  * Script for details.html.
  *****************************************************************************/
 
-import * as scrapbook from "../utils/extension.mjs";
+import * as utils from "../utils/extension.mjs";
 import {server} from "../scrapbook/server.mjs";
 
-scrapbook.loadOptionsAuto(); // async
+utils.loadOptionsAuto(); // async
 
 let gTaskInfo;
 let gIgnoreTitle;
@@ -17,8 +17,8 @@ async function init() {
       const missionId = new URL(document.URL).searchParams.get('mid');
       if (!missionId) { throw new Error(`Missing mission ID.`); }
       const key = {table: "batchCaptureMissionCache", id: missionId};
-      const data = await scrapbook.cache.get(key);
-      await scrapbook.cache.remove(key);
+      const data = await utils.cache.get(key);
+      await utils.cache.remove(key);
       if (!data) { throw new Error(`Missing data for mission "${missionId}".`); }
       gTaskInfo = data.taskInfo;
       gTaskInfo.options = gTaskInfo.options || {};
@@ -51,7 +51,7 @@ async function init() {
         }
       }
       if (source) {
-        document.title = scrapbook.lang('CaptureDetailsTitleForSource', [source]);
+        document.title = utils.lang('CaptureDetailsTitleForSource', [source]);
       }
     }
 
@@ -59,7 +59,7 @@ async function init() {
         gTaskInfo.tasks.some(task => task.recaptureInfo || task.mergeCaptureInfo)) {
       document.documentElement.classList.add('ui-saveTo-server');
 
-      await scrapbook.loadOptionsAuto();
+      await utils.loadOptionsAuto();
       await server.init();
       if (gTaskInfo.bookId === null) {
         gTaskInfo.bookId = server.bookId;
@@ -196,7 +196,7 @@ function getDetailStatusKey() {
 }
 
 async function loadDetailStatus() {
-  const status = await scrapbook.cache.get(getDetailStatusKey(), 'storage');
+  const status = await utils.cache.get(getDetailStatusKey(), 'storage');
   if (!status) { return; }
 
   for (const id in status) {
@@ -212,7 +212,7 @@ async function saveDetailStatus() {
   for (const elem of document.querySelectorAll('details')) {
     status[elem.id] = elem.open;
   }
-  await scrapbook.cache.set(getDetailStatusKey(), status, 'storage');
+  await utils.cache.set(getDetailStatusKey(), status, 'storage');
 }
 
 function updateUi() {
@@ -235,7 +235,7 @@ function updateUi() {
 
   for (const elem of document.querySelectorAll('[id^="opt_"]')) {
     try {
-      scrapbook.parseOption(elem.id.slice(4), elem.value);
+      utils.parseOption(elem.id.slice(4), elem.value);
       elem.setCustomValidity('');
     } catch (ex) {
       elem.setCustomValidity(ex.message);
@@ -260,7 +260,7 @@ function updateInputText(elem, value) {
 }
 
 async function capture({dialog = null, taskInfo, ignoreTitle = false, uniquify = false}) {
-  await scrapbook.invokeCaptureEx({dialog, taskInfo, ignoreTitle, uniquify, waitForResponse: false});
+  await utils.invokeCaptureEx({dialog, taskInfo, ignoreTitle, uniquify, waitForResponse: false});
 }
 
 function parseTasks() {
@@ -393,7 +393,7 @@ function onBookIdChange(event) {
 }
 
 async function onFillParentIdClick(event) {
-  const result = await scrapbook.openModalWindow({
+  const result = await utils.openModalWindow({
     url: browser.runtime.getURL("scrapbook/itempicker.html"),
     args: {
       bookId: getOptionFromElement(document.getElementById('tasks_bookId')),
@@ -423,22 +423,22 @@ async function onFillDownLinkDocUrlFilterChange(event) {
             switch (command) {
               case "domain": {
                 return '/^https?://(?:[0-9A-Za-z-]+\\.)*?' +
-                  scrapbook.escapeRegExp(u.hostname.replace(/^www\./, '')) +
+                  utils.escapeRegExp(u.hostname.replace(/^www\./, '')) +
                   '(?:\\d+)?/' + '/';
               }
               case "origin": {
                 u.pathname = u.search = u.hash = '';
-                return '/^' + scrapbook.escapeRegExp(u.href).replace(/\\\//g, '/') + '/';
+                return '/^' + utils.escapeRegExp(u.href).replace(/\\\//g, '/') + '/';
               }
               case "dir": {
                 u.search = u.hash = '';
                 let base = u.href, pos;
                 if ((pos = base.lastIndexOf("/")) !== -1) { base = base.slice(0, pos + 1); }
-                return '/^' + scrapbook.escapeRegExp(base).replace(/\\\//g, '/') + '/';
+                return '/^' + utils.escapeRegExp(base).replace(/\\\//g, '/') + '/';
               }
               case "path": {
                 u.search = u.hash = '';
-                return '/^' + scrapbook.escapeRegExp(u.href).replace(/\\\//g, '/') + '(?=[?#]|$)/';
+                return '/^' + utils.escapeRegExp(u.href).replace(/\\\//g, '/') + '(?=[?#]|$)/';
               }
             }
           } catch (ex) {
@@ -461,8 +461,8 @@ async function onFillDownLinkDocUrlFilterChange(event) {
             if (!Number.isInteger(tabId)) {
               throw new Error('Missing tabId');
             }
-            await scrapbook.initContentScripts(tabId, frameId);
-            return await scrapbook.invokeContentScript({tabId, frameId, cmd, args});
+            await utils.initContentScripts(tabId, frameId);
+            return await utils.invokeContentScript({tabId, frameId, cmd, args});
           } catch (ex) {
             console.error(ex);
             return [];
@@ -470,7 +470,7 @@ async function onFillDownLinkDocUrlFilterChange(event) {
         })());
         const rulesText = (await Promise.all(tasks))
           .reduce((mergedLinks, links) => mergedLinks.concat(links), [])
-          .map(x => x.url + ' ' + scrapbook.split(x.title).join(' '))
+          .map(x => x.url + ' ' + utils.split(x.title).join(' '))
           .join('\n');
         insertInputText(inputElem, rulesText);
         break;
@@ -481,8 +481,8 @@ async function onFillDownLinkDocUrlFilterChange(event) {
         const REGEX_SPACES = /\s+/;
         const INCLUSIVE = command === 'include';
         const PROMPT_MSG = INCLUSIVE ?
-            scrapbook.lang('CaptureDetailsFillDownLinkDocUrlFilterIncludeTooltip') :
-            scrapbook.lang('CaptureDetailsFillDownLinkDocUrlFilterExcludeTooltip');
+            utils.lang('CaptureDetailsFillDownLinkDocUrlFilterIncludeTooltip') :
+            utils.lang('CaptureDetailsFillDownLinkDocUrlFilterExcludeTooltip');
 
         // prepare filter
         let filter;
@@ -498,7 +498,7 @@ async function onFillDownLinkDocUrlFilterChange(event) {
               filter = new RegExp(RegExp.$1, RegExp.$2);
               isRegex = true;
             } else {
-              filter = new RegExp(scrapbook.escapeRegExp(input));
+              filter = new RegExp(utils.escapeRegExp(input));
               isRegex = false;
             }
             break;
@@ -590,13 +590,13 @@ function refreshParentIdOptions() {
   }
 }
 
-scrapbook.addMessageListener((message, sender) => {
+utils.addMessageListener((message, sender) => {
   if (!message.cmd.startsWith("details.")) { return false; }
   return true;
 });
 
 document.addEventListener('DOMContentLoaded', async () => {
-  scrapbook.loadLanguages(document);
+  utils.loadLanguages(document);
 
   document.getElementById('wrapper').addEventListener('submit', onSubmit);
   document.getElementById('btn-abort').addEventListener('click', onAbortClick);

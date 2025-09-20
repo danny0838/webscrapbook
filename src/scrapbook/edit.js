@@ -2,10 +2,10 @@
  * Script for edit.html.
  *****************************************************************************/
 
-import * as scrapbook from "../utils/extension.mjs";
+import * as utils from "../utils/extension.mjs";
 import {server} from "./server.mjs";
 
-scrapbook.loadOptionsAuto(); // async
+utils.loadOptionsAuto(); // async
 
 const editor = {
   id: null,
@@ -24,7 +24,7 @@ const editor = {
       let file = params.get('file');
       let checkRedirect = !file;
 
-      await scrapbook.loadOptionsAuto();
+      await utils.loadOptionsAuto();
       await server.init();
 
       if (typeof bookId !== 'string') {
@@ -45,15 +45,15 @@ const editor = {
 
       file = file || item.index;
       if (file === item.index) {
-        document.title = scrapbook.lang('EditTitle', [item.id]);
+        document.title = utils.lang('EditTitle', [item.id]);
       } else {
-        document.title = scrapbook.lang('EditTitleWithFile', [item.id, file]);
+        document.title = utils.lang('EditTitleWithFile', [item.id, file]);
       }
 
       try {
         let target = this.target = checkRedirect ?
           await book.getItemIndexUrl(item) :
-          book.dataUrl + scrapbook.escapeFilename(file);
+          book.dataUrl + utils.escapeFilename(file);
 
         const text = await server.request({
           url: target + '?a=source',
@@ -97,7 +97,7 @@ const editor = {
             format: 'json',
             csrfToken: true,
             body: {
-              text: scrapbook.unicodeToUtf8(content),
+              text: utils.unicodeToUtf8(content),
             },
           });
 
@@ -115,7 +115,7 @@ const editor = {
                   item: {id},
                 },
               }),
-              auto_cache: JSON.stringify(scrapbook.autoCacheOptions()),
+              auto_cache: JSON.stringify(utils.autoCacheOptions()),
             },
             method: 'POST',
             format: 'json',
@@ -124,7 +124,7 @@ const editor = {
         },
       });
 
-      await scrapbook.invokeExtensionScript({
+      await utils.invokeExtensionScript({
         cmd: "background.onServerTreeChange",
       });
     } catch (ex) {
@@ -138,14 +138,14 @@ const editor = {
   async locate() {
     try {
       this.enableUi(false);
-      const response = await scrapbook.invokeExtensionScript({
+      const response = await utils.invokeExtensionScript({
         cmd: "background.locateItem",
         args: {url: this.target},
       });
       if (response === false) {
-        alert(scrapbook.lang("ErrorLocateSidebarNotOpened"));
+        alert(utils.lang("ErrorLocateSidebarNotOpened"));
       } else if (response === null) {
-        alert(scrapbook.lang("ErrorLocateNotFound"));
+        alert(utils.lang("ErrorLocateNotFound"));
       }
       return response;
     } finally {
@@ -170,7 +170,7 @@ const editor = {
 };
 
 document.addEventListener('DOMContentLoaded', (event) => {
-  scrapbook.loadLanguages(document);
+  utils.loadLanguages(document);
 
   document.getElementById('btn-save').addEventListener('click', (event) => {
     editor.save();

@@ -2,14 +2,14 @@
  * Script for cache.html
  *****************************************************************************/
 
-import * as scrapbook from "../../utils/common.mjs";
+import * as utils from "../../utils/common.mjs";
 import {ScrapbookTool} from "./tool.mjs";
 
 class Tool extends ScrapbookTool {
   getQuery(params) {
     const query = params;
     query.set('a', 'cache');
-    query.set('locale', scrapbook.lang('@@ui_locale'));
+    query.set('locale', utils.lang('@@ui_locale'));
     return query;
   }
 }

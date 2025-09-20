@@ -2,10 +2,10 @@
  * Background script for capturer functionality.
  *****************************************************************************/
 
-import * as scrapbook from "../utils/extension.mjs";
+import * as utils from "../utils/extension.mjs";
 import {server} from "../scrapbook/server.mjs";
 
-scrapbook.loadOptionsAuto(); // async
+utils.loadOptionsAuto(); // async
 
 async function clearCapturerCaches() {
   const filter = {
@@ -13,8 +13,8 @@ async function clearCapturerCaches() {
       table: new Set(["captureMissionCache", "batchCaptureMissionCache", "fetchCache", "blobCache"]),
     },
   };
-  await scrapbook.cache.removeAll(filter, 'indexedDB');
-  await scrapbook.cache.removeAll(filter, 'storage');
+  await utils.cache.removeAll(filter, 'indexedDB');
+  await utils.cache.removeAll(filter, 'storage');
 }
 
 
@@ -43,7 +43,7 @@ function cacheAddDomainSource(cache, domains, source) {
  * @return {string[]} ID of books with a valid cache.
  */
 async function updateBookCaches() {
-  if (scrapbook.hasServer()) {
+  if (utils.hasServer()) {
     try {
       await server.init(true);
       const bookIds = [];
@@ -121,13 +121,13 @@ async function updateBadgeForTabs(tabs) {
 
   for (const {id: tabId, url} of tabs) {
     // prepare regex checkers
-    const u = new URL(scrapbook.normalizeUrl(url));
+    const u = new URL(utils.normalizeUrl(url));
     u.hash = '';
     const urlCheck = u.href;
-    const urlCheckFull = new RegExp(`^${scrapbook.escapeRegExp(u.href)}(?:#|$)`);
+    const urlCheckFull = new RegExp(`^${utils.escapeRegExp(u.href)}(?:#|$)`);
     u.search = '';
-    const urlCheckPath = new RegExp(`^${scrapbook.escapeRegExp(u.href)}(?:\\?.*)?(?:#|$)`);
-    const urlCheckOrigin = new RegExp(`^${scrapbook.escapeRegExp(u.origin)}(?:[/?#]|$)`);
+    const urlCheckPath = new RegExp(`^${utils.escapeRegExp(u.href)}(?:\\?.*)?(?:#|$)`);
+    const urlCheckOrigin = new RegExp(`^${utils.escapeRegExp(u.origin)}(?:[/?#]|$)`);
 
     // calculate match type and count
     const matchTypeAndCount = {
@@ -139,7 +139,7 @@ async function updateBadgeForTabs(tabs) {
     };
 
     // check from session
-    matchTypeAndCount.session += scrapbook.invokeBackgroundScript({
+    matchTypeAndCount.session += utils.invokeBackgroundScript({
       cmd: "getCapturedUrls",
       args: {urls: [urlCheck]},
     })[urlCheck];
@@ -217,11 +217,11 @@ async function updateBadgeForTabs(tabs) {
 }
 
 async function updateBadgeForAllTabs() {
-  if (!scrapbook.getOption("ui.notifyPageCaptured")) {
+  if (!utils.getOption("ui.notifyPageCaptured")) {
     return;
   }
 
-  const tabs = await scrapbook.getContentTabs({});
+  const tabs = await utils.getContentTabs({});
   return await updateBadgeForTabs(tabs);
 }
 
@@ -233,7 +233,7 @@ async function onNavigation(details) {
 
 function toggleNotifyPageCaptured() {
   browser.webNavigation.onCommitted.removeListener(onNavigation);
-  if (scrapbook.getOption("ui.notifyPageCaptured")) {
+  if (utils.getOption("ui.notifyPageCaptured")) {
     browser.webNavigation.onCommitted.addListener(onNavigation, LISTENER_FILTER);
   }
 }
@@ -285,15 +285,15 @@ const autoCaptureBookCaches = new Map();
 
 async function autoCaptureTab(tabInfo) {
   // normalize and remove hash from URL
-  tabInfo.url = scrapbook.normalizeUrl(scrapbook.splitUrlByAnchor(tabInfo.url)[0]);
+  tabInfo.url = utils.normalizeUrl(utils.splitUrlByAnchor(tabInfo.url)[0]);
 
   // skip URLs that are not content page
-  if (!scrapbook.isContentPage(tabInfo.url, allowFileAccess)) {
+  if (!utils.isContentPage(tabInfo.url, allowFileAccess)) {
     return;
   }
 
   // skip URLs in the backend server
-  const serverUrl = scrapbook.getOption("server.url");
+  const serverUrl = utils.getOption("server.url");
   if (serverUrl && tabInfo.url.startsWith(serverUrl)) {
     return;
   }
@@ -376,7 +376,7 @@ async function autoCaptureTab(tabInfo) {
  * @return {string[]} ID of books with a valid cache
  */
 async function updateAutoCaptureBookCaches() {
-  if (scrapbook.hasServer()) {
+  if (utils.hasServer()) {
     try {
       await server.init(true);
       const bookIds = [];
@@ -436,7 +436,7 @@ async function updateAutoCaptureBookCaches() {
  * @param {string[]} [bookIds] - ID of books with a valid cache
  */
 function checkDuplicate(url, bookIds) {
-  if (scrapbook.invokeBackgroundScript({
+  if (utils.invokeBackgroundScript({
     cmd: "getCapturedUrls",
     args: {urls: [url]},
   })[url]) {
@@ -492,7 +492,7 @@ async function invokeCapture(tabInfo, config, isRepeat, skipCheck) {
     waitForResponse: false,
   };
 
-  await scrapbook.invokeCaptureEx(args);
+  await utils.invokeCaptureEx(args);
 
   if (isRepeat) {
     return;
@@ -570,7 +570,7 @@ function toggleAutoCapture() {
   purgeInfoAll();
   browser.tabs.onUpdated.removeListener(onUpdated);
   browser.tabs.onRemoved.removeListener(onRemoved);
-  if (scrapbook.getOption("autocapture.enabled")) {
+  if (utils.getOption("autocapture.enabled")) {
     browser.tabs.onUpdated.addListener(onUpdated);
     browser.tabs.onRemoved.addListener(onRemoved);
   }
@@ -578,7 +578,7 @@ function toggleAutoCapture() {
 
 function configAutoCapture() {
   try {
-    autoCaptureConfigs = scrapbook.parseOption("autocapture.rules", scrapbook.getOption("autocapture.rules"));
+    autoCaptureConfigs = utils.parseOption("autocapture.rules", utils.getOption("autocapture.rules"));
   } catch (ex) {
     console.error(`Ignored invalid auto-capture config: ${ex.message}`);
     autoCaptureConfigs = [];
@@ -594,7 +594,7 @@ async function init() {
   clearCapturerCaches(); // async
 
   allowFileAccess = await browser.extension.isAllowedFileSchemeAccess();
-  await scrapbook.loadOptionsAuto();
+  await utils.loadOptionsAuto();
   toggleNotifyPageCaptured();
   configAutoCapture();
   toggleAutoCapture();

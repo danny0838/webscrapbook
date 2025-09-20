@@ -2,10 +2,10 @@
  * Script for postit.html.
  *****************************************************************************/
 
-import * as scrapbook from "../utils/extension.mjs";
+import * as utils from "../utils/extension.mjs";
 import {server} from "./server.mjs";
 
-scrapbook.loadOptionsAuto(); // async
+utils.loadOptionsAuto(); // async
 
 const editor = {
   id: null,
@@ -22,7 +22,7 @@ const editor = {
       const id = this.id = params.get('id');
       let bookId = this.bookId = params.get('bookId');
 
-      await scrapbook.loadOptionsAuto();
+      await utils.loadOptionsAuto();
       await server.init();
 
       if (typeof bookId !== 'string') {
@@ -82,7 +82,7 @@ const editor = {
 
       const {title} = await book.savePostit(id, content);
 
-      await scrapbook.invokeExtensionScript({
+      await utils.invokeExtensionScript({
         cmd: "background.onServerTreeChange",
       });
 
@@ -105,16 +105,16 @@ const editor = {
       const {id, bookId} = this;
       const book = server.books[bookId];
 
-      const target = book.dataUrl + scrapbook.escapeFilename(book.meta[id].index);
-      const response = await scrapbook.invokeExtensionScript({
+      const target = book.dataUrl + utils.escapeFilename(book.meta[id].index);
+      const response = await utils.invokeExtensionScript({
         cmd: "background.locateItem",
         args: {url: target},
       });
 
       if (response === false) {
-        alert(scrapbook.lang("ErrorLocateSidebarNotOpened"));
+        alert(utils.lang("ErrorLocateSidebarNotOpened"));
       } else if (response === null) {
-        alert(scrapbook.lang("ErrorLocateNotFound"));
+        alert(utils.lang("ErrorLocateNotFound"));
       }
       return response;
     } finally {
@@ -134,7 +134,7 @@ const editor = {
 };
 
 document.addEventListener('DOMContentLoaded', (event) => {
-  scrapbook.loadLanguages(document);
+  utils.loadLanguages(document);
 
   document.getElementById('btn-save').addEventListener('click', (event) => {
     editor.save();
