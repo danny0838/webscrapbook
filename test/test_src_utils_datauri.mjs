@@ -6,7 +6,7 @@ const $describe = $(describe);
 
 describe('utils/datauri.mjs', function () {
   $describe.skipIf($.noBrowser)('dataUriToFile()', function () {
-    it('take filename when useFilename not specified', async function () {
+    it('should take filename when `useFilename` is not specified', async function () {
       var datauri = `data:image/bmp;filename=${encodeURIComponent('ABC123中文𠀀')};base64,${GREEN_BMP_B64}`;
       var file = await dataUriToFile(datauri);
       assert.strictEqual(file.name, "ABC123中文𠀀");
@@ -20,7 +20,7 @@ describe('utils/datauri.mjs', function () {
       assert.strictEqual(file.size, 60);
     });
 
-    it('take filename when useFilename is truthy', async function () {
+    it('should take filename when `useFilename` is truthy', async function () {
       var datauri = `data:image/bmp;filename=${encodeURIComponent('ABC123中文𠀀')};base64,${GREEN_BMP_B64}`;
       var file = await dataUriToFile(datauri, true);
       assert.strictEqual(file.name, "ABC123中文𠀀");
@@ -34,7 +34,7 @@ describe('utils/datauri.mjs', function () {
       assert.strictEqual(file.size, 60);
     });
 
-    it('do not take filename when useFilename is falsy', async function () {
+    it('should not take filename when `useFilename` is falsy', async function () {
       var datauri = `data:image/bmp;filename=${encodeURIComponent('ABC123中文𠀀')};base64,${GREEN_BMP_B64}`;
       var file = await dataUriToFile(datauri, false);
       assert.strictEqual(file.name, "dbc82be549e49d6db9a5719086722a4f1c5079cd.bmp");
