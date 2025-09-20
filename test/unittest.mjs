@@ -7,7 +7,10 @@
  *****************************************************************************/
 
 import {assert, config as chaiConfig} from "./lib/chai.mjs";
-import * as utils from "./shared/utils/common.mjs";
+import {
+  userAgent, delay, deserializeObject, xhr, escapeRegExp,
+  readFileAsText, readFileAsArrayBuffer, readFileAsDataURL, readFileAsDocument,
+} from "./shared/utils/common.mjs";
 import {sha1} from "./shared/utils/sha.mjs";
 
 Object.assign(chaiConfig, {
@@ -358,22 +361,6 @@ Object.defineProperties(MochaQuery, Object.getOwnPropertyDescriptors({
   },
 }));
 
-var {userAgent} = utils;
-
-function delay(...args) { return utils.delay(...args); }
-
-function deserializeObject(...args) { return utils.deserializeObject(...args); }
-
-function xhr(...args) { return utils.xhr(...args); }
-
-function readFileAsText(...args) { return utils.readFileAsText(...args); }
-
-function readFileAsArrayBuffer(...args) { return utils.readFileAsArrayBuffer(...args); }
-
-function readFileAsDataURL(...args) { return utils.readFileAsDataURL(...args); }
-
-function readFileAsDocument(...args) { return utils.readFileAsDocument(...args); }
-
 function getToken(url, role) {
   let token = `${url}\t${role}`;
   token = sha1(token, "TEXT");
@@ -492,8 +479,6 @@ function getRulesFromCssText(cssText) {
   d.head.appendChild(styleElem);
   return styleElem.sheet.cssRules;
 }
-
-function escapeRegExp(...args) { return utils.escapeRegExp(...args); }
 
 /**
  * A RegExp with raw string.

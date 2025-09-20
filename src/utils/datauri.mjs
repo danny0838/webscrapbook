@@ -16,7 +16,10 @@
  *   ref: https://crbug.com/444772033
  *****************************************************************************/
 
-import * as utils from "./common.mjs";
+import {
+  byteStringToArrayBuffer,
+  filenameParts,
+} from "./common.mjs";
 import {sha1} from "./sha.mjs";
 import * as Mime from "../lib/mime.mjs";
 
@@ -43,13 +46,13 @@ function dataUriToFile(dataUri, useFilename = true) {
     }
 
     const bstr = base64 ? atob(data) : unescape(data);
-    const ab = utils.byteStringToArrayBuffer(bstr);
+    const ab = byteStringToArrayBuffer(bstr);
 
     let filename;
     if (useFilename && parameters.filename) {
       filename = decodeURIComponent(parameters.filename);
     } else {
-      let ext = parameters.filename && utils.filenameParts(parameters.filename)[1] || Mime.extension(mime);
+      let ext = parameters.filename && filenameParts(parameters.filename)[1] || Mime.extension(mime);
       ext = ext ? ("." + ext) : "";
       filename = sha1(ab, "ARRAYBUFFER") + ext;
     }
