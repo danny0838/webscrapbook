@@ -23,35 +23,20 @@ async function clearCapturerCaches() {
  * Record captured URLs
  ***************************************************************************/
 
-/**
- * @type {Map<string~url, integer~count>}
- */
-const capturedUrls = new Map();
+const capturedUrls = {
+  /**
+   * @type {Map<string~url, integer~count>}
+   */
+  _map: new Map(),
 
-/**
- * @type invokable
- * @param {Object} [params]
- * @param {string[]} [params.urls]
- * @return {Object<string~url, integer~count>}
- */
-function getCapturedUrls({urls = []} = {}) {
-  const rv = {};
-  for (const url of urls) {
-    rv[url] = capturedUrls.get(url) || 0;
-  }
-  return rv;
-}
+  get(url) {
+    return this._map.get(url) || 0;
+  },
 
-/**
- * @type invokable
- * @param {Object} [params]
- * @param {string[]} [params.urls]
- */
-function setCapturedUrls({urls = []} = {}) {
-  for (const url of urls) {
-    capturedUrls.set(url, (capturedUrls.get(url) || 0) + 1);
-  }
-}
+  set(url) {
+    this._map.set(url, this.get(url) + 1);
+  },
+};
 
 
 /****************************************************************************
@@ -175,7 +160,7 @@ async function updateBadgeForTabs(tabs) {
     };
 
     // check from session
-    matchTypeAndCount.session += getCapturedUrls({urls: [urlCheck]})[urlCheck];
+    matchTypeAndCount.session += capturedUrls.get(urlCheck);
 
     // check from backend
     for (const bookId of bookIds) {
@@ -469,7 +454,7 @@ async function updateAutoCaptureBookCaches() {
  * @param {string[]} [bookIds] - ID of books with a valid cache
  */
 function checkDuplicate(url, bookIds) {
-  if (getCapturedUrls({urls: [url]})[url]) {
+  if (capturedUrls.get(url)) {
     return true;
   }
 
@@ -634,8 +619,6 @@ init();
 
 export {
   capturedUrls,
-  getCapturedUrls,
-  setCapturedUrls,
   toggleNotifyPageCaptured,
   updateBadgeForAllTabs,
   configAutoCapture,
