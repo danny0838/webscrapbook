@@ -21,115 +21,115 @@ const focusedWindows = new Map();
  */
 const capturedUrls = new Map();
 
-const background = {
-  commands: {
-    async openScrapBook() {
-      return await utils.openScrapBook();
-    },
+const commands = {
+  async openScrapBook() {
+    return await utils.openScrapBook();
+  },
 
-    async openOptions() {
-      return await browser.runtime.openOptionsPage();
-    },
+  async openOptions() {
+    return await browser.runtime.openOptionsPage();
+  },
 
-    async openViewer() {
-      return await utils.visitLink({
-        url: browser.runtime.getURL("viewer/load.html"),
-        newTab: true,
-      });
-    },
+  async openViewer() {
+    return await utils.visitLink({
+      url: browser.runtime.getURL("viewer/load.html"),
+      newTab: true,
+    });
+  },
 
-    async openSearch() {
-      return await utils.visitLink({
-        url: browser.runtime.getURL("scrapbook/search.html"),
-        newTab: true,
-      });
-    },
+  async openSearch() {
+    return await utils.visitLink({
+      url: browser.runtime.getURL("scrapbook/search.html"),
+      newTab: true,
+    });
+  },
 
-    async searchCaptures() {
-      const tabs = await utils.getHighlightedTabs();
-      return utils.searchCaptures({
-        tabs,
-        newTab: true,
-      });
-    },
+  async searchCaptures() {
+    const tabs = await utils.getHighlightedTabs();
+    return utils.searchCaptures({
+      tabs,
+      newTab: true,
+    });
+  },
 
-    async captureTab() {
-      const tabs = await utils.getHighlightedTabs();
-      return await utils.invokeCapture(
-        tabs.map(tab => ({
-          tabId: tab.id,
-          url: tab.url,
-          title: tab.title,
-        })),
-      );
-    },
-
-    async captureTabSource() {
-      const tabs = await utils.getHighlightedTabs();
-      return await utils.invokeCapture(
-        tabs.map(tab => ({
-          tabId: tab.id,
-          url: tab.url,
-          title: tab.title,
-          mode: "source",
-        })),
-      );
-    },
-
-    async captureTabBookmark() {
-      const tabs = await utils.getHighlightedTabs();
-      return await utils.invokeCapture(
-        tabs.map(tab => ({
-          tabId: tab.id,
-          url: tab.url,
-          title: tab.title,
-          mode: "bookmark",
-        })),
-      );
-    },
-
-    async captureTabAs() {
-      const tabs = await utils.getHighlightedTabs();
-      return await utils.invokeCaptureAs({
-        tasks: tabs.map(tab => ({
-          tabId: tab.id,
-          url: tab.url,
-          title: tab.title,
-        })),
-      });
-    },
-
-    async batchCapture() {
-      const tabs = await utils.getContentTabs();
-      return await utils.invokeCaptureBatch({
-        tasks: tabs.map(tab => ({
-          tabId: tab.id,
-          url: tab.url,
-          title: tab.title,
-        })),
-      });
-    },
-
-    async batchCaptureLinks() {
-      const tabs = await utils.getHighlightedTabs();
-      return await utils.invokeCaptureBatchLinks({
-        tasks: tabs.map(tab => ({
-          tabId: tab.id,
-          url: tab.url,
-          title: tab.title,
-        })),
-      });
-    },
-
-    async editTab() {
-      const [tab] = await browser.tabs.query({active: true, currentWindow: true});
-      return await utils.editTab({
+  async captureTab() {
+    const tabs = await utils.getHighlightedTabs();
+    return await utils.invokeCapture(
+      tabs.map(tab => ({
         tabId: tab.id,
-        force: true,
-      });
-    },
+        url: tab.url,
+        title: tab.title,
+      })),
+    );
+  },
+
+  async captureTabSource() {
+    const tabs = await utils.getHighlightedTabs();
+    return await utils.invokeCapture(
+      tabs.map(tab => ({
+        tabId: tab.id,
+        url: tab.url,
+        title: tab.title,
+        mode: "source",
+      })),
+    );
+  },
+
+  async captureTabBookmark() {
+    const tabs = await utils.getHighlightedTabs();
+    return await utils.invokeCapture(
+      tabs.map(tab => ({
+        tabId: tab.id,
+        url: tab.url,
+        title: tab.title,
+        mode: "bookmark",
+      })),
+    );
+  },
+
+  async captureTabAs() {
+    const tabs = await utils.getHighlightedTabs();
+    return await utils.invokeCaptureAs({
+      tasks: tabs.map(tab => ({
+        tabId: tab.id,
+        url: tab.url,
+        title: tab.title,
+      })),
+    });
+  },
+
+  async batchCapture() {
+    const tabs = await utils.getContentTabs();
+    return await utils.invokeCaptureBatch({
+      tasks: tabs.map(tab => ({
+        tabId: tab.id,
+        url: tab.url,
+        title: tab.title,
+      })),
+    });
+  },
+
+  async batchCaptureLinks() {
+    const tabs = await utils.getHighlightedTabs();
+    return await utils.invokeCaptureBatchLinks({
+      tasks: tabs.map(tab => ({
+        tabId: tab.id,
+        url: tab.url,
+        title: tab.title,
+      })),
+    });
+  },
+
+  async editTab() {
+    const [tab] = await browser.tabs.query({active: true, currentWindow: true});
+    return await utils.editTab({
+      tabId: tab.id,
+      force: true,
+    });
   },
 };
+
+const background = {};
 
 /**
  * Get the real last focused window.
@@ -576,17 +576,17 @@ function initStorageChangeListener() {
 
 function updateAction(...args) {
   const actions = {
-    showCaptureTab: background.commands.captureTab,
-    showCaptureTabSource: background.commands.captureTabSource,
-    showCaptureTabBookmark: background.commands.captureTabBookmark,
-    showCaptureTabAs: background.commands.captureTabAs,
-    showBatchCapture: background.commands.batchCapture,
-    showBatchCaptureLinks: background.commands.batchCaptureLinks,
-    showEditTab: background.commands.editTab,
-    showSearchCaptures: background.commands.searchCaptures,
-    showOpenScrapBook: background.commands.openScrapBook,
-    showOpenViewer: background.commands.openViewer,
-    showOpenOptions: background.commands.openOptions,
+    showCaptureTab: commands.captureTab,
+    showCaptureTabSource: commands.captureTabSource,
+    showCaptureTabBookmark: commands.captureTabBookmark,
+    showCaptureTabAs: commands.captureTabAs,
+    showBatchCapture: commands.batchCapture,
+    showBatchCaptureLinks: commands.batchCaptureLinks,
+    showEditTab: commands.editTab,
+    showSearchCaptures: commands.searchCaptures,
+    showOpenScrapBook: commands.openScrapBook,
+    showOpenViewer: commands.openViewer,
+    showOpenOptions: commands.openOptions,
   };
   let action;
 
@@ -847,31 +847,31 @@ function initMenusListener() {
     },
 
     searchCaptures(info, tab) {
-      return background.commands.searchCaptures();
+      return commands.searchCaptures();
     },
 
     openScrapBook(info, tab) {
-      return background.commands.openScrapBook();
+      return commands.openScrapBook();
     },
 
     openViewer(info, tab) {
-      return background.commands.openViewer();
+      return commands.openViewer();
     },
 
     captureTab(info, tab) {
-      return background.commands.captureTab();
+      return commands.captureTab();
     },
 
     captureTabSource(info, tab) {
-      return background.commands.captureTabSource();
+      return commands.captureTabSource();
     },
 
     captureTabBookmark(info, tab) {
-      return background.commands.captureTabBookmark();
+      return commands.captureTabBookmark();
     },
 
     captureTabAs(info, tab) {
-      return background.commands.captureTabAs();
+      return commands.captureTabAs();
     },
 
     editTab(info, tab) {
@@ -1036,7 +1036,7 @@ function initCommandsListener() {
   if (!browser.commands) { return; }
 
   browser.commands.onCommand.addListener((cmd) => {
-    return background.commands[cmd]();
+    return commands[cmd]();
   });
 }
 
