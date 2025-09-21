@@ -2,28 +2,28 @@
  * Common utilities for content scripts.
  *****************************************************************************/
 
-const core = {
-  frameId: null,
-};
+let frameId = null;
 
 /**
- * Initialize value for core.frameId.
+ * Initialize value for frameId.
  *
  * @type invokable
  */
-core.init = async function ({frameId}) {
-  core.frameId = frameId;
-};
+async function init({frameId: newFrameId}) {
+  frameId = newFrameId;
+}
 
 /**
  * Return true to confirm that content script is loaded.
  *
  * @type invokable
  */
-core.isScriptLoaded = async function (params) {
+async function isScriptLoaded() {
   return true;
-};
+}
 
 export {
-  core,
+  frameId,
+  init,
+  isScriptLoaded,
 };
