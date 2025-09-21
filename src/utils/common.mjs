@@ -901,6 +901,23 @@ async function initContentScripts(tabId, frameId) {
 }
 
 /**
+ * Get deep property like "foo.bar.0" or ["foo", "bar.baz"] of an object.
+ *
+ * @param {Object} obj
+ * @param {string|string[]} prop
+ * @return {Array} An array [Object, string] for the parsed deep object and
+ *   property.
+ */
+function getDeepProp(obj, prop) {
+  const parts = (typeof prop === 'string') ? prop.split('.') : prop;
+  const subProp = parts.pop();
+  const object = parts.reduce((obj, part) => {
+    return obj?.[part];
+  }, obj);
+  return [object, subProp];
+}
+
+/**
  * Invoke a command with arguments on an object.
  *
  * @param {Object} target
@@ -909,11 +926,7 @@ async function initContentScripts(tabId, frameId) {
  * @return {*}
  */
 function invokeMethod(target, cmd, args) {
-  const parts = (typeof cmd === 'string') ? cmd.split('.') : cmd;
-  const subCmd = parts.pop();
-  const object = parts.reduce((object, part) => {
-    return object[part];
-  }, target);
+  const [object, subCmd] = getDeepProp(target, cmd);
 
   if (typeof object?.[subCmd] !== 'function') {
     throw new Error(`Unable to invoke unknown command '${cmd}'.`);
@@ -3879,6 +3892,7 @@ export {
   loadLanguages,
   addMessageListener,
   initContentScripts,
+  getDeepProp,
   invokeMethod,
   invokeExtensionScript,
   invokeContentScript,
