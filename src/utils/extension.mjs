@@ -346,7 +346,6 @@ async function invokeCaptureEx({
   const results = await invokeExtensionScript({
     id: missionId,
     cmd: 'capturer.getMissionResult',
-    args: {},
   });
 
   return {
