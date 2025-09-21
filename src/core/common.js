@@ -26,7 +26,9 @@ if (typeof Promise.withResolvers === 'undefined') {
 if (typeof browser !== 'undefined') {
   if (browser?.browserAction && !browser?.action) {
     browser.action = browser.browserAction;
-    browser.contextMenus.ContextType.ACTION = browser.contextMenus.ContextType.BROWSER_ACTION;
+    if (browser.contextMenus) {
+      browser.contextMenus.ContextType.ACTION = browser.contextMenus.ContextType.BROWSER_ACTION;
+    }
   }
 
   if (browser?.tabs && !browser?.scripting) {
