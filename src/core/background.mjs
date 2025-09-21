@@ -58,7 +58,7 @@ async function invokeFrameScript({frameId, cmd, args}, sender) {
 /**
  * @type invokable
  */
-async function findBookIdFromUrl({url}, sender) {
+async function findBookIdFromUrl({url}) {
   await server.init(true);
   return await server.findBookIdFromUrl(url);
 }
@@ -72,7 +72,7 @@ async function findBookIdFromUrl({url}, sender) {
  *   - null: no item located
  *   - false: no sidebar opened
  */
-async function locateItem(params, sender) {
+async function locateItem(params) {
   const cmd = 'sidebar.locate';
   const args = params;
   const sidebarUrl = browser.runtime.getURL("scrapbook/sidebar.html");
@@ -136,7 +136,7 @@ async function captureCurrentTab(params = {}, sender) {
 /**
  * @type invokable
  */
-async function createSubPage({url, title}, sender) {
+async function createSubPage({url, title}) {
   await server.init(true);
 
   // search for bookId and item
@@ -322,7 +322,7 @@ Object.assign(openModalWindow, {
 /**
  * @type invokable
  */
-async function onServerTreeChange(_params, sender) {
+async function onServerTreeChange() {
   const tasks = [];
 
   const errorHandler = (ex) => {
@@ -338,17 +338,16 @@ async function onServerTreeChange(_params, sender) {
     browser.runtime.getURL("scrapbook/manage.html"),
   ];
   const cmd = 'sidebar.onServerTreeChange';
-  const args = {};
 
   if (browser.sidebarAction || browser.sidePanel) {
-    tasks.push(utils.invokeExtensionScript({cmd, args}).catch(errorHandler));
+    tasks.push(utils.invokeExtensionScript({cmd}).catch(errorHandler));
   }
 
   const sidebarTabs = (await browser.tabs.query({}))
       .filter(t => sidebarUrls.includes(utils.splitUrl(t.url)[0]));
 
   for (const tab of sidebarTabs) {
-    tasks.push(utils.invokeContentScript({tabId: tab.id, frameId: 0, cmd, args}).catch(errorHandler));
+    tasks.push(utils.invokeContentScript({tabId: tab.id, frameId: 0, cmd}).catch(errorHandler));
   }
 
   return await Promise.all(tasks);
@@ -359,9 +358,9 @@ async function onServerTreeChange(_params, sender) {
  * @param {Object} params
  * @param {string} params.url
  */
-async function onCaptureEnd({url}, sender) {
+async function onCaptureEnd({url}) {
   capturer.capturedUrls.set(url);
-  await onServerTreeChange(undefined, sender);
+  await onServerTreeChange();
 }
 
 /**

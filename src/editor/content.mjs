@@ -1518,7 +1518,6 @@ editor.eraseNodes = async function () {
   return await editor.invokeEditorCommand({
     frameId: await editor.getFocusedFrameId(),
     cmd: "editor.eraseNodesInternal",
-    args: {},
   });
 };
 
@@ -1571,14 +1570,12 @@ editor.uneraseNodes = async function () {
   return await editor.invokeEditorCommand({
     frameId: await editor.getFocusedFrameId(),
     cmd: "editor.uneraseNodesInternal",
-    args: {},
   });
 };
 
 editor.uneraseAllNodes = async function () {
   return await editor.invokeEditorCommand({
     cmd: "editor.uneraseAllNodesInternal",
-    args: {},
   });
 };
 
@@ -1586,14 +1583,12 @@ editor.removeEdits = async function () {
   return await editor.invokeEditorCommand({
     frameId: await editor.getFocusedFrameId(),
     cmd: "editor.removeEditsInternal",
-    args: {},
   });
 };
 
 editor.removeAllEdits = async function () {
   return await editor.invokeEditorCommand({
     cmd: "editor.removeAllEditsInternal",
-    args: {},
   });
 };
 
@@ -1727,7 +1722,6 @@ editor.undo = async function () {
   return await editor.invokeEditorCommand({
     frameId: await editor.getFocusedFrameId(),
     cmd: "editor.undoInternal",
-    args: {},
   });
 };
 
@@ -1744,7 +1738,6 @@ editor.save = async function (params = {}) {
 
     await editor.invokeEditorCommand({
       cmd: "editor.annotator.saveAll",
-      args: {},
     });
     return await utils.invokeExtensionScript({
       cmd: "background.captureCurrentTab",
@@ -1753,7 +1746,6 @@ editor.save = async function (params = {}) {
   } else {
     await editor.invokeEditorCommand({
       cmd: "editor.annotator.saveAll",
-      args: {},
     });
     return await utils.invokeExtensionScript({
       cmd: "background.captureCurrentTab",
@@ -1764,7 +1756,6 @@ editor.save = async function (params = {}) {
 editor.deleteErased = async function () {
   return await editor.invokeEditorCommand({
     cmd: "editor.deleteErasedInternal",
-    args: {},
   });
 };
 
@@ -1790,7 +1781,6 @@ editor.editTitle = async function () {
   return await editor.invokeEditorCommand({
     frameId: await editor.getFocusedFrameId(),
     cmd: "editor.editTitleInternal",
-    args: {},
   });
 };
 
@@ -1798,7 +1788,6 @@ editor.setViewport = async function () {
   return await editor.invokeEditorCommand({
     frameId: await editor.getFocusedFrameId(),
     cmd: "editor.setViewportInternal",
-    args: {},
   });
 };
 
