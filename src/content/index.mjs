@@ -3,7 +3,7 @@
  *****************************************************************************/
 
 import * as utils from "../utils/common.mjs";
-import {core} from "./core.mjs";
+import * as core from "./core.mjs";
 import {capturer} from "../capturer/content.mjs";
 import {editor} from "../editor/content.mjs";
 
