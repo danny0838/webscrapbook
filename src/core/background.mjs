@@ -13,11 +13,6 @@ import * as editor from "../editor/background.mjs";
 const focusedWindows = new Map();
 
 /**
- * @type {Map<string~url, integer~count>}
- */
-const capturedUrls = new Map();
-
-/**
  * Get the real last focused window.
  *
  * Native browser.windows.getLastFocused() gets the last created window
@@ -136,31 +131,6 @@ async function locateItem(params, sender) {
 async function captureCurrentTab(params = {}, sender) {
   const task = Object.assign({tabId: sender.tab.id}, params);
   return await utils.invokeCapture([task]);
-}
-
-/**
- * @type invokable
- * @param {Object} [params]
- * @param {string[]} [params.urls]
- * @return {Object<string~url, integer~count>}
- */
-function getCapturedUrls({urls = []} = {}) {
-  const rv = {};
-  for (const url of urls) {
-    rv[url] = capturedUrls.get(url) || 0;
-  }
-  return rv;
-}
-
-/**
- * @type invokable
- * @param {Object} [params]
- * @param {string[]} [params.urls]
- */
-function setCapturedUrls({urls = []} = {}) {
-  for (const url of urls) {
-    capturedUrls.set(url, (capturedUrls.get(url) || 0) + 1);
-  }
 }
 
 /**
@@ -389,7 +359,7 @@ async function onServerTreeChange(params = {}, sender) {
  * @param {Object} [params]
  */
 async function onCaptureEnd(params, sender) {
-  setCapturedUrls(params);
+  capturer.setCapturedUrls(params);
   await onServerTreeChange(params, sender);
 }
 
@@ -403,14 +373,11 @@ async function getGeoLocation(options) {
 
 export {
   focusedWindows,
-  capturedUrls,
   getLastFocusedWindow,
   invokeFrameScript,
   findBookIdFromUrl,
   locateItem,
   captureCurrentTab,
-  getCapturedUrls,
-  setCapturedUrls,
   createSubPage,
   registerActiveEditorTab,
   invokeEditorCommand,

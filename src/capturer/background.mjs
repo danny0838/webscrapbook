@@ -20,6 +20,41 @@ async function clearCapturerCaches() {
 
 
 /****************************************************************************
+ * Record captured URLs
+ ***************************************************************************/
+
+/**
+ * @type {Map<string~url, integer~count>}
+ */
+const capturedUrls = new Map();
+
+/**
+ * @type invokable
+ * @param {Object} [params]
+ * @param {string[]} [params.urls]
+ * @return {Object<string~url, integer~count>}
+ */
+function getCapturedUrls({urls = []} = {}) {
+  const rv = {};
+  for (const url of urls) {
+    rv[url] = capturedUrls.get(url) || 0;
+  }
+  return rv;
+}
+
+/**
+ * @type invokable
+ * @param {Object} [params]
+ * @param {string[]} [params.urls]
+ */
+function setCapturedUrls({urls = []} = {}) {
+  for (const url of urls) {
+    capturedUrls.set(url, (capturedUrls.get(url) || 0) + 1);
+  }
+}
+
+
+/****************************************************************************
  * Notify captured pages
  ***************************************************************************/
 
@@ -140,10 +175,7 @@ async function updateBadgeForTabs(tabs) {
     };
 
     // check from session
-    matchTypeAndCount.session += utils.invokeBackgroundScript({
-      cmd: "getCapturedUrls",
-      args: {urls: [urlCheck]},
-    })[urlCheck];
+    matchTypeAndCount.session += getCapturedUrls({urls: [urlCheck]})[urlCheck];
 
     // check from backend
     for (const bookId of bookIds) {
@@ -437,10 +469,7 @@ async function updateAutoCaptureBookCaches() {
  * @param {string[]} [bookIds] - ID of books with a valid cache
  */
 function checkDuplicate(url, bookIds) {
-  if (utils.invokeBackgroundScript({
-    cmd: "getCapturedUrls",
-    args: {urls: [url]},
-  })[url]) {
+  if (getCapturedUrls({urls: [url]})[url]) {
     return true;
   }
 
@@ -604,6 +633,9 @@ async function init() {
 init();
 
 export {
+  capturedUrls,
+  getCapturedUrls,
+  setCapturedUrls,
   toggleNotifyPageCaptured,
   updateBadgeForAllTabs,
   configAutoCapture,
