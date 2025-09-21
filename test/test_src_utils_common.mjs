@@ -8,6 +8,65 @@ const $it = $(it);
 const r = String.raw;
 
 describe('utils/common.mjs', function () {
+  describe('utils.invokeMethod', function () {
+    it('should run `cmd` separated with "." when passing string', function () {
+      var target = {method: () => 123};
+      assert.strictEqual(utils.invokeMethod(target, "method"), 123);
+
+      var target = {foo: {bar: {baz: () => 123}}};
+      assert.strictEqual(utils.invokeMethod(target, "foo.bar.baz"), 123);
+
+      var target = {foo: {bar: {baz: {"": () => 123}}}};
+      assert.strictEqual(utils.invokeMethod(target, "foo.bar.baz."), 123);
+    });
+
+    it('should handle `cmd` when passing string[]', function () {
+      var target = {foo: {"bar.baz": () => 123}};
+      assert.strictEqual(utils.invokeMethod(target, ["foo", "bar.baz"]), 123);
+    });
+
+    it('should pass the specified arguments', function () {
+      var target = {method: (v1, v2, v3) => [v1, v2, v3].join(',')};
+      assert.strictEqual(utils.invokeMethod(target, "method", []), ',,');
+      assert.strictEqual(utils.invokeMethod(target, "method", [1]), '1,,');
+      assert.strictEqual(utils.invokeMethod(target, "method", [1, 2]), '1,2,');
+      assert.strictEqual(utils.invokeMethod(target, "method", [1, 2, 3]), '1,2,3');
+    });
+
+    it('should treat as no argument when omitted arguments', function () {
+      var target = {method: (v1, v2, v3) => [v1, v2, v3].join(',')};
+      assert.strictEqual(utils.invokeMethod(target, "method"), ',,');
+    });
+
+    it('should throw if target not exist', function () {
+      var target;
+      assert.throws(() => {
+        utils.invokeMethod(target, "method");
+      });
+    });
+
+    it('should throw if method not exist', function () {
+      var target = {};
+      assert.throws(() => {
+        utils.invokeMethod(target, "method");
+      });
+    });
+
+    it('should throw if method not function', function () {
+      var target = {method: 1};
+      assert.throws(() => {
+        utils.invokeMethod(target, "method");
+      });
+    });
+
+    it('should throw if deep method not traceable', function () {
+      var target = {foo: 1};
+      assert.throws(() => {
+        utils.invokeMethod(target, "foo.bar.baz");
+      });
+    });
+  });
+
   describe('utils.escapeHtmlComment', function () {
     it('basic', function () {
       // starts with ">"
