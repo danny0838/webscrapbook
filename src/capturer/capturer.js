@@ -1284,7 +1284,7 @@ capturer.captureGeneral = async function ({
 
     await utils.invokeExtensionScript({
       cmd: "background.onCaptureEnd",
-      args: {urls: [utils.normalizeUrl(response.sourceUrl)]},
+      args: {url: utils.normalizeUrl(response.sourceUrl)},
     });
 
     // preserve info if error out

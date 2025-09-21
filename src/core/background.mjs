@@ -322,7 +322,7 @@ Object.assign(openModalWindow, {
 /**
  * @type invokable
  */
-async function onServerTreeChange(params = {}, sender) {
+async function onServerTreeChange(_params, sender) {
   const tasks = [];
 
   const errorHandler = (ex) => {
@@ -356,11 +356,12 @@ async function onServerTreeChange(params = {}, sender) {
 
 /**
  * @type invokable
- * @param {Object} [params]
+ * @param {Object} params
+ * @param {string} params.url
  */
-async function onCaptureEnd(params, sender) {
-  capturer.setCapturedUrls(params);
-  await onServerTreeChange(params, sender);
+async function onCaptureEnd({url}, sender) {
+  capturer.capturedUrls.set(url);
+  await onServerTreeChange(undefined, sender);
 }
 
 /**
