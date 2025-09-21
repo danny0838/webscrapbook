@@ -9,6 +9,7 @@ import {
   splitUrl,
   getOption,
   getOptions,
+  invokeMethod,
   invokeExtensionScript,
   initContentScripts,
   invokeContentScript,
@@ -31,7 +32,7 @@ import {Cache} from "./cache.mjs";
 function invokeBackgroundScript({cmd, args}) {
   // if this is the background page
   if (globalThis.background) {
-    return globalThis.background[cmd](args);
+    return invokeMethod(globalThis.background, cmd, [args]);
   }
 
   return invokeExtensionScript({cmd: `background.${cmd}`, args});
