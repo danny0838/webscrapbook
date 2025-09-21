@@ -1458,23 +1458,17 @@ editor.lineMarker = async function (style) {
       'style': style,
     },
   };
-  return await utils.invokeExtensionScript({
-    cmd: "background.invokeEditorCommand",
-    args: {
-      frameId: await editor.getFocusedFrameId(),
-      cmd: "editor.lineMarkerInternal",
-      args,
-    },
+  return await editor.invokeEditorCommand({
+    frameId: await editor.getFocusedFrameId(),
+    cmd: "editor.lineMarkerInternal",
+    args,
   });
 };
 
 editor.viewAnnotations = async function () {
-  return await utils.invokeExtensionScript({
-    cmd: "background.invokeEditorCommand",
-    args: {
-      frameId: await editor.getFocusedFrameId(),
-      cmd: "editor.viewAnnotationsInternal",
-    },
+  return await editor.invokeEditorCommand({
+    frameId: await editor.getFocusedFrameId(),
+    cmd: "editor.viewAnnotationsInternal",
   });
 };
 
@@ -1483,13 +1477,10 @@ editor.locateAnnotation = async function (offset) {
   const args = {
     offset,
   };
-  return await utils.invokeExtensionScript({
-    cmd: "background.invokeEditorCommand",
-    args: {
-      frameId,
-      cmd: "editor.locateAnnotationInternal",
-      args,
-    },
+  return await editor.invokeEditorCommand({
+    frameId,
+    cmd: "editor.locateAnnotationInternal",
+    args,
   });
 };
 
@@ -1505,38 +1496,29 @@ editor.createLink = async function () {
       'href': url,
     },
   };
-  return await utils.invokeExtensionScript({
-    cmd: "background.invokeEditorCommand",
-    args: {
-      frameId,
-      cmd: "editor.lineMarkerInternal",
-      args,
-    },
+  return await editor.invokeEditorCommand({
+    frameId,
+    cmd: "editor.lineMarkerInternal",
+    args,
   });
 };
 
 editor.createSticky = async function (richText, refNode) {
-  return await utils.invokeExtensionScript({
-    cmd: "background.invokeEditorCommand",
+  return await editor.invokeEditorCommand({
+    frameId: await editor.getFocusedFrameId(),
+    cmd: "editor.annotator.createSticky",
     args: {
-      frameId: await editor.getFocusedFrameId(),
-      cmd: "editor.annotator.createSticky",
-      args: {
-        richText,
-        refNode,
-      },
+      richText,
+      refNode,
     },
   });
 };
 
 editor.eraseNodes = async function () {
-  return await utils.invokeExtensionScript({
-    cmd: "background.invokeEditorCommand",
-    args: {
-      frameId: await editor.getFocusedFrameId(),
-      cmd: "editor.eraseNodesInternal",
-      args: {},
-    },
+  return await editor.invokeEditorCommand({
+    frameId: await editor.getFocusedFrameId(),
+    cmd: "editor.eraseNodesInternal",
+    args: {},
   });
 };
 
@@ -1555,13 +1537,10 @@ editor.eraseSelector = async function (allFrames = false) {
     return;
   }
 
-  return await utils.invokeExtensionScript({
-    cmd: "background.invokeEditorCommand",
-    args: {
-      frameId,
-      cmd: "editor.eraseSelectorInternal",
-      args: {selector},
-    },
+  return await editor.invokeEditorCommand({
+    frameId,
+    cmd: "editor.eraseSelectorInternal",
+    args: {selector},
   });
 };
 
@@ -1581,65 +1560,47 @@ editor.eraseXpath = async function (allFrames = false) {
     return;
   }
 
-  return await utils.invokeExtensionScript({
-    cmd: "background.invokeEditorCommand",
-    args: {
-      frameId,
-      cmd: "editor.eraseXpathInternal",
-      args: {selector},
-    },
+  return await editor.invokeEditorCommand({
+    frameId,
+    cmd: "editor.eraseXpathInternal",
+    args: {selector},
   });
 };
 
 editor.uneraseNodes = async function () {
-  return await utils.invokeExtensionScript({
-    cmd: "background.invokeEditorCommand",
-    args: {
-      frameId: await editor.getFocusedFrameId(),
-      cmd: "editor.uneraseNodesInternal",
-      args: {},
-    },
+  return await editor.invokeEditorCommand({
+    frameId: await editor.getFocusedFrameId(),
+    cmd: "editor.uneraseNodesInternal",
+    args: {},
   });
 };
 
 editor.uneraseAllNodes = async function () {
-  return await utils.invokeExtensionScript({
-    cmd: "background.invokeEditorCommand",
-    args: {
-      cmd: "editor.uneraseAllNodesInternal",
-      args: {},
-    },
+  return await editor.invokeEditorCommand({
+    cmd: "editor.uneraseAllNodesInternal",
+    args: {},
   });
 };
 
 editor.removeEdits = async function () {
-  return await utils.invokeExtensionScript({
-    cmd: "background.invokeEditorCommand",
-    args: {
-      frameId: await editor.getFocusedFrameId(),
-      cmd: "editor.removeEditsInternal",
-      args: {},
-    },
+  return await editor.invokeEditorCommand({
+    frameId: await editor.getFocusedFrameId(),
+    cmd: "editor.removeEditsInternal",
+    args: {},
   });
 };
 
 editor.removeAllEdits = async function () {
-  return await utils.invokeExtensionScript({
-    cmd: "background.invokeEditorCommand",
-    args: {
-      cmd: "editor.removeAllEditsInternal",
-      args: {},
-    },
+  return await editor.invokeEditorCommand({
+    cmd: "editor.removeAllEditsInternal",
+    args: {},
   });
 };
 
 editor.toggleAnnotator = async function (willActive) {
-  return await utils.invokeExtensionScript({
-    cmd: "background.invokeEditorCommand",
-    args: {
-      cmd: "editor.annotator.toggle",
-      args: {willActive},
-    },
+  return await editor.invokeEditorCommand({
+    cmd: "editor.annotator.toggle",
+    args: {willActive},
   });
 };
 
@@ -1680,12 +1641,9 @@ editor.toggleDomEraser = async function (willActive, ignoreAnnotator = false) {
     await editor.toggleAnnotator(false);
   }
 
-  await utils.invokeExtensionScript({
-    cmd: "background.invokeEditorCommand",
-    args: {
-      cmd: "editor.domEraser.toggle",
-      args: {willActive},
-    },
+  await editor.invokeEditorCommand({
+    cmd: "editor.domEraser.toggle",
+    args: {willActive},
   });
 
   if (!willActive && !ignoreAnnotator) {
@@ -1728,12 +1686,9 @@ editor.toggleHtmlEditor = async function (willActive, ignoreAnnotator = false) {
     await editor.toggleAnnotator(false);
   }
 
-  await utils.invokeExtensionScript({
-    cmd: "background.invokeEditorCommand",
-    args: {
-      cmd: "editor.htmlEditor.toggle",
-      args: {willActive},
-    },
+  await editor.invokeEditorCommand({
+    cmd: "editor.htmlEditor.toggle",
+    args: {willActive},
   });
 
   if (!willActive && !ignoreAnnotator) {
@@ -1762,23 +1717,17 @@ editor.toggleMutationHandler = async function (willActive) {
     editElem.removeAttribute("checked");
   }
 
-  await utils.invokeExtensionScript({
-    cmd: "background.invokeEditorCommand",
-    args: {
-      cmd: "editor.mutationHandler.toggle",
-      args: {willActive},
-    },
+  await editor.invokeEditorCommand({
+    cmd: "editor.mutationHandler.toggle",
+    args: {willActive},
   });
 };
 
 editor.undo = async function () {
-  return await utils.invokeExtensionScript({
-    cmd: "background.invokeEditorCommand",
-    args: {
-      frameId: await editor.getFocusedFrameId(),
-      cmd: "editor.undoInternal",
-      args: {},
-    },
+  return await editor.invokeEditorCommand({
+    frameId: await editor.getFocusedFrameId(),
+    cmd: "editor.undoInternal",
+    args: {},
   });
 };
 
@@ -1793,24 +1742,18 @@ editor.save = async function (params = {}) {
       }
     }
 
-    await utils.invokeExtensionScript({
-      cmd: "background.invokeEditorCommand",
-      args: {
-        cmd: "editor.annotator.saveAll",
-        args: {},
-      },
+    await editor.invokeEditorCommand({
+      cmd: "editor.annotator.saveAll",
+      args: {},
     });
     return await utils.invokeExtensionScript({
       cmd: "background.captureCurrentTab",
       args: {mode: params.internalize ? "internalize" : "resave"},
     });
   } else {
-    await utils.invokeExtensionScript({
-      cmd: "background.invokeEditorCommand",
-      args: {
-        cmd: "editor.annotator.saveAll",
-        args: {},
-      },
+    await editor.invokeEditorCommand({
+      cmd: "editor.annotator.saveAll",
+      args: {},
     });
     return await utils.invokeExtensionScript({
       cmd: "background.captureCurrentTab",
@@ -1819,12 +1762,9 @@ editor.save = async function (params = {}) {
 };
 
 editor.deleteErased = async function () {
-  return await utils.invokeExtensionScript({
-    cmd: "background.invokeEditorCommand",
-    args: {
-      cmd: "editor.deleteErasedInternal",
-      args: {},
-    },
+  return await editor.invokeEditorCommand({
+    cmd: "editor.deleteErasedInternal",
+    args: {},
   });
 };
 
@@ -1847,24 +1787,18 @@ editor.createSubPage = async function () {
 };
 
 editor.editTitle = async function () {
-  return await utils.invokeExtensionScript({
-    cmd: "background.invokeEditorCommand",
-    args: {
-      frameId: await editor.getFocusedFrameId(),
-      cmd: "editor.editTitleInternal",
-      args: {},
-    },
+  return await editor.invokeEditorCommand({
+    frameId: await editor.getFocusedFrameId(),
+    cmd: "editor.editTitleInternal",
+    args: {},
   });
 };
 
 editor.setViewport = async function () {
-  return await utils.invokeExtensionScript({
-    cmd: "background.invokeEditorCommand",
-    args: {
-      frameId: await editor.getFocusedFrameId(),
-      cmd: "editor.setViewportInternal",
-      args: {},
-    },
+  return await editor.invokeEditorCommand({
+    frameId: await editor.getFocusedFrameId(),
+    cmd: "editor.setViewportInternal",
+    args: {},
   });
 };
 
@@ -1903,12 +1837,9 @@ editor.open = async function () {
       willEnable: true,
     },
   });
-  await utils.invokeExtensionScript({
-    cmd: "background.invokeEditorCommand",
-    args: {
-      cmd: "editor.openInternal",
-      frameIdExcept: 0,
-    },
+  await editor.invokeEditorCommand({
+    cmd: "editor.openInternal",
+    frameIdExcept: 0,
   });
   await editor.toggleAnnotator(true);
 };
@@ -1929,12 +1860,9 @@ editor.close = async function () {
       willEnable: false,
     },
   });
-  await utils.invokeExtensionScript({
-    cmd: "background.invokeEditorCommand",
-    args: {
-      cmd: "editor.closeInternal",
-      frameIdExcept: 0,
-    },
+  await editor.invokeEditorCommand({
+    cmd: "editor.closeInternal",
+    frameIdExcept: 0,
   });
   await editor.toggleDomEraser(false, true);
   await editor.toggleHtmlEditor(false, true);
@@ -2112,12 +2040,9 @@ editor.getFocusedFrameId = async function () {
     return 0;
   }
 
-  const arr = await utils.invokeExtensionScript({
-    cmd: "background.invokeEditorCommand",
-    args: {
-      cmd: "editor.getFocusedFrameIdInternal",
-      frameIdExcept: 0,
-    },
+  const arr = await editor.invokeEditorCommand({
+    cmd: "editor.getFocusedFrameIdInternal",
+    frameIdExcept: 0,
   });
 
   const lastFrame = arr.reduce((acc, cur) => {
@@ -2188,6 +2113,19 @@ editor.addHistory = () => {
   annotator.saveAll();
 
   mutationHandler.addRestorePoint();
+};
+
+/**
+ * @param {commandMessage} params
+ * @param {integer} [params.frameId]
+ * @param {integer} [params.frameIdExcept]
+ * @return {Promise<*>}
+ */
+editor.invokeEditorCommand = async function ({cmd, args, frameId, frameIdExcept}) {
+  return await utils.invokeExtensionScript({
+    cmd: "background.invokeEditorCommand",
+    args: {cmd, args, frameId, frameIdExcept},
+  });
 };
 
 
@@ -2869,12 +2807,9 @@ const domEraser = editor.domEraser = (function () {
 
       // remove tooltip in other frames
       (async () => {
-        utils.invokeExtensionScript({
-          cmd: "background.invokeEditorCommand",
-          args: {
-            cmd: "editor.domEraser.clearTarget",
-            frameIdExcept: core.frameId,
-          },
+        editor.invokeEditorCommand({
+          cmd: "editor.domEraser.clearTarget",
+          frameIdExcept: core.frameId,
         });
       })();
 
@@ -3072,12 +3007,9 @@ const htmlEditor = editor.htmlEditor = {
   },
 
   async strong() {
-    return await utils.invokeExtensionScript({
-      cmd: "background.invokeEditorCommand",
-      args: {
-        frameId: await editor.getFocusedFrameId(),
-        cmd: "editor.htmlEditor._strong",
-      },
+    return await editor.invokeEditorCommand({
+      frameId: await editor.getFocusedFrameId(),
+      cmd: "editor.htmlEditor._strong",
     });
   },
 
@@ -3086,12 +3018,9 @@ const htmlEditor = editor.htmlEditor = {
   },
 
   async em() {
-    return await utils.invokeExtensionScript({
-      cmd: "background.invokeEditorCommand",
-      args: {
-        frameId: await editor.getFocusedFrameId(),
-        cmd: "editor.htmlEditor._em",
-      },
+    return await editor.invokeEditorCommand({
+      frameId: await editor.getFocusedFrameId(),
+      cmd: "editor.htmlEditor._em",
     });
   },
 
@@ -3100,12 +3029,9 @@ const htmlEditor = editor.htmlEditor = {
   },
 
   async underline() {
-    return await utils.invokeExtensionScript({
-      cmd: "background.invokeEditorCommand",
-      args: {
-        frameId: await editor.getFocusedFrameId(),
-        cmd: "editor.htmlEditor._underline",
-      },
+    return await editor.invokeEditorCommand({
+      frameId: await editor.getFocusedFrameId(),
+      cmd: "editor.htmlEditor._underline",
     });
   },
 
@@ -3114,12 +3040,9 @@ const htmlEditor = editor.htmlEditor = {
   },
 
   async strike() {
-    return await utils.invokeExtensionScript({
-      cmd: "background.invokeEditorCommand",
-      args: {
-        frameId: await editor.getFocusedFrameId(),
-        cmd: "editor.htmlEditor._strike",
-      },
+    return await editor.invokeEditorCommand({
+      frameId: await editor.getFocusedFrameId(),
+      cmd: "editor.htmlEditor._strike",
     });
   },
 
@@ -3128,12 +3051,9 @@ const htmlEditor = editor.htmlEditor = {
   },
 
   async superscript() {
-    return await utils.invokeExtensionScript({
-      cmd: "background.invokeEditorCommand",
-      args: {
-        frameId: await editor.getFocusedFrameId(),
-        cmd: "editor.htmlEditor._superscript",
-      },
+    return await editor.invokeEditorCommand({
+      frameId: await editor.getFocusedFrameId(),
+      cmd: "editor.htmlEditor._superscript",
     });
   },
 
@@ -3142,12 +3062,9 @@ const htmlEditor = editor.htmlEditor = {
   },
 
   async subscript() {
-    return await utils.invokeExtensionScript({
-      cmd: "background.invokeEditorCommand",
-      args: {
-        frameId: await editor.getFocusedFrameId(),
-        cmd: "editor.htmlEditor._subscript",
-      },
+    return await editor.invokeEditorCommand({
+      frameId: await editor.getFocusedFrameId(),
+      cmd: "editor.htmlEditor._subscript",
     });
   },
 
@@ -3157,12 +3074,9 @@ const htmlEditor = editor.htmlEditor = {
 
   async color() {
     const frameId = await editor.getFocusedFrameId();
-    return await utils.invokeExtensionScript({
-      cmd: "background.invokeEditorCommand",
-      args: {
-        frameId,
-        cmd: "editor.htmlEditor._color",
-      },
+    return await editor.invokeEditorCommand({
+      frameId,
+      cmd: "editor.htmlEditor._color",
     });
   },
 
@@ -3191,12 +3105,9 @@ const htmlEditor = editor.htmlEditor = {
   },
 
   async formatBlockP() {
-    return await utils.invokeExtensionScript({
-      cmd: "background.invokeEditorCommand",
-      args: {
-        frameId: await editor.getFocusedFrameId(),
-        cmd: "editor.htmlEditor._formatBlockP",
-      },
+    return await editor.invokeEditorCommand({
+      frameId: await editor.getFocusedFrameId(),
+      cmd: "editor.htmlEditor._formatBlockP",
     });
   },
 
@@ -3205,12 +3116,9 @@ const htmlEditor = editor.htmlEditor = {
   },
 
   async formatBlockH1() {
-    return await utils.invokeExtensionScript({
-      cmd: "background.invokeEditorCommand",
-      args: {
-        frameId: await editor.getFocusedFrameId(),
-        cmd: "editor.htmlEditor._formatBlockH1",
-      },
+    return await editor.invokeEditorCommand({
+      frameId: await editor.getFocusedFrameId(),
+      cmd: "editor.htmlEditor._formatBlockH1",
     });
   },
 
@@ -3219,12 +3127,9 @@ const htmlEditor = editor.htmlEditor = {
   },
 
   async formatBlockH2() {
-    return await utils.invokeExtensionScript({
-      cmd: "background.invokeEditorCommand",
-      args: {
-        frameId: await editor.getFocusedFrameId(),
-        cmd: "editor.htmlEditor._formatBlockH2",
-      },
+    return await editor.invokeEditorCommand({
+      frameId: await editor.getFocusedFrameId(),
+      cmd: "editor.htmlEditor._formatBlockH2",
     });
   },
 
@@ -3233,12 +3138,9 @@ const htmlEditor = editor.htmlEditor = {
   },
 
   async formatBlockH3() {
-    return await utils.invokeExtensionScript({
-      cmd: "background.invokeEditorCommand",
-      args: {
-        frameId: await editor.getFocusedFrameId(),
-        cmd: "editor.htmlEditor._formatBlockH3",
-      },
+    return await editor.invokeEditorCommand({
+      frameId: await editor.getFocusedFrameId(),
+      cmd: "editor.htmlEditor._formatBlockH3",
     });
   },
 
@@ -3247,12 +3149,9 @@ const htmlEditor = editor.htmlEditor = {
   },
 
   async formatBlockH4() {
-    return await utils.invokeExtensionScript({
-      cmd: "background.invokeEditorCommand",
-      args: {
-        frameId: await editor.getFocusedFrameId(),
-        cmd: "editor.htmlEditor._formatBlockH4",
-      },
+    return await editor.invokeEditorCommand({
+      frameId: await editor.getFocusedFrameId(),
+      cmd: "editor.htmlEditor._formatBlockH4",
     });
   },
 
@@ -3261,12 +3160,9 @@ const htmlEditor = editor.htmlEditor = {
   },
 
   async formatBlockH5() {
-    return await utils.invokeExtensionScript({
-      cmd: "background.invokeEditorCommand",
-      args: {
-        frameId: await editor.getFocusedFrameId(),
-        cmd: "editor.htmlEditor._formatBlockH5",
-      },
+    return await editor.invokeEditorCommand({
+      frameId: await editor.getFocusedFrameId(),
+      cmd: "editor.htmlEditor._formatBlockH5",
     });
   },
 
@@ -3275,12 +3171,9 @@ const htmlEditor = editor.htmlEditor = {
   },
 
   async formatBlockH6() {
-    return await utils.invokeExtensionScript({
-      cmd: "background.invokeEditorCommand",
-      args: {
-        frameId: await editor.getFocusedFrameId(),
-        cmd: "editor.htmlEditor._formatBlockH6",
-      },
+    return await editor.invokeEditorCommand({
+      frameId: await editor.getFocusedFrameId(),
+      cmd: "editor.htmlEditor._formatBlockH6",
     });
   },
 
@@ -3289,12 +3182,9 @@ const htmlEditor = editor.htmlEditor = {
   },
 
   async formatBlockDiv() {
-    return await utils.invokeExtensionScript({
-      cmd: "background.invokeEditorCommand",
-      args: {
-        frameId: await editor.getFocusedFrameId(),
-        cmd: "editor.htmlEditor._formatBlockDiv",
-      },
+    return await editor.invokeEditorCommand({
+      frameId: await editor.getFocusedFrameId(),
+      cmd: "editor.htmlEditor._formatBlockDiv",
     });
   },
 
@@ -3303,12 +3193,9 @@ const htmlEditor = editor.htmlEditor = {
   },
 
   async formatBlockPre() {
-    return await utils.invokeExtensionScript({
-      cmd: "background.invokeEditorCommand",
-      args: {
-        frameId: await editor.getFocusedFrameId(),
-        cmd: "editor.htmlEditor._formatBlockPre",
-      },
+    return await editor.invokeEditorCommand({
+      frameId: await editor.getFocusedFrameId(),
+      cmd: "editor.htmlEditor._formatBlockPre",
     });
   },
 
@@ -3317,12 +3204,9 @@ const htmlEditor = editor.htmlEditor = {
   },
 
   async listUnordered() {
-    return await utils.invokeExtensionScript({
-      cmd: "background.invokeEditorCommand",
-      args: {
-        frameId: await editor.getFocusedFrameId(),
-        cmd: "editor.htmlEditor._listUnordered",
-      },
+    return await editor.invokeEditorCommand({
+      frameId: await editor.getFocusedFrameId(),
+      cmd: "editor.htmlEditor._listUnordered",
     });
   },
 
@@ -3331,12 +3215,9 @@ const htmlEditor = editor.htmlEditor = {
   },
 
   async listOrdered() {
-    return await utils.invokeExtensionScript({
-      cmd: "background.invokeEditorCommand",
-      args: {
-        frameId: await editor.getFocusedFrameId(),
-        cmd: "editor.htmlEditor._listOrdered",
-      },
+    return await editor.invokeEditorCommand({
+      frameId: await editor.getFocusedFrameId(),
+      cmd: "editor.htmlEditor._listOrdered",
     });
   },
 
@@ -3345,12 +3226,9 @@ const htmlEditor = editor.htmlEditor = {
   },
 
   async outdent() {
-    return await utils.invokeExtensionScript({
-      cmd: "background.invokeEditorCommand",
-      args: {
-        frameId: await editor.getFocusedFrameId(),
-        cmd: "editor.htmlEditor._outdent",
-      },
+    return await editor.invokeEditorCommand({
+      frameId: await editor.getFocusedFrameId(),
+      cmd: "editor.htmlEditor._outdent",
     });
   },
 
@@ -3359,12 +3237,9 @@ const htmlEditor = editor.htmlEditor = {
   },
 
   async indent() {
-    return await utils.invokeExtensionScript({
-      cmd: "background.invokeEditorCommand",
-      args: {
-        frameId: await editor.getFocusedFrameId(),
-        cmd: "editor.htmlEditor._indent",
-      },
+    return await editor.invokeEditorCommand({
+      frameId: await editor.getFocusedFrameId(),
+      cmd: "editor.htmlEditor._indent",
     });
   },
 
@@ -3373,12 +3248,9 @@ const htmlEditor = editor.htmlEditor = {
   },
 
   async justifyLeft() {
-    return await utils.invokeExtensionScript({
-      cmd: "background.invokeEditorCommand",
-      args: {
-        frameId: await editor.getFocusedFrameId(),
-        cmd: "editor.htmlEditor._justifyLeft",
-      },
+    return await editor.invokeEditorCommand({
+      frameId: await editor.getFocusedFrameId(),
+      cmd: "editor.htmlEditor._justifyLeft",
     });
   },
 
@@ -3387,12 +3259,9 @@ const htmlEditor = editor.htmlEditor = {
   },
 
   async justifyCenter() {
-    return await utils.invokeExtensionScript({
-      cmd: "background.invokeEditorCommand",
-      args: {
-        frameId: await editor.getFocusedFrameId(),
-        cmd: "editor.htmlEditor._justifyCenter",
-      },
+    return await editor.invokeEditorCommand({
+      frameId: await editor.getFocusedFrameId(),
+      cmd: "editor.htmlEditor._justifyCenter",
     });
   },
 
@@ -3401,12 +3270,9 @@ const htmlEditor = editor.htmlEditor = {
   },
 
   async justifyRight() {
-    return await utils.invokeExtensionScript({
-      cmd: "background.invokeEditorCommand",
-      args: {
-        frameId: await editor.getFocusedFrameId(),
-        cmd: "editor.htmlEditor._justifyRight",
-      },
+    return await editor.invokeEditorCommand({
+      frameId: await editor.getFocusedFrameId(),
+      cmd: "editor.htmlEditor._justifyRight",
     });
   },
 
@@ -3415,12 +3281,9 @@ const htmlEditor = editor.htmlEditor = {
   },
 
   async justifyFull() {
-    return await utils.invokeExtensionScript({
-      cmd: "background.invokeEditorCommand",
-      args: {
-        frameId: await editor.getFocusedFrameId(),
-        cmd: "editor.htmlEditor._justifyFull",
-      },
+    return await editor.invokeEditorCommand({
+      frameId: await editor.getFocusedFrameId(),
+      cmd: "editor.htmlEditor._justifyFull",
     });
   },
 
@@ -3432,13 +3295,10 @@ const htmlEditor = editor.htmlEditor = {
     const frameId = await editor.getFocusedFrameId();
     const url = prompt(utils.lang('EditorButtonHtmlEditorCreateLinkPrompt'));
     if (!url) { return; }
-    return await utils.invokeExtensionScript({
-      cmd: "background.invokeEditorCommand",
-      args: {
-        frameId,
-        cmd: "editor.htmlEditor._createLink",
-        args: {url},
-      },
+    return await editor.invokeEditorCommand({
+      frameId,
+      cmd: "editor.htmlEditor._createLink",
+      args: {url},
     });
   },
 
@@ -3447,12 +3307,9 @@ const htmlEditor = editor.htmlEditor = {
   },
 
   async hr() {
-    return await utils.invokeExtensionScript({
-      cmd: "background.invokeEditorCommand",
-      args: {
-        frameId: await editor.getFocusedFrameId(),
-        cmd: "editor.htmlEditor._hr",
-      },
+    return await editor.invokeEditorCommand({
+      frameId: await editor.getFocusedFrameId(),
+      cmd: "editor.htmlEditor._hr",
     });
   },
 
@@ -3461,12 +3318,9 @@ const htmlEditor = editor.htmlEditor = {
   },
 
   async todo() {
-    return await utils.invokeExtensionScript({
-      cmd: "background.invokeEditorCommand",
-      args: {
-        frameId: await editor.getFocusedFrameId(),
-        cmd: "editor.htmlEditor._todo",
-      },
+    return await editor.invokeEditorCommand({
+      frameId: await editor.getFocusedFrameId(),
+      cmd: "editor.htmlEditor._todo",
     });
   },
 
@@ -3478,13 +3332,10 @@ const htmlEditor = editor.htmlEditor = {
     const format = utils.getOption("editor.insertDateFormat");
     const isUtc = utils.getOption("editor.insertDateFormatIsUtc");
     const dateStr = Strftime.format(format, {isUtc});
-    return await utils.invokeExtensionScript({
-      cmd: "background.invokeEditorCommand",
-      args: {
-        frameId: await editor.getFocusedFrameId(),
-        cmd: "editor.htmlEditor._insertDate",
-        args: {dateStr},
-      },
+    return await editor.invokeEditorCommand({
+      frameId: await editor.getFocusedFrameId(),
+      cmd: "editor.htmlEditor._insertDate",
+      args: {dateStr},
     });
   },
 
@@ -3495,12 +3346,9 @@ const htmlEditor = editor.htmlEditor = {
   async insertHtml() {
     const frameId = await editor.getFocusedFrameId();
 
-    return await utils.invokeExtensionScript({
-      cmd: "background.invokeEditorCommand",
-      args: {
-        frameId,
-        cmd: "editor.htmlEditor._insertHtml",
-      },
+    return await editor.invokeEditorCommand({
+      frameId,
+      cmd: "editor.htmlEditor._insertHtml",
     });
   },
 
@@ -3584,12 +3432,9 @@ const htmlEditor = editor.htmlEditor = {
   },
 
   async removeFormat() {
-    return await utils.invokeExtensionScript({
-      cmd: "background.invokeEditorCommand",
-      args: {
-        frameId: await editor.getFocusedFrameId(),
-        cmd: "editor.htmlEditor._removeFormat",
-      },
+    return await editor.invokeEditorCommand({
+      frameId: await editor.getFocusedFrameId(),
+      cmd: "editor.htmlEditor._removeFormat",
     });
   },
 
@@ -3598,12 +3443,9 @@ const htmlEditor = editor.htmlEditor = {
   },
 
   async unlink() {
-    return await utils.invokeExtensionScript({
-      cmd: "background.invokeEditorCommand",
-      args: {
-        frameId: await editor.getFocusedFrameId(),
-        cmd: "editor.htmlEditor._unlink",
-      },
+    return await editor.invokeEditorCommand({
+      frameId: await editor.getFocusedFrameId(),
+      cmd: "editor.htmlEditor._unlink",
     });
   },
 
