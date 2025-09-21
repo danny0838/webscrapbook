@@ -17,8 +17,6 @@ const focusedWindows = new Map();
  */
 const capturedUrls = new Map();
 
-const background = {};
-
 /**
  * Get the real last focused window.
  *
@@ -31,7 +29,7 @@ const background = {};
  * @param {boolean} [params.populate]
  * @param {WindowType[]} [params.windowTypes]
  */
-background.getLastFocusedWindow = async function ({
+async function getLastFocusedWindow({
   populate = false,
   windowTypes = ['normal', 'popup'],
 } = {}) {
@@ -47,7 +45,7 @@ background.getLastFocusedWindow = async function ({
     });
 
   return wins.pop();
-};
+}
 
 /**
  * @type invokable
@@ -55,20 +53,20 @@ background.getLastFocusedWindow = async function ({
  * @param {integer} params.frameId
  * @param {MessageSender} sender
  */
-background.invokeFrameScript = async function ({frameId, cmd, args}, sender) {
+async function invokeFrameScript({frameId, cmd, args}, sender) {
   const tabId = sender.tab.id;
   return await utils.invokeContentScript({
     tabId, frameId, cmd, args,
   });
-};
+}
 
 /**
  * @type invokable
  */
-background.findBookIdFromUrl = async function ({url}, sender) {
+async function findBookIdFromUrl({url}, sender) {
   await server.init(true);
   return await server.findBookIdFromUrl(url);
-};
+}
 
 /**
  * Attempt to locate an item in the sidebar.
@@ -79,7 +77,7 @@ background.findBookIdFromUrl = async function ({url}, sender) {
  *   - null: no item located
  *   - false: no sidebar opened
  */
-background.locateItem = async function (params, sender) {
+async function locateItem(params, sender) {
   const cmd = 'sidebar.locate';
   const args = params;
   const sidebarUrl = browser.runtime.getURL("scrapbook/sidebar.html");
@@ -128,17 +126,17 @@ background.locateItem = async function (params, sender) {
   }
 
   return result;
-};
+}
 
 /**
  * @type invokable
  * @param {Object} [params]
  * @param {MessageSender} sender
  */
-background.captureCurrentTab = async function (params = {}, sender) {
+async function captureCurrentTab(params = {}, sender) {
   const task = Object.assign({tabId: sender.tab.id}, params);
   return await utils.invokeCapture([task]);
-};
+}
 
 /**
  * @type invokable
@@ -146,29 +144,29 @@ background.captureCurrentTab = async function (params = {}, sender) {
  * @param {string[]} [params.urls]
  * @return {Object<string~url, integer~count>}
  */
-background.getCapturedUrls = function ({urls = []} = {}) {
+function getCapturedUrls({urls = []} = {}) {
   const rv = {};
   for (const url of urls) {
     rv[url] = capturedUrls.get(url) || 0;
   }
   return rv;
-};
+}
 
 /**
  * @type invokable
  * @param {Object} [params]
  * @param {string[]} [params.urls]
  */
-background.setCapturedUrls = function ({urls = []} = {}) {
+function setCapturedUrls({urls = []} = {}) {
   for (const url of urls) {
     capturedUrls.set(url, (capturedUrls.get(url) || 0) + 1);
   }
-};
+}
 
 /**
  * @type invokable
  */
-background.createSubPage = async function ({url, title}, sender) {
+async function createSubPage({url, title}, sender) {
   await server.init(true);
 
   // search for bookId and item
@@ -210,23 +208,23 @@ background.createSubPage = async function ({url, title}, sender) {
     format: 'json',
     csrfToken: true,
   });
-};
+}
 
 /**
  * @type invokable
  * @param {Object} [params]
  * @param {MessageSender} sender
  */
-background.registerActiveEditorTab = async function ({willEnable = true} = {}, sender) {
+async function registerActiveEditorTab({willEnable = true} = {}, sender) {
   return editor.registerActiveEditorTab(sender.tab.id, willEnable);
-};
+}
 
 /**
  * @type invokable
  * @param {Object} params
  * @param {MessageSender} sender
  */
-background.invokeEditorCommand = async function ({cmd, args, frameId = -1, frameIdExcept = -1}, sender) {
+async function invokeEditorCommand({cmd, args, frameId = -1, frameIdExcept = -1}, sender) {
   const tabId = sender.tab.id;
   if (frameId !== -1) {
     const response = await utils.invokeContentScript({
@@ -262,7 +260,7 @@ background.invokeEditorCommand = async function ({cmd, args, frameId = -1, frame
       });
     return Promise.all(tasks);
   }
-};
+}
 
 /**
  * @type invokable
@@ -275,7 +273,7 @@ background.invokeEditorCommand = async function ({cmd, args, frameId = -1, frame
  * @param {string|string[]} [senderProp]
  * @param {MessageSender} sender
  */
-background.openModalWindow = async function ({
+async function openModalWindow({
   id,
   url,
   args,
@@ -285,7 +283,7 @@ background.openModalWindow = async function ({
 }, sender) {
   const {promise, resolve, reject} = Promise.withResolvers();
 
-  background.openModalWindow.map.set(id, resolve);
+  openModalWindow.map.set(id, resolve);
 
   let tab;
 
@@ -336,17 +334,17 @@ background.openModalWindow = async function ({
   try {
     return await promise;
   } finally {
-    background.openModalWindow.map.delete(id);
+    openModalWindow.map.delete(id);
     try {
       await browser.tabs.remove(tab.id);
     } catch {}
   }
-};
+}
 
-Object.assign(background.openModalWindow, {
+Object.assign(openModalWindow, {
   map: new Map(),
   close({id}) {
-    const resolve = background.openModalWindow.map.get(id);
+    const resolve = openModalWindow.map.get(id);
     resolve && resolve(null);
   },
 });
@@ -354,7 +352,7 @@ Object.assign(background.openModalWindow, {
 /**
  * @type invokable
  */
-background.onServerTreeChange = async function (params = {}, sender) {
+async function onServerTreeChange(params = {}, sender) {
   const tasks = [];
 
   const errorHandler = (ex) => {
@@ -384,27 +382,40 @@ background.onServerTreeChange = async function (params = {}, sender) {
   }
 
   return await Promise.all(tasks);
-};
+}
 
 /**
  * @type invokable
  * @param {Object} [params]
  */
-background.onCaptureEnd = async function (params, sender) {
-  background.setCapturedUrls(params);
-  await background.onServerTreeChange(params, sender);
-};
+async function onCaptureEnd(params, sender) {
+  setCapturedUrls(params);
+  await onServerTreeChange(params, sender);
+}
 
 /**
  * @type invokable
  * @param {Object} [options]
  */
-background.getGeoLocation = async function (options) {
+async function getGeoLocation(options) {
   return utils.getGeoLocation(options);
-};
+}
 
 export {
   focusedWindows,
   capturedUrls,
-  background,
+  getLastFocusedWindow,
+  invokeFrameScript,
+  findBookIdFromUrl,
+  locateItem,
+  captureCurrentTab,
+  getCapturedUrls,
+  setCapturedUrls,
+  createSubPage,
+  registerActiveEditorTab,
+  invokeEditorCommand,
+  openModalWindow,
+  onServerTreeChange,
+  onCaptureEnd,
+  getGeoLocation,
 };
