@@ -8,6 +8,45 @@ const $it = $(it);
 const r = String.raw;
 
 describe('utils/common.mjs', function () {
+  describe('utils.getDeepProp', function () {
+    it('should parse `parts` separated with "." when passing string', function () {
+      var target = {prop: 123};
+      assert.deepEqual(utils.getDeepProp(target, "prop"), [target, "prop"]);
+
+      var target = {foo: {bar: {baz: 123}}};
+      assert.deepEqual(utils.getDeepProp(target, "foo.bar.baz"), [target.foo.bar, "baz"]);
+
+      var target = {foo: {bar: {baz: {"": 123}}}};
+      assert.deepEqual(utils.getDeepProp(target, "foo.bar.baz."), [target.foo.bar.baz, ""]);
+
+      var target = [null, {foo: [{bar: 123}]}];
+      assert.deepEqual(utils.getDeepProp(target, "1.foo.0.bar"), [target[1].foo[0], "bar"]);
+
+      var target = [null, {foo: [{bar: [123]}]}];
+      assert.deepEqual(utils.getDeepProp(target, "1.foo.0.bar.0"), [target[1].foo[0].bar, "0"]);
+    });
+
+    it('should handle `parts` when passing string[]', function () {
+      var target = {foo: {"bar.baz": 123}};
+      assert.deepEqual(utils.getDeepProp(target, ["foo", "bar.baz"]), [target.foo, "bar.baz"]);
+
+      var target = [null, {foo: [{bar: 123}]}];
+      assert.deepEqual(utils.getDeepProp(target, ["1", "foo", "0", "bar"]), [target[1].foo[0], "bar"]);
+
+      var target = [null, {foo: [{bar: [123]}]}];
+      assert.deepEqual(utils.getDeepProp(target, ["1", "foo", "0", "bar", "0"]), [target[1].foo[0].bar, "0"]);
+    });
+
+    it('should safely handle nullish objects', function () {
+      var target;
+      assert.deepEqual(utils.getDeepProp(target, "foo"), [undefined, "foo"]);
+
+      var target = {};
+      assert.deepEqual(utils.getDeepProp(target, "foo.bar"), [undefined, "bar"]);
+      assert.deepEqual(utils.getDeepProp(target, "foo.bar.baz"), [undefined, "baz"]);
+    });
+  });
+
   describe('utils.invokeMethod', function () {
     it('should run `cmd` separated with "." when passing string', function () {
       var target = {method: () => 123};
