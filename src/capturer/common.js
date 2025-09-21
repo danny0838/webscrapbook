@@ -131,11 +131,8 @@ capturer.invoke = async function (method, args, details = {}) {
     return await scrapbook.invokeFrameScript({frameWindow, cmd, args});
   } else {
     // to capturer.html page
-    let id;
-    try {
-      id = missionId || args.settings.missionId;
-      if (!id) { throw new Error(`unknown missionId`); }
-    } catch (ex) {
+    const id = missionId || args?.settings?.missionId;
+    if (!id) {
       throw new Error(`missionId is required to invoke from a content script.`);
     }
     const cmd = "capturer." + method;
