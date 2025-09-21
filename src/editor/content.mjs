@@ -6,7 +6,7 @@ import {ANNOTATION_CSS} from "../utils/common.mjs";
 import * as utils from "../utils/common.mjs";
 import {StorageCache} from "../utils/cache.mjs";
 import {Strftime} from "../lib/strftime.mjs";
-import {core} from "../content/core.mjs";
+import * as core from "../content/core.mjs";
 
 // https://mimesniff.spec.whatwg.org/
 const SCRIPT_TYPES = new Set([
