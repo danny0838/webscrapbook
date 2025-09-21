@@ -787,7 +787,7 @@ const loadLanguages = (() => {
  *
  * @typedef {Object} commandMessage
  * @property {string} [id]
- * @property {string} cmd
+ * @property {string|string[]} cmd
  * @property {*} [args]
  */
 
@@ -904,18 +904,18 @@ async function initContentScripts(tabId, frameId) {
  * Invoke a command with arguments on an object.
  *
  * @param {Object} target
- * @param {string} cmd
+ * @param {string|string[]} cmd
  * @param {Array<*>} [args]
  * @return {*}
  */
 function invokeMethod(target, cmd, args) {
-  const parts = cmd.split('.');
+  const parts = (typeof cmd === 'string') ? cmd.split('.') : cmd;
   const subCmd = parts.pop();
   const object = parts.reduce((object, part) => {
     return object[part];
   }, target);
 
-  if (!object || !subCmd || typeof object[subCmd] !== 'function') {
+  if (typeof object?.[subCmd] !== 'function') {
     throw new Error(`Unable to invoke unknown command '${cmd}'.`);
   }
 
