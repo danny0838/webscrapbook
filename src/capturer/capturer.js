@@ -151,7 +151,7 @@ capturer.invoke = async function (method, args, details = {}) {
     return await utils.invokeContentScript({tabId, frameId, cmd, args});
   } else {
     // capturer.html call self
-    return await capturer[method](args);
+    return utils.invokeMethod(capturer, method, [args]);
   }
 };
 

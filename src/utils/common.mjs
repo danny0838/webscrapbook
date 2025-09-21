@@ -828,20 +828,10 @@ function addMessageListener(
 
     isDebug && console.debug(cmd, "receive", senderInfo, args);
 
-    const parts = cmd.split('.');
-    const subCmd = parts.pop();
-    const object = parts.reduce((object, part) => {
-      return object[part];
-    }, target);
-
     // thrown Error don't show here but cause the sender to receive an error
-    if (!object || !subCmd || typeof object[subCmd] !== 'function') {
-      throw new Error(`Unable to invoke unknown command '${cmd}'.`);
-    }
-
     return Promise.resolve()
       .then(() => {
-        return object[subCmd](args, sender);
+        return invokeMethod(target, cmd, [args, sender]);
       })
       .catch(errorHandler);
   };
@@ -908,6 +898,28 @@ async function initContentScripts(tabId, frameId) {
     );
   }
   return await Promise.all(tasks);
+}
+
+/**
+ * Invoke a command with arguments on an object.
+ *
+ * @param {Object} target
+ * @param {string} cmd
+ * @param {Array<*>} [args]
+ * @return {*}
+ */
+function invokeMethod(target, cmd, args) {
+  const parts = cmd.split('.');
+  const subCmd = parts.pop();
+  const object = parts.reduce((object, part) => {
+    return object[part];
+  }, target);
+
+  if (!object || !subCmd || typeof object[subCmd] !== 'function') {
+    throw new Error(`Unable to invoke unknown command '${cmd}'.`);
+  }
+
+  return object[subCmd](...(args || []));
 }
 
 /**
@@ -3867,6 +3879,7 @@ export {
   loadLanguages,
   addMessageListener,
   initContentScripts,
+  invokeMethod,
   invokeExtensionScript,
   invokeContentScript,
   invokeFrameScript,
