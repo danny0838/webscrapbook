@@ -763,7 +763,7 @@ function updateBackgroundKeeper(...args) {
     const interval = utils.getOption("runtime.backgroundKeeperInterval");
     if (interval > 0) {
       // Keep the service worker alive to prevent memory cache reset,
-      // especially `background.capturedUrls`, which bounds to a
+      // especially `capturer.capturedUrls`, which bounds to a
       // "browser session".
       //
       // The service worker shuts down on 30 seconds of inactivity, and
