@@ -4,7 +4,8 @@
 
 import {DEFAULT_OPTIONS} from "../utils/extension.mjs";
 import * as utils from "../utils/extension.mjs";
-import {background, focusedWindows} from "./background.mjs";
+import {focusedWindows} from "./background.mjs";
+import * as background from "./background.mjs";
 import * as capturer from "../capturer/background.mjs";
 import * as editor from "../editor/background.mjs";
 import * as viewer from "../viewer/background.mjs";
