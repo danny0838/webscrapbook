@@ -1,25 +1,23 @@
 /******************************************************************************
- * Shared script for modal dialog windows.
+ * Script for color.html.
  *****************************************************************************/
 
 import * as utils from "../utils/common.mjs";
-import {dialog} from "../core/dialog.js";
+import {Dialog} from "../core/dialog.mjs";
 
-const dialogOnLoad = dialog.onLoad;
+class ColorDialog extends Dialog {
+  fieldControllers = new WeakMap();
 
-const fieldControllers = new WeakMap();
-
-Object.assign(dialog, {
-  async init(data) {
+  async start(data) {
     document.body.hidden = false;
 
     const {promise, resolve} = Promise.withResolvers();
     this.resolve = resolve;
     return await promise;
-  },
+  }
 
   onLoad(event) {
-    dialogOnLoad.call(this);
+    super.onLoad(event);
 
     for (const elem of document.querySelectorAll('input[type="checkbox"]')) {
       elem.addEventListener('change', onChangeCheckbox);
@@ -31,18 +29,18 @@ Object.assign(dialog, {
 
     for (const elem of document.querySelectorAll('input[type="text"]')) {
       const debounced = utils.debounce(onInputText, {withCancler: true});
-      fieldControllers.set(elem, debounced);
+      this.fieldControllers.set(elem, debounced);
       elem.addEventListener('input', (event) => {
         event.currentTarget.setCustomValidity('');
         debounced(event);
       });
     }
-  },
+  }
 
   onSubmit(event) {
     for (const elem of document.querySelectorAll('input[type="text"]')) {
       validateColorText(elem);
-      fieldControllers.get(elem).cancel();
+      this.fieldControllers.get(elem).cancel();
     }
     if (!event.currentTarget.reportValidity()) {
       return;
@@ -55,8 +53,8 @@ Object.assign(dialog, {
       bgUse: document.querySelector('#bg-use').checked,
     };
     this.close(value);
-  },
-});
+  }
+}
 
 function validateColorText(elem) {
   const target = document.getElementById(elem.dataset.for);
@@ -106,3 +104,6 @@ function onInputText(event) {
   const elem = event.target;
   validateColorText(elem);
 }
+
+/** @global */
+globalThis.dialog = ColorDialog.init();

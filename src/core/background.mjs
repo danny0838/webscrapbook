@@ -291,7 +291,7 @@ async function openModalWindow({
       const result = await utils.invokeContentScript({
         tabId: tab.id,
         frameId: 0,
-        cmd: 'dialog.init',
+        cmd: 'dialog.start',
         args,
       });
       resolve(result);
