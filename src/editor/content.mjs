@@ -1153,7 +1153,7 @@ editor.viewAnnotationsInternal = async function () {
   await utils.openModalWindow({
     url: browser.runtime.getURL('editor/annotations.html'),
     args: [{annotations}],
-    senderProp: '0.source',
+    senderProp: "1",
     windowCreateData: {width: 600, height: 600},
   });
 };
