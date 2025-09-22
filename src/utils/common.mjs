@@ -1078,7 +1078,11 @@ dialog {
   // launch modal window/tab
   invokeExtensionScript({
     cmd: 'background.openModalWindow',
-    args: [{...options, id}],
+    args: [{
+      cmd: "dialog.start",
+      ...options,
+      id,
+    }],
     senderProp: "1",
   }).then(resolve, reject);
 

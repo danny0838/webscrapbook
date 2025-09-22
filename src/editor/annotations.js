@@ -9,9 +9,9 @@ class AnnotationsDialog extends Dialog {
   /**
    * @param {Object} params
    * @param {Object[]} params.annotations
-   * @param {MessageSender} params.source
+   * @param {MessageSender} sender
    */
-  async start({annotations, source: {tab: {id: tabId}, frameId}}) {
+  async start({annotations}, {tab: {id: tabId}, frameId}) {
     await annotationViewer.init({annotations, tabId, frameId});
 
     document.body.hidden = false;

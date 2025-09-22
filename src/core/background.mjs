@@ -219,22 +219,16 @@ async function invokeEditorCommand({cmd, args, frameId = -1, frameIdExcept = -1}
 }
 
 /**
- * @param {Object} params
+ * @param {commandMessage} params
  * @param {string} params.id
  * @param {string|URL} params.url
- * @param {Array<*>} [params.args]
  * @param {Object} [params.windowCreateData]
  * @param {Object} [params.tabCreateData]
- * @param {string|string[]} [senderProp]
  * @param {MessageSender} sender
  */
 async function openModalWindow({
-  id,
-  url,
-  args,
-  windowCreateData,
-  tabCreateData,
-  senderProp,
+  id, url, cmd, args, senderProp,
+  windowCreateData, tabCreateData,
 }, sender) {
   const {promise, resolve, reject} = Promise.withResolvers();
 
@@ -276,7 +270,7 @@ async function openModalWindow({
       const result = await utils.invokeContentScript({
         tabId: tab.id,
         frameId: 0,
-        cmd: 'dialog.start',
+        cmd,
         args,
       });
       resolve(result);
