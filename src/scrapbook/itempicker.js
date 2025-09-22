@@ -2,38 +2,38 @@
  * Script for itempicker.html.
  *****************************************************************************/
 
+/* global dialog */
+
 import * as utils from "../utils/extension.mjs";
 import {Cache} from "../utils/cache.mjs";
-import {dialog} from "../core/dialog.js";
+import {Dialog} from "../core/dialog.mjs";
 import {server} from "./server.mjs";
 import {BookTree} from "./book-tree.mjs";
 
 utils.loadOptionsAuto(); // async
 
-const dialogOnLoad = dialog.onLoad;
-
-Object.assign(dialog, {
-  async init(args) {
+class ItemPickerDialog extends Dialog {
+  async start(args) {
     const {promise, resolve} = Promise.withResolvers();
     this.resolve = resolve;
     itempicker.init(args);
     return await promise;
-  },
+  }
 
   onLoad(event) {
-    dialogOnLoad.call(this);
+    super.onLoad(event);
 
     document.getElementById('recent').addEventListener('change', (event) => {
       const elem = event.target;
       itempicker.selectRecentItem(elem.value);
       elem.value = "";
     });
-  },
+  }
 
   onSubmit(event) {
     itempicker.save();
-  },
-});
+  }
+}
 
 const itempicker = {
   bookId: null,
@@ -239,6 +239,9 @@ const itempicker = {
     }
   },
 };
+
+/** @global */
+globalThis.dialog = ItemPickerDialog.init();
 
 /** @global */
 globalThis.itempicker = itempicker;

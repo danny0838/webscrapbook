@@ -1,12 +1,12 @@
 /******************************************************************************
- * Shared script for modal dialog windows.
+ * Script for insert-html.html.
  *****************************************************************************/
 
 import * as utils from "../utils/common.mjs";
-import {dialog} from "../core/dialog.js";
+import {Dialog} from "../core/dialog.mjs";
 
-Object.assign(dialog, {
-  async init(data) {
+class InsertHtmlDialog extends Dialog {
+  async start(data) {
     const preTagElem = document.querySelector('form [name="pre-tag"]');
     const preContextElem = document.querySelector('form [name="pre-context"]');
     const valueElem = document.querySelector('form [name="value"]');
@@ -32,7 +32,7 @@ Object.assign(dialog, {
     const {promise, resolve} = Promise.withResolvers();
     this.resolve = resolve;
     return await promise;
-  },
+  }
 
   onSubmit(event) {
     const value = {
@@ -41,5 +41,8 @@ Object.assign(dialog, {
       postContext: document.querySelector('form [name="post-context"]').value,
     };
     this.close(value);
-  },
-});
+  }
+}
+
+/** @global */
+globalThis.dialog = InsertHtmlDialog.init();
