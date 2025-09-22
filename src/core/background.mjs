@@ -283,8 +283,8 @@ async function openModalWindow({
       return;
     }
 
-    if (senderProp) {
-      args[senderProp] = sender;
+    if (sender && senderProp) {
+      utils.setDeepProp(args, senderProp, sender);
     }
 
     try {
