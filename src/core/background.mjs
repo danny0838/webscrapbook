@@ -48,8 +48,7 @@ async function getLastFocusedWindow({
  * @param {integer} params.frameId
  * @param {MessageSender} sender
  */
-async function invokeFrameScript({frameId, cmd, args}, sender) {
-  const tabId = sender.tab.id;
+async function invokeFrameScript({frameId, cmd, args}, {tab: {id: tabId}}) {
   return await utils.invokeContentScript({
     tabId, frameId, cmd, args,
   });
@@ -128,8 +127,8 @@ async function locateItem(params) {
  * @param {Object} [params]
  * @param {MessageSender} sender
  */
-async function captureCurrentTab(params = {}, sender) {
-  const task = Object.assign({tabId: sender.tab.id}, params);
+async function captureCurrentTab(params = {}, {tab: {id: tabId}}) {
+  const task = Object.assign({tabId}, params);
   return await utils.invokeCapture([task]);
 }
 
@@ -185,8 +184,8 @@ async function createSubPage({url, title}) {
  * @param {Object} [params]
  * @param {MessageSender} sender
  */
-async function registerActiveEditorTab({willEnable = true} = {}, sender) {
-  return editor.registerActiveEditorTab(sender.tab.id, willEnable);
+async function registerActiveEditorTab({willEnable = true} = {}, {tab: {id: tabId}}) {
+  return editor.registerActiveEditorTab(tabId, willEnable);
 }
 
 /**
@@ -194,8 +193,7 @@ async function registerActiveEditorTab({willEnable = true} = {}, sender) {
  * @param {Object} params
  * @param {MessageSender} sender
  */
-async function invokeEditorCommand({cmd, args, frameId = -1, frameIdExcept = -1}, sender) {
-  const tabId = sender.tab.id;
+async function invokeEditorCommand({cmd, args, frameId = -1, frameIdExcept = -1}, {tab: {id: tabId}}) {
   if (frameId !== -1) {
     const response = await utils.invokeContentScript({
       tabId, frameId, cmd, args,
