@@ -140,7 +140,7 @@ const editor = {
       this.enableUi(false);
       const response = await utils.invokeExtensionScript({
         cmd: "background.locateItem",
-        args: {url: this.target},
+        args: [{url: this.target}],
       });
       if (response === false) {
         alert(utils.lang("ErrorLocateSidebarNotOpened"));

@@ -139,7 +139,7 @@ const annotationViewer = {
       tabId: annotationViewer.tabId,
       frameId: annotationViewer.frameId,
       cmd: "editor.highlightAnnotation",
-      args: {id},
+      args: [{id}],
     });
   },
 

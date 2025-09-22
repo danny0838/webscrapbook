@@ -108,7 +108,7 @@ const editor = {
       const target = book.dataUrl + utils.escapeFilename(book.meta[id].index);
       const response = await utils.invokeExtensionScript({
         cmd: "background.locateItem",
-        args: {url: target},
+        args: [{url: target}],
       });
 
       if (response === false) {

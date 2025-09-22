@@ -31,7 +31,7 @@ function onDomContentLoaded(details) {
         tabId,
         frameId,
         cmd: "editor.initFrame",
-        args: status,
+        args: [status],
       });
     });
   }

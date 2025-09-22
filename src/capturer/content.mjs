@@ -9,7 +9,7 @@ import * as utils from "../utils/common.mjs";
 import {capturer} from "./common.mjs";
 
 /**
- * Invoke an invokable capturer method from another script.
+ * Invoke a capturer method from another script.
  *
  * - To invoke a background script, provide details.missionId or
  *   args.settings.missionId.
@@ -33,7 +33,7 @@ capturer.invoke = async function (method, args, details = {}) {
     return await utils.invokeFrameScript({frameWindow, cmd, args});
   } else {
     // to capturer.html page
-    const id = missionId || args?.settings?.missionId;
+    const id = missionId || args?.[0]?.settings?.missionId;
     if (!id) {
       throw new Error(`missionId is required to invoke from a content script.`);
     }
@@ -70,7 +70,7 @@ capturer.downloadFile = async function (params) {
     }
   }
 
-  return await capturer.invoke("downloadFile", params);
+  return await capturer.invoke("downloadFile", [params]);
 };
 
 /**
@@ -101,7 +101,7 @@ capturer.fetchCss = async function (params) {
     }
   }
 
-  return await capturer.invoke("fetchCss", params);
+  return await capturer.invoke("fetchCss", [params]);
 };
 
 /**
@@ -132,7 +132,7 @@ capturer.captureUrl = async function (params) {
     }
   }
 
-  return await capturer.invoke("captureUrl", params);
+  return await capturer.invoke("captureUrl", [params]);
 };
 
 /**
@@ -148,7 +148,7 @@ capturer.saveDocument = async function (params) {
   // pass blob data to the extention script through cache
   params.data.blob = await capturer.saveBlobCache(params.data.blob);
 
-  return await capturer.invoke("saveDocument", params);
+  return await capturer.invoke("saveDocument", [params]);
 };
 
 export * from "./common.mjs";

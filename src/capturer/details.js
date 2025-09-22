@@ -396,11 +396,11 @@ function onBookIdChange(event) {
 async function onFillParentIdClick(event) {
   const result = await utils.openModalWindow({
     url: browser.runtime.getURL("scrapbook/itempicker.html"),
-    args: {
+    args: [{
       bookId: getOptionFromElement(document.getElementById('tasks_bookId')),
       recentItemsKey: 'scrapbookLastPickedItems',
       withRelation: !document.getElementById('tasks_index').matches(':disabled'),
-    },
+    }],
     windowCreateData: {width: 350, height: 600},
   });
   if (result) { pickItem(result); }
@@ -456,7 +456,7 @@ async function onFillDownLinkDocUrlFilterChange(event) {
       case "selectedLinks":
       case "allLinks": {
         const cmd = "capturer.retrieveSelectedLinks";
-        const args = {select: command === 'selectedLinks' ? 'selected' : 'all'};
+        const args = [{select: command === 'selectedLinks' ? 'selected' : 'all'}];
         const tasks = gTaskInfo.tasks.map(({tabId, frameId = 0}) => (async () => {
           try {
             if (!Number.isInteger(tabId)) {
