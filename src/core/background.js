@@ -723,11 +723,11 @@ function initExternalMessageListener() {
         break;
       }
       case "invokeCapture": {
-        result = utils.invokeCapture(args);
+        result = utils.invokeCapture(...(args || []));
         break;
       }
       case "invokeCaptureEx": {
-        result = utils.invokeCaptureEx(args);
+        result = utils.invokeCaptureEx(...(args || []));
         break;
       }
       default: {

@@ -788,7 +788,7 @@ const loadLanguages = (() => {
  * @typedef {Object} commandMessage
  * @property {string} [id]
  * @property {string|string[]} cmd
- * @property {*} [args]
+ * @property {Array<*>} [args]
  */
 
 /**
@@ -831,7 +831,7 @@ function addMessageListener(
     // thrown Error don't show here but cause the sender to receive an error
     return Promise.resolve()
       .then(() => {
-        return invokeMethod(target, cmd, [args, sender]);
+        return invokeMethod(target, cmd, [...(args || []), sender]);
       })
       .catch(errorHandler);
   };
@@ -872,7 +872,7 @@ async function initContentScripts(tabId, frameId) {
               injectImmediately: true,
               files: CONTENT_SCRIPT_FILES,
             });
-            await browser.tabs.sendMessage(tabId, {cmd: "core.init", args: {frameId}}, {frameId});
+            await browser.tabs.sendMessage(tabId, {cmd: "core.init", args: [{frameId}]}, {frameId});
           } catch (ex) {
             // Chromium may fail to inject content script to some pages due to unclear reason.
             // Record the error and pass.
@@ -955,7 +955,7 @@ function invokeMethod(target, cmd, args) {
  */
 
 /**
- * Invoke an invokable command in the extension script.
+ * Invoke a function in the extension script.
  *
  * @param {commandMessage} params
  * @return {Promise<*>}
@@ -968,7 +968,7 @@ async function invokeExtensionScript({id, cmd, args}) {
 }
 
 /**
- * Invoke an invokable command in the content script.
+ * Invoke a function in the content script.
  *
  * @param {commandMessage} params
  * @param {integer} params.tabId
@@ -983,7 +983,7 @@ async function invokeContentScript({tabId, frameId, cmd, args}) {
 }
 
 /**
- * Invoke an invokable command in a frame.
+ * Invoke a function in a frame.
  *
  * @param {commandMessage} params
  * @param {Window} params.frameWindow
@@ -1009,7 +1009,7 @@ async function invokeFrameScript({frameWindow, cmd, args}) {
   if (frameId) {
     return await invokeExtensionScript({
       cmd: "background.invokeFrameScript",
-      args: {frameId, cmd, args},
+      args: [{frameId, cmd, args}],
     });
   }
 }
@@ -1074,7 +1074,7 @@ dialog {
   // launch modal window/tab
   invokeExtensionScript({
     cmd: 'background.openModalWindow',
-    args: {...options, id},
+    args: [{...options, id}],
   }).then(resolve, reject);
 
   try {
@@ -1083,7 +1083,7 @@ dialog {
     // close the dialog window/tab if interrupted
     invokeExtensionScript({
       cmd: 'background.openModalWindow.close',
-      args: {id},
+      args: [{id}],
     }).catch(() => {});
     return null;
   } finally {
@@ -3821,7 +3821,7 @@ async function getScreenBounds(refWindow, {
 async function promptWindow(message = '', defaultValue = '') {
   const result = await openModalWindow({
     url: browser.runtime.getURL('core/prompt.html'),
-    args: {message, defaultValue},
+    args: [{message, defaultValue}],
   });
   return result?.input;
 }

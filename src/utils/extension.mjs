@@ -23,7 +23,7 @@ import {Cache} from "./cache.mjs";
  ***************************************************************************/
 
 /**
- * Invoke an invokable command in the background script.
+ * Invoke a function in the background script.
  *
  * @param {commandMessage} params
  * @param {string} params.cmd - without prefix "background."
@@ -32,7 +32,7 @@ import {Cache} from "./cache.mjs";
 function invokeBackgroundScript({cmd, args}) {
   // if this is the background page
   if (globalThis.background) {
-    return invokeMethod(globalThis.background, cmd, [args]);
+    return invokeMethod(globalThis.background, cmd, args);
   }
 
   return invokeExtensionScript({cmd: `background.${cmd}`, args});
@@ -136,7 +136,7 @@ async function visitLink({
   if (inNormalWindow && browser.windows) {
     const win = await invokeBackgroundScript({
       cmd: "getLastFocusedWindow",
-      args: {windowTypes: ['normal'], populate: !newTab},
+      args: [{windowTypes: ['normal'], populate: !newTab}],
     });
 
     if (!win) {
@@ -403,9 +403,9 @@ async function invokeCaptureBatchLinks(taskInfo) {
           tabId,
           frameId,
           cmd: "capturer.retrieveSelectedLinks",
-          args: {
+          args: [{
             select: fullPage ? 'all' : undefined,
-          },
+          }],
         });
       })
       .catch((ex) => {
@@ -534,7 +534,7 @@ async function editTab({tabId, frameId = 0, willActive, force}) {
     tabId,
     frameId,
     cmd: "editor.init",
-    args: {willActive, force},
+    args: [{willActive, force}],
   });
 }
 

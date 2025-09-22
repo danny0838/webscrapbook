@@ -28,7 +28,7 @@ chrome.runtime.onConnect.addListener((port) => {
   port.onMessage.addListener(async (message, port) => {
     const {id, cmd, args} = message;
     try {
-      await window[cmd](args, port);
+      await global[cmd](...(args || []), port);
     } catch (ex) {
       port.postMessage({id, error: {message: ex.message}});
     }
@@ -41,7 +41,7 @@ chrome.runtime.onConnect.addListener((port) => {
 window.addEventListener('WsbTest', async (event) => {
   const {id, cmd, args} = event.detail;
   try {
-    const response = await global[cmd](args);
+    const response = await global[cmd](...(args || []));
     window.dispatchEvent(new CustomEvent("WsbTestResolve", {
       detail: {id, response},
     }));
@@ -56,7 +56,7 @@ function onRadioInput(event) {
   const elem = event.currentTarget;
   if (elem.checked) {
     const value = Boolean(elem.value);
-    messagePort.postMessage({cmd: 'result', args: {value}});
+    messagePort.postMessage({cmd: 'result', args: [value]});
   }
 }
 

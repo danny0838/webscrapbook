@@ -128,7 +128,7 @@ capturer.error = function (...msg) {
 };
 
 /**
- * Invoke an invokable capturer method from another script.
+ * Invoke a capturer method from another script.
  *
  * This overrides the same method in common.js, and should take compatible
  * parameters.
@@ -151,7 +151,7 @@ capturer.invoke = async function (method, args, details = {}) {
     return await utils.invokeContentScript({tabId, frameId, cmd, args});
   } else {
     // capturer.html call self
-    return utils.invokeMethod(capturer, method, [args]);
+    return utils.invokeMethod(capturer, method, args);
   }
 };
 
@@ -1284,7 +1284,7 @@ capturer.captureGeneral = async function ({
 
     await utils.invokeExtensionScript({
       cmd: "background.onCaptureEnd",
-      args: {url: utils.normalizeUrl(response.sourceUrl)},
+      args: [{url: utils.normalizeUrl(response.sourceUrl)}],
     });
 
     // preserve info if error out
@@ -1332,10 +1332,10 @@ capturer.captureTab = async function ({
   }
 
   const source = `[${tabId}${(frameId ? ':' + frameId : '')}] ${url}`;
-  const message = {
+  const message = [{
     settings,
     options,
-  };
+  }];
 
   capturer.log(`Capturing (document) ${source} ...`);
 
@@ -1453,14 +1453,14 @@ capturer.captureRemoteTab = async function ({
   });
 
   try {
-    return await capturer.invoke("captureDocumentOrFile", {
+    return await capturer.invoke("captureDocumentOrFile", [{
       refUrl,
       refPolicy,
       settings: Object.assign({}, settings, {
         fullPage: true,
       }),
       options,
-    }, {
+    }], {
       tabId: tab.id,
       frameId: 0,
     });
@@ -1828,13 +1828,13 @@ Bookmark for <a href="${utils.escapeHtml(sourceUrl)}">${utils.escapeHtml(sourceU
     options,
   });
 
-  const registry = await capturer.invoke("registerDocument", {
+  const registry = await capturer.invoke("registerDocument", [{
     docUrl: sourceUrl,
     mime: "text/html",
     role: "document",
     settings,
     options,
-  });
+  }]);
 
   const documentFileName = registry.filename;
 
@@ -1937,13 +1937,13 @@ Redirecting to file <a href="${utils.escapeHtml(response.url)}">${utils.escapeHt
     options,
   });
 
-  const registry = await capturer.invoke("registerDocument", {
+  const registry = await capturer.invoke("registerDocument", [{
     docUrl: sourceUrl,
     mime: "text/html",
     role: "document",
     settings,
     options,
-  });
+  }]);
 
   const documentFileName = registry.filename;
 
@@ -2048,12 +2048,12 @@ capturer.resaveTab = async function ({
         }
       });
 
-      const message = {
+      const message = [{
         internalize,
         isMainPage: isMainDocument,
         item,
         options: Object.assign(await utils.getOptions("capture"), options),
-      };
+      }];
 
       isDebug && console.debug("(main) send", source, message);
       const response = await capturer.invoke("retrieveDocumentContent", message, {tabId, frameId});
@@ -3552,10 +3552,10 @@ Redirecting to <a href="${utils.escapeHtml(target)}">${utils.escapeHtml(target, 
 
       getTargetDirName: {
         const dir = utils.filepathParts(settings.indexFilename)[0];
-        const newFilename = await capturer.invoke("getAvailableSaveFilename", {
+        const newFilename = await capturer.invoke("getAvailableSaveFilename", [{
           filename: settings.indexFilename,
           options,
-        });
+        }]);
         settings.indexFilename = (dir ? dir + '/' : '') + newFilename;
       }
 

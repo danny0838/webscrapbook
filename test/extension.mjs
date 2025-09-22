@@ -146,8 +146,9 @@ async function openPageTab(url) {
 async function openTestTab(createProperties, handler) {
   if (typeof handler === 'undefined') {
     handler = (message, port, resolve) => {
-      if (message.cmd == 'result') {
-        resolve(message.args.value);
+      const {cmd, args} = message;
+      if (cmd === 'result') {
+        resolve(args[0]);
       }
     };
   }
@@ -186,7 +187,7 @@ async function capture(params, options = {}) {
     await delay(delayTime);
   }
 
-  const args = {
+  const args = [{
     taskInfo: {
       tasks: [
         headless ? params : Object.assign({
@@ -206,7 +207,7 @@ async function capture(params, options = {}) {
       left: window.screen.availWidth - 50,
     },
     waitForResponse: true,
-  };
+  }];
 
   const {result: response} = await browser.runtime.sendMessage(config["wsb_extension_id"], {
     cmd: "invokeCaptureEx",
