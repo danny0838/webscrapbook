@@ -900,7 +900,6 @@ capturer.resolveRedirects = async function (params) {
 };
 
 /**
- * @type invokable
  * @param {Object} params
  * @param {Object} params.item
  * @param {string} params.parentId
@@ -972,16 +971,12 @@ capturer.addItemToServer = async function ({item, parentId, index}) {
 };
 
 /**
- * @type invokable
  * @return {Promise<Object>}
  */
 capturer.getMissionResult = async function () {
   return capturePromise;
 };
 
-/**
- * @type invokable
- */
 capturer.remoteMsg = async function ({msg, type}) {
   if (['log', 'warn', 'error'].includes(type)) {
     capturer[type](...msg);
@@ -1861,7 +1856,6 @@ Bookmark for <a href="${utils.escapeHtml(sourceUrl)}">${utils.escapeHtml(sourceU
 };
 
 /**
- * @type invokable
  * @param {Object} params
  * @param {string} params.url - may include hash
  * @param {string} [params.refUrl] - the referrer URL
@@ -2793,7 +2787,6 @@ capturer.getRegisterToken = function (url, role) {
  * - If role is not provided, return a non-uniquified document filename
  *   without registration.
  *
- * @type invokable
  * @param {Object} params
  * @param {string} params.docUrl
  * @param {string} params.mime
@@ -2940,7 +2933,6 @@ capturer.registerDocument = async function (params) {
  * - If role is not provided, return a non-uniquified filename without
  *   registration.
  *
- * @type invokable
  * @param {string} params.url
  * @param {string} [params.role] - "resource", "css", "css-*" (dynamic)
  * @param {captureSettings} params.settings
@@ -3199,7 +3191,6 @@ capturer.downLinkUrlFilter = function (url, options) {
 };
 
 /**
- * @type invokable
  * @param {Object} params
  * @param {Object} params.data
  * @param {transferableBlob} params.data.blob
@@ -3252,7 +3243,6 @@ capturer.saveDocument = async function (params) {
  */
 
 /**
- * @type invokable
  * @param {Object} params
  * @param {Object} [params.data]
  * @param {transferableBlob} [params.data.blob]
@@ -3584,7 +3574,6 @@ Redirecting to <a href="${utils.escapeHtml(target)}">${utils.escapeHtml(target, 
 };
 
 /**
- * @type invokable
  * @param {Object} params
  * @param {string} params.url - may include hash
  * @param {string} [params.refUrl] - the referrer URL
@@ -3658,7 +3647,6 @@ capturer.downloadFile = async function (params) {
 /**
  * Fetch a remote CSS and resolve its charset and text.
  *
- * @type invokable
  * @param {Object} params
  * @param {string} params.url
  * @param {string} [params.refUrl]
@@ -3699,7 +3687,6 @@ capturer.fetchCss = async function (params) {
  */
 
 /**
- * @type invokable
  * @param {Object} params
  * @param {transferableBlob} params.blob - may include charset
  * @param {string} [params.filename] - validated and unique; may be absent when

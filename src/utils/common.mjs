@@ -948,13 +948,6 @@ function invokeMethod(target, cmd, args) {
 }
 
 /**
- * A function that can be invoked through messaging.
- *
- * @typedef {Function} invokable
- * @property {Object} [params]
- */
-
-/**
  * Invoke a function in the extension script.
  *
  * @param {commandMessage} params
