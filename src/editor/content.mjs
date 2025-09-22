@@ -1677,6 +1677,7 @@ editor.save = async function (params = {}) {
     return await utils.invokeExtensionScript({
       cmd: "background.captureCurrentTab",
       args: [{mode: params.internalize ? "internalize" : "resave"}],
+      senderProp: "1",
     });
   } else {
     await editor.invokeEditorCommand({
@@ -1685,6 +1686,7 @@ editor.save = async function (params = {}) {
     return await utils.invokeExtensionScript({
       cmd: "background.captureCurrentTab",
       args: [{}],
+      senderProp: "1",
     });
   }
 };
@@ -1759,6 +1761,7 @@ editor.open = async function () {
   await utils.invokeExtensionScript({
     cmd: "background.registerActiveEditorTab",
     args: [{willEnable: true}],
+    senderProp: "1",
   });
   await editor.invokeEditorCommand({
     cmd: "editor.openInternal",
@@ -1780,6 +1783,7 @@ editor.close = async function () {
   await utils.invokeExtensionScript({
     cmd: "background.registerActiveEditorTab",
     args: [{willEnable: false}],
+    senderProp: "1",
   });
   await editor.invokeEditorCommand({
     cmd: "editor.closeInternal",
@@ -2046,6 +2050,7 @@ editor.invokeEditorCommand = async function ({cmd, args, frameId, frameIdExcept}
   return await utils.invokeExtensionScript({
     cmd: "background.invokeEditorCommand",
     args: [{cmd, args, frameId, frameIdExcept}],
+    senderProp: "1",
   });
 };
 
