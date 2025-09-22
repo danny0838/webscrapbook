@@ -82,7 +82,6 @@ const capturer = {};
  */
 
 /**
- * @type invokable
  * @memberof capturer
  * @param {Object} params
  * @param {Document} [params.doc]
@@ -149,7 +148,6 @@ capturer.captureDocumentOrFile = async function (params) {
  */
 
 /**
- * @type invokable
  * @memberof capturer
  * @param {Object} params
  * @param {Document} [params.doc]
@@ -3382,7 +3380,6 @@ capturer.captureDocument = async function (params) {
  */
 
 /**
- * @type invokable
  * @memberof capturer
  * @param {Object} params
  * @param {Document} [params.doc]
@@ -4106,7 +4103,6 @@ capturer.preSaveProcess = async function (params) {
 };
 
 /**
- * @type invokable
  * @param {Object} params
  * @param {Document} [params.doc]
  * @param {string} [params.select]

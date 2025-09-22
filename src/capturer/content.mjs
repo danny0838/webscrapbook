@@ -43,7 +43,6 @@ capturer.invoke = async function (method, args, details = {}) {
 };
 
 /**
- * @type invokable
  * @memberof capturer
  * @variation 2
  * @param {Object} params - See {@link capturer.downloadFile}.
@@ -74,7 +73,6 @@ capturer.downloadFile = async function (params) {
 };
 
 /**
- * @type invokable
  * @memberof capturer
  * @variation 2
  * @param {Object} params - See {@link capturer.fetchCss}.
@@ -105,7 +103,6 @@ capturer.fetchCss = async function (params) {
 };
 
 /**
- * @type invokable
  * @memberof capturer
  * @variation 2
  * @param {Object} params - See {@link capturer.captureUrl}.
@@ -136,7 +133,6 @@ capturer.captureUrl = async function (params) {
 };
 
 /**
- * @type invokable
  * @memberof capturer
  * @variation 2
  * @param {Object} params - See {@link capturer.saveDocument}.

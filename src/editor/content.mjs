@@ -93,9 +93,6 @@ height: 100vh;`;
  * Invokables
  ***************************************************************************/
 
-/**
- * @type invokable
- */
 editor.init = async function ({willActive = !editor.active, force = false} = {}) {
   if (!willActive) {
     return editor.close();
@@ -847,9 +844,6 @@ editor.init = async function ({willActive = !editor.active, force = false} = {})
   return editor.open();
 };
 
-/**
- * @type invokable
- */
 editor.initFrame = async function ({
   active = true,
   annotatorActive = true,
@@ -868,9 +862,6 @@ editor.initFrame = async function ({
   editor.mutationHandler.toggle({willActive: mutationHandlerActive});
 };
 
-/**
- * @type invokable
- */
 editor.getStatus = function () {
   return {
     active: this.active,
@@ -881,30 +872,18 @@ editor.getStatus = function () {
   };
 };
 
-/**
- * @type invokable
- */
 editor.openInternal = function () {
   document.documentElement.setAttribute('data-scrapbook-toolbar-active', '');
 };
 
-/**
- * @type invokable
- */
 editor.closeInternal = function () {
   document.documentElement.removeAttribute('data-scrapbook-toolbar-active');
 };
 
-/**
- * @type invokable
- */
 editor.getFocusedFrameIdInternal = function () {
   return {frameId: core.frameId, time: editor.lastWindowBlurTime};
 };
 
-/**
- * @type invokable
- */
 editor.lineMarkerInternal = function ({tagName = 'span', attrs = {}} = {}) {
   editor.addHistory();
 
@@ -1154,9 +1133,6 @@ function getAnnotationsSummary(annotationElems) {
   return rv;
 }
 
-/**
- * @type invokable
- */
 editor.highlightAnnotation = function ({elem, id, sel}) {
   if (!elem && id) {
     elem = document.querySelector(`[data-scrapbook-id="${CSS.escape(id)}"]`);
@@ -1171,9 +1147,6 @@ editor.highlightAnnotation = function ({elem, id, sel}) {
   elem.scrollIntoView();
 };
 
-/**
- * @type invokable
- */
 editor.viewAnnotationsInternal = async function () {
   const annotationElems = getAnnotationElems({includeHidden: true});
   const annotations = getAnnotationsSummary(annotationElems);
@@ -1185,9 +1158,6 @@ editor.viewAnnotationsInternal = async function () {
   });
 };
 
-/**
- * @type invokable
- */
 editor.locateAnnotationInternal = function ({offset = 0} = {}) {
   // collect valid annotation elements
   const annotationElems = getAnnotationElems();
@@ -1209,9 +1179,6 @@ editor.locateAnnotationInternal = function ({offset = 0} = {}) {
   editor.highlightAnnotation({elem, sel});
 };
 
-/**
- * @type invokable
- */
 editor.eraseNodesInternal = function () {
   editor.addHistory();
 
@@ -1224,9 +1191,6 @@ editor.eraseNodesInternal = function () {
   }
 };
 
-/**
- * @type invokable
- */
 editor.eraseSelectorInternal = function ({selector}) {
   editor.addHistory();
 
@@ -1241,9 +1205,6 @@ editor.eraseSelectorInternal = function ({selector}) {
   }
 };
 
-/**
- * @type invokable
- */
 editor.eraseXpathInternal = function ({selector}) {
   editor.addHistory();
 
@@ -1263,9 +1224,6 @@ editor.eraseXpathInternal = function ({selector}) {
   }
 };
 
-/**
- * @type invokable
- */
 editor.uneraseNodesInternal = function () {
   editor.addHistory();
 
@@ -1280,9 +1238,6 @@ editor.uneraseNodesInternal = function () {
   }
 };
 
-/**
- * @type invokable
- */
 editor.uneraseAllNodesInternal = function () {
   editor.addHistory();
 
@@ -1311,9 +1266,6 @@ editor.uneraseAllNodesInternal = function () {
   while (unerase()) {}
 };
 
-/**
- * @type invokable
- */
 editor.removeEditsInternal = function () {
   editor.addHistory();
 
@@ -1329,9 +1281,6 @@ editor.removeEditsInternal = function () {
   }
 };
 
-/**
- * @type invokable
- */
 editor.removeAllEditsInternal = function () {
   editor.addHistory();
 
@@ -1351,18 +1300,12 @@ editor.removeAllEditsInternal = function () {
   }
 };
 
-/**
- * @type invokable
- */
 editor.undoInternal = function () {
   if (!document.body) { return; }
 
   mutationHandler.applyRestorePoint();
 };
 
-/**
- * @type invokable
- */
 editor.deleteErasedInternal = function () {
   editor.addHistory();
 
@@ -1383,18 +1326,12 @@ editor.deleteErasedInternal = function () {
   }
 };
 
-/**
- * @type invokable
- */
 editor.editTitleInternal = function () {
   let title = prompt(utils.lang('EditorButtonSaveEditTitlePrompt'), document.title);
   if (title === null) { return; }
   document.title = title;
 };
 
-/**
- * @type invokable
- */
 editor.setViewportInternal = function () {
   let viewportElem = document.querySelector('meta[name="viewport"i]');
   let viewportDeclaration = viewportElem ? viewportElem.getAttribute('content') : 'width=device-width, initial-scale=1.0';
@@ -2289,9 +2226,6 @@ const annotator = editor.annotator = (function () {
   const annotator = {
     active: false,
 
-    /**
-     * @type invokable
-     */
     toggle({willActive = !this.active} = {}) {
       if (willActive) {
         if (!this.active) {
@@ -2335,9 +2269,6 @@ const annotator = editor.annotator = (function () {
       }
     },
 
-    /**
-     * @type invokable
-     */
     async editLineMarker(elem) {
       // this is unexpected
       if (elem.shadowRoot) { return; }
@@ -2367,7 +2298,6 @@ const annotator = editor.annotator = (function () {
     },
 
     /**
-     * @type invokable
      * @param {boolean} [richText] - Whether content is rich text.
      * @param {Node|false} [refNode] - The ref node to create a sticky note
      *   around. Auto-detected by selection when unspecified. False to not
@@ -2743,9 +2673,6 @@ const domEraser = editor.domEraser = (function () {
   const domEraser = {
     active: false,
 
-    /**
-     * @type invokable
-     */
     toggle({willActive = !this.active} = {}) {
       if (willActive) {
         if (!this.active) {
@@ -2972,9 +2899,6 @@ const domEraser = editor.domEraser = (function () {
 const htmlEditor = editor.htmlEditor = {
   active: false,
 
-  /**
-   * @type invokable
-   */
   async toggle({willActive = !this.active} = {}) {
     if (willActive) {
       if (!this.active) {
@@ -3461,9 +3385,6 @@ const mutationHandler = editor.mutationHandler = (function () {
     active: true,
     history: [],
 
-    /**
-     * @type invokable
-     */
     toggle({willActive = !this.active} = {}) {
       if (willActive) {
         if (!this.active) {

@@ -6,8 +6,6 @@ let frameId = null;
 
 /**
  * Initialize value for frameId.
- *
- * @type invokable
  */
 async function init({frameId: newFrameId}) {
   frameId = newFrameId;
@@ -15,8 +13,6 @@ async function init({frameId: newFrameId}) {
 
 /**
  * Return true to confirm that content script is loaded.
- *
- * @type invokable
  */
 async function isScriptLoaded() {
   return true;

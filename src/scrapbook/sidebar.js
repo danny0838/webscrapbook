@@ -993,8 +993,6 @@ const sidebar = {
    * Locate item position in the sidebar.
    *
    * Provide {bookId, id}, {url}, or {bookId, url}.
-   *
-   * @type invokable
    */
   async locate({bookId, id, url}) {
     if (this.mode !== 'normal') { return null; }
