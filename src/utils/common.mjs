@@ -789,6 +789,7 @@ const loadLanguages = (() => {
  * @property {string} [id]
  * @property {string|string[]} cmd
  * @property {Array<*>} [args]
+ * @property {string|string[]} [senderProp]
  */
 
 /**
@@ -820,18 +821,26 @@ function addMessageListener(
   const listener = (message, sender) => {
     if (filter && !filter(message, sender)) { return; }
 
-    const {cmd, args} = message;
+    const {cmd, args, senderProp} = message;
     const senderInfo = '[' +
       (sender.tab ? sender.tab.id : -1) +
       (typeof sender.frameId !== 'undefined' ? ':' + sender.frameId : '') +
       ']';
+
+    if (sender && senderProp) {
+      try {
+        setDeepProp(args, senderProp, sender);
+      } catch (ex) {
+        throw new Error(`Failed to assign sender: ${ex}`);
+      }
+    }
 
     isDebug && console.debug(cmd, "receive", senderInfo, args);
 
     // thrown Error don't show here but cause the sender to receive an error
     return Promise.resolve()
       .then(() => {
-        return invokeMethod(target, cmd, [...(args || []), sender]);
+        return invokeMethod(target, cmd, args);
       })
       .catch(errorHandler);
   };
@@ -953,9 +962,9 @@ function invokeMethod(target, cmd, args) {
  * @param {commandMessage} params
  * @return {Promise<*>}
  */
-async function invokeExtensionScript({id, cmd, args}) {
+async function invokeExtensionScript({id, cmd, args, senderProp}) {
   isDebug && console.debug(cmd, "send to extension page", args);
-  const response = await browser.runtime.sendMessage({id, cmd, args});
+  const response = await browser.runtime.sendMessage({id, cmd, args, senderProp});
   isDebug && console.debug(cmd, "response from extension page", response);
   return response;
 }
@@ -1003,6 +1012,7 @@ async function invokeFrameScript({frameWindow, cmd, args}) {
     return await invokeExtensionScript({
       cmd: "background.invokeFrameScript",
       args: [{frameId, cmd, args}],
+      senderProp: "1",
     });
   }
 }
@@ -1068,6 +1078,7 @@ dialog {
   invokeExtensionScript({
     cmd: 'background.openModalWindow',
     args: [{...options, id}],
+    senderProp: "1",
   }).then(resolve, reject);
 
   try {
