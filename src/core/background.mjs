@@ -19,7 +19,6 @@ const focusedWindows = new Map();
  * (the window "on top"), rather than the window the user last activates a
  * tab within.
  *
- * @type invokable
  * @param {Object} params
  * @param {boolean} [params.populate]
  * @param {WindowType[]} [params.windowTypes]
@@ -43,7 +42,6 @@ async function getLastFocusedWindow({
 }
 
 /**
- * @type invokable
  * @param {commandMessage} params
  * @param {integer} params.frameId
  * @param {MessageSender} sender
@@ -54,9 +52,6 @@ async function invokeFrameScript({frameId, cmd, args}, {tab: {id: tabId}}) {
   });
 }
 
-/**
- * @type invokable
- */
 async function findBookIdFromUrl({url}) {
   await server.init(true);
   return await server.findBookIdFromUrl(url);
@@ -65,7 +60,6 @@ async function findBookIdFromUrl({url}) {
 /**
  * Attempt to locate an item in the sidebar.
  *
- * @type invokable
  * @return {Object|null|false} The located item.
  *   - Object: the located item
  *   - null: no item located
@@ -123,7 +117,6 @@ async function locateItem(params) {
 }
 
 /**
- * @type invokable
  * @param {Object} params
  * @param {MessageSender} sender
  */
@@ -132,9 +125,6 @@ async function captureCurrentTab(params, {tab: {id: tabId}}) {
   return await utils.invokeCapture([task]);
 }
 
-/**
- * @type invokable
- */
 async function createSubPage({url, title}) {
   await server.init(true);
 
@@ -180,7 +170,6 @@ async function createSubPage({url, title}) {
 }
 
 /**
- * @type invokable
  * @param {Object} params
  * @param {MessageSender} sender
  */
@@ -189,7 +178,6 @@ async function registerActiveEditorTab({willEnable = true}, {tab: {id: tabId}}) 
 }
 
 /**
- * @type invokable
  * @param {Object} params
  * @param {MessageSender} sender
  */
@@ -231,7 +219,6 @@ async function invokeEditorCommand({cmd, args, frameId = -1, frameIdExcept = -1}
 }
 
 /**
- * @type invokable
  * @param {Object} params
  * @param {string} params.id
  * @param {string|URL} params.url
@@ -317,9 +304,6 @@ Object.assign(openModalWindow, {
   },
 });
 
-/**
- * @type invokable
- */
 async function onServerTreeChange() {
   const tasks = [];
 
@@ -352,7 +336,6 @@ async function onServerTreeChange() {
 }
 
 /**
- * @type invokable
  * @param {Object} params
  * @param {string} params.url
  */
@@ -362,7 +345,6 @@ async function onCaptureEnd({url}) {
 }
 
 /**
- * @type invokable
  * @param {Object} [options]
  */
 async function getGeoLocation(options) {
