@@ -918,6 +918,18 @@ function getDeepProp(obj, prop) {
 }
 
 /**
+ * Set deep property like "foo.bar.0" or ["foo", "bar.baz"] for an object.
+ *
+ * @param {Object} obj
+ * @param {string|string[]} prop
+ * @param {*} [value]
+ */
+function setDeepProp(obj, prop, value) {
+  const [object, subProp] = getDeepProp(obj, prop);
+  object[subProp] = value;
+}
+
+/**
  * Invoke a command with arguments on an object.
  *
  * @param {Object} target
@@ -3893,6 +3905,7 @@ export {
   addMessageListener,
   initContentScripts,
   getDeepProp,
+  setDeepProp,
   invokeMethod,
   invokeExtensionScript,
   invokeContentScript,
