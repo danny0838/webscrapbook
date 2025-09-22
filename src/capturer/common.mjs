@@ -119,7 +119,7 @@ capturer.captureDocumentOrFile = async function (params) {
       });
     }
 
-    return await capturer.invoke("captureFile", {
+    return await capturer.invoke("captureFile", [{
       url: doc.URL,
       refUrl,
       refPolicy,
@@ -128,7 +128,7 @@ capturer.captureDocumentOrFile = async function (params) {
         title: settings.title || doc.title,
       }),
       options,
-    });
+    }]);
   }
 
   // otherwise, capture as document
@@ -171,11 +171,11 @@ capturer.captureDocument = async function (params) {
   isDebug && console.debug("call: captureDocument", params);
 
   const warn = async (...msg) => {
-    return capturer.invoke("remoteMsg", {
+    return capturer.invoke("remoteMsg", [{
       msg,
       type: 'warn',
       settings, // for missionId
-    });
+    }]);
   };
 
   // add hash and error handling
@@ -1395,12 +1395,12 @@ capturer.captureDocument = async function (params) {
                 // frame window accessible:
                 // capture the content document through messaging if viable
                 if (frameWindow) {
-                  const response = await capturer.invoke("captureDocumentOrFile", {
+                  const response = await capturer.invoke("captureDocumentOrFile", [{
                     refUrl,
                     refPolicy,
                     settings: frameSettings,
                     options,
-                  }, {frameWindow}).catch(captureFrameErrorHandler);
+                  }], {frameWindow}).catch(captureFrameErrorHandler);
                   // undefined for data URL, sandboxed blob URL, etc.
                   if (response) {
                     return captureFrameCallback(response);
@@ -2788,7 +2788,7 @@ capturer.captureDocument = async function (params) {
 
   // register the main document before parsing so that it goes before
   // sub-frame documents.
-  const registry = await capturer.invoke("registerDocument", {
+  const registry = await capturer.invoke("registerDocument", [{
     docUrl,
     mime,
     role: (options["capture.saveAs"] === "singleHtml" || (docUrl.startsWith("data:") && !options["capture.saveDataUriAsFile"])) ? undefined :
@@ -2796,7 +2796,7 @@ capturer.captureDocument = async function (params) {
         `document-${utils.getUuid()}`,
     settings,
     options,
-  });
+  }]);
 
   // if a previous registry exists, return it (except for the main document,
   // which should only happen during a merge capture)
@@ -3184,13 +3184,13 @@ capturer.captureDocument = async function (params) {
           const refPolicy = docRefPolicy;
           const url = u.origin + '/' + 'favicon.ico';
           tasks.push(async () => {
-            const fetchResponse = await capturer.invoke("fetch", {
+            const fetchResponse = await capturer.invoke("fetch", [{
               url: url,
               refUrl,
               refPolicy,
               settings,
               options,
-            });
+            }]);
             if (!fetchResponse.error) {
               const favIconNode = headNode.appendChild(newDoc.createElement('link'));
               favIconNode.rel = 'shortcut icon';
@@ -4541,11 +4541,11 @@ class DocumentCssHandler {
   }
 
   warn(msg) {
-    return capturer.invoke("remoteMsg", {
+    return capturer.invoke("remoteMsg", [{
       msg,
       type: 'warn',
       settings: this.settings, // for missionId
-    });
+    }]);
   }
 
   /**
@@ -5494,14 +5494,14 @@ class DocumentCssHandler {
         break registerFilename;
       }
 
-      const registry = await capturer.invoke("registerFile", {
+      const registry = await capturer.invoke("registerFile", [{
         url: sourceUrl,
         role: options["capture.saveAs"] === "singleHtml" ? undefined :
             isDynamic ? `css-${utils.getUuid()}` :
             envCharset ? `css-${envCharset.toLowerCase()}` : 'css',
         settings,
         options,
-      });
+      }]);
 
       // handle circular CSS if it's a file to be saved as data URI
       if (isCircular && options["capture.saveAs"] === "singleHtml") {
@@ -5612,13 +5612,13 @@ class DocumentCssHandler {
       blob = await capturer.saveBlobCache(blob);
 
       // imported or external CSS
-      const response = await capturer.invoke("downloadBlob", {
+      const response = await capturer.invoke("downloadBlob", [{
         blob,
         filename: newFilename,
         sourceUrl,
         settings,
         options,
-      });
+      }]);
 
       await callback(elem, Object.assign({}, response, {
         url: response.url + utils.splitUrlByAnchor(sourceUrl)[1],

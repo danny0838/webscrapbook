@@ -427,7 +427,7 @@ const search = {
     const id = elem.closest('[data-id]').getAttribute('data-id');
     const response = await utils.invokeExtensionScript({
       cmd: "background.locateItem",
-      args: {bookId, id},
+      args: [{bookId, id}],
     });
     if (response === false) {
       alert(utils.lang("ErrorLocateSidebarNotOpened"));

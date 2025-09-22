@@ -1441,11 +1441,11 @@ const sidebar = {
   async pickItem({bookId, recentItemsKey = 'scrapbookLastPickedItems', withRelation = true}) {
     const result = await utils.openModalWindow({
       url: browser.runtime.getURL("scrapbook/itempicker.html"),
-      args: {
+      args: [{
         bookId,
         recentItemsKey,
         withRelation,
-      },
+      }],
       windowCreateData: {width: 350, height: 600},
     });
     return result;

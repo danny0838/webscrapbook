@@ -129,7 +129,7 @@ editor.init = async function ({willActive = !editor.active, force = false} = {})
     try {
       const bookId = await utils.invokeExtensionScript({
         cmd: "background.findBookIdFromUrl",
-        args: {url: document.URL},
+        args: [{url: document.URL}],
       });
 
       if (typeof bookId !== 'string') {
@@ -1179,10 +1179,8 @@ editor.viewAnnotationsInternal = async function () {
   const annotations = getAnnotationsSummary(annotationElems);
   await utils.openModalWindow({
     url: browser.runtime.getURL('editor/annotations.html'),
-    args: {
-      annotations,
-    },
-    senderProp: 'source',
+    args: [{annotations}],
+    senderProp: '0.source',
     windowCreateData: {width: 600, height: 600},
   });
 };
@@ -1439,7 +1437,7 @@ editor.setViewportInternal = function () {
 editor.locate = async function () {
   const response = await utils.invokeExtensionScript({
     cmd: "background.locateItem",
-    args: {url: document.URL},
+    args: [{url: document.URL}],
   });
   if (response === false) {
     alert(utils.lang("ErrorLocateSidebarNotOpened"));
@@ -1450,14 +1448,14 @@ editor.locate = async function () {
 };
 
 editor.lineMarker = async function (style) {
-  const args = {
+  const args = [{
     tagName: utils.getOption("editor.useNativeTags") ? 'span' : 'scrapbook-linemarker',
     attrs: {
       'data-scrapbook-id': utils.dateToId(),
       'data-scrapbook-elem': 'linemarker',
       'style': style,
     },
-  };
+  }];
   return await editor.invokeEditorCommand({
     frameId: await editor.getFocusedFrameId(),
     cmd: "editor.lineMarkerInternal",
@@ -1474,9 +1472,9 @@ editor.viewAnnotations = async function () {
 
 editor.locateAnnotation = async function (offset) {
   const frameId = await editor.getFocusedFrameId();
-  const args = {
+  const args = [{
     offset,
-  };
+  }];
   return await editor.invokeEditorCommand({
     frameId,
     cmd: "editor.locateAnnotationInternal",
@@ -1488,14 +1486,14 @@ editor.createLink = async function () {
   const frameId = await editor.getFocusedFrameId();
   const url = prompt(utils.lang('EditorButtonAnnotationLinkPrompt'));
   if (!url) { return; }
-  const args = {
+  const args = [{
     tagName: 'a',
     attrs: {
       'data-scrapbook-id': utils.dateToId(),
       'data-scrapbook-elem': 'link-url',
       'href': url,
     },
-  };
+  }];
   return await editor.invokeEditorCommand({
     frameId,
     cmd: "editor.lineMarkerInternal",
@@ -1507,10 +1505,10 @@ editor.createSticky = async function (richText, refNode) {
   return await editor.invokeEditorCommand({
     frameId: await editor.getFocusedFrameId(),
     cmd: "editor.annotator.createSticky",
-    args: {
+    args: [{
       richText,
       refNode,
-    },
+    }],
   });
 };
 
@@ -1539,7 +1537,7 @@ editor.eraseSelector = async function (allFrames = false) {
   return await editor.invokeEditorCommand({
     frameId,
     cmd: "editor.eraseSelectorInternal",
-    args: {selector},
+    args: [{selector}],
   });
 };
 
@@ -1562,7 +1560,7 @@ editor.eraseXpath = async function (allFrames = false) {
   return await editor.invokeEditorCommand({
     frameId,
     cmd: "editor.eraseXpathInternal",
-    args: {selector},
+    args: [{selector}],
   });
 };
 
@@ -1595,7 +1593,7 @@ editor.removeAllEdits = async function () {
 editor.toggleAnnotator = async function (willActive) {
   return await editor.invokeEditorCommand({
     cmd: "editor.annotator.toggle",
-    args: {willActive},
+    args: [{willActive}],
   });
 };
 
@@ -1638,7 +1636,7 @@ editor.toggleDomEraser = async function (willActive, ignoreAnnotator = false) {
 
   await editor.invokeEditorCommand({
     cmd: "editor.domEraser.toggle",
-    args: {willActive},
+    args: [{willActive}],
   });
 
   if (!willActive && !ignoreAnnotator) {
@@ -1683,7 +1681,7 @@ editor.toggleHtmlEditor = async function (willActive, ignoreAnnotator = false) {
 
   await editor.invokeEditorCommand({
     cmd: "editor.htmlEditor.toggle",
-    args: {willActive},
+    args: [{willActive}],
   });
 
   if (!willActive && !ignoreAnnotator) {
@@ -1714,7 +1712,7 @@ editor.toggleMutationHandler = async function (willActive) {
 
   await editor.invokeEditorCommand({
     cmd: "editor.mutationHandler.toggle",
-    args: {willActive},
+    args: [{willActive}],
   });
 };
 
@@ -1741,7 +1739,7 @@ editor.save = async function (params = {}) {
     });
     return await utils.invokeExtensionScript({
       cmd: "background.captureCurrentTab",
-      args: {mode: params.internalize ? "internalize" : "resave"},
+      args: [{mode: params.internalize ? "internalize" : "resave"}],
     });
   } else {
     await editor.invokeEditorCommand({
@@ -1749,6 +1747,7 @@ editor.save = async function (params = {}) {
     });
     return await utils.invokeExtensionScript({
       cmd: "background.captureCurrentTab",
+      args: [{}],
     });
   }
 };
@@ -1766,10 +1765,10 @@ editor.createSubPage = async function () {
   try {
     await utils.invokeExtensionScript({
       cmd: "background.createSubPage",
-      args: {
+      args: [{
         url: location.href,
         title,
-      },
+      }],
     });
   } catch (ex) {
     console.error(ex);
@@ -1822,9 +1821,7 @@ editor.open = async function () {
   document.documentElement.appendChild(editor.element);
   await utils.invokeExtensionScript({
     cmd: "background.registerActiveEditorTab",
-    args: {
-      willEnable: true,
-    },
+    args: [{willEnable: true}],
   });
   await editor.invokeEditorCommand({
     cmd: "editor.openInternal",
@@ -1845,9 +1842,7 @@ editor.close = async function () {
 
   await utils.invokeExtensionScript({
     cmd: "background.registerActiveEditorTab",
-    args: {
-      willEnable: false,
-    },
+    args: [{willEnable: false}],
   });
   await editor.invokeEditorCommand({
     cmd: "editor.closeInternal",
@@ -2113,7 +2108,7 @@ editor.addHistory = () => {
 editor.invokeEditorCommand = async function ({cmd, args, frameId, frameIdExcept}) {
   return await utils.invokeExtensionScript({
     cmd: "background.invokeEditorCommand",
-    args: {cmd, args, frameId, frameIdExcept},
+    args: [{cmd, args, frameId, frameIdExcept}],
   });
 };
 
@@ -3287,7 +3282,7 @@ const htmlEditor = editor.htmlEditor = {
     return await editor.invokeEditorCommand({
       frameId,
       cmd: "editor.htmlEditor._createLink",
-      args: {url},
+      args: [{url}],
     });
   },
 
@@ -3324,7 +3319,7 @@ const htmlEditor = editor.htmlEditor = {
     return await editor.invokeEditorCommand({
       frameId: await editor.getFocusedFrameId(),
       cmd: "editor.htmlEditor._insertDate",
-      args: {dateStr},
+      args: [{dateStr}],
     });
   },
 
@@ -3377,7 +3372,7 @@ const htmlEditor = editor.htmlEditor = {
 
     const result = await utils.openModalWindow({
       url: browser.runtime.getURL('editor/insert-html.html'),
-      args: data,
+      args: [data],
       windowCreateData: {width: 600, height: 600},
     });
 

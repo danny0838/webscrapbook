@@ -73,7 +73,7 @@ async function findBookIdFromUrl({url}) {
  */
 async function locateItem(params) {
   const cmd = 'sidebar.locate';
-  const args = params;
+  const args = [params];
   const sidebarUrl = browser.runtime.getURL("scrapbook/sidebar.html");
 
   if (browser.sidebarAction) {
@@ -124,10 +124,10 @@ async function locateItem(params) {
 
 /**
  * @type invokable
- * @param {Object} [params]
+ * @param {Object} params
  * @param {MessageSender} sender
  */
-async function captureCurrentTab(params = {}, {tab: {id: tabId}}) {
+async function captureCurrentTab(params, {tab: {id: tabId}}) {
   const task = Object.assign({tabId}, params);
   return await utils.invokeCapture([task]);
 }
@@ -181,10 +181,10 @@ async function createSubPage({url, title}) {
 
 /**
  * @type invokable
- * @param {Object} [params]
+ * @param {Object} params
  * @param {MessageSender} sender
  */
-async function registerActiveEditorTab({willEnable = true} = {}, {tab: {id: tabId}}) {
+async function registerActiveEditorTab({willEnable = true}, {tab: {id: tabId}}) {
   return editor.registerActiveEditorTab(tabId, willEnable);
 }
 
