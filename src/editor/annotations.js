@@ -1,17 +1,17 @@
 /******************************************************************************
- * Shared script for modal dialog windows.
+ * Script for annotations.html.
  *****************************************************************************/
 
 import * as utils from "../utils/common.mjs";
-import {dialog} from "../core/dialog.js";
+import {Dialog} from "../core/dialog.mjs";
 
-Object.assign(dialog, {
+class AnnotationsDialog extends Dialog {
   /**
    * @param {Object} params
    * @param {Object[]} params.annotations
    * @param {MessageSender} params.source
    */
-  async init({annotations, source: {tab: {id: tabId}, frameId}}) {
+  async start({annotations, source: {tab: {id: tabId}, frameId}}) {
     await annotationViewer.init({annotations, tabId, frameId});
 
     document.body.hidden = false;
@@ -19,21 +19,19 @@ Object.assign(dialog, {
     const {promise, resolve} = Promise.withResolvers();
     this.resolve = resolve;
     return await promise;
-  },
+  }
 
   onLoad(event) {
-    utils.loadLanguages(document);
-
     document.querySelector('form').addEventListener('submit', (event) => {
       event.preventDefault();
       this.onSubmit(event);
     });
-  },
+  }
 
   onSubmit(event) {
     this.close();
-  },
-});
+  }
+}
 
 const annotationViewer = {
   tabId: null,
@@ -163,6 +161,9 @@ const annotationViewer = {
     }
   },
 };
+
+/** @global */
+globalThis.dialog = AnnotationsDialog.init();
 
 /** @global */
 globalThis.annotationViewer = annotationViewer;
