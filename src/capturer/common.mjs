@@ -51,6 +51,12 @@ const REMOVE_HIDDEN_EXCLUDE_HTML = new Set(["html", "head", "title", "meta", "li
 const REMOVE_HIDDEN_EXCLUDE_SVG = new Set(["svg"]);
 const REMOVE_HIDDEN_EXCLUDE_MATH = new Set(["math"]);
 
+class ItemInfoFormatter extends _ItemInfoFormatter {
+  format_uuid() {
+    return utils.getUuid();
+  }
+}
+
 /**
  * @global
  * @namespace
@@ -4153,12 +4159,6 @@ capturer.retrieveSelectedLinks = async function ({
 
   return rv;
 };
-
-class ItemInfoFormatter extends _ItemInfoFormatter {
-  format_uuid() {
-    return utils.getUuid();
-  }
-}
 
 /**
  * Format filename of the main item file to save.
