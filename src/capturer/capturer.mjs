@@ -9,14 +9,21 @@ import {dataUriToFile} from "../utils/datauri.mjs";
 import {Zip} from "../utils/zip.mjs";
 import {sha1} from "../utils/sha.mjs";
 import * as Mime from "../lib/mime.mjs";
-import {server} from "../scrapbook/server.mjs";
 import {MapWithDefault} from "../lib/map-with-default.mjs";
 import {Referrer} from "../lib/referrer.mjs";
+import {server} from "../scrapbook/server.mjs";
+import {ItemInfoFormatter as _ItemInfoFormatter} from "../scrapbook/item-info-formatter.mjs";
 import {BaseCapturer} from "./common.mjs";
 import {CaptureHelperHandler} from "./helper-handler.mjs";
 
 const REBUILD_LINK_ROLE_PATTERN = /^document(?:-[a-f0-9-]+)?$/;
 const REBUILD_LINK_SVG_HREF_ATTRS = ['href', 'xlink:href'];
+
+class ItemInfoFormatter extends _ItemInfoFormatter {
+  format_uuid() {
+    return utils.getUuid();
+  }
+}
 
 class Capturer extends BaseCapturer {
   // missionId is fixed to this instance, to identify the capture mission
@@ -355,6 +362,55 @@ class Capturer extends BaseCapturer {
       path = basename + '(' + (++index) + ')' + (ext ? '.' + ext : '');
     }
     return path;
+  }
+
+  /**
+   * Format filename of the main item file to save.
+   *
+   * @param {Object} params
+   * @param {string} params.title
+   * @param {string} params.sourceUrl
+   * @param {boolean} params.isFolder
+   * @param {captureSettings} [params.settings]
+   * @param {captureOptions} [params.options]
+   * @return {string} The formatted filename.
+   */
+  async formatIndexFilename({
+    title, sourceUrl, isFolder,
+    settings: {
+      timeId: id,
+    } = {},
+    options: {
+      "capture.saveFilename": template,
+      "capture.saveAsciiFilename": saveAsciiFilename,
+      "capture.saveFilenameMaxLenUtf16": saveFilenameMaxLenUtf16,
+      "capture.saveFilenameMaxLenUtf8": saveFilenameMaxLenUtf8,
+    } = {},
+  }) {
+    // a dummy scrapbook item for formatting
+    const item = {
+      id,
+      create: id,
+      title,
+      source: sourceUrl,
+    };
+
+    const formatter = new ItemInfoFormatter(item);
+    let filename = template
+      .split('/')
+      .map(x => utils.validateFilename(formatter.format(x), saveAsciiFilename))
+      .join('/');
+
+    // see `getUniqueFilename` for limitation details
+    filename = utils.crop(filename, saveFilenameMaxLenUtf16, saveFilenameMaxLenUtf8, "");
+
+    // in case the cropped filename has invalid ending chars
+    filename = filename
+      .split('/')
+      .map(x => utils.validateFilename(x))
+      .join('/');
+
+    return filename;
   }
 
   async saveFileCache({timeId, path, blob}) {
