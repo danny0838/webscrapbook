@@ -14,7 +14,8 @@ import * as Mime from "../lib/mime.mjs";
 import {server} from "../scrapbook/server.mjs";
 import {MapWithDefault} from "../lib/map-with-default.mjs";
 import {Referrer} from "../lib/referrer.mjs";
-import {capturer, CaptureHelperHandler} from "./common.mjs";
+import {capturer} from "./common.mjs";
+import {CaptureHelperHandler} from "./helper-handler.mjs";
 
 const REBUILD_LINK_ROLE_PATTERN = /^document(?:-[a-f0-9-]+)?$/;
 const REBUILD_LINK_SVG_HREF_ATTRS = ['href', 'xlink:href'];

@@ -50,6 +50,8 @@ import {escapeRegExp} from "./shared/utils/common.mjs";
   await import('./test_src_utils_datauri.mjs');
   await import('./test_src_utils_zip.mjs');
   await import('./test_src_capturer_common.mjs');
+  await import('./test_src_capturer_css-handler.mjs');
+  await import('./test_src_capturer_helper-handler.mjs');
   await import('./test_capture.mjs');
   await import('./test_manual.mjs');
 
