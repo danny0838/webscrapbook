@@ -22,9 +22,8 @@
 /**
  * Invoke an invokable command in the background script.
  *
- * @param {Object} params
- * @param {string} params.cmd
- * @param {Object} [params.args]
+ * @param {commandMessage} params
+ * @param {string} params.cmd - without prefix "background."
  * @return {*}
  */
 scrapbook.invokeBackgroundScript = function ({cmd, args}) {

@@ -260,7 +260,7 @@ class Server {
   /**
    * Load the config of the backend server
    *
-   * @return {boolean} whether server config is changed
+   * @return {boolean} Whether server config has been changed.
    */
   async init(refresh = false) {
     if (this._config && !refresh) {
@@ -639,7 +639,7 @@ class Book {
   /**
    * Refresh loaded tree files if changed on the server.
    *
-   * @return {boolean} Whether the tree is changed.
+   * @return {boolean} Whether the tree has been changed.
    */
   async refreshTreeFiles() {
     const refresh = !await this.validateTree();
@@ -827,16 +827,16 @@ class Book {
 
   /**
    * @callback transactionCallback
-   * @param {Book} book - the Book the transaction is performed on.
+   * @param {Book} book - The Book the transaction is performed on.
    * @param {Object} params
    * @param {string} params.lockId - ID of the lock.
-   * @param {Function} params.discardLock - a controller that discards the lock
+   * @param {Function} params.discardLock - A controller that discards the lock
    *   (no longer keep and release it) when called. This should normally be
    *   called after requested another action that keeps the lock (by passing
    *   lockId).
-   * @param {string} [params.backupTs] - the timestamp for the automatic backup
+   * @param {string} [params.backupTs] - The timestamp for the automatic backup
    *   ("validate" mode).
-   * @param {boolean} [params.updated] - whether the server tree has been
+   * @param {boolean} [params.updated] - Whether the server tree has been
    *   updated ("refresh" mode).
    */
 
@@ -851,19 +851,19 @@ class Book {
    * NOTE: this is NOT a true transaction, which supports atomic and rollback.
    *
    * @param {Object} params
-   * @param {transactionCallback} params.callback - the callback function to
+   * @param {transactionCallback} params.callback - The callback function to
    *   peform the tasks.
-   * @param {string} [params.mode] - mode for the transaction:
+   * @param {string} [params.mode] - Mode for the transaction:
    *   - "validate": validate the tree before the request and fail out if the
    *     remote tree has been updated.
    *   - "refresh": refresh the tree before the request and pass an extra param
    *     about whether the remote tree has been updated.
-   * @param {boolean|Promise<boolean>} [params.autoBackup] - whether to
+   * @param {boolean|Promise<boolean>} [params.autoBackup] - Whether to
    *   automatically create a temporary tree backup before a transaction and
    *   remove after success.
-   * @param {string} [params.autoBackupTs] - timestamp for the auto backup.
-   * @param {string} [params.autoBackupNote] - note for the auto backup.
-   * @param {integer} [params.timeout] - timeout for lock.
+   * @param {string} [params.autoBackupTs] - The timestamp for the auto backup.
+   * @param {string} [params.autoBackupNote] - The note for the auto backup.
+   * @param {integer} [params.timeout] - The timeout for lock.
    */
   async transaction({
     callback,
@@ -1247,9 +1247,9 @@ scrapbook.toc(${JSON.stringify(jsonData, null, 2).replace(/\u2028/g, '\\u2028').
    *
    * @param {Object} params
    * @param {Object} params.item
-   * @param {string} params.icon - icon URL to cache
-   * @return {Promise<string>} the new icon URL
-   * @throws {Error} when the favicon cannot be cached
+   * @param {string} params.icon - The icon URL to cache.
+   * @return {Promise<string>} The new icon URL.
+   * @throws {Error} When the favicon cannot be cached.
    */
   async cacheFavIcon({book, item, icon}) {
     const getShaFile = (data) => {

@@ -1,10 +1,11 @@
-/**
+/******************************************************************************
  * A JavaScript implementation for mimetype and file extension conversion
  *
- * Copyright Danny Lin 2017-2024
+ * Copyright Danny Lin 2017-2025
  * Distributed under the MIT License
  * https://opensource.org/licenses/MIT
- */
+ *****************************************************************************/
+
 (function (global, factory) {
   if (typeof exports === "object" && typeof module === "object") {
     // CommonJS

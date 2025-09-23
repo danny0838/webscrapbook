@@ -51,7 +51,7 @@ function cacheAddDomainSource(cache, domains, source) {
 }
 
 /**
- * @return {string[]} bookIds - id of books with a valid cache
+ * @return {string[]} ID of books with a valid cache.
  */
 async function updateBookCaches() {
   if (scrapbook.hasServer()) {
@@ -384,7 +384,7 @@ async function autoCaptureTab(tabInfo) {
 }
 
 /**
- * @return {integer[]} ID of books with a valid cache
+ * @return {string[]} ID of books with a valid cache
  */
 async function updateAutoCaptureBookCaches() {
   if (scrapbook.hasServer()) {

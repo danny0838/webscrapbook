@@ -1,14 +1,15 @@
-/**
+/******************************************************************************
  * A JavaScript implementation for POSIX strftime().
  *
  * ref: https://pubs.opengroup.org/onlinepubs/9699919799/functions/strftime.html
  *
  * Revised from the version by T. H. Doan (https://thdoan.github.io/strftime/)
  *
- * Copyright Danny Lin 2020-2024
+ * Copyright Danny Lin 2020-2025
  * Distributed under the MIT License
  * https://opensource.org/licenses/MIT
- */
+ *****************************************************************************/
+
 (function (global, factory) {
   if (typeof exports === "object" && typeof module === "object") {
     // CommonJS

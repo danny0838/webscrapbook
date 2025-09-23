@@ -1,10 +1,11 @@
-/**
+/******************************************************************************
  * Cross-platform utilities for unit testing.
  *
- * Copyright Danny Lin 2024
+ * Copyright Danny Lin 2024-2025
  * Distributed under the MIT License
  * https://opensource.org/licenses/MIT
- */
+ *****************************************************************************/
+
 (function (global, factory) {
   if (typeof exports === "object" && typeof module === "object") {
     // CommonJS
