@@ -1191,7 +1191,7 @@ editor.eraseNodesInternal = function () {
   }
 };
 
-editor.eraseSelectorInternal = function ({selector}) {
+editor.eraseSelectorInternal = function (selector) {
   editor.addHistory();
 
   const timeId = utils.dateToId();
@@ -1205,7 +1205,7 @@ editor.eraseSelectorInternal = function ({selector}) {
   }
 };
 
-editor.eraseXpathInternal = function ({selector}) {
+editor.eraseXpathInternal = function (selector) {
   editor.addHistory();
 
   const timeId = utils.dateToId();
@@ -1474,7 +1474,7 @@ editor.eraseSelector = async function (allFrames = false) {
   return await editor.invokeEditorCommand({
     frameId,
     cmd: "editor.eraseSelectorInternal",
-    args: [{selector}],
+    args: [selector],
   });
 };
 
@@ -1497,7 +1497,7 @@ editor.eraseXpath = async function (allFrames = false) {
   return await editor.invokeEditorCommand({
     frameId,
     cmd: "editor.eraseXpathInternal",
-    args: [{selector}],
+    args: [selector],
   });
 };
 
