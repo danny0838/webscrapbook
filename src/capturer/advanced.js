@@ -112,7 +112,7 @@ function toggleTooltip(elem) {
 async function exit() {
   const tab = await browser.tabs.getCurrent();
   return await browser.tabs.remove(tab.id);
-};
+}
 
 function onTasksChange(event) {
   parseTasks();

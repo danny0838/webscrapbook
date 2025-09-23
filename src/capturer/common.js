@@ -5794,7 +5794,7 @@ class DocumentCssHandler {
       }));
     }
   }
-};
+}
 
 capturer.DocumentCssHandler = DocumentCssHandler;
 
@@ -6844,7 +6844,7 @@ class CaptureHelperHandler {
       }
     }
   }
-};
+}
 
 capturer.CaptureHelperHandler = CaptureHelperHandler;
 

@@ -336,7 +336,7 @@ const search = {
     } catch (ex) {
       console.error(ex);
       this.addMsg(scrapbook.lang('ErrorSearch', [ex.message]), {type: 'error', wrapper});
-    };
+    }
   },
 
   showResults(results, {book, wrapper}) {

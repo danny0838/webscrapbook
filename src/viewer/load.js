@@ -37,12 +37,12 @@
 function onDragEnter(e) {
   viewer.dropmask.hidden = false;
   viewer.lastDropTarget = e.target;
-};
+}
 
 function onDragOver(e) {
   e.preventDefault(); // required to allow drop
   e.dataTransfer.dropEffect = "copy";
-};
+}
 
 function onDragLeave(e) {
   let shouldUnMask = false;
@@ -59,7 +59,7 @@ function onDragLeave(e) {
   if (shouldUnMask) {
     viewer.dropmask.hidden = true;
   }
-};
+}
 
 async function onDrop(e) {
   e.preventDefault();
@@ -86,7 +86,7 @@ async function onDrop(e) {
   }
 
   return await viewer.loadFiles(files);
-};
+}
 
 function onChangeFiles(e) {
   e.preventDefault();
@@ -94,7 +94,7 @@ function onChangeFiles(e) {
   if (!files.length) { return; }
 
   return viewer.loadFiles(files);
-};
+}
 
 const viewer = {
   mainUrl: new URL(document.URL),

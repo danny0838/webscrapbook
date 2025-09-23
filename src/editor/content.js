@@ -1323,7 +1323,7 @@ editor.uneraseAllNodesInternal = function () {
     return unerased;
   };
 
-  while (unerase()) {};
+  while (unerase()) {}
 };
 
 /**

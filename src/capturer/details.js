@@ -256,7 +256,7 @@ function updateUi() {
 function insertInputText(elem, value) {
   const sep = (elem.value && value) ? '\n' : '';
   updateInputText(elem, elem.value + sep + value);
-};
+}
 
 function updateInputText(elem, value) {
   // Use execCommand rather than set value to allow undo in the textarea.
@@ -354,7 +354,7 @@ function toggleTooltip(elem) {
 async function exit() {
   const tab = await browser.tabs.getCurrent();
   return await browser.tabs.remove(tab.id);
-};
+}
 
 async function onSubmit(event) {
   event.preventDefault();

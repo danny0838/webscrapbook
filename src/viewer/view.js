@@ -637,7 +637,7 @@ class ComplexUrlFetcher {
       return match;
     });
   }
-};
+}
 
 async function init() {
   await scrapbook.loadOptions();

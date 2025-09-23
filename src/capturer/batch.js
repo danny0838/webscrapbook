@@ -119,7 +119,7 @@ function toggleTooltip(elem) {
 async function exit() {
   const tab = await browser.tabs.getCurrent();
   return await browser.tabs.remove(tab.id);
-};
+}
 
 async function onCaptureClick(event) {
   const inputText = document.getElementById('tasks').value;

@@ -113,7 +113,7 @@ const search = {
     } catch (ex) {
       console.error(ex);
       this.addMsg(scrapbook.lang('ErrorSearch', [ex.message]), 'error');
-    };
+    }
   },
 
   async getSearchResults(urls, bookIds) {

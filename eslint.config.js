@@ -50,6 +50,7 @@ export default [
       "@stylistic/indent-binary-ops": "off",
       "@stylistic/max-statements-per-line": "off",
       "@stylistic/multiline-ternary": "off",
+      "@stylistic/no-extra-semi": "error",
       "@stylistic/no-mixed-operators": "off",
       "@stylistic/no-multi-spaces": ["error", {ignoreEOLComments: true}],
       "@stylistic/no-multiple-empty-lines": ["error", {max: 2, maxBOF: 0, maxEOF: 0}],

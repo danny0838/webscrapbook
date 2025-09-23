@@ -35,7 +35,7 @@ class MapWithDefault extends Map {
     }
     return super.get(key);
   }
-};
+}
 
 return MapWithDefault;
 }));

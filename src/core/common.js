@@ -2871,7 +2871,7 @@ scrapbook.crop = function (str, charLimit, byteLimit, ellipsis = '...') {
           return this.utf8ToUnicode(bytes) + ellipsis;
         } catch (e) {
           // error if we cut a UTF-8 char sequence in the middle
-        };
+        }
         bytes = bytes.substring(0, bytes.length - 1);
       }
     }
