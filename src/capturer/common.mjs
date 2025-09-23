@@ -7,7 +7,6 @@ import {ANNOTATION_CSS} from "../utils/common.mjs";
 import * as utils from "../utils/common.mjs";
 import {StorageCache, serializeObject, deserializeObject} from "../utils/cache.mjs";
 import {dataUriToFile} from "../utils/datauri.mjs";
-import {ItemInfoFormatter as _ItemInfoFormatter} from "../scrapbook/item-info-formatter.mjs";
 import {DocumentCssHandler, DocumentCssResourcesHandler} from "./css-handler.mjs";
 import {CaptureHelperHandler} from "./helper-handler.mjs";
 
@@ -50,12 +49,6 @@ const REWRITABLE_SPECIAL_OBJECTS = new Set([false, 'adoptedStyleSheet']);
 const REMOVE_HIDDEN_EXCLUDE_HTML = new Set(["html", "head", "title", "meta", "link", "style", "script", "body", "noscript", "template", "source", "track"]);
 const REMOVE_HIDDEN_EXCLUDE_SVG = new Set(["svg"]);
 const REMOVE_HIDDEN_EXCLUDE_MATH = new Set(["math"]);
-
-class ItemInfoFormatter extends _ItemInfoFormatter {
-  format_uuid() {
-    return utils.getUuid();
-  }
-}
 
 /**
  * Settings of the current capture.
@@ -2778,13 +2771,13 @@ class BaseCapturer {
           'site' :
           'document';
       }
-      settings.indexFilename = settings.indexFilename || await this.formatIndexFilename({
+      settings.indexFilename = settings.indexFilename || await this.invoke("formatIndexFilename", [{
         title: settings.title || doc.title || utils.filenameParts(utils.urlToFilename(docUrl))[0] || "untitled",
         sourceUrl: docUrl,
         isFolder: options["capture.saveAs"] === "folder",
         settings,
         options,
-      });
+      }]);
     }
 
     // register the main document before parsing so that it goes before
@@ -4155,55 +4148,6 @@ class BaseCapturer {
     return rv;
   }
 
-  /**
-   * Format filename of the main item file to save.
-   *
-   * @param {Object} params
-   * @param {string} params.title
-   * @param {string} params.sourceUrl
-   * @param {boolean} params.isFolder
-   * @param {captureSettings} [params.settings]
-   * @param {captureOptions} [params.options]
-   * @return {string} The formatted filename.
-   */
-  async formatIndexFilename({
-    title, sourceUrl, isFolder,
-    settings: {
-      timeId: id,
-    } = {},
-    options: {
-      "capture.saveFilename": template,
-      "capture.saveAsciiFilename": saveAsciiFilename,
-      "capture.saveFilenameMaxLenUtf16": saveFilenameMaxLenUtf16,
-      "capture.saveFilenameMaxLenUtf8": saveFilenameMaxLenUtf8,
-    } = {},
-  }) {
-    // a dummy scrapbook item for formatting
-    const item = {
-      id,
-      create: id,
-      title,
-      source: sourceUrl,
-    };
-
-    const formatter = new ItemInfoFormatter(item);
-    let filename = template
-      .split('/')
-      .map(x => utils.validateFilename(formatter.format(x), saveAsciiFilename))
-      .join('/');
-
-    // see `getUniqueFilename` for limitation details
-    filename = utils.crop(filename, saveFilenameMaxLenUtf16, saveFilenameMaxLenUtf8, "");
-
-    // in case the cropped filename has invalid ending chars
-    filename = filename
-      .split('/')
-      .map(x => utils.validateFilename(x))
-      .join('/');
-
-    return filename;
-  }
-
   getRedirectedUrl(redirectedUrl, sourceUrlHash) {
     const [redirectedUrlMain, redirectedUrlHash] = utils.splitUrlByAnchor(redirectedUrl);
 
@@ -4335,5 +4279,4 @@ class BaseCapturer {
 
 export {
   BaseCapturer,
-  ItemInfoFormatter,
 };
