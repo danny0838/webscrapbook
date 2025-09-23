@@ -175,6 +175,9 @@ background.getLastFocusedWindow = async function ({
 
 /**
  * @type invokable
+ * @param {commandMessage} params
+ * @param {integer} params.frameId
+ * @param {MessageSender} sender
  */
 background.invokeFrameScript = async function ({frameId, cmd, args}, sender) {
   const tabId = sender.tab.id;
@@ -253,6 +256,8 @@ background.locateItem = async function (params, sender) {
 
 /**
  * @type invokable
+ * @param {Object} [params]
+ * @param {MessageSender} sender
  */
 background.captureCurrentTab = async function (params = {}, sender) {
   const task = Object.assign({tabId: sender.tab.id}, params);
@@ -333,6 +338,8 @@ background.createSubPage = async function ({url, title}, sender) {
 
 /**
  * @type invokable
+ * @param {Object} [params]
+ * @param {MessageSender} sender
  */
 background.registerActiveEditorTab = async function ({willEnable = true} = {}, sender) {
   return editor.registerActiveEditorTab(sender.tab.id, willEnable);
@@ -340,6 +347,8 @@ background.registerActiveEditorTab = async function ({willEnable = true} = {}, s
 
 /**
  * @type invokable
+ * @param {Object} params
+ * @param {MessageSender} sender
  */
 background.invokeEditorCommand = async function ({cmd, args, frameId = -1, frameIdExcept = -1}, sender) {
   const tabId = sender.tab.id;
@@ -381,6 +390,14 @@ background.invokeEditorCommand = async function ({cmd, args, frameId = -1, frame
 
 /**
  * @type invokable
+ * @param {Object} params
+ * @param {string} params.id
+ * @param {string|URL} params.url
+ * @param {Array<*>} [params.args]
+ * @param {Object} [params.windowCreateData]
+ * @param {Object} [params.tabCreateData]
+ * @param {string|string[]} [senderProp]
+ * @param {MessageSender} sender
  */
 background.openModalWindow = async function ({
   id,

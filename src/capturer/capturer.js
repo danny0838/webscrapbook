@@ -151,11 +151,11 @@ capturer.error = function (...msg) {
  *
  * @override
  * @param {string} method - The capturer method to invoke.
- * @param {Object} [args] - The arguments to pass to the capturer method.
+ * @param {*} [args] - The arguments to pass to the capturer method.
  * @param {Object} [details] - Data to determine invocation behavior.
- * @param {string} [details.tabId]
- * @param {string} [details.frameId]
- * @return {Promise<Object>}
+ * @param {integer} [details.tabId]
+ * @param {integer} [details.frameId]
+ * @return {Promise<*>}
  */
 capturer.invoke = async function (method, args, details = {}) {
   const {tabId, frameId = 0} = details;
@@ -1004,16 +1004,46 @@ capturer.remoteMsg = async function ({msg, type}) {
 };
 
 /**
- * @param {Object} params
- * @param {Array} params.tasks
- * @param {string} [params.bookId] - bookId ID for the captured items
- * @param {string} [params.parentId] - parent item ID for the captured items
- * @param {integer} [params.index] - position index for the captured items
- * @param {float} [params.delay] - delay between tasks (ms)
- * @param {string} [params.mode] - base capture mode
- * @param {captureOptions} [params.options] - base capture options, overwriting default
- * @param {string} [params.comment] - comment for the captured item
- * @return {Promise<Array|Object>} A list of task results (or error), or an object of error.
+ * @typedef {Object} specialCaptureInfo
+ * @property {string} bookId
+ * @property {string} itemId
+ */
+
+/**
+ * @typedef {Object} task
+ * @property {integer} [tabId]
+ * @property {integer} [frameId]
+ * @property {boolean} [fullPage]
+ * @property {string} [url]
+ * @property {string} [mode]
+ * @property {captureOptions} [options]
+ * @property {string} [title]
+ * @property {string} [comment]
+ * @property {string} [favIconUrl]
+ * @property {specialCaptureInfo} [recaptureInfo]
+ * @property {specialCaptureInfo} [mergeCaptureInfo]
+ */
+
+/**
+ * @typedef {Object} taskInfo
+ * @property {task[]} tasks
+ * @property {string} [bookId] - bookId ID for the captured items
+ * @property {string} [parentId] - parent item ID for the captured items
+ * @property {integer} [index] - position index for the captured items
+ * @property {float} [delay] - delay between tasks (ms)
+ * @property {string} [mode] - base capture mode
+ * @property {captureOptions} [options] - base capture options, overwriting default
+ * @property {string} [comment] - comment for the captured item
+ * @property {string} [autoClose] - how to close the dialog automatically when done
+ */
+
+/**
+ * @typedef {{error: {message: string}}} errorObject
+ */
+
+/**
+ * @param {taskInfo} params
+ * @return {Promise<Array<captureDocumentResponse|transferableBlob|errorObject>>}
  */
 capturer.runTasks = async function ({
   tasks,
@@ -2749,7 +2779,7 @@ capturer.mergeCapture = async function ({
 /**
  * @param {string} url
  * @param {string} role
- * @return {?string} the token, or null for an invalid URL
+ * @return {?string} The token, or null for an invalid URL.
  */
 capturer.getRegisterToken = function (url, role) {
   try {
@@ -3857,7 +3887,7 @@ capturer.saveBlob = async function (params) {
  * @param {boolean} params.autoErase
  * @param {boolean} params.savePrompt
  * @param {string} params.conflictAction
- * @return {Promise<DownloadItem>} DownloadItem for the saved URL..
+ * @return {Promise<DownloadItem>} DownloadItem for the saved URL.
  */
 capturer.saveUrl = async function (params) {
   isDebug && console.debug("call: saveUrl", params);

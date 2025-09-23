@@ -131,7 +131,17 @@ class BookTree extends Tree {
   }
 
   /**
-   * @return {Object[]} item info from top to elem parent
+   * @typedef {Object} itemParentInfo
+   * @property {Element} elem
+   * @property {string} id
+   * @property {integer} [index]
+
+  /**
+   * @param {Element} itemElem
+   * @param {Object} [params]
+   * @param {boolean} [params.includeIndex]
+   * @param {Map} [cacheMap]
+   * @return {itemParentInfo[]} Parent info objects from top to elem parent.
    */
   getParents(itemElem, {includeIndex = false, cacheMap} = {}) {
     let parents = [];

@@ -1434,6 +1434,25 @@ scrapbook.loadLanguages = function (...args) {
  ***************************************************************************/
 
 /**
+ * An object passed through messaging to invoke a function.
+ *
+ * @typedef {Object} commandMessage
+ * @property {string} [id]
+ * @property {string} cmd
+ * @property {*} [args]
+ */
+
+/**
+ * The object automatically passed to the `runtime.onMessage()` listener by the
+ * native WebExtension API.
+ *
+ * @typedef {browser.runtime.MessageSender} MessageSender
+ * @property {string} [id]
+ * @property {string} [tab]
+ * @property {string} [frameId]
+ */
+
+/**
  * Add a message listener, with optional filter and errorHandler.
  *
  * @param {Function} [filter]
@@ -1547,18 +1566,16 @@ scrapbook.initContentScripts = async function (tabId, frameId) {
 
 /**
  * A function that can be invoked through messaging.
+ *
  * @typedef {Function} invokable
- * @param {Object} [params]
+ * @property {Object} [params]
  */
 
 /**
  * Invoke an invokable command in the extension script.
  *
- * @param {Object} params
- * @param {string} [params.id]
- * @param {string} params.cmd
- * @param {Object} [params.args]
- * @return {Promise<Object>}
+ * @param {commandMessage} params
+ * @return {Promise<*>}
  */
 scrapbook.invokeExtensionScript = async function ({id, cmd, args}) {
   isDebug && console.debug(cmd, "send to extension page", args);
@@ -1570,12 +1587,10 @@ scrapbook.invokeExtensionScript = async function ({id, cmd, args}) {
 /**
  * Invoke an invokable command in the content script.
  *
- * @param {Object} params
+ * @param {commandMessage} params
  * @param {integer} params.tabId
  * @param {integer} params.frameId
- * @param {string} params.cmd
- * @param {Object} [params.args]
- * @return {Promise<Object>}
+ * @return {Promise<*>}
  */
 scrapbook.invokeContentScript = async function ({tabId, frameId, cmd, args}) {
   isDebug && console.debug(cmd, "send to content script", `[${tabId}:${frameId}]`, args);
@@ -1587,11 +1602,9 @@ scrapbook.invokeContentScript = async function ({tabId, frameId, cmd, args}) {
 /**
  * Invoke an invokable command in a frame.
  *
- * @param {Object} params
+ * @param {commandMessage} params
  * @param {Window} params.frameWindow
- * @param {string} params.cmd
- * @param {Object} [params.args]
- * @return {Promise<Object>}
+ * @return {Promise<*>}
  */
 scrapbook.invokeFrameScript = async function ({frameWindow, cmd, args}) {
   const frameId = await new Promise((resolve, reject) => {
@@ -1759,7 +1772,7 @@ scrapbook.validateFilename = function (filename, forceAscii) {
  * Returns the ScrapBook ID from a given Date object
  *
  * @param  {Date} [date] - Given day, or now if not provided.
- * @return {?string} the ScrapBook ID
+ * @return {?string} The ScrapBook ID.
  */
 scrapbook.dateToId = function (date) {
   const dt = date || new Date();
@@ -1808,7 +1821,7 @@ scrapbook.idToDate = function (...args) {
  *   - inaccurate when used across timezones
  *   - items with same seconds issue
  * @param {Date} [date] - Given day, or now if not provided.
- * @return {?string} the ScrapBook ID
+ * @return {?string} The ScrapBook ID.
  */
 scrapbook.dateToIdOld = function (date) {
   const dt = date || new Date();
@@ -2251,6 +2264,7 @@ scrapbook.getAdoptedStyleSheets = function* (docOrShadowRoot) {
  * @param {Object} [options]
  * @param {Map|WeakMap} [options.origNodeMap]
  * @param {Map|WeakMap} [options.clonedNodeMap]
+ * @return {Document} The cloned document.
  */
 scrapbook.cloneDocument = function (doc, {
   origNodeMap,
@@ -2275,9 +2289,11 @@ scrapbook.cloneDocument = function (doc, {
  * @param {Node} node
  * @param {boolean} [deep]
  * @param {Object} [options]
+ * @param {Document} [options.newDoc]
  * @param {Map|WeakMap} [options.origNodeMap]
  * @param {Map|WeakMap} [options.clonedNodeMap]
  * @param {boolean} [options.includeShadowDom]
+ * @return {Node} The cloned node.
  */
 scrapbook.cloneNode = function (...args) {
   const cloneShadowDom = (node, newNode, options = {}) => {
@@ -2758,7 +2774,7 @@ scrapbook.eraseNode = function (node, options) {
 /**
  * Replace a serialized HTML comment with the original nodes.
  *
- * @return {boolean} whether the unerase is successful
+ * @return {boolean} Whether the unerase is successful.
  */
 scrapbook.uneraseNode = function (node, {
   mapCommentToWrapper,

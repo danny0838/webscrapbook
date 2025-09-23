@@ -1,12 +1,13 @@
-/**
+/******************************************************************************
  * A JavaScript implementation for MapWithDefault
  *
  * ref: https://stackoverflow.com/questions/51319147/map-default-value
  *
- * Copyright Danny Lin 2017-2024
+ * Copyright Danny Lin 2017-2025
  * Distributed under the MIT License
  * https://opensource.org/licenses/MIT
- */
+ *****************************************************************************/
+
 (function (global, factory) {
   if (typeof exports === "object" && typeof module === "object") {
     // CommonJS
