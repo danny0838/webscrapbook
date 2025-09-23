@@ -1,6 +1,7 @@
-/**
+/******************************************************************************
  * Utilities for unit testing in server or browser extension.
- */
+ *****************************************************************************/
+
 (function (global, factory) {
   if (typeof exports === "object" && typeof module === "object") {
     // CommonJS

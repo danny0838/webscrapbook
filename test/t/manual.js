@@ -1,3 +1,7 @@
+/******************************************************************************
+ * Script for every page that invokes a manual test.
+ *****************************************************************************/
+
 'use strict';
 
 async function invokeTestExtension({cmd, args}) {

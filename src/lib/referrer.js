@@ -1,13 +1,14 @@
-/**
+/******************************************************************************
  * A JavaScript implementation for referrer handling
  *
  * ref: https://www.w3.org/TR/referrer-policy/#referrer-policies
  * ref: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Referrer-Policy
  *
- * Copyright Danny Lin 2021-2024
+ * Copyright Danny Lin 2021-2025
  * Distributed under the MIT License
  * https://opensource.org/licenses/MIT
- */
+ *****************************************************************************/
+
 (function (global, factory) {
   if (typeof exports === "object" && typeof module === "object") {
     // CommonJS

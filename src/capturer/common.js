@@ -85,16 +85,17 @@ const capturer = {};
 
 /**
  * Settings of the current capture.
+ *
  * @typedef {Object} captureSettings
- * @property {string} missionId - missionId ID for the current capture tasks
+ * @property {string} missionId - mission ID for the current capture tasks
  * @property {string} timeId - scrapbook ID for the current capture task
  * @property {?string} documentName - document name for registering
- * @property {?string} indexFilename
+ * @property {?string} indexFilename - index filename of the current capture task
  * @property {string[]} recurseChain
  * @property {number} depth
  * @property {boolean} isMainPage
  * @property {boolean} isMainFrame
- * @property {boolean} fullPage
+ * @property {boolean} fullPage - force to capture the full page
  * @property {string} type - item type
  * @property {string} title - item title
  * @property {string} favIconUrl - item favicon
@@ -103,6 +104,7 @@ const capturer = {};
 /**
  * Options of the current capture which is the "capture.*" subgroup of
  * scrapbookOptions.
+ *
  * @typedef {scrapbookOptions} captureOptions
  */
 
@@ -117,11 +119,11 @@ const capturer = {};
  * @memberof capturer
  * @variation 2
  * @param {string} method - The capturer method to invoke.
- * @param {Object} [args] - The arguments to pass to the capturer method.
+ * @param {*} [args] - The arguments to pass to the capturer method.
  * @param {Object} [details] - Data to determine invocation behavior.
  * @param {Window} [details.frameWindow]
  * @param {string} [details.missionId]
- * @return {Promise<Object>}
+ * @return {Promise<*>}
  */
 capturer.invoke = async function (method, args, details = {}) {
   const {frameWindow, missionId} = details;
@@ -2904,7 +2906,7 @@ capturer.captureDocument = async function (params) {
   // baseUrlFallback: the initial baseUrl, used for resolving base elements.
   // baseUrlFinal: the final baseUrl, used for resolving links etc.
   // refUrl: used as the referrer when retrieving resources. Actually same
-  //     as baseUrlFallback.
+  //     as docUrl.
   //
   // URLs in the document are usually resolved using baseUrl, which can be
   // dynamically changed when the first <base href="..."> element is parsed
@@ -3213,7 +3215,7 @@ capturer.captureDocument = async function (params) {
 
   // preprocess with helpers
   // Expect options["capture.helpers"] to be parsable when
-  // options["capture.helpersEnabled"] is trthy, as validated in
+  // options["capture.helpersEnabled"] is truthy, as validated in
   // `capturer.captureGeneral`.
   if (options["capture.helpersEnabled"]) {
     const helpers = scrapbook.parseOption("capture.helpers", options["capture.helpers"]);
@@ -4458,6 +4460,7 @@ capturer.getErrorUrl = function (sourceUrl, options) {
 
 /**
  * An object that can be transmitted through messaging.
+ *
  * @typedef {Blob|serializedBlob|blobCacheObject} transferableBlob
  */
 
@@ -5071,9 +5074,9 @@ class DocumentCssHandler {
    *   cross-orign CSS.
    * @param {string} [params.refUrl] - The referrer URL for retrieving a
    *   cross-orign CSS.
-   * @param {string} [params.refPolicy] - the referrer policy for retrieving a
+   * @param {string} [params.refPolicy] - The referrer policy for retrieving a
    *   cross-orign CSS.
-   * @param {string} [params.envCharset] - the environment charset for
+   * @param {string} [params.envCharset] - The environment charset for
    *   retrieving a cross-orign CSS.
    * @param {boolean} [params.crossOrigin] - Whether to retrieve CSS via web
    *   request if it's cross origin.
@@ -5136,16 +5139,16 @@ class DocumentCssHandler {
    * Rewrite a given CSS Text.
    *
    * @param {Object} params
-   * @param {string} params.cssText - the CSS text to rewrite.
-   * @param {string} params.baseUrl - the base URL for URL resolving.
-   * @param {string} params.refUrl - the referrer URL for fetching resources.
-   * @param {string} [params.refPolicy] - the referrer policy for fetching
+   * @param {string} params.cssText - The CSS text to rewrite.
+   * @param {string} params.baseUrl - The base URL for URL resolving.
+   * @param {string} params.refUrl - The referrer URL for fetching resources.
+   * @param {string} [params.refPolicy] - The referrer policy for fetching
    *   resources.
-   * @param {string} [params.envCharset] - the environment charset for fetching
+   * @param {string} [params.envCharset] - The environment charset for fetching
    *   resources.
-   * @param {CSSStyleSheet} [params.refCss] - the reference CSS (which holds
+   * @param {CSSStyleSheet} [params.refCss] - The reference CSS (which holds
    *   the @import rule(s), for an imported CSS).
-   * @param {Node} [params.rootNode] - the reference root node for an imported
+   * @param {Node} [params.rootNode] - The reference root node for an imported
    *   CSS.
    * @param {boolean} [params.isInline] - whether cssText is inline.
    * @param {captureSettings} [params.settings]
@@ -5307,20 +5310,20 @@ class DocumentCssHandler {
    * Rewrite given cssRules to cssText.
    *
    * @param {Object} params
-   * @param {CSSRuleList|CSSRule[]} params.cssRules - the CSS rules to rewrite.
-   * @param {string} params.baseUrl - the base URL for URL resolving.
-   * @param {string} params.refUrl - the referrer URL for fetching resources.
-   * @param {string} [params.refPolicy] - the referrer policy for fetching
+   * @param {CSSRuleList|CSSRule[]} params.cssRules - The CSS rules to rewrite.
+   * @param {string} params.baseUrl - The base URL for URL resolving.
+   * @param {string} params.refUrl - The referrer URL for fetching resources.
+   * @param {string} [params.refPolicy] - The referrer policy for fetching
    *   resources.
-   * @param {string} [params.envCharset] - the environment charset for fetching
+   * @param {string} [params.envCharset] - The environment charset for fetching
    *   resources.
-   * @param {CSSStyleSheet} [params.refCss] - the reference CSS (which holds
+   * @param {CSSStyleSheet} [params.refCss] - The reference CSS (which holds
    *   the @import rule(s), for an imported CSS).
-   * @param {Node|Node[]} [params.rootNode] - the document or ShadowRoot nodes
+   * @param {Node|Node[]} [params.rootNode] - The document or ShadowRoot nodes
    *   for verifying selectors.
-   * @param {string} [params.indent] - the string to indent the output CSS
+   * @param {string} [params.indent] - The string to indent the output CSS
    *   text.
-   * @param {string} [params.sep] - the string to separate each CSS rule.
+   * @param {string} [params.sep] - The string to separate each CSS rule.
    * @param {captureSettings} [params.settings]
    * @param {captureOptions} [params.options]
    */
@@ -5513,18 +5516,18 @@ class DocumentCssHandler {
    * - Pass {url, refCss, callback} for imported CSS.
    *
    * @param {Object} params
-   * @param {HTMLElement} [params.elem] - the elem to have CSS rewritten.
-   * @param {string} [params.url] - the source URL of the imported CSS.
-   * @param {?CSSStyleSheet} [params.refCss] - the reference CSS of the
+   * @param {HTMLElement} [params.elem] - The elem to have CSS rewritten.
+   * @param {string} [params.url] - The source URL of the imported CSS.
+   * @param {?CSSStyleSheet} [params.refCss] - The reference CSS of the
    *   imported CSS (CSSImportRule.styleSheet).
-   * @param {string} [params.baseUrl] - the base URL for URL resolving.
-   * @param {string} [params.refUrl] - the referrer URL for fetching
+   * @param {string} [params.baseUrl] - The base URL for URL resolving.
+   * @param {string} [params.refUrl] - The referrer URL for fetching
    *   resources.
-   * @param {string} [params.refPolicy] - the referrer policy for fetching
+   * @param {string} [params.refPolicy] - The referrer policy for fetching
    *   resources.
-   * @param {string} [params.envCharset] - the environment charset for
+   * @param {string} [params.envCharset] - The environment charset for
    *   fetching resources.
-   * @param {Node} [params.rootNode] - the reference root node for an
+   * @param {Node} [params.rootNode] - The reference root node for an
    *   imported CSS.
    * @param {rewriteCssRewriter} params.callback
    * @param {captureSettings} [params.settings]

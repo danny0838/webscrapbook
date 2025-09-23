@@ -12,6 +12,11 @@
 'use strict';
 
 Object.assign(dialog, {
+  /**
+   * @param {Object} params
+   * @param {Object[]} params.annotations
+   * @param {MessageSender} params.source
+   */
   async init({annotations, source: {tab: {id: tabId}, frameId}}) {
     await annotationViewer.init({annotations, tabId, frameId});
 
