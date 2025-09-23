@@ -1,10 +1,12 @@
 import {MochaQuery as $, assert} from "./unittest.mjs";
 
-import {capturer} from "./shared/capturer/common.mjs";
+import {BaseCapturer} from "./shared/capturer/common.mjs";
 
 describe('capturer/common.mjs', function () {
-  describe('capturer', function () {
-    describe('.getRedirectedUrl()', function () {
+  describe('BaseCapturer', function () {
+    const capturer = new BaseCapturer();
+
+    describe('#getRedirectedUrl()', function () {
       it("should use the redirected URL hash if it exists", function () {
         assert.strictEqual(
           capturer.getRedirectedUrl("http://example.com/page#", ""),
@@ -87,7 +89,7 @@ describe('capturer/common.mjs', function () {
       });
     });
 
-    describe('.resolveRelativeUrl()', function () {
+    describe('#resolveRelativeUrl()', function () {
       it("should resolve a relative URL using the base URL", function () {
         assert.strictEqual(
           capturer.resolveRelativeUrl("mypage.html", "http://example.com/"),
@@ -130,7 +132,7 @@ describe('capturer/common.mjs', function () {
       });
     });
 
-    describe('.isAboutUrl()', function () {
+    describe('#isAboutUrl()', function () {
       it("should return true for exactly about:srcdoc", function () {
         assert.isTrue(capturer.isAboutUrl("about:srcdoc"));
         assert.isFalse(capturer.isAboutUrl("about:srcdoc/subdir"));
@@ -162,7 +164,7 @@ describe('capturer/common.mjs', function () {
       });
     });
 
-    describe('.getErrorUrl()', function () {
+    describe('#getErrorUrl()', function () {
       const optionsBasic = {};
       const optionsLinkUnsavedUri = {"capture.linkUnsavedUri": true};
 
