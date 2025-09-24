@@ -19,9 +19,11 @@ const REBUILD_LINK_ROLE_PATTERN = /^document(?:-[a-f0-9-]+)?$/;
 const REBUILD_LINK_SVG_HREF_ATTRS = ['href', 'xlink:href'];
 
 class Capturer extends BaseCapturer {
-  // missionId is fixed to this page, to identify the capture mission
+  // missionId is fixed to this instance, to identify the capture mission
   // generate a unique one, if not otherwise set
   missionId = utils.getUuid();
+
+  logger = document.createElement('pre');
 
   /**
    * @typedef {Object} missionCaptureInfoFilesEntry
@@ -125,6 +127,14 @@ class Capturer extends BaseCapturer {
     span.className = 'error';
     span.append(...msg);
     this.logger.append(span, '\n');
+  }
+
+  addMessageListener() {
+    return utils.addMessageListener((message, sender) => {
+      if (!message.cmd.startsWith("capturer.")) { return false; }
+      if (message.id !== this.missionId) { return false; }
+      return true;
+    }, undefined, {capturer: this});
   }
 
   /**
@@ -970,13 +980,6 @@ class Capturer extends BaseCapturer {
     this.addItemToServer.added = true;
   }
 
-  /**
-   * @return {Promise<Object>}
-   */
-  async getMissionResult() {
-    return capturePromise;
-  }
-
   async remoteMsg({msg, type}) {
     if (['log', 'warn', 'error'].includes(type)) {
       this[type](...msg);
@@ -1022,6 +1025,87 @@ class Capturer extends BaseCapturer {
   /**
    * @typedef {{error: {message: string}}} errorObject
    */
+
+  /**
+   * @param {taskInfo} taskInfo
+   * @return {Promise<Array<captureDocumentResponse|transferableBlob|errorObject>>}
+   */
+  async run(taskInfo) {
+    const messageListener = this.addMessageListener();
+
+    const downloadsCreatedListener = (downloadItem) => {
+      isDebug && console.debug("downloads.onCreated", downloadItem);
+
+      const downloadHooks = this.downloadHooks;
+      const {id, url, filename} = downloadItem;
+      if (!downloadHooks.has(url)) { return; }
+
+      // In Chromium, the onCreated is fired when the "Save as" prompt popups.
+      //
+      // In Firefox, the onCreated is fired only when the user clicks
+      // save in the "Save as" prompt, and no event if the user clicks
+      // cancel.
+      //
+      // We wait until the user clicks save (or cancel in Chromium) to resolve
+      // the Promise (and then the window may close).
+      if (utils.userAgent.is('gecko')) {
+        downloadHooks.get(url).onComplete(downloadItem);
+      } else {
+        downloadHooks.set(id, downloadHooks.get(url));
+      }
+      downloadHooks.delete(url);
+    };
+    browser.downloads.onCreated.addListener(downloadsCreatedListener);
+
+    const downloadsChangedListener = async (downloadDelta) => {
+      isDebug && console.debug("downloads.onChanged", downloadDelta);
+
+      const downloadId = downloadDelta.id, downloadHooks = this.downloadHooks;
+      if (!downloadHooks.has(downloadId)) { return; }
+
+      let erase = true;
+      try {
+        if (downloadDelta.state?.current === "complete") {
+          const downloadItem = (await browser.downloads.search({id: downloadId}))[0];
+          if (downloadItem) {
+            downloadHooks.get(downloadId).onComplete(downloadItem);
+          } else {
+            // This should not happen.
+            downloadHooks.get(downloadId).onError(new Error("Cannot find downloaded item."));
+          }
+        } else if (downloadDelta.error) {
+          downloadHooks.get(downloadId).onError(new Error(downloadDelta.error.current));
+        } else {
+          erase = false;
+        }
+      } catch (ex) {
+        console.error(ex);
+      }
+
+      if (erase) {
+        // erase the download history of additional downloads (autoErase = true)
+        try {
+          if (downloadHooks.get(downloadId).autoErase) {
+            const erasedIds = await browser.downloads.erase({id: downloadId});
+          }
+          downloadHooks.delete(downloadId);
+        } catch (ex) {
+          console.error(ex);
+        }
+      }
+    };
+    browser.downloads.onChanged.addListener(downloadsChangedListener);
+
+    try {
+      return await this.runTasks(taskInfo);
+    } finally {
+      if (messageListener) {
+        browser.runtime.onMessage.removeListener(messageListener);
+      }
+      browser.downloads.onCreated.removeListener(downloadsCreatedListener);
+      browser.downloads.onCreated.removeListener(downloadsChangedListener);
+    }
+  }
 
   /**
    * @param {taskInfo} params
@@ -4335,149 +4419,40 @@ Redirecting to <a href="${utils.escapeHtml(target)}">${utils.escapeHtml(target, 
   }
 }
 
+class WorkerCapturer extends Capturer {
+  _promise = (() => {
+    const {promise, resolve, reject} = Promise.withResolvers();
+    promise.resolve = resolve;
+    promise.reject = reject;
+    return promise;
+  })();
 
-/****************************************************************************
- * Events handling
- ***************************************************************************/
+  _autoClose;
+  _autoCloseDelay = 1000;
 
-const capturer = new Capturer();
+  logger = document.getElementById('logger');
 
-utils.addMessageListener((message, sender) => {
-  if (!message.cmd.startsWith("capturer.")) { return false; }
-  if (message.id !== capturer.missionId) { return false; }
-  return true;
-});
-
-browser.downloads.onCreated.addListener((downloadItem) => {
-  isDebug && console.debug("downloads.onCreated", downloadItem);
-
-  const downloadHooks = capturer.downloadHooks;
-  const {id, url, filename} = downloadItem;
-  if (!downloadHooks.has(url)) { return; }
-
-  // In Chromium, the onCreated is fired when the "Save as" prompt popups.
-  //
-  // In Firefox, the onCreated is fired only when the user clicks
-  // save in the "Save as" prompt, and no event if the user clicks
-  // cancel.
-  //
-  // We wait until the user clicks save (or cancel in Chromium) to resolve
-  // the Promise (and then the window may close).
-  if (utils.userAgent.is('gecko')) {
-    downloadHooks.get(url).onComplete(downloadItem);
-  } else {
-    downloadHooks.set(id, downloadHooks.get(url));
-  }
-  downloadHooks.delete(url);
-});
-
-browser.downloads.onChanged.addListener(async (downloadDelta) => {
-  isDebug && console.debug("downloads.onChanged", downloadDelta);
-
-  const downloadId = downloadDelta.id, downloadHooks = capturer.downloadHooks;
-  if (!downloadHooks.has(downloadId)) { return; }
-
-  let erase = true;
-  try {
-    if (downloadDelta.state?.current === "complete") {
-      const downloadItem = (await browser.downloads.search({id: downloadId}))[0];
-      if (downloadItem) {
-        downloadHooks.get(downloadId).onComplete(downloadItem);
-      } else {
-        // This should not happen.
-        downloadHooks.get(downloadId).onError(new Error("Cannot find downloaded item."));
-      }
-    } else if (downloadDelta.error) {
-      downloadHooks.get(downloadId).onError(new Error(downloadDelta.error.current));
-    } else {
-      erase = false;
-    }
-  } catch (ex) {
-    console.error(ex);
+  addMessageListener() {
+    return null;
   }
 
-  if (erase) {
-    // erase the download history of additional downloads (autoErase = true)
-    try {
-      if (downloadHooks.get(downloadId).autoErase) {
-        const erasedIds = await browser.downloads.erase({id: downloadId});
-      }
-      downloadHooks.delete(downloadId);
-    } catch (ex) {
-      console.error(ex);
-    }
-  }
-});
+  async run() {
+    super.addMessageListener();
 
-const capturePromise = new Promise((resolve, reject) => {
-  const urlObj = new URL(document.URL);
-  const s = urlObj.searchParams;
-
-  // use missionId provided from URL params to read task data
-  const missionId = capturer.missionId = s.get('mid');
-
-  const closeWindow = async () => {
-    await utils.delay(1000);
-
-    const tab = await browser.tabs.getCurrent();
-    return await browser.tabs.remove(tab.id);
-  };
-
-  document.addEventListener("DOMContentLoaded", async function () {
-    utils.loadLanguages(document);
-
-    capturer.logger = document.getElementById('logger');
-
-    await utils.loadOptions();
-
-    let autoClose = utils.getOption("ui.autoCloseCaptureDialog");
-
-    let results;
-    runTasks: {
-      if (!missionId) {
-        capturer.error(`Error: Mission ID not set.`);
-        break runTasks;
-      }
-
-      const key = {table: "captureMissionCache", id: missionId};
-      const taskInfo = await Cache.get(key);
-      await Cache.remove(key);
-      if (!taskInfo || !taskInfo.tasks) {
-        capturer.error(`Error: missing task data for mission "${missionId}".`);
-        break runTasks;
-      }
-
-      if (typeof taskInfo.autoClose === 'string') {
-        autoClose = taskInfo.autoClose;
-      }
-
-      if (!taskInfo.tasks.length) {
-        capturer.error(`Error: nothing to capture.`);
-        break runTasks;
-      }
-
-      try {
-        results = await capturer.runTasks(taskInfo);
-      } catch (ex) {
-        console.error(ex);
-        capturer.error(`Unexpected error: ${ex.message}`);
-        break runTasks;
-      }
-    }
-
-    resolve(results);
+    this._promise.resolve(this._run());
+    const results = await this._promise;
 
     const hasFailure = !results || results.some(x => x.error);
 
-    switch (autoClose) {
+    switch (this._autoClose) {
       case "nowarn": {
-        if (capturer.logger.querySelector('.warn, .error')) {
+        if (this.logger.querySelector('.warn, .error')) {
           break;
         }
       }
       // eslint-disable-next-line no-fallthrough
       case "noerror": {
-        if (capturer.logger.querySelector('.error')) {
+        if (this.logger.querySelector('.error')) {
           break;
         }
       }
@@ -4489,7 +4464,7 @@ const capturePromise = new Promise((resolve, reject) => {
       }
       // eslint-disable-next-line no-fallthrough
       case "always": {
-        await closeWindow();
+        await this.exit();
         break;
       }
       case "none":
@@ -4497,8 +4472,65 @@ const capturePromise = new Promise((resolve, reject) => {
         break;
       }
     }
-  });
-});
+  }
+
+  async _run() {
+    const urlObj = new URL(document.URL);
+    const s = urlObj.searchParams;
+
+    // use missionId provided from URL params to read task data
+    const missionId = this.missionId = s.get('mid');
+
+    utils.loadLanguages(document);
+
+    await utils.loadOptions();
+
+    this._autoClose = utils.getOption("ui.autoCloseCaptureDialog");
+
+    if (!missionId) {
+      this.error(`Error: Mission ID not set.`);
+      return;
+    }
+
+    const key = {table: "captureMissionCache", id: missionId};
+    const taskInfo = await Cache.get(key);
+    await Cache.remove(key);
+    if (!taskInfo || !taskInfo.tasks) {
+      this.error(`Error: missing task data for mission "${missionId}".`);
+      return;
+    }
+
+    if (typeof taskInfo.autoClose === 'string') {
+      this._autoClose = taskInfo.autoClose;
+    }
+
+    if (!taskInfo.tasks.length) {
+      this.error(`Error: nothing to capture.`);
+      return;
+    }
+
+    try {
+      return await super.run(taskInfo, {ignoreTitle: false});
+    } catch (ex) {
+      console.error(ex);
+      this.error(`Unexpected error: ${ex.message}`);
+      return;
+    }
+  }
+
+  async getMissionResult() {
+    return this._promise;
+  }
+
+  async exit() {
+    await utils.delay(this._autoCloseDelay);
+    const tab = await browser.tabs.getCurrent();
+    return await browser.tabs.remove(tab.id);
+  }
+}
+
+const capturer = new WorkerCapturer();
+capturer.run(); // async
 
 /** @global */
 globalThis.capturer = capturer;
