@@ -278,7 +278,7 @@ class Server {
     {
       let rootUrlObj;
       try {
-        rootUrlObj = new URL(scrapbook.getOption("server.url"));
+        rootUrlObj = new URL(await scrapbook.getOption("server.url"));
         if (!rootUrlObj.pathname.endsWith('/')) { rootUrlObj.pathname += '/'; }
         rootUrlObj.search = rootUrlObj.hash = '';
       } catch (ex) {
@@ -858,8 +858,9 @@ class Book {
    *       the remote tree has been updated.
    *     - "refresh": refresh the tree before the request and pass an extra
    *        param about whether the remote tree has been updated.
-   * @param {boolean} [params.autoBackup] - whether to automatically create a
-   *     temporary tree backup before a transaction and remove after success.
+   * @param {boolean|Promise<boolean>} [params.autoBackup] - whether to
+   *     automatically create a temporary tree backup before a transaction and
+   *     remove after success.
    * @param {string} [params.autoBackupTs] - timestamp for the auto backup.
    * @param {string} [params.autoBackupNote] - note for the auto backup.
    * @param {integer} [params.timeout] - timeout for lock.
@@ -915,7 +916,7 @@ class Book {
       }
 
       // auto backup
-      if (autoBackup) {
+      if (await autoBackup) {
         backupTs = autoBackupTs || scrapbook.dateToId();
 
         // Load tree files if not done yet.
