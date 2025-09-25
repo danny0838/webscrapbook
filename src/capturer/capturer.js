@@ -28,7 +28,13 @@ class WorkerCapturer extends Capturer {
     super.addMessageListener();
 
     this._promise.resolve(this._run());
-    const results = await this._promise;
+    let results;
+    try {
+      results = await this._promise;
+    } catch (ex) {
+      console.error(ex);
+      this.error(`Error: ${ex.message}`);
+    }
 
     const hasFailure = !results || results.some(x => x.error);
 
@@ -69,41 +75,31 @@ class WorkerCapturer extends Capturer {
     // use missionId provided from URL params to read task data
     const missionId = this.missionId = s.get('mid');
 
-    utils.loadLanguages(document);
-
     await utils.loadOptions();
 
     this._autoClose = utils.getOption("ui.autoCloseCaptureDialog");
 
     if (!missionId) {
-      this.error(`Error: Mission ID not set.`);
-      return;
+      throw new Error(`Mission ID not set.`);
     }
 
     const key = {table: "captureMissionCache", id: missionId};
     const taskInfo = await Cache.get(key);
     await Cache.remove(key);
-    if (!taskInfo || !taskInfo.tasks) {
-      this.error(`Error: missing task data for mission "${missionId}".`);
-      return;
-    }
 
-    if (typeof taskInfo.autoClose === 'string') {
+    if (typeof taskInfo?.autoClose === 'string') {
       this._autoClose = taskInfo.autoClose;
     }
 
-    if (!taskInfo.tasks.length) {
-      this.error(`Error: nothing to capture.`);
-      return;
+    if (!taskInfo?.tasks) {
+      throw new Error(`Missing task data for mission "${missionId}".`);
     }
 
-    try {
-      return await super.run(taskInfo, {ignoreTitle: false});
-    } catch (ex) {
-      console.error(ex);
-      this.error(`Unexpected error: ${ex.message}`);
-      return;
+    if (!taskInfo.tasks.length) {
+      throw new Error(`Nothing to capture.`);
     }
+
+    return await super.run(taskInfo, {ignoreTitle: false});
   }
 
   async getMissionResult() {
@@ -116,6 +112,8 @@ class WorkerCapturer extends Capturer {
     return await browser.tabs.remove(tab.id);
   }
 }
+
+utils.loadLanguages(document);
 
 const capturer = new WorkerCapturer();
 capturer.run(); // async
