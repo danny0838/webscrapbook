@@ -4861,7 +4861,7 @@ class DocumentCssHandler {
     const fn = (rule) => {
       return rewriteRule(rule);
     };
-    Object.defineProperty(DocumentCssHandler, 'getSelectorText', {value: fn});
+    Object.defineProperty(this, 'getSelectorText', {value: fn});
     return fn(...args);
   }
 
@@ -4986,7 +4986,7 @@ class DocumentCssHandler {
       return tokenizer.tokensToString(result);
     };
 
-    Object.defineProperty(DocumentCssHandler, 'getSelectorVerifier', {value: fn});
+    Object.defineProperty(this, 'getSelectorVerifier', {value: fn});
     return fn(...args);
   }
 
