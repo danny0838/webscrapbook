@@ -1136,8 +1136,7 @@ scrapbook.cache = {
     },
 
     async _getKeys(fallback = true) {
-      // Chromium < 130 and Firefox
-      // ref: https://bugzilla.mozilla.org/show_bug.cgi?id=1910669
+      // Chromium < 130 and Firefox < 143
       if (!browser.storage.local.getKeys) {
         if (fallback) {
           return Object.keys(await browser.storage.local.get());
@@ -1157,8 +1156,7 @@ scrapbook.cache = {
     async getAll(filter) {
       const keys = await this._getKeys(false);
 
-      // Chromium < 130 and Firefox
-      // ref: https://bugzilla.mozilla.org/show_bug.cgi?id=1910669
+      // Chromium < 130 and Firefox < 143
       if (!keys) {
         const items = await browser.storage.local.get();
         for (const key in items) {
