@@ -1,5 +1,5 @@
 # Configs
-/test/config.local.json
+/src/test/config.local.json
 
 # IDE - Node.js
 /node_modules/
@@ -10,8 +10,8 @@
 
 # Build outputs
 /src/manifest.json
-/test/manifest.json
+/src/test/manifest.json
 /dist/
 
 # Temporary files
-/test/shared/
+/src/test/shared/
