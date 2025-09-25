@@ -1,6 +1,6 @@
 import {MochaQuery as $, assert} from "./unittest.mjs";
 
-import {Referrer} from "./shared/lib/referrer.mjs";
+import {Referrer} from "../lib/referrer.mjs";
 
 const $it = $(it);
 

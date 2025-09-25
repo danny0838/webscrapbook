@@ -12,21 +12,29 @@
 
 2. Install WebScrapBook extension (standard install or as a temporary extension).
 
-3. Install `WebScrapBook Test Suite` extension from this directory (as a temporary extension).
+3. Click on the action of the extension and choose `Tests` to select the tests to run.
 
-4. Copy `config.json` to `config.local.json` and configure:
-   * `wsb_extension_id`: should match the extension ID of the installed WebScrapBook extension
-   * `server_port`, `server_port2`, and `backend_port`: should be available (not used by other applications)
+### End-to-end capture tests
 
-5. Install PyWebScrapBook and configure related extension options: (Optional, for backend server related end-to-end tests)
-   * `Backend server > Address`: should match `http://localhost:<backend_port>/`
+1. Install PyWebScrapBook and configure related extension options.
 
-6. Run `server.py` to start the local hosting server. (Optional, for end-to-end capture tests)
+2. Copy `config.json` to `config.local.json` and make sure `server_port`, `server_port2`, and `backend_port` are available (not used by other applications).
 
-7. Click on the browser action of the test suite extension. A tab will be opened and the test will start automatically.
-   > Alternatively, right-click on the browser action for subgroup tests.
+3. Tweak WebScrapBook option `Backend server > Address` to match `http://localhost:<backend_port>/`
 
-7. Do the same tests in a private window for Firefox (which may behave differently from in a normal window).
+4. Run `server.py` to start the local hosting server.
+
+5. Run capture tests.
+
+6. Do the same tests in a private window for Firefox (which may behave differently from in a normal window).
+
+### External messaging tests
+
+1. Install the external test extension from `src/test/external` (as a temporary extension).
+
+2. Copy `config.json` to `config.local.json` and make sure `extension_id` matches the installed external test extension.
+
+3. Run external messaging tests.
 
 ## Notes
 

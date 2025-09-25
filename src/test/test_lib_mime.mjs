@@ -1,6 +1,6 @@
 import {MochaQuery as $, assert} from "./unittest.mjs";
 
-import * as Mime from "./shared/lib/mime.mjs";
+import * as Mime from "../lib/mime.mjs";
 
 describe('lib/mime.js', function () {
   describe('Mime', function () {

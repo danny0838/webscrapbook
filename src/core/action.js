@@ -144,6 +144,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     elem.hidden = !shown;
   }
 
+  // specially handle tests
+  document.getElementById("openTests").hidden = browser.runtime.getManifest().author !== "test";
+
   // disable backend server related options if not configured
   if (!utils.hasServer()) {
     document.getElementById("searchCaptures").disabled = true;
@@ -258,6 +261,14 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   document.getElementById("openOptions").addEventListener('click', async (event) => {
     await browser.runtime.openOptionsPage();
+    autoClose();
+  });
+
+  document.getElementById("openTests").addEventListener('click', async (event) => {
+    await utils.visitLink({
+      url: browser.runtime.getURL("test/tests.html"),
+      newTab: true,
+    });
     autoClose();
   });
 

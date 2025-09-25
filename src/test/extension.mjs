@@ -6,8 +6,9 @@
  * https://opensource.org/licenses/MIT
  *****************************************************************************/
 
-import {userAgent, delay} from "./shared/utils/common.mjs";
-import {deserializeObject} from "./shared/utils/cache.mjs";
+import {userAgent, delay} from "../utils/common.mjs";
+import {deserializeObject} from "../utils/cache.mjs";
+import {Capturer} from "../capturer/capturer.mjs";
 
 let config;
 let backend;
@@ -17,7 +18,7 @@ let localhost2;
 async function init() {
   const config1 = await (async () => {
     try {
-      const url = browser.runtime.getURL('config.json');
+      const url = browser.runtime.getURL('test/config.json');
       return await fetch(url).then(r => r.json());
     } catch (ex) {
       // pass
@@ -25,7 +26,7 @@ async function init() {
   })();
   const config2 = await (async () => {
     try {
-      const url = browser.runtime.getURL('config.local.json');
+      const url = browser.runtime.getURL('test/config.local.json');
       return await fetch(url).then(r => r.json());
     } catch (ex) {
       // pass
@@ -66,14 +67,14 @@ async function checkTestServer() {
 }
 
 async function checkExtension() {
-  const id = config["wsb_extension_id"];
+  const id = config["extension_id"];
   try {
     if (!await browser.runtime.sendMessage(id, {cmd: "ping"})) {
       throw new Error('ping failure');
     }
   } catch (ex) {
     console.error(ex);
-    throw new Error(`Unable to connect to the WebScrapBook extension with ID "${id}". Make sure the extension is installed and its ID is correctly configured.`);
+    throw new Error(`Unable to connect to the test extension with ID "${id}". Make sure the extension is installed and its ID is correctly configured.`);
   }
 }
 
@@ -187,35 +188,18 @@ async function capture(params, options = {}) {
     await delay(delayTime);
   }
 
-  const args = [{
-    taskInfo: {
-      tasks: [
-        headless ? params : Object.assign({
-          tabId: pageTab.id,
-          title: pageTab.title,
-          url: pageTab.url,
-        }, params),
-      ],
-    },
-    windowCreateData: {
-      incognito: (await browser.windows.getCurrent()).incognito,
-      focused: false,
-      type: "popup",
-      width: 50,
-      height: 50,
-      top: window.screen.availHeight - 50,
-      left: window.screen.availWidth - 50,
-    },
-    waitForResponse: true,
-  }];
+  const taskInfo = {
+    tasks: [
+      headless ? params : Object.assign({
+        tabId: pageTab.id,
+        url: pageTab.url,
+      }, params),
+    ],
+  };
 
-  const {result: response} = await browser.runtime.sendMessage(config["wsb_extension_id"], {
-    cmd: "invokeCaptureEx",
-    args,
-  });
+  const capturer = new Capturer();
+  const [result] = await capturer.run(taskInfo);
 
-  const result = response.results[0];
-  await browser.tabs.remove(response.tab.id);
   !headless && await browser.tabs.remove(pageTab.id);
 
   if (rawResponse) {

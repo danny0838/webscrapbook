@@ -1,6 +1,6 @@
 import {MochaQuery as $, assert} from "./unittest.mjs";
 
-import {BaseCapturer} from "./shared/capturer/common.mjs";
+import {BaseCapturer} from "../capturer/common.mjs";
 
 describe('capturer/common.mjs', function () {
   describe('BaseCapturer', function () {

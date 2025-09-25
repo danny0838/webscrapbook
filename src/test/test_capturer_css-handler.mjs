@@ -1,10 +1,10 @@
 import {MochaQuery as $, assert, getRulesFromCssText, cssRegex} from "./unittest.mjs";
-import {userAgent} from "./shared/utils/common.mjs";
+import {userAgent} from "../utils/common.mjs";
 
 import {
   CssSelectorTokenizer,
   DocumentCssHandler,
-} from "./shared/capturer/css-handler.mjs";
+} from "../capturer/css-handler.mjs";
 
 const $describe = $(describe);
 const $it = $(it);

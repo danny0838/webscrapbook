@@ -1,6 +1,6 @@
 import {MochaQuery as $, assert} from "./unittest.mjs";
 
-import {CaptureHelperHandler} from "./shared/capturer/helper-handler.mjs";
+import {CaptureHelperHandler} from "../capturer/helper-handler.mjs";
 
 const $describe = $(describe);
 

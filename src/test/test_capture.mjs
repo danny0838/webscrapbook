@@ -11,8 +11,8 @@ import {
 import {
   userAgent, xhr, escapeRegExp,
   readFileAsText, readFileAsArrayBuffer, readFileAsDataURL, readFileAsDocument,
-} from "./shared/utils/common.mjs";
-import {Zip} from "./shared/utils/zip.mjs";
+} from "../utils/common.mjs";
+import {Zip} from "../utils/zip.mjs";
 
 const $describe = $(describe);
 const $it = $(it);
@@ -133,7 +133,6 @@ $describe.skipIf($.noExtensionBrowser)('Capture tests', function () {
     await Promise.all([
       checkBackendServer(),
       checkTestServer(),
-      checkExtension(),
     ]);
   });
 

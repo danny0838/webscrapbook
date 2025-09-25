@@ -1,12 +1,12 @@
 import {MochaQuery as $, assert, GREEN_BMP_BYTES} from "./unittest.mjs";
 import sinon from "./lib/sinon-esm.js";
-import {unicodeToUtf8, byteStringToArrayBuffer, readFileAsText} from "./shared/utils/common.mjs";
+import {unicodeToUtf8, byteStringToArrayBuffer, readFileAsText} from "../utils/common.mjs";
 
 import {
   readBlobAsByteStrings, serializeObject, deserializeObject,
   SerializedBlob,
   BaseCache, StorageCache, IdbCache, SessionCache, Cache,
-} from "./shared/utils/cache.mjs";
+} from "../utils/cache.mjs";
 
 const $describe = $(describe);
 

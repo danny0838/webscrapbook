@@ -1,7 +1,7 @@
 import {assert} from "./unittest.mjs";
 import sinon from "./lib/sinon-esm.js";
 
-import {Zip, isCompressible} from "./shared/utils/zip.mjs";
+import {Zip, isCompressible} from "../utils/zip.mjs";
 
 describe('utils/zip.mjs', function () {
   afterEach(function () {

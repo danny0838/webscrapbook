@@ -26,8 +26,8 @@ export default [
       "src/lib/mime.js",
       "src/lib/sha.js",
       "src/content/index.js",
-      "test/lib/**/*.js",
-      "test/lib/**/*.mjs",
+      "src/test/lib/**/*.js",
+      "src/test/lib/**/*.mjs",
     ],
   },
   {
@@ -101,17 +101,8 @@ export default [
   },
   {
     files: [
-      "test/**/*.js",
-      "test/**/*.mjs",
-    ],
-    rules: {
-      "import/no-unresolved": "warn", // prevent workflow failure when test/shared/* not generated
-    },
-  },
-  {
-    files: [
-      "test/test.js",
-      "test/test_*.mjs",
+      "src/test/test.js",
+      "src/test/test_*.mjs",
     ],
     languageOptions: {
       globals: globals.mocha,
@@ -119,8 +110,8 @@ export default [
   },
   {
     files: [
-      "test/unittest-encoding.js",
-      "test/t/**/*.js",
+      "src/test/unittest-encoding.js",
+      "src/test/t/**/*.js",
     ],
     languageOptions: {
       sourceType: "script",

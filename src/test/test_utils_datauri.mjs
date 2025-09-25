@@ -1,6 +1,6 @@
 import {MochaQuery as $, assert, GREEN_BMP_B64} from "./unittest.mjs";
 
-import {dataUriToFile} from "./shared/utils/datauri.mjs";
+import {dataUriToFile} from "../utils/datauri.mjs";
 
 const $describe = $(describe);
 

@@ -7,8 +7,8 @@
  *****************************************************************************/
 
 import {assert, config as chaiConfig} from "./lib/chai.mjs";
-import {userAgent, escapeRegExp} from "./shared/utils/common.mjs";
-import {sha1} from "./shared/utils/sha.mjs";
+import {userAgent, escapeRegExp} from "../utils/common.mjs";
+import {sha1} from "../utils/sha.mjs";
 
 Object.assign(chaiConfig, {
   truncateThreshold: 1024,
@@ -447,7 +447,7 @@ var encodeText = (() => {
     const frame = document.createElement("iframe");
     frame.style.setProperty('display', 'none', 'important');
     {
-      const js = browser.runtime.getURL('unittest-encoding.js');
+      const js = browser.runtime.getURL('test/unittest-encoding.js');
       const _str = escapeHtml(str);
 
       // run script in a document with specific charset to get the encoded text

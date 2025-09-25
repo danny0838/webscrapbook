@@ -1,6 +1,6 @@
 import {MochaQuery as $, assert} from "./unittest.mjs";
 
-import {MapWithDefault} from "./shared/lib/map-with-default.mjs";
+import {MapWithDefault} from "../lib/map-with-default.mjs";
 
 describe('lib/map-with-default.mjs', function () {
   describe('MapWithDefault', function () {
