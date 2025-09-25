@@ -1,31 +1,10 @@
 {
   "manifest_version": 2,
-  "name": "WebScrapBook Test Suite",
-  "description": "Test suite for WebScrapBook extension.",
-  "version": "2.25.1",
-  "author": "Danny Lin",
+  "name": "WebScrapBook External Test",
+  "description": "Test suite for WebScrapBook external messaging.",
+  "version": "0.1.0",
   "minimum_chrome_version": "85",
   "background": {
     "page": "background.html"
-  },
-  "content_scripts": [
-    {
-      "matches": [
-        "http://localhost/capturex_*",
-        "http://localhost/viewer_*"
-      ],
-      "js": [
-        "content.js"
-      ],
-      "run_at": "document_start"
-    }
-  ],
-  "browser_action": {
-    "default_title": "WebScrapBook Test Suite"
-  },
-  "permissions": [
-    "contextMenus",
-    "storage",
-    "http://*/*"
-  ]
+  }
 }

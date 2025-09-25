@@ -10,8 +10,5 @@
 
 # Build outputs
 /src/manifest.json
-/src/test/manifest.json
+/src/test/external/manifest.json
 /dist/
-
-# Temporary files
-/src/test/shared/

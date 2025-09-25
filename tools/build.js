@@ -11,7 +11,7 @@ import {rollup} from 'rollup';
 const ROOT = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
 
 const srcDir = path.join(ROOT, 'src');
-const testDir = path.join(ROOT, 'test');
+const testDir = path.join(srcDir, 'test');
 const artifactsDir = path.join(ROOT, 'dist');
 
 /**
@@ -35,24 +35,24 @@ async function build(target) {
   switch (target) {
     case 'firefox-mv3': {
       console.log('Building files for Firefox (MV3)...');
-      hardlink(path.join(srcDir, 'manifest.firefox.json'), path.join(srcDir, 'manifest.json'));
+      fs.copyFileSync(path.join(srcDir, 'manifest.firefox.json'), path.join(srcDir, 'manifest.json'));
       break;
     }
     case 'chromium':
     case 'chromium-mv3': {
       console.log('Building files for Chromium (MV3)...');
-      hardlink(path.join(srcDir, 'manifest.chromium.json'), path.join(srcDir, 'manifest.json'));
+      fs.copyFileSync(path.join(srcDir, 'manifest.chromium.json'), path.join(srcDir, 'manifest.json'));
       break;
     }
     case 'firefox':
     case 'firefox-mv2': {
       console.log('Building files for Firefox (MV2)...');
-      hardlink(path.join(srcDir, 'manifest.firefox-mv2.json'), path.join(srcDir, 'manifest.json'));
+      fs.copyFileSync(path.join(srcDir, 'manifest.firefox-mv2.json'), path.join(srcDir, 'manifest.json'));
       break;
     }
     case 'chromium-mv2': {
       console.log('Building files for Chromium (MV2)...');
-      hardlink(path.join(srcDir, 'manifest.chromium-mv2.json'), path.join(srcDir, 'manifest.json'));
+      fs.copyFileSync(path.join(srcDir, 'manifest.chromium-mv2.json'), path.join(srcDir, 'manifest.json'));
       break;
     }
     default: {
@@ -99,27 +99,28 @@ async function build(target) {
 }
 
 async function buildTest(target) {
+  const testExternalDir = path.join(testDir, 'external');
   switch (target) {
     case 'firefox-mv3': {
       console.log('Building test files for Firefox (MV3)...');
-      hardlink(path.join(testDir, 'manifest.firefox.json'), path.join(testDir, 'manifest.json'));
+      hardlink(path.join(testExternalDir, 'manifest.firefox.json'), path.join(testExternalDir, 'manifest.json'));
       break;
     }
     case 'chromium':
     case 'chromium-mv3': {
       console.log('Building test files for Chromium (MV3)...');
-      hardlink(path.join(testDir, 'manifest.chromium.json'), path.join(testDir, 'manifest.json'));
+      hardlink(path.join(testExternalDir, 'manifest.chromium.json'), path.join(testExternalDir, 'manifest.json'));
       break;
     }
     case 'firefox':
     case 'firefox-mv2': {
       console.log('Building test files for Firefox (MV2)...');
-      hardlink(path.join(testDir, 'manifest.firefox-mv2.json'), path.join(testDir, 'manifest.json'));
+      hardlink(path.join(testExternalDir, 'manifest.firefox-mv2.json'), path.join(testExternalDir, 'manifest.json'));
       break;
     }
     case 'chromium-mv2': {
       console.log('Building test files for Chromium (MV2)...');
-      hardlink(path.join(testDir, 'manifest.chromium-mv2.json'), path.join(testDir, 'manifest.json'));
+      hardlink(path.join(testExternalDir, 'manifest.chromium-mv2.json'), path.join(testExternalDir, 'manifest.json'));
       break;
     }
     default: {
@@ -127,42 +128,25 @@ async function buildTest(target) {
     }
   }
 
-  // sync version to manifest files
-  {
-    const version = JSON.parse(fs.readFileSync('package.json', 'utf8')).version;
-    for (const dst of globSync([
-      path.join(testDir, 'manifest.*.json'),
-    ], {windowsPathsNoEscape: true})) {
-      const data = JSON.parse(fs.readFileSync(dst, 'utf8'));
-      if (data.version !== version) {
-        console.log(`Updating version for "${dst}" ...`);
-        data.version = version;
-        fs.writeFileSync(dst, JSON.stringify(data, null, 2) + '\n');
-      }
-    }
+  const src = path.join(srcDir, 'manifest.json');
+  const data = JSON.parse(fs.readFileSync(src, 'utf8'));
+  data.name += " (dev)";
+  data.author = "test";
+  data.content_scripts = [{
+    "matches": [
+      "http://localhost/capturex_*",
+      "http://localhost/viewer_*",
+    ],
+    "js": [
+      "test/content.js",
+    ],
+    "run_at": "document_start",
+  }];
+  if (data.web_accessible_resources?.[0]?.use_dynamic_url) {
+    data.web_accessible_resources[0].use_dynamic_url = false;
   }
 
-  // mirror source files under the shared directory
-  const testSharedDir = path.join(testDir, 'shared');
-
-  for (const dst of globSync([
-    path.join(testSharedDir, '**'),
-  ], {windowsPathsNoEscape: true})) {
-    const subpath = path.relative(testSharedDir, dst);
-    const src = path.join(srcDir, subpath);
-    if (!fs.existsSync(src)) {
-      fs.rmSync(dst, {force: true, recursive: true});
-    }
-  }
-
-  for (const src of globSync([
-    path.join(srcDir, '**', '*.mjs'),
-    path.join(srcDir, 'lib', '**', '*.js'),
-  ], {windowsPathsNoEscape: true})) {
-    const subpath = path.relative(srcDir, src);
-    const dst = path.join(testSharedDir, subpath);
-    hardlink(src, dst);
-  }
+  fs.writeFileSync(src, JSON.stringify(data, null, 2) + '\n');
 }
 
 async function dev(target) {
@@ -183,6 +167,7 @@ async function pack(target) {
     ignoreFiles: [
       '**/*.map',
       'manifest.*.json',
+      'test',
     ],
   });
 }

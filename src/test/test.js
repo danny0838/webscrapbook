@@ -4,7 +4,7 @@
  *****************************************************************************/
 
 import * as suite from "./extension.mjs";
-import {escapeRegExp} from "./shared/utils/common.mjs";
+import {escapeRegExp} from "../utils/common.mjs";
 
 // Top-level await is available only in Chromium >=89 and Firefox >= 89
 (async () => {
@@ -45,14 +45,15 @@ import {escapeRegExp} from "./shared/utils/common.mjs";
   await import('./test_lib_referrer.mjs');
   await import('./test_lib_map-with-default.mjs');
   await import('./test_lib_strftime.mjs');
-  await import('./test_src_utils_common.mjs');
-  await import('./test_src_utils_cache.mjs');
-  await import('./test_src_utils_datauri.mjs');
-  await import('./test_src_utils_zip.mjs');
-  await import('./test_src_capturer_common.mjs');
-  await import('./test_src_capturer_css-handler.mjs');
-  await import('./test_src_capturer_helper-handler.mjs');
+  await import('./test_utils_common.mjs');
+  await import('./test_utils_cache.mjs');
+  await import('./test_utils_datauri.mjs');
+  await import('./test_utils_zip.mjs');
+  await import('./test_capturer_common.mjs');
+  await import('./test_capturer_css-handler.mjs');
+  await import('./test_capturer_helper-handler.mjs');
   await import('./test_capture.mjs');
+  await import('./test_external.mjs');
   await import('./test_manual.mjs');
 
   mocha.run();

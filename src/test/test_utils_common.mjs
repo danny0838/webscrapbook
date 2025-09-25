@@ -5,7 +5,7 @@ import {
 } from "./unittest.mjs";
 import sinon from "./lib/sinon-esm.js";
 
-import * as utils from "./shared/utils/common.mjs";
+import * as utils from "../utils/common.mjs";
 
 const $describe = $(describe);
 const $it = $(it);

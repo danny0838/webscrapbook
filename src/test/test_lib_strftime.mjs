@@ -1,6 +1,6 @@
 import {MochaQuery as $, assert} from "./unittest.mjs";
 
-import {Strftime} from "./shared/lib/strftime.mjs";
+import {Strftime} from "../lib/strftime.mjs";
 
 describe('lib/strftime.js', function () {
   describe('Strftime', function () {
