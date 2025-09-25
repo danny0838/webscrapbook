@@ -1,38 +1,182 @@
 import {MochaQuery as $, assert} from "./unittest.mjs";
+import sinon from "./lib/sinon-esm.js";
 import {readFileAsText} from "./shared/utils/common.mjs";
 
 import {StorageCache, IdbCache, SessionCache} from "./shared/utils/cache.mjs";
 
 const $describe = $(describe);
 
+class StubStorage {
+  static STUB_OBJ = {
+    get: async (keys) => {
+      if (keys == null) {
+        return Object.fromEntries(this._map.entries());
+      }
+
+      if (typeof keys === "string") {
+        return {[keys]: this._map.get(keys)};
+      }
+
+      if (Array.isArray(keys)) {
+        const result = {};
+        for (const k of keys) {
+          result[k] = this._map.get(k);
+        }
+        return result;
+      }
+
+      const result = {};
+      for (const [k, v] of Object.entries(keys)) {
+        result[k] = v;
+      }
+      return result;
+    },
+
+    getKeys: async () => {
+      return Array.from(this._map.keys());
+    },
+
+    set: async (items) => {
+      for (const [k, v] of Object.entries(items)) {
+        this._map.set(k, v);
+      }
+    },
+
+    remove: async (keys) => {
+      if (typeof keys === 'string') {
+        keys = [keys];
+      }
+      for (const k of keys) {
+        this._map.delete(k);
+      }
+    },
+
+    clear: async () => {
+      this._map.clear();
+    },
+  };
+
+  static _map = new Map();
+  static _stub;
+
+  static apply() {
+    if (this._stub) { return; }
+    this._stub = sinon.stub(browser.storage, "local").value(this.STUB_OBJ);
+  }
+
+  static restore() {
+    if (!this._stub) { return; }
+    this._stub.restore();
+    this._stub = null;
+  }
+}
+
+class StubIdb {
+  static DB_NAME = "scrapbook_test";
+  static _stub;
+
+  static apply() {
+    if (this._stub) { return; }
+    this._stub = sinon.stub(IdbCache, "DB_NAME").value(this.DB_NAME);
+  }
+
+  static restore() {
+    if (!this._stub) { return; }
+    this._stub.restore();
+    this._stub = null;
+  }
+}
+
+class StubSessionStorage {
+  static STUB_OBJ = Object.defineProperties({}, {
+    getItem: {
+      value: (key) => {
+        return this._map.get(String(key)) ?? null;
+      },
+    },
+
+    setItem: {
+      value: (key, value) => {
+        this._map.set(String(key), String(value));
+      },
+    },
+
+    removeItem: {
+      value: (key) => {
+        this._map.delete(String(key));
+      },
+    },
+
+    clear: {
+      value: () => {
+        this._map.clear();
+      },
+    },
+
+    key: {
+      value: (index) => {
+        const keys = Array.from(this._map.keys());
+        return keys[index] ?? null;
+      },
+    },
+
+    length: {
+      get: () => {
+        return this._map.size;
+      },
+    },
+  });
+
+  static _map = new Map();
+  static _stub;
+
+  static apply() {
+    if (this._stub) { return; }
+    this._stub = sinon.stub(globalThis, "sessionStorage").value(this.STUB_OBJ);
+  }
+
+  static restore() {
+    if (!this._stub) { return; }
+    this._stub.restore();
+    this._stub = null;
+  }
+}
+
+async function dbDelete(dbName) {
+  return await new Promise((resolve, reject) => {
+    const req = indexedDB.deleteDatabase(dbName);
+    req.onsuccess = (event) => resolve(event.target.result);
+    req.onerror = (event) => reject(event.target.error);
+  }).catch((ex) => {
+    throw new Error(`Failed to delete database "${dbName}": ${ex.message}`);
+  });
+}
+
+async function cleanUp() {
+  await browser.storage.local.clear();
+  await dbDelete(StubIdb.DB_NAME);
+  sessionStorage.clear();
+}
+
 describe('utils/cache.mjs', function () {
-  const DB_NAME = "scrapbook";
-
-  async function dbDelete(dbName) {
-    return await new Promise((resolve, reject) => {
-      const req = indexedDB.deleteDatabase(dbName);
-      req.onsuccess = (event) => resolve(event.target.result);
-      req.onerror = (event) => reject(event.target.error);
-    });
-  }
-
-  async function cleanUp() {
-    await browser.storage.local.clear();
-
-    try {
-      await dbDelete(DB_NAME);
-    } catch (ex) {
-      throw new Error(`Failed to delete database "${DB_NAME}": ${ex.message}`);
-    }
-
-    sessionStorage.clear();
-  }
-
   for (const cache of [StorageCache, IdbCache, SessionCache]) {
     $describe.skipIf($.noExtensionBrowser)(cache.name, function () {
-      before(cleanUp);
+      before(async function applyStubs() {
+        StubStorage.apply();
+        StubIdb.apply();
+        StubSessionStorage.apply();
+        await cleanUp();
+      });
 
-      afterEach(cleanUp);
+      afterEach(async function clearStubData() {
+        await cleanUp();
+      });
+
+      after(async function restoreStubs() {
+        StubStorage.restore();
+        StubIdb.restore();
+        StubSessionStorage.restore();
+      });
 
       describe('set', function () {
         it('key as object', async function () {
@@ -137,7 +281,7 @@ describe('utils/cache.mjs', function () {
         });
       });
 
-      describe('getAll', function () {
+      const getAllTests = function () {
         const key1 = {table: "test", id: "123"};
         const key2 = {table: "test", id: "456"};
         const key3 = {table: "test", id: "789"};
@@ -260,7 +404,29 @@ describe('utils/cache.mjs', function () {
           assert.deepEqual(await readFileAsText(complex.f1), await readFileAsText(value.f1));
           assert.deepEqual(await readFileAsText(complex.f2), await readFileAsText(value.f2));
         });
-      });
+      };
+
+      if (cache === StorageCache) {
+        describe('getAll', function () {
+          context('with `browser.storage.local.getKeys`', getAllTests);
+
+          context('without `browser.storage.local.getKeys`', function () {
+            let getKeysStub;
+
+            before(function () {
+              getKeysStub = sinon.stub(browser.storage.local, "getKeys");
+            });
+
+            after(function () {
+              getKeysStub.restore();
+            });
+
+            getAllTests.call(this);
+          });
+        });
+      } else {
+        describe('getAll', getAllTests);
+      }
 
       describe('remove', function () {
         const key1 = {table: "test", id: "123"};
