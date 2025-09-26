@@ -3,8 +3,8 @@
  * @requires mocha
  *****************************************************************************/
 
-import {escapeRegExp} from "./unittest.mjs";
 import * as suite from "./extension.mjs";
+import {escapeRegExp} from "./shared/utils/common.mjs";
 
 // Top-level await is available only in Chromium >=89 and Firefox >= 89
 (async () => {
