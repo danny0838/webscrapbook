@@ -3,7 +3,7 @@ import sinon from "./lib/sinon-esm.js";
 import {unicodeToUtf8, byteStringToArrayBuffer, readFileAsText} from "./shared/utils/common.mjs";
 
 import {
-  serializeObject, deserializeObject,
+  readBlobAsByteStrings, serializeObject, deserializeObject,
   BaseCache, StorageCache, IdbCache, SessionCache, Cache,
 } from "./shared/utils/cache.mjs";
 
@@ -172,6 +172,24 @@ describe('utils/cache.mjs', function () {
     sandbox?.restore();
   });
 
+  describe('readBlobAsByteStrings', function () {
+    it('should read a Blob as byte strings', async function () {
+      var blob = new Blob([new Uint8Array([0xA4, 0x40, 0xA4, 0xD1])], {type: 'text/plain'});
+      assert.deepEqual(await readBlobAsByteStrings(blob), ['\xA4\x40\xA4\xD1']);
+
+      var blob = new File([new Uint8Array([0xEF, 0xBB, 0xBF, 0xF0, 0xA0, 0x80, 0x80])], 'myfile.txt', {type: 'text/plain'});
+      assert.deepEqual(await readBlobAsByteStrings(blob), ['\xEF\xBB\xBF\xF0\xA0\x80\x80']);
+    });
+
+    it('should split the byte strings at `maxByteString`', async function () {
+      var blob = new Blob([new Uint8Array(12)], {type: 'text/plain'});
+      assert.deepEqual(await readBlobAsByteStrings(blob, 24), ['\x00'.repeat(12)]);
+      assert.deepEqual(await readBlobAsByteStrings(blob, 12), ['\x00'.repeat(12)]);
+      assert.deepEqual(await readBlobAsByteStrings(blob, 6), ['\x00'.repeat(6), '\x00'.repeat(6)]);
+      assert.deepEqual(await readBlobAsByteStrings(blob, 5), ['\x00'.repeat(5), '\x00'.repeat(5), '\x00'.repeat(2)]);
+    });
+  });
+
   describe('serializeObject', function () {
     it('should serialize Blob', async function () {
       var text = 'foo bar 中文𠀀';
@@ -227,6 +245,23 @@ describe('utils/cache.mjs', function () {
 
       var input = {a: 1, b: 2};
       assert.strictEqual(serializeObject(input), input);
+    });
+
+    it('should split large byte string', async function () {
+      var text = 'foo bar 中文𠀀';
+      var blob = new Blob([text], {type: 'text/plain'});
+      var bytes = unicodeToUtf8(text);
+      assert.deepEqual(await serializeObject(blob, 4), {
+        __type__: 'Blob',
+        type: 'text/plain',
+        data: [
+          bytes.substring(0, 4),
+          bytes.substring(4, 8),
+          bytes.substring(8, 12),
+          bytes.substring(12, 16),
+          bytes.substring(16, 20),
+        ],
+      });
     });
   });
 
