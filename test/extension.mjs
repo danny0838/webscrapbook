@@ -6,7 +6,7 @@
  * https://opensource.org/licenses/MIT
  *****************************************************************************/
 
-import {userAgent, delay, deserializeObject} from "./unittest.mjs";
+import {userAgent, delay, deserializeObject} from "./shared/utils/common.mjs";
 
 let config;
 let backend;

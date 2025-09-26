@@ -1,14 +1,16 @@
 import {
   MochaQuery as $, assert,
-  userAgent,
-  xhr, readFileAsText, readFileAsArrayBuffer, readFileAsDataURL, readFileAsDocument,
-  getRulesFromCssText, getToken, escapeRegExp, regex, rawRegex, cssRegex,
+  getRulesFromCssText, getToken, regex, rawRegex, cssRegex,
 } from "./unittest.mjs";
 import {
   checkBackendServer, checkTestServer, checkExtension,
   backend, localhost, localhost2,
   capture, captureHeadless, backendRequest,
 } from "./extension.mjs";
+import {
+  userAgent, xhr, escapeRegExp,
+  readFileAsText, readFileAsArrayBuffer, readFileAsDataURL, readFileAsDocument,
+} from "./shared/utils/common.mjs";
 import {Zip} from "./shared/utils/zip.mjs";
 
 const $describe = $(describe);
