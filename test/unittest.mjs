@@ -7,10 +7,7 @@
  *****************************************************************************/
 
 import {assert, config as chaiConfig} from "./lib/chai.mjs";
-import {
-  userAgent, delay, deserializeObject, xhr, escapeRegExp,
-  readFileAsText, readFileAsArrayBuffer, readFileAsDataURL, readFileAsDocument,
-} from "./shared/utils/common.mjs";
+import {userAgent, escapeRegExp} from "./shared/utils/common.mjs";
 import {sha1} from "./shared/utils/sha.mjs";
 
 Object.assign(chaiConfig, {
@@ -541,19 +538,9 @@ function cssRegex(strings, ...args) {
 export {
   assert,
   MochaQuery,
-  userAgent,
-  delay,
-  deserializeObject,
-  xhr,
-  readFileAsText,
-  readFileAsArrayBuffer,
-  readFileAsDataURL,
-  readFileAsDocument,
-  sha1,
   getToken,
   encodeText,
   getRulesFromCssText,
-  escapeRegExp,
   regex,
   rawRegex,
   cssRegex,

@@ -1,4 +1,5 @@
-import {MochaQuery as $, assert, userAgent, getRulesFromCssText, cssRegex} from "./unittest.mjs";
+import {MochaQuery as $, assert, getRulesFromCssText, cssRegex} from "./unittest.mjs";
+import {userAgent} from "./shared/utils/common.mjs";
 
 import {
   capturer,
