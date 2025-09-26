@@ -1786,7 +1786,8 @@ capturer.captureBookmark = async function (params) {
     const favIconElem = (favIconUrl && !["blank", "remove", "link"].includes(options["capture.favicon"])) ?
         `<link rel="shortcut icon" href="${scrapbook.escapeHtml(favIconUrl)}">\n` :
         "";
-    return `<!DOCTYPE html>
+    return `\
+<!DOCTYPE html>
 <html${meta}>
 <head>
 <meta charset="UTF-8">
@@ -3257,7 +3258,8 @@ capturer.saveMainDocument = async function (params) {
         (itemType ? ' data-scrapbook-type="' + scrapbook.escapeHtml(itemType) + '"' : "") :
         "";
 
-    const html = `<!DOCTYPE html>
+    const html = `\
+<!DOCTYPE html>
 <html${meta}>
 <head>
 <meta charset="UTF-8">
@@ -3488,7 +3490,8 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
       }
 
       // generate index.rdf
-      const rdfContent = `<?xml version="1.0"?>
+      const rdfContent = `\
+<?xml version="1.0"?>
 <RDF:RDF xmlns:MAF="http://maf.mozdev.org/metadata/rdf#"
        xmlns:NC="http://home.netscape.com/NC-rdf#"
        xmlns:RDF="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
