@@ -36,45 +36,50 @@ import {
  */
 
 /**
+ * @param {Blob} blob
+ * @param {integer} [maxByteString]
+ * @return {string[]}
+ */
+async function readBlobAsByteStrings(
+  blob,
+  // Max JavaScript string is 256MiB UTF-16 chars in an older Browser.
+  maxByteString = 32 * 1024 * 1024,
+) {
+  const rv = [];
+  const u8ar = new Uint8Array(await readFileAsArrayBuffer(blob));
+  for (let i = 0, I = u8ar.length; i < I; i += maxByteString) {
+    rv.push(arrayBufferToByteString(u8ar.subarray(i, i + maxByteString)));
+  }
+  return rv;
+}
+
+/**
  * Serialize an object to be transmittable through messaging.
  *
  * If the serialization cannot be done synchronously, a Promise is returned.
  *
  * @param {*} obj
+ * @param {integer} [maxByteString]
  * @return {*|serializedBlob|Promise<serializedBlob>}
  */
-const serializeObject = (() => {
-  // Max JavaScript string is 256MiB UTF-16 chars in an older Browser.
-  const BYTE_STRING_MAX = 32 * 1024 * 1024;
-
-  const readBlobAsByteStrings = async (blob) => {
-    const rv = [];
-    const u8ar = new Uint8Array(await readFileAsArrayBuffer(blob));
-    for (let i = 0, I = u8ar.length; i < I; i += BYTE_STRING_MAX) {
-      rv.push(arrayBufferToByteString(u8ar.subarray(i, i + BYTE_STRING_MAX)));
-    }
-    return rv;
-  };
-
-  return function serializeObject(obj) {
-    if (obj instanceof File) {
-      return (async () => ({
-        __type__: 'File',
-        name: obj.name,
-        type: obj.type,
-        lastModified: obj.lastModified,
-        data: await readBlobAsByteStrings(obj),
-      }))();
-    } else if (obj instanceof Blob) {
-      return (async () => ({
-        __type__: 'Blob',
-        type: obj.type,
-        data: await readBlobAsByteStrings(obj),
-      }))();
-    }
-    return obj;
-  };
-})();
+function serializeObject(obj, maxByteString) {
+  if (obj instanceof File) {
+    return (async () => ({
+      __type__: 'File',
+      name: obj.name,
+      type: obj.type,
+      lastModified: obj.lastModified,
+      data: await readBlobAsByteStrings(obj, maxByteString),
+    }))();
+  } else if (obj instanceof Blob) {
+    return (async () => ({
+      __type__: 'Blob',
+      type: obj.type,
+      data: await readBlobAsByteStrings(obj, maxByteString),
+    }))();
+  }
+  return obj;
+}
 
 /**
  * Deserialize a serializedBlob.
@@ -558,6 +563,7 @@ class Cache {
 }
 
 export {
+  readBlobAsByteStrings,
   serializeObject,
   deserializeObject,
   BaseCache,
