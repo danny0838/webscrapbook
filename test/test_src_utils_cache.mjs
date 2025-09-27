@@ -305,7 +305,7 @@ describe('utils/cache.mjs', function () {
     });
   });
 
-  $describe.skipIf($.noExtensionBrowser)('BaseCache', function () {
+  describe('BaseCache', function () {
     describe('_serializeObject', function () {
       it('should serialize deep objects', async function () {
         var blob = new Blob(['foo'], {type: 'text/plain'});
