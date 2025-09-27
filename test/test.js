@@ -231,7 +231,7 @@ class TestSuite {
       waitForResponse: true,
     };
 
-    const response = await browser.runtime.sendMessage(this.config["wsb_extension_id"], {
+    const {result: response} = await browser.runtime.sendMessage(this.config["wsb_extension_id"], {
       cmd: "invokeCaptureEx",
       args,
     });
