@@ -1138,15 +1138,17 @@ function initExternalMessageListener() {
         break;
       }
       default: {
-        // thrown Error don't show here but cause the sender to receive an error
-        throw new Error(`Unable to invoke unknown command '${cmd}'.`);
+        result = Promise.reject(new Error(`Unable to invoke unknown command '${cmd}'.`));
       }
     }
 
     return Promise.resolve(result)
+      .then((result) => {
+        return {result};
+      })
       .catch((ex) => {
         console.error(ex);
-        throw ex;
+        return {error: {message: ex.message}};
       });
   });
 }
