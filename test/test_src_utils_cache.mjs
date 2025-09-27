@@ -4,6 +4,7 @@ import {unicodeToUtf8, byteStringToArrayBuffer, readFileAsText} from "./shared/u
 
 import {
   readBlobAsByteStrings, serializeObject, deserializeObject,
+  SerializedBlob,
   BaseCache, StorageCache, IdbCache, SessionCache, Cache,
 } from "./shared/utils/cache.mjs";
 
@@ -428,7 +429,7 @@ describe('utils/cache.mjs', function () {
                 await cache.set(key1, blob);
 
                 assert.deepEqual(await browser.storage.local.get(null), {
-                  [JSON.stringify(key1)]: {__type__: 'Blob', type: 'text/plain', data: ['foo bar']},
+                  [JSON.stringify(key1)]: await SerializedBlob.fromBlob(blob),
                 });
                 sinon.assert.calledOnceWithExactly(spy, blob);
               });
@@ -463,7 +464,7 @@ describe('utils/cache.mjs', function () {
               assert.strictEqual(sessionStorage.length, 1);
               assert.deepEqual(
                 sessionStorage.getItem(JSON.stringify(key1)),
-                JSON.stringify({__type__: 'Blob', type: 'text/plain', data: ['foo bar']}),
+                JSON.stringify(await SerializedBlob.fromBlob(blob)),
               );
               sinon.assert.calledOnceWithExactly(spy, blob);
             });

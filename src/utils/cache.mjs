@@ -19,13 +19,51 @@ import {
 } from "./common.mjs";
 
 /**
+ * An object representing a serialized Blob.
+ *
+ * It can be either a SerializedBlob class or an equivalent object.
+ *
  * @typedef {Object} serializedBlob
  * @property {string} __type__
  * @property {string} type
  * @property {string[]} data
  */
 
+class SerializedBlob {
+  constructor(data, {type = "", size} = {}) {
+    this.__type__ = "Blob";
+    this.type = type;
+    this.data = data;
+    Object.defineProperty(this, 'size', {value: size, enumerable: false, writable: true, configurable: true});
+  }
+
+  static async fromBlob(obj, maxByteString) {
+    const {type, size} = obj;
+    const data = await readBlobAsByteStrings(obj, maxByteString);
+    return new this(data, {type, size});
+  }
+
+  /**
+   * @param {serializedBlob} obj
+   */
+  static toBlob(obj) {
+    const {data, type} = obj;
+    return new Blob(
+      data.map(x => byteStringToArrayBuffer(x)),
+      {type},
+    );
+  }
+
+  toBlob() {
+    return this.constructor.toBlob(this);
+  }
+}
+
 /**
+ * An object representing a serialized File.
+ *
+ * It can be either a SerializedFile class or an equivalent object.
+ *
  * @typedef {serializedBlob} serializedFile
  * @property {string} __type__
  * @property {string} name
@@ -33,6 +71,37 @@ import {
  * @property {number} lastModified
  * @property {string[]} data
  */
+
+class SerializedFile extends SerializedBlob {
+  constructor(data, name = "", {type, lastModified = Date.now(), size} = {}) {
+    super(data, {type, size});
+    this.__type__ = "File";
+    this.name = name;
+    this.lastModified = lastModified;
+  }
+
+  static async fromFile(obj, maxByteString) {
+    const {name, type, lastModified, size} = obj;
+    const data = await readBlobAsByteStrings(obj, maxByteString);
+    return new this(data, name, {type, lastModified, size});
+  }
+
+  /**
+   * @param {serializedFile} obj
+   */
+  static toFile(obj) {
+    const {data, name, type, lastModified} = obj;
+    return new File(
+      data.map(x => byteStringToArrayBuffer(x)),
+      name,
+      {type, lastModified},
+    );
+  }
+
+  toFile() {
+    return this.constructor.toFile(this);
+  }
+}
 
 /**
  * @param {Blob} blob
@@ -57,7 +126,8 @@ async function readBlobAsByteStrings(
 }
 
 /**
- * Serialize an object to be transmittable through messaging.
+ * Serialize an object to be JSON stringifiable so that it can be safely stored
+ * in storage or transmitted through messaging.
  *
  * If the serialization cannot be done synchronously, a Promise is returned.
  *
@@ -67,19 +137,9 @@ async function readBlobAsByteStrings(
  */
 function serializeObject(obj, maxByteString) {
   if (obj instanceof File) {
-    return (async () => ({
-      __type__: 'File',
-      name: obj.name,
-      type: obj.type,
-      lastModified: obj.lastModified,
-      data: await readBlobAsByteStrings(obj, maxByteString),
-    }))();
+    return SerializedFile.fromFile(obj, maxByteString);
   } else if (obj instanceof Blob) {
-    return (async () => ({
-      __type__: 'Blob',
-      type: obj.type,
-      data: await readBlobAsByteStrings(obj, maxByteString),
-    }))();
+    return SerializedBlob.fromBlob(obj, maxByteString);
   }
   return obj;
 }
@@ -95,19 +155,10 @@ function serializeObject(obj, maxByteString) {
 function deserializeObject(obj) {
   switch (obj?.__type__) {
     case "File": {
-      const {data, name, type, lastModified} = obj;
-      return new File(
-        data.map(x => byteStringToArrayBuffer(x)),
-        name,
-        {type, lastModified},
-      );
+      return SerializedFile.toFile(obj);
     }
     case "Blob": {
-      const {data, type} = obj;
-      return new Blob(
-        data.map(x => byteStringToArrayBuffer(x)),
-        {type},
-      );
+      return SerializedBlob.toBlob(obj);
     }
   }
   return obj;
@@ -566,6 +617,8 @@ class Cache {
 }
 
 export {
+  SerializedBlob,
+  SerializedFile,
   readBlobAsByteStrings,
   serializeObject,
   deserializeObject,
