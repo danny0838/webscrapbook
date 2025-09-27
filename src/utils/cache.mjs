@@ -14,7 +14,6 @@
 import {
   userAgent,
   getUuid,
-  readFileAsArrayBuffer,
   arrayBufferToByteString,
   byteStringToArrayBuffer,
 } from "./common.mjs";
@@ -43,14 +42,18 @@ import {
 async function readBlobAsByteStrings(
   blob,
   // Max JavaScript string is 256MiB UTF-16 chars in an older Browser.
-  maxByteString = 32 * 1024 * 1024,
+  // By default use the same value as `arrayBufferToByteString` chunk size to
+  // prevent string concatenation.
+  maxByteString = 65535,
 ) {
-  const rv = [];
-  const u8ar = new Uint8Array(await readFileAsArrayBuffer(blob));
-  for (let i = 0, I = u8ar.length; i < I; i += maxByteString) {
-    rv.push(arrayBufferToByteString(u8ar.subarray(i, i + maxByteString)));
+  const chunks = [];
+  const totalSize = blob.size;
+  for (let offset = 0; offset < totalSize; offset += maxByteString) {
+    const slice = blob.slice(offset, offset + maxByteString);
+    const buffer = await slice.arrayBuffer();
+    chunks.push(arrayBufferToByteString(buffer));
   }
-  return rv;
+  return chunks;
 }
 
 /**
