@@ -1,6 +1,14 @@
 import js from "@eslint/js";
+import {includeIgnoreFile} from "@eslint/compat";
 import globals from "globals";
 import stylistic from "@stylistic/eslint-plugin";
+
+import path from "node:path";
+import {fileURLToPath} from "node:url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const gitignorePath = path.resolve(__dirname, ".gitignore");
 
 // ref: https://github.com/eslint-stylistic/eslint-stylistic/blob/main/packages/eslint-plugin/configs/customize.ts
 const stylisticCustomized = stylistic.configs.customize({
@@ -9,15 +17,14 @@ const stylisticCustomized = stylistic.configs.customize({
 });
 
 export default [
+  includeIgnoreFile(gitignorePath),
   {
     ignores: [
-      "dist",
       "src/lib/browser-polyfill.js",
       "src/lib/jszip.js",
       "src/lib/mime.js",
       "src/lib/sha.js",
       "test/lib/**/*.js",
-      "test/shared/**/*.js",
     ],
   },
   {

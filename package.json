@@ -20,6 +20,7 @@
     "pack:firefox3": "node tools/build.js -t firefox-mv3 -m pack"
   },
   "devDependencies": {
+    "@eslint/compat": "^1.4.0",
     "@stylistic/eslint-plugin": "^4.2.0",
     "eslint": "^9.23.0",
     "glob": "^11.0.2",
