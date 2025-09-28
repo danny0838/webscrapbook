@@ -14,10 +14,10 @@ import {Referrer} from "../lib/referrer.mjs";
 import {server} from "../scrapbook/server.mjs";
 import {ItemInfoFormatter as _ItemInfoFormatter} from "../scrapbook/item-info-formatter.mjs";
 import {BaseCapturer} from "./common.mjs";
+import {RebuildLinksDocumentRewriter} from "./doc-handler.mjs";
 import {CaptureHelperHandler} from "./helper-handler.mjs";
 
 const REBUILD_LINK_ROLE_PATTERN = /^document(?:-[a-f0-9-]+)?$/;
-const REBUILD_LINK_SVG_HREF_ATTRS = ['href', 'xlink:href'];
 
 class ItemInfoFormatter extends _ItemInfoFormatter {
   format_uuid() {
@@ -4169,126 +4169,37 @@ Redirecting to <a href="${utils.escapeHtml(target)}">${utils.escapeHtml(target, 
    * @param {string} params.timeId
    * @param {captureOptions} params.options
    */
-  async rebuildLinks(params) {
-    const rewriteUrl = (url, filenameMap, redirects) => {
-      // assume a non-absolute URL to be already mapped
-      if (!utils.isUrlAbsolute(url)) {
-        return null;
+  async rebuildLinks({timeId, options}) {
+    const {files, filenameMap, redirects} = this.captureInfo.get(timeId);
+
+    for (const [filename, {path, role, blob}] of files) {
+      if (!blob) {
+        continue;
       }
 
-      let [urlMain, urlHash] = utils.splitUrlByAnchor(url);
-
-      // handle possible redirect
-      const redirectedUrl = redirects.get(urlMain);
-      if (redirectedUrl) {
-        [urlMain, urlHash] = utils.splitUrlByAnchor(this.getRedirectedUrl(redirectedUrl, urlHash));
+      if (!REBUILD_LINK_ROLE_PATTERN.test(role)) {
+        continue;
       }
 
-      const token = this.getRegisterToken(urlMain, 'document');
-      if (!token) {
-        // skip invalid URL
-        return null;
-      }
-      const p = filenameMap.get(token);
-      if (!p) { return null; }
-
-      return this.getRedirectedUrl(p.url, urlHash);
-    };
-
-    const rewriteHref = (elem, attr, filenameMap, redirects) => {
-      const url = elem.getAttribute(attr);
-      const newUrl = rewriteUrl(url, filenameMap, redirects);
-      if (!newUrl) { return; }
-      elem.setAttribute(attr, newUrl);
-    };
-
-    const rewriteMetaRefresh = (elem, filenameMap, redirects) => {
-      const {time, url} = utils.parseHeaderRefresh(elem.getAttribute("content"));
-      if (!url) { return; }
-      const newUrl = rewriteUrl(url, filenameMap, redirects);
-      if (!newUrl) { return; }
-      elem.setAttribute("content", `${time}; url=${newUrl}`);
-    };
-
-    const processRootNode = (rootNode, filenameMap, redirects) => {
-      // rewrite links
-      switch (rootNode.nodeName.toLowerCase()) {
-        case 'svg': {
-          for (const elem of rootNode.querySelectorAll('a[*|href]')) {
-            for (const attr of REBUILD_LINK_SVG_HREF_ATTRS) {
-              if (!elem.hasAttribute(attr)) { continue; }
-              rewriteHref(elem, attr, filenameMap, redirects);
-            }
-          }
-          break;
-        }
-        case 'math': {
-          for (const elem of rootNode.querySelectorAll('[href]')) {
-            rewriteHref(elem, 'href', filenameMap, redirects);
-          }
-          break;
-        }
-        case 'html':
-        case '#document-fragment': {
-          for (const elem of rootNode.querySelectorAll('a[href], area[href]')) {
-            if (elem.closest('svg, math')) { continue; }
-            if (elem.hasAttribute('download')) { continue; }
-            rewriteHref(elem, 'href', filenameMap, redirects);
-          }
-          for (const elem of rootNode.querySelectorAll('meta[http-equiv="refresh" i][content]')) {
-            rewriteMetaRefresh(elem, filenameMap, redirects);
-          }
-          for (const elem of rootNode.querySelectorAll('iframe[srcdoc]')) {
-            const doc = (new DOMParser()).parseFromString(elem.srcdoc, 'text/html');
-            processRootNode(doc.documentElement, filenameMap, redirects);
-            elem.srcdoc = doc.documentElement.outerHTML;
-          }
-          for (const elem of rootNode.querySelectorAll('svg, math')) {
-            processRootNode(elem, filenameMap, redirects);
-          }
-          break;
-        }
+      const doc = await utils.readFileAsDocument(blob);
+      if (!doc) {
+        this.warn(`Failed to rebuild links for file ${filename}: corrupted document.`);
+        continue;
       }
 
-      // recurse into shadow roots
-      for (const elem of rootNode.querySelectorAll('[data-scrapbook-shadowdom]')) {
-        const shadowRoot = elem.attachShadow({mode: 'open'});
-        shadowRoot.innerHTML = elem.getAttribute('data-scrapbook-shadowdom');
-        processRootNode(shadowRoot, filenameMap, redirects);
-        elem.setAttribute("data-scrapbook-shadowdom", shadowRoot.innerHTML);
-      }
-    };
+      RebuildLinksDocumentRewriter.run(doc, {
+        capturer: this,
+        filenameMap,
+        redirects,
+      });
 
-    const rebuildLinks = this.rebuildLinks = async ({timeId, options}) => {
-      const {files, filenameMap, redirects} = this.captureInfo.get(timeId);
-
-      for (const [filename, {path, role, blob}] of files) {
-        if (!blob) {
-          continue;
-        }
-
-        if (!REBUILD_LINK_ROLE_PATTERN.test(role)) {
-          continue;
-        }
-
-        const doc = await utils.readFileAsDocument(blob);
-        if (!doc) {
-          this.warn(`Failed to rebuild links for file ${filename}: corrupted document.`);
-          continue;
-        }
-
-        processRootNode(doc.documentElement, filenameMap, redirects);
-
-        const content = utils.documentToString(doc, options["capture.prettyPrint"]);
-        await this.saveFileCache({
-          timeId,
-          path,
-          blob: new Blob([content], {type: blob.type}),
-        });
-      }
-    };
-
-    return await rebuildLinks(params);
+      const content = utils.documentToString(doc, options["capture.prettyPrint"]);
+      await this.saveFileCache({
+        timeId,
+        path,
+        blob: new Blob([content], {type: blob.type}),
+      });
+    }
   }
 
   /**
@@ -4490,5 +4401,6 @@ Redirecting to <a href="${utils.escapeHtml(target)}">${utils.escapeHtml(target, 
 
 export * from "./common.mjs";
 export {
+  RebuildLinksDocumentRewriter,
   Capturer,
 };
