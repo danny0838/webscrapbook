@@ -10,7 +10,7 @@ import {assert, config as chaiConfig} from "./lib/chai.mjs";
 import sinon from "./lib/sinon-esm.js";
 import {
   NS_XMLNS, NS_HTML, NS_SVG, NS_XLINK,
-  userAgent, escapeRegExp, trim,
+  userAgent, escapeRegExp, trim, getShadowRoot,
 } from "../utils/common.mjs";
 import {sha1} from "../utils/sha.mjs";
 
@@ -221,6 +221,19 @@ Object.defineProperties(MochaQuery, Object.getOwnPropertyDescriptors({
       'multiple selection not supported',
     );
     Object.defineProperty(this, 'noMultipleSelection', {value});
+    return value;
+  },
+  get noShadowRootClosed() {
+    // retrieving closed shadow DOM is not supported in Chromium < 88
+    const value = this.noBrowser.condition ? this.noBrowser : new MochaQuery.Query(
+      (() => {
+        const div = document.createElement('div');
+        div.attachShadow({mode: 'closed'});
+        return !getShadowRoot(div);
+      })(),
+      'retrieving closed shadow DOM is not supported',
+    );
+    Object.defineProperty(this, 'noShadowRootClosed', {value});
     return value;
   },
   get noShadowRootClonable() {
@@ -582,6 +595,19 @@ function getAttributes(node) {
   return attrs;
 }
 
+function slotAssign(slotElem, ...nodes) {
+  try {
+    return slotElem.assign(...nodes);
+  } catch (ex) {
+    if (ex.message.includes('must have a callable @@iterator')) {
+      // Chromium < 92: HTMLSlotElement.assign() accepts sequence<Node>
+      return slotElem.assign(nodes);
+    } else {
+      throw ex;
+    }
+  }
+}
+
 function createFragFixture(html) {
   const template = document.createElement('template');
   template.innerHTML = html.trim();
@@ -941,6 +967,7 @@ export {
   rawRegex,
   cssRegex,
   getAttributes,
+  slotAssign,
   createFragFixture,
   createDomFixture,
   createNodeFixture,

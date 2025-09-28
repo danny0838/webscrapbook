@@ -4,6 +4,7 @@
 
 import {ANNOTATION_CSS} from "../utils/common.mjs";
 import * as utils from "../utils/common.mjs";
+import {DocumentRewriter} from "../utils/doc-handler.mjs";
 import {StorageCache} from "../utils/cache.mjs";
 import {Strftime} from "../lib/strftime.mjs";
 import * as core from "../content/core.mjs";
@@ -1985,11 +1986,11 @@ editor.getFocusedFrameId = async function () {
 };
 
 editor.eraseRange = function (range, timeId = utils.dateToId()) {
-  utils.eraseRange(range, {timeId, mapCommentToWrapper: editor.erasedContents});
+  DocumentRewriter.eraseRange(range, {timeId, mapCommentToWrapper: editor.erasedContents});
 };
 
 editor.eraseNode = function (node, timeId = utils.dateToId()) {
-  utils.eraseNode(node, {timeId, mapCommentToWrapper: editor.erasedContents});
+  DocumentRewriter.eraseNode(node, {timeId, mapCommentToWrapper: editor.erasedContents});
 };
 
 /**
@@ -2020,7 +2021,7 @@ editor.removeScrapBookObject = function (node) {
       break;
     }
     case 3: {
-      const unerased = utils.uneraseNode(node, {
+      const unerased = DocumentRewriter.uneraseNode(node, {
         mapCommentToWrapper: editor.erasedContents,
       });
       if (!unerased) {
