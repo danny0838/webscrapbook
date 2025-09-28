@@ -2,7 +2,6 @@
 
 ## System requirements
 
-* Chromium ≥ 73 and/or Firefox ≥ 68
 * [Node.js](https://nodejs.org)
 * [Python](https://www.python.org) ≥ 3.7 (Optional)
 * [PyWebScrapBook](https://github.com/danny0838/PyWebScrapBook) (Optional)
