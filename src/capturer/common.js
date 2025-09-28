@@ -1631,7 +1631,7 @@ capturer.captureDocument = async function (params) {
                 // check circular reference if saving as data URL
                 if (frameOptions["capture.saveAs"] === "singleHtml") {
                   if (frameSettings.recurseChain.includes(sourceUrlMain)) {
-                    console.warn(scrapbook.lang("WarnCaptureCircular", [refUrl, sourceUrlMain]));
+                    warn(scrapbook.lang("WarnCaptureCircular", [refUrl, sourceUrlMain]));
                     captureRewriteAttr(frame, "src", `urn:scrapbook:download:circular:url:${sourceUrl}`);
                     return;
                   }
@@ -2159,7 +2159,7 @@ capturer.captureDocument = async function (params) {
                   // check circular reference if saving as data URL
                   if (embedOptions["capture.saveAs"] === "singleHtml") {
                     if (embedSettings.recurseChain.includes(sourceUrlMain)) {
-                      console.warn(scrapbook.lang("WarnCaptureCircular", [refUrl, sourceUrlMain]));
+                      warn(scrapbook.lang("WarnCaptureCircular", [refUrl, sourceUrlMain]));
                       captureRewriteAttr(elem, "src", `urn:scrapbook:download:circular:url:${sourceUrl}`);
                       return;
                     }
@@ -2281,7 +2281,7 @@ capturer.captureDocument = async function (params) {
                   // check circular reference if saving as data URL
                   if (objectOptions["capture.saveAs"] === "singleHtml") {
                     if (objectSettings.recurseChain.includes(sourceUrlMain)) {
-                      console.warn(scrapbook.lang("WarnCaptureCircular", [refUrl, sourceUrlMain]));
+                      warn(scrapbook.lang("WarnCaptureCircular", [refUrl, sourceUrlMain]));
                       captureRewriteAttr(elem, "data", `urn:scrapbook:download:circular:url:${sourceUrl}`);
                       return;
                     }
@@ -5676,7 +5676,7 @@ class DocumentCssHandler {
       if (isCircular && options["capture.saveAs"] === "singleHtml") {
         const target = sourceUrl;
         const source = settings.recurseChain[settings.recurseChain.length - 1];
-        console.warn(scrapbook.lang("WarnCaptureCircular", [source, target]));
+        this.warn(scrapbook.lang("WarnCaptureCircular", [source, target]));
         await callback(elem, Object.assign({}, registry, {
           url: `urn:scrapbook:download:circular:url:${sourceUrl}`,
         }));
