@@ -173,7 +173,7 @@ describe('utils/cache.mjs', function () {
     sandbox?.restore();
   });
 
-  describe('readBlobAsByteStrings', function () {
+  describe('readBlobAsByteStrings()', function () {
     it('should read a Blob as byte strings', async function () {
       var blob = new Blob([new Uint8Array([0xA4, 0x40, 0xA4, 0xD1])], {type: 'text/plain'});
       assert.deepEqual(await readBlobAsByteStrings(blob), ['\xA4\x40\xA4\xD1']);
@@ -191,7 +191,7 @@ describe('utils/cache.mjs', function () {
     });
   });
 
-  describe('serializeObject', function () {
+  describe('serializeObject()', function () {
     it('should serialize Blob', async function () {
       var text = 'foo bar 中文𠀀';
       var blob = new Blob([text], {type: 'text/plain'});
@@ -266,7 +266,7 @@ describe('utils/cache.mjs', function () {
     });
   });
 
-  describe('deserializeObject', function () {
+  describe('deserializeObject()', function () {
     it('should deserialize Blob synchronously', function () {
       var bytes = atob('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQIW2Ng/M/wHwAEBQIAs+lPYAAAAABJRU5ErkJggg==');
       var blob = new Blob([byteStringToArrayBuffer(bytes)], {type: 'image/bmp'});
@@ -307,7 +307,7 @@ describe('utils/cache.mjs', function () {
   });
 
   describe('BaseCache', function () {
-    describe('_serializeObject', function () {
+    describe('._serializeObject()', function () {
       it('should serialize deep objects', async function () {
         var blob = new Blob(['foo'], {type: 'text/plain'});
         assert.deepEqual(
@@ -334,7 +334,7 @@ describe('utils/cache.mjs', function () {
       });
     });
 
-    describe('_deserializeObject', function () {
+    describe('._deserializeObject()', function () {
       it('should deserialize deep objects', async function () {
         var blob = new Blob(['foo'], {type: 'text/plain'});
         assert.deepEqual(
@@ -361,7 +361,7 @@ describe('utils/cache.mjs', function () {
       });
     });
 
-    describe('_getKeyStr', function () {
+    describe('._getKeyStr()', function () {
       it('should return the original string when passing a string', function () {
         assert.deepEqual(BaseCache._getKeyStr('foo bar'), 'foo bar');
       });
@@ -392,7 +392,7 @@ describe('utils/cache.mjs', function () {
         StubSessionStorage.restore();
       });
 
-      describe('set', function () {
+      describe('.set()', function () {
         it('key as object', async function () {
           const key1 = {table: "test", id: "123"};
           const key2 = {table: "test", id: "456"};
@@ -474,7 +474,7 @@ describe('utils/cache.mjs', function () {
         }
       });
 
-      describe('get', function () {
+      describe('.get()', function () {
         it('key as object', async function () {
           const key1 = {table: "test", id: "123"};
           const key2 = {table: "test", id: "456"};
@@ -677,7 +677,7 @@ describe('utils/cache.mjs', function () {
       };
 
       if (cache === StorageCache) {
-        describe('getAll', function () {
+        describe('.getAll()', function () {
           context('with `browser.storage.local.getKeys`', getAllTests);
 
           context('without `browser.storage.local.getKeys`', function () {
@@ -695,10 +695,10 @@ describe('utils/cache.mjs', function () {
           });
         });
       } else {
-        describe('getAll', getAllTests);
+        describe('.getAll()', getAllTests);
       }
 
-      describe('remove', function () {
+      describe('.remove()', function () {
         const key1 = {table: "test", id: "123"};
         const key2 = {table: "test", id: "456"};
         const key3 = {table: "test", id: "789"};
@@ -730,7 +730,7 @@ describe('utils/cache.mjs', function () {
         });
       });
 
-      describe('removeAll', function () {
+      describe('.removeAll()', function () {
         const key1 = {table: "test", id: "123"};
         const key2 = {table: "test", id: "456"};
         const key3 = {table: "test", id: "789"};
@@ -821,7 +821,7 @@ describe('utils/cache.mjs', function () {
   }
 
   $describe.skipIf($.noExtensionBrowser)('Cache', function () {
-    describe('set', function () {
+    describe('.set()', function () {
       for (const [STORAGE, cache] of Object.entries(Cache.caches)) {
         it(`should call ${cache.name} method when passing "${STORAGE}"`, async function () {
           const stub = sandbox.stub(cache, "set");
@@ -833,7 +833,7 @@ describe('utils/cache.mjs', function () {
       }
     });
 
-    describe('get', function () {
+    describe('.get()', function () {
       for (const [STORAGE, cache] of Object.entries(Cache.caches)) {
         it(`should call ${cache.name} method when passing "${STORAGE}"`, async function () {
           const stub = sandbox.stub(cache, "get");
@@ -845,7 +845,7 @@ describe('utils/cache.mjs', function () {
       }
     });
 
-    describe('getAll', function () {
+    describe('.getAll()', function () {
       for (const [STORAGE, cache] of Object.entries(Cache.caches)) {
         it(`should call ${cache.name} method when passing "${STORAGE}"`, async function () {
           const stub = sandbox.stub(cache, "getAll");
@@ -857,7 +857,7 @@ describe('utils/cache.mjs', function () {
       }
     });
 
-    describe('remove', function () {
+    describe('.remove()', function () {
       for (const [STORAGE, cache] of Object.entries(Cache.caches)) {
         it(`should call ${cache.name} method when passing "${STORAGE}"`, async function () {
           const stub = sandbox.stub(cache, "remove");
@@ -869,7 +869,7 @@ describe('utils/cache.mjs', function () {
       }
     });
 
-    describe('removeAll', function () {
+    describe('.removeAll()', function () {
       for (const [STORAGE, cache] of Object.entries(Cache.caches)) {
         it(`should call ${cache.name} method when passing "${STORAGE}"`, async function () {
           const stub = sandbox.stub(cache, "removeAll");

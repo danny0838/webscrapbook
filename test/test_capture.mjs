@@ -128,7 +128,7 @@ function assertNoRecord(rootNode, {deep = true, filter = 'any'} = {}) {
 }
 
 describe('Capture tests', function () {
-  before(async function () {
+  before(async function checkEnvironment() {
     await Promise.all([
       checkBackendServer(),
       checkTestServer(),
