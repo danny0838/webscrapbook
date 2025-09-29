@@ -8,7 +8,7 @@ const $it = $(it);
 const r = String.raw;
 
 describe('utils/common.mjs', function () {
-  describe('utils.getDeepProp', function () {
+  describe('getDeepProp()', function () {
     it('should parse `parts` separated with "." when passing string', function () {
       var target = {prop: 123};
       assert.deepEqual(utils.getDeepProp(target, "prop"), [target, "prop"]);
@@ -47,7 +47,7 @@ describe('utils/common.mjs', function () {
     });
   });
 
-  describe('utils.invokeMethod', function () {
+  describe('invokeMethod()', function () {
     it('should run `cmd` separated with "." when passing string', function () {
       var target = {method: () => 123};
       assert.strictEqual(utils.invokeMethod(target, "method"), 123);
@@ -106,7 +106,7 @@ describe('utils/common.mjs', function () {
     });
   });
 
-  describe('utils.escapeHtmlComment', function () {
+  describe('escapeHtmlComment()', function () {
     it('basic', function () {
       // starts with ">"
       assert.strictEqual(
@@ -170,7 +170,7 @@ describe('utils/common.mjs', function () {
     });
   });
 
-  describe('utils.unescapeHtmlComment', function () {
+  describe('unescapeHtmlComment()', function () {
     function checkUnescape(str) {
       var s = str;
       s = utils.escapeHtmlComment(s);
@@ -215,7 +215,7 @@ describe('utils/common.mjs', function () {
     });
   });
 
-  describe('utils.escapeFilename', function () {
+  describe('escapeFilename()', function () {
     it('basic', function () {
       // escape " ", "%", "?", "#"
       assert.strictEqual(
@@ -243,7 +243,7 @@ describe('utils/common.mjs', function () {
     });
   });
 
-  describe('utils.quote', function () {
+  describe('quote()', function () {
     it('basic', function () {
       assert.strictEqual(
         utils.quote('中文/路徑/文件.txt'),
@@ -252,7 +252,7 @@ describe('utils/common.mjs', function () {
     });
   });
 
-  describe('utils.validateFilename', function () {
+  describe('validateFilename()', function () {
     const chars = Array.from({length: 0xA0}).map((_, i) => String.fromCodePoint(i)).join('');
 
     it('basic', function () {
@@ -412,7 +412,7 @@ describe('utils/common.mjs', function () {
     });
   });
 
-  describe('utils.dateToId', function () {
+  describe('dateToId()', function () {
     it('basic', function () {
       // create an ID from a Date object
       assert.strictEqual(
@@ -438,7 +438,7 @@ describe('utils/common.mjs', function () {
     });
   });
 
-  describe('utils.idToDate', function () {
+  describe('idToDate()', function () {
     it('basic', function () {
       assert.deepEqual(
         utils.idToDate('20200102030405067'),
@@ -473,7 +473,7 @@ describe('utils/common.mjs', function () {
     });
   });
 
-  describe('utils.dateToIdOld', function () {
+  describe('dateToIdOld()', function () {
     it('basic', function () {
       // create an ID from a Date object
       assert.strictEqual(
@@ -499,7 +499,7 @@ describe('utils/common.mjs', function () {
     });
   });
 
-  describe('utils.idToDateOld', function () {
+  describe('idToDateOld()', function () {
     it('basic', function () {
       assert.strictEqual(
         utils.idToDateOld('20200102030405').valueOf(),
@@ -537,7 +537,7 @@ describe('utils/common.mjs', function () {
     });
   });
 
-  describe('utils.crop', function () {
+  describe('crop()', function () {
     it('charLimit', function () {
       var string = 'foo bar 中文𠀀字';
 
@@ -611,7 +611,7 @@ describe('utils/common.mjs', function () {
     });
   });
 
-  describe('utils.unicodeToUtf8', function () {
+  describe('unicodeToUtf8()', function () {
     it('basic', function () {
       assert.strictEqual(utils.unicodeToUtf8('\u0000'), '\x00');
       assert.strictEqual(utils.unicodeToUtf8('\u0080'), '\xC2\x80');
@@ -622,7 +622,7 @@ describe('utils/common.mjs', function () {
     });
   });
 
-  describe('utils.utf8ToUnicode', function () {
+  describe('utf8ToUnicode()', function () {
     it('basic', function () {
       assert.strictEqual(utils.utf8ToUnicode('\x00'), '\u0000');
       assert.strictEqual(utils.utf8ToUnicode('\xC2\x80'), '\u0080');
@@ -633,7 +633,7 @@ describe('utils/common.mjs', function () {
     });
   });
 
-  describe('utils.byteStringToArrayBuffer', function () {
+  describe('byteStringToArrayBuffer()', function () {
     it('basic', function () {
       // "一天" in Big5
       var buffer = utils.byteStringToArrayBuffer('\xA4\x40\xA4\xD1');
@@ -661,7 +661,7 @@ describe('utils/common.mjs', function () {
     });
   });
 
-  describe('utils.arrayBufferToByteString', function () {
+  describe('arrayBufferToByteString()', function () {
     it('basic', function () {
       // "一天" in Big5
       var buffer = new Uint8Array([0xA4, 0x40, 0xA4, 0xD1]);
@@ -688,7 +688,7 @@ describe('utils/common.mjs', function () {
     });
   });
 
-  describe('utils.trim', function () {
+  describe('trim()', function () {
     it('basic', function () {
       var strings = ['foo', 'bar', 'baz'];
 
@@ -714,7 +714,7 @@ describe('utils/common.mjs', function () {
     });
   });
 
-  describe('utils.split', function () {
+  describe('split()', function () {
     it('basic', function () {
       var strings = ['foo', 'bar', 'baz'];
 
@@ -741,7 +741,7 @@ describe('utils/common.mjs', function () {
     });
   });
 
-  describe('utils.normalizeUrl', function () {
+  describe('normalizeUrl()', function () {
     it('encode chars that requires percent encoding with all upper case', function () {
       assert.strictEqual(
         utils.normalizeUrl(`http://example.com/中文`),
@@ -814,7 +814,7 @@ describe('utils/common.mjs', function () {
     });
   });
 
-  describe('utils.isUrlAbsolute', function () {
+  describe('isUrlAbsolute()', function () {
     it('basic', function () {
       // absolute URL cases
       assert.strictEqual(utils.isUrlAbsolute(`http://example.com:8000/foo?bar=baz#frag`), true);
@@ -835,7 +835,7 @@ describe('utils/common.mjs', function () {
     });
   });
 
-  describe('utils.getRelativeUrl', function () {
+  describe('getRelativeUrl()', function () {
     it('absolute URLs', function () {
       // different since protocol
       assert.strictEqual(
@@ -1261,7 +1261,7 @@ describe('utils/common.mjs', function () {
     });
   });
 
-  describe('utils.parseHeaderContentType', function () {
+  describe('parseHeaderContentType()', function () {
     it('basic', function () {
       assert.deepEqual(
         utils.parseHeaderContentType(`text/html`),
@@ -1364,7 +1364,7 @@ describe('utils/common.mjs', function () {
     });
   });
 
-  describe('utils.parseHeaderContentDisposition', function () {
+  describe('parseHeaderContentDisposition()', function () {
     it('basic', function () {
       assert.deepEqual(
         utils.parseHeaderContentDisposition(`attachment; filename=file.html`),
@@ -1481,7 +1481,7 @@ describe('utils/common.mjs', function () {
     });
   });
 
-  describe('utils.parseHeaderRefresh', function () {
+  describe('parseHeaderRefresh()', function () {
     it('basic', function () {
       assert.deepEqual(utils.parseHeaderRefresh(``), {time: undefined, url: undefined});
       assert.deepEqual(utils.parseHeaderRefresh(` `), {time: undefined, url: undefined});
@@ -1549,7 +1549,7 @@ describe('utils/common.mjs', function () {
     });
   });
 
-  $describe.skipIf($.noBrowser)('utils.readFileAsArrayBuffer', function () {
+  $describe.skipIf($.noBrowser)('readFileAsArrayBuffer()', function () {
     it('basic', async function () {
       var blob = new Blob(["ABC123 中文 𠀀"], {type: "text/plain"});
       var ab = await utils.readFileAsArrayBuffer(blob);
@@ -1557,7 +1557,7 @@ describe('utils/common.mjs', function () {
     });
   });
 
-  $describe.skipIf($.noBrowser)('utils.readFileAsDataURL', function () {
+  $describe.skipIf($.noBrowser)('readFileAsDataURL()', function () {
     it('basic', async function () {
       var greenBmp = atob('Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAP8AAAAA');
       var ab = utils.byteStringToArrayBuffer(greenBmp);
@@ -1567,7 +1567,7 @@ describe('utils/common.mjs', function () {
     });
   });
 
-  $describe.skipIf($.noBrowser)('utils.readFileAsText', function () {
+  $describe.skipIf($.noBrowser)('readFileAsText()', function () {
     it('return string in specified charset', async function () {
       var blob = new Blob(["ABC123 中文 𠀀"], {type: "text/plain"});
       var str = await await utils.readFileAsText(blob, 'UTF-8');
@@ -1587,7 +1587,7 @@ describe('utils/common.mjs', function () {
     });
   });
 
-  $describe.skipIf($.noBrowser)('utils.readFileAsDocument', function () {
+  $describe.skipIf($.noBrowser)('readFileAsDocument()', function () {
     it('basic', async function () {
       var html = `<a href="http://example.com">ABC123 中文 𠀀</a>`;
       var blob = new Blob([html], {type: "text/html; charset=utf-8"});
@@ -1597,7 +1597,7 @@ describe('utils/common.mjs', function () {
     });
   });
 
-  describe('utils.mimeIsText', function () {
+  describe('mimeIsText()', function () {
     it('basic', function () {
       // text/*
       assert.strictEqual(utils.mimeIsText('text/plain'), true);
@@ -1642,7 +1642,7 @@ describe('utils/common.mjs', function () {
     });
   });
 
-  $describe.skipIf($.noBrowser)('utils.parseCssFile', function () {
+  $describe.skipIf($.noBrowser)('parseCssFile()', function () {
     it('priority: 1. BOM', async function () {
       // UTF-8
       var str = '@charset "Big5"; content: "abc中文𠀀"';
@@ -1849,7 +1849,7 @@ describe('utils/common.mjs', function () {
     });
   });
 
-  $describe.skipIf($.noBrowser)('utils.rewriteCssFile', function () {
+  $describe.skipIf($.noBrowser)('rewriteCssFile()', function () {
     it('force UTF-8 if charset is known', async function () {
       const rewriter = async css => `${css} /* rewritten */`;
 
@@ -1869,7 +1869,7 @@ describe('utils/common.mjs', function () {
     });
   });
 
-  describe('utils.rewriteCssText', function () {
+  describe('rewriteCssText()', function () {
     const optionsImage = {
       rewriteImportUrl: url => ({url}),
       rewriteFontFaceUrl: url => ({url}),
@@ -2610,7 +2610,7 @@ div { image-background: var(${/(--sb(\d+)-2)/}); }`;
     });
   });
 
-  describe('utils.rewriteSrcset', function () {
+  describe('rewriteSrcset()', function () {
     it('sync', function () {
       const rewriter = url => `<${url}>`;
 
@@ -2744,7 +2744,7 @@ div { image-background: var(${/(--sb(\d+)-2)/}); }`;
     });
   });
 
-  describe('utils.rewriteUrls', function () {
+  describe('rewriteUrls()', function () {
     it('sync', function () {
       const rewriter = url => `<${url}>`;
 
@@ -2802,7 +2802,7 @@ div { image-background: var(${/(--sb(\d+)-2)/}); }`;
     });
   });
 
-  describe('utils.getOffsetInSource', function () {
+  describe('getOffsetInSource()', function () {
     it('should correctly handle `node` and `offset`', function () {
       const sample = document.createElement('template');
       sample.innerHTML = `

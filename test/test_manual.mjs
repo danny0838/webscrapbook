@@ -5,7 +5,7 @@ import {
 } from "./extension.mjs";
 
 describe('Manual tests', function () {
-  before(async function () {
+  before(async function checkEnvironment() {
     await checkTestServer();
   });
 
