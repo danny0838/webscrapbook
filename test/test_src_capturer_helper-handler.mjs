@@ -13,7 +13,7 @@ describe('capturer/helper-handler.mjs', function () {
     }
 
     describe(".getOverwritingOptions()", function () {
-      it("do not include capture helper related options", function () {
+      it("should not include capture helper related options", function () {
         var options = CaptureHelperHandler.getOverwritingOptions(
           [
             {
@@ -33,7 +33,7 @@ describe('capturer/helper-handler.mjs', function () {
         });
       });
 
-      it("merge options in last-win manner", function () {
+      it("should merge options in last-win manner", function () {
         var options = CaptureHelperHandler.getOverwritingOptions(
           [
             {
@@ -60,7 +60,7 @@ describe('capturer/helper-handler.mjs', function () {
         });
       });
 
-      it("skip helpers with truthy disabled property", function () {
+      it("should skip helpers with truthy disabled property", function () {
         var options = CaptureHelperHandler.getOverwritingOptions(
           [
             {
@@ -92,7 +92,7 @@ describe('capturer/helper-handler.mjs', function () {
         });
       });
 
-      it("skip helpers whose pattern do not match document URL", function () {
+      it("should skip helpers whose pattern do not match document URL", function () {
         var options = CaptureHelperHandler.getOverwritingOptions(
           [
             {
@@ -118,7 +118,7 @@ describe('capturer/helper-handler.mjs', function () {
         });
       });
 
-      it("return empty object if docUrl is falsy", function () {
+      it("should return empty object if docUrl is falsy", function () {
         var options = CaptureHelperHandler.getOverwritingOptions(
           [
             {
@@ -140,7 +140,7 @@ describe('capturer/helper-handler.mjs', function () {
     });
 
     describe(".parseRegexStr()", function () {
-      it("basic", function () {
+      it("should return {source, flags} for a RegExp", function () {
         var {source, flags} = CaptureHelperHandler.parseRegexStr(`/abc/def/`);
         assert.deepEqual({source, flags}, {source: r`abc\/def`, flags: ``});
 
@@ -148,16 +148,18 @@ describe('capturer/helper-handler.mjs', function () {
         assert.deepEqual({source, flags}, {source: r`abc\/def`, flags: `gimuy`});
       });
 
-      it("return null for an invalid regex string", function () {
+      it("should return null for an invalid regex string", function () {
         assert.strictEqual(CaptureHelperHandler.parseRegexStr(`abc/def`), null);
       });
     });
 
     describe(".isCommand()", function () {
-      it("basic", function () {
+      it("should return true if passing a command array", function () {
         assert.strictEqual(CaptureHelperHandler.isCommand(["if", true, "yes", "no"]), true);
         assert.strictEqual(CaptureHelperHandler.isCommand(["if"]), true);
+      });
 
+      it("should return true if passing another value", function () {
         assert.strictEqual(CaptureHelperHandler.isCommand(null), false);
         assert.strictEqual(CaptureHelperHandler.isCommand(0), false);
         assert.strictEqual(CaptureHelperHandler.isCommand(1), false);
@@ -187,125 +189,103 @@ describe('capturer/helper-handler.mjs', function () {
 </body>`);
       }
 
-      function removeElems(elems) {
-        for (const elem of elems) {
-          elem.remove();
-        }
-      }
-
       context("when passing an object selector", function () {
-        it("should select from refNode with CSS when having `.css`", function () {
-          var doc = makeTestDoc();
-          var selector = {css: "div"};
-          removeElems(CaptureHelperHandler.selectNodes(doc, selector));
-          assert.strictEqual(doc.body.innerHTML.trim(), ``);
+        context("should select with CSS when having `.css`", function () {
+          it("should return matched elements", function () {
+            var doc = makeTestDoc();
+            var selector = {css: "div"};
+            var result = Array.from(CaptureHelperHandler.selectNodes(doc, selector));
+            assert.deepEqual(result, [
+              doc.querySelector('#parent-prev'),
+              doc.querySelector('#parent'),
+              doc.querySelector('#prev'),
+              doc.querySelector('#target'),
+              doc.querySelector('#child-1'),
+              doc.querySelector('#child-2'),
+              doc.querySelector('#child-3'),
+              doc.querySelector('#next'),
+              doc.querySelector('#parent-next'),
+            ]);
+          });
         });
 
-        it("should select from refNode with XPath when having `.xpath`", function () {
-          var doc = makeTestDoc();
-          var selector = {xpath: "//div"};
-          removeElems(CaptureHelperHandler.selectNodes(doc, selector));
-          assert.strictEqual(doc.body.innerHTML.trim(), ``);
+        context("should select with XPath when having `.xpath`", function () {
+          it("should return matched nodes", function () {
+            var doc = makeTestDoc();
+            var selector = {xpath: ".//div"};
+            var result = CaptureHelperHandler.selectNodes(doc, selector);
+            assert.deepEqual(result, [
+              doc.querySelector('#parent-prev'),
+              doc.querySelector('#parent'),
+              doc.querySelector('#prev'),
+              doc.querySelector('#target'),
+              doc.querySelector('#child-1'),
+              doc.querySelector('#child-2'),
+              doc.querySelector('#child-3'),
+              doc.querySelector('#next'),
+              doc.querySelector('#parent-next'),
+            ]);
+          });
         });
 
         context("should modify refNode when having `.base`", function () {
-          it("self", function () {
+          it("should handle a simple base", function () {
             var doc = makeTestDoc();
-            var selector = "self";
+
+            var selector = {base: "self"};
             var refNode = doc.querySelector('#target');
             var result = CaptureHelperHandler.selectNodes(refNode, selector);
-            assert.strictEqual(result.length, 1);
-            assert.strictEqual(result[0], refNode);
-          });
+            assert.deepEqual(result, [refNode]);
 
-          it("root", function () {
-            var doc = makeTestDoc();
-            var selector = "root";
+            var selector = {base: "root"};
             var refNode = doc.querySelector('#target');
             var result = CaptureHelperHandler.selectNodes(refNode, selector);
-            assert.strictEqual(result.length, 1);
-            assert.strictEqual(result[0], doc);
-          });
+            assert.deepEqual(result, [doc]);
 
-          it("parent", function () {
-            var doc = makeTestDoc();
             var selector = {base: "parent"};
             var refNode = doc.querySelector('#target');
             var result = CaptureHelperHandler.selectNodes(refNode, selector);
-            assert.strictEqual(result.length, 1);
-            assert.strictEqual(result[0], refNode.parentNode);
-          });
+            assert.deepEqual(result, [refNode.parentNode]);
 
-          it("previousSibling", function () {
-            var doc = makeTestDoc();
             var selector = {base: "previousSibling"};
             var refNode = doc.querySelector('#target');
             var result = CaptureHelperHandler.selectNodes(refNode, selector);
-            assert.strictEqual(result.length, 1);
-            assert.strictEqual(result[0], refNode.previousSibling);
-          });
+            assert.deepEqual(result, [refNode.previousSibling]);
 
-          it("nextSibling", function () {
-            var doc = makeTestDoc();
             var selector = {base: "nextSibling"};
             var refNode = doc.querySelector('#target');
             var result = CaptureHelperHandler.selectNodes(refNode, selector);
-            assert.strictEqual(result.length, 1);
-            assert.strictEqual(result[0], refNode.nextSibling);
-          });
+            assert.deepEqual(result, [refNode.nextSibling]);
 
-          it("firstChild", function () {
-            var doc = makeTestDoc();
             var selector = {base: "firstChild"};
             var refNode = doc.querySelector('#target');
             var result = CaptureHelperHandler.selectNodes(refNode, selector);
-            assert.strictEqual(result.length, 1);
-            assert.strictEqual(result[0], refNode.firstChild);
-          });
+            assert.deepEqual(result, [refNode.firstChild]);
 
-          it("lastChild", function () {
-            var doc = makeTestDoc();
             var selector = {base: "lastChild"};
             var refNode = doc.querySelector('#target');
             var result = CaptureHelperHandler.selectNodes(refNode, selector);
-            assert.strictEqual(result.length, 1);
-            assert.strictEqual(result[0], refNode.lastChild);
-          });
+            assert.deepEqual(result, [refNode.lastChild]);
 
-          it("previousElementSibling", function () {
-            var doc = makeTestDoc();
             var selector = {base: "previousElementSibling"};
             var refNode = doc.querySelector('#target');
             var result = CaptureHelperHandler.selectNodes(refNode, selector);
-            assert.strictEqual(result.length, 1);
-            assert.strictEqual(result[0], refNode.previousElementSibling);
-          });
+            assert.deepEqual(result, [refNode.previousElementSibling]);
 
-          it("nextElementSibling", function () {
-            var doc = makeTestDoc();
             var selector = {base: "nextElementSibling"};
             var refNode = doc.querySelector('#target');
             var result = CaptureHelperHandler.selectNodes(refNode, selector);
-            assert.strictEqual(result.length, 1);
-            assert.strictEqual(result[0], refNode.nextElementSibling);
-          });
+            assert.deepEqual(result, [refNode.nextElementSibling]);
 
-          it("firstElementChild", function () {
-            var doc = makeTestDoc();
             var selector = {base: "firstElementChild"};
             var refNode = doc.querySelector('#target');
             var result = CaptureHelperHandler.selectNodes(refNode, selector);
-            assert.strictEqual(result.length, 1);
-            assert.strictEqual(result[0], refNode.firstElementChild);
-          });
+            assert.deepEqual(result, [refNode.firstElementChild]);
 
-          it("lastElementChild", function () {
-            var doc = makeTestDoc();
             var selector = {base: "lastElementChild"};
             var refNode = doc.querySelector('#target');
             var result = CaptureHelperHandler.selectNodes(refNode, selector);
-            assert.strictEqual(result.length, 1);
-            assert.strictEqual(result[0], refNode.lastElementChild);
+            assert.deepEqual(result, [refNode.lastElementChild]);
           });
 
           it('should handle a chained base', function () {
@@ -313,22 +293,21 @@ describe('capturer/helper-handler.mjs', function () {
             var selector = {base: "firstChild.nextSibling.nextSibling.nextSibling"};
             var refNode = doc.querySelector('#target');
             var result = CaptureHelperHandler.selectNodes(refNode, selector);
-            assert.strictEqual(result.length, 1);
-            assert.strictEqual(result[0], refNode.firstChild.nextSibling.nextSibling.nextSibling);
+            assert.deepEqual(result, [refNode.firstChild.nextSibling.nextSibling.nextSibling]);
           });
 
           it('should select from modified refNode when also having selector', function () {
             var doc = makeTestDoc();
             var selector = {base: "parent", css: "div"};
-            removeElems(CaptureHelperHandler.selectNodes(doc.querySelector('#target'), selector));
-            assert.strictEqual(doc.body.innerHTML.trim(), `\
-<div id="parent-prev"></div>
-<div id="parent">
-  
-  
-  
-</div>
-<div id="parent-next"></div>`);
+            var result = Array.from(CaptureHelperHandler.selectNodes(doc.querySelector('#target'), selector));
+            assert.deepEqual(result, [
+              doc.querySelector('#prev'),
+              doc.querySelector('#target'),
+              doc.querySelector('#child-1'),
+              doc.querySelector('#child-2'),
+              doc.querySelector('#child-3'),
+              doc.querySelector('#next'),
+            ]);
           });
         });
       });
@@ -339,57 +318,51 @@ describe('capturer/helper-handler.mjs', function () {
           var selector = "parent";
           var refNode = doc.querySelector('#target');
           var result = CaptureHelperHandler.selectNodes(refNode, selector);
-          assert.strictEqual(result.length, 1);
-          assert.strictEqual(result[0], refNode.parentNode);
+          assert.deepEqual(result, [refNode.parentNode]);
 
           var doc = makeTestDoc();
           var selector = "parent.firstChild.nextSibling";
           var refNode = doc.querySelector('#target');
           var result = CaptureHelperHandler.selectNodes(refNode, selector);
-          assert.strictEqual(result.length, 1);
-          assert.strictEqual(result[0], refNode.parentNode.firstChild.nextSibling);
+          assert.deepEqual(result, [refNode.parentNode.firstChild.nextSibling]);
         });
 
         it('should treat invalid base as {css: ...}', function () {
           var doc = makeTestDoc();
           var selector = "div";
-          removeElems(CaptureHelperHandler.selectNodes(doc, selector));
-          assert.strictEqual(doc.body.innerHTML.trim(), ``);
+          var result = Array.from(CaptureHelperHandler.selectNodes(doc, selector));
+          assert.deepEqual(result, [
+            doc.querySelector('#parent-prev'),
+            doc.querySelector('#parent'),
+            doc.querySelector('#prev'),
+            doc.querySelector('#target'),
+            doc.querySelector('#child-1'),
+            doc.querySelector('#child-2'),
+            doc.querySelector('#child-3'),
+            doc.querySelector('#next'),
+            doc.querySelector('#parent-next'),
+          ]);
 
           var doc = makeTestDoc();
           var selector = "body > div";
-          removeElems(CaptureHelperHandler.selectNodes(doc, selector));
-          assert.strictEqual(doc.body.innerHTML.trim(), ``);
+          var result = Array.from(CaptureHelperHandler.selectNodes(doc, selector));
+          assert.deepEqual(result, [
+            doc.querySelector('#parent-prev'),
+            doc.querySelector('#parent'),
+            doc.querySelector('#parent-next'),
+          ]);
         });
       });
 
       context("when passing a falsy selector", function () {
-        it("should return original refNode when passing undefined", function () {
-          var doc = makeTestDoc();
-          var selector;
-          var refNode = doc.querySelector('#target');
-          var result = CaptureHelperHandler.selectNodes(refNode, selector);
-          assert.strictEqual(result.length, 1);
-          assert.strictEqual(result[0], refNode);
-        });
-
-        it("should return original refNode when passing null", function () {
-          var doc = makeTestDoc();
-          var selector = null;
-          var refNode = doc.querySelector('#target');
-          var result = CaptureHelperHandler.selectNodes(refNode, selector);
-          assert.strictEqual(result.length, 1);
-          assert.strictEqual(result[0], refNode);
-        });
-
-        it("should return original refNode when passing an empty string", function () {
-          var doc = makeTestDoc();
-          var selector = "";
-          var refNode = doc.querySelector('#target');
-          var result = CaptureHelperHandler.selectNodes(refNode, selector);
-          assert.strictEqual(result.length, 1);
-          assert.strictEqual(result[0], refNode);
-        });
+        for (const selector of [undefined, null, false, ""]) {
+          it(`should return original refNode when passing ${JSON.stringify(selector)}`, function () {
+            var doc = makeTestDoc();
+            var refNode = doc.querySelector('#target');
+            var result = CaptureHelperHandler.selectNodes(refNode, selector);
+            assert.deepEqual(result, [refNode]);
+          });
+        }
       });
     });
 
@@ -401,7 +374,7 @@ describe('capturer/helper-handler.mjs', function () {
       }
 
       context("cmd_if", function () {
-        it("basic", function () {
+        it("should return argument 3 when argument 2 is truthy", function () {
           var helper = new CaptureHelperHandler();
           var doc = makeTestDoc();
 
@@ -419,6 +392,11 @@ describe('capturer/helper-handler.mjs', function () {
 
           var command = ["if", [], 1, 0];
           assert.strictEqual(helper.runCommand(command, doc), 1);
+        });
+
+        it("should return argument 4 when the argument 2 is falsy", function () {
+          var helper = new CaptureHelperHandler();
+          var doc = makeTestDoc();
 
           var command = ["if", false, 1, 0];
           assert.strictEqual(helper.runCommand(command, doc), 0);
@@ -433,7 +411,7 @@ describe('capturer/helper-handler.mjs', function () {
           assert.strictEqual(helper.runCommand(command, doc), 0);
         });
 
-        it("resolve parameter commands", function () {
+        it("should resolve parameter commands", function () {
           var helper = new CaptureHelperHandler();
           var doc = makeTestDoc();
 
@@ -446,7 +424,7 @@ describe('capturer/helper-handler.mjs', function () {
       });
 
       context("cmd_equal", function () {
-        it("equality", function () {
+        it("should return equality test result of argument 2 and 3", function () {
           var helper = new CaptureHelperHandler();
           var doc = makeTestDoc();
 
@@ -460,7 +438,7 @@ describe('capturer/helper-handler.mjs', function () {
           assert.strictEqual(helper.runCommand(command, doc), true);
         });
 
-        it("strict equality", function () {
+        it("should return strict equality test result of argument 2 and 3 if argument 4 is truthy", function () {
           var helper = new CaptureHelperHandler();
           var doc = makeTestDoc();
 
@@ -474,7 +452,7 @@ describe('capturer/helper-handler.mjs', function () {
           assert.strictEqual(helper.runCommand(command, doc), false);
         });
 
-        it("resolve parameter commands", function () {
+        it("should resolve parameter commands", function () {
           var helper = new CaptureHelperHandler();
           var doc = makeTestDoc();
 
@@ -484,7 +462,7 @@ describe('capturer/helper-handler.mjs', function () {
       });
 
       context("cmd_and", function () {
-        it("return first falsy or last value", function () {
+        it("should return first falsy or last value", function () {
           var helper = new CaptureHelperHandler();
           var doc = makeTestDoc();
 
@@ -513,7 +491,7 @@ describe('capturer/helper-handler.mjs', function () {
           assert.strictEqual(helper.runCommand(command, doc), null);
         });
 
-        it("resolve parameter commands", function () {
+        it("should resolve parameter commands", function () {
           var helper = new CaptureHelperHandler();
           var doc = makeTestDoc();
 
@@ -523,7 +501,7 @@ describe('capturer/helper-handler.mjs', function () {
       });
 
       context("cmd_or", function () {
-        it("return first truthy or last value", function () {
+        it("should return first truthy or last value", function () {
           var helper = new CaptureHelperHandler();
           var doc = makeTestDoc();
 
@@ -552,7 +530,7 @@ describe('capturer/helper-handler.mjs', function () {
           assert.strictEqual(helper.runCommand(command, doc), null);
         });
 
-        it("resolve parameter commands", function () {
+        it("should resolve parameter commands", function () {
           var helper = new CaptureHelperHandler();
           var doc = makeTestDoc();
 
@@ -562,7 +540,7 @@ describe('capturer/helper-handler.mjs', function () {
       });
 
       context("cmd_concat", function () {
-        it("basic", function () {
+        it("should return the concatenated string of the arguments", function () {
           var helper = new CaptureHelperHandler();
           var doc = makeTestDoc();
 
@@ -576,7 +554,7 @@ describe('capturer/helper-handler.mjs', function () {
           assert.strictEqual(helper.runCommand(command, doc), "foobarbaz");
         });
 
-        it('coerce truthy non-string value to string', function () {
+        it('should coerce truthy non-string value to string', function () {
           var helper = new CaptureHelperHandler();
           var doc = makeTestDoc();
 
@@ -587,7 +565,7 @@ describe('capturer/helper-handler.mjs', function () {
           assert.strictEqual(helper.runCommand(command, doc), "foobar[object Object]");
         });
 
-        it('treat falsy value as empty string', function () {
+        it('should treat falsy value as empty string', function () {
           var helper = new CaptureHelperHandler();
           var doc = makeTestDoc();
 
@@ -595,7 +573,7 @@ describe('capturer/helper-handler.mjs', function () {
           assert.strictEqual(helper.runCommand(command, doc), "foo");
         });
 
-        it("resolve parameter commands", function () {
+        it("should resolve parameter commands", function () {
           var helper = new CaptureHelperHandler();
           var doc = makeTestDoc();
 
@@ -605,7 +583,7 @@ describe('capturer/helper-handler.mjs', function () {
       });
 
       context("cmd_slice", function () {
-        it("basic", function () {
+        it("should the sliced string", function () {
           var helper = new CaptureHelperHandler();
           var doc = makeTestDoc();
 
@@ -625,7 +603,7 @@ describe('capturer/helper-handler.mjs', function () {
           assert.strictEqual(helper.runCommand(command, doc), "01234");
         });
 
-        it("resolve parameter commands", function () {
+        it("should resolve parameter commands", function () {
           var helper = new CaptureHelperHandler();
           var doc = makeTestDoc();
 
@@ -635,7 +613,7 @@ describe('capturer/helper-handler.mjs', function () {
       });
 
       context("cmd_upper", function () {
-        it("basic", function () {
+        it("should return the upper cased string", function () {
           var helper = new CaptureHelperHandler();
           var doc = makeTestDoc();
 
@@ -643,7 +621,7 @@ describe('capturer/helper-handler.mjs', function () {
           assert.strictEqual(helper.runCommand(command, doc), "123ABCABC中文");
         });
 
-        it("resolve parameter commands", function () {
+        it("should resolve parameter commands", function () {
           var helper = new CaptureHelperHandler();
           var doc = makeTestDoc();
 
@@ -653,7 +631,7 @@ describe('capturer/helper-handler.mjs', function () {
       });
 
       context("cmd_lower", function () {
-        it("basic", function () {
+        it("should return the lower cased string", function () {
           var helper = new CaptureHelperHandler();
           var doc = makeTestDoc();
 
@@ -661,7 +639,7 @@ describe('capturer/helper-handler.mjs', function () {
           assert.strictEqual(helper.runCommand(command, doc), "123abcabc中文");
         });
 
-        it("resolve parameter commands", function () {
+        it("should resolve parameter commands", function () {
           var helper = new CaptureHelperHandler();
           var doc = makeTestDoc();
 
@@ -671,7 +649,7 @@ describe('capturer/helper-handler.mjs', function () {
       });
 
       context("cmd_encode_uri", function () {
-        it("basic", function () {
+        it("should return the URI-encoded string", function () {
           var helper = new CaptureHelperHandler();
           var doc = makeTestDoc();
 
@@ -682,7 +660,7 @@ describe('capturer/helper-handler.mjs', function () {
           assert.strictEqual(helper.runCommand(command, doc), ' ;,/?#:@&=+$%E4%B8%AD');
         });
 
-        it("resolve parameter commands", function () {
+        it("should resolve parameter commands", function () {
           var helper = new CaptureHelperHandler();
           var doc = makeTestDoc();
 
@@ -692,7 +670,7 @@ describe('capturer/helper-handler.mjs', function () {
       });
 
       context("cmd_decode_uri", function () {
-        it("basic", function () {
+        it("should return the URI-decoded string", function () {
           var helper = new CaptureHelperHandler();
           var doc = makeTestDoc();
 
@@ -708,7 +686,7 @@ describe('capturer/helper-handler.mjs', function () {
           assert.strictEqual(helper.runCommand(command, doc), '%E4');
         });
 
-        it("resolve parameter commands", function () {
+        it("should resolve parameter commands", function () {
           var helper = new CaptureHelperHandler();
           var doc = makeTestDoc();
 
@@ -718,7 +696,7 @@ describe('capturer/helper-handler.mjs', function () {
       });
 
       context("cmd_add", function () {
-        it("basic", function () {
+        it("should return the summed value of the arguments", function () {
           var helper = new CaptureHelperHandler();
           var doc = makeTestDoc();
 
@@ -732,7 +710,7 @@ describe('capturer/helper-handler.mjs', function () {
           assert.strictEqual(helper.runCommand(command, doc), 111);
         });
 
-        it("resolve parameter commands", function () {
+        it("should resolve parameter commands", function () {
           var helper = new CaptureHelperHandler();
           var doc = makeTestDoc();
 
@@ -742,7 +720,7 @@ describe('capturer/helper-handler.mjs', function () {
       });
 
       context("cmd_subtract", function () {
-        it("basic", function () {
+        it("should return the subtracted value of argument 2 with others", function () {
           var helper = new CaptureHelperHandler();
           var doc = makeTestDoc();
 
@@ -756,7 +734,7 @@ describe('capturer/helper-handler.mjs', function () {
           assert.strictEqual(helper.runCommand(command, doc), 89);
         });
 
-        it("resolve parameter commands", function () {
+        it("should resolve parameter commands", function () {
           var helper = new CaptureHelperHandler();
           var doc = makeTestDoc();
 
@@ -766,7 +744,7 @@ describe('capturer/helper-handler.mjs', function () {
       });
 
       context("cmd_multiply", function () {
-        it("basic", function () {
+        it("should return the multiplied value of the arguments", function () {
           var helper = new CaptureHelperHandler();
           var doc = makeTestDoc();
 
@@ -780,7 +758,7 @@ describe('capturer/helper-handler.mjs', function () {
           assert.strictEqual(helper.runCommand(command, doc), 2000);
         });
 
-        it("resolve parameter commands", function () {
+        it("should resolve parameter commands", function () {
           var helper = new CaptureHelperHandler();
           var doc = makeTestDoc();
 
@@ -790,7 +768,7 @@ describe('capturer/helper-handler.mjs', function () {
       });
 
       context("cmd_divide", function () {
-        it("basic", function () {
+        it("should return the divided value of argument 2 with others", function () {
           var helper = new CaptureHelperHandler();
           var doc = makeTestDoc();
 
@@ -807,7 +785,7 @@ describe('capturer/helper-handler.mjs', function () {
           assert.strictEqual(helper.runCommand(command, doc), 2.5);
         });
 
-        it("resolve parameter commands", function () {
+        it("should resolve parameter commands", function () {
           var helper = new CaptureHelperHandler();
           var doc = makeTestDoc();
 
@@ -817,7 +795,7 @@ describe('capturer/helper-handler.mjs', function () {
       });
 
       context("cmd_mod", function () {
-        it("basic", function () {
+        it("should return the modulo value of argument 2 with others", function () {
           var helper = new CaptureHelperHandler();
           var doc = makeTestDoc();
 
@@ -834,7 +812,7 @@ describe('capturer/helper-handler.mjs', function () {
           assert.strictEqual(helper.runCommand(command, doc), 1);
         });
 
-        it("resolve parameter commands", function () {
+        it("should resolve parameter commands", function () {
           var helper = new CaptureHelperHandler();
           var doc = makeTestDoc();
 
@@ -844,7 +822,7 @@ describe('capturer/helper-handler.mjs', function () {
       });
 
       context("cmd_power", function () {
-        it("basic", function () {
+        it("should return the powered value of argument 2 with others", function () {
           var helper = new CaptureHelperHandler();
           var doc = makeTestDoc();
 
@@ -858,7 +836,7 @@ describe('capturer/helper-handler.mjs', function () {
           assert.strictEqual(helper.runCommand(command, doc), 64);
         });
 
-        it("resolve parameter commands", function () {
+        it("should resolve parameter commands", function () {
           var helper = new CaptureHelperHandler();
           var doc = makeTestDoc();
 
@@ -868,7 +846,7 @@ describe('capturer/helper-handler.mjs', function () {
       });
 
       context("cmd_for", function () {
-        it("basic", function () {
+        it("should run passed commands sequentially", function () {
           var helper = new CaptureHelperHandler();
           var doc = makeTestDoc();
 
@@ -884,7 +862,7 @@ describe('capturer/helper-handler.mjs', function () {
       });
 
       context("cmd_match", function () {
-        it("boolean", function () {
+        it("should return whether argument 2 string matches argument 3 RegExp", function () {
           var helper = new CaptureHelperHandler();
           var doc = makeTestDoc();
 
@@ -898,7 +876,7 @@ describe('capturer/helper-handler.mjs', function () {
           assert.strictEqual(helper.runCommand(command, doc), true);
         });
 
-        it("indexed capture group", function () {
+        it("should return the indexed capture group if argument 4 is an integer", function () {
           var helper = new CaptureHelperHandler();
           var doc = makeTestDoc();
 
@@ -915,7 +893,7 @@ describe('capturer/helper-handler.mjs', function () {
           assert.strictEqual(helper.runCommand(command, doc), null);
         });
 
-        it("named capture group", function () {
+        it("should return the named capture group if argument 4 is a string", function () {
           var helper = new CaptureHelperHandler();
           var doc = makeTestDoc();
 
@@ -929,7 +907,7 @@ describe('capturer/helper-handler.mjs', function () {
           assert.strictEqual(helper.runCommand(command, doc), null);
         });
 
-        it("resolve parameter commands", function () {
+        it("should resolve parameter commands", function () {
           var helper = new CaptureHelperHandler();
           var doc = makeTestDoc();
 
@@ -939,7 +917,7 @@ describe('capturer/helper-handler.mjs', function () {
       });
 
       context("cmd_replace", function () {
-        it("basic", function () {
+        it("should return the replaced string", function () {
           var helper = new CaptureHelperHandler();
           var doc = makeTestDoc();
 
@@ -947,7 +925,7 @@ describe('capturer/helper-handler.mjs', function () {
           assert.strictEqual(helper.runCommand(command, doc), 'modified: content, text');
         });
 
-        it("treat missing replacement as an empty string", function () {
+        it("should return an empty string if argument 3 is omitted", function () {
           var helper = new CaptureHelperHandler();
           var doc = makeTestDoc();
 
@@ -955,7 +933,7 @@ describe('capturer/helper-handler.mjs', function () {
           assert.strictEqual(helper.runCommand(command, doc), "");
         });
 
-        it("resolve parameter commands", function () {
+        it("should resolve parameter commands", function () {
           var helper = new CaptureHelperHandler();
           var doc = makeTestDoc();
 
@@ -965,7 +943,7 @@ describe('capturer/helper-handler.mjs', function () {
       });
 
       context("cmd_has_node", function () {
-        it("basic", function () {
+        it("should return whether at least one node is selected", function () {
           var helper = new CaptureHelperHandler();
           var doc = makeTestDoc();
 
@@ -976,7 +954,7 @@ describe('capturer/helper-handler.mjs', function () {
           assert.strictEqual(helper.runCommand(command, doc), false);
         });
 
-        it("resolve parameter commands", function () {
+        it("should resolve parameter commands", function () {
           var helper = new CaptureHelperHandler();
           var doc = makeTestDoc();
 
@@ -986,7 +964,7 @@ describe('capturer/helper-handler.mjs', function () {
       });
 
       context("cmd_has_attr", function () {
-        it("basic", function () {
+        it("should return whether the first selected node has the attribute", function () {
           var helper = new CaptureHelperHandler();
           var doc = makeTestDoc();
 
@@ -997,7 +975,7 @@ describe('capturer/helper-handler.mjs', function () {
           assert.strictEqual(helper.runCommand(command, doc), false);
         });
 
-        it("resolve parameter commands", function () {
+        it("should resolve parameter commands", function () {
           var helper = new CaptureHelperHandler();
           var doc = makeTestDoc();
 
@@ -1013,18 +991,23 @@ describe('capturer/helper-handler.mjs', function () {
 <div><b>elem2</b></div>`);
         }
 
-        it("basic", function () {
+        it("should return the innerHTML of the first selected node", function () {
           var helper = new CaptureHelperHandler();
           var doc = makeTestDoc();
 
           var command = ["get_html", {css: "div"}];
           assert.strictEqual(helper.runCommand(command, doc), "<b>elem1</b>");
+        });
+
+        it("should return the outerHTML of the first selected node if argument 3 is truthy", function () {
+          var helper = new CaptureHelperHandler();
+          var doc = makeTestDoc();
 
           var command = ["get_html", {css: "div"}, true];
           assert.strictEqual(helper.runCommand(command, doc), "<div><b>elem1</b></div>");
         });
 
-        it("resolve parameter commands", function () {
+        it("should resolve parameter commands", function () {
           var helper = new CaptureHelperHandler();
           var doc = makeTestDoc();
 
@@ -1040,7 +1023,7 @@ describe('capturer/helper-handler.mjs', function () {
 <div><b>elem2-1</b><b>elem2-2</b></div>`);
         }
 
-        it("basic", function () {
+        it("should return the text content of the first selected node", function () {
           var helper = new CaptureHelperHandler();
           var doc = makeTestDoc();
 
@@ -1048,7 +1031,7 @@ describe('capturer/helper-handler.mjs', function () {
           assert.strictEqual(helper.runCommand(command, doc), "elem1-1elem1-2");
         });
 
-        it("resolve parameter commands", function () {
+        it("should resolve parameter commands", function () {
           var helper = new CaptureHelperHandler();
           var doc = makeTestDoc();
 
@@ -1064,7 +1047,7 @@ describe('capturer/helper-handler.mjs', function () {
 <img data-src="image2.jpg">`);
         }
 
-        it("basic", function () {
+        it("should return the attribute of the first selected node", function () {
           var helper = new CaptureHelperHandler();
           var doc = makeTestDoc();
 
@@ -1072,7 +1055,7 @@ describe('capturer/helper-handler.mjs', function () {
           assert.strictEqual(helper.runCommand(command, doc), "image1.jpg");
         });
 
-        it("resolve parameter commands", function () {
+        it("should resolve parameter commands", function () {
           var helper = new CaptureHelperHandler();
           var doc = makeTestDoc();
 
@@ -1088,12 +1071,17 @@ describe('capturer/helper-handler.mjs', function () {
 <div style="color: yellow !important;"></div>`);
         }
 
-        it("basic", function () {
+        it("should return the CSS property of the first selected node", function () {
           var helper = new CaptureHelperHandler();
           var doc = makeTestDoc();
 
           var command = ["get_css", {css: "div"}, "color"];
           assert.strictEqual(helper.runCommand(command, doc), "green");
+        });
+
+        it("should return the CSS priority of the first selected node if argument 4 is truthy", function () {
+          var helper = new CaptureHelperHandler();
+          var doc = makeTestDoc();
 
           var command = ["get_css", {css: "div"}, "color", true];
           assert.strictEqual(helper.runCommand(command, doc), "");
@@ -1102,7 +1090,7 @@ describe('capturer/helper-handler.mjs', function () {
           assert.strictEqual(helper.runCommand(command, doc), "important");
         });
 
-        it("resolve parameter commands", function () {
+        it("should resolve parameter commands", function () {
           var helper = new CaptureHelperHandler();
           var doc = makeTestDoc();
 
@@ -1118,7 +1106,7 @@ describe('capturer/helper-handler.mjs', function () {
 <div><b>elem2</b></div>`);
         }
 
-        it("basic", function () {
+        it("should remove the selected nodes", function () {
           var helper = new CaptureHelperHandler();
 
           var doc = makeTestDoc();
@@ -1129,7 +1117,7 @@ describe('capturer/helper-handler.mjs', function () {
 <div></div>`);
         });
 
-        it("resolve parameter commands", function () {
+        it("should resolve parameter commands", function () {
           var helper = new CaptureHelperHandler();
 
           var doc = makeTestDoc();
@@ -1148,7 +1136,7 @@ describe('capturer/helper-handler.mjs', function () {
 <div><b>elem2</b></div>`);
         }
 
-        it("basic", function () {
+        it("should remove the selected nodes while keeping their descendants", function () {
           var helper = new CaptureHelperHandler();
 
           var doc = makeTestDoc();
@@ -1159,7 +1147,7 @@ describe('capturer/helper-handler.mjs', function () {
 <b>elem2</b>`);
         });
 
-        it("resolve parameter commands", function () {
+        it("should resolve parameter commands", function () {
           var helper = new CaptureHelperHandler();
 
           var doc = makeTestDoc();
@@ -1192,7 +1180,7 @@ describe('capturer/helper-handler.mjs', function () {
 </html>`);
         }
 
-        it("basic", function () {
+        it("should remove nodes other than the selected nodes and ancestors", function () {
           var helper = new CaptureHelperHandler();
 
           var doc = makeTestDoc();
@@ -1212,7 +1200,7 @@ describe('capturer/helper-handler.mjs', function () {
 </body>`);
         });
 
-        it("resolve parameter commands", function () {
+        it("should resolve parameter commands", function () {
           var helper = new CaptureHelperHandler();
 
           var doc = makeTestDoc();
@@ -1240,7 +1228,7 @@ describe('capturer/helper-handler.mjs', function () {
 <div><b>elem2</b></div>`);
         }
 
-        it("basic", function () {
+        it("should set innerHTML for the selected nodes", function () {
           var helper = new CaptureHelperHandler();
 
           var doc = makeTestDoc();
@@ -1249,6 +1237,10 @@ describe('capturer/helper-handler.mjs', function () {
           assert.strictEqual(doc.body.innerHTML.trim(), `\
 <div><em>text</em></div>
 <div><em>text</em></div>`);
+        });
+
+        it("should set outerHTML for the selected nodes if aregument 4 is truthy", function () {
+          var helper = new CaptureHelperHandler();
 
           var doc = makeTestDoc();
           var command = ["html", {css: "div"}, "<em>text</em>", true];
@@ -1258,7 +1250,7 @@ describe('capturer/helper-handler.mjs', function () {
 <em>text</em>`);
         });
 
-        it("resolve parameter commands", function () {
+        it("should resolve parameter commands", function () {
           var helper = new CaptureHelperHandler();
 
           var doc = makeTestDoc();
@@ -1277,7 +1269,7 @@ describe('capturer/helper-handler.mjs', function () {
 <div>text2</div>`);
         }
 
-        it("basic", function () {
+        it("should set text content for the selected nodes", function () {
           var helper = new CaptureHelperHandler();
 
           var doc = makeTestDoc();
@@ -1288,7 +1280,7 @@ describe('capturer/helper-handler.mjs', function () {
           assert.strictEqual(elems[1].textContent, '<em>text</em>');
         });
 
-        it("resolve parameter commands", function () {
+        it("should resolve parameter commands", function () {
           var helper = new CaptureHelperHandler();
 
           var doc = makeTestDoc();
@@ -1307,126 +1299,132 @@ describe('capturer/helper-handler.mjs', function () {
 <img data-src="image2.jpg">`);
         }
 
-        it("name, value", function () {
-          var helper = new CaptureHelperHandler();
+        context('when passing (name, value)', function () {
+          it("should set the named attribute with the value when value is a string", function () {
+            var helper = new CaptureHelperHandler();
 
-          var doc = makeTestDoc();
-          var command = ["attr", {css: "img"}, "data-src", "myimage.jpg"];
-          assert.strictEqual(helper.runCommand(command, doc), undefined);
-          assert.strictEqual(doc.body.innerHTML.trim(), `\
+            var doc = makeTestDoc();
+            var command = ["attr", {css: "img"}, "data-src", "myimage.jpg"];
+            assert.strictEqual(helper.runCommand(command, doc), undefined);
+            assert.strictEqual(doc.body.innerHTML.trim(), `\
 <img data-src="myimage.jpg">
 <img data-src="myimage.jpg">`);
 
-          var doc = makeTestDoc();
-          var command = ["attr", {css: "img"}, "src", "myimage.jpg"];
-          assert.strictEqual(helper.runCommand(command, doc), undefined);
-          assert.strictEqual(doc.body.innerHTML.trim(), `\
+            var doc = makeTestDoc();
+            var command = ["attr", {css: "img"}, "src", "myimage.jpg"];
+            assert.strictEqual(helper.runCommand(command, doc), undefined);
+            assert.strictEqual(doc.body.innerHTML.trim(), `\
 <img data-src="image1.jpg" src="myimage.jpg">
 <img data-src="image2.jpg" src="myimage.jpg">`);
-        });
+          });
 
-        it("name, value (null)", function () {
-          var helper = new CaptureHelperHandler();
+          it("should remove the named attribute when value is null", function () {
+            var helper = new CaptureHelperHandler();
 
-          var doc = makeTestDoc();
-          var command = ["attr", {css: "img"}, "data-src", null];
-          assert.strictEqual(helper.runCommand(command, doc), undefined);
-          assert.strictEqual(doc.body.innerHTML.trim(), `\
+            var doc = makeTestDoc();
+            var command = ["attr", {css: "img"}, "data-src", null];
+            assert.strictEqual(helper.runCommand(command, doc), undefined);
+            assert.strictEqual(doc.body.innerHTML.trim(), `\
 <img>
 <img>`);
-        });
+          });
 
-        it("name, value (resolve parameter commands)", function () {
-          var helper = new CaptureHelperHandler();
+          it("should resolve parameter commands", function () {
+            var helper = new CaptureHelperHandler();
 
-          var doc = makeTestDoc();
-          var command = ["attr", ["if", true, {css: "img"}], ["concat", "src"], ["get_attr", null, "data-src"]];
-          assert.strictEqual(helper.runCommand(command, doc), undefined);
-          assert.strictEqual(doc.body.innerHTML.trim(), `\
+            var doc = makeTestDoc();
+            var command = ["attr", ["if", true, {css: "img"}], ["concat", "src"], ["get_attr", null, "data-src"]];
+            assert.strictEqual(helper.runCommand(command, doc), undefined);
+            assert.strictEqual(doc.body.innerHTML.trim(), `\
 <img data-src="image1.jpg" src="image1.jpg">
 <img data-src="image2.jpg" src="image2.jpg">`);
+          });
         });
 
-        it("Object", function () {
-          var helper = new CaptureHelperHandler();
+        context('when passing an Object', function () {
+          it("should set the attributes", function () {
+            var helper = new CaptureHelperHandler();
 
-          var doc = makeTestDoc();
-          var command = ["attr", {css: "img"}, {
-            "src": "myimage.jpg",
-            "data-src": null,
-            "data-extra": "extra-value",
-          }];
-          assert.strictEqual(helper.runCommand(command, doc), undefined);
-          assert.strictEqual(doc.body.innerHTML.trim(), `\
+            var doc = makeTestDoc();
+            var command = ["attr", {css: "img"}, {
+              "src": "myimage.jpg",
+              "data-src": null,
+              "data-extra": "extra-value",
+            }];
+            assert.strictEqual(helper.runCommand(command, doc), undefined);
+            assert.strictEqual(doc.body.innerHTML.trim(), `\
 <img src="myimage.jpg" data-extra="extra-value">
 <img src="myimage.jpg" data-extra="extra-value">`);
-        });
+          });
 
-        it("Object (resolve parameter commands)", function () {
-          var helper = new CaptureHelperHandler();
+          it("should resolve parameter commands", function () {
+            var helper = new CaptureHelperHandler();
 
-          var doc = makeTestDoc();
-          var command = ["attr", ["if", true, {css: "img"}], ["if", true, {
-            "src": "myimage.jpg",
-            "data-src": null,
-            "data-extra": "extra-value",
-          }]];
-          assert.strictEqual(helper.runCommand(command, doc), undefined);
-          assert.strictEqual(doc.body.innerHTML.trim(), `\
+            var doc = makeTestDoc();
+            var command = ["attr", ["if", true, {css: "img"}], ["if", true, {
+              "src": "myimage.jpg",
+              "data-src": null,
+              "data-extra": "extra-value",
+            }]];
+            assert.strictEqual(helper.runCommand(command, doc), undefined);
+            assert.strictEqual(doc.body.innerHTML.trim(), `\
 <img src="myimage.jpg" data-extra="extra-value">
 <img src="myimage.jpg" data-extra="extra-value">`);
 
-          var doc = makeTestDoc();
-          var command = ["attr", {css: "img"}, {
-            "src": ["get_attr", null, "data-src"],
-            "data-src": ["if", true, null],
-            "data-extra": ["concat", "extra-value"],
-          }];
-          assert.strictEqual(helper.runCommand(command, doc), undefined);
-          assert.strictEqual(doc.body.innerHTML.trim(), `\
+            var doc = makeTestDoc();
+            var command = ["attr", {css: "img"}, {
+              "src": ["get_attr", null, "data-src"],
+              "data-src": ["if", true, null],
+              "data-extra": ["concat", "extra-value"],
+            }];
+            assert.strictEqual(helper.runCommand(command, doc), undefined);
+            assert.strictEqual(doc.body.innerHTML.trim(), `\
 <img src="image1.jpg" data-extra="extra-value">
 <img src="image2.jpg" data-extra="extra-value">`);
+          });
         });
 
-        it("Array", function () {
-          var helper = new CaptureHelperHandler();
+        context('when passing an Array', function () {
+          it("should set the attributes", function () {
+            var helper = new CaptureHelperHandler();
 
-          var doc = makeTestDoc();
-          var command = ["attr", {css: "img"}, [
-            ["src", "myimage.jpg"],
-            ["data-src", null],
-            ["data-extra", "extra-value"],
-          ]];
-          assert.strictEqual(helper.runCommand(command, doc), undefined);
-          assert.strictEqual(doc.body.innerHTML.trim(), `\
+            var doc = makeTestDoc();
+            var command = ["attr", {css: "img"}, [
+              ["src", "myimage.jpg"],
+              ["data-src", null],
+              ["data-extra", "extra-value"],
+            ]];
+            assert.strictEqual(helper.runCommand(command, doc), undefined);
+            assert.strictEqual(doc.body.innerHTML.trim(), `\
 <img src="myimage.jpg" data-extra="extra-value">
 <img src="myimage.jpg" data-extra="extra-value">`);
-        });
+          });
 
-        it("Array (resolve parameter commands)", function () {
-          var helper = new CaptureHelperHandler();
+          it("should resolve parameter commands", function () {
+            var helper = new CaptureHelperHandler();
 
-          var doc = makeTestDoc();
-          var command = ["attr", ["if", true, {css: "img"}], ["if", true, [
-            ["src", "myimage.jpg"],
-            ["data-src", null],
-            ["data-extra", "extra-value"],
-          ]]];
-          assert.strictEqual(helper.runCommand(command, doc), undefined);
-          assert.strictEqual(doc.body.innerHTML.trim(), `\
+            var doc = makeTestDoc();
+            var command = ["attr", ["if", true, {css: "img"}], ["if", true, [
+              ["src", "myimage.jpg"],
+              ["data-src", null],
+              ["data-extra", "extra-value"],
+            ]]];
+            assert.strictEqual(helper.runCommand(command, doc), undefined);
+            assert.strictEqual(doc.body.innerHTML.trim(), `\
 <img src="myimage.jpg" data-extra="extra-value">
 <img src="myimage.jpg" data-extra="extra-value">`);
 
-          var doc = makeTestDoc();
-          var command = ["attr", {css: "img"}, [
-            [["concat", "src"], ["get_attr", null, "data-src"]],
-            [["concat", "data-src"], ["if", true, null]],
-            [["concat", "data-extra"], ["concat", "extra-value"]],
-          ]];
-          assert.strictEqual(helper.runCommand(command, doc), undefined);
-          assert.strictEqual(doc.body.innerHTML.trim(), `\
+            var doc = makeTestDoc();
+            var command = ["attr", {css: "img"}, [
+              [["concat", "src"], ["get_attr", null, "data-src"]],
+              [["concat", "data-src"], ["if", true, null]],
+              [["concat", "data-extra"], ["concat", "extra-value"]],
+            ]];
+            assert.strictEqual(helper.runCommand(command, doc), undefined);
+            assert.strictEqual(doc.body.innerHTML.trim(), `\
 <img src="image1.jpg" data-extra="extra-value">
 <img src="image2.jpg" data-extra="extra-value">`);
+          });
         });
       });
 
@@ -1437,133 +1435,139 @@ describe('capturer/helper-handler.mjs', function () {
 <div style="color: yellow;"></div>`);
         }
 
-        it("name, value", function () {
-          var helper = new CaptureHelperHandler();
+        context('when passing (name, value, [priority])', function () {
+          it("should set the named CSS property with the value when value is a string", function () {
+            var helper = new CaptureHelperHandler();
 
-          var doc = makeTestDoc();
-          var command = ["css", {css: "div"}, "color", "red"];
-          assert.strictEqual(helper.runCommand(command, doc), undefined);
-          assert.strictEqual(doc.body.innerHTML.trim(), `\
+            var doc = makeTestDoc();
+            var command = ["css", {css: "div"}, "color", "red"];
+            assert.strictEqual(helper.runCommand(command, doc), undefined);
+            assert.strictEqual(doc.body.innerHTML.trim(), `\
 <div style="color: red;"></div>
 <div style="color: red;"></div>`);
 
-          var doc = makeTestDoc();
-          var command = ["css", {css: "div"}, "display", "inline"];
-          assert.strictEqual(helper.runCommand(command, doc), undefined);
-          assert.strictEqual(doc.body.innerHTML.trim(), `\
+            var doc = makeTestDoc();
+            var command = ["css", {css: "div"}, "display", "inline"];
+            assert.strictEqual(helper.runCommand(command, doc), undefined);
+            assert.strictEqual(doc.body.innerHTML.trim(), `\
 <div style="color: green; display: inline;"></div>
 <div style="color: yellow; display: inline;"></div>`);
-        });
+          });
 
-        it("name, value (null)", function () {
-          var helper = new CaptureHelperHandler();
+          it("should remove the named CSS property when value is null", function () {
+            var helper = new CaptureHelperHandler();
 
-          var doc = makeTestDoc();
-          var command = ["css", {css: "div"}, "color", null];
-          assert.strictEqual(helper.runCommand(command, doc), undefined);
-          assert.strictEqual(doc.body.innerHTML.trim(), `\
+            var doc = makeTestDoc();
+            var command = ["css", {css: "div"}, "color", null];
+            assert.strictEqual(helper.runCommand(command, doc), undefined);
+            assert.strictEqual(doc.body.innerHTML.trim(), `\
 <div style=""></div>
 <div style=""></div>`);
-        });
+          });
 
-        it("name, value, priority", function () {
-          var helper = new CaptureHelperHandler();
+          it("should set the CSS property with priority when provided", function () {
+            var helper = new CaptureHelperHandler();
 
-          var doc = makeTestDoc();
-          var command = ["css", {css: "div"}, "color", "red", "important"];
-          assert.strictEqual(helper.runCommand(command, doc), undefined);
-          assert.strictEqual(doc.body.innerHTML.trim(), `\
+            var doc = makeTestDoc();
+            var command = ["css", {css: "div"}, "color", "red", "important"];
+            assert.strictEqual(helper.runCommand(command, doc), undefined);
+            assert.strictEqual(doc.body.innerHTML.trim(), `\
 <div style="color: red !important;"></div>
 <div style="color: red !important;"></div>`);
-        });
+          });
 
-        it("name, value, priority (resolve parameter commands)", function () {
-          var helper = new CaptureHelperHandler();
+          it("should resolve parameter commands", function () {
+            var helper = new CaptureHelperHandler();
 
-          var doc = makeTestDoc();
-          var command = ["css", ["if", true, {css: "div"}], ["concat", "color"], ["get_css", null, "color"], ["concat", "important"]];
-          assert.strictEqual(helper.runCommand(command, doc), undefined);
-          assert.strictEqual(doc.body.innerHTML.trim(), `\
+            var doc = makeTestDoc();
+            var command = ["css", ["if", true, {css: "div"}], ["concat", "color"], ["get_css", null, "color"], ["concat", "important"]];
+            assert.strictEqual(helper.runCommand(command, doc), undefined);
+            assert.strictEqual(doc.body.innerHTML.trim(), `\
 <div style="color: green !important;"></div>
 <div style="color: yellow !important;"></div>`);
+          });
         });
 
-        it("Object", function () {
-          var helper = new CaptureHelperHandler();
+        context('when passing an Object', function () {
+          it("should set CSS properties", function () {
+            var helper = new CaptureHelperHandler();
 
-          var doc = makeTestDoc();
-          var command = ["css", {css: "div"}, {
-            "color": null,
-            "display": "inline",
-          }];
-          assert.strictEqual(helper.runCommand(command, doc), undefined);
-          assert.strictEqual(doc.body.innerHTML.trim(), `\
+            var doc = makeTestDoc();
+            var command = ["css", {css: "div"}, {
+              "color": null,
+              "display": "inline",
+            }];
+            assert.strictEqual(helper.runCommand(command, doc), undefined);
+            assert.strictEqual(doc.body.innerHTML.trim(), `\
 <div style="display: inline;"></div>
 <div style="display: inline;"></div>`);
-        });
+          });
 
-        it("Object (resolve parameter commands)", function () {
-          var helper = new CaptureHelperHandler();
+          it("should resolve parameter commands", function () {
+            var helper = new CaptureHelperHandler();
 
-          var doc = makeTestDoc();
-          var command = ["css", ["if", true, {css: "div"}], ["if", true, {
-            "color": null,
-            "display": "inline",
-          }]];
-          assert.strictEqual(helper.runCommand(command, doc), undefined);
-          assert.strictEqual(doc.body.innerHTML.trim(), `\
+            var doc = makeTestDoc();
+            var command = ["css", ["if", true, {css: "div"}], ["if", true, {
+              "color": null,
+              "display": "inline",
+            }]];
+            assert.strictEqual(helper.runCommand(command, doc), undefined);
+            assert.strictEqual(doc.body.innerHTML.trim(), `\
 <div style="display: inline;"></div>
 <div style="display: inline;"></div>`);
 
-          var doc = makeTestDoc();
-          var command = ["css", {css: "div"}, {
-            "background-color": ["get_css", null, "color"],
-            "color": ["if", true, null],
-          }];
-          assert.strictEqual(helper.runCommand(command, doc), undefined);
-          assert.strictEqual(doc.body.innerHTML.trim(), `\
+            var doc = makeTestDoc();
+            var command = ["css", {css: "div"}, {
+              "background-color": ["get_css", null, "color"],
+              "color": ["if", true, null],
+            }];
+            assert.strictEqual(helper.runCommand(command, doc), undefined);
+            assert.strictEqual(doc.body.innerHTML.trim(), `\
 <div style="background-color: green;"></div>
 <div style="background-color: yellow;"></div>`);
+          });
         });
 
-        it("Array", function () {
-          var helper = new CaptureHelperHandler();
+        context('when passing an Array', function () {
+          it("should set CSS properties", function () {
+            var helper = new CaptureHelperHandler();
 
-          var doc = makeTestDoc();
-          var command = ["css", {css: "div"}, [
-            ["color", null],
-            ["display", "inline"],
-            ["font-family", "monospace", "important"],
-          ]];
-          assert.strictEqual(helper.runCommand(command, doc), undefined);
-          assert.strictEqual(doc.body.innerHTML.trim(), `\
+            var doc = makeTestDoc();
+            var command = ["css", {css: "div"}, [
+              ["color", null],
+              ["display", "inline"],
+              ["font-family", "monospace", "important"],
+            ]];
+            assert.strictEqual(helper.runCommand(command, doc), undefined);
+            assert.strictEqual(doc.body.innerHTML.trim(), `\
 <div style="display: inline; font-family: monospace !important;"></div>
 <div style="display: inline; font-family: monospace !important;"></div>`);
-        });
+          });
 
-        it("Array (resolve parameter commands)", function () {
-          var helper = new CaptureHelperHandler();
+          it("should resolve parameter commands", function () {
+            var helper = new CaptureHelperHandler();
 
-          var doc = makeTestDoc();
-          var command = ["css", ["if", true, {css: "div"}], ["if", true, [
-            ["color", null],
-            ["display", "inline"],
-            ["font-family", "monospace", "important"],
-          ]]];
-          assert.strictEqual(helper.runCommand(command, doc), undefined);
-          assert.strictEqual(doc.body.innerHTML.trim(), `\
+            var doc = makeTestDoc();
+            var command = ["css", ["if", true, {css: "div"}], ["if", true, [
+              ["color", null],
+              ["display", "inline"],
+              ["font-family", "monospace", "important"],
+            ]]];
+            assert.strictEqual(helper.runCommand(command, doc), undefined);
+            assert.strictEqual(doc.body.innerHTML.trim(), `\
 <div style="display: inline; font-family: monospace !important;"></div>
 <div style="display: inline; font-family: monospace !important;"></div>`);
 
-          var doc = makeTestDoc();
-          var command = ["css", {css: "div"}, [
-            [["concat", "background-color"], ["get_css", null, "color"], ["concat", "important"]],
-            [["concat", "color"], ["if", true, null]],
-          ]];
-          assert.strictEqual(helper.runCommand(command, doc), undefined);
-          assert.strictEqual(doc.body.innerHTML.trim(), `\
+            var doc = makeTestDoc();
+            var command = ["css", {css: "div"}, [
+              [["concat", "background-color"], ["get_css", null, "color"], ["concat", "important"]],
+              [["concat", "color"], ["if", true, null]],
+            ]];
+            assert.strictEqual(helper.runCommand(command, doc), undefined);
+            assert.strictEqual(doc.body.innerHTML.trim(), `\
 <div style="background-color: green !important;"></div>
 <div style="background-color: yellow !important;"></div>`);
+          });
         });
       });
 
@@ -1578,168 +1582,174 @@ describe('capturer/helper-handler.mjs', function () {
           return makeHtmlDocument(`<div></div>`);
         }
 
-        it("mode = before", function () {
-          var helper = new CaptureHelperHandler();
+        context('when argument 3 is a string', function () {
+          it('should insert before the selected node when argument 3 is "before"', function () {
+            var helper = new CaptureHelperHandler();
 
-          var doc = makeTestDoc();
-          var command = ["insert", {"css": ".target"}, "insertedText", "before"];
-          assert.strictEqual(helper.runCommand(command, doc), undefined);
-          assert.strictEqual(doc.body.innerHTML.trim(), `\
+            var doc = makeTestDoc();
+            var command = ["insert", {"css": ".target"}, "insertedText", "before"];
+            assert.strictEqual(helper.runCommand(command, doc), undefined);
+            assert.strictEqual(doc.body.innerHTML.trim(), `\
 insertedText<div class="target"><div id="child-1"></div><div id="child-2"></div><div id="child-3"></div></div>
 insertedText<div class="target"><div id="child-1"></div><div id="child-2"></div><div id="child-3"></div></div>`);
-        });
+          });
 
-        it("mode = after", function () {
-          var helper = new CaptureHelperHandler();
+          it('should insert after the selected node when argument 3 is "after"', function () {
+            var helper = new CaptureHelperHandler();
 
-          var doc = makeTestDoc();
-          var command = ["insert", {"css": ".target"}, "insertedText", "after"];
-          assert.strictEqual(helper.runCommand(command, doc), undefined);
-          assert.strictEqual(doc.body.innerHTML.trim(), `\
+            var doc = makeTestDoc();
+            var command = ["insert", {"css": ".target"}, "insertedText", "after"];
+            assert.strictEqual(helper.runCommand(command, doc), undefined);
+            assert.strictEqual(doc.body.innerHTML.trim(), `\
 <div class="target"><div id="child-1"></div><div id="child-2"></div><div id="child-3"></div></div>insertedText
 <div class="target"><div id="child-1"></div><div id="child-2"></div><div id="child-3"></div></div>insertedText`);
-        });
+          });
 
-        it("mode = replace", function () {
-          var helper = new CaptureHelperHandler();
+          it('should replace the selected node when argument 3 is "replace"', function () {
+            var helper = new CaptureHelperHandler();
 
-          var doc = makeTestDoc();
-          var command = ["insert", {"css": ".target"}, "insertedText", "replace"];
-          assert.strictEqual(helper.runCommand(command, doc), undefined);
-          assert.strictEqual(doc.body.innerHTML.trim(), `\
+            var doc = makeTestDoc();
+            var command = ["insert", {"css": ".target"}, "insertedText", "replace"];
+            assert.strictEqual(helper.runCommand(command, doc), undefined);
+            assert.strictEqual(doc.body.innerHTML.trim(), `\
 insertedText
 insertedText`);
-        });
+          });
 
-        it("mode = insert", function () {
-          var helper = new CaptureHelperHandler();
+          it('should insert at the position defined by argument 4 of the selected node when argument 3 is "insert"', function () {
+            var helper = new CaptureHelperHandler();
 
-          var doc = makeTestDoc();
-          var command = ["insert", {"css": ".target"}, "insertedText", "insert", 0];
-          assert.strictEqual(helper.runCommand(command, doc), undefined);
-          assert.strictEqual(doc.body.innerHTML.trim(), `\
+            var doc = makeTestDoc();
+            var command = ["insert", {"css": ".target"}, "insertedText", "insert", 0];
+            assert.strictEqual(helper.runCommand(command, doc), undefined);
+            assert.strictEqual(doc.body.innerHTML.trim(), `\
 <div class="target">insertedText<div id="child-1"></div><div id="child-2"></div><div id="child-3"></div></div>
 <div class="target">insertedText<div id="child-1"></div><div id="child-2"></div><div id="child-3"></div></div>`);
 
-          var doc = makeTestDoc();
-          var command = ["insert", {"css": ".target"}, "insertedText", "insert", 1];
-          assert.strictEqual(helper.runCommand(command, doc), undefined);
-          assert.strictEqual(doc.body.innerHTML.trim(), `\
+            var doc = makeTestDoc();
+            var command = ["insert", {"css": ".target"}, "insertedText", "insert", 1];
+            assert.strictEqual(helper.runCommand(command, doc), undefined);
+            assert.strictEqual(doc.body.innerHTML.trim(), `\
 <div class="target"><div id="child-1"></div>insertedText<div id="child-2"></div><div id="child-3"></div></div>
 <div class="target"><div id="child-1"></div>insertedText<div id="child-2"></div><div id="child-3"></div></div>`);
 
-          var doc = makeTestDoc();
-          var command = ["insert", {"css": ".target"}, "insertedText", "insert", 100];
-          assert.strictEqual(helper.runCommand(command, doc), undefined);
-          assert.strictEqual(doc.body.innerHTML.trim(), `\
+            var doc = makeTestDoc();
+            var command = ["insert", {"css": ".target"}, "insertedText", "insert", 100];
+            assert.strictEqual(helper.runCommand(command, doc), undefined);
+            assert.strictEqual(doc.body.innerHTML.trim(), `\
 <div class="target"><div id="child-1"></div><div id="child-2"></div><div id="child-3"></div>insertedText</div>
 <div class="target"><div id="child-1"></div><div id="child-2"></div><div id="child-3"></div>insertedText</div>`);
 
-          var doc = makeTestDoc();
-          var command = ["insert", {"css": ".target"}, "insertedText", "insert"];
-          assert.strictEqual(helper.runCommand(command, doc), undefined);
-          assert.strictEqual(doc.body.innerHTML.trim(), `\
+            var doc = makeTestDoc();
+            var command = ["insert", {"css": ".target"}, "insertedText", "insert"];
+            assert.strictEqual(helper.runCommand(command, doc), undefined);
+            assert.strictEqual(doc.body.innerHTML.trim(), `\
 <div class="target"><div id="child-1"></div><div id="child-2"></div><div id="child-3"></div>insertedText</div>
 <div class="target"><div id="child-1"></div><div id="child-2"></div><div id="child-3"></div>insertedText</div>`);
+          });
+
+          it('should append to the selected node when argument 3 is "append"', function () {
+            var helper = new CaptureHelperHandler();
+
+            var doc = makeTestDoc();
+            var command = ["insert", {"css": ".target"}, "insertedText", "append"];
+            assert.strictEqual(helper.runCommand(command, doc), undefined);
+            assert.strictEqual(doc.body.innerHTML.trim(), `\
+<div class="target"><div id="child-1"></div><div id="child-2"></div><div id="child-3"></div>insertedText</div>
+<div class="target"><div id="child-1"></div><div id="child-2"></div><div id="child-3"></div>insertedText</div>`);
+          });
+
+          it("should append to the selected node when argument 3 is omitted", function () {
+            var helper = new CaptureHelperHandler();
+
+            var doc = makeTestDoc();
+            var command = ["insert", {"css": ".target"}, "insertedText"];
+            assert.strictEqual(helper.runCommand(command, doc), undefined);
+            assert.strictEqual(doc.body.innerHTML.trim(), `\
+<div class="target"><div id="child-1"></div><div id="child-2"></div><div id="child-3"></div>insertedText</div>
+<div class="target"><div id="child-1"></div><div id="child-2"></div><div id="child-3"></div>insertedText</div>`);
+
+            var doc = makeTestDoc();
+            var command = ["insert", {"css": ".target"}, "insertedText", "!unknown"];
+            assert.strictEqual(helper.runCommand(command, doc), undefined);
+            assert.strictEqual(doc.body.innerHTML.trim(), `\
+<div class="target"><div id="child-1"></div><div id="child-2"></div><div id="child-3"></div>insertedText</div>
+<div class="target"><div id="child-1"></div><div id="child-2"></div><div id="child-3"></div>insertedText</div>`);
+          });
         });
 
-        it("mode = append", function () {
-          var helper = new CaptureHelperHandler();
+        context('when argument 3 is an Object (virtual DOM)', function () {
+          it("should insert the generated nodes", function () {
+            var helper = new CaptureHelperHandler();
 
-          var doc = makeTestDoc();
-          var command = ["insert", {"css": ".target"}, "insertedText", "append"];
-          assert.strictEqual(helper.runCommand(command, doc), undefined);
-          assert.strictEqual(doc.body.innerHTML.trim(), `\
-<div class="target"><div id="child-1"></div><div id="child-2"></div><div id="child-3"></div>insertedText</div>
-<div class="target"><div id="child-1"></div><div id="child-2"></div><div id="child-3"></div>insertedText</div>`);
-        });
-
-        it("mode missing or unknown (append by default)", function () {
-          var helper = new CaptureHelperHandler();
-
-          var doc = makeTestDoc();
-          var command = ["insert", {"css": ".target"}, "insertedText"];
-          assert.strictEqual(helper.runCommand(command, doc), undefined);
-          assert.strictEqual(doc.body.innerHTML.trim(), `\
-<div class="target"><div id="child-1"></div><div id="child-2"></div><div id="child-3"></div>insertedText</div>
-<div class="target"><div id="child-1"></div><div id="child-2"></div><div id="child-3"></div>insertedText</div>`);
-
-          var doc = makeTestDoc();
-          var command = ["insert", {"css": ".target"}, "insertedText", "!unknown"];
-          assert.strictEqual(helper.runCommand(command, doc), undefined);
-          assert.strictEqual(doc.body.innerHTML.trim(), `\
-<div class="target"><div id="child-1"></div><div id="child-2"></div><div id="child-3"></div>insertedText</div>
-<div class="target"><div id="child-1"></div><div id="child-2"></div><div id="child-3"></div>insertedText</div>`);
-        });
-
-        it("nodeData as Object (virtual DOM)", function () {
-          var helper = new CaptureHelperHandler();
-
-          var doc = makeTestDoc();
-          var command = ["insert", {"css": ".target"}, {
-            "name": "b",
-            "attrs": [["data-attr1", "value1"], ["data-attr2", "value2"]],
-            "children": [
-              "text",
-              {
-                "name": "i",
-                "attrs": {
-                  "data-a1": "v1",
+            var doc = makeTestDoc();
+            var command = ["insert", {"css": ".target"}, {
+              "name": "b",
+              "attrs": [["data-attr1", "value1"], ["data-attr2", "value2"]],
+              "children": [
+                "text",
+                {
+                  "name": "i",
+                  "attrs": {
+                    "data-a1": "v1",
+                  },
+                  "value": "elem-child",
                 },
-                "value": "elem-child",
-              },
-              {
-                "name": "u",
-                "attrs": {
-                  "data-a1": "v1",
+                {
+                  "name": "u",
+                  "attrs": {
+                    "data-a1": "v1",
+                  },
+                  "value": "elem-child",
+                  "children": ["elem-child-child"],
                 },
-                "value": "elem-child",
-                "children": ["elem-child-child"],
-              },
-              {
-                "name": "#comment",
-                "value": "safe <-- comment --> text",
-              },
-              {
-                "name": "#text",
-                "value": "text-child",
-              },
-            ],
-          }];
-          assert.strictEqual(helper.runCommand(command, doc), undefined);
-          assert.strictEqual(doc.body.innerHTML.trim(), `\
+                {
+                  "name": "#comment",
+                  "value": "safe <-- comment --> text",
+                },
+                {
+                  "name": "#text",
+                  "value": "text-child",
+                },
+              ],
+            }];
+            assert.strictEqual(helper.runCommand(command, doc), undefined);
+            assert.strictEqual(doc.body.innerHTML.trim(), `\
 <div class="target"><div id="child-1"></div><div id="child-2"></div><div id="child-3"></div>\
 <b data-attr1="value1" data-attr2="value2">text<i data-a1="v1">elem-child</i><u data-a1="v1">elem-child</u><!--safe <-\u200B- comment -\u200B-> text-->text-child</b>\
 </div>
 <div class="target"><div id="child-1"></div><div id="child-2"></div><div id="child-3"></div>\
 <b data-attr1="value1" data-attr2="value2">text<i data-a1="v1">elem-child</i><u data-a1="v1">elem-child</u><!--safe <-\u200B- comment -\u200B-> text-->text-child</b>\
 </div>`);
+          });
         });
 
-        it("nodeData as Object (selector)", function () {
-          var helper = new CaptureHelperHandler();
+        context('when argument 3 is an Object (selector)', function () {
+          it("should insert the selected nodes", function () {
+            var helper = new CaptureHelperHandler();
 
-          var doc = makeTestDoc();
-          var command = ["insert", {"css": "#child-1"}, {
-            "base": "nextSibling",
-          }];
-          assert.strictEqual(helper.runCommand(command, doc), undefined);
-          assert.strictEqual(doc.body.innerHTML.trim(), `\
+            var doc = makeTestDoc();
+            var command = ["insert", {"css": "#child-1"}, {
+              "base": "nextSibling",
+            }];
+            assert.strictEqual(helper.runCommand(command, doc), undefined);
+            assert.strictEqual(doc.body.innerHTML.trim(), `\
 <div class="target"><div id="child-1"><div id="child-2"></div></div><div id="child-3"></div></div>
 <div class="target"><div id="child-1"><div id="child-2"></div></div><div id="child-3"></div></div>`);
 
-          var doc = makeTestDoc();
-          var command = ["insert", {"css": "#child-1"}, {
-            "base": "parent",
-            "css": "div:not(#child-1)",
-          }];
-          assert.strictEqual(helper.runCommand(command, doc), undefined);
-          assert.strictEqual(doc.body.innerHTML.trim(), `\
+            var doc = makeTestDoc();
+            var command = ["insert", {"css": "#child-1"}, {
+              "base": "parent",
+              "css": "div:not(#child-1)",
+            }];
+            assert.strictEqual(helper.runCommand(command, doc), undefined);
+            assert.strictEqual(doc.body.innerHTML.trim(), `\
 <div class="target"><div id="child-1"><div id="child-2"></div><div id="child-3"></div></div></div>
 <div class="target"><div id="child-1"><div id="child-2"></div><div id="child-3"></div></div></div>`);
+          });
         });
 
-        it("resolve parameter commands", function () {
+        it("should resolve parameter commands", function () {
           var helper = new CaptureHelperHandler();
 
           var doc = makeTestDoc();
@@ -1800,7 +1810,7 @@ insertedText`);
     });
 
     describe("#run()", function () {
-      it("skip helpers with disabled property", function () {
+      it("should skip helpers with truthy `disabled` property", function () {
         var doc = makeHtmlDocument(`\
 <div class="exclude1"></div>
 <div class="exclude2"></div>
@@ -1826,12 +1836,13 @@ insertedText`);
         var helper = new CaptureHelperHandler({
           helpers,
           rootNode: doc,
+          docUrl: 'http://example.com/',
         });
         assert.deepEqual(helper.run(), {errors: []});
         assert.strictEqual(doc.body.innerHTML.trim(), `<div class="exclude2"></div>`);
       });
 
-      it("skip helpers whose pattern does not match document URL", function () {
+      it("should skip helpers whose `pattern` does not match document URL", function () {
         var doc = makeHtmlDocument(`\
 <div class="exclude1"></div>
 <div class="exclude2"></div>
@@ -1858,7 +1869,7 @@ insertedText`);
         var helper = new CaptureHelperHandler({
           helpers,
           rootNode: doc,
-          docUrl: 'http://example.com',
+          docUrl: 'http://example.com/',
         });
         assert.deepEqual(helper.run(), {errors: []});
         assert.strictEqual(doc.body.innerHTML.trim(), `<div class="exclude2"></div>`);
