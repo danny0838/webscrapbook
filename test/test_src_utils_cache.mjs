@@ -152,7 +152,7 @@ describe('utils/cache.mjs', function () {
     sinon.restore();
   });
 
-  describe('readBlobAsByteStrings', function () {
+  describe('readBlobAsByteStrings()', function () {
     it('should read a Blob as byte strings', async function () {
       var blob = new Blob([new Uint8Array([0xA4, 0x40, 0xA4, 0xD1])], {type: 'text/plain'});
       assert.deepEqual(await readBlobAsByteStrings(blob), ['\xA4\x40\xA4\xD1']);
@@ -170,7 +170,7 @@ describe('utils/cache.mjs', function () {
     });
   });
 
-  describe('serializeObject', function () {
+  describe('serializeObject()', function () {
     it('should serialize Blob', async function () {
       var text = 'foo bar 中文𠀀';
       var blob = new Blob([text], {type: 'text/plain'});
@@ -245,7 +245,7 @@ describe('utils/cache.mjs', function () {
     });
   });
 
-  describe('deserializeObject', function () {
+  describe('deserializeObject()', function () {
     it('should deserialize Blob synchronously', function () {
       var bytes = atob('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQIW2Ng/M/wHwAEBQIAs+lPYAAAAABJRU5ErkJggg==');
       var blob = new Blob([byteStringToArrayBuffer(bytes)], {type: 'image/bmp'});
@@ -286,7 +286,7 @@ describe('utils/cache.mjs', function () {
   });
 
   describe('BaseCache', function () {
-    describe('_serializeObject', function () {
+    describe('._serializeObject()', function () {
       it('should serialize deep objects', async function () {
         var blob = new Blob(['foo'], {type: 'text/plain'});
         assert.deepEqual(
@@ -313,7 +313,7 @@ describe('utils/cache.mjs', function () {
       });
     });
 
-    describe('_deserializeObject', function () {
+    describe('._deserializeObject()', function () {
       it('should deserialize deep objects', async function () {
         var blob = new Blob(['foo'], {type: 'text/plain'});
         assert.deepEqual(
@@ -340,7 +340,7 @@ describe('utils/cache.mjs', function () {
       });
     });
 
-    describe('_getKeyStr', function () {
+    describe('._getKeyStr()', function () {
       it('should return the original string when passing a string', function () {
         assert.deepEqual(BaseCache._getKeyStr('foo bar'), 'foo bar');
       });
@@ -364,8 +364,8 @@ describe('utils/cache.mjs', function () {
         await cleanUp();
       });
 
-      describe('set', function () {
-        it('key as object', async function () {
+      describe('.set()', function () {
+        it('should set value when key is an object', async function () {
           const key1 = {table: "test", id: "123"};
           const key2 = {table: "test", id: "456"};
           await cache.set(key1, "value123");
@@ -377,7 +377,7 @@ describe('utils/cache.mjs', function () {
           });
         });
 
-        it('key as string', async function () {
+        it('should set value when key is a string', async function () {
           const key1 = {table: "test", id: "123"};
           const key2 = {table: "test", id: "456"};
           await cache.set(JSON.stringify(key1), "value123");
@@ -446,8 +446,8 @@ describe('utils/cache.mjs', function () {
         }
       });
 
-      describe('get', function () {
-        it('key as object', async function () {
+      describe('.get()', function () {
+        it('should get value when key is an object', async function () {
           const key1 = {table: "test", id: "123"};
           const key2 = {table: "test", id: "456"};
           await cache.set(key1, "value123");
@@ -456,7 +456,7 @@ describe('utils/cache.mjs', function () {
           assert.strictEqual(await cache.get(key2), "value456");
         });
 
-        it('key as string', async function () {
+        it('should get value when key is a string', async function () {
           const key1 = {table: "test", id: "123"};
           const key2 = {table: "test", id: "456"};
           await cache.set(key1, "value123");
@@ -536,7 +536,7 @@ describe('utils/cache.mjs', function () {
           await cache.set(key4, "value012");
         });
 
-        it('filter as undefined', async function () {
+        it('should get all values when filter is undefined', async function () {
           assert.deepEqual(await cache.getAll(undefined), {
             [JSON.stringify(key1)]: "value123",
             [JSON.stringify(key2)]: "value456",
@@ -545,7 +545,7 @@ describe('utils/cache.mjs', function () {
           });
         });
 
-        it('filter as null', async function () {
+        it('should get all values when filter is null', async function () {
           assert.deepEqual(await cache.getAll(null), {
             [JSON.stringify(key1)]: "value123",
             [JSON.stringify(key2)]: "value456",
@@ -554,7 +554,7 @@ describe('utils/cache.mjs', function () {
           });
         });
 
-        it('filter as object', async function () {
+        it('should get filtered values when filter is an object', async function () {
           assert.deepEqual(await cache.getAll({}), {
             [JSON.stringify(key1)]: "value123",
             [JSON.stringify(key2)]: "value456",
@@ -649,7 +649,7 @@ describe('utils/cache.mjs', function () {
       };
 
       if (cache === StorageCache) {
-        describe('getAll', function () {
+        describe('.getAll()', function () {
           context('with `browser.storage.local.getKeys`', getAllTests);
 
           context('without `browser.storage.local.getKeys`', function () {
@@ -661,10 +661,10 @@ describe('utils/cache.mjs', function () {
           });
         });
       } else {
-        describe('getAll', getAllTests);
+        describe('.getAll()', getAllTests);
       }
 
-      describe('remove', function () {
+      describe('.remove()', function () {
         const key1 = {table: "test", id: "123"};
         const key2 = {table: "test", id: "456"};
         const key3 = {table: "test", id: "789"};
@@ -677,7 +677,7 @@ describe('utils/cache.mjs', function () {
           await cache.set(key4, "value012");
         });
 
-        it('keys as object', async function () {
+        it('should remove value when key is an object', async function () {
           await cache.remove(key1);
           assert.deepEqual(await cache.getAll(null), {
             [JSON.stringify(key2)]: "value456",
@@ -686,7 +686,7 @@ describe('utils/cache.mjs', function () {
           });
         });
 
-        it('keys as string', async function () {
+        it('should remove value when key is a string', async function () {
           await cache.remove(JSON.stringify(key1));
           assert.deepEqual(await cache.getAll(null), {
             [JSON.stringify(key2)]: "value456",
@@ -696,7 +696,7 @@ describe('utils/cache.mjs', function () {
         });
       });
 
-      describe('removeAll', function () {
+      describe('.removeAll()', function () {
         const key1 = {table: "test", id: "123"};
         const key2 = {table: "test", id: "456"};
         const key3 = {table: "test", id: "789"};
@@ -709,29 +709,29 @@ describe('utils/cache.mjs', function () {
           await cache.set(key4, "value012");
         });
 
-        it('filter as undefined', async function () {
+        it('should remove all values when filter is undefined', async function () {
           await cache.removeAll(undefined);
           assert.deepEqual(await cache.getAll(null), {});
         });
 
-        it('filter as null', async function () {
+        it('should remove all values when filter is null', async function () {
           await cache.removeAll(null);
           assert.deepEqual(await cache.getAll(null), {});
         });
 
-        it('filter as object (empty)', async function () {
+        it('should remove all values when filter is an empty object', async function () {
           await cache.removeAll({});
           assert.deepEqual(await cache.getAll(null), {});
         });
 
-        it('filter as object (includes single key)', async function () {
+        it('should remove filtered values when filter is an object (includes single key)', async function () {
           await cache.removeAll({includes: {table: "test"}});
           assert.deepEqual(await cache.getAll(null), {
             [JSON.stringify(key4)]: "value012",
           });
         });
 
-        it('filter as object (includes multiple keys)', async function () {
+        it('should remove filtered values when filter is an object (includes multiple keys)', async function () {
           await cache.removeAll({includes: {table: "test", id: "123"}});
           assert.deepEqual(await cache.getAll(null), {
             [JSON.stringify(key2)]: "value456",
@@ -740,7 +740,7 @@ describe('utils/cache.mjs', function () {
           });
         });
 
-        it('filter as object (includes Set)', async function () {
+        it('should remove filtered values when filter is an object (includes Set)', async function () {
           await cache.removeAll({includes: {table: "test", id: new Set(["456", "789"])}});
           assert.deepEqual(await cache.getAll(null), {
             [JSON.stringify(key1)]: "value123",
@@ -748,7 +748,7 @@ describe('utils/cache.mjs', function () {
           });
         });
 
-        it('filter as object (includes Array)', async function () {
+        it('should remove filtered values when filter is an object (includes Array)', async function () {
           await cache.removeAll({includes: {table: "test", id: ["456", "789"]}});
           assert.deepEqual(await cache.getAll(null), {
             [JSON.stringify(key1)]: "value123",
@@ -756,7 +756,7 @@ describe('utils/cache.mjs', function () {
           });
         });
 
-        it('filter as object (excludes string)', async function () {
+        it('should remove filtered values when filter is an object (excludes string)', async function () {
           await cache.removeAll({excludes: {table: "test"}});
           assert.deepEqual(await cache.getAll(null), {
             [JSON.stringify(key1)]: "value123",
@@ -765,7 +765,7 @@ describe('utils/cache.mjs', function () {
           });
         });
 
-        it('filter as object (excludes Set)', async function () {
+        it('should remove filtered values when filter is an object (excludes Set)', async function () {
           await cache.removeAll({includes: {table: "test"}, excludes: {id: new Set(["123", "789"])}});
           assert.deepEqual(await cache.getAll(null), {
             [JSON.stringify(key1)]: "value123",
@@ -774,7 +774,7 @@ describe('utils/cache.mjs', function () {
           });
         });
 
-        it('filter as object (excludes Array)', async function () {
+        it('should remove filtered values when filter is an object (excludes Array)', async function () {
           await cache.removeAll({includes: {table: "test"}, excludes: {id: ["123", "789"]}});
           assert.deepEqual(await cache.getAll(null), {
             [JSON.stringify(key1)]: "value123",
@@ -787,7 +787,7 @@ describe('utils/cache.mjs', function () {
   }
 
   $describe.skipIf($.noExtensionBrowser)('Cache', function () {
-    describe('set', function () {
+    describe('.set()', function () {
       for (const [STORAGE, cache] of Object.entries(Cache.caches)) {
         it(`should call ${cache.name} method when passing "${STORAGE}"`, async function () {
           const stub = sinon.stub(cache, "set");
@@ -799,7 +799,7 @@ describe('utils/cache.mjs', function () {
       }
     });
 
-    describe('get', function () {
+    describe('.get()', function () {
       for (const [STORAGE, cache] of Object.entries(Cache.caches)) {
         it(`should call ${cache.name} method when passing "${STORAGE}"`, async function () {
           const stub = sinon.stub(cache, "get");
@@ -811,7 +811,7 @@ describe('utils/cache.mjs', function () {
       }
     });
 
-    describe('getAll', function () {
+    describe('.getAll()', function () {
       for (const [STORAGE, cache] of Object.entries(Cache.caches)) {
         it(`should call ${cache.name} method when passing "${STORAGE}"`, async function () {
           const stub = sinon.stub(cache, "getAll");
@@ -823,7 +823,7 @@ describe('utils/cache.mjs', function () {
       }
     });
 
-    describe('remove', function () {
+    describe('.remove()', function () {
       for (const [STORAGE, cache] of Object.entries(Cache.caches)) {
         it(`should call ${cache.name} method when passing "${STORAGE}"`, async function () {
           const stub = sinon.stub(cache, "remove");
@@ -835,7 +835,7 @@ describe('utils/cache.mjs', function () {
       }
     });
 
-    describe('removeAll', function () {
+    describe('.removeAll()', function () {
       for (const [STORAGE, cache] of Object.entries(Cache.caches)) {
         it(`should call ${cache.name} method when passing "${STORAGE}"`, async function () {
           const stub = sinon.stub(cache, "removeAll");

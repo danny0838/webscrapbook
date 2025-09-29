@@ -5,7 +5,7 @@ import {dataUriToFile} from "./shared/utils/datauri.mjs";
 const $describe = $(describe);
 
 describe('utils/datauri.mjs', function () {
-  $describe.skipIf($.noBrowser)('dataUriToFile', function () {
+  $describe.skipIf($.noBrowser)('dataUriToFile()', function () {
     it('take filename when useFilename not specified', async function () {
       var datauri = `data:image/bmp;filename=${encodeURIComponent('ABC123中文𠀀')};base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAP8AAAAA`;
       var file = await dataUriToFile(datauri);

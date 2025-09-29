@@ -14,315 +14,317 @@ const $it = $(it);
 const r = String.raw;
 
 describe('capturer/common.mjs', function () {
-  describe('capturer.getRedirectedUrl', function () {
-    it("use the redirected URL hash if it exists", function () {
-      assert.strictEqual(
-        capturer.getRedirectedUrl("http://example.com/page#", ""),
-        "http://example.com/page#",
-      );
-      assert.strictEqual(
-        capturer.getRedirectedUrl("http://example.com/page?id=123#", ""),
-        "http://example.com/page?id=123#",
-      );
-      assert.strictEqual(
-        capturer.getRedirectedUrl("http://example.com/page#", "#frag"),
-        "http://example.com/page#",
-      );
-      assert.strictEqual(
-        capturer.getRedirectedUrl("http://example.com/page?id=123#", "#frag"),
-        "http://example.com/page?id=123#",
-      );
-      assert.strictEqual(
-        capturer.getRedirectedUrl("http://example.com/page#foo", ""),
-        "http://example.com/page#foo",
-      );
-      assert.strictEqual(
-        capturer.getRedirectedUrl("http://example.com/page?id=123#foo", ""),
-        "http://example.com/page?id=123#foo",
-      );
-      assert.strictEqual(
-        capturer.getRedirectedUrl("http://example.com/page#foo", "#frag"),
-        "http://example.com/page#foo",
-      );
-      assert.strictEqual(
-        capturer.getRedirectedUrl("http://example.com/page?id=123#foo", "#frag"),
-        "http://example.com/page?id=123#foo",
-      );
+  describe('capturer', function () {
+    describe('.getRedirectedUrl()', function () {
+      it("use the redirected URL hash if it exists", function () {
+        assert.strictEqual(
+          capturer.getRedirectedUrl("http://example.com/page#", ""),
+          "http://example.com/page#",
+        );
+        assert.strictEqual(
+          capturer.getRedirectedUrl("http://example.com/page?id=123#", ""),
+          "http://example.com/page?id=123#",
+        );
+        assert.strictEqual(
+          capturer.getRedirectedUrl("http://example.com/page#", "#frag"),
+          "http://example.com/page#",
+        );
+        assert.strictEqual(
+          capturer.getRedirectedUrl("http://example.com/page?id=123#", "#frag"),
+          "http://example.com/page?id=123#",
+        );
+        assert.strictEqual(
+          capturer.getRedirectedUrl("http://example.com/page#foo", ""),
+          "http://example.com/page#foo",
+        );
+        assert.strictEqual(
+          capturer.getRedirectedUrl("http://example.com/page?id=123#foo", ""),
+          "http://example.com/page?id=123#foo",
+        );
+        assert.strictEqual(
+          capturer.getRedirectedUrl("http://example.com/page#foo", "#frag"),
+          "http://example.com/page#foo",
+        );
+        assert.strictEqual(
+          capturer.getRedirectedUrl("http://example.com/page?id=123#foo", "#frag"),
+          "http://example.com/page?id=123#foo",
+        );
+      });
+
+      it("use the original URL hash if the redirected URL has no hash", function () {
+        assert.strictEqual(
+          capturer.getRedirectedUrl("http://example.com/page", ""),
+          "http://example.com/page",
+        );
+        assert.strictEqual(
+          capturer.getRedirectedUrl("http://example.com/page?id=123", ""),
+          "http://example.com/page?id=123",
+        );
+        assert.strictEqual(
+          capturer.getRedirectedUrl("http://example.com/page", "#"),
+          "http://example.com/page#",
+        );
+        assert.strictEqual(
+          capturer.getRedirectedUrl("http://example.com/page?id=123", "#"),
+          "http://example.com/page?id=123#",
+        );
+        assert.strictEqual(
+          capturer.getRedirectedUrl("http://example.com/page", "#frag"),
+          "http://example.com/page#frag",
+        );
+        assert.strictEqual(
+          capturer.getRedirectedUrl("http://example.com/page?id=123", "#frag"),
+          "http://example.com/page?id=123#frag",
+        );
+      });
+
+      it("don't include hash for data URL", function () {
+        assert.strictEqual(
+          capturer.getRedirectedUrl("data:text/html,foo#", ""),
+          "data:text/html,foo",
+        );
+        assert.strictEqual(
+          capturer.getRedirectedUrl("data:text/html,foo#", "#frag"),
+          "data:text/html,foo",
+        );
+        assert.strictEqual(
+          capturer.getRedirectedUrl("data:text/html,foo", ""),
+          "data:text/html,foo",
+        );
+        assert.strictEqual(
+          capturer.getRedirectedUrl("data:text/html,foo", "#frag"),
+          "data:text/html,foo",
+        );
+      });
     });
 
-    it("use the original URL hash if the redirected URL has no hash", function () {
-      assert.strictEqual(
-        capturer.getRedirectedUrl("http://example.com/page", ""),
-        "http://example.com/page",
-      );
-      assert.strictEqual(
-        capturer.getRedirectedUrl("http://example.com/page?id=123", ""),
-        "http://example.com/page?id=123",
-      );
-      assert.strictEqual(
-        capturer.getRedirectedUrl("http://example.com/page", "#"),
-        "http://example.com/page#",
-      );
-      assert.strictEqual(
-        capturer.getRedirectedUrl("http://example.com/page?id=123", "#"),
-        "http://example.com/page?id=123#",
-      );
-      assert.strictEqual(
-        capturer.getRedirectedUrl("http://example.com/page", "#frag"),
-        "http://example.com/page#frag",
-      );
-      assert.strictEqual(
-        capturer.getRedirectedUrl("http://example.com/page?id=123", "#frag"),
-        "http://example.com/page?id=123#frag",
-      );
+    describe('.resolveRelativeUrl()', function () {
+      it("resolve a relative URL using the base URL", function () {
+        assert.strictEqual(
+          capturer.resolveRelativeUrl("mypage.html", "http://example.com/"),
+          "http://example.com/mypage.html",
+        );
+        assert.strictEqual(
+          capturer.resolveRelativeUrl("mypage.html?id=123", "http://example.com/"),
+          "http://example.com/mypage.html?id=123",
+        );
+        assert.strictEqual(
+          capturer.resolveRelativeUrl("mypage.html?id=123#frag", "http://example.com/"),
+          "http://example.com/mypage.html?id=123#frag",
+        );
+        assert.strictEqual(
+          capturer.resolveRelativeUrl("?id=123", "http://example.com/"),
+          "http://example.com/?id=123",
+        );
+        assert.strictEqual(
+          capturer.resolveRelativeUrl("?", "http://example.com/"),
+          "http://example.com/?",
+        );
+      });
+
+      it("don't resolve an empty URL", function () {
+        assert.strictEqual(
+          capturer.resolveRelativeUrl("", "http://example.com/"),
+          "",
+        );
+      });
+
+      it("don't resolve a pure hash URL", function () {
+        assert.strictEqual(
+          capturer.resolveRelativeUrl("#hash", "http://example.com/"),
+          "#hash",
+        );
+        assert.strictEqual(
+          capturer.resolveRelativeUrl("#", "http://example.com/"),
+          "#",
+        );
+      });
     });
 
-    it("don't include hash for data URL", function () {
-      assert.strictEqual(
-        capturer.getRedirectedUrl("data:text/html,foo#", ""),
-        "data:text/html,foo",
-      );
-      assert.strictEqual(
-        capturer.getRedirectedUrl("data:text/html,foo#", "#frag"),
-        "data:text/html,foo",
-      );
-      assert.strictEqual(
-        capturer.getRedirectedUrl("data:text/html,foo", ""),
-        "data:text/html,foo",
-      );
-      assert.strictEqual(
-        capturer.getRedirectedUrl("data:text/html,foo", "#frag"),
-        "data:text/html,foo",
-      );
-    });
-  });
+    describe('.isAboutUrl()', function () {
+      it("true for exactly about:srcdoc", function () {
+        assert.strictEqual(
+          capturer.isAboutUrl("about:srcdoc"),
+          true,
+        );
+        assert.strictEqual(
+          capturer.isAboutUrl("about:srcdoc/subdir"),
+          false,
+        );
+        assert.strictEqual(
+          capturer.isAboutUrl("about:srcdoc?"),
+          false,
+        );
+        assert.strictEqual(
+          capturer.isAboutUrl("about:srcdoc?id=123"),
+          false,
+        );
+        assert.strictEqual(
+          capturer.isAboutUrl("about:srcdoc#"),
+          false,
+        );
+        assert.strictEqual(
+          capturer.isAboutUrl("about:srcdoc#frag"),
+          false,
+        );
+      });
 
-  describe('capturer.resolveRelativeUrl', function () {
-    it("resolve a relative URL using the base URL", function () {
-      assert.strictEqual(
-        capturer.resolveRelativeUrl("mypage.html", "http://example.com/"),
-        "http://example.com/mypage.html",
-      );
-      assert.strictEqual(
-        capturer.resolveRelativeUrl("mypage.html?id=123", "http://example.com/"),
-        "http://example.com/mypage.html?id=123",
-      );
-      assert.strictEqual(
-        capturer.resolveRelativeUrl("mypage.html?id=123#frag", "http://example.com/"),
-        "http://example.com/mypage.html?id=123#frag",
-      );
-      assert.strictEqual(
-        capturer.resolveRelativeUrl("?id=123", "http://example.com/"),
-        "http://example.com/?id=123",
-      );
-      assert.strictEqual(
-        capturer.resolveRelativeUrl("?", "http://example.com/"),
-        "http://example.com/?",
-      );
-    });
+      it("true for about:blank", function () {
+        assert.strictEqual(
+          capturer.isAboutUrl("about:blank"),
+          true,
+        );
+        assert.strictEqual(
+          capturer.isAboutUrl("about:blank/subdir"),
+          false,
+        );
+        assert.strictEqual(
+          capturer.isAboutUrl("about:blank?"),
+          true,
+        );
+        assert.strictEqual(
+          capturer.isAboutUrl("about:blank?id=123"),
+          true,
+        );
+        assert.strictEqual(
+          capturer.isAboutUrl("about:blank#"),
+          true,
+        );
+        assert.strictEqual(
+          capturer.isAboutUrl("about:blank#frag"),
+          true,
+        );
+      });
 
-    it("don't resolve an empty URL", function () {
-      assert.strictEqual(
-        capturer.resolveRelativeUrl("", "http://example.com/"),
-        "",
-      );
-    });
-
-    it("don't resolve a pure hash URL", function () {
-      assert.strictEqual(
-        capturer.resolveRelativeUrl("#hash", "http://example.com/"),
-        "#hash",
-      );
-      assert.strictEqual(
-        capturer.resolveRelativeUrl("#", "http://example.com/"),
-        "#",
-      );
-    });
-  });
-
-  describe('capturer.isAboutUrl', function () {
-    it("true for exactly about:srcdoc", function () {
-      assert.strictEqual(
-        capturer.isAboutUrl("about:srcdoc"),
-        true,
-      );
-      assert.strictEqual(
-        capturer.isAboutUrl("about:srcdoc/subdir"),
-        false,
-      );
-      assert.strictEqual(
-        capturer.isAboutUrl("about:srcdoc?"),
-        false,
-      );
-      assert.strictEqual(
-        capturer.isAboutUrl("about:srcdoc?id=123"),
-        false,
-      );
-      assert.strictEqual(
-        capturer.isAboutUrl("about:srcdoc#"),
-        false,
-      );
-      assert.strictEqual(
-        capturer.isAboutUrl("about:srcdoc#frag"),
-        false,
-      );
-    });
-
-    it("true for about:blank", function () {
-      assert.strictEqual(
-        capturer.isAboutUrl("about:blank"),
-        true,
-      );
-      assert.strictEqual(
-        capturer.isAboutUrl("about:blank/subdir"),
-        false,
-      );
-      assert.strictEqual(
-        capturer.isAboutUrl("about:blank?"),
-        true,
-      );
-      assert.strictEqual(
-        capturer.isAboutUrl("about:blank?id=123"),
-        true,
-      );
-      assert.strictEqual(
-        capturer.isAboutUrl("about:blank#"),
-        true,
-      );
-      assert.strictEqual(
-        capturer.isAboutUrl("about:blank#frag"),
-        true,
-      );
+      it("false for other URLs", function () {
+        assert.strictEqual(
+          capturer.isAboutUrl("about:invalid"),
+          false,
+        );
+        assert.strictEqual(
+          capturer.isAboutUrl("about:newtab"),
+          false,
+        );
+        assert.strictEqual(
+          capturer.isAboutUrl("http://example.com/page"),
+          false,
+        );
+        assert.strictEqual(
+          capturer.isAboutUrl("https://example.com/page"),
+          false,
+        );
+        assert.strictEqual(
+          capturer.isAboutUrl("ws://example.com/page"),
+          false,
+        );
+        assert.strictEqual(
+          capturer.isAboutUrl("wss://example.com/page"),
+          false,
+        );
+        assert.strictEqual(
+          capturer.isAboutUrl("file:///foo/bar"),
+          false,
+        );
+        assert.strictEqual(
+          capturer.isAboutUrl("data:text/html,foo"),
+          false,
+        );
+      });
     });
 
-    it("false for other URLs", function () {
-      assert.strictEqual(
-        capturer.isAboutUrl("about:invalid"),
-        false,
-      );
-      assert.strictEqual(
-        capturer.isAboutUrl("about:newtab"),
-        false,
-      );
-      assert.strictEqual(
-        capturer.isAboutUrl("http://example.com/page"),
-        false,
-      );
-      assert.strictEqual(
-        capturer.isAboutUrl("https://example.com/page"),
-        false,
-      );
-      assert.strictEqual(
-        capturer.isAboutUrl("ws://example.com/page"),
-        false,
-      );
-      assert.strictEqual(
-        capturer.isAboutUrl("wss://example.com/page"),
-        false,
-      );
-      assert.strictEqual(
-        capturer.isAboutUrl("file:///foo/bar"),
-        false,
-      );
-      assert.strictEqual(
-        capturer.isAboutUrl("data:text/html,foo"),
-        false,
-      );
-    });
-  });
+    describe('.getErrorUrl()', function () {
+      const optionsBasic = {};
+      const optionsLinkUnsavedUri = {"capture.linkUnsavedUri": true};
 
-  describe('capturer.getErrorUrl', function () {
-    const optionsBasic = {};
-    const optionsLinkUnsavedUri = {"capture.linkUnsavedUri": true};
+      it("rewrite http:, https:, file:, and about:", function () {
+        assert.strictEqual(
+          capturer.getErrorUrl("http://example.com/?id=123#456", optionsBasic),
+          "urn:scrapbook:download:error:http://example.com/?id=123#456",
+        );
+        assert.strictEqual(
+          capturer.getErrorUrl("https://example.com/?id=123#456", optionsBasic),
+          "urn:scrapbook:download:error:https://example.com/?id=123#456",
+        );
+        assert.strictEqual(
+          capturer.getErrorUrl("file:///foo/bar", optionsBasic),
+          "urn:scrapbook:download:error:file:///foo/bar",
+        );
+        assert.strictEqual(
+          capturer.getErrorUrl("about:blank", optionsBasic),
+          "urn:scrapbook:download:error:about:blank",
+        );
+        assert.strictEqual(
+          capturer.getErrorUrl("about:srcdoc", optionsBasic),
+          "urn:scrapbook:download:error:about:srcdoc",
+        );
+      });
 
-    it("rewrite http:, https:, file:, and about:", function () {
-      assert.strictEqual(
-        capturer.getErrorUrl("http://example.com/?id=123#456", optionsBasic),
-        "urn:scrapbook:download:error:http://example.com/?id=123#456",
-      );
-      assert.strictEqual(
-        capturer.getErrorUrl("https://example.com/?id=123#456", optionsBasic),
-        "urn:scrapbook:download:error:https://example.com/?id=123#456",
-      );
-      assert.strictEqual(
-        capturer.getErrorUrl("file:///foo/bar", optionsBasic),
-        "urn:scrapbook:download:error:file:///foo/bar",
-      );
-      assert.strictEqual(
-        capturer.getErrorUrl("about:blank", optionsBasic),
-        "urn:scrapbook:download:error:about:blank",
-      );
-      assert.strictEqual(
-        capturer.getErrorUrl("about:srcdoc", optionsBasic),
-        "urn:scrapbook:download:error:about:srcdoc",
-      );
-    });
+      it("strip details for data: and blob:", function () {
+        assert.strictEqual(
+          capturer.getErrorUrl("data:text/css,foo", optionsBasic),
+          "urn:scrapbook:download:error:data:",
+        );
+        assert.strictEqual(
+          capturer.getErrorUrl("blob:https://example.com/58eead10-e54d-4b72-9ae4-150381dcb68c", optionsBasic),
+          "urn:scrapbook:download:error:blob:",
+        );
+      });
 
-    it("strip details for data: and blob:", function () {
-      assert.strictEqual(
-        capturer.getErrorUrl("data:text/css,foo", optionsBasic),
-        "urn:scrapbook:download:error:data:",
-      );
-      assert.strictEqual(
-        capturer.getErrorUrl("blob:https://example.com/58eead10-e54d-4b72-9ae4-150381dcb68c", optionsBasic),
-        "urn:scrapbook:download:error:blob:",
-      );
-    });
+      it("don't rewrite other protocols", function () {
+        assert.strictEqual(
+          capturer.getErrorUrl("ftp://example.com/file.png", optionsBasic),
+          "ftp://example.com/file.png",
+        );
+        assert.strictEqual(
+          capturer.getErrorUrl("ws://example.com/?id=123", optionsBasic),
+          "ws://example.com/?id=123",
+        );
+        assert.strictEqual(
+          capturer.getErrorUrl("wss://example.com/?id=123", optionsBasic),
+          "wss://example.com/?id=123",
+        );
+        assert.strictEqual(
+          capturer.getErrorUrl("urn:scrapbook:download:error:http://example.com", optionsBasic),
+          "urn:scrapbook:download:error:http://example.com",
+        );
+      });
 
-    it("don't rewrite other protocols", function () {
-      assert.strictEqual(
-        capturer.getErrorUrl("ftp://example.com/file.png", optionsBasic),
-        "ftp://example.com/file.png",
-      );
-      assert.strictEqual(
-        capturer.getErrorUrl("ws://example.com/?id=123", optionsBasic),
-        "ws://example.com/?id=123",
-      );
-      assert.strictEqual(
-        capturer.getErrorUrl("wss://example.com/?id=123", optionsBasic),
-        "wss://example.com/?id=123",
-      );
-      assert.strictEqual(
-        capturer.getErrorUrl("urn:scrapbook:download:error:http://example.com", optionsBasic),
-        "urn:scrapbook:download:error:http://example.com",
-      );
-    });
+      it("don't rewrite if capture.linkUnsavedUri is truthy", function () {
+        assert.strictEqual(
+          capturer.getErrorUrl("http://example.com/?id=123#456", optionsLinkUnsavedUri),
+          "http://example.com/?id=123#456",
+        );
+        assert.strictEqual(
+          capturer.getErrorUrl("https://example.com/?id=123#456", optionsLinkUnsavedUri),
+          "https://example.com/?id=123#456",
+        );
+        assert.strictEqual(
+          capturer.getErrorUrl("file:///foo/bar", optionsLinkUnsavedUri),
+          "file:///foo/bar",
+        );
+        assert.strictEqual(
+          capturer.getErrorUrl("about:blank", optionsLinkUnsavedUri),
+          "about:blank",
+        );
+        assert.strictEqual(
+          capturer.getErrorUrl("about:srcdoc", optionsLinkUnsavedUri),
+          "about:srcdoc",
+        );
 
-    it("don't rewrite if capture.linkUnsavedUri is truthy", function () {
-      assert.strictEqual(
-        capturer.getErrorUrl("http://example.com/?id=123#456", optionsLinkUnsavedUri),
-        "http://example.com/?id=123#456",
-      );
-      assert.strictEqual(
-        capturer.getErrorUrl("https://example.com/?id=123#456", optionsLinkUnsavedUri),
-        "https://example.com/?id=123#456",
-      );
-      assert.strictEqual(
-        capturer.getErrorUrl("file:///foo/bar", optionsLinkUnsavedUri),
-        "file:///foo/bar",
-      );
-      assert.strictEqual(
-        capturer.getErrorUrl("about:blank", optionsLinkUnsavedUri),
-        "about:blank",
-      );
-      assert.strictEqual(
-        capturer.getErrorUrl("about:srcdoc", optionsLinkUnsavedUri),
-        "about:srcdoc",
-      );
-
-      assert.strictEqual(
-        capturer.getErrorUrl("data:text/css,foo", optionsLinkUnsavedUri),
-        "data:text/css,foo",
-      );
-      assert.strictEqual(
-        capturer.getErrorUrl("blob:https://example.com/58eead10-e54d-4b72-9ae4-150381dcb68c", optionsLinkUnsavedUri),
-        "blob:https://example.com/58eead10-e54d-4b72-9ae4-150381dcb68c",
-      );
+        assert.strictEqual(
+          capturer.getErrorUrl("data:text/css,foo", optionsLinkUnsavedUri),
+          "data:text/css,foo",
+        );
+        assert.strictEqual(
+          capturer.getErrorUrl("blob:https://example.com/58eead10-e54d-4b72-9ae4-150381dcb68c", optionsLinkUnsavedUri),
+          "blob:https://example.com/58eead10-e54d-4b72-9ae4-150381dcb68c",
+        );
+      });
     });
   });
 
   describe('CssSelectorTokenizer', function () {
-    describe('CssSelectorTokenizer.run', function () {
+    describe('#run()', function () {
       const tokenizer = new CssSelectorTokenizer();
 
       it('basic selectors', function () {
@@ -613,7 +615,7 @@ describe('capturer/common.mjs', function () {
       });
     });
 
-    describe('CssSelectorTokenizer.tokensToString', function () {
+    describe('#tokensToString()', function () {
       const tokenizer = new CssSelectorTokenizer();
 
       it('basic', function () {
@@ -627,7 +629,7 @@ describe('capturer/common.mjs', function () {
   });
 
   describe('DocumentCssHandler', function () {
-    $describe.skipIf($.noBrowser)('DocumentCssHandler.getSelectorText', function () {
+    $describe.skipIf($.noBrowser)('.getSelectorText()', function () {
       const getSelectorText = (...args) => {
         return DocumentCssHandler.getSelectorText(...args);
       };
@@ -750,7 +752,7 @@ ul {
       });
     });
 
-    describe('DocumentCssHandler.getSelectorVerifier', function () {
+    describe('.getSelectorVerifier()', function () {
       const getSelectorVerifier = (...args) => {
         return DocumentCssHandler.getSelectorVerifier(...args);
       };
@@ -903,7 +905,7 @@ ul {
       });
     });
 
-    $describe.skipIf($.noBrowser)('DocumentCssHandler.getRulesFromCssText', function () {
+    $describe.skipIf($.noBrowser)('.getRulesFromCssText()', function () {
       const getRulesFromCssText = (...args) => {
         return DocumentCssHandler.getRulesFromCssText(...args);
       };
@@ -1178,7 +1180,7 @@ class { }`);
       return new DOMParser().parseFromString(html, 'text/html');
     }
 
-    describe("CaptureHelperHandler.getOverwritingOptions", function () {
+    describe(".getOverwritingOptions()", function () {
       it("do not include capture helper related options", function () {
         var options = CaptureHelperHandler.getOverwritingOptions(
           [
@@ -1305,7 +1307,7 @@ class { }`);
       });
     });
 
-    describe("CaptureHelperHandler.parseRegexStr", function () {
+    describe(".parseRegexStr()", function () {
       it("basic", function () {
         var {source, flags} = CaptureHelperHandler.parseRegexStr(`/abc/def/`);
         assert.deepEqual({source, flags}, {source: r`abc\/def`, flags: ``});
@@ -1319,7 +1321,7 @@ class { }`);
       });
     });
 
-    describe("CaptureHelperHandler.isCommand", function () {
+    describe(".isCommand()", function () {
       it("basic", function () {
         assert.strictEqual(CaptureHelperHandler.isCommand(["if", true, "yes", "no"]), true);
         assert.strictEqual(CaptureHelperHandler.isCommand(["if"]), true);
@@ -1335,7 +1337,7 @@ class { }`);
       });
     });
 
-    describe("CaptureHelperHandler.selectNodes", function () {
+    describe(".selectNodes()", function () {
       function makeTestDoc() {
         return makeHtmlDocument(`\
 <body>
@@ -1359,22 +1361,22 @@ class { }`);
         }
       }
 
-      describe("Object", function () {
-        it(".css", function () {
+      context("when passing an object selector", function () {
+        it("should select from refNode with CSS when having `.css`", function () {
           var doc = makeTestDoc();
           var selector = {css: "div"};
           removeElems(CaptureHelperHandler.selectNodes(doc, selector));
           assert.strictEqual(doc.body.innerHTML.trim(), ``);
         });
 
-        it(".xpath", function () {
+        it("should select from refNode with XPath when having `.xpath`", function () {
           var doc = makeTestDoc();
           var selector = {xpath: "//div"};
           removeElems(CaptureHelperHandler.selectNodes(doc, selector));
           assert.strictEqual(doc.body.innerHTML.trim(), ``);
         });
 
-        describe(".base", function () {
+        context("should modify refNode when having `.base`", function () {
           it("self", function () {
             var doc = makeTestDoc();
             var selector = "self";
@@ -1474,7 +1476,7 @@ class { }`);
             assert.strictEqual(result[0], refNode.lastElementChild);
           });
 
-          it('chaining', function () {
+          it('should handle a chained base', function () {
             var doc = makeTestDoc();
             var selector = {base: "firstChild.nextSibling.nextSibling.nextSibling"};
             var refNode = doc.querySelector('#target');
@@ -1483,7 +1485,7 @@ class { }`);
             assert.strictEqual(result[0], refNode.firstChild.nextSibling.nextSibling.nextSibling);
           });
 
-          it('with selector', function () {
+          it('should select from modified refNode when also having selector', function () {
             var doc = makeTestDoc();
             var selector = {base: "parent", css: "div"};
             removeElems(CaptureHelperHandler.selectNodes(doc.querySelector('#target'), selector));
@@ -1499,8 +1501,8 @@ class { }`);
         });
       });
 
-      describe("string", function () {
-        it('valid base should be treated as {base: ...}', function () {
+      context("when passing a string selector", function () {
+        it('should treat valid base as {base: ...}', function () {
           var doc = makeTestDoc();
           var selector = "parent";
           var refNode = doc.querySelector('#target');
@@ -1516,7 +1518,7 @@ class { }`);
           assert.strictEqual(result[0], refNode.parentNode.firstChild.nextSibling);
         });
 
-        it('non-valid base should be treated as {css: ...}', function () {
+        it('should treat invalid base as {css: ...}', function () {
           var doc = makeTestDoc();
           var selector = "div";
           removeElems(CaptureHelperHandler.selectNodes(doc, selector));
@@ -1529,8 +1531,8 @@ class { }`);
         });
       });
 
-      describe("falsy", function () {
-        it("undefined", function () {
+      context("when passing a falsy selector", function () {
+        it("should return original refNode when passing undefined", function () {
           var doc = makeTestDoc();
           var selector;
           var refNode = doc.querySelector('#target');
@@ -1539,7 +1541,7 @@ class { }`);
           assert.strictEqual(result[0], refNode);
         });
 
-        it("null", function () {
+        it("should return original refNode when passing null", function () {
           var doc = makeTestDoc();
           var selector = null;
           var refNode = doc.querySelector('#target');
@@ -1548,7 +1550,7 @@ class { }`);
           assert.strictEqual(result[0], refNode);
         });
 
-        it("empty string", function () {
+        it("should return original refNode when passing an empty string", function () {
           var doc = makeTestDoc();
           var selector = "";
           var refNode = doc.querySelector('#target');
@@ -1559,14 +1561,14 @@ class { }`);
       });
     });
 
-    describe("CaptureHelperHandler.runCommand", function () {
+    describe("#runCommand()", function () {
       function makeTestDoc() {
         return makeHtmlDocument(`\
 <div id="target">target</div>
 <div id="target2">target2</div>`);
       }
 
-      describe("cmd_if", function () {
+      context("cmd_if", function () {
         it("basic", function () {
           var helper = new CaptureHelperHandler();
           var doc = makeTestDoc();
@@ -1611,7 +1613,7 @@ class { }`);
         });
       });
 
-      describe("cmd_equal", function () {
+      context("cmd_equal", function () {
         it("equality", function () {
           var helper = new CaptureHelperHandler();
           var doc = makeTestDoc();
@@ -1649,7 +1651,7 @@ class { }`);
         });
       });
 
-      describe("cmd_and", function () {
+      context("cmd_and", function () {
         it("return first falsy or last value", function () {
           var helper = new CaptureHelperHandler();
           var doc = makeTestDoc();
@@ -1688,7 +1690,7 @@ class { }`);
         });
       });
 
-      describe("cmd_or", function () {
+      context("cmd_or", function () {
         it("return first truthy or last value", function () {
           var helper = new CaptureHelperHandler();
           var doc = makeTestDoc();
@@ -1727,7 +1729,7 @@ class { }`);
         });
       });
 
-      describe("cmd_concat", function () {
+      context("cmd_concat", function () {
         it("basic", function () {
           var helper = new CaptureHelperHandler();
           var doc = makeTestDoc();
@@ -1770,7 +1772,7 @@ class { }`);
         });
       });
 
-      describe("cmd_slice", function () {
+      context("cmd_slice", function () {
         it("basic", function () {
           var helper = new CaptureHelperHandler();
           var doc = makeTestDoc();
@@ -1800,7 +1802,7 @@ class { }`);
         });
       });
 
-      describe("cmd_upper", function () {
+      context("cmd_upper", function () {
         it("basic", function () {
           var helper = new CaptureHelperHandler();
           var doc = makeTestDoc();
@@ -1818,7 +1820,7 @@ class { }`);
         });
       });
 
-      describe("cmd_lower", function () {
+      context("cmd_lower", function () {
         it("basic", function () {
           var helper = new CaptureHelperHandler();
           var doc = makeTestDoc();
@@ -1836,7 +1838,7 @@ class { }`);
         });
       });
 
-      describe("cmd_encode_uri", function () {
+      context("cmd_encode_uri", function () {
         it("basic", function () {
           var helper = new CaptureHelperHandler();
           var doc = makeTestDoc();
@@ -1857,7 +1859,7 @@ class { }`);
         });
       });
 
-      describe("cmd_decode_uri", function () {
+      context("cmd_decode_uri", function () {
         it("basic", function () {
           var helper = new CaptureHelperHandler();
           var doc = makeTestDoc();
@@ -1883,7 +1885,7 @@ class { }`);
         });
       });
 
-      describe("cmd_add", function () {
+      context("cmd_add", function () {
         it("basic", function () {
           var helper = new CaptureHelperHandler();
           var doc = makeTestDoc();
@@ -1907,7 +1909,7 @@ class { }`);
         });
       });
 
-      describe("cmd_subtract", function () {
+      context("cmd_subtract", function () {
         it("basic", function () {
           var helper = new CaptureHelperHandler();
           var doc = makeTestDoc();
@@ -1931,7 +1933,7 @@ class { }`);
         });
       });
 
-      describe("cmd_multiply", function () {
+      context("cmd_multiply", function () {
         it("basic", function () {
           var helper = new CaptureHelperHandler();
           var doc = makeTestDoc();
@@ -1955,7 +1957,7 @@ class { }`);
         });
       });
 
-      describe("cmd_divide", function () {
+      context("cmd_divide", function () {
         it("basic", function () {
           var helper = new CaptureHelperHandler();
           var doc = makeTestDoc();
@@ -1982,7 +1984,7 @@ class { }`);
         });
       });
 
-      describe("cmd_mod", function () {
+      context("cmd_mod", function () {
         it("basic", function () {
           var helper = new CaptureHelperHandler();
           var doc = makeTestDoc();
@@ -2009,7 +2011,7 @@ class { }`);
         });
       });
 
-      describe("cmd_power", function () {
+      context("cmd_power", function () {
         it("basic", function () {
           var helper = new CaptureHelperHandler();
           var doc = makeTestDoc();
@@ -2033,7 +2035,7 @@ class { }`);
         });
       });
 
-      describe("cmd_for", function () {
+      context("cmd_for", function () {
         it("basic", function () {
           var helper = new CaptureHelperHandler();
           var doc = makeTestDoc();
@@ -2049,7 +2051,7 @@ class { }`);
         });
       });
 
-      describe("cmd_match", function () {
+      context("cmd_match", function () {
         it("boolean", function () {
           var helper = new CaptureHelperHandler();
           var doc = makeTestDoc();
@@ -2104,7 +2106,7 @@ class { }`);
         });
       });
 
-      describe("cmd_replace", function () {
+      context("cmd_replace", function () {
         it("basic", function () {
           var helper = new CaptureHelperHandler();
           var doc = makeTestDoc();
@@ -2130,7 +2132,7 @@ class { }`);
         });
       });
 
-      describe("cmd_has_node", function () {
+      context("cmd_has_node", function () {
         it("basic", function () {
           var helper = new CaptureHelperHandler();
           var doc = makeTestDoc();
@@ -2151,7 +2153,7 @@ class { }`);
         });
       });
 
-      describe("cmd_has_attr", function () {
+      context("cmd_has_attr", function () {
         it("basic", function () {
           var helper = new CaptureHelperHandler();
           var doc = makeTestDoc();
@@ -2172,7 +2174,7 @@ class { }`);
         });
       });
 
-      describe("cmd_get_html", function () {
+      context("cmd_get_html", function () {
         function makeTestDoc() {
           return makeHtmlDocument(`\
 <div><b>elem1</b></div>
@@ -2199,7 +2201,7 @@ class { }`);
         });
       });
 
-      describe("cmd_get_text", function () {
+      context("cmd_get_text", function () {
         function makeTestDoc() {
           return makeHtmlDocument(`\
 <div><b>elem1-1</b><b>elem1-2</b></div>
@@ -2223,7 +2225,7 @@ class { }`);
         });
       });
 
-      describe("cmd_get_attr", function () {
+      context("cmd_get_attr", function () {
         function makeTestDoc() {
           return makeHtmlDocument(`\
 <img data-src="image1.jpg">
@@ -2247,7 +2249,7 @@ class { }`);
         });
       });
 
-      describe("cmd_get_css", function () {
+      context("cmd_get_css", function () {
         function makeTestDoc() {
           return makeHtmlDocument(`\
 <div style="color: green;"></div>
@@ -2277,7 +2279,7 @@ class { }`);
         });
       });
 
-      describe("cmd_remove", function () {
+      context("cmd_remove", function () {
         function makeTestDoc() {
           return makeHtmlDocument(`\
 <div><b>elem1</b></div>
@@ -2307,7 +2309,7 @@ class { }`);
         });
       });
 
-      describe("cmd_unwrap", function () {
+      context("cmd_unwrap", function () {
         function makeTestDoc() {
           return makeHtmlDocument(`\
 <div><b>elem1</b></div>
@@ -2337,7 +2339,7 @@ class { }`);
         });
       });
 
-      describe("cmd_isolate", function () {
+      context("cmd_isolate", function () {
         function makeTestDoc() {
           return makeHtmlDocument(`\
 <html>
@@ -2399,7 +2401,7 @@ class { }`);
         });
       });
 
-      describe("cmd_html", function () {
+      context("cmd_html", function () {
         function makeTestDoc() {
           return makeHtmlDocument(`\
 <div><b>elem1</b></div>
@@ -2436,7 +2438,7 @@ class { }`);
         });
       });
 
-      describe("cmd_text", function () {
+      context("cmd_text", function () {
         function makeTestDoc() {
           return makeHtmlDocument(`\
 <div>text1</div>
@@ -2466,7 +2468,7 @@ class { }`);
         });
       });
 
-      describe("cmd_attr", function () {
+      context("cmd_attr", function () {
         function makeTestDoc() {
           return makeHtmlDocument(`\
 <img data-src="image1.jpg">
@@ -2596,7 +2598,7 @@ class { }`);
         });
       });
 
-      describe("cmd_css", function () {
+      context("cmd_css", function () {
         function makeTestDoc() {
           return makeHtmlDocument(`\
 <div style="color: green;"></div>
@@ -2733,7 +2735,7 @@ class { }`);
         });
       });
 
-      describe("cmd_insert", function () {
+      context("cmd_insert", function () {
         function makeTestDoc() {
           return makeHtmlDocument(`\
 <div class="target"><div id="child-1"></div><div id="child-2"></div><div id="child-3"></div></div>
@@ -2965,7 +2967,7 @@ insertedText`);
       });
     });
 
-    describe("CaptureHelperHandler.run", function () {
+    describe("#run()", function () {
       it("skip helpers with disabled property", function () {
         var doc = makeHtmlDocument(`\
 <div class="exclude1"></div>
