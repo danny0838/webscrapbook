@@ -52,12 +52,10 @@ window.addEventListener('WsbTest', async (event) => {
   }
 });
 
-function onRadioInput(event) {
+function onButtonClick(event) {
   const elem = event.currentTarget;
-  if (elem.checked) {
-    const value = Boolean(elem.value);
-    messagePort.postMessage({cmd: 'result', args: [value]});
-  }
+  const value = elem.value === "YES";
+  messagePort.postMessage({cmd: 'result', args: [value]});
 }
 
 async function initManualTest() {
@@ -68,21 +66,17 @@ async function initManualTest() {
   const label = form.appendChild(document.createElement('label'));
   label.textContent = `Does it work?`;
 
-  const label1 = form.appendChild(document.createElement('label'));
-  const input1 = label1.appendChild(document.createElement('input'));
-  input1.type = 'radio';
-  input1.name = 'work';
-  input1.value = 'ok';
-  input1.addEventListener('input', onRadioInput);
-  label1.append('YES');
+  const input1 = form.appendChild(document.createElement('input'));
+  input1.type = 'button';
+  input1.value = 'YES';
+  input1.accessKey = 'Y';
+  input1.addEventListener('click', onButtonClick);
 
-  const label2 = form.appendChild(document.createElement('label'));
-  const input2 = label2.appendChild(document.createElement('input'));
-  input2.type = 'radio';
-  input2.name = 'work';
-  input2.value = '';
-  input2.addEventListener('input', onRadioInput);
-  label2.append('NO');
+  const input2 = form.appendChild(document.createElement('input'));
+  input2.type = 'button';
+  input2.value = 'NO';
+  input2.accessKey = 'N';
+  input2.addEventListener('click', onButtonClick);
 }
 
 return {
