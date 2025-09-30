@@ -5,7 +5,7 @@
 import {isDebug} from "../utils/debug.mjs";
 import {ANNOTATION_CSS} from "../utils/common.mjs";
 import * as utils from "../utils/common.mjs";
-import {DocumentCloner} from "../utils/doc-cloner.mjs";
+import {DocumentCloner, PartialDocumentCloner} from "../utils/doc-cloner.mjs";
 import {StorageCache, serializeObject, deserializeObject} from "../utils/cache.mjs";
 import {dataUriToFile} from "../utils/datauri.mjs";
 import {DocumentCssHandler, DocumentCssResourcesHandler} from "./css-handler.mjs";
@@ -193,19 +193,6 @@ class BaseCapturer {
           warn(utils.lang("ErrorFileDownloadError", [url, ex.message]));
           return {url: this.getErrorUrl(url, options), error: {message: ex.message}};
         });
-    };
-
-    // Map cloned nodes and the original for later reference
-    // since cloned nodes may lose some information,
-    // e.g. cloned iframes has no content, cloned canvas has no image,
-    // and cloned form elements has no current status.
-    const cloneNodeMapping = (node, deep = false) => {
-      return DocumentCloner.cloneNode(node, deep, {
-        newDoc,
-        origNodeMap,
-        clonedNodeMap,
-        includeShadowDom: options["capture.shadowDom"] === "save",
-      });
     };
 
     const captureRecordAddedNode = (elem, record = options["capture.recordRewrites"]) => {
@@ -2819,216 +2806,135 @@ class BaseCapturer {
     const adoptedStyleSheetMap = new Map();
     const customElementNames = new Set();
 
-    // create a new document to replicate nodes via import
-    const newDoc = DocumentCloner.cloneDocument(doc, {origNodeMap, clonedNodeMap});
+    const selection = (() => {
+      if (settings.fullPage) { return null; }
+      const sel = utils.getSelection(doc);
+      if (sel?.type !== 'Range') { return null; }
+      return sel;
+    })();
 
-    let rootNode, headNode;
-    let selection = settings.fullPage ? null : utils.getSelection(doc);
-    {
-      if (selection?.type !== 'Range') {
-        selection = null;
-      }
+    // create a new document to replicate nodes via import
+    const newDoc = (() => {
+      const includeShadowDom = options["capture.shadowDom"] === "save";
 
       if (selection) {
-        // capture selection: clone selected ranges
-        const cloneNodeAndAncestors = (node) => {
-          const nodeChain = [];
-          let tmpNode = node;
-
-          while (!clonedNodeMap.has(tmpNode)) {
-            nodeChain.unshift(tmpNode);
-            tmpNode = tmpNode.parentNode;
-          }
-
-          for (tmpNode of nodeChain) {
-            const newParentNode = clonedNodeMap.get(tmpNode.parentNode);
-            const newNode = cloneNodeMapping(tmpNode, false);
-            newParentNode.appendChild(newNode);
-          }
+        const hookBeforeRange = (refNode) => {
+          const doc = refNode.ownerDocument || refNode;
+          refNode.appendChild(doc.createComment("scrapbook-capture-selected"));
         };
-
-        // #text, CDATA, COMMENT
-        const isTextNode = (node) => {
-          return [3, 4, 8].includes(node.nodeType);
+        const hookAfterRange = (refNode) => {
+          const doc = refNode.ownerDocument || refNode;
+          refNode.appendChild(doc.createComment("/scrapbook-capture-selected"));
         };
+        const hookBetweenText = (refNode) => {
+          const doc = refNode.ownerDocument || refNode;
+          refNode.appendChild(doc.createComment("scrapbook-capture-selected-splitter"));
+          refNode.appendChild(doc.createTextNode(" … "));
+          refNode.appendChild(doc.createComment("/scrapbook-capture-selected-splitter"));
+        };
+        const hookBetweenComment = (refNode) => {
+          const doc = refNode.ownerDocument || refNode;
+          refNode.appendChild(doc.createComment("scrapbook-capture-selected-splitter"));
+          refNode.appendChild(doc.createComment(" … "));
+          refNode.appendChild(doc.createComment("/scrapbook-capture-selected-splitter"));
+        };
+        const hookBetweenCdata = hookBetweenText;
 
-        // @FIXME: handle sparsely selected table cells
-        let curRange, caNode, scNode, ecNode, lastTextNode;
-        for (curRange of utils.getSelectionRanges(selection)) {
-          // skip a collapsed range
-          if (curRange.collapsed) {
-            continue;
-          }
-
-          caNode = curRange.commonAncestorContainer;
-
-          // @TODO:
-          // A selection in a shadow root requires special care.
-          // Currently treat as selecting the topmost host for simplicity and
-          // prevent an issue if capturing shadow DOM is disabled.
-          handleShadowRoot: {
-            let selNode = caNode;
-            let selNodeRoot = selNode.getRootNode();
-            while (selNodeRoot instanceof ShadowRoot) {
-              selNode = selNodeRoot.host;
-              selNodeRoot = selNode.getRootNode();
-            }
-            if (selNode !== caNode) {
-              curRange = new Range();
-              curRange.selectNode(selNode);
-              caNode = curRange.commonAncestorContainer;
-            }
-          }
-
-          scNode = curRange.startContainer;
-          ecNode = curRange.endContainer;
-
-          // Clone nodes from root to common ancestor.
-          // (with special handling of text nodes)
-          const refNode = (isTextNode(caNode)) ? caNode.parentNode : caNode;
-          let clonedRefNode = clonedNodeMap.get(refNode);
-          if (!clonedRefNode) {
-            cloneNodeAndAncestors(refNode);
-            clonedRefNode = clonedNodeMap.get(refNode);
-          }
-
-          // Add splitter between multiple ranges of the same text-like node.
-          if (scNode === lastTextNode) {
-            clonedRefNode.appendChild(newDoc.createComment("scrapbook-capture-selected-splitter"));
-            if (scNode.nodeType === 8) {
-              clonedRefNode.appendChild(newDoc.createComment(" … "));
-            } else {
-              clonedRefNode.appendChild(newDoc.createTextNode(" … "));
-            }
-            clonedRefNode.appendChild(newDoc.createComment("/scrapbook-capture-selected-splitter"));
-          }
-
-          // Clone sparingly selected nodes in the common ancestor.
-          // (with special handling of text nodes)
-          clonedRefNode.appendChild(newDoc.createComment("scrapbook-capture-selected"));
-          {
-            const iterator = doc.createNodeIterator(refNode, NodeFilter.SHOW_ALL & ~NodeFilter.SHOW_DOCUMENT);
-            let node;
-            let nodeRange = doc.createRange();
-            while (node = iterator.nextNode()) {
-              nodeRange.selectNode(node);
-
-              if (nodeRange.compareBoundaryPoints(Range.START_TO_START, curRange) < 0) {
-                // before start
-                if (node === scNode && isTextNode(node) &&
-                    nodeRange.compareBoundaryPoints(Range.START_TO_END, curRange) > 0) {
-                  let start = curRange.startOffset;
-                  let end = (node === ecNode) ? curRange.endOffset : undefined;
-                  cloneNodeAndAncestors(node.parentNode);
-                  const newParentNode = clonedNodeMap.get(node.parentNode);
-                  const newNode = node.cloneNode(false);
-                  newNode.nodeValue = node.nodeValue.slice(start, end);
-                  newParentNode.appendChild(newNode);
-                  lastTextNode = node;
-                }
-                continue;
-              }
-
-              if (nodeRange.compareBoundaryPoints(Range.END_TO_END, curRange) > 0) {
-                // after end
-                if (node === ecNode && isTextNode(node) &&
-                    nodeRange.compareBoundaryPoints(Range.END_TO_START, curRange) < 0) {
-                  let start = 0;
-                  let end = curRange.endOffset;
-                  cloneNodeAndAncestors(node.parentNode);
-                  const newParentNode = clonedNodeMap.get(node.parentNode);
-                  const newNode = node.cloneNode(false);
-                  newNode.nodeValue = node.nodeValue.slice(start, end);
-                  newParentNode.appendChild(newNode);
-                  lastTextNode = node;
-                }
-                continue;
-              }
-
-              // clone the node
-              cloneNodeAndAncestors(node);
-            }
-          }
-          clonedRefNode.appendChild(newDoc.createComment("/scrapbook-capture-selected"));
-        }
+        const newDoc = PartialDocumentCloner.clone(doc, {
+          selection,
+          origNodeMap,
+          clonedNodeMap,
+          includeShadowDom,
+          hookBeforeRange,
+          hookAfterRange,
+          hookBetweenText,
+          hookBetweenComment,
+          hookBetweenCdata,
+        });
 
         // clone doctype if not yet done
-        {
-          const doctypeNode = doc.doctype;
-          if (doctypeNode) {
-            if (!clonedNodeMap.has(doctypeNode)) {
-              newDoc.insertBefore(cloneNodeMapping(doctypeNode, false), newDoc.firstChild);
-            }
-          }
+        const doctypeNode = doc.doctype;
+        if (doctypeNode && !clonedNodeMap.has(doctypeNode)) {
+          newDoc.insertBefore(
+            PartialDocumentCloner.cloneNode(doctypeNode, false, {
+              newDoc, origNodeMap, clonedNodeMap, includeShadowDom,
+            }),
+            newDoc.firstChild,
+          );
         }
 
         // clone html if not yet done
-        rootNode = clonedNodeMap.get(docElemNode);
+        let rootNode = clonedNodeMap.get(docElemNode);
         if (!rootNode) {
-          cloneNodeAndAncestors(docElemNode);
+          PartialDocumentCloner.cloneNodeAndAncestors(docElemNode, {
+            newDoc, origNodeMap, clonedNodeMap, includeShadowDom,
+          });
           rootNode = clonedNodeMap.get(docElemNode);
         }
 
         // clone head if not yet done
         // (treated as all head is selected if not involved yet)
-        // generate one if not exist
         if (rootNode.nodeName.toLowerCase() === "html") {
-          headNode = doc.head;
-          let headNodeNew = clonedNodeMap.get(headNode);
-          if (headNodeNew) {
-            headNode = headNodeNew;
-          } else {
-            if (headNode) {
-              headNode = cloneNodeMapping(headNode, true);
-            } else {
-              headNode = newDoc.createElement("head");
-              captureRecordAddedNode(headNode);
-            }
-            rootNode.insertBefore(headNode, rootNode.firstChild);
+          const headNode = doc.head;
+          if (headNode && !clonedNodeMap.has(headNode)) {
+            rootNode.insertBefore(
+              PartialDocumentCloner.cloneNode(headNode, true, {
+                newDoc, origNodeMap, clonedNodeMap, includeShadowDom,
+              }),
+              rootNode.firstChild,
+            );
           }
         }
-      } else {
-        // not capture selection: clone all nodes
-        for (const node of doc.childNodes) {
-          newDoc.appendChild(cloneNodeMapping(node, true));
-        }
-        rootNode = newDoc.documentElement;
 
-        // generate head if not exists
-        if (rootNode.nodeName.toLowerCase() === "html") {
-          headNode = newDoc.head;
-          if (!headNode) {
-            headNode = rootNode.insertBefore(newDoc.createElement("head"), rootNode.firstChild);
-            captureRecordAddedNode(headNode);
-          }
-        }
+        return newDoc;
       }
 
-      // add linefeeds to head and body to improve layout
-      if (options["capture.prettyPrint"]) {
-        if (rootNode.nodeName.toLowerCase() === "html") {
-          const headNodeBefore = headNode.previousSibling;
-          if (!headNodeBefore || headNodeBefore.nodeType != 3) {
-            headNode.before("\n");
-          }
-          const headNodeStart = headNode.firstChild;
-          if (!headNodeStart || headNodeStart.nodeType != 3) {
-            headNode.prepend("\n");
-          }
-          const headNodeEnd = headNode.lastChild;
-          if (!headNodeEnd || headNodeEnd.nodeType != 3) {
-            headNode.append("\n");
-          }
-          const headNodeAfter = headNode.nextSibling;
-          if (!headNodeAfter || headNodeAfter.nodeType != 3) {
-            headNode.after("\n");
-          }
-          const bodyNode = rootNode.querySelector("body");
-          if (bodyNode) {
-            const bodyNodeAfter = bodyNode.nextSibling;
-            if (!bodyNodeAfter) {
-              bodyNode.after("\n");
-            }
+      return DocumentCloner.clone(doc, {
+        origNodeMap,
+        clonedNodeMap,
+        includeShadowDom,
+      });
+    })();
+
+    const rootNode = newDoc.documentElement;
+    const headNode = (() => {
+      if (rootNode.nodeName.toLowerCase() === "html") {
+        let headNode = newDoc.head;
+
+        // generate head if not exists
+        if (!headNode) {
+          headNode = rootNode.insertBefore(newDoc.createElement("head"), rootNode.firstChild);
+          captureRecordAddedNode(headNode);
+        }
+
+        return headNode;
+      }
+    })();
+
+    // add linefeeds to head and body to improve layout
+    if (options["capture.prettyPrint"]) {
+      if (rootNode.nodeName.toLowerCase() === "html") {
+        const headNodeBefore = headNode.previousSibling;
+        if (!headNodeBefore || headNodeBefore.nodeType != 3) {
+          headNode.before("\n");
+        }
+        const headNodeStart = headNode.firstChild;
+        if (!headNodeStart || headNodeStart.nodeType != 3) {
+          headNode.prepend("\n");
+        }
+        const headNodeEnd = headNode.lastChild;
+        if (!headNodeEnd || headNodeEnd.nodeType != 3) {
+          headNode.append("\n");
+        }
+        const headNodeAfter = headNode.nextSibling;
+        if (!headNodeAfter || headNodeAfter.nodeType != 3) {
+          headNode.after("\n");
+        }
+        const bodyNode = rootNode.querySelector("body");
+        if (bodyNode) {
+          const bodyNodeAfter = bodyNode.nextSibling;
+          if (!bodyNodeAfter) {
+            bodyNode.after("\n");
           }
         }
       }

@@ -3354,10 +3354,11 @@ function getSelectedNodes({query = document, whatToShow = -1, nodeFilter, fuzzy 
 }
 
 /**
- * @param {Document|ShadowRoot|Selection} [query]
+ * @param {Document|ShadowRoot|Selection|Range[]} [query]
  * @return {Range[]} The selected ranges.
  */
 function getSelectionRanges(query = document) {
+  if (Array.isArray(query)) { return query; }
   const sel = query.nodeType ? getSelection(query) : query;
   const result = [];
   if (sel) {

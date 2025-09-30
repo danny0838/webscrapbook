@@ -7,7 +7,7 @@ import {
   userAgent, documentToString, getShadowRoot, byteStringToArrayBuffer,
 } from "../utils/common.mjs";
 
-import {DocumentCloner} from "../utils/doc-cloner.mjs";
+import {DocumentCloner, PartialDocumentCloner} from "../utils/doc-cloner.mjs";
 
 const $describe = $(describe);
 const $context = $(context);
@@ -703,6 +703,1052 @@ describe('utils/doc-cloner.mjs', function () {
           );
           assert.isNull(spy.getCall(5));
         });
+      });
+    });
+  });
+
+  $describe.skipIf($.noBrowser)('PartialDocumentCloner', function () {
+    const hookBeforeRange = (refNode) => {
+      const doc = refNode.ownerDocument || refNode;
+      refNode.appendChild(doc.createComment("range"));
+    };
+    const hookAfterRange = (refNode) => {
+      const doc = refNode.ownerDocument || refNode;
+      refNode.appendChild(doc.createComment("/range"));
+    };
+    const hookBetweenText = (refNode) => {
+      const doc = refNode.ownerDocument || refNode;
+      refNode.appendChild(doc.createComment("splitter"));
+      refNode.appendChild(doc.createTextNode(" … "));
+      refNode.appendChild(doc.createComment("/splitter"));
+    };
+    const hookBetweenComment = (refNode) => {
+      const doc = refNode.ownerDocument || refNode;
+      refNode.appendChild(doc.createComment("splitter"));
+      refNode.appendChild(doc.createComment(" … "));
+      refNode.appendChild(doc.createComment("/splitter"));
+    };
+    const hookBetweenCdata = (refNode) => {
+      const doc = refNode.ownerDocument || refNode;
+      refNode.appendChild(doc.createComment("splitter"));
+      refNode.appendChild(doc.createCDATASection(" … "));
+      refNode.appendChild(doc.createComment("/splitter"));
+    };
+
+    describe('.cloneSelection()', function () {
+      context('for single range', function () {
+        let baseDoc;
+
+        before(function initBaseDoc() {
+          baseDoc = createDocFixture({code: `\
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+</head>
+<body>
+<section>text<div><br></div><!--comment--></section>
+</body>
+</html>`});
+        });
+
+        context('when selecting an Element', function () {
+          it('should clone the selected nodes with ancestors', function () {
+            var spy = sinon.spy(PartialDocumentCloner, 'cloneNodeAndAncestors');
+
+            var doc = baseDoc;
+            var ranges = [
+              (() => {
+                var range = doc.createRange();
+                range.selectNode(doc.querySelector('div'));
+                return range;
+              })(),
+            ];
+            var origNodeMap = new Map();
+            var clonedNodeMap = new Map();
+            var newDoc = PartialDocumentCloner.cloneSelection(doc, {
+              ranges, origNodeMap, clonedNodeMap,
+              hookBeforeRange, hookAfterRange, hookBetweenText, hookBetweenComment, hookBetweenCdata,
+            });
+
+            assert.strictEqual(
+              documentToString(newDoc),
+              '<html><body><section><!--range--><div><br></div><!--/range--></section></body></html>',
+            );
+
+            sinon.assert.calledWithExactly(spy.getCall(0),
+              doc.querySelector('section'),
+              {newDoc, origNodeMap, clonedNodeMap, includeShadowDom: undefined},
+            );
+            sinon.assert.calledWithExactly(spy.getCall(1),
+              doc.querySelector('div'),
+              {newDoc, origNodeMap, clonedNodeMap, includeShadowDom: undefined},
+            );
+            sinon.assert.calledWithExactly(spy.getCall(2),
+              doc.querySelector('br'),
+              {newDoc, origNodeMap, clonedNodeMap, includeShadowDom: undefined},
+            );
+            assert.isNull(spy.getCall(3));
+          });
+        });
+
+        context('when selecting a Text', function () {
+          it('should clone the selected nodes with ancestors', function () {
+            var spy = sinon.spy(PartialDocumentCloner, 'cloneNodeAndAncestors');
+
+            var doc = baseDoc;
+            var ranges = [
+              (() => {
+                var range = doc.createRange();
+                range.selectNode(doc.querySelector('section').firstChild);
+                return range;
+              })(),
+            ];
+            var origNodeMap = new Map();
+            var clonedNodeMap = new Map();
+            var newDoc = PartialDocumentCloner.cloneSelection(doc, {
+              ranges, origNodeMap, clonedNodeMap,
+              hookBeforeRange, hookAfterRange, hookBetweenText, hookBetweenComment, hookBetweenCdata,
+            });
+
+            assert.strictEqual(
+              documentToString(newDoc),
+              '<html><body><section><!--range-->text<!--/range--></section></body></html>',
+            );
+
+            sinon.assert.calledWithExactly(spy.getCall(0),
+              doc.querySelector('section'),
+              {newDoc, origNodeMap, clonedNodeMap, includeShadowDom: undefined},
+            );
+            sinon.assert.calledWithExactly(spy.getCall(1),
+              doc.querySelector('section').firstChild,
+              {newDoc, origNodeMap, clonedNodeMap, includeShadowDom: undefined},
+            );
+            assert.isNull(spy.getCall(2));
+          });
+
+          it('should insert the split node when the selection starts in a Text', function () {
+            var spy = sinon.spy(PartialDocumentCloner, 'cloneNodeAndAncestors');
+
+            var doc = baseDoc;
+            var ranges = [
+              (() => {
+                var range = doc.createRange();
+                range.setStart(doc.querySelector('section').firstChild, 1);
+                range.setEndAfter(doc.querySelector('section').firstChild);
+                return range;
+              })(),
+            ];
+            var origNodeMap = new Map();
+            var clonedNodeMap = new Map();
+            var newDoc = PartialDocumentCloner.cloneSelection(doc, {
+              ranges, origNodeMap, clonedNodeMap,
+              hookBeforeRange, hookAfterRange, hookBetweenText, hookBetweenComment, hookBetweenCdata,
+            });
+
+            assert.strictEqual(
+              documentToString(newDoc),
+              '<html><body><section><!--range-->ext<!--/range--></section></body></html>',
+            );
+
+            sinon.assert.calledWithExactly(spy.getCall(0),
+              doc.querySelector('section'),
+              {newDoc, origNodeMap, clonedNodeMap, includeShadowDom: undefined},
+            );
+            sinon.assert.calledWithExactly(spy.getCall(1),
+              doc.querySelector('section'),
+              {newDoc, origNodeMap, clonedNodeMap, includeShadowDom: undefined},
+            );
+            assert.isNull(spy.getCall(2));
+          });
+
+          it('should insert the split node when the selection ends in a Text', function () {
+            var spy = sinon.spy(PartialDocumentCloner, 'cloneNodeAndAncestors');
+
+            var doc = baseDoc;
+            var ranges = [
+              (() => {
+                var range = doc.createRange();
+                range.setStartBefore(doc.querySelector('section').firstChild);
+                range.setEnd(doc.querySelector('section').firstChild, 3);
+                return range;
+              })(),
+            ];
+            var origNodeMap = new Map();
+            var clonedNodeMap = new Map();
+            var newDoc = PartialDocumentCloner.cloneSelection(doc, {
+              ranges, origNodeMap, clonedNodeMap,
+              hookBeforeRange, hookAfterRange, hookBetweenText, hookBetweenComment, hookBetweenCdata,
+            });
+
+            assert.strictEqual(
+              documentToString(newDoc),
+              '<html><body><section><!--range-->tex<!--/range--></section></body></html>',
+            );
+
+            sinon.assert.calledWithExactly(spy.getCall(0),
+              doc.querySelector('section'),
+              {newDoc, origNodeMap, clonedNodeMap, includeShadowDom: undefined},
+            );
+            sinon.assert.calledWithExactly(spy.getCall(1),
+              doc.querySelector('section'),
+              {newDoc, origNodeMap, clonedNodeMap, includeShadowDom: undefined},
+            );
+            assert.isNull(spy.getCall(2));
+          });
+
+          it('should insert the split node when the selection starts and ends in a Text', function () {
+            var spy = sinon.spy(PartialDocumentCloner, 'cloneNodeAndAncestors');
+
+            var doc = baseDoc;
+            var ranges = [
+              (() => {
+                var range = doc.createRange();
+                range.setStart(doc.querySelector('section').firstChild, 1);
+                range.setEnd(doc.querySelector('section').firstChild, 3);
+                return range;
+              })(),
+            ];
+            var origNodeMap = new Map();
+            var clonedNodeMap = new Map();
+            var newDoc = PartialDocumentCloner.cloneSelection(doc, {
+              ranges, origNodeMap, clonedNodeMap,
+              hookBeforeRange, hookAfterRange, hookBetweenText, hookBetweenComment, hookBetweenCdata,
+            });
+
+            assert.strictEqual(
+              documentToString(newDoc),
+              '<html><body><section><!--range-->ex<!--/range--></section></body></html>',
+            );
+
+            sinon.assert.calledWithExactly(spy.getCall(0),
+              doc.querySelector('section'),
+              {newDoc, origNodeMap, clonedNodeMap, includeShadowDom: undefined},
+            );
+            sinon.assert.calledWithExactly(spy.getCall(1),
+              doc.querySelector('section'),
+              {newDoc, origNodeMap, clonedNodeMap, includeShadowDom: undefined},
+            );
+            assert.isNull(spy.getCall(2));
+          });
+        });
+
+        context('when selecting a Comment', function () {
+          it('should clone the selected nodes with ancestors', function () {
+            var spy = sinon.spy(PartialDocumentCloner, 'cloneNodeAndAncestors');
+
+            var doc = baseDoc;
+            var ranges = [
+              (() => {
+                var range = doc.createRange();
+                range.selectNode(doc.querySelector('section').lastChild);
+                return range;
+              })(),
+            ];
+            var origNodeMap = new Map();
+            var clonedNodeMap = new Map();
+            var newDoc = PartialDocumentCloner.cloneSelection(doc, {
+              ranges, origNodeMap, clonedNodeMap,
+              hookBeforeRange, hookAfterRange, hookBetweenText, hookBetweenComment, hookBetweenCdata,
+            });
+
+            assert.strictEqual(
+              documentToString(newDoc),
+              '<html><body><section><!--range--><!--comment--><!--/range--></section></body></html>',
+            );
+
+            sinon.assert.calledWithExactly(spy.getCall(0),
+              doc.querySelector('section'),
+              {newDoc, origNodeMap, clonedNodeMap, includeShadowDom: undefined},
+            );
+            sinon.assert.calledWithExactly(spy.getCall(1),
+              doc.querySelector('section').lastChild,
+              {newDoc, origNodeMap, clonedNodeMap, includeShadowDom: undefined},
+            );
+            assert.isNull(spy.getCall(2));
+          });
+
+          it('should insert the split node when the selection starts in a Comment', function () {
+            var spy = sinon.spy(PartialDocumentCloner, 'cloneNodeAndAncestors');
+
+            var doc = baseDoc;
+            var ranges = [
+              (() => {
+                var range = doc.createRange();
+                range.setStart(doc.querySelector('section').lastChild, 3);
+                range.setEndAfter(doc.querySelector('section').lastChild);
+                return range;
+              })(),
+            ];
+            var origNodeMap = new Map();
+            var clonedNodeMap = new Map();
+            var newDoc = PartialDocumentCloner.cloneSelection(doc, {
+              ranges, origNodeMap, clonedNodeMap,
+              hookBeforeRange, hookAfterRange, hookBetweenText, hookBetweenComment, hookBetweenCdata,
+            });
+
+            assert.strictEqual(
+              documentToString(newDoc),
+              '<html><body><section><!--range--><!--ment--><!--/range--></section></body></html>',
+            );
+
+            sinon.assert.calledWithExactly(spy.getCall(0),
+              doc.querySelector('section'),
+              {newDoc, origNodeMap, clonedNodeMap, includeShadowDom: undefined},
+            );
+            sinon.assert.calledWithExactly(spy.getCall(1),
+              doc.querySelector('section'),
+              {newDoc, origNodeMap, clonedNodeMap, includeShadowDom: undefined},
+            );
+            assert.isNull(spy.getCall(2));
+          });
+
+          it('should insert the split node when the selection ends in a Comment', function () {
+            var spy = sinon.spy(PartialDocumentCloner, 'cloneNodeAndAncestors');
+
+            var doc = baseDoc;
+            var ranges = [
+              (() => {
+                var range = doc.createRange();
+                range.setStartBefore(doc.querySelector('section').lastChild);
+                range.setEnd(doc.querySelector('section').lastChild, 3);
+                return range;
+              })(),
+            ];
+            var origNodeMap = new Map();
+            var clonedNodeMap = new Map();
+            var newDoc = PartialDocumentCloner.cloneSelection(doc, {
+              ranges, origNodeMap, clonedNodeMap,
+              hookBeforeRange, hookAfterRange, hookBetweenText, hookBetweenComment, hookBetweenCdata,
+            });
+
+            assert.strictEqual(
+              documentToString(newDoc),
+              '<html><body><section><!--range--><!--com--><!--/range--></section></body></html>',
+            );
+
+            sinon.assert.calledWithExactly(spy.getCall(0),
+              doc.querySelector('section'),
+              {newDoc, origNodeMap, clonedNodeMap, includeShadowDom: undefined},
+            );
+            sinon.assert.calledWithExactly(spy.getCall(1),
+              doc.querySelector('section'),
+              {newDoc, origNodeMap, clonedNodeMap, includeShadowDom: undefined},
+            );
+            assert.isNull(spy.getCall(2));
+          });
+
+          it('should insert the split node when the selection starts and ends in a Comment', function () {
+            var spy = sinon.spy(PartialDocumentCloner, 'cloneNodeAndAncestors');
+
+            var doc = baseDoc;
+            var ranges = [
+              (() => {
+                var range = doc.createRange();
+                range.setStart(doc.querySelector('section').lastChild, 3);
+                range.setEnd(doc.querySelector('section').lastChild, 6);
+                return range;
+              })(),
+            ];
+            var origNodeMap = new Map();
+            var clonedNodeMap = new Map();
+            var newDoc = PartialDocumentCloner.cloneSelection(doc, {
+              ranges, origNodeMap, clonedNodeMap,
+              hookBeforeRange, hookAfterRange, hookBetweenText, hookBetweenComment, hookBetweenCdata,
+            });
+
+            assert.strictEqual(
+              documentToString(newDoc),
+              '<html><body><section><!--range--><!--men--><!--/range--></section></body></html>',
+            );
+
+            sinon.assert.calledWithExactly(spy.getCall(0),
+              doc.querySelector('section'),
+              {newDoc, origNodeMap, clonedNodeMap, includeShadowDom: undefined},
+            );
+            sinon.assert.calledWithExactly(spy.getCall(1),
+              doc.querySelector('section'),
+              {newDoc, origNodeMap, clonedNodeMap, includeShadowDom: undefined},
+            );
+            assert.isNull(spy.getCall(2));
+          });
+        });
+
+        context('when selecting a CDATA', function () {
+          let baseDoc;
+
+          before(function initBaseDoc() {
+            baseDoc = createDocFixture({type: 'xhtml', code: `\
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<body>
+<section><![CDATA[1 + 1 > 2]]></section>
+</body>
+</html>`});
+          });
+
+          it('should clone the selected nodes with ancestors', function () {
+            var spy = sinon.spy(PartialDocumentCloner, 'cloneNodeAndAncestors');
+
+            var doc = baseDoc;
+            var ranges = [
+              (() => {
+                var range = doc.createRange();
+                range.selectNode(doc.querySelector('section').firstChild);
+                return range;
+              })(),
+            ];
+            var origNodeMap = new Map();
+            var clonedNodeMap = new Map();
+            var newDoc = PartialDocumentCloner.cloneSelection(doc, {
+              ranges, origNodeMap, clonedNodeMap,
+              hookBeforeRange, hookAfterRange, hookBetweenText, hookBetweenComment, hookBetweenCdata,
+            });
+
+            assert.strictEqual(
+              documentToString(newDoc),
+              '<html xmlns="http://www.w3.org/1999/xhtml"><body><section><!--range--><![CDATA[1 + 1 > 2]]><!--/range--></section></body></html>',
+            );
+
+            sinon.assert.calledWithExactly(spy.getCall(0),
+              doc.querySelector('section'),
+              {newDoc, origNodeMap, clonedNodeMap, includeShadowDom: undefined},
+            );
+            sinon.assert.calledWithExactly(spy.getCall(1),
+              doc.querySelector('section').firstChild,
+              {newDoc, origNodeMap, clonedNodeMap, includeShadowDom: undefined},
+            );
+            assert.isNull(spy.getCall(2));
+          });
+
+          it('should insert the split node when the selection starts in a CDATA', function () {
+            var spy = sinon.spy(PartialDocumentCloner, 'cloneNodeAndAncestors');
+
+            var doc = baseDoc;
+            var ranges = [
+              (() => {
+                var range = doc.createRange();
+                range.setStart(doc.querySelector('section').firstChild, 4);
+                range.setEndAfter(doc.querySelector('section').firstChild);
+                return range;
+              })(),
+            ];
+            var origNodeMap = new Map();
+            var clonedNodeMap = new Map();
+            var newDoc = PartialDocumentCloner.cloneSelection(doc, {
+              ranges, origNodeMap, clonedNodeMap,
+              hookBeforeRange, hookAfterRange, hookBetweenText, hookBetweenComment, hookBetweenCdata,
+            });
+
+            assert.strictEqual(
+              documentToString(newDoc),
+              '<html xmlns="http://www.w3.org/1999/xhtml"><body><section><!--range--><![CDATA[1 > 2]]><!--/range--></section></body></html>',
+            );
+
+            sinon.assert.calledWithExactly(spy.getCall(0),
+              doc.querySelector('section'),
+              {newDoc, origNodeMap, clonedNodeMap, includeShadowDom: undefined},
+            );
+            sinon.assert.calledWithExactly(spy.getCall(1),
+              doc.querySelector('section'),
+              {newDoc, origNodeMap, clonedNodeMap, includeShadowDom: undefined},
+            );
+            assert.isNull(spy.getCall(2));
+          });
+
+          it('should insert the split node when the selection ends in a CDATA', function () {
+            var spy = sinon.spy(PartialDocumentCloner, 'cloneNodeAndAncestors');
+
+            var doc = baseDoc;
+            var ranges = [
+              (() => {
+                var range = doc.createRange();
+                range.setStartBefore(doc.querySelector('section').firstChild);
+                range.setEnd(doc.querySelector('section').firstChild, 5);
+                return range;
+              })(),
+            ];
+            var origNodeMap = new Map();
+            var clonedNodeMap = new Map();
+            var newDoc = PartialDocumentCloner.cloneSelection(doc, {
+              ranges, origNodeMap, clonedNodeMap,
+              hookBeforeRange, hookAfterRange, hookBetweenText, hookBetweenComment, hookBetweenCdata,
+            });
+
+            assert.strictEqual(
+              documentToString(newDoc),
+              '<html xmlns="http://www.w3.org/1999/xhtml"><body><section><!--range--><![CDATA[1 + 1]]><!--/range--></section></body></html>',
+            );
+
+            sinon.assert.calledWithExactly(spy.getCall(0),
+              doc.querySelector('section'),
+              {newDoc, origNodeMap, clonedNodeMap, includeShadowDom: undefined},
+            );
+            sinon.assert.calledWithExactly(spy.getCall(1),
+              doc.querySelector('section'),
+              {newDoc, origNodeMap, clonedNodeMap, includeShadowDom: undefined},
+            );
+            assert.isNull(spy.getCall(2));
+          });
+
+          it('should insert the split node when the selection starts and ends in a CDATA', function () {
+            var spy = sinon.spy(PartialDocumentCloner, 'cloneNodeAndAncestors');
+
+            var doc = baseDoc;
+            var ranges = [
+              (() => {
+                var range = doc.createRange();
+                range.setStart(doc.querySelector('section').firstChild, 2);
+                range.setEnd(doc.querySelector('section').firstChild, 5);
+                return range;
+              })(),
+            ];
+            var origNodeMap = new Map();
+            var clonedNodeMap = new Map();
+            var newDoc = PartialDocumentCloner.cloneSelection(doc, {
+              ranges, origNodeMap, clonedNodeMap,
+              hookBeforeRange, hookAfterRange, hookBetweenText, hookBetweenComment, hookBetweenCdata,
+            });
+
+            assert.strictEqual(
+              documentToString(newDoc),
+              '<html xmlns="http://www.w3.org/1999/xhtml"><body><section><!--range--><![CDATA[+ 1]]><!--/range--></section></body></html>',
+            );
+
+            sinon.assert.calledWithExactly(spy.getCall(0),
+              doc.querySelector('section'),
+              {newDoc, origNodeMap, clonedNodeMap, includeShadowDom: undefined},
+            );
+            sinon.assert.calledWithExactly(spy.getCall(1),
+              doc.querySelector('section'),
+              {newDoc, origNodeMap, clonedNodeMap, includeShadowDom: undefined},
+            );
+            assert.isNull(spy.getCall(2));
+          });
+        });
+
+        context('when selecting multiple nodes', function () {
+          let baseDoc;
+
+          before(function initBaseDoc() {
+            baseDoc = createDocFixture({code: `\
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+</head>
+<body>
+<section id="s1">text<div><br></div><!--comment--></section>
+<section id="s2">text<div><br></div><!--comment--></section>
+<section id="s3">text<div><br></div><!--comment--></section>
+</body>
+</html>`});
+          });
+
+          it('should clone the selected nodes with ancestors', function () {
+            var spy = sinon.spy(PartialDocumentCloner, 'cloneNodeAndAncestors');
+
+            var doc = baseDoc;
+            var ranges = [
+              (() => {
+                var range = doc.createRange();
+                range.setStart(doc.querySelector('#s1'), 2);
+                range.setEnd(doc.querySelector('#s3'), 1);
+                return range;
+              })(),
+            ];
+            var origNodeMap = new Map();
+            var clonedNodeMap = new Map();
+            var newDoc = PartialDocumentCloner.cloneSelection(doc, {
+              ranges, origNodeMap, clonedNodeMap,
+              hookBeforeRange, hookAfterRange, hookBetweenText, hookBetweenComment, hookBetweenCdata,
+            });
+
+            assert.strictEqual(
+              documentToString(newDoc),
+              `\
+<html>\
+<body>\
+<!--range-->\
+<section id="s1"><!--comment--></section>
+<section id="s2">text<div><br></div><!--comment--></section>
+<section id="s3">text</section>\
+<!--/range-->\
+</body>\
+</html>`,
+            );
+
+            sinon.assert.calledWithExactly(spy.getCall(0),
+              doc.querySelector('body'),
+              {newDoc, origNodeMap, clonedNodeMap, includeShadowDom: undefined},
+            );
+            sinon.assert.calledWithExactly(spy.getCall(1),
+              doc.querySelector('#s1').lastChild,
+              {newDoc, origNodeMap, clonedNodeMap, includeShadowDom: undefined},
+            );
+            sinon.assert.calledWithExactly(spy.getCall(2),
+              doc.querySelector('#s1').nextSibling,
+              {newDoc, origNodeMap, clonedNodeMap, includeShadowDom: undefined},
+            );
+            sinon.assert.calledWithExactly(spy.getCall(3),
+              doc.querySelector('#s2'),
+              {newDoc, origNodeMap, clonedNodeMap, includeShadowDom: undefined},
+            );
+            sinon.assert.calledWithExactly(spy.getCall(4),
+              doc.querySelector('#s2').firstChild,
+              {newDoc, origNodeMap, clonedNodeMap, includeShadowDom: undefined},
+            );
+            sinon.assert.calledWithExactly(spy.getCall(5),
+              doc.querySelector('#s2 div'),
+              {newDoc, origNodeMap, clonedNodeMap, includeShadowDom: undefined},
+            );
+            sinon.assert.calledWithExactly(spy.getCall(6),
+              doc.querySelector('#s2 div br'),
+              {newDoc, origNodeMap, clonedNodeMap, includeShadowDom: undefined},
+            );
+            sinon.assert.calledWithExactly(spy.getCall(7),
+              doc.querySelector('#s2').lastChild,
+              {newDoc, origNodeMap, clonedNodeMap, includeShadowDom: undefined},
+            );
+            sinon.assert.calledWithExactly(spy.getCall(8),
+              doc.querySelector('#s2').nextSibling,
+              {newDoc, origNodeMap, clonedNodeMap, includeShadowDom: undefined},
+            );
+            sinon.assert.calledWithExactly(spy.getCall(9),
+              doc.querySelector('#s3').firstChild,
+              {newDoc, origNodeMap, clonedNodeMap, includeShadowDom: undefined},
+            );
+            assert.isNull(spy.getCall(10));
+          });
+        });
+
+        context('when collapsed', function () {
+          it('should do nothing', function () {
+            var spy = sinon.spy(PartialDocumentCloner, 'cloneNodeAndAncestors');
+
+            var doc = baseDoc;
+            var ranges = [
+              (() => {
+                var range = doc.createRange();
+                range.setStart(doc.querySelector('section'), 0);
+                range.setEnd(doc.querySelector('section'), 0);
+                return range;
+              })(),
+            ];
+            var origNodeMap = new Map();
+            var clonedNodeMap = new Map();
+            var newDoc = PartialDocumentCloner.cloneSelection(doc, {
+              ranges, origNodeMap, clonedNodeMap,
+              hookBeforeRange, hookAfterRange, hookBetweenText, hookBetweenComment, hookBetweenCdata,
+            });
+
+            assert.strictEqual(
+              documentToString(newDoc),
+              '',
+            );
+
+            sinon.assert.notCalled(spy);
+          });
+        });
+      });
+
+      context('for multiple ranges', function () {
+        context('for ranges of nodes', function () {
+          it('should clone the selected nodes with ancestors', function () {
+            var spy = sinon.spy(PartialDocumentCloner, 'cloneNodeAndAncestors');
+
+            var doc = createDocFixture({code: `\
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+</head>
+<body>
+<section id="s1">text<div><br></div><!--comment--></section>
+<section id="s2">text<div><br></div><!--comment--></section>
+<section id="s3">text<div><br></div><!--comment--></section>
+</body>
+</html>`});
+            var ranges = [
+              (() => {
+                var range = doc.createRange();
+                range.setStart(doc.querySelector('#s1'), 0);
+                range.setEnd(doc.querySelector('#s1'), 1);
+                return range;
+              })(),
+              (() => {
+                var range = doc.createRange();
+                range.selectNode(doc.querySelector('#s2'));
+                return range;
+              })(),
+              (() => {
+                var range = doc.createRange();
+                range.setStart(doc.querySelector('#s3'), 1);
+                range.setEnd(doc.querySelector('#s3'), 2);
+                return range;
+              })(),
+            ];
+            var origNodeMap = new Map();
+            var clonedNodeMap = new Map();
+            var newDoc = PartialDocumentCloner.cloneSelection(doc, {
+              ranges, origNodeMap, clonedNodeMap,
+              hookBeforeRange, hookAfterRange, hookBetweenText, hookBetweenComment, hookBetweenCdata,
+            });
+
+            assert.strictEqual(
+              documentToString(newDoc),
+              `\
+<html>\
+<body>\
+<section id="s1"><!--range-->text<!--/range--></section>\
+<!--range--><section id="s2">text<div><br></div><!--comment--></section><!--/range-->\
+<section id="s3"><!--range--><div><br></div><!--/range--></section>\
+</body>\
+</html>`,
+            );
+
+            sinon.assert.calledWithExactly(spy.getCall(0),
+              doc.querySelector('#s1'),
+              {newDoc, origNodeMap, clonedNodeMap, includeShadowDom: undefined},
+            );
+            sinon.assert.calledWithExactly(spy.getCall(1),
+              doc.querySelector('#s1').firstChild,
+              {newDoc, origNodeMap, clonedNodeMap, includeShadowDom: undefined},
+            );
+            sinon.assert.calledWithExactly(spy.getCall(2),
+              doc.querySelector('#s2'),
+              {newDoc, origNodeMap, clonedNodeMap, includeShadowDom: undefined},
+            );
+            sinon.assert.calledWithExactly(spy.getCall(3),
+              doc.querySelector('#s2').firstChild,
+              {newDoc, origNodeMap, clonedNodeMap, includeShadowDom: undefined},
+            );
+            sinon.assert.calledWithExactly(spy.getCall(4),
+              doc.querySelector('#s2 div'),
+              {newDoc, origNodeMap, clonedNodeMap, includeShadowDom: undefined},
+            );
+            sinon.assert.calledWithExactly(spy.getCall(5),
+              doc.querySelector('#s2 br'),
+              {newDoc, origNodeMap, clonedNodeMap, includeShadowDom: undefined},
+            );
+            sinon.assert.calledWithExactly(spy.getCall(6),
+              doc.querySelector('#s2').lastChild,
+              {newDoc, origNodeMap, clonedNodeMap, includeShadowDom: undefined},
+            );
+            sinon.assert.calledWithExactly(spy.getCall(7),
+              doc.querySelector('#s3'),
+              {newDoc, origNodeMap, clonedNodeMap, includeShadowDom: undefined},
+            );
+            sinon.assert.calledWithExactly(spy.getCall(8),
+              doc.querySelector('#s3 div'),
+              {newDoc, origNodeMap, clonedNodeMap, includeShadowDom: undefined},
+            );
+            sinon.assert.calledWithExactly(spy.getCall(9),
+              doc.querySelector('#s3 br'),
+              {newDoc, origNodeMap, clonedNodeMap, includeShadowDom: undefined},
+            );
+            assert.isNull(spy.getCall(10));
+          });
+        });
+
+        context('for ranges in a Text', function () {
+          it('should split the Text and add splitters between them', function () {
+            var spy = sinon.spy(PartialDocumentCloner, 'cloneNodeAndAncestors');
+
+            var doc = createDocFixture({code: `\
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+</head>
+<body>
+<section>text1 text2 text3 text4 text5</section>
+</body>
+</html>`});
+            var ranges = [
+              (() => {
+                var range = doc.createRange();
+                range.setStartBefore(doc.querySelector('section').firstChild);
+                range.setEnd(doc.querySelector('section').firstChild, 5);
+                return range;
+              })(),
+              (() => {
+                var range = doc.createRange();
+                range.setStart(doc.querySelector('section').firstChild, 12);
+                range.setEnd(doc.querySelector('section').firstChild, 17);
+                return range;
+              })(),
+              (() => {
+                var range = doc.createRange();
+                range.setStart(doc.querySelector('section').firstChild, 24);
+                range.setEndAfter(doc.querySelector('section').firstChild);
+                return range;
+              })(),
+            ];
+            var origNodeMap = new Map();
+            var clonedNodeMap = new Map();
+            var newDoc = PartialDocumentCloner.cloneSelection(doc, {
+              ranges, origNodeMap, clonedNodeMap,
+              hookBeforeRange, hookAfterRange, hookBetweenText, hookBetweenComment, hookBetweenCdata,
+            });
+
+            assert.strictEqual(
+              documentToString(newDoc),
+              `\
+<html>\
+<body>\
+<section>\
+<!--range-->text1<!--/range-->\
+<!--splitter--> … <!--/splitter-->\
+<!--range-->text3<!--/range-->\
+<!--splitter--> … <!--/splitter-->\
+<!--range-->text5<!--/range-->\
+</section>\
+</body>\
+</html>`,
+            );
+
+            sinon.assert.calledWithExactly(spy.getCall(0),
+              doc.querySelector('section'),
+              {newDoc, origNodeMap, clonedNodeMap, includeShadowDom: undefined},
+            );
+            sinon.assert.calledWithExactly(spy.getCall(1),
+              doc.querySelector('section'),
+              {newDoc, origNodeMap, clonedNodeMap, includeShadowDom: undefined},
+            );
+            sinon.assert.calledWithExactly(spy.getCall(2),
+              doc.querySelector('section'),
+              {newDoc, origNodeMap, clonedNodeMap, includeShadowDom: undefined},
+            );
+            sinon.assert.calledWithExactly(spy.getCall(3),
+              doc.querySelector('section'),
+              {newDoc, origNodeMap, clonedNodeMap, includeShadowDom: undefined},
+            );
+            assert.isNull(spy.getCall(4));
+          });
+        });
+
+        context('for ranges in a Comment', function () {
+          it('should split the Comment and add splitters between them', function () {
+            var spy = sinon.spy(PartialDocumentCloner, 'cloneNodeAndAncestors');
+
+            var doc = createDocFixture({code: `\
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+</head>
+<body>
+<section><!--text1 text2 text3 text4 text5--></section>
+</body>
+</html>`});
+            var ranges = [
+              (() => {
+                var range = doc.createRange();
+                range.setStartBefore(doc.querySelector('section').firstChild);
+                range.setEnd(doc.querySelector('section').firstChild, 5);
+                return range;
+              })(),
+              (() => {
+                var range = doc.createRange();
+                range.setStart(doc.querySelector('section').firstChild, 12);
+                range.setEnd(doc.querySelector('section').firstChild, 17);
+                return range;
+              })(),
+              (() => {
+                var range = doc.createRange();
+                range.setStart(doc.querySelector('section').firstChild, 24);
+                range.setEndAfter(doc.querySelector('section').firstChild);
+                return range;
+              })(),
+            ];
+            var origNodeMap = new Map();
+            var clonedNodeMap = new Map();
+            var newDoc = PartialDocumentCloner.cloneSelection(doc, {
+              ranges, origNodeMap, clonedNodeMap,
+              hookBeforeRange, hookAfterRange, hookBetweenText, hookBetweenComment, hookBetweenCdata,
+            });
+
+            assert.strictEqual(
+              documentToString(newDoc),
+              `\
+<html>\
+<body>\
+<section>\
+<!--range--><!--text1--><!--/range-->\
+<!--splitter--><!-- … --><!--/splitter-->\
+<!--range--><!--text3--><!--/range-->\
+<!--splitter--><!-- … --><!--/splitter-->\
+<!--range--><!--text5--><!--/range-->\
+</section>\
+</body>\
+</html>`,
+            );
+
+            sinon.assert.calledWithExactly(spy.getCall(0),
+              doc.querySelector('section'),
+              {newDoc, origNodeMap, clonedNodeMap, includeShadowDom: undefined},
+            );
+            sinon.assert.calledWithExactly(spy.getCall(1),
+              doc.querySelector('section'),
+              {newDoc, origNodeMap, clonedNodeMap, includeShadowDom: undefined},
+            );
+            sinon.assert.calledWithExactly(spy.getCall(2),
+              doc.querySelector('section'),
+              {newDoc, origNodeMap, clonedNodeMap, includeShadowDom: undefined},
+            );
+            sinon.assert.calledWithExactly(spy.getCall(3),
+              doc.querySelector('section'),
+              {newDoc, origNodeMap, clonedNodeMap, includeShadowDom: undefined},
+            );
+            assert.isNull(spy.getCall(4));
+          });
+        });
+
+        context('for ranges in a CDATA', function () {
+          it('should split the CDATA and add splitters between them', function () {
+            var spy = sinon.spy(PartialDocumentCloner, 'cloneNodeAndAncestors');
+
+            var doc = createDocFixture({type: 'xhtml', code: `\
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<body>
+<section><![CDATA[text1 text2 text3 text4 text5]]></section>
+</body>
+</html>`});
+            var ranges = [
+              (() => {
+                var range = doc.createRange();
+                range.setStartBefore(doc.querySelector('section').firstChild);
+                range.setEnd(doc.querySelector('section').firstChild, 5);
+                return range;
+              })(),
+              (() => {
+                var range = doc.createRange();
+                range.setStart(doc.querySelector('section').firstChild, 12);
+                range.setEnd(doc.querySelector('section').firstChild, 17);
+                return range;
+              })(),
+              (() => {
+                var range = doc.createRange();
+                range.setStart(doc.querySelector('section').firstChild, 24);
+                range.setEndAfter(doc.querySelector('section').firstChild);
+                return range;
+              })(),
+            ];
+            var origNodeMap = new Map();
+            var clonedNodeMap = new Map();
+            var newDoc = PartialDocumentCloner.cloneSelection(doc, {
+              ranges, origNodeMap, clonedNodeMap,
+              hookBeforeRange, hookAfterRange, hookBetweenText, hookBetweenComment, hookBetweenCdata,
+            });
+
+            assert.strictEqual(
+              documentToString(newDoc),
+              `\
+<html xmlns="http://www.w3.org/1999/xhtml">\
+<body>\
+<section>\
+<!--range--><![CDATA[text1]]><!--/range-->\
+<!--splitter--><![CDATA[ … ]]><!--/splitter-->\
+<!--range--><![CDATA[text3]]><!--/range-->\
+<!--splitter--><![CDATA[ … ]]><!--/splitter-->\
+<!--range--><![CDATA[text5]]><!--/range-->\
+</section>\
+</body>\
+</html>`,
+            );
+
+            sinon.assert.calledWithExactly(spy.getCall(0),
+              doc.querySelector('section'),
+              {newDoc, origNodeMap, clonedNodeMap, includeShadowDom: undefined},
+            );
+            sinon.assert.calledWithExactly(spy.getCall(1),
+              doc.querySelector('section'),
+              {newDoc, origNodeMap, clonedNodeMap, includeShadowDom: undefined},
+            );
+            sinon.assert.calledWithExactly(spy.getCall(2),
+              doc.querySelector('section'),
+              {newDoc, origNodeMap, clonedNodeMap, includeShadowDom: undefined},
+            );
+            sinon.assert.calledWithExactly(spy.getCall(3),
+              doc.querySelector('section'),
+              {newDoc, origNodeMap, clonedNodeMap, includeShadowDom: undefined},
+            );
+            assert.isNull(spy.getCall(4));
+          });
+        });
+      });
+    });
+
+    describe('.cloneNodeAndAncestors()', function () {
+      let baseDoc;
+
+      before(function initBaseDoc() {
+        baseDoc = createDocFixture({code: `\
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+</head>
+<body>
+<section>text<div><br></div><!--comment--></section>
+</body>
+</html>`});
+      });
+
+      it('should clone the specified node with ancestors and append to the cloned document', function () {
+        var spy = sinon.spy(PartialDocumentCloner, 'cloneNode');
+
+        var origNodeMap = new Map();
+        var clonedNodeMap = new Map();
+        var doc = baseDoc;
+        var newDoc = PartialDocumentCloner.cloneDocument(doc, {origNodeMap, clonedNodeMap});
+        var node = doc.querySelector('div');
+        PartialDocumentCloner.cloneNodeAndAncestors(node, {newDoc, origNodeMap, clonedNodeMap});
+
+        assert.strictEqual(documentToString(newDoc), '<html><body><section><div></div></section></body></html>');
+
+        sinon.assert.calledWithExactly(spy.getCall(0), doc.documentElement, false, {
+          newDoc,
+          origNodeMap,
+          clonedNodeMap,
+        });
+        sinon.assert.calledWithExactly(spy.getCall(1), doc.body, false, {
+          newDoc,
+          origNodeMap,
+          clonedNodeMap,
+        });
+        sinon.assert.calledWithExactly(spy.getCall(2), doc.querySelector('section'), false, {
+          newDoc,
+          origNodeMap,
+          clonedNodeMap,
+        });
+        sinon.assert.calledWithExactly(spy.getCall(3), doc.querySelector('div'), false, {
+          newDoc,
+          origNodeMap,
+          clonedNodeMap,
+        });
+        assert.isNull(spy.getCall(4));
+      });
+
+      it('should do nothing if the specified node has already been added', function () {
+        var origNodeMap = new Map();
+        var clonedNodeMap = new Map();
+        var doc = baseDoc;
+        var newDoc = PartialDocumentCloner.cloneDocument(doc, {origNodeMap, clonedNodeMap});
+
+        var node = doc.querySelector('div');
+        PartialDocumentCloner.cloneNodeAndAncestors(node, {newDoc, origNodeMap, clonedNodeMap});
+        assert.strictEqual(documentToString(newDoc), '<html><body><section><div></div></section></body></html>');
+
+        var spy = sinon.spy(PartialDocumentCloner, 'cloneNode');
+
+        var node = doc.querySelector('div');
+        PartialDocumentCloner.cloneNodeAndAncestors(node, {newDoc, origNodeMap, clonedNodeMap});
+        assert.strictEqual(documentToString(newDoc), '<html><body><section><div></div></section></body></html>');
+
+        sinon.assert.notCalled(spy);
       });
     });
   });

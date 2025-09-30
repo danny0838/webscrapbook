@@ -386,6 +386,13 @@ Object.defineProperties(MochaQuery, Object.getOwnPropertyDescriptors({
   },
 }));
 
+function assertRangesEqual(actual, expected, message = 'Ranges are not equal') {
+  assert.strictEqual(actual.startContainer, expected.startContainer, `${message} (startContainer)`);
+  assert.strictEqual(actual.startOffset, expected.startOffset, `${message} (startOffset)`);
+  assert.strictEqual(actual.endContainer, expected.endContainer, `${message} (endContainer)`);
+  assert.strictEqual(actual.endOffset, expected.endOffset, `${message} (endOffset)`);
+}
+
 function getToken(url, role) {
   let token = `${url}\t${role}`;
   token = sha1(token, "TEXT");
@@ -933,6 +940,7 @@ export {
   INVALID_URL_SAMPLES,
   assert,
   MochaQuery,
+  assertRangesEqual,
   getToken,
   encodeText,
   getRulesFromCssText,
