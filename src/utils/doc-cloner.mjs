@@ -27,13 +27,14 @@ class DocumentCloner {
    * @return {Document} The cloned document.
    */
   static cloneDocument(doc, {origNodeMap, clonedNodeMap} = {}) {
-    const {contentType: mime, documentElement: docElemNode} = doc;
+    const {contentType: mime} = doc;
     const newDoc = (new DOMParser()).parseFromString(
-      '<' + docElemNode.nodeName.toLowerCase() + '/>',
+      '<html></html>',
       DOMPARSER_SUPPORT_TYPES.has(mime) ? mime : 'text/html',
     );
-    while (newDoc.firstChild) {
-      newDoc.removeChild(newDoc.firstChild);
+    let child;
+    while (child = newDoc.firstChild) {
+      newDoc.removeChild(child);
     }
     origNodeMap?.set(newDoc, doc);
     clonedNodeMap?.set(doc, newDoc);
@@ -52,13 +53,22 @@ class DocumentCloner {
    * @param {boolean} [options.includeShadowDom]
    * @return {Node} The cloned node.
    */
-  static cloneNode(node, deep = false, options = {}) {
-    const {
-      newDoc = node.ownerDocument,
+  static cloneNode(node, deep = false, {
+    newDoc = node.ownerDocument,
+    origNodeMap,
+    clonedNodeMap,
+    includeShadowDom = false,
+  } = {}) {
+    return this._cloneNode(node, deep, {
+      newDoc,
       origNodeMap,
       clonedNodeMap,
       includeShadowDom,
-    } = options;
+    });
+  }
+
+  static _cloneNode(node, deep, options) {
+    const {newDoc, origNodeMap, clonedNodeMap, includeShadowDom} = options;
 
     const newNode = newDoc.importNode(node, deep);
 
@@ -83,7 +93,16 @@ class DocumentCloner {
     return newNode;
   }
 
-  static cloneShadowDom(node, newNode, options = {}) {
+  /**
+   * @param {Node} node
+   * @param {Node} newNode
+   * @param {Object} options
+   * @param {Document} options.newDoc
+   * @param {Map|WeakMap} options.origNodeMap
+   * @param {Map|WeakMap} options.clonedNodeMap
+   * @param {boolean} options.includeShadowDom
+   */
+  static cloneShadowDom(node, newNode, options) {
     const shadowRoot = getShadowRoot(node);
     if (!shadowRoot) { return; }
     const {origNodeMap, clonedNodeMap, includeShadowDom} = options;
