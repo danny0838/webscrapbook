@@ -5,6 +5,7 @@
 import {isDebug} from "../utils/debug.mjs";
 import {ANNOTATION_CSS} from "../utils/common.mjs";
 import * as utils from "../utils/common.mjs";
+import {DocumentCloner} from "../utils/doc-cloner.mjs";
 import {StorageCache, serializeObject, deserializeObject} from "../utils/cache.mjs";
 import {dataUriToFile} from "../utils/datauri.mjs";
 import {DocumentCssHandler, DocumentCssResourcesHandler} from "./css-handler.mjs";
@@ -199,7 +200,7 @@ class BaseCapturer {
     // e.g. cloned iframes has no content, cloned canvas has no image,
     // and cloned form elements has no current status.
     const cloneNodeMapping = (node, deep = false) => {
-      return utils.cloneNode(node, deep, {
+      return DocumentCloner.cloneNode(node, deep, {
         newDoc,
         origNodeMap,
         clonedNodeMap,
@@ -2819,7 +2820,7 @@ class BaseCapturer {
     const customElementNames = new Set();
 
     // create a new document to replicate nodes via import
-    const newDoc = utils.cloneDocument(doc, {origNodeMap, clonedNodeMap});
+    const newDoc = DocumentCloner.cloneDocument(doc, {origNodeMap, clonedNodeMap});
 
     let rootNode, headNode;
     let selection = settings.fullPage ? null : utils.getSelection(doc);
@@ -3399,15 +3400,6 @@ class BaseCapturer {
         continue;
       }
 
-      const cloneNodeMapping = (node, deep = false) => {
-        return utils.cloneNode(node, deep, {
-          newDoc,
-          origNodeMap,
-          clonedNodeMap,
-          includeShadowDom: true,
-        });
-      };
-
       const addResource = (url) => {
         const uuid = utils.getUuid();
         const key = "urn:scrapbook:url:" + uuid;
@@ -3682,11 +3674,11 @@ class BaseCapturer {
       const adoptedStyleSheetMap = new Map();
 
       // create a new document to replicate nodes via import
-      const newDoc = utils.cloneDocument(doc, {origNodeMap, clonedNodeMap});
-
-      for (const node of doc.childNodes) {
-        newDoc.appendChild(cloneNodeMapping(node, true));
-      }
+      const newDoc = DocumentCloner.clone(doc, {
+        origNodeMap,
+        clonedNodeMap,
+        includeShadowDom: true,
+      });
 
       const rootNode = newDoc.documentElement;
       const isMainFrame = i === 0;
