@@ -127,7 +127,7 @@ function assertNoRecord(rootNode, {deep = true, filter = 'any'} = {}) {
   }
 }
 
-describe('Capture tests', function () {
+$describe.skipIf($.noExtensionBrowser)('Capture tests', function () {
   before(async function checkEnvironment() {
     await Promise.all([
       checkBackendServer(),
