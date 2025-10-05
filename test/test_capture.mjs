@@ -1,5 +1,6 @@
 import {
   MochaQuery as $, assert,
+  RED_BMP_B64, GREEN_BMP_B64, BLUE_BMP_B64, YELLOW_BMP_B64,
   getRulesFromCssText, getToken, regex, rawRegex, cssRegex,
 } from "./unittest.mjs";
 import {
@@ -177,7 +178,7 @@ $describe.skipIf($.noExtensionBrowser)('Capture tests', function () {
         var imgFile = zip.file('red.bmp');
         assert.exists(imgFile);
         var imgData = await imgFile.async('base64');
-        assert.strictEqual(imgData, 'Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAAD/AAAA');
+        assert.strictEqual(imgData, RED_BMP_B64);
 
         var imgElem = doc.querySelectorAll('img')[1];
         assert.exists(imgElem);
@@ -185,7 +186,7 @@ $describe.skipIf($.noExtensionBrowser)('Capture tests', function () {
         var imgFile = zip.file('blue.bmp');
         assert.exists(imgFile);
         var imgData = await imgFile.async('base64');
-        assert.strictEqual(imgData, 'Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAA/wAAAAAA');
+        assert.strictEqual(imgData, BLUE_BMP_B64);
       });
 
       it('capture.saveAs = maff', async function () {
@@ -238,7 +239,7 @@ $describe.skipIf($.noExtensionBrowser)('Capture tests', function () {
         var imgFile = zip.file(topdir + 'red.bmp');
         assert.exists(imgFile);
         var imgData = await imgFile.async('base64');
-        assert.strictEqual(imgData, 'Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAAD/AAAA');
+        assert.strictEqual(imgData, RED_BMP_B64);
 
         var imgElem = doc.querySelectorAll('img')[1];
         assert.exists(imgElem);
@@ -246,7 +247,7 @@ $describe.skipIf($.noExtensionBrowser)('Capture tests', function () {
         var imgFile = zip.file(topdir + 'blue.bmp');
         assert.exists(imgFile);
         var imgData = await imgFile.async('base64');
-        assert.strictEqual(imgData, 'Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAA/wAAAAAA');
+        assert.strictEqual(imgData, BLUE_BMP_B64);
       });
 
       it('capture.saveAs = singleHtml', async function () {
@@ -274,11 +275,11 @@ $describe.skipIf($.noExtensionBrowser)('Capture tests', function () {
 
         var imgElem = doc.querySelectorAll('img')[0];
         assert.exists(imgElem);
-        assert.strictEqual(imgElem.getAttribute('src'), 'data:image/bmp;filename=red.bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAAD/AAAA');
+        assert.strictEqual(imgElem.getAttribute('src'), `data:image/bmp;filename=red.bmp;base64,${RED_BMP_B64}`);
 
         var imgElem = doc.querySelectorAll('img')[1];
         assert.exists(imgElem);
-        assert.strictEqual(imgElem.getAttribute('src'), 'data:image/bmp;filename=blue.bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAA/wAAAAAA');
+        assert.strictEqual(imgElem.getAttribute('src'), `data:image/bmp;filename=blue.bmp;base64,${BLUE_BMP_B64}`);
       });
     });
 
@@ -330,7 +331,7 @@ $describe.skipIf($.noExtensionBrowser)('Capture tests', function () {
         var imgFile = zip.file('red.bmp');
         assert.exists(imgFile);
         var imgData = await imgFile.async('base64');
-        assert.strictEqual(imgData, 'Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAAD/AAAA');
+        assert.strictEqual(imgData, RED_BMP_B64);
 
         var imgElem = doc.querySelectorAll('img')[1];
         assert.exists(imgElem);
@@ -338,7 +339,7 @@ $describe.skipIf($.noExtensionBrowser)('Capture tests', function () {
         var imgFile = zip.file('blue.bmp');
         assert.exists(imgFile);
         var imgData = await imgFile.async('base64');
-        assert.strictEqual(imgData, 'Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAA/wAAAAAA');
+        assert.strictEqual(imgData, BLUE_BMP_B64);
       });
 
       it('capture.saveAs = maff', async function () {
@@ -396,7 +397,7 @@ $describe.skipIf($.noExtensionBrowser)('Capture tests', function () {
         var imgFile = zip.file(topdir + 'red.bmp');
         assert.exists(imgFile);
         var imgData = await imgFile.async('base64');
-        assert.strictEqual(imgData, 'Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAAD/AAAA');
+        assert.strictEqual(imgData, RED_BMP_B64);
 
         var imgElem = doc.querySelectorAll('img')[1];
         assert.exists(imgElem);
@@ -404,7 +405,7 @@ $describe.skipIf($.noExtensionBrowser)('Capture tests', function () {
         var imgFile = zip.file(topdir + 'blue.bmp');
         assert.exists(imgFile);
         var imgData = await imgFile.async('base64');
-        assert.strictEqual(imgData, 'Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAA/wAAAAAA');
+        assert.strictEqual(imgData, BLUE_BMP_B64);
       });
 
       it('capture.saveAs = singleHtml', async function () {
@@ -431,11 +432,11 @@ $describe.skipIf($.noExtensionBrowser)('Capture tests', function () {
 
         var imgElem = doc.querySelectorAll('img')[0];
         assert.exists(imgElem);
-        assert.strictEqual(imgElem.getAttribute('src'), 'data:image/bmp;filename=red.bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAAD/AAAA');
+        assert.strictEqual(imgElem.getAttribute('src'), `data:image/bmp;filename=red.bmp;base64,${RED_BMP_B64}`);
 
         var imgElem = doc.querySelectorAll('img')[1];
         assert.exists(imgElem);
-        assert.strictEqual(imgElem.getAttribute('src'), 'data:image/bmp;filename=blue.bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAA/wAAAAAA');
+        assert.strictEqual(imgElem.getAttribute('src'), `data:image/bmp;filename=blue.bmp;base64,${BLUE_BMP_B64}`);
       });
     });
 
@@ -469,7 +470,7 @@ $describe.skipIf($.noExtensionBrowser)('Capture tests', function () {
         var savedFile = zip.file('file.bmp');
         assert.exists(savedFile);
         var b64 = (await readFileAsDataURL(await savedFile.async('blob'))).replace(/^.*,/, "");
-        assert.strictEqual(b64, "Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAAD/AAAA");
+        assert.strictEqual(b64, RED_BMP_B64);
       });
 
       it('capture.saveAs = maff', async function () {
@@ -508,7 +509,7 @@ $describe.skipIf($.noExtensionBrowser)('Capture tests', function () {
         var savedFile = zip.file(topdir + 'file.bmp');
         assert.exists(savedFile);
         var b64 = (await readFileAsDataURL(await savedFile.async('blob'))).replace(/^.*,/, "");
-        assert.strictEqual(b64, "Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAAD/AAAA");
+        assert.strictEqual(b64, RED_BMP_B64);
       });
 
       it('capture.saveAs = singleHtml', async function () {
@@ -527,8 +528,7 @@ $describe.skipIf($.noExtensionBrowser)('Capture tests', function () {
         assert.strictEqual(doc.documentElement.getAttribute('data-scrapbook-type'), 'file');
         var metaRefreshElem = doc.querySelector('meta[http-equiv="refresh"][content]');
         assert.exists(metaRefreshElem);
-        assert.strictEqual(metaRefreshElem.getAttribute('content'),
-          "0; url=data:image/bmp;filename=file.bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAAD/AAAA");
+        assert.strictEqual(metaRefreshElem.getAttribute('content'), `0; url=data:image/bmp;filename=file.bmp;base64,${RED_BMP_B64}`);
         assert.notExists(doc.querySelector('a[href="file.bmp"]')); // do NOT generate anchor to avoid long content
         assert.notExists(doc.querySelector('img'));
       });
@@ -884,37 +884,37 @@ p { background-image: url("123ABCabc_%25E4%25B8%25AD%25E6%2596%2587_%25F0%25A0%2
         var savedFile = zip.file('file.bmp');
         assert.exists(savedFile);
         var b64 = (await readFileAsDataURL(await savedFile.async('blob'))).replace(/^.*,/, "");
-        assert.strictEqual(b64, "Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAAD/AAAA");
+        assert.strictEqual(b64, RED_BMP_B64);
 
         // FILENAME
         var savedFile = zip.file('file2.bmp');
         assert.exists(savedFile);
         var b64 = (await readFileAsDataURL(await savedFile.async('blob'))).replace(/^.*,/, "");
-        assert.strictEqual(b64, "Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAAD/AAAA");
+        assert.strictEqual(b64, RED_BMP_B64);
 
         // filename = "..."
         var savedFile = zip.file('file _X_.bmp');
         assert.exists(savedFile);
         var b64 = (await readFileAsDataURL(await savedFile.async('blob'))).replace(/^.*,/, "");
-        assert.strictEqual(b64, "Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAAD/AAAA");
+        assert.strictEqual(b64, RED_BMP_B64);
 
         // filename=...; filename*=iso-8859-1'en'...
         var savedFile = zip.file('£ rates.bmp');
         assert.exists(savedFile);
         var b64 = (await readFileAsDataURL(await savedFile.async('blob'))).replace(/^.*,/, "");
-        assert.strictEqual(b64, "Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAAD/AAAA");
+        assert.strictEqual(b64, RED_BMP_B64);
 
         // filename*=UTF-8''...; filename=...
         var savedFile = zip.file('中文𠀀.bmp');
         assert.exists(savedFile);
         var b64 = (await readFileAsDataURL(await savedFile.async('blob'))).replace(/^.*,/, "");
-        assert.strictEqual(b64, "Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAAD/AAAA");
+        assert.strictEqual(b64, RED_BMP_B64);
 
         // content-type; no file extension (should generate one)
         var savedFile = zip.file('noext.bmp');
         assert.exists(savedFile);
         var b64 = (await readFileAsDataURL(await savedFile.async('blob'))).replace(/^.*,/, "");
-        assert.strictEqual(b64, "Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAAD/AAAA");
+        assert.strictEqual(b64, RED_BMP_B64);
       });
 
       /**
@@ -1037,9 +1037,9 @@ p { background-image: url("123ABCabc_%25E4%25B8%25AD%25E6%2596%2587_%25F0%25A0%2
         assert.strictEqual(doc.querySelector('style').textContent.trim(), `\
 @import url("data:text/css;charset=UTF-8,body%7Bfont-size:20px;%7D");
 @font-face { font-family: myFont; src: url("data:font/woff;base64,"); }
-p { background-image: url("data:image/bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAAD/AAAA"); }`);
-        assert.strictEqual(doc.querySelector('img').getAttribute('src'), "data:image/bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAAD/AAAA");
-        assert.strictEqual(doc.querySelector('img[srcset]').getAttribute('srcset'), "data:image/bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAAD/AAAA 1x, data:image/bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAA/wAAAAAA 2x");
+p { background-image: url("data:image/bmp;base64,${RED_BMP_B64}"); }`);
+        assert.strictEqual(doc.querySelector('img').getAttribute('src'), `data:image/bmp;base64,${RED_BMP_B64}`);
+        assert.strictEqual(doc.querySelector('img[srcset]').getAttribute('srcset'), `data:image/bmp;base64,${RED_BMP_B64} 1x, data:image/bmp;base64,${BLUE_BMP_B64} 2x`);
       });
 
       it('capture.saveDataUriAsFile = true', async function () {
@@ -1085,9 +1085,9 @@ p { background-image: url("ecb6e0b0acec8b20d5f0360a52fe336a7a7cb475.bmp"); }`);
         assert.strictEqual(doc.querySelector('style').textContent.trim(), `\
 @import url("data:text/css;charset=UTF-8,body%7Bfont-size:20px;%7D");
 @font-face { font-family: myFont; src: url("data:font/woff;base64,"); }
-p { background-image: url("data:image/bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAAD/AAAA"); }`);
-        assert.strictEqual(doc.querySelector('img').getAttribute('src'), "data:image/bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAAD/AAAA");
-        assert.strictEqual(doc.querySelector('img[srcset]').getAttribute('srcset'), "data:image/bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAAD/AAAA 1x, data:image/bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAA/wAAAAAA 2x");
+p { background-image: url("data:image/bmp;base64,${RED_BMP_B64}"); }`);
+        assert.strictEqual(doc.querySelector('img').getAttribute('src'), `data:image/bmp;base64,${RED_BMP_B64}`);
+        assert.strictEqual(doc.querySelector('img[srcset]').getAttribute('srcset'), `data:image/bmp;base64,${RED_BMP_B64} 1x, data:image/bmp;base64,${BLUE_BMP_B64} 2x`);
       });
 
       it('should take parameters in data URL if capture.saveDataUriAsFile = true', async function () {
@@ -1227,7 +1227,7 @@ p { background-image: url("data:image/bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAE
         assert.strictEqual(text, `\
 @import "data:text/css;charset=UTF-8;filename=null.css,";
 @font-face { font-family: myFont; src: url("data:font/woff;filename=null.woff;base64,"); }
-p { background-image: url("data:image/bmp;filename=red.bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAAD/AAAA"); }`);
+p { background-image: url("data:image/bmp;filename=red.bmp;base64,${RED_BMP_B64}"); }`);
       });
 
       it('absolute: should save as file when capture.saveDataUriAsFile = true', async function () {
@@ -1440,7 +1440,7 @@ p { background-image: url("red.bmp"); }`);
         var frameDoc = (await xhr({url: frameSrc, responseType: "document"})).response;
 
         assert.exists(frameDoc.querySelector('html[data-scrapbook-source="data:"]'));
-        assert.strictEqual(frameDoc.querySelector('img').getAttribute('src'), `data:image/bmp;filename=red.bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAAD/AAAA`);
+        assert.strictEqual(frameDoc.querySelector('img').getAttribute('src'), `data:image/bmp;filename=red.bmp;base64,${RED_BMP_B64}`);
         assert.strictEqual(frameDoc.querySelectorAll('a')[0].getAttribute('href'), `data:text/plain;filename=file.txt,Linked%20file.`);
         assert.strictEqual(frameDoc.querySelectorAll('a')[1].getAttribute('href'), `${localhost}/capture_dataUri_frame/page.html`);
       });
@@ -1525,21 +1525,21 @@ p { background-image: url("red.bmp"); }`);
       var doc = await readFileAsDocument(blob);
 
       assert.strictEqual(doc.querySelectorAll('style')[0].textContent.trim(), `\
-#internal { background: url("data:image/bmp;filename=green.bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAP8AAAAA"); }
+#internal { background: url("data:image/bmp;filename=green.bmp;base64,${GREEN_BMP_B64}"); }
 #internal::after { content: "內部"; }`);
       assert.strictEqual(doc.querySelector('link').getAttribute('href'), `\
-data:text/css;charset=UTF-8;filename=link.css,%23external%20%7B%20background:%20url(%22data:image/bmp;filename=green.bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAP8AAAAA%22);%20%7D%0A%23external::after%20%7B%20content:%20%22外部%22;%20%7D%0A`);
+data:text/css;charset=UTF-8;filename=link.css,%23external%20%7B%20background:%20url(%22data:image/bmp;filename=green.bmp;base64,${GREEN_BMP_B64}%22);%20%7D%0A%23external::after%20%7B%20content:%20%22外部%22;%20%7D%0A`);
       assert.strictEqual(doc.querySelectorAll('style')[1].textContent.trim(), `\
-@import "data:text/css;charset=UTF-8;filename=import.css,%23import%20%7B%20background:%20url(%22data:image/bmp;filename=green.bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAP8AAAAA%22);%20%7D%0A%23import::after%20%7B%20content:%20%22匯入%22;%20%7D%0A";`);
-      assert.strictEqual(doc.querySelector('img').getAttribute('src'), `data:image/bmp;filename=red.bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAAD/AAAA`);
+@import "data:text/css;charset=UTF-8;filename=import.css,%23import%20%7B%20background:%20url(%22data:image/bmp;filename=green.bmp;base64,${GREEN_BMP_B64}%22);%20%7D%0A%23import::after%20%7B%20content:%20%22匯入%22;%20%7D%0A";`);
+      assert.strictEqual(doc.querySelector('img').getAttribute('src'), `data:image/bmp;filename=red.bmp;base64,${RED_BMP_B64}`);
       assert.strictEqual(doc.querySelectorAll('iframe')[1].getAttribute('src'), `data:text/plain;filename=big5.txt,Big5%A4%A4%A4%E5%A4%BA%AEe`);
 
       var srcdocBlob = new Blob([doc.querySelectorAll('iframe')[0].getAttribute('srcdoc')], {type: "text/html;charset=UTF-8"});
       var srcdoc = await readFileAsDocument(srcdocBlob);
       assert.strictEqual(srcdoc.querySelector('style').textContent.trim(), `\
-#internal { background: url("data:image/bmp;filename=green.bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAP8AAAAA"); }
+#internal { background: url("data:image/bmp;filename=green.bmp;base64,${GREEN_BMP_B64}"); }
 #internal::after { content: "內部"; }`);
-      assert.strictEqual(srcdoc.querySelector('img').getAttribute('src'), `data:image/bmp;filename=red.bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAAD/AAAA`);
+      assert.strictEqual(srcdoc.querySelector('img').getAttribute('src'), `data:image/bmp;filename=red.bmp;base64,${RED_BMP_B64}`);
     });
 
     it('should use non-uniquified filename for generated data URLs', async function () {
@@ -1555,9 +1555,9 @@ data:text/css;charset=UTF-8;filename=link.css,%23external%20%7B%20background:%20
       var doc = await readFileAsDocument(blob);
       var imgs = doc.querySelectorAll('img');
 
-      assert.strictEqual(imgs[0].getAttribute('src'), `data:image/bmp;filename=green.bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAP8AAAAA`);
-      assert.strictEqual(imgs[1].getAttribute('src'), `data:image/bmp;filename=green.bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAP8AAAAA`);
-      assert.strictEqual(imgs[2].getAttribute('src'), `data:image/bmp;filename=green.bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAP8AAAAA`);
+      assert.strictEqual(imgs[0].getAttribute('src'), `data:image/bmp;filename=green.bmp;base64,${GREEN_BMP_B64}`);
+      assert.strictEqual(imgs[1].getAttribute('src'), `data:image/bmp;filename=green.bmp;base64,${GREEN_BMP_B64}`);
+      assert.strictEqual(imgs[2].getAttribute('src'), `data:image/bmp;filename=green.bmp;base64,${GREEN_BMP_B64}`);
     });
 
     it('should generate resource map when capture.mergeCssResources = true', async function () {
@@ -1597,13 +1597,13 @@ data:text/css;charset=UTF-8;filename=link.css,%23external%20%7B%20background:%20
       })).response.trim();
       var cssText2 = cssText.replace(/var\(--sb\d+-\d+\)/g, x => map[x] || x);
       assert.notStrictEqual(cssText, cssText2);
-      assert.strictEqual(cssText2, `#link { background: url("data:image/bmp;filename=yellow.bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAP//AAAA"); }`);
+      assert.strictEqual(cssText2, `#link { background: url("data:image/bmp;filename=yellow.bmp;base64,${YELLOW_BMP_B64}"); }`);
 
       // internal
       var cssText = styles[2].textContent.trim();
       var cssText2 = cssText.replace(/var\(--sb\d+-\d+\)/g, x => map[x] || x);
       assert.notStrictEqual(cssText, cssText2);
-      assert.strictEqual(cssText2, `#internal { background: url("data:image/bmp;filename=yellow.bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAP//AAAA"); }`);
+      assert.strictEqual(cssText2, `#internal { background: url("data:image/bmp;filename=yellow.bmp;base64,${YELLOW_BMP_B64}"); }`);
 
       // internal keyframe
       var cssText = styles[3].textContent.trim();
@@ -1611,7 +1611,7 @@ data:text/css;charset=UTF-8;filename=link.css,%23external%20%7B%20background:%20
       assert.notStrictEqual(cssText, cssText2);
       assert.strictEqual(cssText2, `\
 @keyframes spin {
-  from { transform: rotate(0turn); background-image: url("data:image/bmp;filename=yellow.bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAP//AAAA"); }
+  from { transform: rotate(0turn); background-image: url("data:image/bmp;filename=yellow.bmp;base64,${YELLOW_BMP_B64}"); }
   to { transform: rotate(1turn); }
 }`);
     });
@@ -1647,17 +1647,17 @@ data:text/css;charset=UTF-8;filename=link.css,%23external%20%7B%20background:%20
         url: doc.querySelector('link').getAttribute('href').trim(),
         responseType: 'text',
       })).response.trim();
-      assert.strictEqual(cssText, `#link { background: url("data:image/bmp;filename=yellow.bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAP//AAAA"); }`);
+      assert.strictEqual(cssText, `#link { background: url("data:image/bmp;filename=yellow.bmp;base64,${YELLOW_BMP_B64}"); }`);
 
       // internal
       var cssText = styles[2].textContent.trim();
-      assert.strictEqual(cssText, `#internal { background: url("data:image/bmp;filename=yellow.bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAP//AAAA"); }`);
+      assert.strictEqual(cssText, `#internal { background: url("data:image/bmp;filename=yellow.bmp;base64,${YELLOW_BMP_B64}"); }`);
 
       // internal keyframe
       var cssText = styles[3].textContent.trim();
       assert.strictEqual(cssText, `\
 @keyframes spin {
-  from { transform: rotate(0turn); background-image: url("data:image/bmp;filename=yellow.bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAP//AAAA"); }
+  from { transform: rotate(0turn); background-image: url("data:image/bmp;filename=yellow.bmp;base64,${YELLOW_BMP_B64}"); }
   to { transform: rotate(1turn); }
 }`);
     });
@@ -2338,10 +2338,7 @@ p { background-image: url("about:blank"); }`);
         assert.strictEqual(doc.querySelector('title').textContent, 'ABC 中文 𠀀 にほんご');
         assert.strictEqual(doc.querySelector(`meta[http-equiv="refresh"]`).getAttribute('content'), `0; url=${localhost}/capture_bookmark/basic.html`);
         assert.strictEqual(doc.querySelector('a').getAttribute('href'), `${localhost}/capture_bookmark/basic.html`);
-        assert.strictEqual(
-          doc.querySelector('link[rel="shortcut icon"]').getAttribute('href'),
-          `data:image/bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAAD/AAAA`,
-        );
+        assert.strictEqual(doc.querySelector('link[rel="shortcut icon"]').getAttribute('href'), `data:image/bmp;base64,${RED_BMP_B64}`);
       });
 
       it('for URL: should fetch title and favicon', async function () {
@@ -2360,10 +2357,7 @@ p { background-image: url("about:blank"); }`);
         assert.strictEqual(doc.querySelector('title').textContent, 'ABC 中文 𠀀 にほんご');
         assert.strictEqual(doc.querySelector(`meta[http-equiv="refresh"]`).getAttribute('content'), `0; url=${localhost}/capture_bookmark/basic.html`);
         assert.strictEqual(doc.querySelector('a').getAttribute('href'), `${localhost}/capture_bookmark/basic.html`);
-        assert.strictEqual(
-          doc.querySelector('link[rel="shortcut icon"]').getAttribute('href'),
-          `data:image/bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAAD/AAAA`,
-        );
+        assert.strictEqual(doc.querySelector('link[rel="shortcut icon"]').getAttribute('href'), `data:image/bmp;base64,${RED_BMP_B64}`);
       });
 
       it('for URL (attachment): should ignore title and favicon', async function () {
@@ -3378,7 +3372,7 @@ p { background-image: url("about:blank"); }`);
         var imgFile = zip.file('img.bmp');
         assert.exists(imgFile);
         var imgData = await imgFile.async('base64');
-        assert.strictEqual(imgData, 'Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAP8AAAAA');  // green
+        assert.strictEqual(imgData, GREEN_BMP_B64);
 
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -3400,7 +3394,7 @@ p { background-image: url("about:blank"); }`);
         var imgFile = zip.file('img.bmp');
         assert.exists(imgFile);
         var imgData = await imgFile.async('base64');
-        assert.strictEqual(imgData, 'Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAP8AAAAA');  // green
+        assert.strictEqual(imgData, GREEN_BMP_B64);
 
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -3503,10 +3497,7 @@ p { background-image: url("about:blank"); }`);
         });
 
         var doc = await readFileAsDocument(blob);
-        assert.strictEqual(
-          doc.querySelector('link[rel="shortcut icon"]').getAttribute('href'),
-          'data:image/bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAAD/AAAA',
-        );
+        assert.strictEqual(doc.querySelector('link[rel="shortcut icon"]').getAttribute('href'), `data:image/bmp;base64,${RED_BMP_B64}`);
       });
 
       it('capture.favicon = link (bookmark)', async function () {
@@ -3592,10 +3583,7 @@ p { background-image: url("about:blank"); }`);
         });
 
         var doc = await readFileAsDocument(blob);
-        assert.strictEqual(
-          doc.querySelector('link[rel="shortcut icon"]').getAttribute('href'),
-          'data:image/x-icon;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAP8AAAAA',
-        );
+        assert.strictEqual(doc.querySelector('link[rel="shortcut icon"]').getAttribute('href'), `data:image/x-icon;base64,${GREEN_BMP_B64}`);
       });
 
       it("should ignore site favicon for attachment when mode = bookmark", async function () {
@@ -3638,10 +3626,7 @@ p { background-image: url("about:blank"); }`);
         });
 
         var doc = await readFileAsDocument(blob);
-        assert.strictEqual(
-          doc.querySelector('link[rel="shortcut icon"]').getAttribute('href'),
-          'data:image/bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAAD/AAAA',
-        );
+        assert.strictEqual(doc.querySelector('link[rel="shortcut icon"]').getAttribute('href'), `data:image/bmp;base64,${RED_BMP_B64}`);
       });
     });
 
@@ -8728,7 +8713,7 @@ body { color: red; }`);
         var imgFile = zip.file('red.bmp');
         assert.exists(imgFile);
         var imgData = await imgFile.async('base64');
-        assert.strictEqual(imgData, 'Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAAD/AAAA');
+        assert.strictEqual(imgData, RED_BMP_B64);
 
         // frame2.xhtml
         var frame = frames[1];
@@ -8784,7 +8769,7 @@ body { color: red; }`);
         var imgFile = zip.file('red.bmp');
         assert.exists(imgFile);
         var imgData = await imgFile.async('base64');
-        assert.strictEqual(imgData, 'Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAAD/AAAA');
+        assert.strictEqual(imgData, RED_BMP_B64);
 
         // frame2.xhtml
         var frame = frames[1];
@@ -8898,7 +8883,7 @@ body { color: red; }`);
         var imgFile = zip.file('red.bmp');
         assert.exists(imgFile);
         var imgData = await imgFile.async('base64');
-        assert.strictEqual(imgData, 'Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAAD/AAAA');
+        assert.strictEqual(imgData, RED_BMP_B64);
       });
 
       $it.skipIf(
@@ -8924,7 +8909,7 @@ body { color: red; }`);
         var imgFile = zip.file('red.bmp');
         assert.exists(imgFile);
         var imgData = await imgFile.async('base64');
-        assert.strictEqual(imgData, 'Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAAD/AAAA');
+        assert.strictEqual(imgData, RED_BMP_B64);
       });
 
       it('allow-same-origin', async function () {
@@ -8948,7 +8933,7 @@ body { color: red; }`);
         var imgFile = zip.file('red.bmp');
         assert.exists(imgFile);
         var imgData = await imgFile.async('base64');
-        assert.strictEqual(imgData, 'Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAAD/AAAA');
+        assert.strictEqual(imgData, RED_BMP_B64);
       });
     });
 
@@ -8986,7 +8971,7 @@ body { color: red; }`);
         var imgFile = zip.file('red.bmp');
         assert.exists(imgFile);
         var imgData = await imgFile.async('base64');
-        assert.strictEqual(imgData, 'Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAAD/AAAA');
+        assert.strictEqual(imgData, RED_BMP_B64);
 
         // frame[srcdoc] should be ignored (left unchanged) and its src should be used
         //
@@ -9040,7 +9025,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
 
         assert(srcdoc.querySelector('html[data-scrapbook-source="about:srcdoc"]'));
         assert.strictEqual(srcdoc.querySelector('p').textContent.trim(), `srcdoc content modified`);
-        assert.strictEqual(srcdoc.querySelector('img').getAttribute('src'), 'data:image/bmp;filename=red.bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAAD/AAAA');
+        assert.strictEqual(srcdoc.querySelector('img').getAttribute('src'), `data:image/bmp;filename=red.bmp;base64,${RED_BMP_B64}`);
         assert.notExists(zip.file('red.bmp'));
 
         // frame[srcdoc] should be ignored (left unchanged) and its src should be used
@@ -9403,7 +9388,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
         var imgFile = zip.file('red.bmp');
         assert.exists(imgFile);
         var imgData = await imgFile.async('base64');
-        assert.strictEqual(imgData, 'Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAAD/AAAA');
+        assert.strictEqual(imgData, RED_BMP_B64);
 
         var frame = frames[1];
         assert.strictEqual(frame.getAttribute('src'), `index_2.xhtml`);
@@ -9461,7 +9446,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
         var imgFile = zip.file('red.bmp');
         assert.exists(imgFile);
         var imgData = await imgFile.async('base64');
-        assert.strictEqual(imgData, 'Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAAD/AAAA');
+        assert.strictEqual(imgData, RED_BMP_B64);
 
         // meta refresh in the srcdoc should be resolved according to the base URL of the main document
         var frame = doc.querySelectorAll('iframe')[1];
@@ -9521,7 +9506,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
 
         assert(srcdoc.querySelector('html[data-scrapbook-source="about:srcdoc"]'));
         assert.strictEqual(srcdoc.querySelector('p').textContent.trim(), `srcdoc content`);
-        assert.strictEqual(srcdoc.querySelector('img').getAttribute('src'), 'data:image/bmp;filename=red.bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAAD/AAAA');
+        assert.strictEqual(srcdoc.querySelector('img').getAttribute('src'), `data:image/bmp;filename=red.bmp;base64,${RED_BMP_B64}`);
         assert.notExists(zip.file('red.bmp'));
 
         // meta refresh in the srcdoc should be resolved according to the base URL of the main document
@@ -11185,7 +11170,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
         var imgFile = zip.file('red.bmp');
         assert.exists(imgFile);
         var imgData = await imgFile.async('base64');
-        assert.strictEqual(imgData, 'Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAAD/AAAA');
+        assert.strictEqual(imgData, RED_BMP_B64);
 
         // frame2.xhtml
         var frame = frames[1];
@@ -11440,7 +11425,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
         var imgFile = zip.file('red.bmp');
         assert.exists(imgFile);
         var imgData = await imgFile.async('base64');
-        assert.strictEqual(imgData, 'Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAAD/AAAA');
+        assert.strictEqual(imgData, RED_BMP_B64);
 
         // frame2.xhtml
         var frame = frames[1];

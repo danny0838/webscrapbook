@@ -1,4 +1,4 @@
-import {MochaQuery as $, assert} from "./unittest.mjs";
+import {MochaQuery as $, assert, GREEN_BMP_BYTES} from "./unittest.mjs";
 import sinon from "./lib/sinon-esm.js";
 import {unicodeToUtf8, byteStringToArrayBuffer, readFileAsText} from "./shared/utils/common.mjs";
 
@@ -201,12 +201,11 @@ describe('utils/cache.mjs', function () {
         data: [unicodeToUtf8(text)],
       });
 
-      var bytes = atob('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQIW2Ng/M/wHwAEBQIAs+lPYAAAAABJRU5ErkJggg==');
-      var blob = new Blob([byteStringToArrayBuffer(bytes)], {type: 'image/bmp'});
+      var blob = new Blob([byteStringToArrayBuffer(GREEN_BMP_BYTES)], {type: 'image/bmp'});
       assert.deepEqual(await serializeObject(blob), {
         __type__: 'Blob',
         type: 'image/bmp',
-        data: [bytes],
+        data: [GREEN_BMP_BYTES],
       });
     });
 
@@ -223,14 +222,13 @@ describe('utils/cache.mjs', function () {
         data: [unicodeToUtf8(text)],
       });
 
-      var bytes = atob('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQIW2Ng/M/wHwAEBQIAs+lPYAAAAABJRU5ErkJggg==');
-      var file = new File([byteStringToArrayBuffer(bytes)], 'image.bmp', {type: 'image/bmp', lastModified});
+      var file = new File([byteStringToArrayBuffer(GREEN_BMP_BYTES)], 'image.bmp', {type: 'image/bmp', lastModified});
       assert.deepEqual(await serializeObject(file), {
         __type__: 'File',
         name: 'image.bmp',
         type: 'image/bmp',
         lastModified,
-        data: [bytes],
+        data: [GREEN_BMP_BYTES],
       });
     });
 
@@ -268,26 +266,24 @@ describe('utils/cache.mjs', function () {
 
   describe('deserializeObject()', function () {
     it('should deserialize Blob synchronously', function () {
-      var bytes = atob('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQIW2Ng/M/wHwAEBQIAs+lPYAAAAABJRU5ErkJggg==');
-      var blob = new Blob([byteStringToArrayBuffer(bytes)], {type: 'image/bmp'});
+      var blob = new Blob([byteStringToArrayBuffer(GREEN_BMP_BYTES)], {type: 'image/bmp'});
       assert.deepEqual(deserializeObject({
         __type__: 'Blob',
         type: 'image/bmp',
-        data: [bytes],
+        data: [GREEN_BMP_BYTES],
       }), blob);
     });
 
     it('should deserialize File synchronously', function () {
       var lastModified = Date.now();
 
-      var bytes = atob('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQIW2Ng/M/wHwAEBQIAs+lPYAAAAABJRU5ErkJggg==');
-      var file = new File([byteStringToArrayBuffer(bytes)], 'image.bmp', {type: 'image/bmp', lastModified});
+      var file = new File([byteStringToArrayBuffer(GREEN_BMP_BYTES)], 'image.bmp', {type: 'image/bmp', lastModified});
       assert.deepEqual(deserializeObject({
         __type__: 'File',
         name: 'image.bmp',
         type: 'image/bmp',
         lastModified,
-        data: [bytes],
+        data: [GREEN_BMP_BYTES],
       }), file);
     });
 
