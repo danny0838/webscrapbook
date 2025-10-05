@@ -2802,7 +2802,7 @@ div { image-background: var(${/(--sb(\d+)-2)/}); }`;
     });
   });
 
-  describe('getOffsetInSource()', function () {
+  $describe.skipIf($.noBrowser)('getOffsetInSource()', function () {
     it('should correctly handle `node` and `offset`', function () {
       const sample = document.createElement('template');
       sample.innerHTML = `
