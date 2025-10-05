@@ -1,10 +1,13 @@
+import {MochaQuery as $} from "./unittest.mjs";
 import {
   checkTestServer,
   localhost,
   openTestTab,
 } from "./extension.mjs";
 
-describe('Manual tests', function () {
+const $describe = $(describe);
+
+$describe.skipIf($.noExtensionBrowser)('Manual tests', function () {
   before(async function checkEnvironment() {
     await checkTestServer();
   });
