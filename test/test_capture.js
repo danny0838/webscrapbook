@@ -1846,6 +1846,10 @@ p { background-image: url("about:blank"); }`);
       assert.notExists(doc.querySelector('#next'));
       assert.notExists(doc.querySelector('img[src="blue.bmp"]'));
       assert.notExists(zip.file("blue.bmp"));
+
+      // should contain doctype and full head
+      assert.exists(doc.doctype);
+      assert.exists(doc.querySelector('head style'));
     });
 
     it('select an element', async function () {
@@ -1880,6 +1884,10 @@ p { background-image: url("about:blank"); }`);
       assert.notExists(doc.querySelector('#next'));
       assert.notExists(doc.querySelector('img[src="blue.bmp"]'));
       assert.notExists(zip.file("blue.bmp"));
+
+      // should contain doctype and full head
+      assert.exists(doc.doctype);
+      assert.exists(doc.querySelector('head style'));
     });
 
     it('select in a text node', async function () {
@@ -1914,6 +1922,10 @@ p { background-image: url("about:blank"); }`);
       assert.notExists(doc.querySelector('#next'));
       assert.notExists(doc.querySelector('img[src="blue.bmp"]'));
       assert.notExists(zip.file("blue.bmp"));
+
+      // should contain doctype and full head
+      assert.exists(doc.doctype);
+      assert.exists(doc.querySelector('head style'));
     });
 
     it('select in a comment node', async function () {
@@ -1949,6 +1961,10 @@ p { background-image: url("about:blank"); }`);
       assert.notExists(doc.querySelector('#next'));
       assert.notExists(doc.querySelector('img[src="blue.bmp"]'));
       assert.notExists(zip.file("blue.bmp"));
+
+      // should contain doctype and full head
+      assert.exists(doc.doctype);
+      assert.exists(doc.querySelector('head style'));
     });
 
     it('select in a CDATA node (for XHTML)', async function () {
@@ -1984,6 +2000,10 @@ p { background-image: url("about:blank"); }`);
       assert.notExists(doc.querySelector('#next'));
       assert.notExists(doc.querySelector('img[src="blue.bmp"]'));
       assert.notExists(zip.file("blue.bmp"));
+
+      // should contain doctype and full head
+      assert.exists(doc.doctype);
+      assert.exists(doc.querySelector('head style'));
     });
 
     $it.skipIf($.noMultipleSelection)('multiple ranges', async function () {
