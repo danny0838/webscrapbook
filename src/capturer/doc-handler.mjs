@@ -988,7 +988,7 @@ class CaptureDocumentRewriter extends MapperMixin(CaptureDocumentRewriterBase) {
         };
         const hookBetweenCdata = hookBetweenText;
 
-        const newDoc = PartialDocumentCloner.clone(doc, {
+        return PartialDocumentCloner.clone(doc, {
           selection,
           origNodeMap,
           clonedNodeMap,
@@ -999,43 +999,6 @@ class CaptureDocumentRewriter extends MapperMixin(CaptureDocumentRewriterBase) {
           hookBetweenComment,
           hookBetweenCdata,
         });
-
-        // clone doctype if not yet done
-        const doctypeNode = doc.doctype;
-        if (doctypeNode && !clonedNodeMap.has(doctypeNode)) {
-          newDoc.insertBefore(
-            PartialDocumentCloner.cloneNode(doctypeNode, false, {
-              newDoc, origNodeMap, clonedNodeMap, includeShadowDom,
-            }),
-            newDoc.firstChild,
-          );
-        }
-
-        // clone html if not yet done
-        const {documentElement: docElemNode} = doc;
-        let rootNode = clonedNodeMap.get(docElemNode);
-        if (!rootNode) {
-          PartialDocumentCloner.cloneNodeAndAncestors(docElemNode, {
-            newDoc, origNodeMap, clonedNodeMap, includeShadowDom,
-          });
-          rootNode = clonedNodeMap.get(docElemNode);
-        }
-
-        // clone head if not yet done
-        // (treated as all head is selected if not involved yet)
-        if (rootNode.namespaceURI === NS_HTML) {
-          const headNode = doc.head;
-          if (headNode && !clonedNodeMap.has(headNode)) {
-            rootNode.insertBefore(
-              PartialDocumentCloner.cloneNode(headNode, true, {
-                newDoc, origNodeMap, clonedNodeMap, includeShadowDom,
-              }),
-              rootNode.firstChild,
-            );
-          }
-        }
-
-        return newDoc;
       }
 
       return DocumentCloner.clone(doc, {
@@ -1138,7 +1101,7 @@ class CaptureDocumentRewriter extends MapperMixin(CaptureDocumentRewriterBase) {
   }
 
   async _run() {
-    const rootNode = this.doc.documentElement;
+    const rootNode = this.initRootNode();
     this.initHeadNode();
 
     this.handlePrettyPrint();
@@ -1164,6 +1127,36 @@ class CaptureDocumentRewriter extends MapperMixin(CaptureDocumentRewriterBase) {
     this.recordShadowRoots();
     this.recordCssResourceMap();
     this.recordCustomElements();
+  }
+
+  initRootNode({
+    doc = this.doc,
+  } = {}) {
+    let rootNode = doc.documentElement;
+
+    // generate an appropriate root node when possible
+    if (!rootNode) {
+      switch (doc.contentType) {
+        case "text/xml": {
+          // The root node of XML can be anything and no way to guess
+          throw new Error('Missing document root.');
+        }
+        case "image/svg+xml": {
+          rootNode = doc.appendChild(doc.createElementNS(NS_SVG, "svg"));
+          this.captureRecordAddedNode(rootNode);
+          break;
+        }
+        case "text/html":
+        case "application/xhtml+xml":
+        default: {
+          rootNode = doc.appendChild(doc.createElement("html"));
+          this.captureRecordAddedNode(rootNode);
+          break;
+        }
+      }
+    }
+
+    return rootNode;
   }
 
   initHeadNode({

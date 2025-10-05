@@ -1,5 +1,5 @@
 import {
-  MochaQuery as $, assert,
+  MochaQuery as $, assert, assertRangesEqual,
   GREEN_BMP_BYTES, createNodeFixture, createDomFixture, createDocFixture, createIframeFixture,
 } from "./unittest.mjs";
 import sinon from "./lib/sinon-esm.js";
@@ -734,6 +734,755 @@ describe('utils/doc-cloner.mjs', function () {
       refNode.appendChild(doc.createCDATASection(" … "));
       refNode.appendChild(doc.createComment("/splitter"));
     };
+
+    describe('.clone()', function () {
+      context('option `includeDoctype`', function () {
+        let baseDoc;
+
+        before(function initBaseDoc() {
+          baseDoc = createDocFixture({code: `\
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"></head>
+<body><section></section></body>\
+</html>`});
+          assert.strictEqual(
+            documentToString(baseDoc),
+            `\
+<!DOCTYPE html>\
+<html>\
+<head><meta charset="utf-8"></head>
+<body><section></section></body>\
+</html>`,
+          );
+        });
+
+        it('should clone doctype if exists when truthy', function () {
+          var doc = baseDoc;
+          var selection = [
+            (() => {
+              var range = doc.createRange();
+              range.selectNode(doc.querySelector('section'));
+              return range;
+            })(),
+          ];
+          var origNodeMap = new Map();
+          var clonedNodeMap = new Map();
+          var newDoc = PartialDocumentCloner.clone(doc, {
+            selection, origNodeMap, clonedNodeMap,
+            hookBeforeRange, hookAfterRange,
+            hookBetweenText, hookBetweenComment, hookBetweenCdata,
+            includeDoctype: true,
+            includeRoot: false,
+            includeHead: false,
+            includeBody: false,
+          });
+
+          assert.strictEqual(
+            documentToString(newDoc),
+            `\
+<!DOCTYPE html>\
+<html>\
+<body><!--range--><section></section><!--/range--></body>\
+</html>`,
+          );
+        });
+
+        it('should safely do nothing if doctype does not exist when truthy', function () {
+          var doc = DocumentCloner.clone(baseDoc);
+          doc.doctype.remove();
+          assert.strictEqual(
+            documentToString(doc),
+            `\
+<html>\
+<head><meta charset="utf-8"></head>
+<body><section></section></body>\
+</html>`,
+          );
+
+          var selection = [
+            (() => {
+              var range = doc.createRange();
+              range.selectNode(doc.querySelector('section'));
+              return range;
+            })(),
+          ];
+          var origNodeMap = new Map();
+          var clonedNodeMap = new Map();
+          var newDoc = PartialDocumentCloner.clone(doc, {
+            selection, origNodeMap, clonedNodeMap,
+            hookBeforeRange, hookAfterRange,
+            hookBetweenText, hookBetweenComment, hookBetweenCdata,
+            includeDoctype: true,
+            includeRoot: false,
+            includeHead: false,
+            includeBody: false,
+          });
+
+          assert.strictEqual(
+            documentToString(newDoc),
+            `\
+<html>\
+<body><!--range--><section></section><!--/range--></body>\
+</html>`,
+          );
+        });
+
+        it('should not clone doctype when falsy', function () {
+          var doc = baseDoc;
+          var selection = [
+            (() => {
+              var range = doc.createRange();
+              range.selectNode(doc.querySelector('section'));
+              return range;
+            })(),
+          ];
+          var origNodeMap = new Map();
+          var clonedNodeMap = new Map();
+          var newDoc = PartialDocumentCloner.clone(doc, {
+            selection, origNodeMap, clonedNodeMap,
+            hookBeforeRange, hookAfterRange,
+            hookBetweenText, hookBetweenComment, hookBetweenCdata,
+            includeDoctype: false,
+            includeRoot: false,
+            includeHead: false,
+            includeBody: false,
+          });
+
+          assert.strictEqual(
+            documentToString(newDoc),
+            `\
+<html>\
+<body><!--range--><section></section><!--/range--></body>\
+</html>`,
+          );
+        });
+      });
+
+      context('option `includeRoot`', function () {
+        let baseDoc;
+
+        before(function initBaseDoc() {
+          baseDoc = createDocFixture({code: `\
+<!DOCTYPE html>\
+<!-- before html -->\
+<html>\
+<head><meta charset="utf-8"></head>
+<body><section></section></body>\
+</html>\
+<!-- after html -->`});
+          assert.strictEqual(
+            documentToString(baseDoc),
+            `\
+<!DOCTYPE html>\
+<!-- before html -->\
+<html>\
+<head><meta charset="utf-8"></head>
+<body><section></section></body>\
+</html>\
+<!-- after html -->`,
+          );
+        });
+
+        it('should clone documentElement if exists when truthy', function () {
+          var doc = baseDoc;
+          var selection = [
+            (() => {
+              var range = doc.createRange();
+              range.selectNode(doc.childNodes[1]);
+              return range;
+            })(),
+            (() => {
+              var range = doc.createRange();
+              range.selectNode(doc.lastChild);
+              return range;
+            })(),
+          ];
+          var origNodeMap = new Map();
+          var clonedNodeMap = new Map();
+          var newDoc = PartialDocumentCloner.clone(doc, {
+            selection, origNodeMap, clonedNodeMap,
+            hookBeforeRange, hookAfterRange,
+            hookBetweenText, hookBetweenComment, hookBetweenCdata,
+            includeDoctype: false,
+            includeRoot: true,
+            includeHead: false,
+            includeBody: false,
+          });
+
+          assert.strictEqual(
+            documentToString(newDoc),
+            `\
+<!--range--><!-- before html --><!--/range-->\
+<html></html>\
+<!--range--><!-- after html --><!--/range-->`,
+          );
+        });
+
+        it('should safely do nothing if documentElement does not exist when truthy', function () {
+          var doc = DocumentCloner.clone(baseDoc);
+          doc.documentElement.remove();
+          assert.strictEqual(
+            documentToString(doc),
+            `\
+<!DOCTYPE html>\
+<!-- before html -->\
+<!-- after html -->`,
+          );
+
+          var selection = [
+            (() => {
+              var range = doc.createRange();
+              range.selectNode(doc.childNodes[1]);
+              return range;
+            })(),
+            (() => {
+              var range = doc.createRange();
+              range.selectNode(doc.lastChild);
+              return range;
+            })(),
+          ];
+          var origNodeMap = new Map();
+          var clonedNodeMap = new Map();
+          var newDoc = PartialDocumentCloner.clone(doc, {
+            selection, origNodeMap, clonedNodeMap,
+            hookBeforeRange, hookAfterRange,
+            hookBetweenText, hookBetweenComment, hookBetweenCdata,
+            includeDoctype: false,
+            includeRoot: true,
+            includeHead: false,
+            includeBody: false,
+          });
+
+          assert.strictEqual(
+            documentToString(newDoc),
+            `\
+<!--range--><!-- before html --><!--/range-->\
+<!--range--><!-- after html --><!--/range-->`,
+          );
+        });
+
+        it('should not clone documentElement when falsy', function () {
+          var doc = baseDoc;
+          var selection = [
+            (() => {
+              var range = doc.createRange();
+              range.selectNode(doc.childNodes[1]);
+              return range;
+            })(),
+            (() => {
+              var range = doc.createRange();
+              range.selectNode(doc.lastChild);
+              return range;
+            })(),
+          ];
+          var origNodeMap = new Map();
+          var clonedNodeMap = new Map();
+          var newDoc = PartialDocumentCloner.clone(doc, {
+            selection, origNodeMap, clonedNodeMap,
+            hookBeforeRange, hookAfterRange,
+            hookBetweenText, hookBetweenComment, hookBetweenCdata,
+            includeDoctype: false,
+            includeRoot: false,
+            includeHead: false,
+            includeBody: false,
+          });
+
+          assert.strictEqual(
+            documentToString(newDoc),
+            `\
+<!--range--><!-- before html --><!--/range-->\
+<!--range--><!-- after html --><!--/range-->`,
+          );
+        });
+
+        it('should safely do nothing if documentElement is cloned with selected descendants when falsy', function () {
+          var doc = baseDoc;
+          var selection = [
+            (() => {
+              var range = doc.createRange();
+              range.selectNode(doc.querySelector('section'));
+              return range;
+            })(),
+          ];
+          var origNodeMap = new Map();
+          var clonedNodeMap = new Map();
+          var newDoc = PartialDocumentCloner.clone(doc, {
+            selection, origNodeMap, clonedNodeMap,
+            hookBeforeRange, hookAfterRange,
+            hookBetweenText, hookBetweenComment, hookBetweenCdata,
+            includeDoctype: false,
+            includeRoot: false,
+            includeHead: false,
+            includeBody: false,
+          });
+
+          assert.strictEqual(
+            documentToString(newDoc),
+            `\
+<html>\
+<body><!--range--><section></section><!--/range--></body>\
+</html>`,
+          );
+        });
+      });
+
+      context('option `includeHead`', function () {
+        let baseDoc;
+
+        before(function initBaseDoc() {
+          baseDoc = createDocFixture({code: `\
+<!DOCTYPE html>\
+<html>\
+<head>
+<meta charset="utf-8">
+<title>mytitle</title>
+</head>
+<body><section></section></body>\
+</html>`});
+          assert.strictEqual(
+            documentToString(baseDoc),
+            `\
+<!DOCTYPE html>\
+<html>\
+<head>
+<meta charset="utf-8">
+<title>mytitle</title>
+</head>
+<body><section></section></body>\
+</html>`,
+          );
+        });
+
+        it('should clone head if exists when truthy', function () {
+          var doc = baseDoc;
+          var selection = [
+            (() => {
+              var range = doc.createRange();
+              range.selectNode(doc.querySelector('section'));
+              return range;
+            })(),
+          ];
+          var origNodeMap = new Map();
+          var clonedNodeMap = new Map();
+          var newDoc = PartialDocumentCloner.clone(doc, {
+            selection, origNodeMap, clonedNodeMap,
+            hookBeforeRange, hookAfterRange,
+            hookBetweenText, hookBetweenComment, hookBetweenCdata,
+            includeDoctype: false,
+            includeRoot: false,
+            includeHead: true,
+            includeBody: false,
+          });
+
+          assert.strictEqual(
+            documentToString(newDoc),
+            `\
+<html>\
+<head>
+<meta charset="utf-8">
+<title>mytitle</title>
+</head>\
+<body><!--range--><section></section><!--/range--></body>\
+</html>`,
+          );
+        });
+
+        it('should safely do nothing if head does not exist when truthy', function () {
+          var doc = DocumentCloner.clone(baseDoc);
+          doc.head.remove();
+          assert.strictEqual(
+            documentToString(doc),
+            `\
+<!DOCTYPE html>\
+<html>
+<body><section></section></body>\
+</html>`,
+          );
+
+          var selection = [
+            (() => {
+              var range = doc.createRange();
+              range.selectNode(doc.querySelector('section'));
+              return range;
+            })(),
+          ];
+          var origNodeMap = new Map();
+          var clonedNodeMap = new Map();
+          var newDoc = PartialDocumentCloner.clone(doc, {
+            selection, origNodeMap, clonedNodeMap,
+            hookBeforeRange, hookAfterRange,
+            hookBetweenText, hookBetweenComment, hookBetweenCdata,
+            includeDoctype: false,
+            includeRoot: false,
+            includeHead: false,
+            includeBody: false,
+          });
+
+          assert.strictEqual(
+            documentToString(newDoc),
+            `\
+<html>\
+<body><!--range--><section></section><!--/range--></body>\
+</html>`,
+          );
+        });
+
+        it('should not clone head when falsy', function () {
+          var doc = baseDoc;
+          var selection = [
+            (() => {
+              var range = doc.createRange();
+              range.selectNode(doc.querySelector('section'));
+              return range;
+            })(),
+          ];
+          var origNodeMap = new Map();
+          var clonedNodeMap = new Map();
+          var newDoc = PartialDocumentCloner.clone(doc, {
+            selection, origNodeMap, clonedNodeMap,
+            hookBeforeRange, hookAfterRange,
+            hookBetweenText, hookBetweenComment, hookBetweenCdata,
+            includeDoctype: false,
+            includeRoot: false,
+            includeHead: false,
+            includeBody: false,
+          });
+
+          assert.strictEqual(
+            documentToString(newDoc),
+            `\
+<html>\
+<body><!--range--><section></section><!--/range--></body>\
+</html>`,
+          );
+        });
+
+        it('should safely do nothing if head is cloned with selected descendants when falsy', function () {
+          var doc = baseDoc;
+          var selection = [
+            (() => {
+              var range = doc.createRange();
+              range.selectNode(doc.querySelector('meta'));
+              return range;
+            })(),
+          ];
+          var origNodeMap = new Map();
+          var clonedNodeMap = new Map();
+          var newDoc = PartialDocumentCloner.clone(doc, {
+            selection, origNodeMap, clonedNodeMap,
+            hookBeforeRange, hookAfterRange,
+            hookBetweenText, hookBetweenComment, hookBetweenCdata,
+            includeDoctype: false,
+            includeRoot: false,
+            includeHead: false,
+            includeBody: false,
+          });
+
+          assert.strictEqual(
+            documentToString(newDoc),
+            `\
+<html>\
+<head>\
+<!--range--><meta charset="utf-8"><!--/range-->\
+</head>\
+</html>`,
+          );
+        });
+      });
+
+      context('option `includeBody`', function () {
+        var doc;
+
+        before(function initDoc() {
+          doc = createDocFixture({code: `\
+<!DOCTYPE html>\
+<html>\
+<head><meta charset="utf-8"></head>
+<body><section></section></body>\
+</html>`});
+          doc.body.insertAdjacentHTML('afterend', '<script>console.log("after body");</script>');
+          assert.strictEqual(
+            documentToString(doc),
+            `\
+<!DOCTYPE html>\
+<html>\
+<head><meta charset="utf-8"></head>
+<body><section></section></body>\
+<script>console.log("after body");</script>\
+</html>`,
+          );
+        });
+
+        it('should clone body if exists when truthy', function () {
+          var selection = [
+            (() => {
+              var range = doc.createRange();
+              range.selectNode(doc.querySelector('script'));
+              return range;
+            })(),
+          ];
+          var origNodeMap = new Map();
+          var clonedNodeMap = new Map();
+          var newDoc = PartialDocumentCloner.clone(doc, {
+            selection, origNodeMap, clonedNodeMap,
+            hookBeforeRange, hookAfterRange,
+            hookBetweenText, hookBetweenComment, hookBetweenCdata,
+            includeDoctype: false,
+            includeRoot: false,
+            includeHead: false,
+            includeBody: true,
+          });
+
+          assert.strictEqual(
+            documentToString(newDoc),
+            `\
+<html>\
+<body></body>\
+<!--range--><script>console.log("after body");</script><!--/range-->\
+</html>`,
+          );
+        });
+
+        it('should safely do nothing if body does not exist when truthy', function () {
+          var doc = createDocFixture({code: `\
+<!DOCTYPE html>\
+<html>\
+<head><meta charset="utf-8"></head>
+<body><section></section></body>\
+</html>`});
+          doc.body.remove();
+          assert.strictEqual(
+            documentToString(doc),
+            `\
+<!DOCTYPE html>\
+<html>\
+<head><meta charset="utf-8"></head>
+</html>`,
+          );
+
+          var selection = [
+            (() => {
+              var range = doc.createRange();
+              range.selectNode(doc.querySelector('meta'));
+              return range;
+            })(),
+          ];
+          var origNodeMap = new Map();
+          var clonedNodeMap = new Map();
+          var newDoc = PartialDocumentCloner.clone(doc, {
+            selection, origNodeMap, clonedNodeMap,
+            hookBeforeRange, hookAfterRange,
+            hookBetweenText, hookBetweenComment, hookBetweenCdata,
+            includeDoctype: false,
+            includeRoot: false,
+            includeHead: false,
+            includeBody: true,
+          });
+
+          assert.strictEqual(
+            documentToString(newDoc),
+            `\
+<html>\
+<head><!--range--><meta charset="utf-8"><!--/range--></head>\
+</html>`,
+          );
+        });
+
+        it('should not clone body when falsy', function () {
+          var selection = [
+            (() => {
+              var range = doc.createRange();
+              range.selectNode(doc.querySelector('script'));
+              return range;
+            })(),
+          ];
+          var origNodeMap = new Map();
+          var clonedNodeMap = new Map();
+          var newDoc = PartialDocumentCloner.clone(doc, {
+            selection, origNodeMap, clonedNodeMap,
+            hookBeforeRange, hookAfterRange,
+            hookBetweenText, hookBetweenComment, hookBetweenCdata,
+            includeDoctype: false,
+            includeRoot: false,
+            includeHead: false,
+            includeBody: false,
+          });
+
+          assert.strictEqual(
+            documentToString(newDoc),
+            `\
+<html>\
+<!--range--><script>console.log("after body");</script><!--/range-->\
+</html>`,
+          );
+        });
+
+        it('should safely do nothing if body is cloned with selected descendants when falsy', function () {
+          var selection = [
+            (() => {
+              var range = doc.createRange();
+              range.selectNode(doc.querySelector('section'));
+              return range;
+            })(),
+          ];
+          var origNodeMap = new Map();
+          var clonedNodeMap = new Map();
+          var newDoc = PartialDocumentCloner.clone(doc, {
+            selection, origNodeMap, clonedNodeMap,
+            hookBeforeRange, hookAfterRange,
+            hookBetweenText, hookBetweenComment, hookBetweenCdata,
+            includeDoctype: false,
+            includeRoot: false,
+            includeHead: false,
+            includeBody: false,
+          });
+
+          assert.strictEqual(
+            documentToString(newDoc),
+            `\
+<html>\
+<body><!--range--><section></section><!--/range--></body>\
+</html>`,
+          );
+        });
+
+      });
+
+      context('default options', function () {
+        let baseDoc;
+
+        before(function initBaseDoc() {
+          baseDoc = createDocFixture({code: `\
+<!DOCTYPE html>\
+<html>\
+<head>
+<meta charset="utf-8">
+</head>
+<body>
+<section>text<div><br></div><!--comment--></section>
+</body>\
+</html>`});
+          assert.strictEqual(
+            documentToString(baseDoc),
+            `\
+<!DOCTYPE html>\
+<html>\
+<head>
+<meta charset="utf-8">
+</head>
+<body>
+<section>text<div><br></div><!--comment--></section>
+</body>\
+</html>`,
+          );
+        });
+
+        it('should clone the selected nodes with ancestors', function () {
+          var doc = baseDoc;
+          var selection = [
+            (() => {
+              var range = doc.createRange();
+              range.selectNode(doc.querySelector('div'));
+              return range;
+            })(),
+          ];
+          var origNodeMap = new Map();
+          var clonedNodeMap = new Map();
+          var newDoc = PartialDocumentCloner.clone(doc, {
+            selection, origNodeMap, clonedNodeMap,
+            hookBeforeRange, hookAfterRange,
+            hookBetweenText, hookBetweenComment, hookBetweenCdata,
+          });
+
+          assert.strictEqual(
+            documentToString(newDoc),
+            `\
+<!DOCTYPE html>\
+<html>\
+<head>
+<meta charset="utf-8">
+</head>\
+<body>\
+<section><!--range--><div><br></div><!--/range--></section>\
+</body>\
+</html>`,
+          );
+        });
+
+        it('should clone doctype, documentElement, head, and body when no selection', function () {
+          var doc = baseDoc;
+          var selection = [];
+          var origNodeMap = new Map();
+          var clonedNodeMap = new Map();
+          var newDoc = PartialDocumentCloner.clone(doc, {
+            selection, origNodeMap, clonedNodeMap,
+            hookBeforeRange, hookAfterRange,
+            hookBetweenText, hookBetweenComment, hookBetweenCdata,
+          });
+
+          assert.strictEqual(
+            documentToString(newDoc),
+            `\
+<!DOCTYPE html>\
+<html>\
+<head>
+<meta charset="utf-8">
+</head>\
+<body></body>\
+</html>`,
+          );
+        });
+      });
+
+      context('shadow DOM handling', function () {
+        it('should treat each range in a shadow DOM as selecting the outermost shadow root', function () {
+          var stub = sinon.stub(PartialDocumentCloner, 'cloneSelection');
+
+          var doc = createDocFixture({name: 'div', shadow: {
+            children: [
+              {name: 'div', shadow: {
+                children: [
+                  {name: 'span', value: 'text'},
+                ],
+              }},
+            ],
+          }});
+          var ranges = [
+            (() => {
+              var range = doc.createRange();
+              range.selectNode(doc.querySelector('div').shadowRoot.querySelector('div').shadowRoot.querySelector('span'));
+              return range;
+            })(),
+          ];
+          var origNodeMap = new Map();
+          var clonedNodeMap = new Map();
+          PartialDocumentCloner.clone(doc, {
+            selection: ranges,
+            origNodeMap,
+            clonedNodeMap,
+            includeDoctype: false,
+            includeRoot: false,
+            includeHead: false,
+            includeBody: false,
+          });
+
+          sinon.assert.calledOnceWithMatch(stub, doc, {
+            ranges: sinon.match.array,
+            origNodeMap,
+            clonedNodeMap,
+          });
+          assertRangesEqual(
+            stub.getCall(0).args[1].ranges[0],
+            (() => {
+              var range = doc.createRange();
+              range.selectNode(doc.querySelector('div'));
+              return range;
+            })(),
+          );
+        });
+      });
+    });
 
     describe('.cloneSelection()', function () {
       context('for single range', function () {
@@ -1676,6 +2425,122 @@ describe('utils/doc-cloner.mjs', function () {
               {newDoc, origNodeMap, clonedNodeMap, includeShadowDom: undefined},
             );
             assert.isNull(spy.getCall(4));
+          });
+        });
+      });
+
+      context('for special ranges', function () {
+        let baseDoc;
+
+        before(function initBaseDoc() {
+          baseDoc = createDocFixture({code: `\
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+</head>
+<body>
+<section>text<div><br></div><!--comment--></section>
+</body>
+</html>`});
+        });
+
+        context('when selecting nodes', function () {
+          it('should ignore `hookBeforeRange`/`hookAfterRange`', function () {
+            var spy = sinon.spy(PartialDocumentCloner, 'cloneNodeAndAncestors');
+
+            var doc = baseDoc;
+            var ranges = [
+              (() => {
+                var range = doc.createRange();
+                range.setStart(doc.querySelector('section'), 0);
+                range.setEnd(doc.querySelector('section').lastChild, 3);
+                return range;
+              })(),
+              (() => {
+                var range = doc.createRange();
+                range.setStart(doc.querySelector('section').lastChild, 4);
+                range.setEnd(doc.querySelector('section').lastChild, 7);
+                return range;
+              })(),
+            ];
+            var specialRanges = new Set(ranges);
+            var origNodeMap = new Map();
+            var clonedNodeMap = new Map();
+            var newDoc = PartialDocumentCloner.cloneSelection(doc, {
+              ranges, specialRanges, origNodeMap, clonedNodeMap,
+              hookBeforeRange, hookAfterRange, hookBetweenText, hookBetweenComment, hookBetweenCdata,
+            });
+
+            assert.strictEqual(
+              documentToString(newDoc),
+              `\
+<html>\
+<body>\
+<section>text<div><br></div><!--com--><!--splitter--><!-- … --><!--/splitter--><!--ent--></section>\
+</body>\
+</html>`,
+            );
+
+            sinon.assert.calledWithExactly(spy.getCall(0),
+              doc.querySelector('section'),
+              {newDoc, origNodeMap, clonedNodeMap, includeShadowDom: undefined},
+            );
+            sinon.assert.calledWithExactly(spy.getCall(1),
+              doc.querySelector('section').firstChild,
+              {newDoc, origNodeMap, clonedNodeMap, includeShadowDom: undefined},
+            );
+            sinon.assert.calledWithExactly(spy.getCall(2),
+              doc.querySelector('section div'),
+              {newDoc, origNodeMap, clonedNodeMap, includeShadowDom: undefined},
+            );
+            sinon.assert.calledWithExactly(spy.getCall(3),
+              doc.querySelector('section br'),
+              {newDoc, origNodeMap, clonedNodeMap, includeShadowDom: undefined},
+            );
+            sinon.assert.calledWithExactly(spy.getCall(4),
+              doc.querySelector('section'),
+              {newDoc, origNodeMap, clonedNodeMap, includeShadowDom: undefined},
+            );
+            sinon.assert.calledWithExactly(spy.getCall(5),
+              doc.querySelector('section'),
+              {newDoc, origNodeMap, clonedNodeMap, includeShadowDom: undefined},
+            );
+            assert.isNull(spy.getCall(6));
+          });
+        });
+
+        context('when collapsed', function () {
+          it('should clone the common ancestor node with ancestors', function () {
+            var spy = sinon.spy(PartialDocumentCloner, 'cloneNodeAndAncestors');
+
+            var doc = baseDoc;
+            var ranges = [
+              (() => {
+                var range = doc.createRange();
+                range.setStart(doc.querySelector('section'), 0);
+                range.setEnd(doc.querySelector('section'), 0);
+                return range;
+              })(),
+            ];
+            var specialRanges = new Set(ranges);
+            var origNodeMap = new Map();
+            var clonedNodeMap = new Map();
+            var newDoc = PartialDocumentCloner.cloneSelection(doc, {
+              ranges, specialRanges, origNodeMap, clonedNodeMap,
+              hookBeforeRange, hookAfterRange, hookBetweenText, hookBetweenComment, hookBetweenCdata,
+            });
+
+            assert.strictEqual(
+              documentToString(newDoc),
+              '<html><body><section></section></body></html>',
+            );
+
+            sinon.assert.calledWithExactly(spy.getCall(0),
+              doc.querySelector('section'),
+              {newDoc, origNodeMap, clonedNodeMap, includeShadowDom: undefined},
+            );
+            assert.isNull(spy.getCall(1));
           });
         });
       });

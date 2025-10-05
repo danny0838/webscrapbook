@@ -60,7 +60,7 @@ class BaseCapturer {
     if (!["text/html", "application/xhtml+xml", "image/svg+xml"].includes(doc.contentType)) {
       // handle saveFileAsHtml
       // if the document can be rendered as HTML, save as a normal HTML file
-      if (doc.documentElement.namespaceURI === NS_HTML && options["capture.saveFileAsHtml"]) {
+      if (doc.documentElement?.namespaceURI === NS_HTML && options["capture.saveFileAsHtml"]) {
         return await this.captureDocument({
           doc,
           docUrl,

@@ -964,6 +964,163 @@ describe('capturer/doc-handler.mjs', function () {
       });
     });
 
+    describe('#_initDocument()', function () {
+      let spyAdded;
+
+      beforeEach(function () {
+        // stub to terminate execution just after `initHeadNode`
+        const doneSignal = {};
+        const stubRun = sinon.stub(CaptureDocumentRewriter.prototype, '_run').callsFake(async function (...args) {
+          try {
+            await stubRun.wrappedMethod.apply(this, args);
+          } catch (ex) {
+            if (ex !== doneSignal) {
+              throw ex;
+            }
+          }
+        });
+        const stubInitHeadNode = sinon.stub(CaptureDocumentRewriter.prototype, 'initHeadNode').callsFake(function (...args) {
+          stubInitHeadNode.wrappedMethod.apply(this, args);
+          throw doneSignal;
+        });
+
+        spyAdded = sinon.spy(CaptureDocumentRewriter.prototype, 'captureRecordAddedNode');
+      });
+
+      context('for HTML document', function () {
+        it('should generate root and head if not exist', async function () {
+          var doc = createDocFixture();
+          doc.documentElement.remove();
+
+          var {doc} = await new TestCapturer().captureDocument({doc});
+          var rootNode = doc.documentElement;
+          var headNode = doc.head;
+
+          assert.strictEqual(rootNode.nodeName, 'HTML');
+          assert.strictEqual(rootNode.namespaceURI, NS_HTML);
+          assert.strictEqual(headNode.nodeName, 'HEAD');
+          assert.strictEqual(headNode.namespaceURI, NS_HTML);
+          sinon.assert.calledWithExactly(spyAdded.getCall(0), rootNode);
+          sinon.assert.calledWithExactly(spyAdded.getCall(1), headNode);
+        });
+
+        it('should generate head if not exist', async function () {
+          var doc = createDocFixture();
+          doc.head.remove();
+
+          var {doc} = await new TestCapturer().captureDocument({doc});
+          var headNode = doc.head;
+
+          assert.strictEqual(headNode.nodeName, 'HEAD');
+          assert.strictEqual(headNode.namespaceURI, NS_HTML);
+          sinon.assert.calledWithExactly(spyAdded.getCall(0), doc.head);
+        });
+      });
+
+      context('for HTML-like document', function () {
+        it('should generate root and head if not exist', async function () {
+          var blob = new Blob([GREEN_BMP_BYTES], {type: 'image/bmp'});
+          var iframe = await createIframeFixture({
+            src: URL.createObjectURL(blob),
+          });
+          var doc = iframe.contentDocument;
+          doc.documentElement.remove();
+          assert.strictEqual(doc.contentType, 'image/bmp');
+
+          var {doc} = await new TestCapturer().captureDocument({doc});
+          var rootNode = doc.documentElement;
+          var headNode = doc.head;
+
+          assert.strictEqual(rootNode.nodeName, 'HTML');
+          assert.strictEqual(rootNode.namespaceURI, NS_HTML);
+          assert.strictEqual(headNode.nodeName, 'HEAD');
+          assert.strictEqual(headNode.namespaceURI, NS_HTML);
+          sinon.assert.calledWithExactly(spyAdded.getCall(0), rootNode);
+          sinon.assert.calledWithExactly(spyAdded.getCall(1), headNode);
+        });
+
+        it('should generate head if not exist', async function () {
+          var blob = new Blob([GREEN_BMP_BYTES], {type: 'image/bmp'});
+          var iframe = await createIframeFixture({
+            src: URL.createObjectURL(blob),
+          });
+          var doc = iframe.contentDocument;
+          doc.head.remove();
+          assert.strictEqual(doc.contentType, 'image/bmp');
+
+          var {doc} = await new TestCapturer().captureDocument({doc});
+          var headNode = doc.head;
+
+          assert.strictEqual(headNode.nodeName, 'HEAD');
+          assert.strictEqual(headNode.namespaceURI, NS_HTML);
+          sinon.assert.calledWithExactly(spyAdded.getCall(0), headNode);
+        });
+      });
+
+      context('for XHTML document', function () {
+        it('should generate root and head if not exist', async function () {
+          var doc = createDocFixture({type: 'xhtml'});
+          doc.documentElement.remove();
+
+          var {doc} = await new TestCapturer().captureDocument({doc});
+          var rootNode = doc.documentElement;
+          var headNode = doc.head;
+
+          assert.strictEqual(rootNode.nodeName, 'html');
+          assert.strictEqual(rootNode.namespaceURI, NS_HTML);
+          assert.strictEqual(headNode.nodeName, 'head');
+          assert.strictEqual(headNode.namespaceURI, NS_HTML);
+          sinon.assert.calledWithExactly(spyAdded.getCall(0), rootNode);
+          sinon.assert.calledWithExactly(spyAdded.getCall(1), headNode);
+        });
+
+        it('should generate head if not exist', async function () {
+          var doc = createDocFixture({type: 'xhtml'});
+          doc.head.remove();
+
+          var {doc} = await new TestCapturer().captureDocument({doc});
+          var headNode = doc.head;
+
+          assert.strictEqual(headNode.nodeName, 'head');
+          assert.strictEqual(headNode.namespaceURI, NS_HTML);
+          sinon.assert.calledWithExactly(spyAdded.getCall(0), headNode);
+        });
+      });
+
+      context('for SVG document', function () {
+        it('should generate root if not exist', async function () {
+          var doc = createDocFixture({type: 'svg'});
+          doc.documentElement.remove();
+
+          var {doc} = await new TestCapturer().captureDocument({doc});
+          var rootNode = doc.documentElement;
+          var headNode = doc.head;
+
+          assert.strictEqual(rootNode.nodeName, 'svg');
+          assert.strictEqual(rootNode.namespaceURI, NS_SVG);
+          assert.isNull(headNode);
+          sinon.assert.calledWithExactly(spyAdded.getCall(0), rootNode);
+        });
+      });
+
+      context('for XML document', function () {
+        it('should throw if root not exist', async function () {
+          var doc = createDocFixture({type: 'xml'});
+          doc.documentElement.remove();
+
+          var error;
+          try {
+            await new TestCapturer().captureDocument({doc});
+          } catch (ex) {
+            error = ex;
+          }
+
+          assert.instanceOf(error, Error);
+          assert.strictEqual(error.message, 'Missing document root.');
+        });
+      });
+    });
+
     describe('#rewriteRecursively()', function () {
       function docFactory() {
         return createNodeFixture({name: 'main', id: 'e', children: [

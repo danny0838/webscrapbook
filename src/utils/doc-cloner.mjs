@@ -149,8 +149,102 @@ class PartialDocumentCloner extends DocumentCloner {
     hookBetweenText,
     hookBetweenComment,
     hookBetweenCdata,
+    includeDoctype = true,
+    includeRoot = true,
+    includeHead = true,
+    includeBody = true,
   } = {}) {
-    const ranges = getSelectionRanges(selection);
+    const specialRanges = new Set();
+    let ranges = getSelectionRanges(selection);
+
+    // @TODO:
+    // A selection in a shadow root requires special care.
+    // Currently treat as selecting the topmost host to prevent issues:
+    // - Compare ranges in different document/shadowRoot during sort.
+    // - Clone nodes across shadow roots.
+    // - Selected shadow root contents don't contain <style>, <link>, etc.
+    // - If not `includeShadowDom`.
+    // - If shadow root is clonable.
+    for (let i = 0, I = ranges.length; i < I; i++) {
+      const range = ranges[i];
+      let ca = range.commonAncestorContainer;
+      let node = ca;
+      let root = node.getRootNode();
+      while (root.host) {
+        node = root.host;
+        root = node.getRootNode();
+      }
+      if (node === ca) { continue; }
+      const newRange = doc.createRange();
+      newRange.selectNode(node);
+      ranges[i] = newRange;
+    }
+
+    // include special nodes when requested
+    if (includeDoctype) {
+      const doctypeNode = doc.doctype;
+      if (doctypeNode) {
+        const range = doc.createRange();
+        range.selectNode(doctypeNode);
+        ranges.push(range);
+        specialRanges.add(range);
+      }
+    }
+
+    if (includeRoot) {
+      const rootNode = doc.documentElement;
+      if (rootNode) {
+        const range = doc.createRange();
+        range.setStart(rootNode, 0);
+        range.setEnd(rootNode, 0);
+        ranges.push(range);
+        specialRanges.add(range);
+      }
+    }
+
+    if (includeHead) {
+      const headNode = doc.head;
+      if (headNode) {
+        const range = doc.createRange();
+        range.selectNode(headNode);
+        ranges.push(range);
+        specialRanges.add(range);
+      }
+    }
+
+    if (includeBody) {
+      const bodyNode = doc.body;
+      if (bodyNode) {
+        const range = doc.createRange();
+        range.setStart(bodyNode, 0);
+        range.setEnd(bodyNode, 0);
+        ranges.push(range);
+        specialRanges.add(range);
+      }
+    }
+
+    // sort the ranges
+    ranges.sort((r1, r2) => {
+      const deltaStart = r1.compareBoundaryPoints(Range.START_TO_START, r2);
+      if (deltaStart !== 0) { return deltaStart; }
+      const deltaEnd = r1.compareBoundaryPoints(Range.END_TO_END, r2);
+      return deltaEnd;
+    });
+
+    // prevent range overlap
+    for (let i = 0, I = ranges.length; i < I; i++) {
+      const range = ranges[i];
+      for (let j = 0; j < i; j++) {
+        const refRange = ranges[j];
+        if (range.compareBoundaryPoints(Range.END_TO_START, refRange) < 0) {
+          range.setStart(refRange.endContainer, refRange.endOffset);
+        }
+      }
+    }
+
+    // remove collapsed ranges (except for special)
+    ranges = ranges.filter(r => !r.collapsed || specialRanges.has(r));
+
     return this.cloneSelection(doc, {
       ranges,
       origNodeMap,
@@ -161,6 +255,7 @@ class PartialDocumentCloner extends DocumentCloner {
       hookBetweenText,
       hookBetweenComment,
       hookBetweenCdata,
+      specialRanges,
     });
   }
 
@@ -177,6 +272,7 @@ class PartialDocumentCloner extends DocumentCloner {
    * @param {Function} [options.hookBetweenText]
    * @param {Function} [options.hookBetweenComment]
    * @param {Function} [options.hookBetweenCdata]
+   * @param {Set<Range>} [options.specialRanges]
    * @return {Document} The cloned document.
    */
   static cloneSelection(doc, {
@@ -189,6 +285,7 @@ class PartialDocumentCloner extends DocumentCloner {
     hookBetweenText,
     hookBetweenComment,
     hookBetweenCdata,
+    specialRanges,
   } = {}) {
     const newDoc = this.cloneDocument(doc, {origNodeMap, clonedNodeMap});
     const options = {newDoc, origNodeMap, clonedNodeMap, includeShadowDom};
@@ -197,30 +294,15 @@ class PartialDocumentCloner extends DocumentCloner {
     let curRange, caNode, scNode, ecNode, lastTextNode;
     for (curRange of ranges) {
       // skip a collapsed range
+      // specially treat a special range as cloning the parent node
       if (curRange.collapsed) {
+        if (specialRanges?.has(curRange)) {
+          this.cloneNodeAndAncestors(curRange.commonAncestorContainer, options);
+        }
         continue;
       }
 
       caNode = curRange.commonAncestorContainer;
-
-      // @TODO:
-      // A selection in a shadow root requires special care.
-      // Currently treat as selecting the topmost host for simplicity and
-      // prevent an issue if capturing shadow DOM is disabled.
-      handleShadowRoot: {
-        let selNode = caNode;
-        let selNodeRoot = selNode.getRootNode();
-        while (selNodeRoot instanceof ShadowRoot) {
-          selNode = selNodeRoot.host;
-          selNodeRoot = selNode.getRootNode();
-        }
-        if (selNode !== caNode) {
-          curRange = new Range();
-          curRange.selectNode(selNode);
-          caNode = curRange.commonAncestorContainer;
-        }
-      }
-
       scNode = curRange.startContainer;
       ecNode = curRange.endContainer;
 
@@ -253,7 +335,9 @@ class PartialDocumentCloner extends DocumentCloner {
 
       // Clone sparingly selected nodes in the common ancestor.
       // (with special handling of text nodes)
-      hookBeforeRange?.(clonedRefNode);
+      if (!specialRanges?.has(curRange)) {
+        hookBeforeRange?.(clonedRefNode);
+      }
 
       const iterator = doc.createNodeIterator(refNode, NodeFilter.SHOW_ALL & ~NodeFilter.SHOW_DOCUMENT);
       let node;
@@ -297,7 +381,9 @@ class PartialDocumentCloner extends DocumentCloner {
         this.cloneNodeAndAncestors(node, options);
       }
 
-      hookAfterRange?.(clonedRefNode);
+      if (!specialRanges?.has(curRange)) {
+        hookAfterRange?.(clonedRefNode);
+      }
     }
 
     return newDoc;
