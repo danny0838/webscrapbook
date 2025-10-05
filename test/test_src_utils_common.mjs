@@ -1,4 +1,8 @@
-import {MochaQuery as $, assert, encodeText, cssRegex} from "./unittest.mjs";
+import {
+  MochaQuery as $, assert,
+  encodeText, cssRegex,
+  GREEN_BMP_B64,
+} from "./unittest.mjs";
 
 import * as utils from "./shared/utils/common.mjs";
 
@@ -652,7 +656,7 @@ describe('utils/common.mjs', function () {
       assert.deepEqual([...new Uint8Array(buffer)], [0xFF, 0xFE, 0x40, 0xD8, 0x00, 0xDC]);
 
       // blob of green bmp
-      var bstr = atob('Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAP8AAAAA');
+      var bstr = atob(GREEN_BMP_B64);
       var buffer = utils.byteStringToArrayBuffer(bstr);
       assert.deepEqual(
         [...new Uint8Array(buffer)],
@@ -681,10 +685,7 @@ describe('utils/common.mjs', function () {
 
       // blob of green bmp
       var buffer = new Uint8Array([66, 77, 60, 0, 0, 0, 0, 0, 0, 0, 54, 0, 0, 0, 40, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 32, 0, 0, 0, 0, 0, 6, 0, 0, 0, 18, 11, 0, 0, 18, 11, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 255, 0, 0, 0, 0]);
-      assert.strictEqual(
-        btoa(utils.arrayBufferToByteString(buffer)),
-        "Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAP8AAAAA",
-      );
+      assert.strictEqual(btoa(utils.arrayBufferToByteString(buffer)), GREEN_BMP_B64);
     });
   });
 
@@ -1559,11 +1560,11 @@ describe('utils/common.mjs', function () {
 
   $describe.skipIf($.noBrowser)('readFileAsDataURL()', function () {
     it('basic', async function () {
-      var greenBmp = atob('Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAP8AAAAA');
+      var greenBmp = atob(GREEN_BMP_B64);
       var ab = utils.byteStringToArrayBuffer(greenBmp);
       var blob = new Blob([ab], {type: "image/bmp"});
       var datauri = await utils.readFileAsDataURL(blob);
-      assert.strictEqual(datauri, "data:image/bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAP8AAAAA");
+      assert.strictEqual(datauri, `data:image/bmp;base64,${GREEN_BMP_B64}`);
     });
   });
 
