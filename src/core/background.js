@@ -196,9 +196,9 @@ background.findBookIdFromUrl = async function ({url}, sender) {
  *
  * @type invokable
  * @return {Object|null|false} The located item.
- *     - Object: the located item
- *     - null: no item located
- *     - false: no sidebar opened
+ *   - Object: the located item
+ *   - null: no item located
+ *   - false: no sidebar opened
  */
 background.locateItem = async function (params, sender) {
   const cmd = 'sidebar.locate';

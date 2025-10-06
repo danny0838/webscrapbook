@@ -769,7 +769,7 @@ scrapbook.getOption = function (key, options = scrapbook.options) {
 /**
  * @param {string} key - The option name to parse
  * @param {*} [value] - An arbitarary value to feed to the parser. Read as
- *      scrapbook.getOption if not provided.
+ *    scrapbook.getOption if not provided.
  * @return {*|Promise<*>}
  */
 scrapbook.parseOption = function (key, value) {
@@ -788,7 +788,7 @@ scrapbook.parseOption = function (key, value) {
 
 /**
  * @param {null|string|string[]|Object} [keys] - Fallback to DEFAULT_OPTIONS
- *     when passing non-object.
+ *   when passing non-object.
  * @param {Object} [options]
  * @return {Object|Promise<Object>}
  */
@@ -1805,8 +1805,8 @@ scrapbook.idToDate = function (...args) {
  * Returns the legacy ScrapBook ID from a given Date object
  *
  * @deprecated Used by legacy ScrapBook, with several issues:
- *     - inaccurate when used across timezones
- *     - items with same seconds issue
+ *   - inaccurate when used across timezones
+ *   - items with same seconds issue
  * @param {Date} [date] - Given day, or now if not provided.
  * @return {?string} the ScrapBook ID
  */
@@ -2168,11 +2168,11 @@ scrapbook.getScrapbookObjectType = function (node) {
 
 /**
  * @return {integer} Scrapbook object remove type of the element.
- *     -1: not a scrapbook object
- *      0: not removable as a scrapbook object
- *      1: should remove
- *      2: should unwrap
- *      3: should uncomment
+ *   -1: not a scrapbook object
+ *    0: not removable as a scrapbook object
+ *    1: should remove
+ *    2: should unwrap
+ *    3: should uncomment
  */
 scrapbook.getScrapBookObjectRemoveType = function (node) {
   let type = scrapbook.getScrapbookObjectType(node);
@@ -2185,7 +2185,7 @@ scrapbook.getScrapBookObjectRemoveType = function (node) {
 
 /**
  * @return {Element[]} Related elements having the shared ID; or the
- *     original element.
+ *   original element.
  */
 scrapbook.getScrapBookObjectElems = function (node) {
   let id = node.getAttribute("data-scrapbook-id");
@@ -2521,7 +2521,7 @@ scrapbook.htmlify = function (node, options = {}) {
  * Reverse htmlify for an element.
  *
  * @param {boolean} [options.apply] - true to apply the recorded value to
- *     the element; otherwise remove the record only.
+ *   the element; otherwise remove the record only.
  * @param {boolean} [options.canvas] - true to handle canvas.
  * @param {boolean} [options.form] - true to handle form elements.
  * @param {boolean} [options.shadowDom] - true to handle shadowDom.

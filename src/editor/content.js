@@ -2460,8 +2460,9 @@ const annotator = editor.annotator = (function () {
     /**
      * @type invokable
      * @param {boolean} [richText] - Whether content is rich text.
-     * @param {Node|false} [refNode] - The ref node to create a sticky note around.
-     *     Auto-detected by selection when unspecified. False to not create a relative note.
+     * @param {Node|false} [refNode] - The ref node to create a sticky note
+     *   around. Auto-detected by selection when unspecified. False to not
+     *   create a relative note.
      */
     createSticky({richText, refNode} = {}) {
       editor.addHistory();

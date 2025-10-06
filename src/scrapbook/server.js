@@ -830,14 +830,14 @@ class Book {
    * @param {Book} book - the Book the transaction is performed on.
    * @param {Object} params
    * @param {string} params.lockId - ID of the lock.
-   * @param {Function} params.discardLock - a controller that discards the
-   *     lock (no longer keep and release it) when called. This should
-   *     normally be called after requested another action that keeps the
-   *     lock (by passing lockId).
-   * @param {string} [params.backupTs] - the timestamp for the automatic
-   *     backup ("validate" mode).
+   * @param {Function} params.discardLock - a controller that discards the lock
+   *   (no longer keep and release it) when called. This should normally be
+   *   called after requested another action that keeps the lock (by passing
+   *   lockId).
+   * @param {string} [params.backupTs] - the timestamp for the automatic backup
+   *   ("validate" mode).
    * @param {boolean} [params.updated] - whether the server tree has been
-   *     updated ("refresh" mode).
+   *   updated ("refresh" mode).
    */
 
   /**
@@ -852,15 +852,15 @@ class Book {
    *
    * @param {Object} params
    * @param {transactionCallback} params.callback - the callback function to
-   *     peform the tasks.
+   *   peform the tasks.
    * @param {string} [params.mode] - mode for the transaction:
-   *     - "validate": validate the tree before the request and fail out if
-   *       the remote tree has been updated.
-   *     - "refresh": refresh the tree before the request and pass an extra
-   *        param about whether the remote tree has been updated.
+   *   - "validate": validate the tree before the request and fail out if the
+   *     remote tree has been updated.
+   *   - "refresh": refresh the tree before the request and pass an extra param
+   *     about whether the remote tree has been updated.
    * @param {boolean|Promise<boolean>} [params.autoBackup] - whether to
-   *     automatically create a temporary tree backup before a transaction and
-   *     remove after success.
+   *   automatically create a temporary tree backup before a transaction and
+   *   remove after success.
    * @param {string} [params.autoBackupTs] - timestamp for the auto backup.
    * @param {string} [params.autoBackupNote] - note for the auto backup.
    * @param {integer} [params.timeout] - timeout for lock.

@@ -1110,19 +1110,19 @@ capturer.runTasks = async function ({
  * @param {integer} [params.tabId] - ID of the tab to capture
  * @param {integer} [params.frameId] - ID of the frame to capture
  * @param {string} [params.url] - source URL of the page to capture (ignored
- *     when tabId is set)
+ *   when tabId is set)
  * @param {string} [params.refUrl] - the referrer policy
  * @param {string} [params.mode] - "tab", "source", "bookmark"
  * @param {captureSettings} [params.settings] - overriding settings
  * @param {captureOptions} params.options - options for the capture
- * @param {captureOptions} params.presets - preset options,
- *     which are never overwritten by capture helpers, for the capture
+ * @param {captureOptions} params.presets - preset options, which are never
+ *   overwritten by capture helpers, for the capture
  * @param {string} [params.comment] - comment for the captured item
  * @param {?string} [params.bookId] - bookId ID for the captured items
  * @param {string} [params.parentId] - parent item ID for the captured items
  * @param {integer} [params.index] - position index for the captured items
- * @param {boolean} [params.captureOnly] - skip adding item and clean up
- *     (for special modes like recapture and mergeCapture)
+ * @param {boolean} [params.captureOnly] - skip adding item and clean up (for
+ *   special modes like recapture and mergeCapture)
  * @return {Promise<captureDocumentResponse|transferableBlob>}
  */
 capturer.captureGeneral = async function ({
@@ -1461,15 +1461,16 @@ capturer.captureRemoteTab = async function ({
  * @param {string} [params.refUrl]
  * @param {string} [params.refPolicy] - the referrer policy
  * @param {Blob} [params.overrideBlob]
- * @param {boolean} [params.isAttachment] - the resource is known to be an attachment
- * @param {boolean} [params.downLink] - is downLink mode (check filter,
- *     and capture as file or register in linkedPages)
+ * @param {boolean} [params.isAttachment] - the resource is known to be an
+ *   attachment
+ * @param {boolean} [params.downLink] - is downLink mode (check filter, and
+ *   capture as file or register in linkedPages)
  * @param {boolean} [params.downLinkExtra] - is an extra downLink resource (don't check filter)
  * @param {boolean} [params.downLinkPage] - is a page previously registered in linkedPages
  * @param {captureSettings} params.settings
  * @param {captureOptions} params.options
  * @return {Promise<captureDocumentResponse|transferableBlob|null>} The capture
- *     result, or null if not to be captured.
+ *   result, or null if not to be captured.
  */
 capturer.captureUrl = async function (params) {
   isDebug && console.debug("call: captureUrl", params);
@@ -3684,8 +3685,8 @@ capturer.fetchCss = async function (params) {
  * @type invokable
  * @param {Object} params
  * @param {transferableBlob} params.blob - may include charset
- * @param {string} [params.filename] - validated and unique;
- *     may be absent when saveAs = singleHtml
+ * @param {string} [params.filename] - validated and unique; may be absent when
+ *   saveAs = singleHtml
  * @param {string} params.sourceUrl
  * @param {captureSettings} params.settings
  * @param {captureOptions} params.options

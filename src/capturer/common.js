@@ -321,12 +321,12 @@ capturer.captureDocumentOrFile = async function (params) {
  * @memberof capturer
  * @param {Object} params
  * @param {Document} [params.doc]
- * @param {string} [params.metaDocUrl] - an overriding meta document URL
- *     (real doc URL like about:srcdoc, for handling document metadata)
+ * @param {string} [params.metaDocUrl] - an overriding meta document URL (real
+ *   doc URL like about:srcdoc, for handling document metadata)
  * @param {string} [params.docUrl] - an overriding document URL (for request
- *     referrers)
+ *   referrers)
  * @param {string} [params.baseUrl] - an overriding document base URL (for
- *     resolving relative URLs)
+ *   resolving relative URLs)
  * @param {string} [params.refPolicy] - the default document referrer policy
  * @param {string} [params.mime] - an overriding document contentType
  * @param {captureSettings} params.settings
@@ -5068,17 +5068,17 @@ class DocumentCssHandler {
    * @param {Object} params
    * @param {?CSSStyleSheet} params.css - The CSS to get rules from.
    * @param {string} [params.url] - The overriding source URL for retrieving a
-   *     cross-orign CSS.
+   *   cross-orign CSS.
    * @param {string} [params.refUrl] - The referrer URL for retrieving a
-   *     cross-orign CSS.
-   * @param {string} [params.refPolicy] - the referrer policy for retrieving
-   *     a cross-orign CSS.
+   *   cross-orign CSS.
+   * @param {string} [params.refPolicy] - the referrer policy for retrieving a
+   *   cross-orign CSS.
    * @param {string} [params.envCharset] - the environment charset for
-   *     retrieving a cross-orign CSS.
+   *   retrieving a cross-orign CSS.
    * @param {boolean} [params.crossOrigin] - Whether to retrieve CSS via web
-   *     request if it's cross origin.
+   *   request if it's cross origin.
    * @param {boolean} [params.errorWithNull] - Whether to return null if CSS
-   *     not retrievable.
+   *   not retrievable.
    * @return {?CSSStyleRule[]}
    */
   async getRulesFromCss({css, url, refUrl, refPolicy, envCharset, crossOrigin = true, errorWithNull = false}) {
@@ -5140,13 +5140,13 @@ class DocumentCssHandler {
    * @param {string} params.baseUrl - the base URL for URL resolving.
    * @param {string} params.refUrl - the referrer URL for fetching resources.
    * @param {string} [params.refPolicy] - the referrer policy for fetching
-   *     resources.
-   * @param {string} [params.envCharset] - the environment charset for
-   *     fetching resources.
-   * @param {CSSStyleSheet} [params.refCss] - the reference CSS (which
-   *     holds the @import rule(s), for an imported CSS).
-   * @param {Node} [params.rootNode] - the reference root node for an
-   *     imported CSS.
+   *   resources.
+   * @param {string} [params.envCharset] - the environment charset for fetching
+   *   resources.
+   * @param {CSSStyleSheet} [params.refCss] - the reference CSS (which holds
+   *   the @import rule(s), for an imported CSS).
+   * @param {Node} [params.rootNode] - the reference root node for an imported
+   *   CSS.
    * @param {boolean} [params.isInline] - whether cssText is inline.
    * @param {captureSettings} [params.settings]
    * @param {captureOptions} [params.options]
@@ -5311,15 +5311,15 @@ class DocumentCssHandler {
    * @param {string} params.baseUrl - the base URL for URL resolving.
    * @param {string} params.refUrl - the referrer URL for fetching resources.
    * @param {string} [params.refPolicy] - the referrer policy for fetching
-   *     resources.
-   * @param {string} [params.envCharset] - the environment charset for
-   *     fetching resources.
-   * @param {CSSStyleSheet} [params.refCss] - the reference CSS (which
-   *     holds the @import rule(s), for an imported CSS).
-   * @param {Node|Node[]} [params.rootNode] - the document or ShadowRoot
-   *     nodes for verifying selectors.
+   *   resources.
+   * @param {string} [params.envCharset] - the environment charset for fetching
+   *   resources.
+   * @param {CSSStyleSheet} [params.refCss] - the reference CSS (which holds
+   *   the @import rule(s), for an imported CSS).
+   * @param {Node|Node[]} [params.rootNode] - the document or ShadowRoot nodes
+   *   for verifying selectors.
    * @param {string} [params.indent] - the string to indent the output CSS
-   *     text.
+   *   text.
    * @param {string} [params.sep] - the string to separate each CSS rule.
    * @param {captureSettings} [params.settings]
    * @param {captureOptions} [params.options]
@@ -5516,16 +5516,16 @@ class DocumentCssHandler {
    * @param {HTMLElement} [params.elem] - the elem to have CSS rewritten.
    * @param {string} [params.url] - the source URL of the imported CSS.
    * @param {?CSSStyleSheet} [params.refCss] - the reference CSS of the
-   *     imported CSS (CSSImportRule.styleSheet).
+   *   imported CSS (CSSImportRule.styleSheet).
    * @param {string} [params.baseUrl] - the base URL for URL resolving.
    * @param {string} [params.refUrl] - the referrer URL for fetching
-   *     resources.
+   *   resources.
    * @param {string} [params.refPolicy] - the referrer policy for fetching
-   *     resources.
+   *   resources.
    * @param {string} [params.envCharset] - the environment charset for
-   *     fetching resources.
+   *   fetching resources.
    * @param {Node} [params.rootNode] - the reference root node for an
-   *     imported CSS.
+   *   imported CSS.
    * @param {rewriteCssRewriter} params.callback
    * @param {captureSettings} [params.settings]
    * @param {captureOptions} [params.options]

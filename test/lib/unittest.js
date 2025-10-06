@@ -407,8 +407,8 @@ function getToken(url, role) {
  * @param {string} str - the string to encode
  * @param {string} [charset=UTF-8] - the target charset to encode into
  * @param {*} [replacement] - the replacement char for a non-encodable char,
- *     which should be a valid ASCII char. Empty string to replace with
- *     nothing. Falsy to throw an error instead.
+ *   which should be a valid ASCII char. Empty string to replace with
+ *   nothing. Falsy to throw an error instead.
  * @return {Promise<Uint8Array>} The encoded bytes.
  */
 var encodeText = (() => {
@@ -522,7 +522,7 @@ function escapeRegExp(...args) { return scrapbook.escapeRegExp(...args); }
  * This is similar to /.../ but allows "/".
  *
  * Usage:
- *     regex`^text/html$` === /^text\/html$/
+ *   regex`^text/html$` === /^text\/html$/
  */
 function regex(strings, ...args) {
   const results = [strings.raw[0]];
@@ -537,7 +537,7 @@ function regex(strings, ...args) {
  * A RegExp with literal string and optional interpolated RegExp source fragments.
  *
  * Usage:
- *     rawRegex`${'^'}(function () {${'.+'}})()${'$'}` === /^\(function \(\) \{.+\}\)\(\)$/
+ *   rawRegex`${'^'}(function () {${'.+'}})()${'$'}` === /^\(function \(\) \{.+\}\)\(\)$/
  */
 function rawRegex(strings, ...args) {
   const results = [escapeRegExp(strings.raw[0])];
@@ -557,7 +557,7 @@ function rawRegex(strings, ...args) {
  * interpolated RegExp source fragments.
  *
  * Usage:
- *     cssRegex`body { background: ${/\w+/} }` === /body\s*\{\s*background:\s*\w+\s*\}/
+ *   cssRegex`body { background: ${/\w+/} }` === /body\s*\{\s*background:\s*\w+\s*\}/
  */
 function cssRegex(strings, ...args) {
   const ASCII_WHITESPACE = String.raw`\t\n\f\r `;

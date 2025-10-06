@@ -193,8 +193,8 @@ class Tree {
    *   }
    *
    * @param {HTMLElement} itemElem
-   * @param {Map<HTMLElement~itemElem, integer~index>} [cacheMap] -
-   *     A cache Map for better performance when accessed many times at once.
+   * @param {Map<HTMLElement~itemElem, integer~index>} [cacheMap] - A cache Map
+   *   for better performance when accessed many times at once.
    * @return {integer}
    */
   getIndex(itemElem, cacheMap) {
