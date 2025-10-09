@@ -1293,14 +1293,16 @@ capturer.captureTab = async function ({
 }) {
   let {url, title, cookieStoreId, discarded} = await browser.tabs.get(tabId);
 
+  if (Number.isInteger(frameId) && frameId !== 0) {
+    ({url} = await browser.webNavigation.getFrame({tabId, frameId}));
+  }
+
   // redirect headless capture
   // infer title from the current tab if frameId not provided
   switch (mode) {
     case "source":
     case "bookmark": {
-      if (Number.isInteger(frameId)) {
-        ({url} = await browser.webNavigation.getFrame({tabId, frameId}));
-      } else {
+      if (!Number.isInteger(frameId)) {
         settings = Object.assign({}, settings, {
           title: settings.title || title,
         });
