@@ -1791,7 +1791,6 @@ class Capturer extends BaseCapturer {
 
       return await this.captureDocumentOrFile({
         doc,
-        metaDocUrl: url,
         docUrl: url,
         refUrl,
         refPolicy,

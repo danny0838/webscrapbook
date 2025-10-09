@@ -82,11 +82,11 @@ class BaseCapturer {
   /**
    * @param {Object} params
    * @param {Document} [params.doc]
-   * @param {string} [params.metaDocUrl] - an overriding meta document URL
    * @param {string} [params.docUrl] - an overriding document URL
-   * @param {string} [params.baseUrl] - an overriding document base URL
+   * @param {string} [params.envDocUrl] - the environment document URL
+   * @param {string} [params.baseUrl] - the environment base URL
    * @param {string} [params.refUrl] - the referrer URL
-   * @param {string} [params.refPolicy] - the referrer policy
+   * @param {string} [params.refPolicy] - the environment referrer policy
    * @param {captureSettings} params.settings
    * @param {string} [params.settings.title] - item title
    * @param {string} [params.settings.favIconUrl] - item favicon
@@ -96,7 +96,7 @@ class BaseCapturer {
   async captureDocumentOrFile(params) {
     isDebug && console.debug("call: captureDocumentOrFile", params);
 
-    const {doc = document, metaDocUrl, docUrl, baseUrl, refUrl, refPolicy, settings, options} = params;
+    const {doc = document, docUrl, envDocUrl, baseUrl, refUrl, refPolicy, settings, options} = params;
 
     // if not HTML|SVG document, capture as file
     if (!["text/html", "application/xhtml+xml", "image/svg+xml"].includes(doc.contentType)) {
@@ -105,8 +105,8 @@ class BaseCapturer {
       if (doc.documentElement.nodeName.toLowerCase() === "html" && options["capture.saveFileAsHtml"]) {
         return await this.captureDocument({
           doc,
-          metaDocUrl,
           docUrl,
+          envDocUrl,
           baseUrl,
           refPolicy,
           mime: "text/html",
@@ -130,8 +130,8 @@ class BaseCapturer {
     // otherwise, capture as document
     return await this.captureDocument({
       doc,
-      metaDocUrl,
       docUrl,
+      envDocUrl,
       baseUrl,
       refPolicy,
       settings,
@@ -147,13 +147,13 @@ class BaseCapturer {
   /**
    * @param {Object} params
    * @param {Document} [params.doc]
-   * @param {string} [params.metaDocUrl] - an overriding meta document URL
-   *   (real doc URL like about:srcdoc, for handling document metadata)
-   * @param {string} [params.docUrl] - an overriding document URL (for request
-   *   referrers)
-   * @param {string} [params.baseUrl] - an overriding document base URL (for
-   *   resolving relative URLs)
-   * @param {string} [params.refPolicy] - the default document referrer policy
+   * @param {string} [params.docUrl] - an overriding document URL
+   * @param {string} [params.envDocUrl] - the environment document URL (for
+   *   request referrers for about: document)
+   * @param {string} [params.baseUrl] - the environment base URL (for
+   *   resolving relative URLs for about: document)
+   * @param {string} [params.refPolicy] - the environment referrer policy (
+   *   the default referrer policy for about: document)
    * @param {string} [params.mime] - an overriding document contentType
    * @param {captureSettings} params.settings
    * @param {string} [params.settings.title] - item title
@@ -309,7 +309,7 @@ class BaseCapturer {
 
       // This link targets the current page
       const [urlMain, urlHash] = utils.splitUrlByAnchor(url);
-      if (urlMain === metaDocUrl && !this.isAboutUrl(metaDocUrl)) {
+      if (urlMain === docUrl && !this.isAboutUrl(docUrl)) {
         // @TODO: for iframe whose URL is about:blank or about:srcdoc,
         // this link should point to the captured page
         if (urlHash === "" || urlHash === "#") {
@@ -1271,8 +1271,8 @@ class BaseCapturer {
                     if (frameDoc) {
                       return this.captureDocumentOrFile({
                         doc: frameDoc,
-                        metaDocUrl: sourceUrl,
-                        docUrl,
+                        docUrl: sourceUrl,
+                        envDocUrl,
                         baseUrl: baseUrlCurrent,
                         refUrl,
                         refPolicy,
@@ -1287,8 +1287,8 @@ class BaseCapturer {
 
                     return this.captureDocument({
                       doc,
-                      metaDocUrl: sourceUrl,
-                      docUrl,
+                      docUrl: sourceUrl,
+                      envDocUrl,
                       baseUrl: baseUrlCurrent,
                       refPolicy,
                       settings: frameSettings,
@@ -1369,8 +1369,8 @@ class BaseCapturer {
                     sourceUrl = frameDoc.URL;
                     return this.captureDocumentOrFile({
                       doc: frameDoc,
-                      docUrl: this.isAboutUrl(sourceUrl) ? docUrl : sourceUrl,
-                      baseUrl: this.isAboutUrl(sourceUrl) ? baseUrlCurrent : sourceUrl,
+                      envDocUrl,
+                      baseUrl: baseUrlCurrent,
                       refUrl,
                       refPolicy,
                       settings: frameSettings,
@@ -1414,8 +1414,8 @@ class BaseCapturer {
 
                     return this.captureDocument({
                       doc,
-                      metaDocUrl: sourceUrl,
-                      docUrl,
+                      docUrl: sourceUrl,
+                      envDocUrl,
                       baseUrl: baseUrlCurrent,
                       refPolicy,
                       settings: frameSettings,
@@ -1452,7 +1452,7 @@ class BaseCapturer {
                   }
 
                   const [sourceUrlMain, sourceUrlHash] = utils.splitUrlByAnchor(sourceUrl);
-                  frameSettings.recurseChain.push(docUrl);
+                  frameSettings.recurseChain.push(envDocUrl);
 
                   // check circular reference if saving as data URL
                   if (frameOptions["capture.saveAs"] === "singleHtml") {
@@ -2723,14 +2723,16 @@ class BaseCapturer {
     const isHeadless = !doc.defaultView;
 
     // determine docUrl, baseUrl, etc.
-    const [metaDocUrl, metaDocUrlHash] = utils.splitUrlByAnchor(params.metaDocUrl || doc.URL);
     const [docUrl, docUrlHash] = utils.splitUrlByAnchor(params.docUrl || doc.URL);
+    const envDocUrl = (this.isAboutUrl(docUrl) && params.envDocUrl) ?
+      utils.splitUrlByAnchor(params.envDocUrl)[0] :
+      docUrl;
 
     // baseUrl: updates dynamically when the first base[href] is parsed.
     // baseUrlFallback: the initial baseUrl, used for resolving base elements.
     // baseUrlFinal: the final baseUrl, used for resolving links etc.
     // refUrl: used as the referrer when retrieving resources. Actually same
-    //     as docUrl.
+    //     as envDocUrl.
     //
     // URLs in the document are usually resolved using baseUrl, which can be
     // dynamically changed when the first <base href="..."> element is parsed
@@ -2745,7 +2747,9 @@ class BaseCapturer {
     // dynamic baseUrl for a bad document with an URL before base[href].
     //
     // ref: https://html.spec.whatwg.org/#dynamic-changes-to-base-urls
-    const baseUrlFallback = utils.splitUrlByAnchor(params.baseUrl || docUrl)[0];
+    const baseUrlFallback = (this.isAboutUrl(docUrl) && params.baseUrl) ?
+      utils.splitUrlByAnchor(params.baseUrl)[0] :
+      envDocUrl;
     let baseUrl = baseUrlFallback;
     const baseUrlFinal = (() => {
       let base = baseUrlFallback;
@@ -2757,13 +2761,13 @@ class BaseCapturer {
       }
       return base;
     })();
-    const refUrl = docUrl;
+    const refUrl = envDocUrl;
     let seenBaseElem = false;
 
     // determine mime
     const mime = params.mime || doc.contentType;
 
-    let docRefPolicy = this.isAboutUrl(metaDocUrl) ? (params.refPolicy || "") : "";
+    let docRefPolicy = this.isAboutUrl(docUrl) ? (params.refPolicy || "") : "";
 
     if (isMainPage && isMainFrame) {
       if (!settings.type) {
@@ -2772,8 +2776,8 @@ class BaseCapturer {
           'document';
       }
       settings.indexFilename = settings.indexFilename || await this.invoke("formatIndexFilename", [{
-        title: settings.title || doc.title || utils.filenameParts(utils.urlToFilename(docUrl))[0] || "untitled",
-        sourceUrl: docUrl,
+        title: settings.title || doc.title || utils.filenameParts(utils.urlToFilename(envDocUrl))[0] || "untitled",
+        sourceUrl: envDocUrl,
         isFolder: options["capture.saveAs"] === "folder",
         settings,
         options,
@@ -2783,10 +2787,10 @@ class BaseCapturer {
     // register the main document before parsing so that it goes before
     // sub-frame documents.
     const registry = await this.invoke("registerDocument", [{
-      docUrl,
+      docUrl: envDocUrl,
       mime,
-      role: (options["capture.saveAs"] === "singleHtml" || (docUrl.startsWith("data:") && !options["capture.saveDataUriAsFile"])) ? undefined :
-          (isMainFrame || (isHeadless && !this.isAboutUrl(metaDocUrl))) ? "document" :
+      role: (options["capture.saveAs"] === "singleHtml" || (envDocUrl.startsWith("data:") && !options["capture.saveDataUriAsFile"])) ? undefined :
+          (isMainFrame || (isHeadless && !this.isAboutUrl(docUrl))) ? "document" :
           `document-${utils.getUuid()}`,
       settings,
       options,
@@ -2797,7 +2801,7 @@ class BaseCapturer {
     if (registry.isDuplicate && !(isMainPage && isMainFrame)) {
       return Object.assign({}, registry, {
         url: this.getRedirectedUrl(registry.url, docUrlHash),
-        sourceUrl: docUrl,
+        sourceUrl: envDocUrl,
       });
     }
 
@@ -3046,7 +3050,7 @@ class BaseCapturer {
       const parser = new CaptureHelperHandler({
         helpers,
         rootNode,
-        docUrl,
+        docUrl: envDocUrl,
         origNodeMap,
         options,
       });
@@ -3122,7 +3126,7 @@ class BaseCapturer {
 
     // record metadata
     if (options["capture.recordDocumentMeta"]) {
-      let url = metaDocUrl.startsWith("data:") ? "data:" : metaDocUrl;
+      let url = docUrl.startsWith("data:") ? "data:" : docUrl;
 
       // add hash only for index.html as subframes with different hash
       // must share the same file and record (e.g. foo.html and foo.html#bar)
@@ -3170,7 +3174,7 @@ class BaseCapturer {
           case "link":
           case "save":
           default: {
-            const u = new URL(docUrl);
+            const u = new URL(envDocUrl);
             if (!['http:', 'https:'].includes(u.protocol)) {
               break;
             }
@@ -3338,7 +3342,7 @@ class BaseCapturer {
     const content = utils.documentToString(newDoc, options["capture.prettyPrint"]);
     const blob = new Blob([content], {type: `${mime};charset=UTF-8`});
     const response = await this.saveDocument({
-      sourceUrl: this.getRedirectedUrl(docUrl, docUrlHash),
+      sourceUrl: this.getRedirectedUrl(envDocUrl, docUrlHash),
       documentFileName,
       settings,
       options,
@@ -3356,7 +3360,7 @@ class BaseCapturer {
 
     return Object.assign({}, response, {
       url: this.getRedirectedUrl(response.url, docUrlHash),
-      sourceUrl: docUrl,
+      sourceUrl: envDocUrl,
     });
   }
 
