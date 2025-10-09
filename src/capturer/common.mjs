@@ -3237,7 +3237,7 @@ class BaseCapturer {
 
     // common pre-save process
     await this.preSaveProcess({
-      rootNode,
+      doc: newDoc,
       isMainDocument: isMainPage && isMainFrame,
       deleteErased: options["capture.deleteErasedOnCapture"],
       requireBasicLoader,
@@ -3319,7 +3319,7 @@ class BaseCapturer {
 
       // common pre-save process
       await this.preSaveProcess({
-        rootNode: newDoc.documentElement,
+        doc: newDoc,
         isMainDocument: isMainPage && isMainFrame,
         deleteErased: options["capture.deleteErasedOnSave"],
         requireBasicLoader,
@@ -3343,7 +3343,7 @@ class BaseCapturer {
    * Process DOM before capture or resave.
    *
    * @param {Object} params
-   * @param {Document} params.rootNode
+   * @param {Document} params.doc
    * @param {boolean} params.isMainDocument
    * @param {boolean} params.deleteErased
    * @param {boolean} params.requireBasicLoader
@@ -3353,8 +3353,7 @@ class BaseCapturer {
   async preSaveProcess(params) {
     isDebug && console.debug("call: preSaveProcess", params);
 
-    const {rootNode, isMainDocument, deleteErased, requireBasicLoader, insertInfoBar} = params;
-    const doc = rootNode.ownerDocument;
+    const {doc, isMainDocument, deleteErased, requireBasicLoader, insertInfoBar} = params;
 
     PresaveDocumentRewriter.run(doc, {isMainDocument, deleteErased, requireBasicLoader, insertInfoBar});
   }
