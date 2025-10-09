@@ -2673,7 +2673,7 @@ Redirecting to file <a href="${utils.escapeHtml(response.url)}">${utils.escapeHt
           }
 
           await this.preSaveProcess({
-            rootNode: newDoc.documentElement,
+            doc: newDoc,
             isMainDocument: true,
             deleteErased: false,
             requireBasicLoader: !!newDoc.querySelector('script[data-scrapbook-elem="basic-loader"]'),
