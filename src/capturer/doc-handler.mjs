@@ -879,13 +879,12 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
 
     return new this().run(newDoc, {
       capturer, settings, options,
-      isHeadless,
+      isHeadless, isPartial: !!selection,
       docUrl, docUrlHash, envDocUrl,
       baseUrl, baseUrlFinal, baseUrlFallback, seenBaseElem,
       refUrl, docRefPolicy,
       mime,
       origNodeMap, clonedNodeMap,
-      selection,
     });
   }
 
@@ -980,13 +979,12 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
 
   async run(newDoc, {
     capturer, settings, options,
-    isHeadless,
+    isHeadless, isPartial,
     docUrl, docUrlHash, envDocUrl,
     baseUrl, baseUrlFinal, baseUrlFallback, seenBaseElem,
     refUrl, docRefPolicy,
     mime,
     origNodeMap, clonedNodeMap,
-    selection,
   }) {
     this.doc = newDoc;
     this.capturer = capturer;
@@ -1141,10 +1139,10 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
           return urlHash;
         }
 
-        // For fullPage capture (no selection), relink to the captured page.
+        // For fullPage capture, relink to the captured page.
         // For partial capture, the captured page could be incomplete,
         // relink to the captured page only when the target node is included in the selected fragment.
-        let hasLocalTarget = !selection;
+        let hasLocalTarget = !isPartial;
         if (!hasLocalTarget) {
           const targetId = CSS.escape(utils.decodeURIComponent(urlHash.slice(1)));
           if (rootNode.querySelector(`#${targetId}, a[name="${targetId}"]`)) {
