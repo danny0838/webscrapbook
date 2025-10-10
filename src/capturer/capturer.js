@@ -1021,7 +1021,7 @@ capturer.runTasks = async function ({
   mode: baseMode, options: baseOptions,
 }) {
   delay = parseFloat(delay) || 5;
-  baseOptions = Object.assign(scrapbook.getOptions("capture"), baseOptions);
+  baseOptions = Object.assign(await scrapbook.getOptions("capture"), baseOptions);
 
   const results = [];
 
@@ -2033,7 +2033,7 @@ capturer.resaveTab = async function ({
         internalize,
         isMainPage: isMainDocument,
         item,
-        options: Object.assign(scrapbook.getOptions("capture"), options),
+        options: Object.assign(await scrapbook.getOptions("capture"), options),
       };
 
       isDebug && console.debug("(main) send", source, message);
