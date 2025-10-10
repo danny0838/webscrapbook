@@ -2968,7 +2968,7 @@ capturer.captureDocument = async function (params) {
 
   // if a previous registry exists, return it (except for the main document,
   // which should only happen during a merge capture)
-  if (registry.isDuplicate && !(settings.isMainPage && settings.isMainFrame)) {
+  if (registry.isDuplicate && !(isMainPage && isMainFrame)) {
     return Object.assign({}, registry, {
       url: capturer.getRedirectedUrl(registry.url, docUrlHash),
       sourceUrl: docUrl,
@@ -4439,7 +4439,7 @@ capturer.isJavascriptUrl = function (url) {
 };
 
 capturer.getErrorUrl = function (sourceUrl, options) {
-  if (!options || !options["capture.linkUnsavedUri"]) {
+  if (!options?.["capture.linkUnsavedUri"]) {
     if (['http:', 'https:', 'file:', 'about:'].some(p => sourceUrl.startsWith(p))) {
       return `urn:scrapbook:download:error:${sourceUrl}`;
     } else if (sourceUrl.startsWith("data:")) {
