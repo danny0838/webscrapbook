@@ -27,12 +27,9 @@
  * onDragOver .dropmask
  * onDragOver .dropmask
  * ...
- * onDragLeave .dropmask[1]
+ * onDragLeave .dropmask
  *  or
  * onDrop   .dropmask (in this case onDragLeave doesn't fire)
- *
- * [1]: In Firefox, we get document (e10s) or XULDocument (non-e10s).
- *      https://bugzilla.mozilla.org/show_bug.cgi?id=1420590
  */
 function onDragEnter(e) {
   viewer.dropmask.hidden = false;
@@ -45,20 +42,8 @@ function onDragOver(e) {
 }
 
 function onDragLeave(e) {
-  let shouldUnMask = false;
-  try {
-    if (e.target === viewer.lastDropTarget ||
-        e.target === document ||
-        e.target.nodeName === "#document"/* XULDocument */) {
-      shouldUnMask = true;
-    }
-  } catch (ex) {
-    // access to XULDocument may throw
-    shouldUnMask = true;
-  }
-  if (shouldUnMask) {
-    viewer.dropmask.hidden = true;
-  }
+  if (e.target !== viewer.lastDropTarget) { return; }
+  viewer.dropmask.hidden = true;
 }
 
 async function onDrop(e) {
