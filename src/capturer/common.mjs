@@ -165,7 +165,6 @@ class BaseCapturer {
       return base;
     })();
     const refUrl = envDocUrl;
-    let seenBaseElem = false;
 
     // determine mime
     const mime = params.mime || doc.contentType;
@@ -223,7 +222,7 @@ class BaseCapturer {
       settings, options,
       isHeadless,
       docUrl, docUrlHash, envDocUrl,
-      baseUrl, baseUrlFinal, baseUrlFallback, seenBaseElem,
+      baseUrl, baseUrlFinal, baseUrlFallback,
       refUrl, docRefPolicy,
       mime,
     });

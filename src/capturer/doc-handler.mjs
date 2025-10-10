@@ -860,7 +860,7 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
     capturer, settings, options,
     isHeadless,
     docUrl, docUrlHash, envDocUrl,
-    baseUrl, baseUrlFinal, baseUrlFallback, seenBaseElem,
+    baseUrl, baseUrlFinal, baseUrlFallback,
     refUrl, docRefPolicy,
     mime,
   }) {
@@ -881,7 +881,7 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
       capturer, settings, options,
       isHeadless, isPartial: !!selection,
       docUrl, docUrlHash, envDocUrl,
-      baseUrl, baseUrlFinal, baseUrlFallback, seenBaseElem,
+      baseUrl, baseUrlFinal, baseUrlFallback,
       refUrl, docRefPolicy,
       mime,
       origNodeMap, clonedNodeMap,
@@ -981,7 +981,7 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
     capturer, settings, options,
     isHeadless, isPartial,
     docUrl, docUrlHash, envDocUrl,
-    baseUrl, baseUrlFinal, baseUrlFallback, seenBaseElem,
+    baseUrl, baseUrlFinal, baseUrlFallback,
     refUrl, docRefPolicy,
     mime,
     origNodeMap, clonedNodeMap,
@@ -1451,9 +1451,9 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
 
             // Update baseUrl for the first base[href].
             // Note: don't consider a <base> elem in a shadowRoot.
-            if (!seenBaseElem && elem.getRootNode().nodeType !== 11) {
+            if (!baseElem && elem.getRootNode().nodeType !== 11) {
               baseUrl = utils.splitUrlByAnchor(newUrl)[0];
-              seenBaseElem = true;
+              baseElem = elem;
             }
 
             switch (options["capture.base"]) {
@@ -3667,6 +3667,7 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
     }
 
     // inspect nodes
+    let baseElem;
     let metaCharsetNode;
     let favIconUrl;
     let requireBasicLoader = false;
