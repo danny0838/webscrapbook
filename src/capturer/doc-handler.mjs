@@ -884,7 +884,7 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
       newDoc, origNodeMap, clonedNodeMap,
     } = this.clone(doc, {includeShadowDom, selection});
 
-    return new this().run(newDoc, {
+    return super.run(newDoc, {
       capturer, settings, options,
       isHeadless, isPartial: !!selection,
       docUrl, docUrlHash, envDocUrl,
@@ -1067,12 +1067,6 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
     this.recordShadowRoots();
     this.recordCssResourceMap();
     this.recordCustomElements();
-
-    return {
-      newDoc: this.doc,
-      requireBasicLoader: this.requireBasicLoader,
-      favIconUrl: this.favIconUrl,
-    };
   }
 
   initHeadNode({

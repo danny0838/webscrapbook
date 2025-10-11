@@ -214,7 +214,7 @@ class BaseCapturer {
 
     // clone the document and rewrite content
     const {
-      newDoc,
+      doc: newDoc,
       requireBasicLoader,
       favIconUrl,
     } = await CaptureDocumentRewriter.runWithClone(doc, {
