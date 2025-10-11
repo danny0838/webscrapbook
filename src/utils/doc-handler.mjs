@@ -246,7 +246,7 @@ class DocumentRewriter extends BaseDocumentRewriter {
             id = slotMap.size;
             slotMap.set(targetNode, id);
           }
-          if (targetNode.nodeType === 1) {
+          if (targetNode.nodeType === Node.ELEMENT_NODE) {
             targetNode.setAttribute("data-scrapbook-slot-index", id);
           } else {
             targetNode.before(document.createComment(`scrapbook-slot-index=${id}`));
@@ -260,7 +260,7 @@ class DocumentRewriter extends BaseDocumentRewriter {
       }
     }
 
-    if (elem.nodeType !== 1) { return; }
+    if (elem.nodeType !== Node.ELEMENT_NODE) { return; }
 
     switch (elem.nodeName.toLowerCase()) {
       case "canvas": {
@@ -432,7 +432,7 @@ class DocumentRewriter extends BaseDocumentRewriter {
             const m = value.match(regex);
             if (m) {
               const next = node.nextSibling;
-              if (next.nodeType === 3) {
+              if (next.nodeType === Node.TEXT_NODE) {
                 slotSources[parseInt(m[1], 10)] = next;
               }
               node.remove();
@@ -461,7 +461,7 @@ class DocumentRewriter extends BaseDocumentRewriter {
       }
     }
 
-    if (elem.nodeType !== 1) { return; }
+    if (elem.nodeType !== Node.ELEMENT_NODE) { return; }
 
     if (canvas && elem.matches('canvas')) {
       const canvasData = elem.getAttribute('data-scrapbook-canvas');

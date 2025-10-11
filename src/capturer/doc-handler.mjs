@@ -698,7 +698,7 @@ class RetrieveDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
             id = this.slotMap.size;
             this.slotMap.set(targetNode, id);
           }
-          if (targetNode.nodeType === 1) {
+          if (targetNode.nodeType === Node.ELEMENT_NODE) {
             targetNode.setAttribute("data-scrapbook-slot-index", id);
           } else {
             targetNode.before(document.createComment(`scrapbook-slot-index=${id}`));
@@ -1129,20 +1129,16 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
 
     if (rootNode.nodeName.toLowerCase() !== "html") { return; }
 
-    const headNodeBefore = headNode.previousSibling;
-    if (!headNodeBefore || headNodeBefore.nodeType != 3) {
+    if (headNode.previousSibling?.nodeType !== Node.TEXT_NODE) {
       headNode.before("\n");
     }
-    const headNodeStart = headNode.firstChild;
-    if (!headNodeStart || headNodeStart.nodeType != 3) {
+    if (headNode.firstChild?.nodeType !== Node.TEXT_NODE) {
       headNode.prepend("\n");
     }
-    const headNodeEnd = headNode.lastChild;
-    if (!headNodeEnd || headNodeEnd.nodeType != 3) {
+    if (headNode.lastChild?.nodeType !== Node.TEXT_NODE) {
       headNode.append("\n");
     }
-    const headNodeAfter = headNode.nextSibling;
-    if (!headNodeAfter || headNodeAfter.nodeType != 3) {
+    if (headNode.nextSibling?.nodeType !== Node.TEXT_NODE) {
       headNode.after("\n");
     }
 
@@ -1557,7 +1553,7 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
 
   rewriteNode(node, rootName) {
     // skip non-element nodes
-    if (node.nodeType !== 1) {
+    if (node.nodeType !== Node.ELEMENT_NODE) {
       return node;
     }
 
@@ -1761,7 +1757,7 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
 
     // Update baseUrl for the first base[href].
     // Note: don't consider a <base> elem in a shadowRoot.
-    if (!this.baseElem && elem.getRootNode().nodeType !== 11) {
+    if (!this.baseElem && elem.getRootNode().nodeType === Node.DOCUMENT_NODE) {
       this.baseUrl = utils.splitUrlByAnchor(newUrl)[0];
       this.baseElem = elem;
     }
@@ -1785,7 +1781,7 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
 
     // <meta> elements in a shadowRoot never works. Don't process or
     // rewrite them.
-    if (elem.getRootNode().nodeType === 11) { return; }
+    if (elem.getRootNode().nodeType !== Node.DOCUMENT_NODE) { return; }
 
     // Exactly one of the name, http-equiv, charset, and itemprop
     // attributes must be specified, according to the spec. Though we
@@ -2024,12 +2020,12 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
 
     switch (options["capture.favicon"]) {
       case "link":
-        if (typeof this.favIconUrl === 'undefined' && elem.getRootNode().nodeType !== 11) {
+        if (typeof this.favIconUrl === 'undefined' && elem.getRootNode().nodeType === Node.DOCUMENT_NODE) {
           this.favIconUrl = elem.getAttribute("href");
         }
         break;
       case "blank":
-        if (typeof this.favIconUrl === 'undefined' && elem.getRootNode().nodeType !== 11) {
+        if (typeof this.favIconUrl === 'undefined' && elem.getRootNode().nodeType === Node.DOCUMENT_NODE) {
           this.favIconUrl = "";
         }
 
@@ -2038,7 +2034,7 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
         this.captureRewriteAttr(elem, "href", null);
         break;
       case "remove":
-        if (typeof this.favIconUrl === 'undefined' && elem.getRootNode().nodeType !== 11) {
+        if (typeof this.favIconUrl === 'undefined' && elem.getRootNode().nodeType === Node.DOCUMENT_NODE) {
           this.favIconUrl = "";
         }
         this.captureRemoveNode(elem);
@@ -2046,7 +2042,7 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
       case "save":
       default: {
         let useFavIcon = false;
-        if (typeof this.favIconUrl === 'undefined' && elem.getRootNode().nodeType !== 11) {
+        if (typeof this.favIconUrl === 'undefined' && elem.getRootNode().nodeType === Node.DOCUMENT_NODE) {
           this.favIconUrl = elem.getAttribute("href");
           useFavIcon = true;
         }
@@ -3721,7 +3717,7 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
         id = slotMap.size;
         slotMap.set(targetNode, id);
       }
-      if (targetNode.nodeType === 1) {
+      if (targetNode.nodeType === Node.ELEMENT_NODE) {
         targetNode.setAttribute("data-scrapbook-slot-index", id);
       } else {
         targetNode.before(this.doc.createComment(`scrapbook-slot-index=${id}`));
