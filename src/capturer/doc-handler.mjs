@@ -3722,8 +3722,8 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
       if (targetNode.nodeType === 1) {
         targetNode.setAttribute("data-scrapbook-slot-index", id);
       } else {
-        targetNode.before(document.createComment(`scrapbook-slot-index=${id}`));
-        targetNode.after(document.createComment(`/scrapbook-slot-index`));
+        targetNode.before(this.doc.createComment(`scrapbook-slot-index=${id}`));
+        targetNode.after(this.doc.createComment(`/scrapbook-slot-index`));
       }
       ids.push(id);
     }
