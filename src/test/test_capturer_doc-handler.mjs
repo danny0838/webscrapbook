@@ -2336,7 +2336,7 @@ describe('capturer/doc-handler.mjs', function () {
                     refPolicy: '',
                     envCharset: 'UTF-8',
                   });
-                  sinon.assert.calledOnceWithExactly(spyRewriteText, elem, 'body { background-image: url("green.bmp"); }');
+                  sinon.assert.calledWithExactly(spyRewriteText, elem, 'body { background-image: url("green.bmp"); }');
                 });
 
                 context(CONTEXT_BASE_URL, function () {
@@ -2362,7 +2362,7 @@ describe('capturer/doc-handler.mjs', function () {
                     assert.strictEqual(elem.textContent, 'body { content: "<\\/style>"; background-image: url("green.bmp"); }');
                   });
 
-                  $it.xfail()('should not escape tag-ending text in non-HTML document', async function () {
+                  it('should not escape tag-ending text in non-HTML document', async function () {
                     var doc = createDocFixture({type: 'xhtml', tagName, value: 'body { content: "</style>"; background-image: url("./green.bmp"); }'});
 
                     var {doc} = await new TestCapturer().captureDocument({doc, docUrl, options});
@@ -2547,7 +2547,7 @@ describe('capturer/doc-handler.mjs', function () {
                     assert.strictEqual(elem.textContent, 'console.debug("<\\/script>")');
                   });
 
-                  $it.xfail()('should not escape tag-ending text in non-HTML document', async function () {
+                  it('should not escape tag-ending text in non-HTML document', async function () {
                     var doc = createDocFixture({type: 'xhtml', tagName, value: 'console.debug("</script>")'});
 
                     var {doc} = await new TestCapturer().captureDocument({doc, docUrl, options});
@@ -7114,7 +7114,7 @@ describe('capturer/doc-handler.mjs', function () {
             sinon.assert.calledWithExactly(spyRewriteText, elem, 'some text with <\\/xmp>');
           });
 
-          $it.xfail()('should not escape tag-ending text in non-HTML document', async function () {
+          it('should not escape tag-ending text in non-HTML document', async function () {
             var doc = createDocFixture({type: 'xhtml', tagName, value: 'some text with </xmp>'});
 
             var {doc} = await new TestCapturer().captureDocument({doc, docUrl});

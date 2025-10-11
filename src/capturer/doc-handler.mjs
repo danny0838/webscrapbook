@@ -2192,8 +2192,8 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
             envCharset: charset,
             settings,
             callback: (elem, response) => {
-              // escape </style> as textContent can contain HTML
-              this.captureRewriteTextContent(elem, response.cssText.replace(/<\/(style>)/gi, "<\\/$1"));
+              this.captureRewriteTextContent(elem, response.cssText);
+              this.escapeRawTextTag(elem);
             },
           });
         });
@@ -2253,8 +2253,7 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
       }
     }
 
-    // escape </script> as textContent can contain HTML
-    this.captureRewriteTextContent(elem, elem.textContent.replace(/<\/(script>)/gi, "<\\/$1"));
+    this.escapeRawTextTag(elem);
   }
 
   [`_handle_{${NS_HTML}}noscript`](elem) {
@@ -3715,8 +3714,7 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
   }
 
   [`_handle_{${NS_HTML}}xmp`](elem) {
-    // escape </xmp> as textContent can contain HTML
-    this.captureRewriteTextContent(elem, elem.textContent.replace(/<\/(xmp>)/gi, "<\\/$1"));
+    this.escapeRawTextTag(elem);
   }
 
   [`_handle_{${NS_SVG}}`](elem) {
@@ -3830,6 +3828,30 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
 
   [`_handle_{${NS_MATHML}}`](elem) {
     this.rewriteAnchor(elem, "href");
+  }
+
+  /**
+   * Escape the text content of a <script>-like element to be safe to save.
+   *
+   * HTML documents do not support namespace, but <script> elements in
+   * HTML/SVG namespaces still work.
+   * - When serializing to text (e.g. outerHTML), the text content of <script>s
+   *   in HTML namespace are not HTML-escaped, while those in other namespaces
+   *   are.
+   * - When loading, <script>s in <svg> (if not in <foreignObject>) or <math>
+   *   will be interpreted as in SVG/MathML namespaces and their text contents
+   *   are HTML-unescaped, while those in the main HTML document are not.
+   */
+  escapeRawTextTag(elem, {
+    tagName = elem.localName,
+    doc = this.doc,
+  } = {}) {
+    if (!elem.textContent) { return; }
+    if (elem.namespaceURI !== NS_HTML) { return; }
+    if (["application/xhtml+xml", "text/xml", "image/svg+xml"].includes(doc.contentType)) { return; }
+
+    // escape </script> etc. as textContent can contain unescaped HTML
+    this.captureRewriteTextContent(elem, elem.textContent.replace(new RegExp(`</(${tagName}>)`, 'gi'), "<\\/$1"));
   }
 
   /**
