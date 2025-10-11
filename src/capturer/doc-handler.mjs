@@ -1584,7 +1584,7 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
       isHeadless,
       refUrl,
       charset,
-      shadowRootList, customElementNames,
+      shadowRootList,
       cssHandler, cssResourcesHandler,
       cssTasks, tasks,
     } = this;
@@ -1703,14 +1703,6 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
         });
         break;
     }
-
-    // record custom elements
-    {
-      const localName = elem.localName;
-      if (CUSTOM_ELEMENT_NAME_PATTERN.test(localName) && !CUSTOM_ELEMENT_NAME_FORBIDDEN.has(localName)) {
-        customElementNames.add(localName);
-      }
-    }
   }
 
   /**
@@ -1783,9 +1775,11 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
   }
 
   [`_handle_{${NS_HTML}}`](elem) {
-    this[`_handle_{${NS_HTML}}${elem.localName}`]?.(elem);
+    const localName = elem.localName;
 
-    const {cssResourcesHandler, shadowRootList, cssTasks, options} = this;
+    this[`_handle_{${NS_HTML}}${localName}`]?.(elem);
+
+    const {cssResourcesHandler, customElementNames, shadowRootList, cssTasks, options} = this;
 
     // handle shadow DOM
     if (options["capture.shadowDom"] === "save") {
@@ -1810,6 +1804,11 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
       default:
         this.captureRewriteAttr(elem, "nonce", null); // this is meaningless as CSP is removed
         break;
+    }
+
+    // record custom elements
+    if (CUSTOM_ELEMENT_NAME_PATTERN.test(localName) && !CUSTOM_ELEMENT_NAME_FORBIDDEN.has(localName)) {
+      customElementNames.add(localName);
     }
   }
 
