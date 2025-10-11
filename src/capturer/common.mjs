@@ -3,6 +3,7 @@
  *****************************************************************************/
 
 import {isDebug} from "../utils/debug.mjs";
+import {NS_HTML} from "../utils/common.mjs";
 import * as utils from "../utils/common.mjs";
 import {StorageCache, serializeObject, deserializeObject} from "../utils/cache.mjs";
 import {CaptureDocumentRewriter, PresaveDocumentRewriter, RetrieveDocumentRewriter} from "./doc-handler.mjs";
@@ -59,7 +60,7 @@ class BaseCapturer {
     if (!["text/html", "application/xhtml+xml", "image/svg+xml"].includes(doc.contentType)) {
       // handle saveFileAsHtml
       // if the document can be rendered as HTML, save as a normal HTML file
-      if (doc.documentElement.nodeName.toLowerCase() === "html" && options["capture.saveFileAsHtml"]) {
+      if (doc.documentElement.namespaceURI === NS_HTML && options["capture.saveFileAsHtml"]) {
         return await this.captureDocument({
           doc,
           docUrl,

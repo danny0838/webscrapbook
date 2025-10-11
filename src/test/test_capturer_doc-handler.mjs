@@ -537,6 +537,20 @@ describe('capturer/doc-handler.mjs', function () {
 
           assert.strictEqual(doc.querySelector(tagName).getAttribute('content'), '0; url=page.html');
         });
+
+        it('should not work when in shadow DOM', async function () {
+          var doc = createDocFixture({tagName: 'div', shadow: {
+            virtual: true,
+            children: [
+              {tagName, attrs: {'http-equiv': "refresh", 'content': `0; url=${docUrl}page.html`}},
+            ],
+          }});
+          rewriter.run(doc, {capturer, filenameMap, redirects});
+
+          var html = doc.querySelector('div').getAttribute('data-scrapbook-shadowdom');
+          var shadow = createFragFixture(html);
+          assert.strictEqual(shadow.querySelector('meta').getAttribute('content'), '0; url=https://example.com/page.html');
+        });
       });
 
       context('for <iframe>', function () {
@@ -643,7 +657,7 @@ describe('capturer/doc-handler.mjs', function () {
     }
 
     function baseUrlHandlingTesterFactory({tagName, selector, docUrl, interrupt = true}) {
-      return function baseUrlHandlingTest([elem, rootName], {func, doneSignal}) {
+      return function baseUrlHandlingTest([elem], {func, doneSignal}) {
         if (!selector) {
           if (tagName) {
             selector = CSS.escape(tagName);
@@ -657,7 +671,7 @@ describe('capturer/doc-handler.mjs', function () {
           sandbox.replace(this, 'baseUrl', `${docUrl}baseUrl/`);
           sandbox.replace(this, 'baseUrlFinal', `${docUrl}baseUrlFinal/`);
           try {
-            const result = func.call(this, elem, rootName);
+            const result = func.call(this, elem);
             if (interrupt) {
               throw doneSignal;
             } else {
@@ -667,7 +681,7 @@ describe('capturer/doc-handler.mjs', function () {
             sandbox.restore();
           }
         }
-        return func.call(this, elem, rootName);
+        return func.call(this, elem);
       };
     }
 
@@ -801,18 +815,18 @@ describe('capturer/doc-handler.mjs', function () {
         var root = docFactory();
         var callback = sinon.stub();
         var rewriter = new CaptureDocumentRewriter();
-        rewriter.rewriteRecursively(root, null, callback);
+        rewriter.rewriteRecursively(root, callback);
 
-        sinon.assert.calledWithExactly(callback.getCall(0), root, null);
-        sinon.assert.calledWithExactly(callback.getCall(1), root.querySelector('#e1'), null);
-        sinon.assert.calledWithExactly(callback.getCall(2), root.querySelector('#e1-1'), null);
-        sinon.assert.calledWithExactly(callback.getCall(3), root.querySelector('#e1-2'), null);
-        sinon.assert.calledWithExactly(callback.getCall(4), root.querySelector('#e2'), null);
-        sinon.assert.calledWithExactly(callback.getCall(5), root.querySelector('#e2-1'), null);
-        sinon.assert.calledWithExactly(callback.getCall(6), root.querySelector('#e2-2'), null);
-        sinon.assert.calledWithExactly(callback.getCall(7), root.querySelector('#e3'), null);
-        sinon.assert.calledWithExactly(callback.getCall(8), root.querySelector('#e3-1'), null);
-        sinon.assert.calledWithExactly(callback.getCall(9), root.querySelector('#e3-2'), null);
+        sinon.assert.calledWithExactly(callback.getCall(0), root);
+        sinon.assert.calledWithExactly(callback.getCall(1), root.querySelector('#e1'));
+        sinon.assert.calledWithExactly(callback.getCall(2), root.querySelector('#e1-1'));
+        sinon.assert.calledWithExactly(callback.getCall(3), root.querySelector('#e1-2'));
+        sinon.assert.calledWithExactly(callback.getCall(4), root.querySelector('#e2'));
+        sinon.assert.calledWithExactly(callback.getCall(5), root.querySelector('#e2-1'));
+        sinon.assert.calledWithExactly(callback.getCall(6), root.querySelector('#e2-2'));
+        sinon.assert.calledWithExactly(callback.getCall(7), root.querySelector('#e3'));
+        sinon.assert.calledWithExactly(callback.getCall(8), root.querySelector('#e3-1'));
+        sinon.assert.calledWithExactly(callback.getCall(9), root.querySelector('#e3-2'));
         assert.isNull(callback.getCall(10));
       });
 
@@ -825,18 +839,18 @@ describe('capturer/doc-handler.mjs', function () {
           }
         });
         var rewriter = new CaptureDocumentRewriter();
-        rewriter.rewriteRecursively(root, null, callback);
+        rewriter.rewriteRecursively(root, callback);
 
-        sinon.assert.calledWithExactly(callback.getCall(0), root, null);
-        sinon.assert.calledWithExactly(callback.getCall(1), root.querySelector('#e1'), null);
-        sinon.assert.calledWithExactly(callback.getCall(2), root.querySelector('#e1-1'), null);
-        sinon.assert.calledWithExactly(callback.getCall(3), root.querySelector('#e1-2'), null);
-        sinon.assert.calledWithExactly(callback.getCall(4), removed, null);
-        sinon.assert.calledWithExactly(callback.getCall(5), removed.querySelector('#e2-1'), null);
-        sinon.assert.calledWithExactly(callback.getCall(6), removed.querySelector('#e2-2'), null);
-        sinon.assert.calledWithExactly(callback.getCall(7), root.querySelector('#e3'), null);
-        sinon.assert.calledWithExactly(callback.getCall(8), root.querySelector('#e3-1'), null);
-        sinon.assert.calledWithExactly(callback.getCall(9), root.querySelector('#e3-2'), null);
+        sinon.assert.calledWithExactly(callback.getCall(0), root);
+        sinon.assert.calledWithExactly(callback.getCall(1), root.querySelector('#e1'));
+        sinon.assert.calledWithExactly(callback.getCall(2), root.querySelector('#e1-1'));
+        sinon.assert.calledWithExactly(callback.getCall(3), root.querySelector('#e1-2'));
+        sinon.assert.calledWithExactly(callback.getCall(4), removed);
+        sinon.assert.calledWithExactly(callback.getCall(5), removed.querySelector('#e2-1'));
+        sinon.assert.calledWithExactly(callback.getCall(6), removed.querySelector('#e2-2'));
+        sinon.assert.calledWithExactly(callback.getCall(7), root.querySelector('#e3'));
+        sinon.assert.calledWithExactly(callback.getCall(8), root.querySelector('#e3-1'));
+        sinon.assert.calledWithExactly(callback.getCall(9), root.querySelector('#e3-2'));
         assert.isNull(callback.getCall(10));
       });
 
@@ -848,16 +862,16 @@ describe('capturer/doc-handler.mjs', function () {
           }
         });
         var rewriter = new CaptureDocumentRewriter();
-        rewriter.rewriteRecursively(root, null, callback);
+        rewriter.rewriteRecursively(root, callback);
 
-        sinon.assert.calledWithExactly(callback.getCall(0), root, null);
-        sinon.assert.calledWithExactly(callback.getCall(1), root.querySelector('#e1'), null);
-        sinon.assert.calledWithExactly(callback.getCall(2), root.querySelector('#e1-1'), null);
-        sinon.assert.calledWithExactly(callback.getCall(3), root.querySelector('#e1-2'), null);
-        sinon.assert.calledWithExactly(callback.getCall(4), root.querySelector('#e2'), null);
-        sinon.assert.calledWithExactly(callback.getCall(5), root.querySelector('#e3'), null);
-        sinon.assert.calledWithExactly(callback.getCall(6), root.querySelector('#e3-1'), null);
-        sinon.assert.calledWithExactly(callback.getCall(7), root.querySelector('#e3-2'), null);
+        sinon.assert.calledWithExactly(callback.getCall(0), root);
+        sinon.assert.calledWithExactly(callback.getCall(1), root.querySelector('#e1'));
+        sinon.assert.calledWithExactly(callback.getCall(2), root.querySelector('#e1-1'));
+        sinon.assert.calledWithExactly(callback.getCall(3), root.querySelector('#e1-2'));
+        sinon.assert.calledWithExactly(callback.getCall(4), root.querySelector('#e2'));
+        sinon.assert.calledWithExactly(callback.getCall(5), root.querySelector('#e3'));
+        sinon.assert.calledWithExactly(callback.getCall(6), root.querySelector('#e3-1'));
+        sinon.assert.calledWithExactly(callback.getCall(7), root.querySelector('#e3-2'));
         assert.isNull(callback.getCall(8));
       });
 
@@ -871,16 +885,16 @@ describe('capturer/doc-handler.mjs', function () {
           }
         });
         var rewriter = new CaptureDocumentRewriter();
-        rewriter.rewriteRecursively(root, null, callback);
+        rewriter.rewriteRecursively(root, callback);
 
-        sinon.assert.calledWithExactly(callback.getCall(0), root, null);
-        sinon.assert.calledWithExactly(callback.getCall(1), root.querySelector('#e1'), null);
-        sinon.assert.calledWithExactly(callback.getCall(2), root.querySelector('#e1-1'), null);
-        sinon.assert.calledWithExactly(callback.getCall(3), root.querySelector('#e1-2'), null);
-        sinon.assert.calledWithExactly(callback.getCall(4), removed, null);
-        sinon.assert.calledWithExactly(callback.getCall(5), root.querySelector('#e3'), null);
-        sinon.assert.calledWithExactly(callback.getCall(6), root.querySelector('#e3-1'), null);
-        sinon.assert.calledWithExactly(callback.getCall(7), root.querySelector('#e3-2'), null);
+        sinon.assert.calledWithExactly(callback.getCall(0), root);
+        sinon.assert.calledWithExactly(callback.getCall(1), root.querySelector('#e1'));
+        sinon.assert.calledWithExactly(callback.getCall(2), root.querySelector('#e1-1'));
+        sinon.assert.calledWithExactly(callback.getCall(3), root.querySelector('#e1-2'));
+        sinon.assert.calledWithExactly(callback.getCall(4), removed);
+        sinon.assert.calledWithExactly(callback.getCall(5), root.querySelector('#e3'));
+        sinon.assert.calledWithExactly(callback.getCall(6), root.querySelector('#e3-1'));
+        sinon.assert.calledWithExactly(callback.getCall(7), root.querySelector('#e3-2'));
         assert.isNull(callback.getCall(8));
       });
 
@@ -895,14 +909,14 @@ describe('capturer/doc-handler.mjs', function () {
         ]});
         var callback = sinon.stub();
         var rewriter = new CaptureDocumentRewriter();
-        rewriter.rewriteRecursively(root, null, callback);
+        rewriter.rewriteRecursively(root, callback);
 
-        sinon.assert.calledWithExactly(callback.getCall(0), root, null);
-        sinon.assert.calledWithExactly(callback.getCall(1), root.querySelector('html'), null);
-        sinon.assert.calledWithExactly(callback.getCall(2), root.querySelector('head'), null);
-        sinon.assert.calledWithExactly(callback.getCall(3), root.querySelector('meta'), null);
-        sinon.assert.calledWithExactly(callback.getCall(4), root.querySelector('body'), null);
-        sinon.assert.calledWithExactly(callback.getCall(5), root.querySelector('div'), null);
+        sinon.assert.calledWithExactly(callback.getCall(0), root);
+        sinon.assert.calledWithExactly(callback.getCall(1), root.querySelector('html'));
+        sinon.assert.calledWithExactly(callback.getCall(2), root.querySelector('head'));
+        sinon.assert.calledWithExactly(callback.getCall(3), root.querySelector('meta'));
+        sinon.assert.calledWithExactly(callback.getCall(4), root.querySelector('body'));
+        sinon.assert.calledWithExactly(callback.getCall(5), root.querySelector('div'));
         assert.isNull(callback.getCall(6));
       });
 
@@ -919,15 +933,15 @@ describe('capturer/doc-handler.mjs', function () {
         ]});
         var callback = sinon.stub();
         var rewriter = new CaptureDocumentRewriter();
-        rewriter.rewriteRecursively(root, null, callback);
+        rewriter.rewriteRecursively(root, callback);
 
-        sinon.assert.calledWithExactly(callback.getCall(0), root, null);
-        sinon.assert.calledWithExactly(callback.getCall(1), root.querySelector('#e1'), null);
-        sinon.assert.calledWithExactly(callback.getCall(2), root.querySelector('#e1-1'), null);
-        sinon.assert.calledWithExactly(callback.getCall(3), root.querySelector('#e1-2'), null);
-        sinon.assert.calledWithExactly(callback.getCall(4), root.querySelector('#e2'), null);
-        sinon.assert.calledWithExactly(callback.getCall(5), root.querySelector('#e2-1'), null);
-        sinon.assert.calledWithExactly(callback.getCall(6), root.querySelector('#e2-2'), null);
+        sinon.assert.calledWithExactly(callback.getCall(0), root);
+        sinon.assert.calledWithExactly(callback.getCall(1), root.querySelector('#e1'));
+        sinon.assert.calledWithExactly(callback.getCall(2), root.querySelector('#e1-1'));
+        sinon.assert.calledWithExactly(callback.getCall(3), root.querySelector('#e1-2'));
+        sinon.assert.calledWithExactly(callback.getCall(4), root.querySelector('#e2'));
+        sinon.assert.calledWithExactly(callback.getCall(5), root.querySelector('#e2-1'));
+        sinon.assert.calledWithExactly(callback.getCall(6), root.querySelector('#e2-2'));
         assert.isNull(callback.getCall(7));
       });
     });
@@ -1072,7 +1086,7 @@ describe('capturer/doc-handler.mjs', function () {
           it('should update base URL dynamically', async function () {
             var doc = docFactory('./resources/');
 
-            var tester = function ([elem, rootName], {func, doneSignal}) {
+            var tester = function ([elem], {func, doneSignal}) {
               switch (elem) {
                 // before base
                 case this.doc.querySelector('meta'): {
@@ -1101,7 +1115,7 @@ describe('capturer/doc-handler.mjs', function () {
                   throw doneSignal;
                 }
               }
-              return func.call(this, elem, rootName);
+              return func.call(this, elem);
             };
 
             var {stub} = await rewriteNodeControlledTest({doc, docUrl, tester});
@@ -1115,7 +1129,7 @@ describe('capturer/doc-handler.mjs', function () {
               {tagName, attrs: {href: './resources2/'}},
             ]});
 
-            var tester = function ([elem, rootName], {func, doneSignal}) {
+            var tester = function ([elem], {func, doneSignal}) {
               switch (elem) {
                 // ignore
                 case this.doc.querySelectorAll('base')[0]: {
@@ -1153,7 +1167,7 @@ describe('capturer/doc-handler.mjs', function () {
                   throw doneSignal;
                 }
               }
-              return func.call(this, elem, rootName);
+              return func.call(this, elem);
             };
 
             var {stub} = await rewriteNodeControlledTest({doc, docUrl, tester});
@@ -1166,7 +1180,7 @@ describe('capturer/doc-handler.mjs', function () {
               {tagName, attrs: {href: './resources/'}},
             ]});
 
-            var tester = function ([elem, rootName], {func, doneSignal}) {
+            var tester = function ([elem], {func, doneSignal}) {
               switch (elem) {
                 // honor
                 case this.doc.querySelectorAll('base')[0]: {
@@ -1195,7 +1209,71 @@ describe('capturer/doc-handler.mjs', function () {
                   throw doneSignal;
                 }
               }
-              return func.call(this, elem, rootName);
+              return func.call(this, elem);
+            };
+
+            var {stub} = await rewriteNodeControlledTest({doc, docUrl, tester});
+            sinon.assert.called(stub);
+          });
+
+          it('should not honor `svg:base`', async function () {
+            var doc = createDocFixture({tagName: 'head', children: [
+              {tagName, ns: NS_SVG, attrs: {href: './resources/'}},
+            ]});
+
+            var tester = function ([elem], {func, doneSignal}) {
+              switch (elem) {
+                // ignore
+                case this.doc.querySelector('base'): {
+                  assert.strictEqual(this.baseElem, undefined);
+                  assert.strictEqual(this.baseUrlFallback, 'https://example.com/');
+                  assert.strictEqual(this.baseUrl, 'https://example.com/');
+                  assert.strictEqual(this.baseUrlFinal, 'https://example.com/');
+                  break;
+                }
+
+                // after base
+                case this.doc.querySelector('body'): {
+                  assert.strictEqual(this.baseElem, undefined);
+                  assert.strictEqual(this.baseUrlFallback, 'https://example.com/');
+                  assert.strictEqual(this.baseUrl, 'https://example.com/');
+                  assert.strictEqual(this.baseUrlFinal, 'https://example.com/');
+                  throw doneSignal;
+                }
+              }
+              return func.call(this, elem);
+            };
+
+            var {stub} = await rewriteNodeControlledTest({doc, docUrl, tester});
+            sinon.assert.called(stub);
+          });
+
+          it('should honor `html:base` under `svg`', async function () {
+            var doc = createDocFixture({tagName: 'svg', ns: NS_SVG, children: [
+              {tagName, attrs: {href: './resources/'}},
+            ]});
+
+            var tester = function ([elem], {func, doneSignal}) {
+              switch (elem) {
+                // ignore
+                case this.doc.querySelector('base'): {
+                  assert.strictEqual(this.baseElem, undefined);
+                  assert.strictEqual(this.baseUrlFallback, 'https://example.com/');
+                  assert.strictEqual(this.baseUrl, 'https://example.com/');
+                  assert.strictEqual(this.baseUrlFinal, 'https://example.com/resources/');
+                  break;
+                }
+
+                // after base
+                case this.doc.querySelector('img'): {
+                  assert.strictEqual(this.baseElem, this.doc.querySelector('base'));
+                  assert.strictEqual(this.baseUrlFallback, 'https://example.com/');
+                  assert.strictEqual(this.baseUrl, 'https://example.com/resources/');
+                  assert.strictEqual(this.baseUrlFinal, 'https://example.com/resources/');
+                  throw doneSignal;
+                }
+              }
+              return func.call(this, elem);
             };
 
             var {stub} = await rewriteNodeControlledTest({doc, docUrl, tester});
@@ -1209,7 +1287,7 @@ describe('capturer/doc-handler.mjs', function () {
               ],
             }});
 
-            var tester = function ([elem, rootName], {func, doneSignal}) {
+            var tester = function ([elem], {func, doneSignal}) {
               switch (elem) {
                 // ignore
                 case this.doc.querySelector('div').shadowRoot.querySelector('base'): {
@@ -1229,7 +1307,7 @@ describe('capturer/doc-handler.mjs', function () {
                   throw doneSignal;
                 }
               }
-              return func.call(this, elem, rootName);
+              return func.call(this, elem);
             };
 
             var {stub} = await rewriteNodeControlledTest({doc, docUrl, tester});
@@ -1636,14 +1714,14 @@ describe('capturer/doc-handler.mjs', function () {
               for (const value of META_REFERRER_POLICY) {
                 var doc = createDocFixture({tagName, attrs: {name: 'referrer', content: value}});
 
-                var tester = function ([elem, rootName], {func, doneSignal}) {
+                var tester = function ([elem], {func, doneSignal}) {
                   if (elem === this.doc.querySelector(tagName)) {
                     assert.strictEqual(this.docRefPolicy, '', `when content value is "${value}"`);
-                    func.call(this, elem, rootName);
+                    func.call(this, elem);
                     assert.strictEqual(this.docRefPolicy, value, `when content value is "${value}"`);
                     throw doneSignal;
                   }
-                  return func.call(this, elem, rootName);
+                  return func.call(this, elem);
                 };
 
                 var {stub} = await rewriteNodeControlledTest({doc, docUrl, tester});
@@ -1655,14 +1733,14 @@ describe('capturer/doc-handler.mjs', function () {
               for (const [value, newValue] of META_REFERRER_POLICY_LEGACY) {
                 var doc = createDocFixture({tagName, attrs: {name: 'referrer', content: value}});
 
-                var tester = function ([elem, rootName], {func, doneSignal}) {
+                var tester = function ([elem], {func, doneSignal}) {
                   if (elem === this.doc.querySelector(tagName)) {
                     assert.strictEqual(this.docRefPolicy, '', `when content value is "${value}"`);
-                    func.call(this, elem, rootName);
+                    func.call(this, elem);
                     assert.strictEqual(this.docRefPolicy, newValue, `when content value is "${value}" ("${newValue}")`);
                     throw doneSignal;
                   }
-                  return func.call(this, elem, rootName);
+                  return func.call(this, elem);
                 };
 
                 var {stub} = await rewriteNodeControlledTest({doc, docUrl, tester});
@@ -1679,14 +1757,14 @@ describe('capturer/doc-handler.mjs', function () {
                 ],
               });
 
-              var tester = function ([elem, rootName], {func, doneSignal}) {
+              var tester = function ([elem], {func, doneSignal}) {
                 if (elem === this.doc.querySelectorAll(tagName)[1]) {
                   assert.strictEqual(this.docRefPolicy, 'origin-when-cross-origin');
-                  func.call(this, elem, rootName);
+                  func.call(this, elem);
                   assert.strictEqual(this.docRefPolicy, 'origin-when-cross-origin');
                   throw doneSignal;
                 }
-                return func.call(this, elem, rootName);
+                return func.call(this, elem);
               };
 
               var {stub} = await rewriteNodeControlledTest({doc, docUrl, tester});
@@ -1914,11 +1992,11 @@ describe('capturer/doc-handler.mjs', function () {
                     it('should update `favIconUrl` to the rewritten URL when undefined', async function () {
                       var doc = createDocFixture({tagName, rel, attrs: {href: "./green.ico"}});
 
-                      var tester = function ([elem, rootName], {func, doneSignal}) {
+                      var tester = function ([elem], {func, doneSignal}) {
                         if (elem === this.doc.querySelector(tagName)) {
                           this.favIconUrl = undefined;
                         }
-                        return func.call(this, elem, rootName);
+                        return func.call(this, elem);
                       };
 
                       var {stub, rewriter} = await rewriteNodeControlledTest({doc, docUrl, tester, options});
@@ -1933,11 +2011,11 @@ describe('capturer/doc-handler.mjs', function () {
                     it('should update `favIconUrl` to the resolved URL when undefined', async function () {
                       var doc = createDocFixture({tagName, rel, attrs: {href: "./green.ico"}});
 
-                      var tester = function ([elem, rootName], {func, doneSignal}) {
+                      var tester = function ([elem], {func, doneSignal}) {
                         if (elem === this.doc.querySelector(tagName)) {
                           this.favIconUrl = undefined;
                         }
-                        return func.call(this, elem, rootName);
+                        return func.call(this, elem);
                       };
 
                       var {stub, rewriter} = await rewriteNodeControlledTest({doc, docUrl, tester, options});
@@ -1953,11 +2031,11 @@ describe('capturer/doc-handler.mjs', function () {
                     it('should update `favIconUrl` to "" when undefined', async function () {
                       var doc = createDocFixture({tagName, rel, attrs: {href: "./green.ico"}});
 
-                      var tester = function ([elem, rootName], {func, doneSignal}) {
+                      var tester = function ([elem], {func, doneSignal}) {
                         if (elem === this.doc.querySelector(tagName)) {
                           this.favIconUrl = undefined;
                         }
-                        return func.call(this, elem, rootName);
+                        return func.call(this, elem);
                       };
 
                       var {stub, rewriter} = await rewriteNodeControlledTest({doc, docUrl, tester, options});
@@ -1975,11 +2053,11 @@ describe('capturer/doc-handler.mjs', function () {
                     children: [{tagName, rel, attrs: {href: "./green.ico"}}],
                   }});
 
-                  var tester = function ([elem, rootName], {func, doneSignal}) {
+                  var tester = function ([elem], {func, doneSignal}) {
                     if (elem === this.doc.querySelector(tagName)) {
                       this.favIconUrl = undefined;
                     }
-                    return func.call(this, elem, rootName);
+                    return func.call(this, elem);
                   };
 
                   var {stub, rewriter} = await rewriteNodeControlledTest({doc, docUrl, tester, options});
@@ -1991,11 +2069,11 @@ describe('capturer/doc-handler.mjs', function () {
                 it('should not alter `favIconUrl` when defined', async function () {
                   var doc = createDocFixture({tagName, rel, attrs: {href: "./green.ico"}});
 
-                  var tester = function ([elem, rootName], {func, doneSignal}) {
+                  var tester = function ([elem], {func, doneSignal}) {
                     if (elem === this.doc.querySelector(tagName)) {
                       this.favIconUrl = 'https://example.com/myicon.ico';
                     }
-                    return func.call(this, elem, rootName);
+                    return func.call(this, elem);
                   };
 
                   var {stub, rewriter} = await rewriteNodeControlledTest({doc, docUrl, tester, options});
@@ -2102,11 +2180,11 @@ describe('capturer/doc-handler.mjs', function () {
               it('should never update `favIconUrl`', async function () {
                 var doc = createDocFixture({tagName, rel, attrs: {href: "./green.png"}});
 
-                var tester = function ([elem, rootName], {func, doneSignal}) {
+                var tester = function ([elem], {func, doneSignal}) {
                   if (elem === this.doc.querySelector(tagName)) {
                     this.favIconUrl = undefined;
                   }
-                  return func.call(this, elem, rootName);
+                  return func.call(this, elem);
                 };
 
                 var {stub, rewriter} = await rewriteNodeControlledTest({doc, docUrl, tester, options});
@@ -3847,6 +3925,24 @@ describe('capturer/doc-handler.mjs', function () {
                 });
               });
 
+              it('should ignore non-HTML descendants', async function () {
+                var doc = docFactory({ns: NS_SVG});
+
+                var {doc} = await new TestCapturer().captureDocument({doc, docUrl, options});
+                var elems = doc.querySelectorAll('source, img');
+                assert.strictEqual(elems[0].getAttribute('srcset'), './img1-1.bmp 2x, ./img1-2.bmp 3x');
+                assert.strictEqual(elems[1].getAttribute('srcset'), './img2.bmp');
+                assert.strictEqual(elems[2].getAttribute('src'), './img3.bmp');
+                assert.strictEqual(elems[2].getAttribute('srcset'), './img4-1.bmp 2x, ./img4-2.bmp 3x');
+
+                sinon.assert.notCalled(spyDownload);
+
+                sinon.assert.neverCalledWith(spyRewrite, elems[0], 'srcset');
+                sinon.assert.neverCalledWith(spyRewrite, elems[1], 'srcset');
+                sinon.assert.neverCalledWith(spyRewrite, elems[2], 'src');
+                sinon.assert.neverCalledWith(spyRewrite, elems[2], 'srcset');
+              });
+
               context(CONTEXT_BASE_URL, function () {
                 it('should resolve the URLs with `baseUrl`', async function () {
                   var doc = docFactory();
@@ -4149,6 +4245,27 @@ describe('capturer/doc-handler.mjs', function () {
                 sinon.assert.notCalled(spyDownload);
               });
 
+              it('should ignore non-HTML descendants', async function () {
+                var doc = docFactoryComplex({ns: NS_SVG});
+
+                var {doc} = await new TestCapturer().captureDocument({doc, docUrl, options});
+                var audio = doc.querySelector('audio');
+                var sources = doc.querySelectorAll('source');
+                var tracks = doc.querySelectorAll('track');
+                assert.strictEqual(audio.getAttribute('src'), null);
+                assert.strictEqual(sources[0].getAttribute('src'), './horse.ogg');
+                assert.strictEqual(sources[1].getAttribute('src'), './horse.mp3');
+                assert.strictEqual(tracks[0].getAttribute('src'), './horse_en.vtt');
+                assert.strictEqual(tracks[1].getAttribute('src'), './horse_zh.vtt');
+
+                sinon.assert.notCalled(spyDownload);
+
+                sinon.assert.neverCalledWith(spyRewrite, sources[0], 'src');
+                sinon.assert.neverCalledWith(spyRewrite, sources[1], 'src');
+                sinon.assert.neverCalledWith(spyRewrite, tracks[0], 'src');
+                sinon.assert.neverCalledWith(spyRewrite, tracks[1], 'src');
+              });
+
               context(CONTEXT_BASE_URL, function () {
                 it('should resolve the URLs with `baseUrl` (simple)', async function () {
                   var doc = docFactorySimple();
@@ -4261,7 +4378,7 @@ describe('capturer/doc-handler.mjs', function () {
             }
 
             async function testSaveCrossOrigin() {
-              var doc = docFactoryComplex({crossorigin: ''});
+              var doc = docFactoryComplex({attrs: {crossorigin: ''}});
 
               var {doc} = await new TestCapturer().captureDocument({doc, docUrl, options});
               var elem = doc.querySelector(tagName);
@@ -4271,7 +4388,7 @@ describe('capturer/doc-handler.mjs', function () {
             }
 
             async function testSaveCrossOriginHeaded() {
-              var {contentDocument: doc} = await docFactoryComplexIframe({crossorigin: ''});
+              var {contentDocument: doc} = await docFactoryComplexIframe({attrs: {crossorigin: ''}});
               sinon.stub(doc.querySelector(tagName), 'currentSrc').value(`${docUrl}small.ogg`);
 
               var {doc} = await new TestCapturer().captureDocument({doc, docUrl, options});
@@ -4468,6 +4585,27 @@ describe('capturer/doc-handler.mjs', function () {
                 assert.strictEqual(tracks[1].getAttribute('srcset'), './small_zh.vtt');
 
                 sinon.assert.notCalled(spyDownload);
+              });
+
+              it('should ignore non-HTML descendants', async function () {
+                var doc = docFactoryComplex({ns: NS_SVG});
+
+                var {doc} = await new TestCapturer().captureDocument({doc, docUrl, options});
+                var video = doc.querySelector('video');
+                var sources = doc.querySelectorAll('source');
+                var tracks = doc.querySelectorAll('track');
+                assert.strictEqual(video.getAttribute('src'), null);
+                assert.strictEqual(sources[0].getAttribute('src'), './small.ogg');
+                assert.strictEqual(sources[1].getAttribute('src'), './small.mp4');
+                assert.strictEqual(tracks[0].getAttribute('src'), './small_en.vtt');
+                assert.strictEqual(tracks[1].getAttribute('src'), './small_zh.vtt');
+
+                sinon.assert.notCalled(spyDownload);
+
+                sinon.assert.neverCalledWith(spyRewrite, sources[0], 'src');
+                sinon.assert.neverCalledWith(spyRewrite, sources[1], 'src');
+                sinon.assert.neverCalledWith(spyRewrite, tracks[0], 'src');
+                sinon.assert.neverCalledWith(spyRewrite, tracks[1], 'src');
               });
 
               context(CONTEXT_BASE_URL, function () {
@@ -7412,8 +7550,8 @@ describe('capturer/doc-handler.mjs', function () {
               assert.strictEqual(elem.getAttributeNS(ns, 'href'), 'https://example.com/linked.html');
 
               sinon.assert.calledOnceWithExactly(spyResolveLink, './linked.html', 'https://example.com/', {checkJavascript: true});
-              sinon.assert.calledWithExactly(spyRewriteAnchor, elem, 'href', {isHtml: false});
-              sinon.assert.calledWithExactly(spyRewriteAnchor, elem, 'xlink:href', {isHtml: false});
+              sinon.assert.calledWithExactly(spyRewriteAnchor, elem, 'href');
+              sinon.assert.calledWithExactly(spyRewriteAnchor, elem, 'xlink:href');
               sinon.assert.calledTwice(spyRewriteAnchor);
               sinon.assert.calledOnceWithExactly(spyRewrite, elem, `${prefix}href`, 'https://example.com/linked.html');
               sinon.assert.notCalled(spyCaptureUrl);
@@ -8093,6 +8231,24 @@ describe('capturer/doc-handler.mjs', function () {
           ]});
           var rewriter = await new TestCapturer().captureDocument({doc, docUrl});
           assert.deepEqual(rewriter.customElementNames, new Set([]));
+        });
+
+        it('should work for an XHTML element with altered prefix', async function () {
+          var doc = createDocFixture({
+            type: 'xhtml',
+            nsmap: {h: NS_HTML},
+            tagName: 'h:html',
+            ns: NS_HTML,
+            children: [
+              {tagName: 'h:head', ns: NS_HTML},
+              {tagName: 'h:body', ns: NS_HTML, children: [
+                {tagName: 'h:custom-elem', ns: NS_HTML},
+              ]},
+            ],
+          });
+
+          var rewriter = await new TestCapturer().captureDocument({doc, docUrl});
+          assert.deepEqual(rewriter.customElementNames, new Set(["custom-elem"]));
         });
 
         for (const mode of ["save", "link", "blank", "remove", "<other>"]) {

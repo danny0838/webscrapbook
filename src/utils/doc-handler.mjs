@@ -262,7 +262,7 @@ class DocumentRewriter extends BaseDocumentRewriter {
 
     if (elem.nodeType !== Node.ELEMENT_NODE) { return; }
 
-    switch (elem.nodeName.toLowerCase()) {
+    switch (elem.localName) {
       case "canvas": {
         try {
           const data = elem.toDataURL();

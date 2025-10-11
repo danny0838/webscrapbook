@@ -2518,7 +2518,7 @@ Redirecting to file <a href="${utils.escapeHtml(response.url)}">${utils.escapeHt
               return `//*[@id=${utils.quoteXPath(elem.id)}]`;
             }
 
-            const tag = elem.nodeName.toLowerCase();
+            const tag = elem.nodeName;
             if (elem === root) {
               return `/${tag}[1]`;
             }
@@ -2529,7 +2529,7 @@ Redirecting to file <a href="${utils.escapeHtml(response.url)}">${utils.escapeHt
               if (sibling === elem) {
                 return `${getXPath(parent, root)}/${tag}[${pos + 1}]`;
               }
-              if (sibling.nodeName.toLowerCase() === tag) {
+              if (sibling.nodeName === tag) {
                 pos++;
               }
             }

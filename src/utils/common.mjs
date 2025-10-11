@@ -1380,8 +1380,8 @@ function getShadowRoot(elem) {
     // Firefox >= 63
     // This API can return the native closed shadowRoot of an element like
     // audio or video. Add a check to exclude such cases.
-    const nodeName = elem.nodeName.toLowerCase();
-    if (VALID_SHADOW_HOST_NAMES.has(nodeName) || nodeName.includes('-')) {
+    const localName = elem.localName;
+    if (VALID_SHADOW_HOST_NAMES.has(localName) || localName.includes('-')) {
       return elem.openOrClosedShadowRoot;
     }
   } else {

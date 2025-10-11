@@ -594,7 +594,7 @@ class DocumentCssHandler {
     } catch (ex) {
       // cssRules not accessible, probably a cross-domain CSS.
       if (crossOrigin) {
-        if (css?.ownerNode?.nodeName.toLowerCase() === 'style') {
+        if (css?.ownerNode?.localName === 'style') {
           rules = this.getRulesFromCssText(css.ownerNode.textContent);
         } else {
           const {settings, options} = this;
@@ -1026,7 +1026,7 @@ class DocumentCssHandler {
     options = options ? Object.assign({}, this.options, options) : this.options;
 
     let sourceUrl;
-    let cssType = !elem ? 'imported' : elem.nodeName.toLowerCase() === 'link' ? 'external' : 'internal';
+    let cssType = !elem ? 'imported' : elem.localName === 'link' ? 'external' : 'internal';
     let cssText = "";
     let cssRules;
     let charset;
