@@ -4064,13 +4064,9 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
         // do nothing
         break;
       case "blank":
-        if (elem.hasAttribute(attr)) {
-          this.captureRewriteAttr(elem, attr, null);
-        }
-        break;
       case "remove":
-        this.captureRemoveNode(elem);
-        throw new NodeDisconnect(elem);
+        this.captureRewriteAttr(elem, attr, null);
+        break;
       case "save-current":
       case "save":
       default: {
