@@ -2137,69 +2137,7 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
   }
 
   [`_handle_{${NS_HTML}}style`](elem) {
-    const {baseUrl, refUrl, docRefPolicy: refPolicy, charset, cssHandler, cssResourcesHandler, cssTasks, tasks, settings, options} = this;
-
-    let disableCss = false;
-    const css = cssHandler.getElemCss(elem);
-    if (css) {
-      if (css.title) {
-        if (!cssHandler.isBrowserPick) {
-          this.captureRewriteAttr(elem, "title", null);
-          if (css.disabled) {
-            disableCss = true;
-          }
-        }
-      } else {
-        if (css.disabled) {
-          disableCss = true;
-        }
-      }
-      cssTasks.push(async () => {
-        await cssResourcesHandler.inspectCss({
-          css,
-          baseUrl,
-          refUrl,
-          refPolicy,
-          envCharset: charset,
-          root: elem.getRootNode(),
-        });
-      });
-    }
-
-    switch (options["capture.style"]) {
-      case "blank": {
-        this.captureRewriteTextContent(elem, "");
-        break;
-      }
-      case "remove": {
-        this.captureRemoveNode(elem);
-        throw new NodeDisconnect(elem);
-      }
-      case "save":
-      case "link":
-      default: {
-        if (disableCss) {
-          this.captureRewriteTextContent(elem, "");
-          elem.setAttribute("data-scrapbook-css-disabled", "");
-          break;
-        }
-        tasks.push(async () => {
-          await cssHandler.rewriteCss({
-            elem,
-            baseUrl,
-            refUrl,
-            refPolicy,
-            envCharset: charset,
-            settings,
-            callback: (elem, response) => {
-              this.captureRewriteTextContent(elem, response.cssText);
-              this.escapeRawTextTag(elem);
-            },
-          });
-        });
-        break;
-      }
-    }
+    this[`_handle_style`].call(this, elem);
   }
 
   [`_handle_{${NS_HTML}}script`](elem) {
@@ -3781,10 +3719,34 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
   }
 
   [`_handle_{${NS_SVG}}style`](elem) {
+    this[`_handle_style`].call(this, elem);
+  }
+
+  [`_handle_{${NS_MATHML}}`](elem) {
+    this.rewriteAnchor(elem, "href");
+  }
+
+  /**
+   * <style> elements in HTML/SVG namespaces behave similarly.
+   */
+  [`_handle_style`](elem) {
     const {baseUrl, refUrl, docRefPolicy: refPolicy, charset, cssHandler, cssResourcesHandler, cssTasks, tasks, settings, options} = this;
 
+    let disableCss = false;
     const css = cssHandler.getElemCss(elem);
     if (css) {
+      if (css.title) {
+        if (!cssHandler.isBrowserPick) {
+          this.captureRewriteAttr(elem, "title", null);
+          if (css.disabled) {
+            disableCss = true;
+          }
+        }
+      } else {
+        if (css.disabled) {
+          disableCss = true;
+        }
+      }
       cssTasks.push(async () => {
         await cssResourcesHandler.inspectCss({
           css,
@@ -3796,6 +3758,7 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
         });
       });
     }
+
     switch (options["capture.style"]) {
       case "blank": {
         this.captureRewriteTextContent(elem, "");
@@ -3808,6 +3771,11 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
       case "save":
       case "link":
       default: {
+        if (disableCss) {
+          this.captureRewriteTextContent(elem, "");
+          elem.setAttribute("data-scrapbook-css-disabled", "");
+          break;
+        }
         tasks.push(async () => {
           await cssHandler.rewriteCss({
             elem,
@@ -3818,6 +3786,7 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
             settings,
             callback: (elem, response) => {
               this.captureRewriteTextContent(elem, response.cssText);
+              this.escapeRawTextTag(elem);
             },
           });
         });
