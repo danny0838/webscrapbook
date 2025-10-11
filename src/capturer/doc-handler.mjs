@@ -1,5 +1,5 @@
 import {isDebug} from "../utils/debug.mjs";
-import {ANNOTATION_CSS} from "../utils/common.mjs";
+import {ANNOTATION_CSS, NS_HTML, NS_SVG, NS_XLINK, NS_MATHML} from "../utils/common.mjs";
 import * as utils from "../utils/common.mjs";
 import {DocumentCloner, PartialDocumentCloner} from "../utils/doc-cloner.mjs";
 import {BaseDocumentRewriter, MapperMixin} from "../utils/doc-handler.mjs";
@@ -43,9 +43,11 @@ const CUSTOM_ELEMENT_NAME_FORBIDDEN = new Set([
 
 const REWRITABLE_SPECIAL_OBJECTS = new Set([false, 'adoptedStyleSheet']);
 
-const REMOVE_HIDDEN_EXCLUDE_HTML = new Set(["html", "head", "title", "meta", "link", "style", "script", "body", "noscript", "template", "source", "track"]);
-const REMOVE_HIDDEN_EXCLUDE_SVG = new Set(["svg"]);
-const REMOVE_HIDDEN_EXCLUDE_MATH = new Set(["math"]);
+const REMOVE_HIDDEN_EXCLUDE = {
+  [NS_HTML]: "html, head, title, meta, link, style, script, body, noscript, template, source, track",
+  [NS_SVG]: "svg",
+  [NS_MATHML]: "math",
+};
 
 // Keep downward compatibility with IE8.
 // indeterminate checkbox: IE >= 6, getAttribute: IE >= 8
@@ -776,7 +778,7 @@ class RebuildLinksDocumentRewriter extends BaseDocumentRewriter {
 
   processRootNode(rootNode) {
     // rewrite links
-    this[`_handle_${rootNode.nodeName.toLowerCase()}`]?.call(this, rootNode);
+    this[`_handle_{${rootNode.namespaceURI ?? NS_HTML}}`]?.(rootNode);
 
     // recurse into shadow roots
     this.rewriteScrapBookShadowDom(rootNode);
@@ -791,14 +793,16 @@ class RebuildLinksDocumentRewriter extends BaseDocumentRewriter {
     }
   }
 
-  ['_handle_html'](rootNode) {
+  [`_handle_{${NS_HTML}}`](rootNode) {
     for (const elem of rootNode.querySelectorAll('a[href], area[href]')) {
-      if (elem.closest('svg, math')) { continue; }
+      if (elem.namespaceURI !== NS_HTML) { continue; }
       if (elem.hasAttribute('download')) { continue; }
       this.rewriteHref(elem, 'href');
     }
-    for (const elem of rootNode.querySelectorAll('meta[http-equiv="refresh" i][content]')) {
-      this.rewriteMetaRefresh(elem);
+    if (!rootNode.host) {
+      for (const elem of rootNode.querySelectorAll('meta[http-equiv="refresh" i][content]')) {
+        this.rewriteMetaRefresh(elem);
+      }
     }
     for (const elem of rootNode.querySelectorAll('iframe[srcdoc]')) {
       const doc = (new DOMParser()).parseFromString(elem.srcdoc, 'text/html');
@@ -810,11 +814,7 @@ class RebuildLinksDocumentRewriter extends BaseDocumentRewriter {
     }
   }
 
-  ['_handle_#document-fragment'](rootNode) {
-    return this['_handle_html'].call(this, rootNode);
-  }
-
-  ['_handle_svg'](rootNode) {
+  [`_handle_{${NS_SVG}}`](rootNode) {
     for (const elem of rootNode.querySelectorAll('a[*|href]')) {
       for (const attr of REBUILD_LINK_SVG_HREF_ATTRS) {
         if (!elem.hasAttribute(attr)) { continue; }
@@ -823,7 +823,7 @@ class RebuildLinksDocumentRewriter extends BaseDocumentRewriter {
     }
   }
 
-  ['_handle_math'](rootNode) {
+  [`_handle_{${NS_MATHML}}`](rootNode) {
     for (const elem of rootNode.querySelectorAll('[href]')) {
       this.rewriteHref(elem, 'href');
     }
@@ -973,7 +973,7 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
 
         // clone head if not yet done
         // (treated as all head is selected if not involved yet)
-        if (rootNode.nodeName.toLowerCase() === "html") {
+        if (rootNode.namespaceURI === NS_HTML) {
           const headNode = doc.head;
           if (headNode && !clonedNodeMap.has(headNode)) {
             rootNode.insertBefore(
@@ -1035,7 +1035,7 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
     const baseUrlFinal = (() => {
       let base = baseUrlFallback;
       for (const elem of doc.querySelectorAll('base[href]')) {
-        if (elem.closest('svg, math')) { continue; }
+        if (elem.namespaceURI !== NS_HTML) { continue; }
         base = new URL(elem.getAttribute('href'), baseUrlFallback).href;
         base = utils.splitUrlByAnchor(base)[0];
         break;
@@ -1093,7 +1093,7 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
     // inspect all nodes (and register async tasks)
     this.handleDownLinkExtras();
     this.addAdoptedStyleSheets(this.origDoc, rootNode);
-    this.rewriteRecursively(rootNode, null, this.rewriteNode);
+    this.rewriteRecursively(rootNode, this.rewriteNode);
 
     // register additional tasks that require data from inspected nodes
     this.recordMetadata();
@@ -1116,7 +1116,7 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
   } = {}) {
     const rootNode = doc.documentElement;
 
-    if (rootNode.nodeName.toLowerCase() !== "html") { return; }
+    if (rootNode.namespaceURI !== NS_HTML) { return; }
 
     let headNode = doc.head;
 
@@ -1142,7 +1142,7 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
     const headNode = doc.head;
     const bodyNode = doc.body;
 
-    if (rootNode.nodeName.toLowerCase() !== "html") { return; }
+    if (rootNode.namespaceURI !== NS_HTML) { return; }
 
     if (headNode.previousSibling?.nodeType !== Node.TEXT_NODE) {
       headNode.before("\n");
@@ -1301,7 +1301,7 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
     const rootNode = doc.documentElement;
     const headNode = doc.head;
 
-    if (rootNode.nodeName.toLowerCase() !== "html") { return; }
+    if (rootNode.namespaceURI !== NS_HTML) { return; }
     if (this.metaCharsetNode) { return; }
 
     this.metaCharsetNode = headNode.insertBefore(doc.createElement("meta"), headNode.firstChild);
@@ -1329,7 +1329,7 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
     const rootNode = doc.documentElement;
     const headNode = doc.head;
 
-    if (rootNode.nodeName.toLowerCase() !== "html") { return; }
+    if (rootNode.namespaceURI !== NS_HTML) { return; }
     if (this.favIconUrl) { return; }
 
     switch (options["capture.favicon"]) {
@@ -1539,16 +1539,9 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
     doc.head.appendChild(elem);
   }
 
-  rewriteRecursively(elem, rootName, callback) {
-    const nodeName = elem.nodeName.toLowerCase();
-
-    // switch rootName for a foreign element
-    if (!rootName && ["svg", "math"].includes(nodeName)) {
-      rootName = nodeName;
-    }
-
+  rewriteRecursively(elem, callback) {
     try {
-      callback.call(this, elem, rootName);
+      callback.call(this, elem);
     } catch (ex) {
       // skip iterating into descendants when NodeSkipIteration is caught
       if (ex instanceof NodeSkipIteration) {
@@ -1564,13 +1557,13 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
       // is removed in this run
       next = child.nextElementSibling;
 
-      this.rewriteRecursively(child, rootName, callback);
+      this.rewriteRecursively(child, callback);
 
       child = next;
     }
   }
 
-  rewriteNode(node, rootName) {
+  rewriteNode(node) {
     // skip non-element nodes
     if (node.nodeType !== Node.ELEMENT_NODE) {
       return;
@@ -1584,7 +1577,6 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
     const {
       settings, options,
       isHeadless,
-      envDocUrl,
       refUrl,
       charset,
       shadowRootList, customElementNames,
@@ -1599,11 +1591,8 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
     if (!isHeadless && elemOrig) {
       switch (options["capture.removeHidden"]) {
         case "undisplayed": {
-          const excludeNodes =
-              rootName === "svg" ? REMOVE_HIDDEN_EXCLUDE_SVG :
-              rootName === "math" ? REMOVE_HIDDEN_EXCLUDE_MATH :
-              REMOVE_HIDDEN_EXCLUDE_HTML;
-          if (!excludeNodes.has(elem.nodeName.toLowerCase())) {
+          const excludeSelector = REMOVE_HIDDEN_EXCLUDE[elem.namespaceURI] ?? REMOVE_HIDDEN_EXCLUDE[NS_HTML];
+          if (!elem.matches(excludeSelector)) {
             const styles = this.origDoc.defaultView.getComputedStyle(elemOrig, null);
             if (styles.getPropertyValue("display") === "none") {
               this.captureRemoveNode(elem);
@@ -1615,47 +1604,7 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
       }
     }
 
-    if (rootName === "svg") {
-      const handler = this[`_handle_svg_${elem.nodeName.toLowerCase()}`];
-      if (handler) {
-        handler.call(this, elem);
-      } else {
-        // SVG spec is quite complicated, but generally we can treat every
-        // href and xlink:href as an image link, except for "a" and "script"
-        for (const attr of ["href", "xlink:href"]) {
-          this.rewriteSvgHref(elem, attr);
-        }
-      }
-    } else if (rootName === "math") {
-      this.rewriteAnchor(elem, "href", {isHtml: false});
-    } else {
-      this[`_handle_html_${elem.nodeName.toLowerCase()}`]?.call(this, elem);
-
-      // handle shadow DOM
-      if (options["capture.shadowDom"] === "save") {
-        const shadowRoot = utils.getShadowRoot(elem);
-        if (shadowRoot) {
-          const shadowRootOrig = this.getOrigNode(shadowRoot);
-          cssTasks.push(() => { cssResourcesHandler.scopePush(shadowRootOrig); });
-          this.addAdoptedStyleSheets(shadowRootOrig, shadowRoot);
-          this.rewriteRecursively(shadowRoot, rootName, this.rewriteNode);
-          cssTasks.push(() => { cssResourcesHandler.scopePop(); });
-          shadowRootList.push(shadowRoot);
-          this.requireBasicLoader = true;
-        }
-      }
-
-      // handle nonce
-      switch (options["capture.contentSecurityPolicy"]) {
-        case "save":
-          // do nothing
-          break;
-        case "remove":
-        default:
-          this.captureRewriteAttr(elem, "nonce", null); // this is meaningless as CSP is removed
-          break;
-      }
-    }
+    this[`_handle_{${elem.namespaceURI}}`]?.(elem);
 
     // styles: style attribute
     if (elem.hasAttribute("style")) {
@@ -1752,14 +1701,45 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
 
     // record custom elements
     {
-      const nodeName = elem.nodeName.toLowerCase();
-      if (CUSTOM_ELEMENT_NAME_PATTERN.test(nodeName) && !CUSTOM_ELEMENT_NAME_FORBIDDEN.has(nodeName)) {
-        customElementNames.add(nodeName);
+      const localName = elem.localName;
+      if (CUSTOM_ELEMENT_NAME_PATTERN.test(localName) && !CUSTOM_ELEMENT_NAME_FORBIDDEN.has(localName)) {
+        customElementNames.add(localName);
       }
     }
   }
 
-  _handle_html_base(elem) {
+  [`_handle_{${NS_HTML}}`](elem) {
+    this[`_handle_{${NS_HTML}}${elem.localName}`]?.(elem);
+
+    const {cssResourcesHandler, shadowRootList, cssTasks, options} = this;
+
+    // handle shadow DOM
+    if (options["capture.shadowDom"] === "save") {
+      const shadowRoot = utils.getShadowRoot(elem);
+      if (shadowRoot) {
+        const shadowRootOrig = this.getOrigNode(shadowRoot);
+        cssTasks.push(() => { cssResourcesHandler.scopePush(shadowRootOrig); });
+        this.addAdoptedStyleSheets(shadowRootOrig, shadowRoot);
+        this.rewriteRecursively(shadowRoot, this.rewriteNode);
+        cssTasks.push(() => { cssResourcesHandler.scopePop(); });
+        shadowRootList.push(shadowRoot);
+        this.requireBasicLoader = true;
+      }
+    }
+
+    // handle nonce
+    switch (options["capture.contentSecurityPolicy"]) {
+      case "save":
+        // do nothing
+        break;
+      case "remove":
+      default:
+        this.captureRewriteAttr(elem, "nonce", null); // this is meaningless as CSP is removed
+        break;
+    }
+  }
+
+  [`_handle_{${NS_HTML}}base`](elem) {
     const {options} = this;
 
     if (!elem.hasAttribute("href")) { return; }
@@ -1789,7 +1769,7 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
     }
   }
 
-  _handle_html_meta(elem) {
+  [`_handle_{${NS_HTML}}meta`](elem) {
     const {refUrl, downLinkTasks, settings, options} = this;
 
     // <meta> elements in a shadowRoot never works. Don't process or
@@ -1904,7 +1884,7 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
     // and thus we simply skip meta[property="og:*"].
   }
 
-  _handle_html_link(elem) {
+  [`_handle_{${NS_HTML}}link`](elem) {
     if (elem.hasAttribute("href")) {
       const newUrl = this.resolveRelativeUrl(elem.getAttribute("href"), this.baseUrl);
       this.captureRewriteAttr(elem, "href", newUrl);
@@ -1921,19 +1901,19 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
     this.captureRewriteAttr(elem, "integrity", null);
 
     if (elem.matches('[rel~="stylesheet"][href]')) {
-      return this[`_handle_html_link#stylesheet`].call(this, elem);
+      return this[`_handle_{${NS_HTML}}link#stylesheet`](elem);
     } else if (elem.matches('[rel~="icon"][href]')) {
-      return this[`_handle_html_link#icon`].call(this, elem);
+      return this[`_handle_{${NS_HTML}}link#icon`](elem);
     } else if (elem.matches('[rel~="preload"][href], [rel~="preload"][imagesrcset], [rel~="modulepreload"][href], [rel~="dns-prefetch"][href], [rel~="preconnect"][href]')) {
-      return this[`_handle_html_link#preload`].call(this, elem);
+      return this[`_handle_{${NS_HTML}}link#preload`](elem);
     } else if (elem.matches('[rel~="prefetch"][href], [rel~="prerender"][href]')) {
-      return this[`_handle_html_link#prefetch`].call(this, elem);
+      return this[`_handle_{${NS_HTML}}link#prefetch`](elem);
     } else if (this.favIconSelector && elem.matches(this.favIconSelector)) {
-      return this[`_handle_html_link#icon_like`].call(this, elem);
+      return this[`_handle_{${NS_HTML}}link#icon_like`](elem);
     }
   }
 
-  ['_handle_html_link#stylesheet'](elem) {
+  [`_handle_{${NS_HTML}}link#stylesheet`](elem) {
     const {baseUrl, refUrl, charset, cssHandler, cssResourcesHandler, cssTasks, tasks, settings, options} = this;
 
     const refPolicy = elem.matches('[rel~="noreferrer"]') ? 'no-referrer' : elem.referrerPolicy || this.docRefPolicy;
@@ -2028,7 +2008,7 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
     }
   }
 
-  ['_handle_html_link#icon'](elem) {
+  [`_handle_{${NS_HTML}}link#icon`](elem) {
     const {refUrl, tasks, settings, options} = this;
 
     switch (options["capture.favicon"]) {
@@ -2084,7 +2064,7 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
     }
   }
 
-  ['_handle_html_link#icon_like'](elem) {
+  [`_handle_{${NS_HTML}}link#icon_like`](elem) {
     const {refUrl, tasks, settings, options} = this;
 
     switch (options["capture.favicon"]) {
@@ -2120,7 +2100,7 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
     }
   }
 
-  ['_handle_html_link#preload'](elem) {
+  [`_handle_{${NS_HTML}}link#preload`](elem) {
     const {options} = this;
 
     // @TODO: handle preloads according to its "as" attribute
@@ -2138,7 +2118,7 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
     }
   }
 
-  ['_handle_html_link#prefetch'](elem) {
+  [`_handle_{${NS_HTML}}link#prefetch`](elem) {
     const {options} = this;
 
     // @TODO: handle prefetches according to its "as" attribute
@@ -2155,7 +2135,7 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
     }
   }
 
-  _handle_html_style(elem) {
+  [`_handle_{${NS_HTML}}style`](elem) {
     const {baseUrl, refUrl, docRefPolicy: refPolicy, charset, cssHandler, cssResourcesHandler, cssTasks, tasks, settings, options} = this;
 
     let disableCss = false;
@@ -2221,7 +2201,7 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
     }
   }
 
-  _handle_html_script(elem) {
+  [`_handle_{${NS_HTML}}script`](elem) {
     const {refUrl, tasks, settings, options} = this;
 
     if (elem.hasAttribute("src")) {
@@ -2250,7 +2230,7 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
         this.captureRemoveNode(elem);
         throw new NodeDisconnect(elem);
       case "save":
-      default:
+      default: {
         if (elem.hasAttribute("src")) {
           const refPolicy = elem.referrerPolicy || this.docRefPolicy;
           tasks.push(async () => {
@@ -2269,13 +2249,14 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
         // remove crossorigin as the origin has changed
         this.captureRewriteAttr(elem, "crossorigin", null);
         break;
+      }
     }
 
     // escape </script> as textContent can contain HTML
     this.captureRewriteTextContent(elem, elem.textContent.replace(/<\/(script>)/gi, "<\\/$1"));
   }
 
-  _handle_html_noscript(elem) {
+  [`_handle_{${NS_HTML}}noscript`](elem) {
     const {options} = this;
 
     switch (options["capture.noscript"]) {
@@ -2308,23 +2289,23 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
     }
   }
 
-  _handle_html_body(elem) {
-    return this[`_handle_html_td`].call(this, elem);
+  [`_handle_{${NS_HTML}}body`](elem) {
+    return this[`_handle_{${NS_HTML}}td`](elem);
   }
 
-  _handle_html_table(elem) {
-    return this[`_handle_html_td`].call(this, elem);
+  [`_handle_{${NS_HTML}}table`](elem) {
+    return this[`_handle_{${NS_HTML}}td`](elem);
   }
 
-  _handle_html_tr(elem) {
-    return this[`_handle_html_td`].call(this, elem);
+  [`_handle_{${NS_HTML}}tr`](elem) {
+    return this[`_handle_{${NS_HTML}}td`](elem);
   }
 
-  _handle_html_th(elem) {
-    return this[`_handle_html_td`].call(this, elem);
+  [`_handle_{${NS_HTML}}th`](elem) {
+    return this[`_handle_{${NS_HTML}}td`](elem);
   }
 
-  _handle_html_td(elem) {
+  [`_handle_{${NS_HTML}}td`](elem) {
     const {refUrl, docRefPolicy: refPolicy, tasks, settings, options} = this;
 
     // deprecated: background attribute (deprecated since HTML5)
@@ -2360,11 +2341,11 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
     }
   }
 
-  _handle_html_frame(elem) {
-    return this[`_handle_html_iframe`].call(this, elem);
+  [`_handle_{${NS_HTML}}frame`](elem) {
+    return this[`_handle_{${NS_HTML}}iframe`](elem);
   }
 
-  _handle_html_iframe(elem) {
+  [`_handle_{${NS_HTML}}iframe`](elem) {
     const {envDocUrl, baseUrl, refUrl, tasks, settings, options} = this;
 
     const frame = elem;
@@ -2381,7 +2362,7 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
     switch (options["capture.frame"]) {
       case "link": {
         // if the frame has srcdoc, use it
-        if (frame.nodeName.toLowerCase() === 'iframe' &&
+        if (frame.localName === 'iframe' &&
             frame.hasAttribute("srcdoc")) {
           const captureFrameCallback = async (response) => {
             isDebug && console.debug("captureFrameCallback", response);
@@ -2457,7 +2438,7 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
         // HTML 5.1 2nd Edition / W3C Recommendation:
         // The src attribute, if present, must be a valid non-empty URL.
         this.captureRewriteAttr(frame, "src", null);
-        if (frame.nodeName.toLowerCase() === 'iframe') {
+        if (frame.localName === 'iframe') {
           this.captureRewriteAttr(frame, "srcdoc", null);
         }
         break;
@@ -2473,7 +2454,7 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
 
           // use srcdoc for data URL document for iframe
           if (response.url.startsWith('data:') &&
-              frame.nodeName.toLowerCase() === 'iframe' &&
+              frame.localName === 'iframe' &&
               options["capture.saveDataUriAsSrcdoc"]) {
             const file = dataUriToFile(response.url);
             const {type: mime, parameters: {charset}} = utils.parseHeaderContentType(file.type);
@@ -2487,7 +2468,7 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
           }
 
           this.captureRewriteAttr(frame, "src", response.url);
-          if (frame.nodeName.toLowerCase() === 'iframe') {
+          if (frame.localName === 'iframe') {
             this.captureRewriteAttr(frame, "srcdoc", null);
           }
           return response;
@@ -2560,7 +2541,7 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
           // frame window inaccessible: (headless capture)
 
           // if the frame has srcdoc, use it
-          if (frame.nodeName.toLowerCase() === 'iframe' &&
+          if (frame.localName === 'iframe' &&
               frame.hasAttribute("srcdoc")) {
             sourceUrl = 'about:srcdoc';
 
@@ -2597,7 +2578,7 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
           // special handling for data URL
           if (sourceUrl.startsWith("data:") &&
               !options["capture.saveDataUriAsFile"] &&
-              !(frame.nodeName.toLowerCase() === 'iframe' && options["capture.saveDataUriAsSrcdoc"]) &&
+              !(frame.localName === 'iframe' && options["capture.saveDataUriAsSrcdoc"]) &&
               options["capture.saveAs"] !== "singleHtml") {
             // Save frame document and inner URLs as data URL since data URL
             // is null origin and no relative URL is allowed in it.
@@ -2631,7 +2612,7 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
     }
   }
 
-  _handle_html_a(elem) {
+  [`_handle_{${NS_HTML}}a`](elem) {
     const {baseUrlFinal, options} = this;
 
     if (elem.hasAttribute("ping")) {
@@ -2654,11 +2635,11 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
     this.rewriteAnchor(elem, "href");
   }
 
-  _handle_html_area(elem) {
-    return this[`_handle_html_a`].call(this, elem);
+  [`_handle_{${NS_HTML}}area`](elem) {
+    return this[`_handle_{${NS_HTML}}a`](elem);
   }
 
-  _handle_html_img(elem) {
+  [`_handle_{${NS_HTML}}img`](elem) {
     const {isHeadless, refUrl, tasks, settings, options} = this;
 
     if (elem.hasAttribute("src")) {
@@ -2753,10 +2734,11 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
     }
   }
 
-  _handle_html_picture(elem) {
+  [`_handle_{${NS_HTML}}picture`](elem) {
     const {isHeadless, refUrl, tasks, settings, options} = this;
 
     for (const subElem of elem.querySelectorAll('source[srcset]')) {
+      if (subElem.namespaceURI !== NS_HTML) { continue; }
       const rewriteSrcset = utils.rewriteSrcset(subElem.getAttribute("srcset"), (url) => {
         return this.resolveRelativeUrl(url, this.baseUrl);
       });
@@ -2769,6 +2751,7 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
         break;
       case "blank":
         for (const subElem of elem.querySelectorAll('source[srcset]')) {
+          if (subElem.namespaceURI !== NS_HTML) { continue; }
           this.captureRewriteAttr(subElem, "srcset", null);
         }
         break;
@@ -2778,6 +2761,7 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
       case "save-current":
         if (!isHeadless) {
           for (const subElem of elem.querySelectorAll('img')) {
+            if (subElem.namespaceURI !== NS_HTML) { continue; }
             const subElemOrig = this.getOrigNode(subElem);
 
             if (subElemOrig?.currentSrc) {
@@ -2788,6 +2772,7 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
           }
 
           for (const subElem of elem.querySelectorAll('source[srcset]')) {
+            if (subElem.namespaceURI !== NS_HTML) { continue; }
             this.captureRemoveNode(subElem);
           }
 
@@ -2799,6 +2784,7 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
       default: {
         const refPolicy = this.docRefPolicy;
         for (const subElem of elem.querySelectorAll('source[srcset]')) {
+          if (subElem.namespaceURI !== NS_HTML) { continue; }
           tasks.push(async () => {
             const response = await utils.rewriteSrcset(subElem.getAttribute("srcset"), async (url) => {
               const newUrl = this.resolveRelativeUrl(url, this.baseUrl);
@@ -2819,7 +2805,7 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
     }
   }
 
-  _handle_html_audio(elem) {
+  [`_handle_{${NS_HTML}}audio`](elem) {
     const {isHeadless, refUrl, docRefPolicy: refPolicy, tasks, settings, options} = this;
 
     if (elem.hasAttribute("src")) {
@@ -2828,6 +2814,7 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
     }
 
     for (const subElem of elem.querySelectorAll('source[src], track[src]')) {
+      if (subElem.namespaceURI !== NS_HTML) { continue; }
       const newUrl = this.resolveRelativeUrl(subElem.getAttribute("src"), this.baseUrl);
       this.captureRewriteAttr(subElem, "src", newUrl);
     }
@@ -2844,6 +2831,7 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
         // HTML 5.1 2nd Edition / W3C Recommendation:
         // The src attribute must be present and be a valid non-empty URL.
         for (const subElem of elem.querySelectorAll('source[src], track[src]')) {
+          if (subElem.namespaceURI !== NS_HTML) { continue; }
           this.captureRewriteAttr(subElem, "src", "about:blank");
         }
 
@@ -2857,6 +2845,7 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
           if (elemOrig?.currentSrc) {
             const url = elemOrig.currentSrc;
             for (const subElem of elem.querySelectorAll('source[src]')) {
+              if (subElem.namespaceURI !== NS_HTML) { continue; }
               this.captureRemoveNode(subElem);
             }
             tasks.push(async () => {
@@ -2873,6 +2862,7 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
           }
 
           for (const subElem of elem.querySelectorAll('track[src]')) {
+            if (subElem.namespaceURI !== NS_HTML) { continue; }
             tasks.push(async () => {
               const response = await this.downloadFile({
                 url: subElem.getAttribute("src"),
@@ -2907,6 +2897,7 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
         }
 
         for (const subElem of elem.querySelectorAll('source[src], track[src]')) {
+          if (subElem.namespaceURI !== NS_HTML) { continue; }
           tasks.push(async () => {
             const response = await this.downloadFile({
               url: subElem.getAttribute("src"),
@@ -2926,7 +2917,7 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
     }
   }
 
-  _handle_html_video(elem) {
+  [`_handle_{${NS_HTML}}video`](elem) {
     const {isHeadless, refUrl, docRefPolicy: refPolicy, tasks, settings, options} = this;
 
     if (elem.hasAttribute("poster")) {
@@ -2940,6 +2931,7 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
     }
 
     for (const subElem of elem.querySelectorAll('source[src], track[src]')) {
+      if (subElem.namespaceURI !== NS_HTML) { continue; }
       const newUrl = this.resolveRelativeUrl(subElem.getAttribute("src"), this.baseUrl);
       this.captureRewriteAttr(subElem, "src", newUrl);
     }
@@ -2962,6 +2954,7 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
         // HTML 5.1 2nd Edition / W3C Recommendation:
         // The src attribute must be present and be a valid non-empty URL.
         for (const subElem of elem.querySelectorAll('source[src], track[src]')) {
+          if (subElem.namespaceURI !== NS_HTML) { continue; }
           this.captureRewriteAttr(subElem, "src", "about:blank");
         }
 
@@ -2989,6 +2982,7 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
           if (elemOrig?.currentSrc) {
             const url = elemOrig.currentSrc;
             for (const subElem of elem.querySelectorAll('source[src]')) {
+              if (subElem.namespaceURI !== NS_HTML) { continue; }
               this.captureRemoveNode(subElem);
             }
             tasks.push(async () => {
@@ -3005,6 +2999,7 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
           }
 
           for (const subElem of elem.querySelectorAll('track[src]')) {
+            if (subElem.namespaceURI !== NS_HTML) { continue; }
             tasks.push(async () => {
               const response = await this.downloadFile({
                 url: subElem.getAttribute("src"),
@@ -3053,6 +3048,7 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
         }
 
         for (const subElem of elem.querySelectorAll('source[src], track[src]')) {
+          if (subElem.namespaceURI !== NS_HTML) { continue; }
           tasks.push(async () => {
             const response = await this.downloadFile({
               url: subElem.getAttribute("src"),
@@ -3072,7 +3068,7 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
     }
   }
 
-  _handle_html_embed(elem) {
+  [`_handle_{${NS_HTML}}embed`](elem) {
     const {refUrl, tasks, settings, options} = this;
 
     if (elem.hasAttribute("src")) {
@@ -3171,7 +3167,7 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
     }
   }
 
-  _handle_html_object(elem) {
+  [`_handle_{${NS_HTML}}object`](elem) {
     const {refUrl, tasks, settings, options} = this;
 
     let objectBaseUrl = this.baseUrl;
@@ -3311,7 +3307,7 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
     }
   }
 
-  _handle_html_applet(elem) {
+  [`_handle_{${NS_HTML}}applet`](elem) {
     const {refUrl, tasks, settings, options} = this;
 
     let appletBaseUrl = this.baseUrl;
@@ -3389,7 +3385,7 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
     }
   }
 
-  _handle_html_canvas(elem) {
+  [`_handle_{${NS_HTML}}canvas`](elem) {
     const {isHeadless, options} = this;
 
     switch (options["capture.canvas"]) {
@@ -3422,7 +3418,7 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
     }
   }
 
-  _handle_html_form(elem) {
+  [`_handle_{${NS_HTML}}form`](elem) {
     const {baseUrlFinal} = this;
 
     if (elem.hasAttribute("action")) {
@@ -3431,7 +3427,7 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
     }
   }
 
-  _handle_html_input(elem) {
+  [`_handle_{${NS_HTML}}input`](elem) {
     const {baseUrlFinal, refUrl, tasks, settings, options} = this;
     const elemOrig = this.getOrigNode(elem);
 
@@ -3597,7 +3593,7 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
     }
   }
 
-  _handle_html_button(elem) {
+  [`_handle_{${NS_HTML}}button`](elem) {
     const {baseUrlFinal} = this;
 
     if (elem.hasAttribute("formaction")) {
@@ -3606,7 +3602,7 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
     }
   }
 
-  _handle_html_option(elem) {
+  [`_handle_{${NS_HTML}}option`](elem) {
     const {options} = this;
     const elemOrig = this.getOrigNode(elem);
 
@@ -3636,7 +3632,7 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
     }
   }
 
-  _handle_html_textarea(elem) {
+  [`_handle_{${NS_HTML}}textarea`](elem) {
     const {options} = this;
     const elemOrig = this.getOrigNode(elem);
 
@@ -3666,11 +3662,11 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
     }
   }
 
-  _handle_html_q(elem) {
-    return this[`_handle_html_blockquote`].call(this, elem);
+  [`_handle_{${NS_HTML}}q`](elem) {
+    return this[`_handle_{${NS_HTML}}blockquote`](elem);
   }
 
-  _handle_html_blockquote(elem) {
+  [`_handle_{${NS_HTML}}blockquote`](elem) {
     const {baseUrlFinal} = this;
 
     if (elem.hasAttribute("cite")) {
@@ -3679,15 +3675,15 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
     }
   }
 
-  _handle_html_ins(elem) {
-    return this[`_handle_html_blockquote`].call(this, elem);
+  [`_handle_{${NS_HTML}}ins`](elem) {
+    return this[`_handle_{${NS_HTML}}blockquote`](elem);
   }
 
-  _handle_html_del(elem) {
-    return this[`_handle_html_blockquote`].call(this, elem);
+  [`_handle_{${NS_HTML}}del`](elem) {
+    return this[`_handle_{${NS_HTML}}blockquote`](elem);
   }
 
-  _handle_html_slot(elem) {
+  [`_handle_{${NS_HTML}}slot`](elem) {
     const {slotMap} = this;
 
     const root = elem.getRootNode();
@@ -3717,18 +3713,31 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
     }
   }
 
-  _handle_html_xmp(elem) {
+  [`_handle_{${NS_HTML}}xmp`](elem) {
     // escape </xmp> as textContent can contain HTML
     this.captureRewriteTextContent(elem, elem.textContent.replace(/<\/(xmp>)/gi, "<\\/$1"));
   }
 
-  _handle_svg_a(elem) {
-    for (const attr of ["href", "xlink:href"]) {
-      this.rewriteAnchor(elem, attr, {isHtml: false});
+  [`_handle_{${NS_SVG}}`](elem) {
+    const handler = this[`_handle_{${NS_SVG}}${elem.localName}`];
+    if (handler) {
+      handler.call(this, elem);
+    } else {
+      // SVG spec is quite complicated, but generally we can treat every
+      // href and xlink:href as an image link, except for "a" and "script"
+      for (const attr of ["href", "xlink:href"]) {
+        this.rewriteSvgHref(elem, attr);
+      }
     }
   }
 
-  _handle_svg_script(elem) {
+  [`_handle_{${NS_SVG}}a`](elem) {
+    for (const attr of ["href", "xlink:href"]) {
+      this.rewriteAnchor(elem, attr);
+    }
+  }
+
+  [`_handle_{${NS_SVG}}script`](elem) {
     const {refUrl, docRefPolicy: refPolicy, tasks, settings, options} = this;
 
     for (const attr of ["href", "xlink:href"]) {
@@ -3772,7 +3781,7 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
     }
   }
 
-  _handle_svg_style(elem) {
+  [`_handle_{${NS_SVG}}style`](elem) {
     const {baseUrl, refUrl, docRefPolicy: refPolicy, charset, cssHandler, cssResourcesHandler, cssTasks, tasks, settings, options} = this;
 
     const css = cssHandler.getElemCss(elem);
@@ -3816,6 +3825,10 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
         break;
       }
     }
+  }
+
+  [`_handle_{${NS_MATHML}}`](elem) {
+    this.rewriteAnchor(elem, "href");
   }
 
   /**
@@ -3996,7 +4009,7 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
     return url;
   }
 
-  rewriteAnchor(elem, attr, {isHtml = true} = {}) {
+  rewriteAnchor(elem, attr) {
     if (!elem.hasAttribute(attr)) { return; }
 
     const {baseUrlFinal, refUrl, docRefPolicy, downLinkTasks, settings, options} = this;
@@ -4009,6 +4022,7 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
     if (['http:', 'https:', 'file:', 'blob:'].some(p => url.startsWith(p))) {
       if (["header", "url"].includes(options["capture.downLink.file.mode"]) ||
           (parseInt(options["capture.downLink.doc.depth"], 10) > 0 && options['capture.saveAs'] !== 'singleHtml')) {
+        const isHtml = elem.namespaceURI === NS_HTML;
         let refPolicy = docRefPolicy;
         if (isHtml) {
           refPolicy = (elem.matches('[rel~="noreferrer"]') ? 'no-referrer' : elem.referrerPolicy) || refPolicy;
