@@ -8458,7 +8458,8 @@ Default3\
 
                       break;
                     }
-                    case "blank": {
+                    case "blank":
+                    case "remove": {
                       it('should remove the attribute', async function () {
                         var doc = docFactory({attrs: [[`${prefix}href`, './myicon.bmp', ns]]});
 
@@ -8468,20 +8469,6 @@ Default3\
 
                         sinon.assert.calledOnceWithExactly(spyResolveLink, './myicon.bmp', 'https://example.com/');
                         sinon.assert.calledWithExactly(spyRewrite, elem, `${prefix}href`, null);
-                      });
-
-                      break;
-                    }
-                    case "remove": {
-                      it('should remove the element', async function () {
-                        var doc = docFactory({attrs: [[`${prefix}href`, './myicon.bmp', ns]]});
-                        var elemOrig = doc.querySelector(tagName);
-
-                        var rewriter = await new TestCapturer().captureDocument({doc, docUrl, options});
-                        assert.isNull(rewriter.doc.querySelector(tagName));
-
-                        sinon.assert.calledOnceWithExactly(spyResolveLink, './myicon.bmp', 'https://example.com/');
-                        sinon.assert.calledOnceWithExactly(spyRemove, rewriter.getClonedNode(elemOrig));
                       });
 
                       break;
