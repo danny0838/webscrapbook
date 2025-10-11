@@ -314,6 +314,13 @@ const INFOBAR_LOADER_TEMPLATE = ("(" + utils.compressJsFunc(function () {
   b.appendChild(i);
 }) + ")()");
 
+const CUSTOM_ELEMENT_NAME_LOADER_TEMPLATE = "(" + utils.compressJsFunc(function (names) {
+  if (!customElements) { return; }
+  for (const name of names) {
+    customElements.define(name, class CustomElement extends HTMLElement {});
+  }
+}) + ")(%names%)";
+
 const REBUILD_LINK_SVG_HREF_ATTRS = ['href', 'xlink:href'];
 
 class PresaveDocumentRewriter extends BaseDocumentRewriter {
@@ -978,7 +985,7 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
     return {newDoc, origNodeMap, clonedNodeMap};
   }
 
-  async run(newDoc, {
+  async run(doc, {
     capturer, settings, options,
     isHeadless, isPartial,
     docUrl, docUrlHash, envDocUrl,
@@ -987,14 +994,13 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
     mime,
     origNodeMap, clonedNodeMap,
   }) {
-    this.doc = newDoc;
+    this.doc = doc;
     this.capturer = capturer;
     this.origNodeMap = origNodeMap;
     this.clonedNodeMap = clonedNodeMap;
 
-    const doc = this.origDoc;
     const {missionId, timeId, isMainPage, isMainFrame} = settings;
-    const {characterSet: charset} = doc;
+    const {characterSet: charset} = this.origDoc;
 
     Object.assign(this, {
       missionId, timeId, settings, options,
@@ -1006,293 +1012,419 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
       mime, charset,
     });
 
-    const shadowRootList = this.shadowRootList = [];
-    const slotMap = this.slotMap = new Map();
-    const adoptedStyleSheetMap = this.adoptedStyleSheetMap = new Map();
-    const customElementNames = this.customElementNames = new Set();
-
-    const rootNode = newDoc.documentElement;
-    const headNode = (() => {
-      if (rootNode.nodeName.toLowerCase() === "html") {
-        let headNode = newDoc.head;
-
-        // generate head if not exists
-        if (!headNode) {
-          headNode = rootNode.insertBefore(newDoc.createElement("head"), rootNode.firstChild);
-          this.captureRecordAddedNode(headNode);
-        }
-
-        return headNode;
-      }
-    })();
-
-    // add linefeeds to head and body to improve layout
-    if (options["capture.prettyPrint"]) {
-      if (rootNode.nodeName.toLowerCase() === "html") {
-        const headNodeBefore = headNode.previousSibling;
-        if (!headNodeBefore || headNodeBefore.nodeType != 3) {
-          headNode.before("\n");
-        }
-        const headNodeStart = headNode.firstChild;
-        if (!headNodeStart || headNodeStart.nodeType != 3) {
-          headNode.prepend("\n");
-        }
-        const headNodeEnd = headNode.lastChild;
-        if (!headNodeEnd || headNodeEnd.nodeType != 3) {
-          headNode.append("\n");
-        }
-        const headNodeAfter = headNode.nextSibling;
-        if (!headNodeAfter || headNodeAfter.nodeType != 3) {
-          headNode.after("\n");
-        }
-        const bodyNode = rootNode.querySelector("body");
-        if (bodyNode) {
-          const bodyNodeAfter = bodyNode.nextSibling;
-          if (!bodyNodeAfter) {
-            bodyNode.after("\n");
-          }
-        }
-      }
-    }
-
-    // remove webscrapbook toolbar related
-    rootNode.removeAttribute('data-scrapbook-toolbar-active');
-    for (const elem of rootNode.querySelectorAll(`[data-scrapbook-elem|="toolbar"]`)) {
-      elem.remove();
-    }
-
-    // preprocess with helpers
-    // Expect options["capture.helpers"] to be parsable when
-    // options["capture.helpersEnabled"] is truthy, as validated in
-    // `captureGeneral`.
-    if (options["capture.helpersEnabled"]) {
-      const helpers = utils.parseOption("capture.helpers", options["capture.helpers"]);
-      const parser = new CaptureHelperHandler({
-        helpers,
-        rootNode,
-        docUrl: envDocUrl,
-        origNodeMap,
-        options,
-      });
-      const result = parser.run();
-
-      if (result.errors.length) {
-        (async () => {
-          for (const error of result.errors) {
-            await this.warn(error);
-          }
-        })();
-      }
-    }
-
-    // init cssHandler
-    const cssHandler = this.cssHandler = new DocumentCssHandler({
-      doc, rootNode: newDoc,
+    this.cssHandler = new DocumentCssHandler({
+      doc: this.origDoc,
+      rootNode: doc,
       origNodeMap, clonedNodeMap,
       settings, options,
     }, this.capturer);
-    const cssResourcesHandler = this.cssResourcesHandler = new DocumentCssResourcesHandler(cssHandler);
+    this.cssResourcesHandler = new DocumentCssResourcesHandler(this.cssHandler);
 
-    // prepare favicon selector
-    const favIconSelector = this.favIconSelector = utils.split(options["capture.faviconAttrs"])
+    this.favIconSelector = utils.split(options["capture.faviconAttrs"])
       .map(attr => `[rel~="${CSS.escape(attr)}"][href]`)
       .join(', ');
 
-    // inspect all nodes (and register async tasks) -->
-    // some additional tasks that requires some data after nodes are inspected -->
-    // start async tasks and wait for them to complete -->
-    // finalize
-    const cssTasks = this.cssTasks = [];
-    const tasks = this.tasks = [];
-    const downLinkTasks = this.downLinkTasks = [];
+    this.shadowRootList = [];
+    this.slotMap = new Map();
+    this.adoptedStyleSheetMap = new Map();
+    this.customElementNames = new Set();
 
-    // add extra URLs with depth 0
-    if (settings.isMainPage && settings.isMainFrame) {
-      if (["header", "url"].includes(options["capture.downLink.file.mode"]) ||
-          (parseInt(options["capture.downLink.doc.depth"], 10) >= 0 && options['capture.saveAs'] !== 'singleHtml')) {
-        const downLinkSettings = Object.assign({}, settings, {
-          depth: 0,
-          isMainPage: false,
-          isMainFrame: true,
-        });
-        const urls = utils.parseOption("capture.downLink.urlExtra", options["capture.downLink.urlExtra"]);
-        for (const url of urls) {
-          downLinkTasks.push(async () => {
-            const response = await this.captureUrl({
-              url,
-              refUrl,
-              downLink: true,
-              downLinkExtra: true,
-              settings: downLinkSettings,
-              options,
-            })
-            .catch((ex) => {
-              console.error(ex);
-              this.warn(utils.lang("ErrorFileDownloadError", [url, ex.message]));
-              return {url: this.getErrorUrl(url, options), error: {message: ex.message}};
-            });
-            return response;
-          });
-        }
-      }
-    }
+    this.cssTasks = [];
+    this.tasks = [];
+    this.downLinkTasks = [];
 
-    // inspect nodes
     this.baseElem = undefined;
     this.metaCharsetNode = undefined;
     this.favIconUrl = undefined;
     this.requireBasicLoader = false;
-    this.addAdoptedStyleSheets(doc, rootNode);
+
+    return await this._run();
+  }
+
+  async _run() {
+    const rootNode = this.doc.documentElement;
+    this.initHeadNode();
+
+    this.handlePrettyPrint();
+    this.removeToolbar();
+    this.processCaptureHelpers();
+
+    // inspect all nodes (and register async tasks)
+    this.handleDownLinkExtras();
+    this.addAdoptedStyleSheets(this.origDoc, rootNode);
     this.rewriteRecursively(rootNode, null, this.rewriteNode);
 
-    // record metadata
-    if (options["capture.recordDocumentMeta"]) {
-      const isIndexPage = isMainPage && isMainFrame && (mime === "text/html" || options["capture.saveAs"] === "singleHtml");
-      let url = docUrl.startsWith("data:") ? "data:" : docUrl;
+    // register additional tasks that require data from inspected nodes
+    this.recordMetadata();
+    this.ensureMetaCharset();
+    this.fetchSiteFavIcon();
+    this.recordAdoptedStyleSheets();
 
-      // add hash only for index.html as subframes with different hash
-      // must share the same file and record (e.g. foo.html and foo.html#bar)
-      if (isIndexPage) {
-        url += docUrlHash;
-      }
+    // start async tasks and wait for them to complete
+    await this.collectUsedCssResources();
+    await this.fetchResources();
+    await this.fetchDownLinkResources();
 
-      rootNode.setAttribute("data-scrapbook-source", url);
+    this.recordShadowRoots();
+    this.recordCssResourceMap();
+    this.recordCustomElements();
 
-      // record item metadata for index.html
-      if (isIndexPage) {
-        rootNode.setAttribute("data-scrapbook-create", timeId);
+    return {
+      newDoc: this.doc,
+      requireBasicLoader: this.requireBasicLoader,
+      favIconUrl: this.favIconUrl,
+    };
+  }
 
-        if (settings.title) {
-          rootNode.setAttribute("data-scrapbook-title", settings.title);
-        }
+  initHeadNode({
+    doc = this.doc,
+  } = {}) {
+    const rootNode = doc.documentElement;
 
-        if (settings.favIconUrl) {
-          rootNode.setAttribute("data-scrapbook-icon", settings.favIconUrl);
-        }
+    if (rootNode.nodeName.toLowerCase() !== "html") { return; }
 
-        if (settings.type) {
-          rootNode.setAttribute("data-scrapbook-type", settings.type);
-        }
-      }
+    let headNode = doc.head;
+
+    // generate head if not exists
+    if (!headNode) {
+      headNode = rootNode.insertBefore(doc.createElement("head"), rootNode.firstChild);
+      this.captureRecordAddedNode(headNode);
     }
 
-    // handle meta charset and favicon
-    if (rootNode.nodeName.toLowerCase() === "html") {
-      if (!this.metaCharsetNode) {
-        this.metaCharsetNode = headNode.insertBefore(newDoc.createElement("meta"), headNode.firstChild);
-        this.metaCharsetNode.setAttribute("charset", "UTF-8");
-        this.captureRecordAddedNode(this.metaCharsetNode);
-        if (options["capture.prettyPrint"]) {
-          this.metaCharsetNode.before("\n");
-        }
-      }
+    return headNode;
+  }
 
-      // attempt to take site favicon if none yet
-      if (!this.favIconUrl) {
-        switch (options["capture.favicon"]) {
-          case "blank":
-          case "remove":
-            break;
-          case "link":
-          case "save":
-          default: {
-            const u = new URL(envDocUrl);
-            if (!['http:', 'https:'].includes(u.protocol)) {
-              break;
-            }
+  /**
+   * Add linefeeds to head and body to improve layout.
+   */
+  handlePrettyPrint({
+    doc = this.doc,
+    options = this.options,
+  } = {}) {
+    if (!options["capture.prettyPrint"]) { return; }
 
-            const refPolicy = this.docRefPolicy;
-            const url = u.origin + '/' + 'favicon.ico';
-            tasks.push(async () => {
-              const fetchResponse = await this.invoke("fetch", [{
-                url: url,
-                refUrl,
-                refPolicy,
-                settings,
-                options,
-              }]);
-              if (!fetchResponse.error) {
-                const favIconNode = headNode.appendChild(newDoc.createElement('link'));
-                favIconNode.rel = 'shortcut icon';
-                favIconNode.href = this.favIconUrl = url;
-                this.captureRecordAddedNode(favIconNode);
-                if (options["capture.prettyPrint"]) {
-                  favIconNode.after("\n");
-                }
-                if (options["capture.favicon"] !== "link") {
-                  const response = await this.downloadFile({
-                    url,
-                    refUrl,
-                    refPolicy,
-                    settings,
-                    options,
-                  });
-                  favIconNode.href = this.favIconUrl = response.url;
-                }
-              }
-            });
-            break;
-          }
-        }
-      }
+    const rootNode = doc.documentElement;
+    const headNode = doc.head;
+    const bodyNode = doc.body;
+
+    if (rootNode.nodeName.toLowerCase() !== "html") { return; }
+
+    const headNodeBefore = headNode.previousSibling;
+    if (!headNodeBefore || headNodeBefore.nodeType != 3) {
+      headNode.before("\n");
+    }
+    const headNodeStart = headNode.firstChild;
+    if (!headNodeStart || headNodeStart.nodeType != 3) {
+      headNode.prepend("\n");
+    }
+    const headNodeEnd = headNode.lastChild;
+    if (!headNodeEnd || headNodeEnd.nodeType != 3) {
+      headNode.append("\n");
+    }
+    const headNodeAfter = headNode.nextSibling;
+    if (!headNodeAfter || headNodeAfter.nodeType != 3) {
+      headNode.after("\n");
     }
 
-    // handle adoptedStyleSheets
-    if (adoptedStyleSheetMap.size && !["blank", "remove"].includes(options["capture.style"])) {
-      const baseUrlCurrent = baseUrl;
-      const refPolicy = this.docRefPolicy;
-      const option = options["capture.rewriteCss"];
-      for (const [css, {id, roots}] of adoptedStyleSheetMap) {
+    if (bodyNode) {
+      const bodyNodeAfter = bodyNode.nextSibling;
+      if (!bodyNodeAfter) {
+        bodyNode.after("\n");
+      }
+    }
+  }
+
+  /**
+   * Remove scrapbook toolbar related elements and attributes.
+   */
+  removeToolbar({
+    rootNode = this.doc.documentElement,
+  } = {}) {
+    rootNode.removeAttribute('data-scrapbook-toolbar-active');
+    for (const elem of rootNode.querySelectorAll(`[data-scrapbook-elem|="toolbar"]`)) {
+      elem.remove();
+    }
+  }
+
+  /**
+   * Preprocess with helpers
+   *
+   * Expect options["capture.helpers"] to be parsable when
+   * options["capture.helpersEnabled"] is truthy, as validated in
+   * `captureGeneral`.
+   */
+  processCaptureHelpers({
+    rootNode = this.doc.documentElement,
+    envDocUrl = this.envDocUrl,
+    origNodeMap = this.origNodeMap,
+    options = this.options,
+  } = {}) {
+    if (!options["capture.helpersEnabled"]) { return; }
+
+    const helpers = utils.parseOption("capture.helpers", options["capture.helpers"]);
+    const parser = new CaptureHelperHandler({
+      helpers,
+      rootNode,
+      docUrl: envDocUrl,
+      origNodeMap,
+      options,
+    });
+    const result = parser.run();
+
+    if (result.errors.length) {
+      (async () => {
+        for (const error of result.errors) {
+          await this.warn(error);
+        }
+      })();
+    }
+  }
+
+  /**
+   * Add `capture.downLink.urlExtra` defined URLs with depth 0.
+   */
+  handleDownLinkExtras({
+    refUrl = this.refUrl,
+    settings = this.settings,
+    options = this.options,
+    downLinkTasks = this.downLinkTasks,
+  } = {}) {
+    if (!(settings.isMainPage && settings.isMainFrame)) { return; }
+    if (!(
+      ["header", "url"].includes(options["capture.downLink.file.mode"]) ||
+      (parseInt(options["capture.downLink.doc.depth"], 10) >= 0 && options['capture.saveAs'] !== 'singleHtml')
+    )) { return; }
+
+    const downLinkSettings = Object.assign({}, settings, {
+      depth: 0,
+      isMainPage: false,
+      isMainFrame: true,
+    });
+    const urls = utils.parseOption("capture.downLink.urlExtra", options["capture.downLink.urlExtra"]);
+    for (const url of urls) {
+      downLinkTasks.push(async () => {
+        const response = await this.captureUrl({
+          url,
+          refUrl,
+          downLink: true,
+          downLinkExtra: true,
+          settings: downLinkSettings,
+          options,
+        })
+        .catch((ex) => {
+          console.error(ex);
+          this.warn(utils.lang("ErrorFileDownloadError", [url, ex.message]));
+          return {url: this.getErrorUrl(url, options), error: {message: ex.message}};
+        });
+        return response;
+      });
+    }
+  }
+
+  recordMetadata({
+    rootNode = this.doc.documentElement,
+    docUrl = this.docUrl,
+    docUrlHash = this.docUrlHash,
+    mime = this.mime,
+    settings: {timeId, isMainPage, isMainFrame, title, favIconUrl, type} = this.settings,
+    options = this.options,
+    isIndexPage = isMainPage && isMainFrame && (mime === "text/html" || options["capture.saveAs"] === "singleHtml"),
+  } = {}) {
+    if (!options["capture.recordDocumentMeta"]) { return; }
+
+    let url = docUrl.startsWith("data:") ? "data:" : docUrl;
+
+    // add hash only for index.html as subframes with different hash
+    // must share the same file and record (e.g. foo.html and foo.html#bar)
+    if (isIndexPage) {
+      url += docUrlHash;
+    }
+
+    rootNode.setAttribute("data-scrapbook-source", url);
+
+    // record item metadata for index.html
+    if (isIndexPage) {
+      rootNode.setAttribute("data-scrapbook-create", timeId);
+
+      if (title) {
+        rootNode.setAttribute("data-scrapbook-title", title);
+      }
+
+      if (favIconUrl) {
+        rootNode.setAttribute("data-scrapbook-icon", favIconUrl);
+      }
+
+      if (type) {
+        rootNode.setAttribute("data-scrapbook-type", type);
+      }
+    }
+  }
+
+  /**
+   * Generate meta charset with UTF-8 if not exist.
+   */
+  ensureMetaCharset({
+    doc = this.doc,
+    options = this.options,
+  } = {}) {
+    const rootNode = doc.documentElement;
+    const headNode = doc.head;
+
+    if (rootNode.nodeName.toLowerCase() !== "html") { return; }
+    if (this.metaCharsetNode) { return; }
+
+    this.metaCharsetNode = headNode.insertBefore(doc.createElement("meta"), headNode.firstChild);
+    this.metaCharsetNode.setAttribute("charset", "UTF-8");
+    this.captureRecordAddedNode(this.metaCharsetNode);
+    if (options["capture.prettyPrint"]) {
+      this.metaCharsetNode.before("\n");
+    }
+  }
+
+  /**
+   * Attempt to fetch site favicon if none yet.
+   *
+   * Asynchronously modifies this.favIconUrl.
+   */
+  fetchSiteFavIcon({
+    doc = this.doc,
+    envDocUrl = this.envDocUrl,
+    refUrl = this.refUrl,
+    refPolicy = this.docRefPolicy,
+    settings = this.settings,
+    options = this.options,
+    tasks = this.tasks,
+  } = {}) {
+    const rootNode = doc.documentElement;
+    const headNode = doc.head;
+
+    if (rootNode.nodeName.toLowerCase() !== "html") { return; }
+    if (this.favIconUrl) { return; }
+
+    switch (options["capture.favicon"]) {
+      case "blank":
+      case "remove":
+        break;
+      case "link":
+      case "save":
+      default: {
+        const u = new URL(envDocUrl);
+        if (!['http:', 'https:'].includes(u.protocol)) {
+          break;
+        }
+
+        const url = u.origin + '/' + 'favicon.ico';
         tasks.push(async () => {
-          let cssText;
-          switch (option) {
-            case "url":
-            case "tidy":
-            case "match": {
-              cssText = await cssHandler.rewriteCssRules({
-                cssRules: css.cssRules,
-                baseUrl: baseUrlCurrent,
+          const fetchResponse = await this.invoke("fetch", [{
+            url: url,
+            refUrl,
+            refPolicy,
+            settings,
+            options,
+          }]);
+          if (!fetchResponse.error) {
+            const favIconNode = headNode.appendChild(doc.createElement('link'));
+            favIconNode.rel = 'shortcut icon';
+            favIconNode.href = this.favIconUrl = url;
+            this.captureRecordAddedNode(favIconNode);
+            if (options["capture.prettyPrint"]) {
+              favIconNode.after("\n");
+            }
+            if (options["capture.favicon"] !== "link") {
+              const response = await this.downloadFile({
+                url,
                 refUrl,
                 refPolicy,
-                envCharset: charset,
-                refCss: css,
-                rootNode: option === 'match' ? roots : null,
-                sep: '\n\n',
                 settings,
                 options,
               });
-              break;
-            }
-            case "none":
-            default: {
-              cssText = Array.prototype.map.call(css.cssRules, x => x.cssText).join('\n\n');
-              break;
+              favIconNode.href = this.favIconUrl = response.url;
             }
           }
-          rootNode.setAttribute(`data-scrapbook-adoptedstylesheet-${id}`, cssText);
         });
-      }
-      this.requireBasicLoader = true;
-    }
-
-    // map used background images and fonts
-    if ((options["capture.imageBackground"] === "save-used" || options["capture.font"] === "save-used") && !isHeadless) {
-      cssTasks.unshift(() => { cssResourcesHandler.start(); });
-      cssTasks.push(() => { cssResourcesHandler.stop(); });
-      await cssTasks.reduce((prevTask, curTask) => {
-        return prevTask.then(curTask);
-      }, Promise.resolve());
-
-      // expose filter to settings
-      if (options["capture.imageBackground"] === "save-used") {
-        settings.usedCssImageUrl = cssResourcesHandler.usedImageUrls;
-      }
-      if (options["capture.font"] === "save-used") {
-        settings.usedCssFontUrl = cssResourcesHandler.usedFontUrls;
+        break;
       }
     }
+  }
 
-    // run async downloading tasks
+  recordAdoptedStyleSheets({
+    rootNode = this.doc.documentElement,
+    baseUrl = this.baseUrl,
+    refUrl = this.refUrl,
+    refPolicy = this.docRefPolicy,
+    charset = this.charset,
+    settings = this.settings,
+    options = this.options,
+    adoptedStyleSheetMap = this.adoptedStyleSheetMap,
+    cssHandler = this.cssHandler,
+    tasks = this.tasks,
+  } = {}) {
+    if (!adoptedStyleSheetMap.size) { return; }
+    if (["blank", "remove"].includes(options["capture.style"])) { return; }
+
+    const option = options["capture.rewriteCss"];
+    for (const [css, {id, roots}] of adoptedStyleSheetMap) {
+      tasks.push(async () => {
+        let cssText;
+        switch (option) {
+          case "url":
+          case "tidy":
+          case "match": {
+            cssText = await cssHandler.rewriteCssRules({
+              cssRules: css.cssRules,
+              baseUrl,
+              refUrl,
+              refPolicy,
+              envCharset: charset,
+              refCss: css,
+              rootNode: option === 'match' ? roots : null,
+              sep: '\n\n',
+              settings,
+              options,
+            });
+            break;
+          }
+          case "none":
+          default: {
+            cssText = Array.prototype.map.call(css.cssRules, x => x.cssText).join('\n\n');
+            break;
+          }
+        }
+        rootNode.setAttribute(`data-scrapbook-adoptedstylesheet-${id}`, cssText);
+      });
+    }
+    this.requireBasicLoader = true;
+  }
+
+  async collectUsedCssResources({
+    isHeadless = this.isHeadless,
+    settings = this.settings,
+    options = this.options,
+    cssTasks = this.cssTasks,
+    cssResourcesHandler = this.cssResourcesHandler,
+  } = {}) {
+    if (!(options["capture.imageBackground"] === "save-used" || options["capture.font"] === "save-used")) { return; }
+    if (isHeadless) { return; }
+
+    cssTasks.unshift(() => { cssResourcesHandler.start(); });
+    cssTasks.push(() => { cssResourcesHandler.stop(); });
+    await cssTasks.reduce((prevTask, curTask) => {
+      return prevTask.then(curTask);
+    }, Promise.resolve());
+
+    // expose filter to settings
+    if (options["capture.imageBackground"] === "save-used") {
+      settings.usedCssImageUrl = cssResourcesHandler.usedImageUrls;
+    }
+    if (options["capture.font"] === "save-used") {
+      settings.usedCssFontUrl = cssResourcesHandler.usedFontUrls;
+    }
+  }
+
+  async fetchResources({
+    options = this.options,
+    tasks = this.tasks,
+  } = {}) {
     if (options["capture.saveResourcesSequentially"]) {
       await tasks.reduce((prevTask, curTask) => {
         return prevTask.then(curTask);
@@ -1300,13 +1432,25 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
     } else {
       await Promise.all(tasks.map(task => task()));
     }
+  }
 
+  async fetchDownLinkResources({
+    downLinkTasks = this.downLinkTasks,
+  } = {}) {
     // run downLink tasks sequentially
     await downLinkTasks.reduce((prevTask, curTask) => {
       return prevTask.then(curTask);
     }, Promise.resolve());
+  }
 
-    // record after the content of all nested shadow roots have been processed
+  /**
+   * Record shadow roots as special attributes on their hosts.
+   *
+   * Should run after the content of all nested shadow roots have been processed.
+   */
+  recordShadowRoots({
+    shadowRootList = this.shadowRootList,
+  } = {}) {
     for (const shadowRoot of shadowRootList) {
       const host = shadowRoot.host;
       host.setAttribute("data-scrapbook-shadowdom", shadowRoot.innerHTML);
@@ -1326,36 +1470,42 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
         host.setAttribute("data-scrapbook-shadowdom-slot-assignment", shadowRoot.slotAssignment);
       }
     }
+  }
 
-    // attach CSS resource map
-    if (cssHandler.resourceMap && Object.keys(cssHandler.resourceMap).length) {
-      const elem = newDoc.createElement('style');
-      elem.setAttribute("data-scrapbook-elem", "css-resource-map");
-      elem.textContent = ':root {'
-          + Object.entries(cssHandler.resourceMap).map(([k, v]) => `${v}:url("${k}");`).join('')
-          + '}';
-      headNode.appendChild(elem);
-    }
+  recordCssResourceMap({
+    doc = this.doc,
+    resourceMap = this.cssHandler.resourceMap,
+  } = {}) {
+    if (!(resourceMap && Object.keys(resourceMap).length)) { return; }
 
-    // add a dummy custom element registration to prevent breaking :defined css rule
-    // if scripts are not captured
-    if (customElementNames.size > 0 && !['save', 'link'].includes(options["capture.script"])) {
-      const elem = newDoc.createElement('script');
-      elem.setAttribute("data-scrapbook-elem", "custom-elements-loader");
-      elem.textContent = "(" + utils.compressJsFunc(function (names) {
-        if (!customElements) { return; }
-        for (const name of names) {
-          customElements.define(name, class CustomElement extends HTMLElement {});
-        }
-      }) + ")(" + JSON.stringify([...customElementNames]) + ")";
-      headNode.appendChild(elem);
-    }
+    const elem = doc.createElement('style');
+    elem.setAttribute("data-scrapbook-elem", "css-resource-map");
+    elem.textContent = ':root {'
+        + Object.entries(resourceMap).map(([k, v]) => `${v}:url("${k}");`).join('')
+        + '}';
+    doc.head.appendChild(elem);
+  }
 
-    return {
-      newDoc,
-      requireBasicLoader: this.requireBasicLoader,
-      favIconUrl: this.favIconUrl,
+  /**
+   * Add a dummy custom element registration to prevent breaking :defined css rules
+   * if scripts are not captured.
+   */
+  recordCustomElements({
+    doc = this.doc,
+    options = this.options,
+    customElementNames = this.customElementNames,
+  } = {}) {
+    if (!customElementNames.size) { return; }
+    if (['save', 'link'].includes(options["capture.script"])) { return; }
+
+    const data = {
+      names: JSON.stringify([...customElementNames]),
     };
+
+    const elem = doc.createElement('script');
+    elem.setAttribute("data-scrapbook-elem", "custom-elements-loader");
+    elem.textContent = CUSTOM_ELEMENT_NAME_LOADER_TEMPLATE.replace(/%([\w@]*)%/g, (_, key) => data[key] || '');
+    doc.head.appendChild(elem);
   }
 
   // the callback should return a falsy value if the elem is removed from DOM
@@ -3967,6 +4117,7 @@ export {
   BASIC_LOADER,
   ANNOTATION_LOADER_TEMPLATE,
   INFOBAR_LOADER_TEMPLATE,
+  CUSTOM_ELEMENT_NAME_LOADER_TEMPLATE,
   PresaveDocumentRewriter,
   RetrieveDocumentRewriter,
   RebuildLinksDocumentRewriter,
