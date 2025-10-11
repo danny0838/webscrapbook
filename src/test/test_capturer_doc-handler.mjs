@@ -16,6 +16,7 @@ import {CaptureHelperHandler} from "../capturer/helper-handler.mjs";
 
 import {
   META_REFERRER_POLICY, META_REFERRER_POLICY_LEGACY,
+  NodeSkipIteration,
   PresaveDocumentRewriter, RebuildLinksDocumentRewriter, CaptureDocumentRewriter,
 } from "../capturer/doc-handler.mjs";
 
@@ -797,7 +798,7 @@ describe('capturer/doc-handler.mjs', function () {
 
       it('should call callback for every element in DOM order', function () {
         var root = docFactory();
-        var callback = sinon.stub().returns(true);
+        var callback = sinon.stub();
         var rewriter = new CaptureDocumentRewriter();
         rewriter.rewriteRecursively(root, null, callback);
 
@@ -821,7 +822,6 @@ describe('capturer/doc-handler.mjs', function () {
           if (elem === removed) {
             elem.remove();
           }
-          return true;
         });
         var rewriter = new CaptureDocumentRewriter();
         rewriter.rewriteRecursively(root, null, callback);
@@ -839,13 +839,12 @@ describe('capturer/doc-handler.mjs', function () {
         assert.isNull(callback.getCall(10));
       });
 
-      it('should not iterate into descendants if the callback returns a falsy value', function () {
+      it('should not iterate into descendants if a NodeSkipIteration is thrown', function () {
         var root = docFactory();
         var callback = sinon.stub().callsFake((elem) => {
           if (elem === root.querySelector('#e2')) {
-            return undefined;
+            throw new NodeSkipIteration(elem);
           }
-          return true;
         });
         var rewriter = new CaptureDocumentRewriter();
         rewriter.rewriteRecursively(root, null, callback);
@@ -861,14 +860,14 @@ describe('capturer/doc-handler.mjs', function () {
         assert.isNull(callback.getCall(8));
       });
 
-      it('should iterate to next sibling if the element is removed and the callback returns a falsy value', function () {
+      it('should iterate to next sibling if the element is removed and a NodeSkipIteration is thrown', function () {
         var root = docFactory();
         var removed = root.querySelector('#e2');
         var callback = sinon.stub().callsFake((elem) => {
           if (elem === removed) {
-            return undefined;
+            elem.remove();
+            throw new NodeSkipIteration(elem);
           }
-          return true;
         });
         var rewriter = new CaptureDocumentRewriter();
         rewriter.rewriteRecursively(root, null, callback);
@@ -893,7 +892,7 @@ describe('capturer/doc-handler.mjs', function () {
             {name: 'div'},
           ]},
         ]});
-        var callback = sinon.stub().returns(true);
+        var callback = sinon.stub();
         var rewriter = new CaptureDocumentRewriter();
         rewriter.rewriteRecursively(root, null, callback);
 
@@ -917,7 +916,7 @@ describe('capturer/doc-handler.mjs', function () {
             {name: 'div', id: 'e2-2'},
           ]},
         ]});
-        var callback = sinon.stub().returns(true);
+        var callback = sinon.stub();
         var rewriter = new CaptureDocumentRewriter();
         rewriter.rewriteRecursively(root, null, callback);
 
