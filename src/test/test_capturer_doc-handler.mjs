@@ -8344,6 +8344,20 @@ describe('capturer/doc-handler.mjs', function () {
           assert.deepEqual(rewriter.customElementNames, new Set(["custom-elem"]));
         });
 
+        it('should not generate registry for non-HTML elements (under <svg>)', async function () {
+          var doc = createDocFixture({tagName: 'svg', ns: NS_SVG, children: [
+            {tagName: 'custom-elem', ns: NS_SVG},
+          ]});
+          var rewriter = await new TestCapturer().captureDocument({doc});
+          assert.deepEqual(rewriter.customElementNames, new Set());
+        });
+
+        it('should not generate registry for non-HTML elements (other)', async function () {
+          var doc = createDocFixture({tagName: 'custom-elem', ns: NS_SVG});
+          var rewriter = await new TestCapturer().captureDocument({doc});
+          assert.deepEqual(rewriter.customElementNames, new Set());
+        });
+
         for (const mode of ["save", "link", "blank", "remove", "<other>"]) {
           context(`when options["capture.script"] = "${mode}"`, function () {
             const options = {
