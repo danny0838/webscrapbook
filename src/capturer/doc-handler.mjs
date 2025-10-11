@@ -323,6 +323,22 @@ const CUSTOM_ELEMENT_NAME_LOADER_TEMPLATE = "(" + utils.compressJsFunc(function 
 
 const REBUILD_LINK_SVG_HREF_ATTRS = ['href', 'xlink:href'];
 
+class NodeSkipIteration extends Error {
+  constructor(node, msg = 'The node should not be iterated deeper.') {
+    super(msg);
+    this.name = 'NodeSkipIteration';
+    this.node = node;
+  }
+}
+
+class NodeDisconnect extends NodeSkipIteration {
+  constructor(node, msg = 'The node has been removed from DOM.') {
+    super(msg);
+    this.name = 'NodeDisconnect';
+    this.node = node;
+  }
+}
+
 class PresaveDocumentRewriter extends BaseDocumentRewriter {
   run(doc, {isMainDocument, deleteErased, requireBasicLoader, insertInfoBar}) {
     Object.assign(this, {doc, isMainDocument, deleteErased, requireBasicLoader, insertInfoBar});
@@ -1523,7 +1539,6 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
     doc.head.appendChild(elem);
   }
 
-  // the callback should return a falsy value if the elem is removed from DOM
   rewriteRecursively(elem, rootName, callback) {
     const nodeName = elem.nodeName.toLowerCase();
 
@@ -1532,33 +1547,38 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
       rootName = nodeName;
     }
 
-    const result = callback.call(this, elem, rootName);
-
-    // skip processing children if elem is removed from DOM
-    if (result) {
-      let child = elem.firstElementChild, next;
-      while (child) {
-        // record next child in prior so that we don't get a problem if child
-        // is removed in this run
-        next = child.nextElementSibling;
-
-        this.rewriteRecursively(child, rootName, callback);
-
-        child = next;
+    try {
+      callback.call(this, elem, rootName);
+    } catch (ex) {
+      // skip iterating into descendants when NodeSkipIteration is caught
+      if (ex instanceof NodeSkipIteration) {
+        return;
       }
+
+      throw ex;
     }
-    return result;
+
+    let child = elem.firstElementChild, next;
+    while (child) {
+      // record next child in prior so that we don't get a problem if child
+      // is removed in this run
+      next = child.nextElementSibling;
+
+      this.rewriteRecursively(child, rootName, callback);
+
+      child = next;
+    }
   }
 
   rewriteNode(node, rootName) {
     // skip non-element nodes
     if (node.nodeType !== Node.ELEMENT_NODE) {
-      return node;
+      return;
     }
 
     // skip processing a special node
     if (!REWRITABLE_SPECIAL_OBJECTS.has(utils.getScrapbookObjectType(node))) {
-      return node;
+      throw new NodeSkipIteration(node);
     }
 
     const {
@@ -1587,7 +1607,7 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
             const styles = this.origDoc.defaultView.getComputedStyle(elemOrig, null);
             if (styles.getPropertyValue("display") === "none") {
               this.captureRemoveNode(elem);
-              return;
+              throw new NodeDisconnect(elem);
             }
           }
           break;
@@ -1598,9 +1618,7 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
     if (rootName === "svg") {
       const handler = this[`_handle_svg_${elem.nodeName.toLowerCase()}`];
       if (handler) {
-        if (handler.call(this, elem)) {
-          return;
-        }
+        handler.call(this, elem);
       } else {
         // SVG spec is quite complicated, but generally we can treat every
         // href and xlink:href as an image link, except for "a" and "script"
@@ -1611,9 +1629,7 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
     } else if (rootName === "math") {
       this.rewriteAnchor(elem, "href", {isHtml: false});
     } else {
-      if (this[`_handle_html_${elem.nodeName.toLowerCase()}`]?.call(this, elem)) {
-        return;
-      }
+      this[`_handle_html_${elem.nodeName.toLowerCase()}`]?.call(this, elem);
 
       // handle shadow DOM
       if (options["capture.shadowDom"] === "save") {
@@ -1741,8 +1757,6 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
         customElementNames.add(nodeName);
       }
     }
-
-    return elem;
   }
 
   _handle_html_base(elem) {
@@ -1767,7 +1781,7 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
         break;
       case "remove":
         this.captureRemoveNode(elem);
-        return;
+        throw new NodeDisconnect(elem);
       case "save":
       default:
         // do nothing
@@ -1864,7 +1878,7 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
             case "remove":
             default:
               this.captureRemoveNode(elem);
-              return;
+              throw new NodeDisconnect(elem);
           }
           break;
         }
@@ -1983,7 +1997,7 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
       }
       case "remove": {
         this.captureRemoveNode(elem);
-        return;
+        throw new NodeDisconnect(elem);
       }
       case "save":
       default: {
@@ -2037,7 +2051,7 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
           this.favIconUrl = "";
         }
         this.captureRemoveNode(elem);
-        return;
+        throw new NodeDisconnect(elem);
       case "save":
       default: {
         let useFavIcon = false;
@@ -2083,7 +2097,7 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
         break;
       case "remove":
         this.captureRemoveNode(elem);
-        return;
+        throw new NodeDisconnect(elem);
       case "save":
       default: {
         const refPolicy = elem.matches('[rel~="noreferrer"]') ? 'no-referrer' : elem.referrerPolicy || this.docRefPolicy;
@@ -2120,7 +2134,7 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
       case "remove":
       default:
         this.captureRemoveNode(elem);
-        return;
+        throw new NodeDisconnect(elem);
     }
   }
 
@@ -2137,7 +2151,7 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
       case "remove":
       default:
         this.captureRemoveNode(elem);
-        return;
+        throw new NodeDisconnect(elem);
     }
   }
 
@@ -2178,7 +2192,7 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
       }
       case "remove": {
         this.captureRemoveNode(elem);
-        return;
+        throw new NodeDisconnect(elem);
       }
       case "save":
       case "link":
@@ -2247,7 +2261,7 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
         break;
       case "remove":
         this.captureRemoveNode(elem);
-        return;
+        throw new NodeDisconnect(elem);
       case "save":
       default:
         if (elem.hasAttribute("src")) {
@@ -2296,7 +2310,7 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
         break;
       case "remove":
         this.captureRemoveNode(elem);
-        return;
+        throw new NodeDisconnect(elem);
       case "save":
       default: {
         // In browsers conforming the spec, elem contains only text
@@ -2476,7 +2490,7 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
       }
       case "remove": {
         this.captureRemoveNode(frame);
-        return;
+        throw new NodeDisconnect(frame);
       }
       case "save":
       default: {
@@ -2704,7 +2718,7 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
         break;
       case "remove":
         this.captureRemoveNode(elem);
-        return;
+        throw new NodeDisconnect(elem);
       case "save-current":
         if (!isHeadless) {
           const elemOrig = this.getOrigNode(elem);
@@ -2786,7 +2800,7 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
         break;
       case "remove":
         this.captureRemoveNode(elem);
-        return;
+        throw new NodeDisconnect(elem);
       case "save-current":
         if (!isHeadless) {
           for (const subElem of elem.querySelectorAll('img')) {
@@ -2862,7 +2876,7 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
         break;
       case "remove":
         this.captureRemoveNode(elem);
-        return;
+        throw new NodeDisconnect(elem);
       case "save-current":
         if (!isHeadless) {
           const elemOrig = this.getOrigNode(elem);
@@ -2980,7 +2994,7 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
         break;
       case "remove":
         this.captureRemoveNode(elem);
-        return;
+        throw new NodeDisconnect(elem);
       case "save-current":
         if (!isHeadless) {
           if (elem.hasAttribute("poster")) {
@@ -3110,7 +3124,7 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
         break;
       case "remove":
         this.captureRemoveNode(elem);
-        return;
+        throw new NodeDisconnect(elem);
       case "save":
       default:
         if (elem.hasAttribute("src")) {
@@ -3232,7 +3246,7 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
         break;
       case "remove":
         this.captureRemoveNode(elem);
-        return;
+        throw new NodeDisconnect(elem);
       case "save":
       default: {
         const refPolicy = this.docRefPolicy;
@@ -3365,7 +3379,7 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
         break;
       case "remove":
         this.captureRemoveNode(elem);
-        return;
+        throw new NodeDisconnect(elem);
       case "save":
       default: {
         const refPolicy = this.docRefPolicy;
@@ -3410,7 +3424,7 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
         break;
       case "remove":
         this.captureRemoveNode(elem);
-        return;
+        throw new NodeDisconnect(elem);
       case "save":
       default: {
         // we get only blank canvas in headless capture
@@ -3471,7 +3485,7 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
             break;
           case "remove":
             this.captureRemoveNode(elem);
-            return;
+            throw new NodeDisconnect(elem);
           case "save-current":
             // srcset and currentSrc are not supported, do the same as save
             // eslint-disable-next-line no-fallthrough
@@ -3762,7 +3776,7 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
         break;
       case "remove":
         this.captureRemoveNode(elem);
-        return;
+        throw new NodeDisconnect(elem);
       case "save":
       default: {
         for (const attr of ["href", "xlink:href"]) {
@@ -3807,7 +3821,7 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
       }
       case "remove": {
         this.captureRemoveNode(elem);
-        return;
+        throw new NodeDisconnect(elem);
       }
       case "save":
       case "link":
@@ -4077,7 +4091,7 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
         break;
       case "remove":
         this.captureRemoveNode(elem);
-        return;
+        throw new NodeDisconnect(elem);
       case "save-current":
       case "save":
       default: {
@@ -4213,6 +4227,8 @@ export {
   ANNOTATION_LOADER_TEMPLATE,
   INFOBAR_LOADER_TEMPLATE,
   CUSTOM_ELEMENT_NAME_LOADER_TEMPLATE,
+  NodeSkipIteration,
+  NodeDisconnect,
   PresaveDocumentRewriter,
   RetrieveDocumentRewriter,
   RebuildLinksDocumentRewriter,
