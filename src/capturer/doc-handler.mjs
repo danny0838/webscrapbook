@@ -1020,8 +1020,10 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
     // baseUrlFinal: the final baseUrl, used for resolving links etc.
     //
     // URLs in the document are usually resolved using baseUrl, which can be
-    // dynamically changed when the first <base href="..."> element is parsed
-    // or when it's "href" attribute changes.
+    // dynamically changed when the first base[href] element is parsed, when
+    // its "href" attribute changes, or when it's removed from DOM (and another
+    // first base element will takes place). If its value is an invalid URL,
+    // baseUrlFallback will be used (instead of finding another base element).
     //
     // Nevertheless, links and citations should be updated when the baseUrl
     // changes, such as a[href], a[ping], q[cite]. As a result, they should
@@ -1037,8 +1039,11 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
       let base = baseUrlFallback;
       for (const elem of doc.querySelectorAll('base[href]')) {
         if (elem.namespaceURI !== NS_HTML) { continue; }
-        base = new URL(elem.getAttribute('href'), baseUrlFallback).href;
-        base = utils.splitUrlByAnchor(base)[0];
+        try {
+          base = new URL(elem.getAttribute('href'), baseUrlFallback).href;
+        } catch {
+          // don't update for invalid URL
+        }
         break;
       }
       return base;
@@ -1752,7 +1757,11 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
     // Update baseUrl for the first base[href].
     // Note: don't consider a <base> elem in a shadowRoot.
     if (!this.baseElem && elem.getRootNode().nodeType === Node.DOCUMENT_NODE) {
-      this.baseUrl = utils.splitUrlByAnchor(newUrl)[0];
+      try {
+        this.baseUrl = new URL(newUrl).href;
+      } catch {
+        // don't update for invalid URL
+      }
       this.baseElem = elem;
     }
 

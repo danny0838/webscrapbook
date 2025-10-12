@@ -1174,6 +1174,48 @@ describe('capturer/doc-handler.mjs', function () {
             sinon.assert.called(stub);
           });
 
+          it('should not alter base URL if the first `base[href]` has an invalid URL', async function () {
+            var doc = createDocFixture({tagName: 'head', children: [
+              {tagName, attrs: {href: 'https://exa[mple.org/'}},
+              {tagName, attrs: {href: './resources/'}},
+            ]});
+
+            var tester = function ([elem], {func, doneSignal}) {
+              switch (elem) {
+                // honor but ignore due to invalid URL
+                case this.doc.querySelectorAll('base')[0]: {
+                  assert.strictEqual(this.baseElem, undefined);
+                  assert.strictEqual(this.baseUrlFallback, 'https://example.com/');
+                  assert.strictEqual(this.baseUrl, 'https://example.com/');
+                  assert.strictEqual(this.baseUrlFinal, 'https://example.com/');
+                  break;
+                }
+
+                // ignore
+                case this.doc.querySelectorAll('base')[1]: {
+                  assert.strictEqual(this.baseElem, this.doc.querySelectorAll('base')[0]);
+                  assert.strictEqual(this.baseUrlFallback, 'https://example.com/');
+                  assert.strictEqual(this.baseUrl, 'https://example.com/');
+                  assert.strictEqual(this.baseUrlFinal, 'https://example.com/');
+                  break;
+                }
+
+                // after bases
+                case this.doc.querySelector('body'): {
+                  assert.strictEqual(this.baseElem, this.doc.querySelectorAll('base')[0]);
+                  assert.strictEqual(this.baseUrlFallback, 'https://example.com/');
+                  assert.strictEqual(this.baseUrl, 'https://example.com/');
+                  assert.strictEqual(this.baseUrlFinal, 'https://example.com/');
+                  throw doneSignal;
+                }
+              }
+              return func.call(this, elem);
+            };
+
+            var {stub} = await rewriteNodeControlledTest({doc, docUrl, tester});
+            sinon.assert.called(stub);
+          });
+
           it('should honor `base[href=""]` and ignore other base elements', async function () {
             var doc = createDocFixture({tagName: 'head', children: [
               {tagName, attrs: {href: ''}},
