@@ -52,6 +52,7 @@ import {escapeRegExp} from "../utils/common.mjs";
   await import('./test_utils_datauri.mjs');
   await import('./test_utils_zip.mjs');
   await import('./test_capturer_common.mjs');
+  await import('./test_capturer_doc-handler.mjs');
   await import('./test_capturer_css-handler.mjs');
   await import('./test_capturer_helper-handler.mjs');
   await import('./test_capturer_capturer.mjs');
