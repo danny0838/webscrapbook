@@ -3656,21 +3656,111 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
   }
 
   [`_handle_{${NS_SVG}}`](elem) {
-    const handler = this[`_handle_{${NS_SVG}}${elem.localName}`];
-    if (handler) {
-      handler.call(this, elem);
-    } else {
-      // SVG spec is quite complicated, but generally we can treat every
-      // href and xlink:href as an image link, except for "a" and "script"
-      for (const attr of ["href", "xlink:href"]) {
-        this.rewriteSvgHref(elem, attr);
-      }
-    }
+    this[`_handle_{${NS_SVG}}${elem.localName}`]?.call(this, elem);
   }
 
   [`_handle_{${NS_SVG}}a`](elem) {
     for (const attr of ["href", "xlink:href"]) {
       this.rewriteAnchor(elem, attr);
+    }
+  }
+
+  [`_handle_{${NS_SVG}}use`](elem) {
+    for (const attr of ["href", "xlink:href"]) {
+      this[`_handle_{${NS_SVG}}use#href`].call(this, elem, attr);
+    }
+  }
+
+  [`_handle_{${NS_SVG}}animate`](elem) {
+    this[`_handle_{${NS_SVG}}use`].call(this, elem);
+  }
+
+  [`_handle_{${NS_SVG}}animateMotion`](elem) {
+    this[`_handle_{${NS_SVG}}use`].call(this, elem);
+  }
+
+  [`_handle_{${NS_SVG}}animateTransform`](elem) {
+    this[`_handle_{${NS_SVG}}use`].call(this, elem);
+  }
+
+  [`_handle_{${NS_SVG}}set`](elem) {
+    this[`_handle_{${NS_SVG}}use`].call(this, elem);
+  }
+
+  [`_handle_{${NS_SVG}}textPath`](elem) {
+    this[`_handle_{${NS_SVG}}use`].call(this, elem);
+  }
+
+  [`_handle_{${NS_SVG}}linearGradient`](elem) {
+    this[`_handle_{${NS_SVG}}use`].call(this, elem);
+  }
+
+  [`_handle_{${NS_SVG}}radialGradient`](elem) {
+    this[`_handle_{${NS_SVG}}use`].call(this, elem);
+  }
+
+  [`_handle_{${NS_SVG}}mpath`](elem) {
+    this[`_handle_{${NS_SVG}}use`].call(this, elem);
+  }
+
+  [`_handle_{${NS_SVG}}pattern`](elem) {
+    this[`_handle_{${NS_SVG}}use`].call(this, elem);
+  }
+
+  [`_handle_{${NS_SVG}}use#href`](elem, attr) {
+    if (!elem.hasAttribute(attr)) { return; }
+    const newUrl = this.resolveRelativeUrl(elem.getAttribute(attr), this.baseUrl);
+    this.captureRewriteAttr(elem, attr, newUrl);
+  }
+
+  [`_handle_{${NS_SVG}}image`](elem) {
+    for (const attr of ["href", "xlink:href"]) {
+      this[`_handle_{${NS_SVG}}image#href`].call(this, elem, attr);
+    }
+  }
+
+  [`_handle_{${NS_SVG}}feImage`](elem) {
+    this[`_handle_{${NS_SVG}}image`].call(this, elem);
+  }
+
+  [`_handle_{${NS_SVG}}image#href`](elem, attr) {
+    if (!elem.hasAttribute(attr)) { return; }
+
+    const {baseUrlFinal, refUrl, docRefPolicy: refPolicy, tasks, settings, options} = this;
+
+    // check local link and rewrite url
+    const url = this.resolveLocalLink(elem.getAttribute(attr), baseUrlFinal);
+    this.captureRewriteAttr(elem, attr, url);
+
+    switch (options["capture.image"]) {
+      case "link":
+        // do nothing
+        break;
+      case "blank":
+      case "remove":
+        this.captureRewriteAttr(elem, attr, null);
+        break;
+      case "save-current":
+      case "save":
+      default: {
+        // skip further processing for non-absolute links
+        if (!utils.isUrlAbsolute(url)) {
+          break;
+        }
+
+        tasks.push(async () => {
+          const response = await this.downloadFile({
+            url,
+            refUrl,
+            refPolicy,
+            settings,
+            options,
+          });
+          this.captureRewriteAttr(elem, attr, response.url);
+          return response;
+        });
+        break;
+      }
     }
   }
 

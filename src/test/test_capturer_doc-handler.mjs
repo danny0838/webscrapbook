@@ -7422,7 +7422,7 @@ describe('capturer/doc-handler.mjs', function () {
         }
       });
 
-      for (const tagName of ["image", "feImage", "use"]) {
+      for (const tagName of ["image", "feImage"]) {
         context(`for <svg:${tagName}>`, function () {
           function docFactory({attrs} = {}) {
             return createDocFixture({type: 'svg', tagName, ns: NS_SVG, attrs});
@@ -7507,11 +7507,66 @@ describe('capturer/doc-handler.mjs', function () {
                   assert.strictEqual(elem.getAttributeNS(null, 'href'), null);
                   assert.strictEqual(elem.getAttributeNS(NS_XLINK, 'href'), null);
 
-                  sinon.assert.notCalled(spyRewrite);
+                  sinon.assert.neverCalledWith(spyRewrite, elem, 'href');
                 });
               });
             });
           }
+        });
+      }
+
+      for (const tagName of [
+        "use",
+        "animate", "animateMotion", "animateTransform",
+        "linearGradient", "radialGradient",
+        "set", "mpath", "pattern",
+        "textPath",
+      ]) {
+        context(`for <svg:${tagName}>`, function () {
+          function docFactory({attrs} = {}) {
+            return createDocFixture({type: 'svg', tagName: 'svg', ns: NS_SVG, children: [
+              {tagName, ns: NS_SVG, attrs},
+              {tagName: 'circle', ns: NS_SVG, id: 'img', attrs: {cx: '50', cy: '50', r: '50'}},
+            ]});
+          }
+
+          for (const [ns, prefix] of [[null, ''], [NS_XLINK, 'xlink:']]) {
+            context(`when having \`${prefix}href\` attribute`, function () {
+              it('should rewrite the attribute to the resolved URL', async function () {
+                var doc = docFactory({attrs: [[`${prefix}href`, '#img', ns]]});
+
+                var {doc} = await new TestCapturer().captureDocument({doc, docUrl});
+                var elem = doc.querySelector(tagName);
+                assert.strictEqual(elem.getAttributeNS(ns, "href"), "#img");
+
+                sinon.assert.calledOnceWithExactly(spyResolve, '#img', 'https://example.com/');
+                sinon.assert.calledWithExactly(spyRewrite, elem, `${prefix}href`, '#img');
+              });
+
+              context(CONTEXT_BASE_URL, function () {
+                it('should resolve the URL with `baseUrl`', async function () {
+                  var doc = docFactory({attrs: [[`${prefix}href`, './file#img', ns]]});
+                  var tester = baseUrlHandlingTesterFactory({tagName, docUrl});
+
+                  var {stub} = await rewriteNodeControlledTest({doc, docUrl, tester});
+                  sinon.assert.called(stub);
+
+                  sinon.assert.calledOnceWithExactly(spyResolve, './file#img', 'https://example.com/baseUrl/');
+                });
+              });
+            });
+          }
+
+          context('when having no `*:href` attribute', function () {
+            it('should do nothing', async function () {
+              var doc = docFactory();
+
+              var {doc} = await new TestCapturer().captureDocument({doc, docUrl});
+              var elem = doc.querySelector(tagName);
+              assert.strictEqual(elem.getAttributeNS(null, 'href'), null);
+              assert.strictEqual(elem.getAttributeNS(NS_XLINK, 'href'), null);
+            });
+          });
         });
       }
 
