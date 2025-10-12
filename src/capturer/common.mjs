@@ -121,6 +121,57 @@ class BaseCapturer {
   async captureDocument(params) {
     isDebug && console.debug("call: captureDocument", params);
 
+    const {duplicate, rewriter, registry} = await this._captureDocument(params);
+
+    if (duplicate) {
+      const {docUrlHash, envDocUrl} = duplicate;
+      return Object.assign({}, registry, {
+        url: this.getRedirectedUrl(registry.url, docUrlHash),
+        sourceUrl: envDocUrl,
+      });
+    }
+
+    const {
+      doc,
+      settings, options,
+      docUrlHash, envDocUrl,
+      mime, title,
+      requireBasicLoader,
+      favIconUrl,
+    } = rewriter;
+    const {filename: documentFileName} = registry;
+
+    // common pre-save process
+    await this.preSaveProcess({
+      doc,
+      isMainDocument: settings.isMainPage && settings.isMainFrame,
+      deleteErased: options["capture.deleteErasedOnCapture"],
+      requireBasicLoader,
+      insertInfoBar: options["capture.insertInfoBar"],
+    });
+
+    // save document
+    const content = utils.documentToString(doc, options["capture.prettyPrint"]);
+    const blob = new Blob([content], {type: `${mime};charset=UTF-8`});
+    const response = await this.saveDocument({
+      sourceUrl: this.getRedirectedUrl(envDocUrl, docUrlHash),
+      documentFileName,
+      settings,
+      options,
+      data: {
+        blob,
+        title: settings.title || title,
+        favIconUrl: settings.favIconUrl || favIconUrl,
+      },
+    });
+
+    return Object.assign({}, response, {
+      url: this.getRedirectedUrl(response.url, docUrlHash),
+      sourceUrl: envDocUrl,
+    });
+  }
+
+  async _captureDocument(params) {
     const {doc = document, settings, options} = params;
     const {isMainPage, isMainFrame} = settings;
     const isHeadless = !doc.defaultView;
@@ -196,28 +247,22 @@ class BaseCapturer {
       options,
     }]);
 
-    // if a previous registry exists, return it (except for the main document,
-    // which should only happen during a merge capture)
+    // if a previous registry exists, return with a `duplicate` object (except
+    // for the main document, which should only happen during a merge capture)
     if (registry.isDuplicate && !(isMainPage && isMainFrame)) {
-      return Object.assign({}, registry, {
-        url: this.getRedirectedUrl(registry.url, docUrlHash),
-        sourceUrl: envDocUrl,
-      });
+      return {
+        duplicate: {docUrl, docUrlHash, envDocUrl},
+        registry,
+      };
     }
-
-    const documentFileName = registry.filename;
 
     // group sub-frames with same filename
     if (isMainFrame) {
-      settings.documentName = utils.filenameParts(documentFileName)[0];
+      settings.documentName = utils.filenameParts(registry.filename)[0];
     }
 
     // clone the document and rewrite content
-    const {
-      doc: newDoc,
-      requireBasicLoader,
-      favIconUrl,
-    } = await CaptureDocumentRewriter.runWithClone(doc, {
+    const rewriter = await CaptureDocumentRewriter.runWithClone(doc, {
       capturer: this,
       settings, options,
       isHeadless,
@@ -227,34 +272,7 @@ class BaseCapturer {
       mime,
     });
 
-    // common pre-save process
-    await this.preSaveProcess({
-      doc: newDoc,
-      isMainDocument: isMainPage && isMainFrame,
-      deleteErased: options["capture.deleteErasedOnCapture"],
-      requireBasicLoader,
-      insertInfoBar: options["capture.insertInfoBar"],
-    });
-
-    // save document
-    const content = utils.documentToString(newDoc, options["capture.prettyPrint"]);
-    const blob = new Blob([content], {type: `${mime};charset=UTF-8`});
-    const response = await this.saveDocument({
-      sourceUrl: this.getRedirectedUrl(envDocUrl, docUrlHash),
-      documentFileName,
-      settings,
-      options,
-      data: {
-        blob,
-        title: settings.title || doc.title,
-        favIconUrl: settings.favIconUrl || favIconUrl,
-      },
-    });
-
-    return Object.assign({}, response, {
-      url: this.getRedirectedUrl(response.url, docUrlHash),
-      sourceUrl: envDocUrl,
-    });
+    return {rewriter, registry};
   }
 
   /**

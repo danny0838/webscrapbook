@@ -999,7 +999,7 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
     this.clonedNodeMap = clonedNodeMap;
 
     const {missionId, timeId, isMainPage, isMainFrame} = settings;
-    const {characterSet: charset} = this.origDoc;
+    const {characterSet: charset, title} = this.origDoc;
 
     Object.assign(this, {
       missionId, timeId, settings, options,
@@ -1008,7 +1008,7 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
       docUrl, docUrlHash, envDocUrl,
       baseUrl, baseUrlFinal, baseUrlFallback,
       refUrl, docRefPolicy,
-      mime, charset,
+      mime, charset, title,
     });
 
     this.cssHandler = new DocumentCssHandler({
