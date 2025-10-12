@@ -4,6 +4,7 @@ import {
   RED_BMP_BYTES, GREEN_BMP_BYTES, BLUE_BMP_BYTES, YELLOW_BMP_BYTES,
   getToken, getRulesFromCssText, rawRegex, encodeText, getAttributes,
   createDocFixture, createIframeFixture,
+  runControlledTest,
 } from "./unittest.mjs";
 import sinon from "./lib/sinon-esm.js";
 import {TestCapturerOffline as TestCapturer, stubXhr, stubServer} from "./extension.mjs";
@@ -2865,6 +2866,77 @@ describe('capturer/capturer.mjs', function () {
             });
           }
         });
+      });
+
+      context('`preSaveProcess` parameters handling', function () {
+        for (const {desc, options, rewriter, expected} of [
+          {
+            desc: '`{deleteErased: true}` when `options["capture.deleteErasedOnCapture"]` = true',
+            options: {"capture.deleteErasedOnCapture": true},
+            expected: {deleteErased: true},
+          },
+          {
+            desc: '`{deleteErased: false}` when `options["capture.deleteErasedOnCapture"]` = false',
+            options: {"capture.deleteErasedOnCapture": false},
+            expected: {deleteErased: false},
+          },
+          {
+            desc: '`{insertInfoBar: true}` when `options["capture.insertInfoBar"]` = true',
+            options: {"capture.insertInfoBar": true},
+            expected: {insertInfoBar: true},
+          },
+          {
+            desc: '`{insertInfoBar: false}` when `options["capture.insertInfoBar"]` = false',
+            options: {"capture.insertInfoBar": false},
+            expected: {insertInfoBar: false},
+          },
+          {
+            desc: '`{isMainDocument: true}` when `settings` has `{isMainPage: true, isMainFrame: true}`',
+            rewriter: ({rewriter}) => { Object.assign(rewriter.settings, {isMainPage: true, isMainFrame: true}); },
+            expected: {isMainDocument: true},
+          },
+          {
+            desc: '`{isMainDocument: false}` when `settings` has `{isMainPage: true, isMainFrame: false}`',
+            rewriter: ({rewriter}) => { Object.assign(rewriter.settings, {isMainPage: true, isMainFrame: false}); },
+            expected: {isMainDocument: false},
+          },
+          {
+            desc: '`{isMainDocument: false}` when `settings` has `{isMainPage: false, isMainFrame: true}`',
+            rewriter: ({rewriter}) => { Object.assign(rewriter.settings, {isMainPage: false, isMainFrame: true}); },
+            expected: {isMainDocument: false},
+          },
+          {
+            desc: '`{isMainDocument: false}` when `settings` has `{isMainPage: false, isMainFrame: false}`',
+            rewriter: ({rewriter}) => { Object.assign(rewriter.settings, {isMainPage: false, isMainFrame: false}); },
+            expected: {isMainDocument: false},
+          },
+          {
+            desc: '`{requireBasicLoader: true}` when `requireBasicLoader` = true',
+            rewriter: ({rewriter}) => { rewriter.requireBasicLoader = true; },
+            expected: {requireBasicLoader: true},
+          },
+          {
+            desc: '`{requireBasicLoader: false}` when `requireBasicLoader` = false',
+            rewriter: ({rewriter}) => { rewriter.requireBasicLoader = false; },
+            expected: {requireBasicLoader: false},
+          },
+        ]) {
+          it(`should call \`preSaveProcess\` with ${desc}`, async function () {
+            var fn = async function () {
+              var spy = sinon.spy(Capturer.prototype, 'preSaveProcess');
+              var doc = createDocFixture();
+              await new TestCapturer().captureGeneral({doc, docUrl, options});
+              sinon.assert.calledWithExactly(spy, sinon.match(expected));
+            };
+            var tester = async function (args, {func}) {
+              const result = await func.apply(this, args);
+              rewriter?.call(this, result);
+              return result;
+            };
+            var stub = await runControlledTest(Capturer.prototype, '_captureDocument', fn, tester);
+            sinon.assert.called(stub);
+          });
+        }
       });
 
       context('single HTML handling', function () {
