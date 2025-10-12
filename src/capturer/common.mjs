@@ -183,9 +183,7 @@ class BaseCapturer {
       utils.splitUrlByAnchor(params.envDocUrl)[0] :
       docUrl;
 
-    const baseUrl = (this.isAboutUrl(docUrl) && params.baseUrl) ?
-      utils.splitUrlByAnchor(params.baseUrl)[0] :
-      envDocUrl;
+    const baseUrl = (this.isAboutUrl(docUrl) && params.baseUrl) ? params.baseUrl : envDocUrl;
 
     const refPolicy = this.isAboutUrl(docUrl) ? (params.refPolicy || "") : "";
 
