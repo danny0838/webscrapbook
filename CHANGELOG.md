@@ -3,6 +3,12 @@
 * Versions before 1.0 are in initial development. APIs are not stable for these versions, even a `y` version can involve a breaking change, and only partial notable changes are summarized in this document. See full commit history in the source repository for details.
 * Backend server requirement in this document refers to the version of [`webscrapbook` Python package](https://github.com/danny0838/pywebscrapbook) (or PyWebScrapBook).
 
+## [2.24.3] - 2025-10-13
+* Fixed incorrect log URL when capturing a frame.
+* Fixed several missing warning messages during a capture.
+* Fixed several potential errors for some modules.
+* Miscellaneous improvements to the internal code, test suite, and development tools.
+
 ## [2.24.2] - 2025-09-21
 * Fixed script error in Firefox for Android.
 * Improved help about host permissions.

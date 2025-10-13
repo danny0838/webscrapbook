@@ -2,7 +2,7 @@
   "manifest_version": 2,
   "name": "WebScrapBook Test Suite",
   "description": "Test suite for WebScrapBook extension.",
-  "version": "2.24.2",
+  "version": "2.24.3",
   "author": "Danny Lin",
   "browser_specific_settings": {
     "gecko": {
