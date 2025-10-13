@@ -2223,13 +2223,10 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
         if (elemOrig && elemOrig.innerHTML === elemOrig.textContent) {
           // elemOrig may not exist for nested <noscript> when handling the inner level,
           // skip as the replacement should have been done in the outer level
-          const tempElem = this.doc.createElement('scrapbook-noscript');
+          const tempElem = this.doc.createElement('template');
           tempElem.innerHTML = elem.textContent;
-          let child;
           elem.textContent = '';
-          while (child = tempElem.firstChild) {
-            elem.appendChild(child);
-          }
+          elem.appendChild(tempElem.content.cloneNode(true));
         }
         break;
       }
