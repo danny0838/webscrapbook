@@ -3,7 +3,7 @@ import {
   RED_BMP_B64, GREEN_BMP_B64, BLUE_BMP_B64,
   RED_BMP_BYTES, GREEN_BMP_BYTES, BLUE_BMP_BYTES,
   rawRegex, getAttributes,
-  createFragFixture, createNodeFixture, createDocFixture, createIframeFixture,
+  createFragFixture, createDomFixture, createNodeFixture, createDocFixture, createIframeFixture,
   runControlledTest,
 } from "./unittest.mjs";
 import {TestCapturerOffline, stubXhr} from "./extension.mjs";
@@ -8640,6 +8640,431 @@ describe('capturer/doc-handler.mjs', function () {
           sinon.assert.match(result, {url});
         });
       }
+    });
+
+    describe('#captureRecordAddedNode()', function () {
+      let rewriter;
+      let timeId;
+
+      beforeEach(function () {
+        rewriter = new CaptureDocumentRewriter();
+        timeId = utils.dateToId();
+      });
+
+      context('when `record` is falsy', function () {
+        it('should do nothing', function () {
+          var wrapper = createDomFixture('<section><div foo="bar">text</div></section>');
+          var elem = wrapper.querySelector('div');
+          rewriter.captureRecordAddedNode(elem, {record: false});
+          assert.strictEqual(wrapper.outerHTML, '<section><div foo="bar">text</div></section>');
+        });
+      });
+
+      context('when `record` is truthy', function () {
+        it('should add recording attribute if not exists', function () {
+          var wrapper = createDomFixture('<section><div foo="bar">text</div></section>');
+          var elem = wrapper.querySelector('div');
+          rewriter.captureRecordAddedNode(elem, {record: true, timeId});
+          assert.strictEqual(wrapper.outerHTML, `<section><div foo="bar" data-scrapbook-orig-null-node-${timeId}="">text</div></section>`);
+        });
+
+        it('should do nothing if the recording attribute exists', function () {
+          var wrapper = createDomFixture(`<section><div foo="bar" data-scrapbook-orig-null-node-${timeId}="foo">text</div></section>`);
+          var elem = wrapper.querySelector('div');
+          rewriter.captureRecordAddedNode(elem, {record: true, timeId});
+          assert.strictEqual(wrapper.outerHTML, `<section><div foo="bar" data-scrapbook-orig-null-node-${timeId}="foo">text</div></section>`);
+        });
+      });
+    });
+
+    describe('#captureRemoveNode()', function () {
+      let rewriter;
+      let timeId;
+
+      beforeEach(function () {
+        rewriter = new CaptureDocumentRewriter();
+        timeId = utils.dateToId();
+      });
+
+      context('when `record` is falsy', function () {
+        it('should remove the element', function () {
+          var wrapper = createDomFixture('<section><div foo="bar">text</div></section>');
+          var elem = wrapper.querySelector('div');
+          rewriter.captureRemoveNode(elem, {record: false});
+          assert.strictEqual(wrapper.outerHTML, '<section></section>');
+        });
+      });
+
+      context('when `record` is truthy', function () {
+        it('should replace the element with a recording comment', function () {
+          var wrapper = createDomFixture('<section><div foo="bar">text</div></section>');
+          var elem = wrapper.querySelector('div');
+          rewriter.captureRemoveNode(elem, {record: true, timeId});
+          assert.strictEqual(wrapper.outerHTML, `<section><!--scrapbook-orig-node-${timeId}=<div foo="bar">text</div>--></section>`);
+        });
+
+        it('should escape the content of the comment', function () {
+          var wrapper = createDomFixture('<section><script>alert("-->");</script></section>');
+          var elem = wrapper.querySelector('script');
+          rewriter.captureRemoveNode(elem, {record: true, timeId});
+          assert.strictEqual(wrapper.outerHTML, `<section><!--scrapbook-orig-node-${timeId}=<script>alert("-\u200B->");</script>--></section>`);
+        });
+      });
+    });
+
+    describe('#captureRewriteAttr()', function () {
+      let rewriter;
+      let timeId;
+
+      beforeEach(function () {
+        rewriter = new CaptureDocumentRewriter();
+        timeId = utils.dateToId();
+      });
+
+      context('when `record` is falsy', function () {
+        context('for plain attribute', function () {
+          it('should alter the attribute if value is a string', function () {
+            var wrapper = createDomFixture('<section><div foo="bar">text</div></section>');
+            var elem = wrapper.querySelector('div');
+            rewriter.captureRewriteAttr(elem, 'foo', 'baz', {record: false});
+            assert.strictEqual(wrapper.outerHTML, '<section><div foo="baz">text</div></section>');
+          });
+
+          it('should add the attribute if not exists and value is a string', function () {
+            var wrapper = createDomFixture('<section><div>text</div></section>');
+            var elem = wrapper.querySelector('div');
+            rewriter.captureRewriteAttr(elem, 'foo', 'bar', {record: false});
+            assert.strictEqual(wrapper.outerHTML, '<section><div foo="bar">text</div></section>');
+          });
+
+          it('should empty the attribute if value is an empty string', function () {
+            var wrapper = createDomFixture('<section><div foo="bar">text</div></section>');
+            var elem = wrapper.querySelector('div');
+            rewriter.captureRewriteAttr(elem, 'foo', '', {record: false});
+            assert.strictEqual(wrapper.outerHTML, '<section><div foo="">text</div></section>');
+          });
+
+          it('should remove the attribute if value is null', function () {
+            var wrapper = createDomFixture('<section><div foo="bar">text</div></section>');
+            var elem = wrapper.querySelector('div');
+            rewriter.captureRewriteAttr(elem, 'foo', null, {record: false});
+            assert.strictEqual(wrapper.outerHTML, '<section><div>text</div></section>');
+          });
+
+          it('should remove the attribute if value is undefined', function () {
+            var wrapper = createDomFixture('<section><div foo="bar">text</div></section>');
+            var elem = wrapper.querySelector('div');
+            rewriter.captureRewriteAttr(elem, 'foo', undefined, {record: false});
+            assert.strictEqual(wrapper.outerHTML, '<section><div>text</div></section>');
+          });
+
+          it('should add empty attribute if not exists and value is true ', function () {
+            var wrapper = createDomFixture('<section><div>text</div></section>');
+            var elem = wrapper.querySelector('div');
+            rewriter.captureRewriteAttr(elem, 'foo', true, {record: false});
+            assert.strictEqual(wrapper.outerHTML, '<section><div foo="">text</div></section>');
+          });
+
+          it('should not alter the attribute if exists and value is true ', function () {
+            var wrapper = createDomFixture('<section><div foo="baz">text</div></section>');
+            var elem = wrapper.querySelector('div');
+            rewriter.captureRewriteAttr(elem, 'foo', true, {record: false});
+            assert.strictEqual(wrapper.outerHTML, '<section><div foo="baz">text</div></section>');
+          });
+
+          it('should remove the attribute if value is false', function () {
+            var wrapper = createDomFixture('<section><div foo="bar">text</div></section>');
+            var elem = wrapper.querySelector('div');
+            rewriter.captureRewriteAttr(elem, 'foo', false, {record: false});
+            assert.strictEqual(wrapper.outerHTML, '<section><div>text</div></section>');
+          });
+        });
+
+        context('for prefixed attribute', function () {
+          it('should alter the attribute if value is a string', function () {
+            var wrapper = createDomFixture('<section><div ns:foo="bar">text</div></section>');
+            var elem = wrapper.querySelector('div');
+            rewriter.captureRewriteAttr(elem, 'ns:foo', 'baz', {record: false});
+            assert.strictEqual(wrapper.outerHTML, '<section><div ns:foo="baz">text</div></section>');
+          });
+
+          it('should add the attribute if not exists and value is a string', function () {
+            var wrapper = createDomFixture('<section><div>text</div></section>');
+            var elem = wrapper.querySelector('div');
+            rewriter.captureRewriteAttr(elem, 'ns:foo', 'bar', {record: false});
+            assert.strictEqual(wrapper.outerHTML, '<section><div ns:foo="bar">text</div></section>');
+          });
+
+          it('should empty the attribute if value is an empty string', function () {
+            var wrapper = createDomFixture('<section><div ns:foo="bar">text</div></section>');
+            var elem = wrapper.querySelector('div');
+            rewriter.captureRewriteAttr(elem, 'ns:foo', '', {record: false});
+            assert.strictEqual(wrapper.outerHTML, '<section><div ns:foo="">text</div></section>');
+          });
+
+          it('should remove the attribute if value is null', function () {
+            var wrapper = createDomFixture('<section><div ns:foo="bar">text</div></section>');
+            var elem = wrapper.querySelector('div');
+            rewriter.captureRewriteAttr(elem, 'ns:foo', null, {record: false});
+            assert.strictEqual(wrapper.outerHTML, '<section><div>text</div></section>');
+          });
+
+          it('should remove the attribute if value is undefined', function () {
+            var wrapper = createDomFixture('<section><div ns:foo="bar">text</div></section>');
+            var elem = wrapper.querySelector('div');
+            rewriter.captureRewriteAttr(elem, 'ns:foo', undefined, {record: false});
+            assert.strictEqual(wrapper.outerHTML, '<section><div>text</div></section>');
+          });
+
+          it('should add empty attribute if not exists and value is true ', function () {
+            var wrapper = createDomFixture('<section><div>text</div></section>');
+            var elem = wrapper.querySelector('div');
+            rewriter.captureRewriteAttr(elem, 'ns:foo', true, {record: false});
+            assert.strictEqual(wrapper.outerHTML, '<section><div ns:foo="">text</div></section>');
+          });
+
+          it('should not alter the attribute if exists and value is true ', function () {
+            var wrapper = createDomFixture('<section><div ns:foo="baz">text</div></section>');
+            var elem = wrapper.querySelector('div');
+            rewriter.captureRewriteAttr(elem, 'ns:foo', true, {record: false});
+            assert.strictEqual(wrapper.outerHTML, '<section><div ns:foo="baz">text</div></section>');
+          });
+
+          it('should remove the attribute if value is false', function () {
+            var wrapper = createDomFixture('<section><div ns:foo="bar">text</div></section>');
+            var elem = wrapper.querySelector('div');
+            rewriter.captureRewriteAttr(elem, 'ns:foo', false, {record: false});
+            assert.strictEqual(wrapper.outerHTML, '<section><div>text</div></section>');
+          });
+        });
+      });
+
+      context('when `record` is truthy', function () {
+        context('when attribute exists', function () {
+          context('for plain attribute', function () {
+            it('should add recording attribute', function () {
+              var wrapper = createDomFixture('<section><div foo="bar">text</div></section>');
+              var elem = wrapper.querySelector('div');
+              rewriter.captureRewriteAttr(elem, 'foo', 'baz', {record: true, timeId});
+              assert.strictEqual(wrapper.outerHTML, `<section><div foo="baz" data-scrapbook-orig-attr-foo-${timeId}="bar">text</div></section>`);
+            });
+
+            it('should not add recording attribute if value not changed', function () {
+              var wrapper = createDomFixture('<section><div foo="bar">text</div></section>');
+              var elem = wrapper.querySelector('div');
+              rewriter.captureRewriteAttr(elem, 'foo', 'bar', {record: true, timeId});
+              assert.strictEqual(wrapper.outerHTML, '<section><div foo="bar">text</div></section>');
+            });
+
+            it('should not alter the recording attribute if exists', function () {
+              var wrapper = createDomFixture('<section><div foo="bar">text</div></section>');
+              var elem = wrapper.querySelector('div');
+              rewriter.captureRewriteAttr(elem, 'foo', 'baz', {record: true, timeId});
+              rewriter.captureRewriteAttr(elem, 'foo', 'bus', {record: true, timeId});
+              assert.strictEqual(wrapper.outerHTML, `<section><div foo="bus" data-scrapbook-orig-attr-foo-${timeId}="bar">text</div></section>`);
+            });
+
+            it('should not add recording attribute if recorded as a null attribute', function () {
+              var wrapper = createDomFixture('<section><div>text</div></section>');
+              var elem = wrapper.querySelector('div');
+              rewriter.captureRewriteAttr(elem, 'foo', 'bar', {record: true, timeId});
+              rewriter.captureRewriteAttr(elem, 'foo', 'baz', {record: true, timeId});
+              assert.strictEqual(wrapper.outerHTML, `<section><div foo="baz" data-scrapbook-orig-null-attr-foo-${timeId}="">text</div></section>`);
+            });
+
+            it('should not add recording attribute if recorded as a null node', function () {
+              var wrapper = createDomFixture('<section></section>');
+              var elem = wrapper.appendChild(wrapper.ownerDocument.createElement('div'));
+              elem.setAttribute('foo', 'bar');
+              rewriter.captureRecordAddedNode(elem, {record: true, timeId});
+              rewriter.captureRewriteAttr(elem, 'foo', 'baz', {record: true, timeId});
+              assert.strictEqual(wrapper.outerHTML, `<section><div foo="baz" data-scrapbook-orig-null-node-${timeId}=""></div></section>`);
+            });
+          });
+
+          context('for prefixed attribute', function () {
+            it('should record attribute `<ns>:<name>` as `<ns>:data-scrapbook-orig-attr-<name>-<id>`', function () {
+              var wrapper = createDomFixture('<section><div ns:foo="bar">text</div></section>');
+              var elem = wrapper.querySelector('div');
+              rewriter.captureRewriteAttr(elem, 'ns:foo', 'baz', {record: true, timeId});
+              assert.strictEqual(wrapper.outerHTML, `<section><div ns:foo="baz" ns:data-scrapbook-orig-attr-foo-${timeId}="bar">text</div></section>`);
+            });
+
+            it('should record attribute `<ns1>:<ns2>:<name>` as `<ns1>:<ns2>:data-scrapbook-orig-attr-<name>-<id>`', function () {
+              var wrapper = createDomFixture('<section><div ns1:ns2:foo="bar">text</div></section>');
+              var elem = wrapper.querySelector('div');
+              rewriter.captureRewriteAttr(elem, 'ns1:ns2:foo', 'baz', {record: true, timeId});
+              assert.strictEqual(wrapper.outerHTML, `<section><div ns1:ns2:foo="baz" ns1:ns2:data-scrapbook-orig-attr-foo-${timeId}="bar">text</div></section>`);
+            });
+
+            it('should not alter the recording attribute if exists', function () {
+              var wrapper = createDomFixture('<section><div ns:foo="bar">text</div></section>');
+              var elem = wrapper.querySelector('div');
+              rewriter.captureRewriteAttr(elem, 'ns:foo', 'baz', {record: true, timeId});
+              rewriter.captureRewriteAttr(elem, 'ns:foo', 'bus', {record: true, timeId});
+              assert.strictEqual(wrapper.outerHTML, `<section><div ns:foo="bus" ns:data-scrapbook-orig-attr-foo-${timeId}="bar">text</div></section>`);
+            });
+
+            it('should not add recording attribute if recorded as a null attribute', function () {
+              var wrapper = createDomFixture('<section><div>text</div></section>');
+              var elem = wrapper.querySelector('div');
+              rewriter.captureRewriteAttr(elem, 'ns:foo', 'bar', {record: true, timeId});
+              rewriter.captureRewriteAttr(elem, 'ns:foo', 'baz', {record: true, timeId});
+              assert.strictEqual(wrapper.outerHTML, `<section><div ns:foo="baz" ns:data-scrapbook-orig-null-attr-foo-${timeId}="">text</div></section>`);
+            });
+
+            it('should not add recording attribute if recorded as a null node', function () {
+              var wrapper = createDomFixture('<section></section>');
+              var elem = wrapper.appendChild(wrapper.ownerDocument.createElement('div'));
+              elem.setAttribute('ns:foo', 'bar');
+              rewriter.captureRecordAddedNode(elem, {record: true, timeId});
+              rewriter.captureRewriteAttr(elem, 'ns:foo', 'baz', {record: true, timeId});
+              assert.strictEqual(wrapper.outerHTML, `<section><div ns:foo="baz" data-scrapbook-orig-null-node-${timeId}=""></div></section>`);
+            });
+          });
+        });
+
+        context('when attribute not exists', function () {
+          context('for plain attribute', function () {
+            it('should add recording attribute', function () {
+              var wrapper = createDomFixture('<section><div>text</div></section>');
+              var elem = wrapper.querySelector('div');
+              rewriter.captureRewriteAttr(elem, 'foo', 'bar', {record: true, timeId});
+              assert.strictEqual(wrapper.outerHTML, `<section><div foo="bar" data-scrapbook-orig-null-attr-foo-${timeId}="">text</div></section>`);
+            });
+
+            it('should not add recording attribute if value is null', function () {
+              var wrapper = createDomFixture('<section><div>text</div></section>');
+              var elem = wrapper.querySelector('div');
+              rewriter.captureRewriteAttr(elem, 'foo', null, {record: true, timeId});
+              assert.strictEqual(wrapper.outerHTML, '<section><div>text</div></section>');
+            });
+
+            it('should not add recording attribute if value is undefined', function () {
+              var wrapper = createDomFixture('<section><div>text</div></section>');
+              var elem = wrapper.querySelector('div');
+              rewriter.captureRewriteAttr(elem, 'foo', undefined, {record: true, timeId});
+              assert.strictEqual(wrapper.outerHTML, '<section><div>text</div></section>');
+            });
+
+            it('should not add recording attribute if value is false', function () {
+              var wrapper = createDomFixture('<section><div>text</div></section>');
+              var elem = wrapper.querySelector('div');
+              rewriter.captureRewriteAttr(elem, 'foo', false, {record: true, timeId});
+              assert.strictEqual(wrapper.outerHTML, '<section><div>text</div></section>');
+            });
+
+            it('should not alter the recording attribute if exists', function () {
+              var wrapper = createDomFixture('<section><div>text</div></section>');
+              var elem = wrapper.querySelector('div');
+              rewriter.captureRewriteAttr(elem, 'foo', 'bar', {record: true, timeId});
+              rewriter.captureRewriteAttr(elem, 'foo', null, {record: true, timeId});
+              rewriter.captureRewriteAttr(elem, 'foo', 'baz', {record: true, timeId});
+              assert.strictEqual(wrapper.outerHTML, `<section><div data-scrapbook-orig-null-attr-foo-${timeId}="" foo="baz">text</div></section>`);
+            });
+
+            it('should not add recording attribute if recorded as having a value', function () {
+              var wrapper = createDomFixture('<section><div foo="bar">text</div></section>');
+              var elem = wrapper.querySelector('div');
+              rewriter.captureRewriteAttr(elem, 'foo', null, {record: true, timeId});
+              rewriter.captureRewriteAttr(elem, 'foo', 'baz', {record: true, timeId});
+              assert.strictEqual(wrapper.outerHTML, `<section><div data-scrapbook-orig-attr-foo-${timeId}="bar" foo="baz">text</div></section>`);
+            });
+
+            it('should not add recording attribute if recorded as a null node', function () {
+              var wrapper = createDomFixture('<section></section>');
+              var elem = wrapper.appendChild(wrapper.ownerDocument.createElement('div'));
+              rewriter.captureRecordAddedNode(elem, {record: true, timeId});
+              rewriter.captureRewriteAttr(elem, 'foo', 'bar', {record: true, timeId});
+              assert.strictEqual(wrapper.outerHTML, `<section><div data-scrapbook-orig-null-node-${timeId}="" foo="bar"></div></section>`);
+            });
+          });
+
+          context('for prefixed attribute', function () {
+            it('should record attribute `<ns>:<name>` as `<ns>:data-scrapbook-orig-attr-<name>-<id>`', function () {
+              var wrapper = createDomFixture('<section><div>text</div></section>');
+              var elem = wrapper.querySelector('div');
+              rewriter.captureRewriteAttr(elem, 'ns:foo', 'bar', {record: true, timeId});
+              assert.strictEqual(wrapper.outerHTML, `<section><div ns:foo="bar" ns:data-scrapbook-orig-null-attr-foo-${timeId}="">text</div></section>`);
+            });
+
+            it('should record attribute `<ns1>:<ns2>:<name>` as `<ns1>:<ns2>:data-scrapbook-orig-attr-<name>-<id>`', function () {
+              var wrapper = createDomFixture('<section><div>text</div></section>');
+              var elem = wrapper.querySelector('div');
+              rewriter.captureRewriteAttr(elem, 'ns1:ns2:foo', 'bar', {record: true, timeId});
+              assert.strictEqual(wrapper.outerHTML, `<section><div ns1:ns2:foo="bar" ns1:ns2:data-scrapbook-orig-null-attr-foo-${timeId}="">text</div></section>`);
+            });
+
+            it('should not alter the recording attribute if exists', function () {
+              var wrapper = createDomFixture('<section><div>text</div></section>');
+              var elem = wrapper.querySelector('div');
+              rewriter.captureRewriteAttr(elem, 'ns:foo', 'bar', {record: true, timeId});
+              rewriter.captureRewriteAttr(elem, 'ns:foo', null, {record: true, timeId});
+              rewriter.captureRewriteAttr(elem, 'ns:foo', 'baz', {record: true, timeId});
+              assert.strictEqual(wrapper.outerHTML, `<section><div ns:data-scrapbook-orig-null-attr-foo-${timeId}="" ns:foo="baz">text</div></section>`);
+            });
+
+            it('should not add recording attribute if recorded as having a value', function () {
+              var wrapper = createDomFixture('<section><div ns:foo="bar">text</div></section>');
+              var elem = wrapper.querySelector('div');
+              rewriter.captureRewriteAttr(elem, 'ns:foo', null, {record: true, timeId});
+              rewriter.captureRewriteAttr(elem, 'ns:foo', 'baz', {record: true, timeId});
+              assert.strictEqual(wrapper.outerHTML, `<section><div ns:data-scrapbook-orig-attr-foo-${timeId}="bar" ns:foo="baz">text</div></section>`);
+            });
+
+            it('should not add recording attribute if recorded as a null node', function () {
+              var wrapper = createDomFixture('<section></section>');
+              var elem = wrapper.appendChild(wrapper.ownerDocument.createElement('div'));
+              rewriter.captureRecordAddedNode(elem, {record: true, timeId});
+              rewriter.captureRewriteAttr(elem, 'ns:foo', 'bar', {record: true, timeId});
+              assert.strictEqual(wrapper.outerHTML, `<section><div data-scrapbook-orig-null-node-${timeId}="" ns:foo="bar"></div></section>`);
+            });
+          });
+        });
+      });
+    });
+
+    describe('#captureRewriteTextContent()', function () {
+      let rewriter;
+      let timeId;
+
+      beforeEach(function () {
+        rewriter = new CaptureDocumentRewriter();
+        timeId = utils.dateToId();
+      });
+
+      context('when `record` is falsy', function () {
+        it('should alter the text content', function () {
+          var wrapper = createDomFixture('<section><div foo="bar">text</div></section>');
+          var elem = wrapper.querySelector('div');
+          rewriter.captureRewriteTextContent(elem, 'newtext', {record: false});
+          assert.strictEqual(wrapper.outerHTML, '<section><div foo="bar">newtext</div></section>');
+        });
+      });
+
+      context('when `record` is truthy', function () {
+        it('should alter the text content and add recording attribute', function () {
+          var wrapper = createDomFixture('<section><div foo="bar">text</div></section>');
+          var elem = wrapper.querySelector('div');
+          rewriter.captureRewriteTextContent(elem, 'newtext', {record: true, timeId});
+          assert.strictEqual(wrapper.outerHTML, `<section><div foo="bar" data-scrapbook-orig-textcontent-${timeId}="text">newtext</div></section>`);
+        });
+
+        it('should not add recording attribute if text content not changed', function () {
+          var wrapper = createDomFixture('<section><div foo="bar">text</div></section>');
+          var elem = wrapper.querySelector('div');
+          rewriter.captureRewriteTextContent(elem, 'text', {record: true, timeId});
+          assert.strictEqual(wrapper.outerHTML, '<section><div foo="bar">text</div></section>');
+        });
+
+        it('should not alter the recording attribute if exists', function () {
+          var wrapper = createDomFixture('<section><div foo="bar">text</div></section>');
+          var elem = wrapper.querySelector('div');
+          rewriter.captureRewriteTextContent(elem, 'new text', {record: true, timeId});
+          rewriter.captureRewriteTextContent(elem, 'brand new text', {record: true, timeId});
+          assert.strictEqual(wrapper.outerHTML, `<section><div foo="bar" data-scrapbook-orig-textcontent-${timeId}="text">brand new text</div></section>`);
+        });
+      });
     });
   });
 });

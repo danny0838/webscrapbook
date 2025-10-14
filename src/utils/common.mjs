@@ -1960,7 +1960,7 @@ function filenameParts(filename) {
 
 function splitXmlAttribute(attr) {
   let ns = "", name = attr, pos;
-  pos = name.indexOf(":");
+  pos = name.lastIndexOf(":");
   if (pos !== -1) { ns = name.slice(0, pos); name = name.slice(pos + 1); }
   return [ns, name];
 }

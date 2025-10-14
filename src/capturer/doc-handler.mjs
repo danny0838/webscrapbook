@@ -3780,9 +3780,20 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
     return elem;
   }
 
-  captureRecordAddedNode(elem, record = this.options["capture.recordRewrites"]) {
+  /**
+   * Add a recording attribute to mark the element as added, if requested.
+   *
+   * @param {Element} elem - The element to handle.
+   * @param {Object} [context]
+   *
+   * @TODO: remove recording attributes with same timeId.
+   */
+  captureRecordAddedNode(elem, {
+    record = this.options["capture.recordRewrites"],
+    timeId = this.timeId,
+  } = {}) {
     if (record) {
-      const recordAttr = `data-scrapbook-orig-null-node-${this.timeId}`;
+      const recordAttr = `data-scrapbook-orig-null-node-${timeId}`;
       if (!elem.hasAttribute(recordAttr)) {
         elem.setAttribute(recordAttr, '');
       }
@@ -3790,13 +3801,23 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
   }
 
   /**
-   * Remove the specified node. Record it if option set.
+   * Remove the specified node. Add a recording attribute if requested.
+   *
+   * @param {Element} elem - The element to remove.
+   * @param {Object} [context]
+   *
+   * @TODO: restore recording attributes with same timeId before generating the
+   * comment.
+   * @TODO: also support non-Element node types?
    */
-  captureRemoveNode(elem, record = this.options["capture.recordRewrites"]) {
+  captureRemoveNode(elem, {
+    record = this.options["capture.recordRewrites"],
+    timeId = this.timeId,
+  } = {}) {
     if (!elem.parentNode) { return; }
 
     if (record) {
-      const comment = this.doc.createComment(`scrapbook-orig-node-${this.timeId}=${utils.escapeHtmlComment(elem.outerHTML)}`);
+      const comment = elem.ownerDocument.createComment(`scrapbook-orig-node-${timeId}=${utils.escapeHtmlComment(elem.outerHTML)}`);
       elem.parentNode.replaceChild(comment, elem);
     } else {
       elem.parentNode.removeChild(elem);
@@ -3804,13 +3825,26 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
   }
 
   /**
-   * Rewrite the specified attr. Record it if option set.
+   * Rewrite the specified attr. Add a recording attribute if requested.
    *
-   * - If value is false/null/undefined, remove the attr.
-   * - If value is true, set attr to "" iff attr not exist.
+   * If `attr` is prefixed with `:` like `pf:att` or `pf:pf2:att`, the
+   * recording attribute will be with the same prefix like
+   * `pf:data-scrapbook-orit-attr-att-<ID>` or
+   * `pf:pf2:data-scrapbook-orit-attr-att-<ID>`.
+   *
+   * @param {Element} elem - The element to handle.
+   * @param {string} [attr] - The attribute name to handle.
+   * @param {?(string|boolean)} [value] - The value to assign.
+   *   - If value is true, attr will be set to "" iff not exist.
+   *   - If value is false/null/undefined, attr will be removed.
+   * @param {Object} [context]
    */
-  captureRewriteAttr(elem, attr, value, record = this.options["capture.recordRewrites"]) {
+  captureRewriteAttr(elem, attr, value, {
+    record = this.options["capture.recordRewrites"],
+    timeId = this.timeId,
+  } = {}) {
     const [ns, att] = utils.splitXmlAttribute(attr);
+    const prefix = ns ? ns + ":" : "";
 
     if (elem.hasAttribute(attr)) {
       if (value === true) { return; }
@@ -3825,9 +3859,9 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
       }
 
       if (record) {
-        const recordAttr = `${ns ? ns + ":" : ""}data-scrapbook-orig-attr-${att}-${this.timeId}`;
-        const recordAttr2 = `${ns ? ns + ":" : ""}data-scrapbook-orig-null-attr-${att}-${this.timeId}`;
-        const recordAttr3 = `data-scrapbook-orig-null-node-${this.timeId}`;
+        const recordAttr = `${prefix}data-scrapbook-orig-attr-${att}-${timeId}`;
+        const recordAttr2 = `${prefix}data-scrapbook-orig-null-attr-${att}-${timeId}`;
+        const recordAttr3 = `data-scrapbook-orig-null-node-${timeId}`;
         if (!elem.hasAttribute(recordAttr) && !elem.hasAttribute(recordAttr2) && !elem.hasAttribute(recordAttr3)) {
           elem.setAttribute(recordAttr, oldValue);
         }
@@ -3840,10 +3874,10 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
       elem.setAttribute(attr, value);
 
       if (record) {
-        const recordAttr = `${ns ? ns + ":" : ""}data-scrapbook-orig-null-attr-${att}-${this.timeId}`;
-        const recordAttr2 = `${ns ? ns + ":" : ""}data-scrapbook-orig-attr-${att}-${this.timeId}`;
-        const recordAttr3 = `data-scrapbook-orig-null-node-${this.timeId}`;
-        if (!elem.hasAttribute(recordAttr) && !elem.hasAttribute(recordAttr2)) {
+        const recordAttr = `${prefix}data-scrapbook-orig-null-attr-${att}-${timeId}`;
+        const recordAttr2 = `${prefix}data-scrapbook-orig-attr-${att}-${timeId}`;
+        const recordAttr3 = `data-scrapbook-orig-null-node-${timeId}`;
+        if (!elem.hasAttribute(recordAttr) && !elem.hasAttribute(recordAttr2) && !elem.hasAttribute(recordAttr3)) {
           elem.setAttribute(recordAttr, "");
         }
       }
@@ -3851,16 +3885,23 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
   }
 
   /**
-   * Rewrite the textContent. Record it if option set.
+   * Rewrite the textContent. Add a recording attribute if requested.
+   *
+   * @param {Element} elem - The element to handle.
+   * @param {string} value - The text content value to assign.
+   * @param {Object} [context]
    */
-  captureRewriteTextContent(elem, value, record = this.options["capture.recordRewrites"]) {
+  captureRewriteTextContent(elem, value, {
+    record = this.options["capture.recordRewrites"],
+    timeId = this.timeId,
+  } = {}) {
     const oldValue = elem.textContent;
     if (oldValue === value) { return; }
 
     elem.textContent = value;
 
     if (record) {
-      const recordAttr = `data-scrapbook-orig-textContent-${this.timeId}`;
+      const recordAttr = `data-scrapbook-orig-textcontent-${timeId}`;
       if (!elem.hasAttribute(recordAttr)) { elem.setAttribute(recordAttr, oldValue); }
     }
   }
