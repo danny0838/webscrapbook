@@ -1350,6 +1350,13 @@ describe('utils/common.mjs', function () {
         ['myns', 'myattr'],
       );
     });
+
+    it('should return [prefixes, value] for an attribute with multiple ":"s', function () {
+      assert.deepEqual(
+        utils.splitXmlAttribute('myns:myns2:myns3:myattr'),
+        ['myns:myns2:myns3', 'myattr'],
+      );
+    });
   });
 
   describe('parseHeaderContentType()', function () {
