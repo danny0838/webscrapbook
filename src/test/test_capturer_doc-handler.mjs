@@ -1590,8 +1590,17 @@ Default3\
           rewriter.run(doc, {capturer, filenameMap, redirects});
 
           var elems = doc.querySelectorAll(tagName);
-          assert.strictEqual(elems[0].getAttribute('href'), 'page.html');
-          assert.strictEqual(elems[1].getAttribute('xlink:href'), 'page.html');
+          assert.strictEqual(elems[0].getAttributeNS(null, 'href'), 'page.html');
+          assert.strictEqual(elems[1].getAttributeNS(NS_XLINK, 'href'), 'page.html');
+        });
+
+        it('should rewrite `xlink:href` in SVG document with altered prefix', async function () {
+          var doc = createDocFixture({type: 'svg', nsmap: {'x': NS_XLINK}, tagName: '#document-fragment', children: [
+            {tagName: 'a', ns: NS_SVG, attrs: [['x:href', `${docUrl}page.html`, NS_XLINK]]},
+          ]});
+          rewriter.run(doc, {capturer, filenameMap, redirects});
+
+          assert.strictEqual(doc.querySelector(tagName).getAttributeNS(NS_XLINK, 'href'), 'page.html');
         });
 
         it('should rewrite `href` and `xlink:href` attributes in SVG in HTML', async function () {
@@ -1602,8 +1611,8 @@ Default3\
           rewriter.run(doc, {capturer, filenameMap, redirects});
 
           var elems = doc.querySelectorAll(tagName);
-          assert.strictEqual(elems[0].getAttribute('href'), 'page.html');
-          assert.strictEqual(elems[1].getAttribute('xlink:href'), 'page.html');
+          assert.strictEqual(elems[0].getAttributeNS(null, 'href'), 'page.html');
+          assert.strictEqual(elems[1].getAttributeNS(NS_XLINK, 'href'), 'page.html');
         });
 
         it('should ignore `download` attribute in SVG in HTML', async function () {
@@ -1614,8 +1623,8 @@ Default3\
           rewriter.run(doc, {capturer, filenameMap, redirects});
 
           var elems = doc.querySelectorAll(tagName);
-          assert.strictEqual(elems[0].getAttribute('href'), 'page.html');
-          assert.strictEqual(elems[1].getAttribute('xlink:href'), 'page.html');
+          assert.strictEqual(elems[0].getAttributeNS(null, 'href'), 'page.html');
+          assert.strictEqual(elems[1].getAttributeNS(NS_XLINK, 'href'), 'page.html');
         });
       });
 
@@ -4282,7 +4291,7 @@ Default3\
 
             sinon.assert.calledOnceWithExactly(spyResolveLink, './page.html', 'https://example.com/', {checkJavascript: true});
             sinon.assert.calledOnceWithExactly(spyRewriteAnchor, elem, 'href');
-            sinon.assert.calledWithExactly(spyRewrite, elem, 'href', 'https://example.com/page.html');
+            sinon.assert.calledWithExactly(spyRewrite, elem, 'href', 'https://example.com/page.html', {ns: undefined});
             sinon.assert.notCalled(spyCaptureUrl);
           });
 
@@ -8298,7 +8307,7 @@ Default3\
                   var elem = doc.querySelector(tagName);
                   assert.strictEqual(elem.getAttributeNS(null, 'href'), 'script.js');
 
-                  sinon.assert.calledWithExactly(spyRewrite, elem, "href", "script.js");
+                  sinon.assert.calledWithExactly(spyRewrite, elem, "href", "script.js", {ns: null});
                 });
 
                 it('should save resource and rewrite `xlink:href` attribute', async function () {
@@ -8308,7 +8317,7 @@ Default3\
                   var elem = doc.querySelector(tagName);
                   assert.strictEqual(elem.getAttributeNS(NS_XLINK, 'href'), 'script.js');
 
-                  sinon.assert.calledWithExactly(spyRewrite, elem, "xlink:href", "script.js");
+                  sinon.assert.calledWithExactly(spyRewrite, elem, "href", "script.js", {ns: NS_XLINK});
                 });
 
                 it('should keep the text content', async function () {
@@ -8331,7 +8340,7 @@ Default3\
                   var elem = doc.querySelector(tagName);
                   assert.strictEqual(elem.getAttributeNS(null, 'href'), 'https://example.com/script.js');
 
-                  sinon.assert.calledWithExactly(spyRewrite, elem, "href", 'https://example.com/script.js');
+                  sinon.assert.calledWithExactly(spyRewrite, elem, "href", 'https://example.com/script.js', {ns: null});
                 });
 
                 it('should rewrite `xlink:href` attribute to the resolved URL', async function () {
@@ -8341,7 +8350,7 @@ Default3\
                   var elem = doc.querySelector(tagName);
                   assert.strictEqual(elem.getAttributeNS(NS_XLINK, 'href'), 'https://example.com/script.js');
 
-                  sinon.assert.calledWithExactly(spyRewrite, elem, "xlink:href", 'https://example.com/script.js');
+                  sinon.assert.calledWithExactly(spyRewrite, elem, "href", 'https://example.com/script.js', {ns: NS_XLINK});
                 });
 
                 it('should keep the text content', async function () {
@@ -8364,7 +8373,7 @@ Default3\
                   var elem = doc.querySelector(tagName);
                   assert.strictEqual(elem.getAttributeNS(null, 'href'), null);
 
-                  sinon.assert.calledWithExactly(spyRewrite, elem, "href", null);
+                  sinon.assert.calledWithExactly(spyRewrite, elem, "href", null, {ns: null});
                 });
 
                 it('should blank `xlink:href` attribute', async function () {
@@ -8374,7 +8383,7 @@ Default3\
                   var elem = doc.querySelector(tagName);
                   assert.strictEqual(elem.getAttributeNS(NS_XLINK, 'href'), null);
 
-                  sinon.assert.calledWithExactly(spyRewrite, elem, "xlink:href", null);
+                  sinon.assert.calledWithExactly(spyRewrite, elem, "href", null, {ns: NS_XLINK});
                 });
 
                 it('should blank the text content', async function () {
@@ -8481,7 +8490,7 @@ Default3\
                         assert.strictEqual(elem.getAttributeNS(ns, 'href'), "myicon.bmp");
 
                         sinon.assert.calledOnceWithExactly(spyResolveLink, './myicon.bmp', 'https://example.com/');
-                        sinon.assert.calledWithExactly(spyRewrite, elem, `${prefix}href`, 'myicon.bmp');
+                        sinon.assert.calledWithExactly(spyRewrite, elem, 'href', 'myicon.bmp', {ns});
                       });
 
                       break;
@@ -8495,7 +8504,7 @@ Default3\
                         assert.strictEqual(elem.getAttributeNS(ns, 'href'), 'https://example.com/myicon.bmp');
 
                         sinon.assert.calledOnceWithExactly(spyResolveLink, './myicon.bmp', 'https://example.com/');
-                        sinon.assert.calledWithExactly(spyRewrite, elem, `${prefix}href`, 'https://example.com/myicon.bmp');
+                        sinon.assert.calledWithExactly(spyRewrite, elem, 'href', 'https://example.com/myicon.bmp', {ns});
                       });
 
                       break;
@@ -8510,7 +8519,7 @@ Default3\
                         assert.strictEqual(elem.getAttributeNS(ns, 'href'), null);
 
                         sinon.assert.calledOnceWithExactly(spyResolveLink, './myicon.bmp', 'https://example.com/');
-                        sinon.assert.calledWithExactly(spyRewrite, elem, `${prefix}href`, null);
+                        sinon.assert.calledWithExactly(spyRewrite, elem, 'href', null, {ns});
                       });
 
                       break;
@@ -8574,7 +8583,7 @@ Default3\
                 assert.strictEqual(elem.getAttributeNS(ns, "href"), "#img");
 
                 sinon.assert.calledOnceWithExactly(spyResolve, '#img', 'https://example.com/');
-                sinon.assert.calledWithExactly(spyRewrite, elem, `${prefix}href`, '#img');
+                sinon.assert.calledWithExactly(spyRewrite, elem, 'href', '#img', {ns});
               });
 
               context(CONTEXT_BASE_URL, function () {
@@ -8626,10 +8635,10 @@ Default3\
               assert.strictEqual(elem.getAttributeNS(ns, 'href'), 'https://example.com/linked.html');
 
               sinon.assert.calledOnceWithExactly(spyResolveLink, './linked.html', 'https://example.com/', {checkJavascript: true});
-              sinon.assert.calledWithExactly(spyRewriteAnchor, elem, 'href');
-              sinon.assert.calledWithExactly(spyRewriteAnchor, elem, 'xlink:href');
+              sinon.assert.calledWithExactly(spyRewriteAnchor, elem, 'href', {ns: null});
+              sinon.assert.calledWithExactly(spyRewriteAnchor, elem, 'href', {ns: NS_XLINK});
               sinon.assert.calledTwice(spyRewriteAnchor);
-              sinon.assert.calledOnceWithExactly(spyRewrite, elem, `${prefix}href`, 'https://example.com/linked.html');
+              sinon.assert.calledOnceWithExactly(spyRewrite, elem, 'href', 'https://example.com/linked.html', {ns});
               sinon.assert.notCalled(spyCaptureUrl);
             });
 
@@ -8710,9 +8719,9 @@ Default3\
 
           sinon.assert.notCalled(spyCaptureUrl);
 
-          sinon.assert.calledWithExactly(spyRewrite, doc.querySelector('math'), 'href', 'https://example.com/math.html');
-          sinon.assert.calledWithExactly(spyRewrite, doc.querySelector('mrow'), 'href', 'https://example.com/mrow.html');
-          sinon.assert.calledWithExactly(spyRewrite, doc.querySelector('mo'), 'href', 'https://example.com/mo.html');
+          sinon.assert.calledWithExactly(spyRewrite, doc.querySelector('math'), 'href', 'https://example.com/math.html', {ns: undefined});
+          sinon.assert.calledWithExactly(spyRewrite, doc.querySelector('mrow'), 'href', 'https://example.com/mrow.html', {ns: undefined});
+          sinon.assert.calledWithExactly(spyRewrite, doc.querySelector('mo'), 'href', 'https://example.com/mo.html', {ns: undefined});
         });
 
         context(CONTEXT_BASE_URL, function () {
@@ -10092,303 +10101,351 @@ Default3\
       });
 
       context('when `record` is falsy', function () {
-        context('for plain attribute', function () {
-          it('should alter the attribute if value is a string', function () {
-            var wrapper = createDomFixture('<section><div foo="bar">text</div></section>');
-            var elem = wrapper.querySelector('div');
-            rewriter.captureRewriteAttr(elem, 'foo', 'baz', {record: false});
-            assert.strictEqual(wrapper.outerHTML, '<section><div foo="baz">text</div></section>');
+        context('when `ns` is null', function () {
+          context('when providing no prefix', function () {
+            it('should alter the attribute if value is a string', function () {
+              var elem = createNodeFixture({tagName: 'a', attrs: {href: 'foo'}, value: 'text'});
+              rewriter.captureRewriteAttr(elem, 'href', 'bar', {ns: null, record: false});
+              assert.strictEqual(elem.outerHTML, '<a href="bar">text</a>');
+              assert.strictEqual(elem.getAttributeNS(null, 'href'), 'bar');
+            });
+
+            it('should add the attribute if not exists and value is a string', function () {
+              var elem = createNodeFixture({tagName: 'a', value: 'text'});
+              rewriter.captureRewriteAttr(elem, 'href', 'bar', {ns: null, record: false});
+              assert.strictEqual(elem.outerHTML, '<a href="bar">text</a>');
+              assert.strictEqual(elem.getAttributeNS(null, 'href'), 'bar');
+            });
+
+            it('should empty the attribute if value is an empty string', function () {
+              var elem = createNodeFixture({tagName: 'a', attrs: {href: 'foo'}, value: 'text'});
+              rewriter.captureRewriteAttr(elem, 'href', '', {ns: null, record: false});
+              assert.strictEqual(elem.outerHTML, '<a href="">text</a>');
+              assert.strictEqual(elem.getAttributeNS(null, 'href'), '');
+            });
+
+            it('should add empty attribute if not exists and value is true ', function () {
+              var elem = createNodeFixture({tagName: 'a', value: 'text'});
+              rewriter.captureRewriteAttr(elem, 'href', true, {ns: null, record: false});
+              assert.strictEqual(elem.outerHTML, '<a href="">text</a>');
+              assert.strictEqual(elem.getAttributeNS(null, 'href'), '');
+            });
+
+            it('should not alter the attribute if exists and value is true ', function () {
+              var elem = createNodeFixture({tagName: 'a', attrs: {href: 'foo'}, value: 'text'});
+              rewriter.captureRewriteAttr(elem, 'href', true, {ns: null, record: false});
+              assert.strictEqual(elem.outerHTML, '<a href="foo">text</a>');
+              assert.strictEqual(elem.getAttributeNS(null, 'href'), 'foo');
+            });
+
+            for (const value of [null, undefined, false]) {
+              it(`should remove the attribute if value is ${String(value)}`, function () {
+                var elem = createNodeFixture({tagName: 'a', attrs: {href: 'foo'}, value: 'text'});
+                rewriter.captureRewriteAttr(elem, 'href', value, {ns: null, record: false});
+                assert.strictEqual(elem.outerHTML, '<a>text</a>');
+                assert.strictEqual(elem.getAttributeNS(null, 'href'), null);
+              });
+            }
           });
 
-          it('should add the attribute if not exists and value is a string', function () {
-            var wrapper = createDomFixture('<section><div>text</div></section>');
-            var elem = wrapper.querySelector('div');
-            rewriter.captureRewriteAttr(elem, 'foo', 'bar', {record: false});
-            assert.strictEqual(wrapper.outerHTML, '<section><div foo="bar">text</div></section>');
-          });
-
-          it('should empty the attribute if value is an empty string', function () {
-            var wrapper = createDomFixture('<section><div foo="bar">text</div></section>');
-            var elem = wrapper.querySelector('div');
-            rewriter.captureRewriteAttr(elem, 'foo', '', {record: false});
-            assert.strictEqual(wrapper.outerHTML, '<section><div foo="">text</div></section>');
-          });
-
-          it('should remove the attribute if value is null', function () {
-            var wrapper = createDomFixture('<section><div foo="bar">text</div></section>');
-            var elem = wrapper.querySelector('div');
-            rewriter.captureRewriteAttr(elem, 'foo', null, {record: false});
-            assert.strictEqual(wrapper.outerHTML, '<section><div>text</div></section>');
-          });
-
-          it('should remove the attribute if value is undefined', function () {
-            var wrapper = createDomFixture('<section><div foo="bar">text</div></section>');
-            var elem = wrapper.querySelector('div');
-            rewriter.captureRewriteAttr(elem, 'foo', undefined, {record: false});
-            assert.strictEqual(wrapper.outerHTML, '<section><div>text</div></section>');
-          });
-
-          it('should add empty attribute if not exists and value is true ', function () {
-            var wrapper = createDomFixture('<section><div>text</div></section>');
-            var elem = wrapper.querySelector('div');
-            rewriter.captureRewriteAttr(elem, 'foo', true, {record: false});
-            assert.strictEqual(wrapper.outerHTML, '<section><div foo="">text</div></section>');
-          });
-
-          it('should not alter the attribute if exists and value is true ', function () {
-            var wrapper = createDomFixture('<section><div foo="baz">text</div></section>');
-            var elem = wrapper.querySelector('div');
-            rewriter.captureRewriteAttr(elem, 'foo', true, {record: false});
-            assert.strictEqual(wrapper.outerHTML, '<section><div foo="baz">text</div></section>');
-          });
-
-          it('should remove the attribute if value is false', function () {
-            var wrapper = createDomFixture('<section><div foo="bar">text</div></section>');
-            var elem = wrapper.querySelector('div');
-            rewriter.captureRewriteAttr(elem, 'foo', false, {record: false});
-            assert.strictEqual(wrapper.outerHTML, '<section><div>text</div></section>');
+          context('when providing a prefix', function () {
+            it('should throw an error', function () {
+              var elem = createNodeFixture({tagName: 'a', attrs: {href: 'foo'}, value: 'text'});
+              assert.throws(() => {
+                rewriter.captureRewriteAttr(elem, 'prefix:href', 'bar', {ns: null, record: false});
+              });
+            });
           });
         });
 
-        context('for prefixed attribute', function () {
-          it('should alter the attribute if value is a string', function () {
-            var wrapper = createDomFixture('<section><div ns:foo="bar">text</div></section>');
-            var elem = wrapper.querySelector('div');
-            rewriter.captureRewriteAttr(elem, 'ns:foo', 'baz', {record: false});
-            assert.strictEqual(wrapper.outerHTML, '<section><div ns:foo="baz">text</div></section>');
+        context('when `ns` is non-null', function () {
+          context('for SVG document', function () {
+            for (const [ctx, prefix] of [
+              ['when providing same prefix', 'xlink:'],
+              ['when providing another prefix', 'x:'],
+              ['when providing no prefix', ''],
+            ]) {
+              context(ctx, function () {
+                it('should alter the attribute if value is a string', function () {
+                  var doc = createDocFixture({type: 'svg', tagName: 'a', ns: NS_SVG, attrs: [['xlink:href', 'foo', NS_XLINK]], value: 'text'});
+                  var elem = doc.querySelector('a');
+                  rewriter.captureRewriteAttr(elem, `${prefix}href`, 'bar', {ns: NS_XLINK, record: false});
+                  assert.strictEqual(utils.documentToString(doc), `<svg xmlns="${NS_SVG}" xmlns:xlink="${NS_XLINK}"><a xlink:href="bar">text</a></svg>`);
+                  assert.strictEqual(elem.getAttributeNS(NS_XLINK, 'href'), 'bar');
+                });
+
+                it('should add the attribute if not exists and value is a string', function () {
+                  var doc = createDocFixture({type: 'svg', tagName: 'a', ns: NS_SVG, value: 'text'});
+                  var elem = doc.querySelector('a');
+                  rewriter.captureRewriteAttr(elem, `${prefix}href`, 'bar', {ns: NS_XLINK, record: false});
+                  assert.strictEqual(utils.documentToString(doc), `<svg xmlns="${NS_SVG}" xmlns:xlink="${NS_XLINK}"><a xlink:href="bar">text</a></svg>`);
+                  assert.strictEqual(elem.getAttributeNS(NS_XLINK, 'href'), 'bar');
+                });
+
+                it('should empty the attribute if value is an empty string', function () {
+                  var doc = createDocFixture({type: 'svg', tagName: 'a', ns: NS_SVG, attrs: [['xlink:href', 'foo', NS_XLINK]], value: 'text'});
+                  var elem = doc.querySelector('a');
+                  rewriter.captureRewriteAttr(elem, `${prefix}href`, '', {ns: NS_XLINK, record: false});
+                  assert.strictEqual(utils.documentToString(doc), `<svg xmlns="${NS_SVG}" xmlns:xlink="${NS_XLINK}"><a xlink:href="">text</a></svg>`);
+                  assert.strictEqual(elem.getAttributeNS(NS_XLINK, 'href'), '');
+                });
+
+                it('should add empty attribute if not exists and value is true ', function () {
+                  var doc = createDocFixture({type: 'svg', tagName: 'a', ns: NS_SVG, value: 'text'});
+                  var elem = doc.querySelector('a');
+                  rewriter.captureRewriteAttr(elem, `${prefix}href`, true, {ns: NS_XLINK, record: false});
+                  assert.strictEqual(utils.documentToString(doc), `<svg xmlns="${NS_SVG}" xmlns:xlink="${NS_XLINK}"><a xlink:href="">text</a></svg>`);
+                  assert.strictEqual(elem.getAttributeNS(NS_XLINK, 'href'), '');
+                });
+
+                it('should not alter the attribute if exists and value is true ', function () {
+                  var doc = createDocFixture({type: 'svg', tagName: 'a', ns: NS_SVG, attrs: [['xlink:href', 'foo', NS_XLINK]], value: 'text'});
+                  var elem = doc.querySelector('a');
+                  rewriter.captureRewriteAttr(elem, `${prefix}href`, true, {ns: NS_XLINK, record: false});
+                  assert.strictEqual(utils.documentToString(doc), `<svg xmlns="${NS_SVG}" xmlns:xlink="${NS_XLINK}"><a xlink:href="foo">text</a></svg>`);
+                  assert.strictEqual(elem.getAttributeNS(NS_XLINK, 'href'), 'foo');
+                });
+
+                for (const value of [null, undefined, false]) {
+                  it(`should remove the attribute if value is ${String(value)}`, function () {
+                    var doc = createDocFixture({type: 'svg', tagName: 'a', ns: NS_SVG, attrs: [['xlink:href', 'foo', NS_XLINK]], value: 'text'});
+                    var elem = doc.querySelector('a');
+                    rewriter.captureRewriteAttr(elem, `${prefix}href`, value, {ns: NS_XLINK, record: false});
+                    assert.strictEqual(utils.documentToString(doc), `<svg xmlns="${NS_SVG}" xmlns:xlink="${NS_XLINK}"><a>text</a></svg>`);
+                    assert.strictEqual(elem.getAttributeNS(NS_XLINK, 'href'), null);
+                  });
+                }
+
+                it('should use the prefix if defined elsewhere', function () {
+                  var doc = createDocFixture({
+                    type: 'svg', nsmap: {},
+                    tagName: 'a', ns: NS_SVG,
+                    attrs: [
+                      ['xmlns:xlink', NS_XLINK, NS_XMLNS],
+                      ['xlink:href', 'foo', NS_XLINK],
+                    ],
+                    value: 'text',
+                  });
+                  var elem = doc.querySelector('a');
+                  rewriter.captureRewriteAttr(elem, `${prefix}href`, 'bar', {ns: NS_XLINK, record: false});
+                  assert.strictEqual(utils.documentToString(doc), `<svg xmlns="${NS_SVG}"><a xmlns:xlink="${NS_XLINK}" xlink:href="bar">text</a></svg>`);
+                  assert.strictEqual(elem.getAttributeNS(NS_XLINK, 'href'), 'bar');
+                });
+              });
+            }
+
+            context('when prefix mapping not defined', function () {
+              // Don't check `documentToString` directly since the order of the
+              // auto-generated `xmlns:*` and other attributes and the name of the
+              // auto-generated prefix may differ among browsers.
+
+              it('should add attribute with default prefix if provided', function () {
+                var doc = createDocFixture({type: 'svg', nsmap: {}, tagName: 'a', ns: NS_SVG, value: 'text'});
+                var elem = doc.querySelector('a');
+                rewriter.captureRewriteAttr(elem, 'xlink:href', 'foo', {ns: NS_XLINK, record: false});
+                var attr = elem.getAttributeNodeNS(NS_XLINK, 'href');
+                assert.strictEqual(attr.prefix, 'xlink');
+                assert.strictEqual(attr.nodeValue, 'foo');
+
+                // verify that `xmlns:xlink` attribute is generated by the browser when serialized
+                var doc = createDocFixture({type: 'svg', code: utils.documentToString(doc)});
+                var elem = doc.querySelector('a');
+                assert.strictEqual(elem.getAttribute('xmlns:xlink'), NS_XLINK);
+                var attr = elem.getAttributeNodeNS(NS_XLINK, 'href');
+                assert.strictEqual(attr.prefix, 'xlink');
+                assert.strictEqual(attr.nodeValue, 'foo');
+              });
+
+              it('should add attribute with null prefix if default prefix not provided', function () {
+                var doc = createDocFixture({type: 'svg', nsmap: {}, tagName: 'a', ns: NS_SVG, value: 'text'});
+                var elem = doc.querySelector('a');
+                rewriter.captureRewriteAttr(elem, 'href', 'foo', {ns: NS_XLINK, record: false});
+                var attr = elem.getAttributeNodeNS(NS_XLINK, 'href');
+                assert.strictEqual(attr.prefix, null);
+                assert.strictEqual(attr.nodeValue, 'foo');
+
+                // verify that a prefix and `xmlns:*` attribute are generated by the browser when serialized
+                var doc = createDocFixture({type: 'svg', code: utils.documentToString(doc)});
+                var elem = doc.querySelector('a');
+                var prefix = Array.prototype.find.call(elem.attributes, e => e.prefix === 'xmlns').localName;
+                var attr = elem.getAttributeNodeNS(NS_XLINK, 'href');
+                assert.notStrictEqual(attr.prefix, 'xlink');
+                assert.strictEqual(attr.prefix, prefix);
+                assert.strictEqual(attr.nodeValue, 'foo');
+              });
+            });
           });
 
-          it('should add the attribute if not exists and value is a string', function () {
-            var wrapper = createDomFixture('<section><div>text</div></section>');
-            var elem = wrapper.querySelector('div');
-            rewriter.captureRewriteAttr(elem, 'ns:foo', 'bar', {record: false});
-            assert.strictEqual(wrapper.outerHTML, '<section><div ns:foo="bar">text</div></section>');
-          });
+          context('for HTML document', function () {
+            for (const [ctx, prefix] of [
+              ['when providing same prefix', 'xlink:'],
+              ['when providing another prefix', 'x:'],
+              ['when providing no prefix', ''],
+            ]) {
+              context(ctx, function () {
+                it('should alter the attribute if value is a string', function () {
+                  var doc = createDocFixture({tagName: 'svg', ns: NS_SVG, children: [
+                    {tagName: 'a', ns: NS_SVG, attrs: [['xlink:href', 'foo', NS_XLINK]], value: 'text'},
+                  ]});
+                  var elem = doc.querySelector('a');
+                  rewriter.captureRewriteAttr(elem, `${prefix}href`, 'bar', {ns: NS_XLINK, record: false});
+                  assert.strictEqual(elem.outerHTML, '<a xlink:href="bar">text</a>');
+                  assert.strictEqual(elem.getAttributeNS(NS_XLINK, 'href'), 'bar');
+                });
 
-          it('should empty the attribute if value is an empty string', function () {
-            var wrapper = createDomFixture('<section><div ns:foo="bar">text</div></section>');
-            var elem = wrapper.querySelector('div');
-            rewriter.captureRewriteAttr(elem, 'ns:foo', '', {record: false});
-            assert.strictEqual(wrapper.outerHTML, '<section><div ns:foo="">text</div></section>');
-          });
+                it('should add the attribute if not exists and value is a string', function () {
+                  var doc = createDocFixture({tagName: 'svg', ns: NS_SVG, children: [
+                    {tagName: 'a', ns: NS_SVG, value: 'text'},
+                  ]});
+                  var elem = doc.querySelector('a');
+                  rewriter.captureRewriteAttr(elem, `${prefix}href`, 'bar', {ns: NS_XLINK, record: false});
+                  assert.strictEqual(elem.outerHTML, '<a xlink:href="bar">text</a>');
+                  assert.strictEqual(elem.getAttributeNS(NS_XLINK, 'href'), 'bar');
+                });
 
-          it('should remove the attribute if value is null', function () {
-            var wrapper = createDomFixture('<section><div ns:foo="bar">text</div></section>');
-            var elem = wrapper.querySelector('div');
-            rewriter.captureRewriteAttr(elem, 'ns:foo', null, {record: false});
-            assert.strictEqual(wrapper.outerHTML, '<section><div>text</div></section>');
-          });
+                it('should empty the attribute if value is an empty string', function () {
+                  var doc = createDocFixture({tagName: 'svg', ns: NS_SVG, children: [
+                    {tagName: 'a', ns: NS_SVG, attrs: [['xlink:href', 'foo', NS_XLINK]], value: 'text'},
+                  ]});
+                  var elem = doc.querySelector('a');
+                  rewriter.captureRewriteAttr(elem, `${prefix}href`, '', {ns: NS_XLINK, record: false});
+                  assert.strictEqual(elem.outerHTML, '<a xlink:href="">text</a>');
+                  assert.strictEqual(elem.getAttributeNS(NS_XLINK, 'href'), '');
+                });
 
-          it('should remove the attribute if value is undefined', function () {
-            var wrapper = createDomFixture('<section><div ns:foo="bar">text</div></section>');
-            var elem = wrapper.querySelector('div');
-            rewriter.captureRewriteAttr(elem, 'ns:foo', undefined, {record: false});
-            assert.strictEqual(wrapper.outerHTML, '<section><div>text</div></section>');
-          });
+                it('should add empty attribute if not exists and value is true ', function () {
+                  var doc = createDocFixture({tagName: 'svg', ns: NS_SVG, children: [
+                    {tagName: 'a', ns: NS_SVG, value: 'text'},
+                  ]});
+                  var elem = doc.querySelector('a');
+                  rewriter.captureRewriteAttr(elem, `${prefix}href`, true, {ns: NS_XLINK, record: false});
+                  assert.strictEqual(elem.outerHTML, '<a xlink:href="">text</a>');
+                  assert.strictEqual(elem.getAttributeNS(NS_XLINK, 'href'), '');
+                });
 
-          it('should add empty attribute if not exists and value is true ', function () {
-            var wrapper = createDomFixture('<section><div>text</div></section>');
-            var elem = wrapper.querySelector('div');
-            rewriter.captureRewriteAttr(elem, 'ns:foo', true, {record: false});
-            assert.strictEqual(wrapper.outerHTML, '<section><div ns:foo="">text</div></section>');
-          });
+                it('should not alter the attribute if exists and value is true ', function () {
+                  var doc = createDocFixture({tagName: 'svg', ns: NS_SVG, children: [
+                    {tagName: 'a', ns: NS_SVG, attrs: [['xlink:href', 'foo', NS_XLINK]], value: 'text'},
+                  ]});
+                  var elem = doc.querySelector('a');
+                  rewriter.captureRewriteAttr(elem, `${prefix}href`, true, {ns: NS_XLINK, record: false});
+                  assert.strictEqual(elem.outerHTML, '<a xlink:href="foo">text</a>');
+                  assert.strictEqual(elem.getAttributeNS(NS_XLINK, 'href'), 'foo');
+                });
 
-          it('should not alter the attribute if exists and value is true ', function () {
-            var wrapper = createDomFixture('<section><div ns:foo="baz">text</div></section>');
-            var elem = wrapper.querySelector('div');
-            rewriter.captureRewriteAttr(elem, 'ns:foo', true, {record: false});
-            assert.strictEqual(wrapper.outerHTML, '<section><div ns:foo="baz">text</div></section>');
-          });
-
-          it('should remove the attribute if value is false', function () {
-            var wrapper = createDomFixture('<section><div ns:foo="bar">text</div></section>');
-            var elem = wrapper.querySelector('div');
-            rewriter.captureRewriteAttr(elem, 'ns:foo', false, {record: false});
-            assert.strictEqual(wrapper.outerHTML, '<section><div>text</div></section>');
+                for (const value of [null, undefined, false]) {
+                  it(`should remove the attribute if value is ${String(value)}`, function () {
+                    var doc = createDocFixture({tagName: 'svg', ns: NS_SVG, children: [
+                      {tagName: 'a', ns: NS_SVG, attrs: [['xlink:href', 'foo', NS_XLINK]], value: 'text'},
+                    ]});
+                    var elem = doc.querySelector('a');
+                    rewriter.captureRewriteAttr(elem, `${prefix}href`, value, {ns: NS_XLINK, record: false});
+                    assert.strictEqual(elem.outerHTML, '<a>text</a>');
+                    assert.strictEqual(elem.getAttributeNS(NS_XLINK, 'href'), null);
+                  });
+                }
+              });
+            }
           });
         });
       });
 
       context('when `record` is truthy', function () {
         context('when attribute exists', function () {
-          context('for plain attribute', function () {
-            it('should add recording attribute', function () {
-              var wrapper = createDomFixture('<section><div foo="bar">text</div></section>');
-              var elem = wrapper.querySelector('div');
-              rewriter.captureRewriteAttr(elem, 'foo', 'baz', {record: true, timeId});
-              assert.strictEqual(wrapper.outerHTML, `<section><div foo="baz" data-scrapbook-orig-attr-foo-${timeId}="bar">text</div></section>`);
-            });
-
-            it('should not add recording attribute if value not changed', function () {
-              var wrapper = createDomFixture('<section><div foo="bar">text</div></section>');
-              var elem = wrapper.querySelector('div');
-              rewriter.captureRewriteAttr(elem, 'foo', 'bar', {record: true, timeId});
-              assert.strictEqual(wrapper.outerHTML, '<section><div foo="bar">text</div></section>');
-            });
-
-            it('should not alter the recording attribute if exists', function () {
-              var wrapper = createDomFixture('<section><div foo="bar">text</div></section>');
-              var elem = wrapper.querySelector('div');
-              rewriter.captureRewriteAttr(elem, 'foo', 'baz', {record: true, timeId});
-              rewriter.captureRewriteAttr(elem, 'foo', 'bus', {record: true, timeId});
-              assert.strictEqual(wrapper.outerHTML, `<section><div foo="bus" data-scrapbook-orig-attr-foo-${timeId}="bar">text</div></section>`);
-            });
-
-            it('should not add recording attribute if recorded as a null attribute', function () {
-              var wrapper = createDomFixture('<section><div>text</div></section>');
-              var elem = wrapper.querySelector('div');
-              rewriter.captureRewriteAttr(elem, 'foo', 'bar', {record: true, timeId});
-              rewriter.captureRewriteAttr(elem, 'foo', 'baz', {record: true, timeId});
-              assert.strictEqual(wrapper.outerHTML, `<section><div foo="baz" data-scrapbook-orig-null-attr-foo-${timeId}="">text</div></section>`);
-            });
-
-            it('should not add recording attribute if recorded as a null node', function () {
-              var wrapper = createDomFixture('<section></section>');
-              var elem = wrapper.appendChild(wrapper.ownerDocument.createElement('div'));
-              elem.setAttribute('foo', 'bar');
-              rewriter.captureRecordAddedNode(elem, {record: true, timeId});
-              rewriter.captureRewriteAttr(elem, 'foo', 'baz', {record: true, timeId});
-              assert.strictEqual(wrapper.outerHTML, `<section><div foo="baz" data-scrapbook-orig-null-node-${timeId}=""></div></section>`);
-            });
+          it('should add recording attribute in same namespace', function () {
+            var doc = createDocFixture({type: 'svg', tagName: 'a', ns: NS_SVG, attrs: [['xlink:href', 'foo', NS_XLINK]], value: 'text'});
+            var elem = doc.querySelector('a');
+            rewriter.captureRewriteAttr(elem, 'href', 'bar', {ns: NS_XLINK, record: true, timeId});
+            assert.strictEqual(elem.getAttributeNS(NS_XLINK, 'href'), 'bar');
+            assert.strictEqual(elem.getAttributeNS(NS_XLINK, `data-scrapbook-orig-attr-href-${timeId}`), 'foo');
           });
 
-          context('for prefixed attribute', function () {
-            it('should record attribute `<ns>:<name>` as `<ns>:data-scrapbook-orig-attr-<name>-<id>`', function () {
-              var wrapper = createDomFixture('<section><div ns:foo="bar">text</div></section>');
-              var elem = wrapper.querySelector('div');
-              rewriter.captureRewriteAttr(elem, 'ns:foo', 'baz', {record: true, timeId});
-              assert.strictEqual(wrapper.outerHTML, `<section><div ns:foo="baz" ns:data-scrapbook-orig-attr-foo-${timeId}="bar">text</div></section>`);
-            });
+          it('should not add recording attribute if value not changed', function () {
+            var doc = createDocFixture({type: 'svg', tagName: 'a', ns: NS_SVG, attrs: [['xlink:href', 'bar', NS_XLINK]], value: 'text'});
+            var elem = doc.querySelector('a');
+            rewriter.captureRewriteAttr(elem, 'href', 'bar', {ns: NS_XLINK, record: true, timeId});
+            assert.strictEqual(elem.getAttributeNS(NS_XLINK, 'href'), 'bar');
+            assert.strictEqual(elem.hasAttributeNS(NS_XLINK, `data-scrapbook-orig-attr-href-${timeId}`), false);
+          });
 
-            it('should record attribute `<ns1>:<ns2>:<name>` as `<ns1>:<ns2>:data-scrapbook-orig-attr-<name>-<id>`', function () {
-              var wrapper = createDomFixture('<section><div ns1:ns2:foo="bar">text</div></section>');
-              var elem = wrapper.querySelector('div');
-              rewriter.captureRewriteAttr(elem, 'ns1:ns2:foo', 'baz', {record: true, timeId});
-              assert.strictEqual(wrapper.outerHTML, `<section><div ns1:ns2:foo="baz" ns1:ns2:data-scrapbook-orig-attr-foo-${timeId}="bar">text</div></section>`);
-            });
+          it('should not alter the recording attribute if exists', function () {
+            var doc = createDocFixture({type: 'svg', tagName: 'a', ns: NS_SVG, attrs: [['xlink:href', 'foo', NS_XLINK]], value: 'text'});
+            var elem = doc.querySelector('a');
+            rewriter.captureRewriteAttr(elem, 'href', 'bar', {ns: NS_XLINK, record: true, timeId});
+            rewriter.captureRewriteAttr(elem, 'href', 'baz', {ns: NS_XLINK, record: true, timeId});
+            assert.strictEqual(elem.getAttributeNS(NS_XLINK, 'href'), 'baz');
+            assert.strictEqual(elem.getAttributeNS(NS_XLINK, `data-scrapbook-orig-attr-href-${timeId}`), 'foo');
+          });
 
-            it('should not alter the recording attribute if exists', function () {
-              var wrapper = createDomFixture('<section><div ns:foo="bar">text</div></section>');
-              var elem = wrapper.querySelector('div');
-              rewriter.captureRewriteAttr(elem, 'ns:foo', 'baz', {record: true, timeId});
-              rewriter.captureRewriteAttr(elem, 'ns:foo', 'bus', {record: true, timeId});
-              assert.strictEqual(wrapper.outerHTML, `<section><div ns:foo="bus" ns:data-scrapbook-orig-attr-foo-${timeId}="bar">text</div></section>`);
-            });
+          it('should not add recording attribute if recorded as a null attribute', function () {
+            var doc = createDocFixture({type: 'svg', tagName: 'a', ns: NS_SVG, value: 'text'});
+            var elem = doc.querySelector('a');
+            rewriter.captureRewriteAttr(elem, 'href', 'foo', {ns: NS_XLINK, record: true, timeId});
+            rewriter.captureRewriteAttr(elem, 'href', 'bar', {ns: NS_XLINK, record: true, timeId});
+            assert.strictEqual(elem.getAttributeNS(NS_XLINK, 'href'), 'bar');
+            assert.strictEqual(elem.getAttributeNS(NS_XLINK, `data-scrapbook-orig-attr-href-${timeId}`), null);
+            assert.strictEqual(elem.getAttributeNS(NS_XLINK, `data-scrapbook-orig-null-attr-href-${timeId}`), '');
+          });
 
-            it('should not add recording attribute if recorded as a null attribute', function () {
-              var wrapper = createDomFixture('<section><div>text</div></section>');
-              var elem = wrapper.querySelector('div');
-              rewriter.captureRewriteAttr(elem, 'ns:foo', 'bar', {record: true, timeId});
-              rewriter.captureRewriteAttr(elem, 'ns:foo', 'baz', {record: true, timeId});
-              assert.strictEqual(wrapper.outerHTML, `<section><div ns:foo="baz" ns:data-scrapbook-orig-null-attr-foo-${timeId}="">text</div></section>`);
-            });
-
-            it('should not add recording attribute if recorded as a null node', function () {
-              var wrapper = createDomFixture('<section></section>');
-              var elem = wrapper.appendChild(wrapper.ownerDocument.createElement('div'));
-              elem.setAttribute('ns:foo', 'bar');
-              rewriter.captureRecordAddedNode(elem, {record: true, timeId});
-              rewriter.captureRewriteAttr(elem, 'ns:foo', 'baz', {record: true, timeId});
-              assert.strictEqual(wrapper.outerHTML, `<section><div ns:foo="baz" data-scrapbook-orig-null-node-${timeId}=""></div></section>`);
-            });
+          it('should not add recording attribute if recorded as a null node', function () {
+            var doc = createDocFixture({type: 'svg', tagName: 'a', ns: NS_SVG, attrs: [['xlink:href', 'foo', NS_XLINK]], value: 'text'});
+            var elem = doc.querySelector('a');
+            rewriter.captureRecordAddedNode(elem, {record: true, timeId});
+            rewriter.captureRewriteAttr(elem, 'href', 'bar', {ns: NS_XLINK, record: true, timeId});
+            assert.strictEqual(elem.getAttributeNS(NS_XLINK, 'href'), 'bar');
+            assert.strictEqual(elem.getAttributeNS(NS_XLINK, `data-scrapbook-orig-attr-href-${timeId}`), null);
+            assert.strictEqual(elem.getAttributeNS(null, `data-scrapbook-orig-null-node-${timeId}`), '');
           });
         });
 
         context('when attribute not exists', function () {
-          context('for plain attribute', function () {
-            it('should add recording attribute', function () {
-              var wrapper = createDomFixture('<section><div>text</div></section>');
-              var elem = wrapper.querySelector('div');
-              rewriter.captureRewriteAttr(elem, 'foo', 'bar', {record: true, timeId});
-              assert.strictEqual(wrapper.outerHTML, `<section><div foo="bar" data-scrapbook-orig-null-attr-foo-${timeId}="">text</div></section>`);
-            });
-
-            it('should not add recording attribute if value is null', function () {
-              var wrapper = createDomFixture('<section><div>text</div></section>');
-              var elem = wrapper.querySelector('div');
-              rewriter.captureRewriteAttr(elem, 'foo', null, {record: true, timeId});
-              assert.strictEqual(wrapper.outerHTML, '<section><div>text</div></section>');
-            });
-
-            it('should not add recording attribute if value is undefined', function () {
-              var wrapper = createDomFixture('<section><div>text</div></section>');
-              var elem = wrapper.querySelector('div');
-              rewriter.captureRewriteAttr(elem, 'foo', undefined, {record: true, timeId});
-              assert.strictEqual(wrapper.outerHTML, '<section><div>text</div></section>');
-            });
-
-            it('should not add recording attribute if value is false', function () {
-              var wrapper = createDomFixture('<section><div>text</div></section>');
-              var elem = wrapper.querySelector('div');
-              rewriter.captureRewriteAttr(elem, 'foo', false, {record: true, timeId});
-              assert.strictEqual(wrapper.outerHTML, '<section><div>text</div></section>');
-            });
-
-            it('should not alter the recording attribute if exists', function () {
-              var wrapper = createDomFixture('<section><div>text</div></section>');
-              var elem = wrapper.querySelector('div');
-              rewriter.captureRewriteAttr(elem, 'foo', 'bar', {record: true, timeId});
-              rewriter.captureRewriteAttr(elem, 'foo', null, {record: true, timeId});
-              rewriter.captureRewriteAttr(elem, 'foo', 'baz', {record: true, timeId});
-              assert.strictEqual(wrapper.outerHTML, `<section><div data-scrapbook-orig-null-attr-foo-${timeId}="" foo="baz">text</div></section>`);
-            });
-
-            it('should not add recording attribute if recorded as having a value', function () {
-              var wrapper = createDomFixture('<section><div foo="bar">text</div></section>');
-              var elem = wrapper.querySelector('div');
-              rewriter.captureRewriteAttr(elem, 'foo', null, {record: true, timeId});
-              rewriter.captureRewriteAttr(elem, 'foo', 'baz', {record: true, timeId});
-              assert.strictEqual(wrapper.outerHTML, `<section><div data-scrapbook-orig-attr-foo-${timeId}="bar" foo="baz">text</div></section>`);
-            });
-
-            it('should not add recording attribute if recorded as a null node', function () {
-              var wrapper = createDomFixture('<section></section>');
-              var elem = wrapper.appendChild(wrapper.ownerDocument.createElement('div'));
-              rewriter.captureRecordAddedNode(elem, {record: true, timeId});
-              rewriter.captureRewriteAttr(elem, 'foo', 'bar', {record: true, timeId});
-              assert.strictEqual(wrapper.outerHTML, `<section><div data-scrapbook-orig-null-node-${timeId}="" foo="bar"></div></section>`);
-            });
+          it('should add recording attribute in same namespace', function () {
+            var doc = createDocFixture({type: 'svg', tagName: 'a', ns: NS_SVG, value: 'text'});
+            var elem = doc.querySelector('a');
+            rewriter.captureRewriteAttr(elem, 'href', 'bar', {ns: NS_XLINK, record: true, timeId});
+            assert.strictEqual(elem.getAttributeNS(NS_XLINK, 'href'), 'bar');
+            assert.strictEqual(elem.getAttributeNS(NS_XLINK, `data-scrapbook-orig-null-attr-href-${timeId}`), '');
           });
 
-          context('for prefixed attribute', function () {
-            it('should record attribute `<ns>:<name>` as `<ns>:data-scrapbook-orig-attr-<name>-<id>`', function () {
-              var wrapper = createDomFixture('<section><div>text</div></section>');
-              var elem = wrapper.querySelector('div');
-              rewriter.captureRewriteAttr(elem, 'ns:foo', 'bar', {record: true, timeId});
-              assert.strictEqual(wrapper.outerHTML, `<section><div ns:foo="bar" ns:data-scrapbook-orig-null-attr-foo-${timeId}="">text</div></section>`);
+          for (const value of [null, undefined, false]) {
+            it(`should not add recording attribute if value is ${String(value)}`, function () {
+              var doc = createDocFixture({type: 'svg', tagName: 'a', ns: NS_SVG, value: 'text'});
+              var elem = doc.querySelector('a');
+              rewriter.captureRewriteAttr(elem, 'href', value, {ns: NS_XLINK, record: true, timeId});
+              assert.strictEqual(elem.getAttributeNS(NS_XLINK, 'href'), null);
+              assert.strictEqual(elem.getAttributeNS(NS_XLINK, `data-scrapbook-orig-null-attr-href-${timeId}`), null);
             });
+          }
 
-            it('should record attribute `<ns1>:<ns2>:<name>` as `<ns1>:<ns2>:data-scrapbook-orig-attr-<name>-<id>`', function () {
-              var wrapper = createDomFixture('<section><div>text</div></section>');
-              var elem = wrapper.querySelector('div');
-              rewriter.captureRewriteAttr(elem, 'ns1:ns2:foo', 'bar', {record: true, timeId});
-              assert.strictEqual(wrapper.outerHTML, `<section><div ns1:ns2:foo="bar" ns1:ns2:data-scrapbook-orig-null-attr-foo-${timeId}="">text</div></section>`);
-            });
+          it('should not alter the recording attribute if exists', function () {
+            var doc = createDocFixture({type: 'svg', tagName: 'a', ns: NS_SVG, value: 'text'});
+            var elem = doc.querySelector('a');
+            rewriter.captureRewriteAttr(elem, 'href', 'foo', {ns: NS_XLINK, record: true, timeId});
+            rewriter.captureRewriteAttr(elem, 'href', null, {ns: NS_XLINK, record: true, timeId});
+            rewriter.captureRewriteAttr(elem, 'href', 'bar', {ns: NS_XLINK, record: true, timeId});
+            assert.strictEqual(elem.getAttributeNS(NS_XLINK, 'href'), 'bar');
+            assert.strictEqual(elem.getAttributeNS(NS_XLINK, `data-scrapbook-orig-null-attr-href-${timeId}`), '');
+          });
 
-            it('should not alter the recording attribute if exists', function () {
-              var wrapper = createDomFixture('<section><div>text</div></section>');
-              var elem = wrapper.querySelector('div');
-              rewriter.captureRewriteAttr(elem, 'ns:foo', 'bar', {record: true, timeId});
-              rewriter.captureRewriteAttr(elem, 'ns:foo', null, {record: true, timeId});
-              rewriter.captureRewriteAttr(elem, 'ns:foo', 'baz', {record: true, timeId});
-              assert.strictEqual(wrapper.outerHTML, `<section><div ns:data-scrapbook-orig-null-attr-foo-${timeId}="" ns:foo="baz">text</div></section>`);
-            });
+          it('should not add recording attribute if recorded as having a value', function () {
+            var doc = createDocFixture({type: 'svg', tagName: 'a', ns: NS_SVG, attrs: [['xlink:href', 'foo', NS_XLINK]], value: 'text'});
+            var elem = doc.querySelector('a');
+            rewriter.captureRewriteAttr(elem, 'href', null, {ns: NS_XLINK, record: true, timeId});
+            rewriter.captureRewriteAttr(elem, 'href', 'bar', {ns: NS_XLINK, record: true, timeId});
+            assert.strictEqual(elem.getAttributeNS(NS_XLINK, 'href'), 'bar');
+            assert.strictEqual(elem.getAttributeNS(NS_XLINK, `data-scrapbook-orig-null-attr-href-${timeId}`), null);
+            assert.strictEqual(elem.getAttributeNS(NS_XLINK, `data-scrapbook-orig-attr-href-${timeId}`), 'foo');
+          });
 
-            it('should not add recording attribute if recorded as having a value', function () {
-              var wrapper = createDomFixture('<section><div ns:foo="bar">text</div></section>');
-              var elem = wrapper.querySelector('div');
-              rewriter.captureRewriteAttr(elem, 'ns:foo', null, {record: true, timeId});
-              rewriter.captureRewriteAttr(elem, 'ns:foo', 'baz', {record: true, timeId});
-              assert.strictEqual(wrapper.outerHTML, `<section><div ns:data-scrapbook-orig-attr-foo-${timeId}="bar" ns:foo="baz">text</div></section>`);
-            });
-
-            it('should not add recording attribute if recorded as a null node', function () {
-              var wrapper = createDomFixture('<section></section>');
-              var elem = wrapper.appendChild(wrapper.ownerDocument.createElement('div'));
-              rewriter.captureRecordAddedNode(elem, {record: true, timeId});
-              rewriter.captureRewriteAttr(elem, 'ns:foo', 'bar', {record: true, timeId});
-              assert.strictEqual(wrapper.outerHTML, `<section><div data-scrapbook-orig-null-node-${timeId}="" ns:foo="bar"></div></section>`);
-            });
+          it('should not add recording attribute if recorded as a null node', function () {
+            var doc = createDocFixture({type: 'svg', tagName: 'a', ns: NS_SVG, value: 'text'});
+            var elem = doc.querySelector('a');
+            rewriter.captureRecordAddedNode(elem, {record: true, timeId});
+            rewriter.captureRewriteAttr(elem, 'href', 'foo', {ns: NS_XLINK, record: true, timeId});
+            assert.strictEqual(elem.getAttributeNS(NS_XLINK, 'href'), 'foo');
+            assert.strictEqual(elem.getAttributeNS(NS_XLINK, `data-scrapbook-orig-null-attr-href-${timeId}`), null);
+            assert.strictEqual(elem.getAttributeNS(NS_XLINK, `data-scrapbook-orig-attr-href-${timeId}`), null);
+            assert.strictEqual(elem.getAttributeNS(null, `data-scrapbook-orig-null-node-${timeId}`), '');
           });
         });
       });
