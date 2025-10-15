@@ -817,9 +817,9 @@ class RebuildLinksDocumentRewriter extends BaseDocumentRewriter {
 
   [`_handle_{${NS_SVG}}`](rootNode) {
     for (const elem of rootNode.querySelectorAll('a[*|href]')) {
-      for (const attr of REBUILD_LINK_SVG_HREF_ATTRS) {
-        if (!elem.hasAttribute(attr)) { continue; }
-        this.rewriteHref(elem, attr);
+      for (const ns of [null, NS_XLINK]) {
+        if (!elem.hasAttributeNS(ns, 'href')) { continue; }
+        this.rewriteHref(elem, 'href', ns);
       }
     }
   }
@@ -855,11 +855,11 @@ class RebuildLinksDocumentRewriter extends BaseDocumentRewriter {
     return this.getRedirectedUrl(p.url, urlHash);
   }
 
-  rewriteHref(elem, attr) {
-    const url = elem.getAttribute(attr);
+  rewriteHref(elem, attr, ns = null) {
+    const url = elem.getAttributeNS(ns, attr);
     const newUrl = this.rewriteUrl(url);
     if (!newUrl) { return; }
-    elem.setAttribute(attr, newUrl);
+    elem.setAttributeNS(ns, attr, newUrl);
   }
 
   rewriteMetaRefresh(elem) {
@@ -3666,14 +3666,14 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
   }
 
   [`_handle_{${NS_SVG}}a`](elem) {
-    for (const attr of ["href", "xlink:href"]) {
-      this.rewriteAnchor(elem, attr);
+    for (const ns of [null, NS_XLINK]) {
+      this.rewriteAnchor(elem, 'href', {ns});
     }
   }
 
   [`_handle_{${NS_SVG}}use`](elem) {
-    for (const attr of ["href", "xlink:href"]) {
-      this[`_handle_{${NS_SVG}}use#href`].call(this, elem, attr);
+    for (const ns of [null, NS_XLINK]) {
+      this[`_handle_{${NS_SVG}}use#href`].call(this, elem, 'href', ns);
     }
   }
 
@@ -3713,15 +3713,15 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
     this[`_handle_{${NS_SVG}}use`].call(this, elem);
   }
 
-  [`_handle_{${NS_SVG}}use#href`](elem, attr) {
-    if (!elem.hasAttribute(attr)) { return; }
-    const newUrl = this.resolveRelativeUrl(elem.getAttribute(attr), this.baseUrl);
-    this.captureRewriteAttr(elem, attr, newUrl);
+  [`_handle_{${NS_SVG}}use#href`](elem, attr, ns) {
+    if (!elem.hasAttributeNS(ns, attr)) { return; }
+    const newUrl = this.resolveRelativeUrl(elem.getAttributeNS(ns, attr), this.baseUrl);
+    this.captureRewriteAttr(elem, attr, newUrl, {ns});
   }
 
   [`_handle_{${NS_SVG}}image`](elem) {
-    for (const attr of ["href", "xlink:href"]) {
-      this[`_handle_{${NS_SVG}}image#href`].call(this, elem, attr);
+    for (const ns of [null, NS_XLINK]) {
+      this[`_handle_{${NS_SVG}}image#href`].call(this, elem, 'href', ns);
     }
   }
 
@@ -3729,14 +3729,14 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
     this[`_handle_{${NS_SVG}}image`].call(this, elem);
   }
 
-  [`_handle_{${NS_SVG}}image#href`](elem, attr) {
-    if (!elem.hasAttribute(attr)) { return; }
+  [`_handle_{${NS_SVG}}image#href`](elem, attr, ns) {
+    if (!elem.hasAttributeNS(ns, attr)) { return; }
 
     const {baseUrlFinal, refUrl, docRefPolicy: refPolicy, tasks, settings, options} = this;
 
     // check local link and rewrite url
-    const url = this.resolveLocalLink(elem.getAttribute(attr), baseUrlFinal);
-    this.captureRewriteAttr(elem, attr, url);
+    const url = this.resolveLocalLink(elem.getAttributeNS(ns, attr), baseUrlFinal);
+    this.captureRewriteAttr(elem, attr, url, {ns});
 
     switch (options["capture.image"]) {
       case "link":
@@ -3744,7 +3744,7 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
         break;
       case "blank":
       case "remove":
-        this.captureRewriteAttr(elem, attr, null);
+        this.captureRewriteAttr(elem, attr, null, {ns});
         break;
       case "save-current":
       case "save":
@@ -3762,7 +3762,7 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
             settings,
             options,
           });
-          this.captureRewriteAttr(elem, attr, response.url);
+          this.captureRewriteAttr(elem, attr, response.url, {ns});
           return response;
         });
         break;
@@ -3773,10 +3773,10 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
   [`_handle_{${NS_SVG}}script`](elem) {
     const {refUrl, docRefPolicy: refPolicy, tasks, settings, options} = this;
 
-    for (const attr of ["href", "xlink:href"]) {
-      if (!elem.hasAttribute(attr)) { continue; }
-      const newUrl = this.resolveRelativeUrl(elem.getAttribute(attr), this.baseUrl);
-      this.captureRewriteAttr(elem, attr, newUrl);
+    for (const ns of [null, NS_XLINK]) {
+      if (!elem.hasAttributeNS(ns, 'href')) { continue; }
+      const newUrl = this.resolveRelativeUrl(elem.getAttributeNS(ns, 'href'), this.baseUrl);
+      this.captureRewriteAttr(elem, 'href', newUrl, {ns});
     }
 
     switch (options["capture.script"]) {
@@ -3784,9 +3784,9 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
         // do nothing
         break;
       case "blank":
-        for (const attr of ["href", "xlink:href"]) {
-          if (!elem.hasAttribute(attr)) { continue; }
-          this.captureRewriteAttr(elem, attr, null);
+        for (const ns of [null, NS_XLINK]) {
+          if (!elem.hasAttributeNS(ns, 'href')) { continue; }
+          this.captureRewriteAttr(elem, 'href', null, {ns});
         }
         this.captureRewriteTextContent(elem, "");
         break;
@@ -3795,17 +3795,17 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
         throw new NodeDisconnect(elem);
       case "save":
       default: {
-        for (const attr of ["href", "xlink:href"]) {
-          if (!elem.hasAttribute(attr)) { continue; }
+        for (const ns of [null, NS_XLINK]) {
+          if (!elem.hasAttributeNS(ns, 'href')) { continue; }
           tasks.push(async () => {
             const response = await this.downloadFile({
-              url: elem.getAttribute(attr),
+              url: elem.getAttributeNS(ns, 'href'),
               refUrl,
               refPolicy,
               settings,
               options,
             });
-            this.captureRewriteAttr(elem, attr, response.url);
+            this.captureRewriteAttr(elem, 'href', response.url, {ns});
             return response;
           });
         }
@@ -3964,45 +3964,61 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
   }
 
   /**
-   * Rewrite the specified attr. Add a recording attribute if requested.
+   * Rewrite the specified attribute. Add a recording attribute if requested.
    *
-   * If `attr` is prefixed with `:` like `pf:att` or `pf:pf2:att`, the
-   * recording attribute will be with the same prefix like
-   * `pf:data-scrapbook-orit-attr-att-<ID>` or
-   * `pf:pf2:data-scrapbook-orit-attr-att-<ID>`.
+   * When `ns` is specified, the prefix of the manipulated attribute will be
+   * automatically looked up from the specified `ns`.  If the lookup result is
+   * null, the prefix of `attr` will be taken.  If `attr` is not prefixed, a
+   * unique prefix and `xmlns:*` will be automatically generated by the browser
+   * when serializing with an API like `outerHTML`.
+   *
+   * For an HTML document, which is namespace agnostic, an appropriate prefix
+   * will be selected when serializing with an API like `outerHTML` for certain
+   * supported foreign namespaces (e.g. `attr` or `x:attr` becomes `xlink:attr`
+   * when the attribute is in XLINK (http://www.w3.org/1999/xlink) namespace),
+   * while no `xmlns:*` will be generated.
+   * Otherwise, the prefix is kept as-is, but the attribute will become null
+   * namespace when read from the serialized string.
    *
    * @param {Element} elem - The element to handle.
    * @param {string} [attr] - The attribute name to handle.
+   *   - It's not allowed to contain more than one ":".
+   *   - It's not allowed to contain a ":" prefix if `ns` is null.
+   *   - In general an unprefixed name is preferred.
    * @param {?(string|boolean)} [value] - The value to assign.
    *   - If value is true, attr will be set to "" iff not exist.
    *   - If value is false/null/undefined, attr will be removed.
    * @param {Object} [context]
+   * @param {?string} [context.ns] - The namespace for the attribute.
    */
   captureRewriteAttr(elem, attr, value, {
+    ns = null,
     record = this.options["capture.recordRewrites"],
     timeId = this.timeId,
   } = {}) {
-    const [ns, att] = utils.splitXmlAttribute(attr);
-    const prefix = ns ? ns + ":" : "";
+    const [defaultPrefix, local] = utils.splitXmlAttribute(attr);
+    let prefix = elem.lookupPrefix(ns) ?? defaultPrefix;
+    prefix = prefix ? prefix + ":" : "";
+    attr = `${prefix}${local}`;
 
-    if (elem.hasAttribute(attr)) {
+    if (elem.hasAttributeNS(ns, local)) {
       if (value === true) { return; }
 
-      const oldValue = elem.getAttribute(attr);
+      const oldValue = elem.getAttributeNS(ns, local);
       if (oldValue === value) { return; }
 
       if ([false, null, undefined].includes(value)) {
-        elem.removeAttribute(attr);
+        elem.removeAttributeNS(ns, local);
       } else {
-        elem.setAttribute(attr, value);
+        elem.setAttributeNS(ns, attr, value);
       }
 
       if (record) {
-        const recordAttr = `${prefix}data-scrapbook-orig-attr-${att}-${timeId}`;
-        const recordAttr2 = `${prefix}data-scrapbook-orig-null-attr-${att}-${timeId}`;
+        const recordAttr = `data-scrapbook-orig-attr-${local}-${timeId}`;
+        const recordAttr2 = `data-scrapbook-orig-null-attr-${local}-${timeId}`;
         const recordAttr3 = `data-scrapbook-orig-null-node-${timeId}`;
-        if (!elem.hasAttribute(recordAttr) && !elem.hasAttribute(recordAttr2) && !elem.hasAttribute(recordAttr3)) {
-          elem.setAttribute(recordAttr, oldValue);
+        if (!elem.hasAttributeNS(ns, recordAttr) && !elem.hasAttributeNS(ns, recordAttr2) && !elem.hasAttribute(recordAttr3)) {
+          elem.setAttributeNS(ns, `${prefix}${recordAttr}`, oldValue);
         }
       }
     } else {
@@ -4010,14 +4026,14 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
 
       if (value === true) { value = ''; }
 
-      elem.setAttribute(attr, value);
+      elem.setAttributeNS(ns, attr, value);
 
       if (record) {
-        const recordAttr = `${prefix}data-scrapbook-orig-null-attr-${att}-${timeId}`;
-        const recordAttr2 = `${prefix}data-scrapbook-orig-attr-${att}-${timeId}`;
+        const recordAttr = `data-scrapbook-orig-null-attr-${local}-${timeId}`;
+        const recordAttr2 = `data-scrapbook-orig-attr-${local}-${timeId}`;
         const recordAttr3 = `data-scrapbook-orig-null-node-${timeId}`;
-        if (!elem.hasAttribute(recordAttr) && !elem.hasAttribute(recordAttr2) && !elem.hasAttribute(recordAttr3)) {
-          elem.setAttribute(recordAttr, "");
+        if (!elem.hasAttributeNS(ns, recordAttr) && !elem.hasAttributeNS(ns, recordAttr2) && !elem.hasAttribute(recordAttr3)) {
+          elem.setAttributeNS(ns, `${prefix}${recordAttr}`, "");
         }
       }
     }
@@ -4097,14 +4113,14 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
     return url;
   }
 
-  rewriteAnchor(elem, attr) {
-    if (!elem.hasAttribute(attr)) { return; }
+  rewriteAnchor(elem, attr, {ns} = {}) {
+    if (!elem.hasAttributeNS(ns, attr)) { return; }
 
     const {baseUrlFinal, refUrl, docRefPolicy, downLinkTasks, settings, options} = this;
 
     // check local link and rewrite url
-    const url = this.resolveLocalLink(elem.getAttribute(attr), baseUrlFinal, {checkJavascript: true});
-    this.captureRewriteAttr(elem, attr, url);
+    const url = this.resolveLocalLink(elem.getAttributeNS(ns, attr), baseUrlFinal, {checkJavascript: true});
+    this.captureRewriteAttr(elem, attr, url, {ns});
 
     // check downLink
     if (['http:', 'https:', 'file:', 'blob:'].some(p => url.startsWith(p))) {
@@ -4138,7 +4154,7 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
           });
 
           if (response) {
-            this.captureRewriteAttr(elem, attr, response.url);
+            this.captureRewriteAttr(elem, attr, response.url, {ns});
           }
           return response;
         });
