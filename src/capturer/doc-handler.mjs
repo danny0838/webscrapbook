@@ -3732,10 +3732,10 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
   [`_handle_{${NS_SVG}}image#href`](elem, attr, ns) {
     if (!elem.hasAttributeNS(ns, attr)) { return; }
 
-    const {baseUrlFinal, refUrl, docRefPolicy: refPolicy, tasks, settings, options} = this;
+    const {baseUrl, refUrl, docRefPolicy: refPolicy, tasks, settings, options} = this;
 
     // check local link and rewrite url
-    const url = this.resolveLocalLink(elem.getAttributeNS(ns, attr), baseUrlFinal);
+    const url = this.resolveRelativeUrl(elem.getAttributeNS(ns, attr), baseUrl);
     this.captureRewriteAttr(elem, attr, url, {ns});
 
     switch (options["capture.image"]) {

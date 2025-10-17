@@ -7497,7 +7497,7 @@ describe('capturer/doc-handler.mjs', function () {
                         var elem = doc.querySelector(tagName);
                         assert.strictEqual(elem.getAttributeNS(ns, 'href'), "myicon.bmp");
 
-                        sinon.assert.calledOnceWithExactly(spyResolveLink, './myicon.bmp', 'https://example.com/');
+                        sinon.assert.calledOnceWithExactly(spyResolve, './myicon.bmp', 'https://example.com/');
                         sinon.assert.calledWithExactly(spyRewrite, elem, 'href', 'myicon.bmp', {ns});
                       });
 
@@ -7511,7 +7511,7 @@ describe('capturer/doc-handler.mjs', function () {
                         var elem = doc.querySelector(tagName);
                         assert.strictEqual(elem.getAttributeNS(ns, 'href'), 'https://example.com/myicon.bmp');
 
-                        sinon.assert.calledOnceWithExactly(spyResolveLink, './myicon.bmp', 'https://example.com/');
+                        sinon.assert.calledOnceWithExactly(spyResolve, './myicon.bmp', 'https://example.com/');
                         sinon.assert.calledWithExactly(spyRewrite, elem, 'href', 'https://example.com/myicon.bmp', {ns});
                       });
 
@@ -7526,7 +7526,7 @@ describe('capturer/doc-handler.mjs', function () {
                         var elem = doc.querySelector(tagName);
                         assert.strictEqual(elem.getAttributeNS(ns, 'href'), null);
 
-                        sinon.assert.calledOnceWithExactly(spyResolveLink, './myicon.bmp', 'https://example.com/');
+                        sinon.assert.calledOnceWithExactly(spyResolve, './myicon.bmp', 'https://example.com/');
                         sinon.assert.calledWithExactly(spyRewrite, elem, 'href', null, {ns});
                       });
 
@@ -7535,14 +7535,14 @@ describe('capturer/doc-handler.mjs', function () {
                   }
 
                   context(CONTEXT_BASE_URL, function () {
-                    it('should resolve the URL with `baseUrlFinal`', async function () {
+                    it('should resolve the URL with `baseUrl`', async function () {
                       var doc = docFactory({attrs: [[`${prefix}href`, './myicon.bmp', ns]]});
                       var tester = baseUrlHandlingTesterFactory({tagName, docUrl});
 
                       var {stub} = await rewriteNodeControlledTest({doc, docUrl, options, tester});
                       sinon.assert.called(stub);
 
-                      sinon.assert.calledOnceWithExactly(spyResolveLink, './myicon.bmp', 'https://example.com/baseUrlFinal/');
+                      sinon.assert.calledOnceWithExactly(spyResolve, './myicon.bmp', 'https://example.com/baseUrl/');
                     });
                   });
                 });
