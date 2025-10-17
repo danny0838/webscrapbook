@@ -3094,7 +3094,7 @@ describe('capturer/doc-handler.mjs', function () {
             var elem = doc.querySelector(tagName);
             assert.strictEqual(elem.getAttribute('href'), 'https://example.com/page.html');
 
-            sinon.assert.calledOnceWithExactly(spyResolveLink, './page.html', 'https://example.com/');
+            sinon.assert.calledOnceWithExactly(spyResolveLink, './page.html', 'https://example.com/', {checkJavascript: true});
             sinon.assert.calledOnceWithExactly(spyRewriteAnchor, elem, 'href');
             sinon.assert.calledWithExactly(spyRewrite, elem, 'href', 'https://example.com/page.html');
             sinon.assert.notCalled(spyCaptureUrl);
@@ -3354,7 +3354,7 @@ describe('capturer/doc-handler.mjs', function () {
               var {stub} = await rewriteNodeControlledTest({doc, docUrl, options, tester});
               sinon.assert.called(stub);
 
-              sinon.assert.calledOnceWithExactly(spyResolveLink, "./page.html", "https://example.com/baseUrlFinal/");
+              sinon.assert.calledOnceWithExactly(spyResolveLink, "./page.html", "https://example.com/baseUrlFinal/", {checkJavascript: true});
               sinon.assert.calledWithExactly(spyResolve.getCall(0), './ping.py', 'https://example.com/baseUrlFinal/');
               sinon.assert.calledWithExactly(spyResolve.getCall(1), './ping.php', 'https://example.com/baseUrlFinal/');
             });
@@ -7267,7 +7267,7 @@ describe('capturer/doc-handler.mjs', function () {
               var elem = doc.querySelector('a');
               assert.strictEqual(elem.getAttributeNS(ns, 'href'), 'https://example.com/linked.html');
 
-              sinon.assert.calledOnceWithExactly(spyResolveLink, './linked.html', 'https://example.com/');
+              sinon.assert.calledOnceWithExactly(spyResolveLink, './linked.html', 'https://example.com/', {checkJavascript: true});
               sinon.assert.calledWithExactly(spyRewriteAnchor, elem, 'href', {isHtml: false});
               sinon.assert.calledWithExactly(spyRewriteAnchor, elem, 'xlink:href', {isHtml: false});
               sinon.assert.calledTwice(spyRewriteAnchor);
@@ -7283,7 +7283,7 @@ describe('capturer/doc-handler.mjs', function () {
                 var {stub} = await rewriteNodeControlledTest({doc, docUrl, tester});
                 sinon.assert.called(stub);
 
-                sinon.assert.calledOnceWithExactly(spyResolveLink, "./linked.html", "https://example.com/baseUrlFinal/");
+                sinon.assert.calledOnceWithExactly(spyResolveLink, "./linked.html", "https://example.com/baseUrlFinal/", {checkJavascript: true});
               });
             });
 
@@ -7365,7 +7365,7 @@ describe('capturer/doc-handler.mjs', function () {
             var {stub} = await rewriteNodeControlledTest({doc, docUrl, tester});
             sinon.assert.called(stub);
 
-            sinon.assert.calledOnceWithExactly(spyResolveLink, "./math.html?id=123#foo", "https://example.com/baseUrlFinal/");
+            sinon.assert.calledOnceWithExactly(spyResolveLink, "./math.html?id=123#foo", "https://example.com/baseUrlFinal/", {checkJavascript: true});
           });
         });
 
@@ -9063,6 +9063,391 @@ describe('capturer/doc-handler.mjs', function () {
           rewriter.captureRewriteTextContent(elem, 'new text', {record: true, timeId});
           rewriter.captureRewriteTextContent(elem, 'brand new text', {record: true, timeId});
           assert.strictEqual(wrapper.outerHTML, `<section><div foo="bar" data-scrapbook-orig-textcontent-${timeId}="text">brand new text</div></section>`);
+        });
+      });
+    });
+
+    describe('#resolveRelativeUrl()', function () {
+      const modeCases = ["save", "link", "blank", "remove"];
+      const skipLocalCases = [undefined, true, false];
+      const urlCases = ["https://example.com", "javascript:alert('test')"];
+
+      let rewriter;
+      let stubResolve;
+
+      beforeEach(function () {
+        rewriter = new CaptureDocumentRewriter();
+        rewriter.capturer = new TestCapturer();
+        stubResolve = sinon.stub(rewriter.capturer, 'resolveRelativeUrl').returns("<resolved>");
+      });
+
+      context('when `checkJavascript` is truthy', function () {
+        const checkJavascript = true;
+
+        for (const mode of modeCases) {
+          context(`options["capture.script"] = "${mode}"`, function () {
+            it('should check the input URL with `isJavascriptUrl`', function () {
+              var spy = sinon.spy(rewriter, 'isJavascriptUrl');
+              for (const url of urlCases) {
+                rewriter.resolveRelativeUrl(url, "http://example.com/", {
+                  checkJavascript,
+                  scriptMode: mode,
+                });
+                assert.deepEqual(spy.lastCall.args, [url]);
+              }
+            });
+
+            context('for javascript: protocol', function () {
+              switch (mode) {
+                case "save":
+                case "link": {
+                  it('should call and return the result from `Capturer.resolveRelativeUrl`', function () {
+                    for (const skipLocal of skipLocalCases) {
+                      assert.strictEqual(
+                        rewriter.resolveRelativeUrl("javascript:alert('test')", "http://example.com/", {
+                          checkJavascript,
+                          skipLocal,
+                          scriptMode: mode,
+                        }),
+                        stubResolve.lastCall.returnValue,
+                      );
+                      assert.deepEqual(stubResolve.lastCall.args, ["javascript:alert('test')", "http://example.com/", {skipLocal}]);
+                    }
+                  });
+
+                  break;
+                }
+                case "blank":
+                case "remove": {
+                  it('should return blanked "javascript:"', function () {
+                    for (const skipLocal of skipLocalCases) {
+                      assert.strictEqual(
+                        rewriter.resolveRelativeUrl("javascript:alert('test')", "http://example.com/", {
+                          checkJavascript,
+                          skipLocal,
+                          scriptMode: mode,
+                        }),
+                        "javascript:",
+                      );
+                      sinon.assert.notCalled(stubResolve);
+                    }
+                  });
+
+                  break;
+                }
+              }
+            });
+
+            context('for other protocol', function () {
+              it('should call and return the result from `Capturer.resolveRelativeUrl`', function () {
+                for (const skipLocal of skipLocalCases) {
+                  assert.strictEqual(
+                    rewriter.resolveRelativeUrl("page.html", "http://example.com/", {
+                      checkJavascript,
+                      skipLocal,
+                      scriptMode: mode,
+                    }),
+                    stubResolve.lastCall.returnValue,
+                  );
+                  assert.deepEqual(stubResolve.lastCall.args, ["page.html", "http://example.com/", {skipLocal}]);
+                }
+              });
+            });
+          });
+        }
+      });
+
+      context('when `checkJavascript` is falsy', function () {
+        const checkJavascript = false;
+
+        for (const mode of modeCases) {
+          context(`options["capture.script"] = "${mode}"`, function () {
+            it('should not check input URL with `isJavascriptUrl`', function () {
+              var spy = sinon.spy(rewriter, 'isJavascriptUrl');
+              for (const url of urlCases) {
+                rewriter.resolveRelativeUrl(url, "http://example.com/", {
+                  checkJavascript,
+                  scriptMode: mode,
+                });
+                sinon.assert.notCalled(spy);
+              }
+            });
+
+            it('should call and return the result from `Capturer.resolveRelativeUrl`', function () {
+              for (const skipLocal of skipLocalCases) {
+                for (const url of urlCases) {
+                  assert.strictEqual(
+                    rewriter.resolveRelativeUrl(url, "http://example.com/", {
+                      checkJavascript,
+                      skipLocal,
+                      scriptMode: mode,
+                    }),
+                    stubResolve.lastCall.returnValue,
+                  );
+                  assert.deepEqual(stubResolve.lastCall.args, [url, "http://example.com/", {skipLocal}]);
+                }
+              }
+            });
+          });
+        }
+      });
+    });
+
+    describe('#resolveLocalLink()', function () {
+      function docFactory(id, type = 'id') {
+        const attrs = (() => {
+          switch (type) {
+            case 'id':
+              return {id};
+            case 'name':
+              return {name: id};
+          }
+        })();
+        return createDocFixture({name: 'a', attrs});
+      }
+
+      const isPartial = false;
+
+      let rewriter;
+      let spyResolve;
+
+      beforeEach(function () {
+        rewriter = new CaptureDocumentRewriter();
+        rewriter.capturer = new TestCapturer();
+        spyResolve = sinon.spy(rewriter, 'resolveRelativeUrl');
+      });
+
+      context('when the resolved URL targets `docUrl`', function () {
+        context('when `docUrl` is not inherited', function () {
+          context('when the resolved URL contains an empty hash', function () {
+            it('should return hash when the URL is ""', function () {
+              Object.assign(rewriter, {
+                doc: docFactory(),
+                docUrl,
+                options: {},
+              });
+              var url = "";
+              var baseUrl = docUrl;
+              assert.strictEqual(
+                rewriter.resolveLocalLink(url, baseUrl),
+                "",
+              );
+              assert.deepEqual(spyResolve.lastCall.args, [url, baseUrl, {checkJavascript: false, skipLocal: false}]);
+            });
+
+            it('should return hash when the URL is "#"', function () {
+              Object.assign(rewriter, {
+                doc: docFactory(),
+                docUrl,
+                options: {},
+              });
+              var url = "#";
+              var baseUrl = docUrl;
+              assert.strictEqual(
+                rewriter.resolveLocalLink(url, baseUrl),
+                "#",
+              );
+              assert.deepEqual(spyResolve.lastCall.args, [url, baseUrl, {checkJavascript: false, skipLocal: false}]);
+            });
+
+            it('should return hash when the URL is same as document', function () {
+              Object.assign(rewriter, {
+                doc: docFactory(),
+                docUrl,
+                options: {},
+              });
+              var url = docUrl + '#';
+              var baseUrl = docUrl;
+              assert.strictEqual(
+                rewriter.resolveLocalLink(url, baseUrl),
+                "#",
+              );
+              assert.deepEqual(spyResolve.lastCall.args, [url, baseUrl, {checkJavascript: false, skipLocal: false}]);
+            });
+
+            it('should return hash when the URL is resolved to be same as document', function () {
+              Object.assign(rewriter, {
+                doc: docFactory(),
+                docUrl: "https://example.com/",
+                options: {},
+              });
+              var url = "..#";
+              var baseUrl = "https://example.com/rebased/";
+              assert.strictEqual(
+                rewriter.resolveLocalLink(url, baseUrl),
+                "#",
+              );
+              assert.deepEqual(spyResolve.lastCall.args, [url, baseUrl, {checkJavascript: false, skipLocal: false}]);
+            });
+          });
+
+          context('when the resolved URL contains a hash', function () {
+            context('when `isPartial` is truthy', function () {
+              const isPartial = true;
+
+              context('when hash target exists', function () {
+                it('should return hash when the document has `*[id="<hash>"]`', function () {
+                  Object.assign(rewriter, {
+                    doc: docFactory("foo"),
+                    docUrl,
+                    isPartial,
+                    options: {},
+                  });
+                  var url = "#foo";
+                  var baseUrl = docUrl;
+                  assert.strictEqual(
+                    rewriter.resolveLocalLink(url, baseUrl),
+                    "#foo",
+                  );
+                  assert.deepEqual(spyResolve.lastCall.args, [url, baseUrl, {checkJavascript: false, skipLocal: false}]);
+                });
+
+                it('should return hash when the document has `a[name="<hash>"]`', function () {
+                  Object.assign(rewriter, {
+                    doc: docFactory("foo", "name"),
+                    docUrl,
+                    isPartial,
+                    options: {},
+                  });
+                  var url = "#foo";
+                  var baseUrl = docUrl;
+                  assert.strictEqual(
+                    rewriter.resolveLocalLink(url, baseUrl),
+                    "#foo",
+                  );
+                  assert.deepEqual(spyResolve.lastCall.args, [url, baseUrl, {checkJavascript: false, skipLocal: false}]);
+                });
+              });
+
+              context('when hash target not exists', function () {
+                it('should call and return the result from `#resolveRelativeUrl`', function () {
+                  Object.assign(rewriter, {
+                    doc: docFactory(),
+                    docUrl,
+                    isPartial,
+                    options: {},
+                  });
+                  var url = "#foo";
+                  var baseUrl = docUrl;
+                  assert.strictEqual(
+                    rewriter.resolveLocalLink(url, baseUrl),
+                    spyResolve.lastCall.returnValue,
+                  );
+                  assert.deepEqual(spyResolve.lastCall.args, [url, baseUrl, {checkJavascript: false, skipLocal: false}]);
+                });
+              });
+            });
+
+            context('when `isPartial` is falsy', function () {
+              const isPartial = false;
+
+              it('should return hash when the URL is hash-only', function () {
+                Object.assign(rewriter, {
+                  doc: docFactory(),
+                  docUrl,
+                  isPartial,
+                  options: {},
+                });
+                var url = "#foo";
+                var baseUrl = docUrl;
+                assert.strictEqual(
+                  rewriter.resolveLocalLink(url, baseUrl),
+                  "#foo",
+                );
+                assert.deepEqual(spyResolve.lastCall.args, [url, baseUrl, {checkJavascript: false, skipLocal: false}]);
+              });
+
+              it('should return hash when the URL is same as document (except for hash)', function () {
+                Object.assign(rewriter, {
+                  doc: docFactory(),
+                  docUrl,
+                  isPartial,
+                  options: {},
+                });
+                var url = docUrl + '#foo';
+                var baseUrl = docUrl;
+                assert.strictEqual(
+                  rewriter.resolveLocalLink(url, baseUrl),
+                  "#foo",
+                );
+                assert.deepEqual(spyResolve.lastCall.args, [url, baseUrl, {checkJavascript: false, skipLocal: false}]);
+              });
+            });
+          });
+        });
+
+        context('when `docUrl` is inherited', function () {
+          it('should call and return the result from `#resolveRelativeUrl` when the URL is "about:blank"', function () {
+            Object.assign(rewriter, {
+              doc: docFactory(),
+              docUrl: "about:blank",
+              isPartial,
+              options: {},
+            });
+            var url = "about:blank#foo";
+            var baseUrl = docUrl;
+            assert.strictEqual(
+              rewriter.resolveLocalLink(url, baseUrl),
+              spyResolve.lastCall.returnValue,
+            );
+            assert.deepEqual(spyResolve.lastCall.args, [url, baseUrl, {checkJavascript: false, skipLocal: false}]);
+          });
+
+          it('should call and return the result from `#resolveRelativeUrl` when the URL is "about:srcdoc"', function () {
+            Object.assign(rewriter, {
+              doc: docFactory(),
+              docUrl: "about:srcdoc",
+              isPartial,
+              options: {},
+            });
+            var url = "about:srcdoc#foo";
+            var baseUrl = docUrl;
+            assert.strictEqual(
+              rewriter.resolveLocalLink(url, baseUrl),
+              spyResolve.lastCall.returnValue,
+            );
+            assert.deepEqual(spyResolve.lastCall.args, [url, baseUrl, {checkJavascript: false, skipLocal: false}]);
+          });
+        });
+      });
+
+      context('when the resolved URL not targets `docUrl`', function () {
+        it('should call and return the result from `#resolveRelativeUrl`', function () {
+          Object.assign(rewriter, {
+            doc: docFactory(),
+            docUrl,
+            isPartial,
+            options: {},
+          });
+          const url = docUrl + '?id=123';
+          const baseUrl = docUrl;
+          assert.strictEqual(
+            rewriter.resolveLocalLink(url, baseUrl),
+            spyResolve.lastCall.returnValue,
+          );
+          assert.deepEqual(spyResolve.lastCall.args, [url, baseUrl, {checkJavascript: false, skipLocal: false}]);
+        });
+
+        it('should pass `checkJavascript` to `#resolveRelativeUrl`', function () {
+          Object.assign(rewriter, {
+            doc: docFactory(),
+            docUrl,
+            isPartial,
+            options: {},
+          });
+          const url = 'javascript:alert("123")';
+          const baseUrl = docUrl;
+          for (const checkJavascript of [undefined, true, false]) {
+            const checkJavascriptArg = checkJavascript ?? false;
+            assert.strictEqual(
+              rewriter.resolveLocalLink(url, baseUrl, {checkJavascript}),
+              spyResolve.lastCall.returnValue,
+            );
+            assert.deepEqual(spyResolve.lastCall.args, [url, baseUrl, {
+              checkJavascript: checkJavascriptArg,
+              skipLocal: false,
+            }]);
+          }
         });
       });
     });

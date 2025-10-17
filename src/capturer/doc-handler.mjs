@@ -3906,10 +3906,14 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
     }
   }
 
-  resolveRelativeUrl(relativeUrl, baseUrl, {checkJavascript = false, skipLocal} = {}) {
+  resolveRelativeUrl(relativeUrl, baseUrl, {
+    checkJavascript = false,
+    skipLocal,
+    scriptMode = this.options["capture.script"],
+  } = {}) {
     // scripts: script-like URLs
     if (checkJavascript && this.isJavascriptUrl(relativeUrl)) {
-      switch (this.options["capture.script"]) {
+      switch (scriptMode) {
         case "save":
         case "link":
           // do nothing
@@ -3917,16 +3921,15 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
         case "blank":
         case "remove":
         default:
-          relativeUrl = "javascript:";
-          break;
+          return "javascript:";
       }
     }
 
     return this.capturer.resolveRelativeUrl(relativeUrl, baseUrl, {skipLocal});
   }
 
-  resolveLocalLink(relativeUrl, baseUrl) {
-    const url = this.capturer.resolveRelativeUrl(relativeUrl, baseUrl, {skipLocal: false});
+  resolveLocalLink(relativeUrl, baseUrl, {checkJavascript = false} = {}) {
+    const url = this.resolveRelativeUrl(relativeUrl, baseUrl, {checkJavascript, skipLocal: false});
 
     // This link targets the current page
     const [urlMain, urlHash] = utils.splitUrlByAnchor(url);
@@ -3960,26 +3963,8 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
 
     const {baseUrlFinal, refUrl, docRefPolicy, downLinkTasks, settings, options} = this;
 
-    let url = elem.getAttribute(attr);
-
-    // scripts: script-like anchors
-    if (this.isJavascriptUrl(url)) {
-      switch (options["capture.script"]) {
-        case "save":
-        case "link":
-          // do nothing
-          break;
-        case "blank":
-        case "remove":
-        default:
-          this.captureRewriteAttr(elem, attr, "javascript:");
-          break;
-      }
-      return;
-    }
-
     // check local link and rewrite url
-    url = this.resolveLocalLink(url, baseUrlFinal);
+    const url = this.resolveLocalLink(elem.getAttribute(attr), baseUrlFinal, {checkJavascript: true});
     this.captureRewriteAttr(elem, attr, url);
 
     // check downLink
@@ -4026,10 +4011,8 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
 
     const {baseUrlFinal, refUrl, docRefPolicy: refPolicy, tasks, settings, options} = this;
 
-    let url = elem.getAttribute(attr);
-
     // check local link and rewrite url
-    url = this.resolveLocalLink(url, baseUrlFinal);
+    const url = this.resolveLocalLink(elem.getAttribute(attr), baseUrlFinal);
     this.captureRewriteAttr(elem, attr, url);
 
     switch (options["capture.image"]) {

@@ -8471,10 +8471,10 @@ body { color: red; }`);
 
         var anchors = doc.querySelectorAll('a');
         assert.strictEqual(anchors[0].getAttribute('href'), `javascript:console.log('a');`);
-        assert.strictEqual(anchors[1].getAttribute('href'), `Javascript:console.log('a');`);
-        assert.strictEqual(anchors[2].getAttribute('href'), ` javascript:console.log('a');`);
-        assert.strictEqual(anchors[3].getAttribute('href'), `\tjavascript:console.log('a');`);
-        assert.strictEqual(anchors[4].getAttribute('href'), `\nj\na\nv\na\ns\nc\nr\ni\np\nt\n:console.log('a');`);
+        assert.strictEqual(anchors[1].getAttribute('href'), `javascript:console.log('a');`);
+        assert.strictEqual(anchors[2].getAttribute('href'), `javascript:console.log('a');`);
+        assert.strictEqual(anchors[3].getAttribute('href'), `javascript:console.log('a');`);
+        assert.strictEqual(anchors[4].getAttribute('href'), `javascript:console.log('a');`);
 
         assert.strictEqual(doc.querySelector('form').getAttribute('action'), `javascript:console.log('form');`);
         assert.strictEqual(doc.querySelector('input[type="image"]').getAttribute('formaction'), `javascript:console.log('input[type=image]');`);
@@ -8521,10 +8521,10 @@ body { color: red; }`);
 
         var anchors = doc.querySelectorAll('a');
         assert.strictEqual(anchors[0].getAttribute('href'), `javascript:console.log('a');`);
-        assert.strictEqual(anchors[1].getAttribute('href'), `Javascript:console.log('a');`);
-        assert.strictEqual(anchors[2].getAttribute('href'), ` javascript:console.log('a');`);
-        assert.strictEqual(anchors[3].getAttribute('href'), `\tjavascript:console.log('a');`);
-        assert.strictEqual(anchors[4].getAttribute('href'), `\nj\na\nv\na\ns\nc\nr\ni\np\nt\n:console.log('a');`);
+        assert.strictEqual(anchors[1].getAttribute('href'), `javascript:console.log('a');`);
+        assert.strictEqual(anchors[2].getAttribute('href'), `javascript:console.log('a');`);
+        assert.strictEqual(anchors[3].getAttribute('href'), `javascript:console.log('a');`);
+        assert.strictEqual(anchors[4].getAttribute('href'), `javascript:console.log('a');`);
 
         assert.strictEqual(doc.querySelector('form').getAttribute('action'), `javascript:console.log('form');`);
         assert.strictEqual(doc.querySelector('input[type="image"]').getAttribute('formaction'), `javascript:console.log('input[type=image]');`);
