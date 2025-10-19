@@ -1,4 +1,4 @@
-import {MochaQuery as $, assert} from "./unittest.mjs";
+import {MochaQuery as $, assert, INVALID_URL_SAMPLES} from "./unittest.mjs";
 
 import {BaseCapturer} from "../capturer/common.mjs";
 
@@ -113,22 +113,46 @@ describe('capturer/common.mjs', function () {
         );
       });
 
-      it("should not resolve an empty URL", function () {
-        assert.strictEqual(
-          capturer.resolveRelativeUrl("", "http://example.com/"),
-          "",
-        );
+      context('when `skipLocal` is truthy (default)', function () {
+        it("should not resolve an empty URL", function () {
+          assert.strictEqual(
+            capturer.resolveRelativeUrl("", "http://example.com/"),
+            "",
+          );
+        });
+
+        it("should not resolve a pure hash URL", function () {
+          assert.strictEqual(
+            capturer.resolveRelativeUrl("#hash", "http://example.com/"),
+            "#hash",
+          );
+          assert.strictEqual(
+            capturer.resolveRelativeUrl("#", "http://example.com/"),
+            "#",
+          );
+        });
       });
 
-      it("should not resolve a pure hash URL", function () {
-        assert.strictEqual(
-          capturer.resolveRelativeUrl("#hash", "http://example.com/"),
-          "#hash",
-        );
-        assert.strictEqual(
-          capturer.resolveRelativeUrl("#", "http://example.com/"),
-          "#",
-        );
+      context('when `skipLocal` is falsy', function () {
+        const context = {skipLocal: false};
+
+        it("should resolve an empty URL", function () {
+          assert.strictEqual(
+            capturer.resolveRelativeUrl("", "http://example.com/", context),
+            "http://example.com/",
+          );
+        });
+
+        it("should resolve a pure hash URL", function () {
+          assert.strictEqual(
+            capturer.resolveRelativeUrl("#hash", "http://example.com/", context),
+            "http://example.com/#hash",
+          );
+          assert.strictEqual(
+            capturer.resolveRelativeUrl("#", "http://example.com/", context),
+            "http://example.com/#",
+          );
+        });
       });
     });
 
@@ -161,6 +185,41 @@ describe('capturer/common.mjs', function () {
         assert.isFalse(capturer.isAboutUrl("file:///foo/bar"));
         assert.isFalse(capturer.isAboutUrl("data:text/html,foo"));
         assert.isFalse(capturer.isAboutUrl("blob:https://example.com/58eead10-e54d-4b72-9ae4-150381dcb68c"));
+      });
+    });
+
+    describe('#isJavascriptUrl()', function () {
+      it('should return true for a URL with javascript: protocol', function () {
+        assert.isTrue(capturer.isJavascriptUrl("javascript:console.log('123')"));
+      });
+
+      it('should return true for a URL with javascript: protocol containing altered case or spaces', function () {
+        assert.isTrue(capturer.isJavascriptUrl("Javascript:console.log('123')"));
+        assert.isTrue(capturer.isJavascriptUrl("JAVASCRIPT:console.log('123')"));
+        assert.isTrue(capturer.isJavascriptUrl(" javascript: console.log('123')"));
+        assert.isTrue(capturer.isJavascriptUrl("\tjavascript: console.log('123')"));
+        assert.isTrue(capturer.isJavascriptUrl("\nj\na\nv\na\ns\nc\nr\ni\np\nt\n: console.log('123')"));
+      });
+
+      it('should return false for a URL with non-javascript: protocol', function () {
+        assert.isFalse(capturer.isJavascriptUrl("http://example.com/?id=123#456"));
+        assert.isFalse(capturer.isJavascriptUrl("https://example.com/"));
+        assert.isFalse(capturer.isJavascriptUrl("data:text/plain,123"));
+        assert.isFalse(capturer.isJavascriptUrl(URL.createObjectURL(new Blob([]))));
+      });
+
+      it('should return false for an incomplete URL', function () {
+        assert.isFalse(capturer.isJavascriptUrl("//example.com/path"));
+        assert.isFalse(capturer.isJavascriptUrl("/example.com/path"));
+        assert.isFalse(capturer.isJavascriptUrl("path/page.html"));
+        assert.isFalse(capturer.isJavascriptUrl("?id=123"));
+        assert.isFalse(capturer.isJavascriptUrl("#foo"));
+      });
+
+      it('should return false for an invalid URL', function () {
+        for (const url of INVALID_URL_SAMPLES) {
+          assert.isFalse(capturer.isJavascriptUrl(url));
+        }
       });
     });
 

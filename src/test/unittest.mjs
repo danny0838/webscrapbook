@@ -33,6 +33,15 @@ const GREEN_BMP_BYTES = atob(GREEN_BMP_B64);
 const BLUE_BMP_BYTES = atob(BLUE_BMP_B64);
 const YELLOW_BMP_BYTES = atob(YELLOW_BMP_B64);
 
+const INVALID_URL_SAMPLES = [
+  "https://exa[mple.org/",
+  "https://exa%23mple.org/",
+  "https://#fragment",
+  "https://:443",
+  "https://example.org:70000",
+  "https://example.org:7z",
+];
+
 /**
  * A jQuery-style extension of `describe` or `it` for chainable and conditional
  * skip or xfail.
@@ -921,6 +930,7 @@ export {
   GREEN_BMP_BYTES,
   BLUE_BMP_BYTES,
   YELLOW_BMP_BYTES,
+  INVALID_URL_SAMPLES,
   assert,
   MochaQuery,
   getToken,
