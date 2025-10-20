@@ -157,13 +157,13 @@ describe('capturer/common.mjs', function () {
     });
 
     describe('#isAboutUrl()', function () {
-      it("should return true for exactly about:srcdoc", function () {
+      it("should return true for about:srcdoc (may contain hash)", function () {
         assert.isTrue(capturer.isAboutUrl("about:srcdoc"));
         assert.isFalse(capturer.isAboutUrl("about:srcdoc/subdir"));
         assert.isFalse(capturer.isAboutUrl("about:srcdoc?"));
         assert.isFalse(capturer.isAboutUrl("about:srcdoc?id=123"));
-        assert.isFalse(capturer.isAboutUrl("about:srcdoc#"));
-        assert.isFalse(capturer.isAboutUrl("about:srcdoc#frag"));
+        assert.isTrue(capturer.isAboutUrl("about:srcdoc#"));
+        assert.isTrue(capturer.isAboutUrl("about:srcdoc#frag"));
       });
 
       it("should return true for about:blank (may contain search or hash)", function () {

@@ -4188,7 +4188,7 @@ class BaseCapturer {
    * ref: https://html.spec.whatwg.org/#determining-the-origin
    */
   isAboutUrl(url) {
-    if (url === 'about:srcdoc') {
+    if (/^about:srcdoc(?=#|$)/.test(url)) {
       return true;
     }
     if (/^about:blank(?=[?#]|$)/.test(url)) {
