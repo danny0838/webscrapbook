@@ -2773,7 +2773,9 @@ function getMetaRefreshTarget(doc, baseUrl = doc.URL, {
   for (const elem of doc.querySelectorAll('base[href], meta[http-equiv="refresh"][content]')) {
     // update baseUrl when seeing the first base[href]
     if (elem.matches('base') && !elem.closest('svg, math') && !seenBaseElem) {
-      baseUrl = new URL(elem.getAttribute('href'), baseUrl).href;
+      try {
+        baseUrl = new URL(elem.getAttribute('href'), baseUrl).href;
+      } catch {}
       seenBaseElem = true;
       continue;
     }
@@ -2791,8 +2793,10 @@ function getMetaRefreshTarget(doc, baseUrl = doc.URL, {
     if (metaRefresh.time > lastMetaRefreshTime) {
       continue;
     }
-    lastMetaRefreshTime = metaRefresh.time;
-    lastMetaRefreshUrl = new URL(metaRefresh.url, baseUrl).href;
+    try {
+      lastMetaRefreshUrl = new URL(metaRefresh.url, baseUrl).href;
+      lastMetaRefreshTime = metaRefresh.time;
+    } catch {}
   }
   return lastMetaRefreshUrl;
 }
