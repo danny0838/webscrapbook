@@ -2957,6 +2957,15 @@ div { image-background: var(${/(--sb(\d+)-2)/}); }`;
       assert.strictEqual(utils.getMetaRefreshTarget(doc, 'https://example.org/'), 'https://example.org/page3.html');
     });
 
+    it('should skip invalid URLs', function () {
+      var doc = createDocFixture({name: 'head', children: [
+        {name: 'meta', attrs: {"http-equiv": "refresh", "content": "0; page1.html"}},
+        {name: 'meta', attrs: {"http-equiv": "refresh", "content": "0; page2.html"}},
+        {name: 'meta', attrs: {"http-equiv": "refresh", "content": "0; https://exa[mple.org"}},
+      ]});
+      assert.strictEqual(utils.getMetaRefreshTarget(doc, 'https://example.org/'), 'https://example.org/page2.html');
+    });
+
     it('should return the URL resolved with altered base URL if there is a base[href]', function () {
       var doc = createDocFixture({name: 'head', children: [
         {name: 'base', attrs: {target: "_blank"}},
@@ -2965,6 +2974,16 @@ div { image-background: var(${/(--sb(\d+)-2)/}); }`;
         {name: 'meta', attrs: {"http-equiv": "refresh", "content": "0; page.html"}},
       ]});
       assert.strictEqual(utils.getMetaRefreshTarget(doc, 'https://example.org/'), 'https://example.org/baseUrl/page.html');
+    });
+
+    it('should ignore base[href] with invalid URL', function () {
+      var doc = createDocFixture({name: 'head', children: [
+        {name: 'base', attrs: {target: "_blank"}},
+        {name: 'base', attrs: {href: "https://exa[mple.org/"}},
+        {name: 'base', attrs: {href: "./baseUrl2/"}},
+        {name: 'meta', attrs: {"http-equiv": "refresh", "content": "0; page.html"}},
+      ]});
+      assert.strictEqual(utils.getMetaRefreshTarget(doc, 'https://example.org/'), 'https://example.org/page.html');
     });
 
     it('should skip a meta refresh if time is non-0', function () {
@@ -2978,6 +2997,15 @@ div { image-background: var(${/(--sb(\d+)-2)/}); }`;
         {name: 'meta', attrs: {"http-equiv": "refresh", "content": "1; page2.html"}},
         {name: 'meta', attrs: {"http-equiv": "refresh", "content": "2; page3.html"}},
         {name: 'meta', attrs: {"http-equiv": "refresh", "content": "2; page4.html"}},
+      ]});
+      assert.strictEqual(utils.getMetaRefreshTarget(doc, 'https://example.org/', {includeDelayedRefresh: true}), 'https://example.org/page2.html');
+    });
+
+    it('should skip invalid URLs when `includeDelayedRefresh` is truthy', function () {
+      var doc = createDocFixture({name: 'head', children: [
+        {name: 'meta', attrs: {"http-equiv": "refresh", "content": "0; https://exa[mple.org/"}},
+        {name: 'meta', attrs: {"http-equiv": "refresh", "content": "1; page1.html"}},
+        {name: 'meta', attrs: {"http-equiv": "refresh", "content": "1; page2.html"}},
       ]});
       assert.strictEqual(utils.getMetaRefreshTarget(doc, 'https://example.org/', {includeDelayedRefresh: true}), 'https://example.org/page2.html');
     });
