@@ -1584,71 +1584,71 @@ describe('utils/common.mjs', function () {
     });
   });
 
-  describe('parseHeaderRefresh()', function () {
+  describe('parseMetaRefresh()', function () {
     it('should return an object with time and url properties', function () {
-      assert.deepEqual(utils.parseHeaderRefresh(``), {time: undefined, url: undefined});
-      assert.deepEqual(utils.parseHeaderRefresh(` `), {time: undefined, url: undefined});
-      assert.deepEqual(utils.parseHeaderRefresh(` ;`), {time: undefined, url: undefined});
-      assert.deepEqual(utils.parseHeaderRefresh(` ,`), {time: undefined, url: undefined});
+      assert.deepEqual(utils.parseMetaRefresh(``), {time: undefined, url: undefined});
+      assert.deepEqual(utils.parseMetaRefresh(` `), {time: undefined, url: undefined});
+      assert.deepEqual(utils.parseMetaRefresh(` ;`), {time: undefined, url: undefined});
+      assert.deepEqual(utils.parseMetaRefresh(` ,`), {time: undefined, url: undefined});
 
-      assert.deepEqual(utils.parseHeaderRefresh(`referred.html`), {time: undefined, url: undefined});
-      assert.deepEqual(utils.parseHeaderRefresh(`url=referred.html`), {time: undefined, url: undefined});
-      assert.deepEqual(utils.parseHeaderRefresh(`;url=referred.html`), {time: undefined, url: undefined});
+      assert.deepEqual(utils.parseMetaRefresh(`referred.html`), {time: undefined, url: undefined});
+      assert.deepEqual(utils.parseMetaRefresh(`url=referred.html`), {time: undefined, url: undefined});
+      assert.deepEqual(utils.parseMetaRefresh(`;url=referred.html`), {time: undefined, url: undefined});
 
-      assert.deepEqual(utils.parseHeaderRefresh(`9`), {time: 9, url: ``});
-      assert.deepEqual(utils.parseHeaderRefresh(`0`), {time: 0, url: ``});
-      assert.deepEqual(utils.parseHeaderRefresh(`3.5.1`), {time: 3, url: ``});
-      assert.deepEqual(utils.parseHeaderRefresh(`-1`), {time: undefined, url: undefined});
-      assert.deepEqual(utils.parseHeaderRefresh(`+1`), {time: undefined, url: undefined});
-      assert.deepEqual(utils.parseHeaderRefresh(`.123.456`), {time: 0, url: ``});
-      assert.deepEqual(utils.parseHeaderRefresh(`.123.456.`), {time: 0, url: ``});
+      assert.deepEqual(utils.parseMetaRefresh(`9`), {time: 9, url: ``});
+      assert.deepEqual(utils.parseMetaRefresh(`0`), {time: 0, url: ``});
+      assert.deepEqual(utils.parseMetaRefresh(`3.5.1`), {time: 3, url: ``});
+      assert.deepEqual(utils.parseMetaRefresh(`-1`), {time: undefined, url: undefined});
+      assert.deepEqual(utils.parseMetaRefresh(`+1`), {time: undefined, url: undefined});
+      assert.deepEqual(utils.parseMetaRefresh(`.123.456`), {time: 0, url: ``});
+      assert.deepEqual(utils.parseMetaRefresh(`.123.456.`), {time: 0, url: ``});
 
-      assert.deepEqual(utils.parseHeaderRefresh(`9 `), {time: 9, url: ``});
-      assert.deepEqual(utils.parseHeaderRefresh(`9;`), {time: 9, url: ``});
-      assert.deepEqual(utils.parseHeaderRefresh(`9,`), {time: 9, url: ``});
-      assert.deepEqual(utils.parseHeaderRefresh(`9 ; `), {time: 9, url: ``});
-      assert.deepEqual(utils.parseHeaderRefresh(`9 , `), {time: 9, url: ``});
+      assert.deepEqual(utils.parseMetaRefresh(`9 `), {time: 9, url: ``});
+      assert.deepEqual(utils.parseMetaRefresh(`9;`), {time: 9, url: ``});
+      assert.deepEqual(utils.parseMetaRefresh(`9,`), {time: 9, url: ``});
+      assert.deepEqual(utils.parseMetaRefresh(`9 ; `), {time: 9, url: ``});
+      assert.deepEqual(utils.parseMetaRefresh(`9 , `), {time: 9, url: ``});
 
-      assert.deepEqual(utils.parseHeaderRefresh(`1 referred.html`), {time: 1, url: `referred.html`});
-      assert.deepEqual(utils.parseHeaderRefresh(`1;referred.html`), {time: 1, url: `referred.html`});
-      assert.deepEqual(utils.parseHeaderRefresh(`1,referred.html`), {time: 1, url: `referred.html`});
-      assert.deepEqual(utils.parseHeaderRefresh(`1 ; referred.html`), {time: 1, url: `referred.html`});
-      assert.deepEqual(utils.parseHeaderRefresh(`1 , referred.html`), {time: 1, url: `referred.html`});
+      assert.deepEqual(utils.parseMetaRefresh(`1 referred.html`), {time: 1, url: `referred.html`});
+      assert.deepEqual(utils.parseMetaRefresh(`1;referred.html`), {time: 1, url: `referred.html`});
+      assert.deepEqual(utils.parseMetaRefresh(`1,referred.html`), {time: 1, url: `referred.html`});
+      assert.deepEqual(utils.parseMetaRefresh(`1 ; referred.html`), {time: 1, url: `referred.html`});
+      assert.deepEqual(utils.parseMetaRefresh(`1 , referred.html`), {time: 1, url: `referred.html`});
 
-      assert.deepEqual(utils.parseHeaderRefresh(`-1 referred.html`), {time: undefined, url: undefined});
-      assert.deepEqual(utils.parseHeaderRefresh(`+1 referred.html`), {time: undefined, url: undefined});
-      assert.deepEqual(utils.parseHeaderRefresh(`. referred.html`), {time: 0, url: `referred.html`});
-      assert.deepEqual(utils.parseHeaderRefresh(`.123.456 referred.html`), {time: 0, url: `referred.html`});
-      assert.deepEqual(utils.parseHeaderRefresh(`.123.456. referred.html`), {time: 0, url: `referred.html`});
+      assert.deepEqual(utils.parseMetaRefresh(`-1 referred.html`), {time: undefined, url: undefined});
+      assert.deepEqual(utils.parseMetaRefresh(`+1 referred.html`), {time: undefined, url: undefined});
+      assert.deepEqual(utils.parseMetaRefresh(`. referred.html`), {time: 0, url: `referred.html`});
+      assert.deepEqual(utils.parseMetaRefresh(`.123.456 referred.html`), {time: 0, url: `referred.html`});
+      assert.deepEqual(utils.parseMetaRefresh(`.123.456. referred.html`), {time: 0, url: `referred.html`});
 
-      assert.deepEqual(utils.parseHeaderRefresh(`1:referred.html`), {time: 1, url: ``});
-      assert.deepEqual(utils.parseHeaderRefresh(`1 u=referred.html`), {time: 1, url: `u=referred.html`});
-      assert.deepEqual(utils.parseHeaderRefresh(`1 u = referred.html`), {time: 1, url: `u = referred.html`});
-      assert.deepEqual(utils.parseHeaderRefresh(`1 url referred.html`), {time: 1, url: `url referred.html`});
+      assert.deepEqual(utils.parseMetaRefresh(`1:referred.html`), {time: 1, url: ``});
+      assert.deepEqual(utils.parseMetaRefresh(`1 u=referred.html`), {time: 1, url: `u=referred.html`});
+      assert.deepEqual(utils.parseMetaRefresh(`1 u = referred.html`), {time: 1, url: `u = referred.html`});
+      assert.deepEqual(utils.parseMetaRefresh(`1 url referred.html`), {time: 1, url: `url referred.html`});
 
-      assert.deepEqual(utils.parseHeaderRefresh(`1 url=referred.html`), {time: 1, url: `referred.html`});
+      assert.deepEqual(utils.parseMetaRefresh(`1 url=referred.html`), {time: 1, url: `referred.html`});
 
-      assert.deepEqual(utils.parseHeaderRefresh(`1 "referred.html"`), {time: 1, url: `referred.html`});
-      assert.deepEqual(utils.parseHeaderRefresh(`1 'referred.html'`), {time: 1, url: `referred.html`});
-      assert.deepEqual(utils.parseHeaderRefresh(`1 "referred.html 123`), {time: 1, url: `referred.html 123`});
-      assert.deepEqual(utils.parseHeaderRefresh(`1 "referred.html'123`), {time: 1, url: `referred.html'123`});
-      assert.deepEqual(utils.parseHeaderRefresh(`1 "referred.html"123`), {time: 1, url: `referred.html`});
-      assert.deepEqual(utils.parseHeaderRefresh(`1 'referred.html"123'`), {time: 1, url: `referred.html"123`});
-      assert.deepEqual(utils.parseHeaderRefresh(`1 'referred.html'123`), {time: 1, url: `referred.html`});
+      assert.deepEqual(utils.parseMetaRefresh(`1 "referred.html"`), {time: 1, url: `referred.html`});
+      assert.deepEqual(utils.parseMetaRefresh(`1 'referred.html'`), {time: 1, url: `referred.html`});
+      assert.deepEqual(utils.parseMetaRefresh(`1 "referred.html 123`), {time: 1, url: `referred.html 123`});
+      assert.deepEqual(utils.parseMetaRefresh(`1 "referred.html'123`), {time: 1, url: `referred.html'123`});
+      assert.deepEqual(utils.parseMetaRefresh(`1 "referred.html"123`), {time: 1, url: `referred.html`});
+      assert.deepEqual(utils.parseMetaRefresh(`1 'referred.html"123'`), {time: 1, url: `referred.html"123`});
+      assert.deepEqual(utils.parseMetaRefresh(`1 'referred.html'123`), {time: 1, url: `referred.html`});
 
-      assert.deepEqual(utils.parseHeaderRefresh(`1 url="referred.html"`), {time: 1, url: `referred.html`});
-      assert.deepEqual(utils.parseHeaderRefresh(`1 url='referred.html'`), {time: 1, url: `referred.html`});
-      assert.deepEqual(utils.parseHeaderRefresh(`1 url="referred.html `), {time: 1, url: `referred.html`});
-      assert.deepEqual(utils.parseHeaderRefresh(`1 url="referred.html'123`), {time: 1, url: `referred.html'123`});
-      assert.deepEqual(utils.parseHeaderRefresh(`1 url='referred.html"123'`), {time: 1, url: `referred.html"123`});
-      assert.deepEqual(utils.parseHeaderRefresh(`1 url='referred.html'123`), {time: 1, url: `referred.html`});
+      assert.deepEqual(utils.parseMetaRefresh(`1 url="referred.html"`), {time: 1, url: `referred.html`});
+      assert.deepEqual(utils.parseMetaRefresh(`1 url='referred.html'`), {time: 1, url: `referred.html`});
+      assert.deepEqual(utils.parseMetaRefresh(`1 url="referred.html `), {time: 1, url: `referred.html`});
+      assert.deepEqual(utils.parseMetaRefresh(`1 url="referred.html'123`), {time: 1, url: `referred.html'123`});
+      assert.deepEqual(utils.parseMetaRefresh(`1 url='referred.html"123'`), {time: 1, url: `referred.html"123`});
+      assert.deepEqual(utils.parseMetaRefresh(`1 url='referred.html'123`), {time: 1, url: `referred.html`});
 
-      assert.deepEqual(utils.parseHeaderRefresh(`1; URL=referred.html`), {time: 1, url: `referred.html`});
-      assert.deepEqual(utils.parseHeaderRefresh(`1, URL=referred.html`), {time: 1, url: `referred.html`});
-      assert.deepEqual(utils.parseHeaderRefresh(`1 ; URL = referred.html`), {time: 1, url: `referred.html`});
-      assert.deepEqual(utils.parseHeaderRefresh(`1 , URL = referred.html`), {time: 1, url: `referred.html`});
+      assert.deepEqual(utils.parseMetaRefresh(`1; URL=referred.html`), {time: 1, url: `referred.html`});
+      assert.deepEqual(utils.parseMetaRefresh(`1, URL=referred.html`), {time: 1, url: `referred.html`});
+      assert.deepEqual(utils.parseMetaRefresh(`1 ; URL = referred.html`), {time: 1, url: `referred.html`});
+      assert.deepEqual(utils.parseMetaRefresh(`1 , URL = referred.html`), {time: 1, url: `referred.html`});
 
-      assert.deepEqual(utils.parseHeaderRefresh(`1; uRl=referred.html`), {time: 1, url: `referred.html`});
+      assert.deepEqual(utils.parseMetaRefresh(`1; uRl=referred.html`), {time: 1, url: `referred.html`});
     });
   });
 

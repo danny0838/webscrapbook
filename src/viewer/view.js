@@ -227,7 +227,7 @@ const viewer = {
         switch (elem.nodeName.toLowerCase()) {
           case "meta": {
             if (elem.matches('meta[http-equiv="refresh"][content]')) {
-              const metaRefresh = utils.parseHeaderRefresh(elem.getAttribute("content"));
+              const metaRefresh = utils.parseMetaRefresh(elem.getAttribute("content"));
               if (metaRefresh.url) {
                 const info = viewer.parseUrl(metaRefresh.url, refUrl);
                 const [sourcePage] = utils.splitUrlByAnchor(refUrl);

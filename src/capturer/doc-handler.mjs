@@ -863,7 +863,7 @@ class RebuildLinksDocumentRewriter extends BaseDocumentRewriter {
   }
 
   rewriteMetaRefresh(elem) {
-    const {time, url} = utils.parseHeaderRefresh(elem.getAttribute("content"));
+    const {time, url} = utils.parseMetaRefresh(elem.getAttribute("content"));
     if (!url) { return; }
     const newUrl = this.rewriteUrl(url);
     if (!newUrl) { return; }
@@ -1822,7 +1822,7 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
         }
         case "refresh": {
           // rewrite meta refresh
-          const metaRefresh = utils.parseHeaderRefresh(elem.getAttribute("content"));
+          const metaRefresh = utils.parseMetaRefresh(elem.getAttribute("content"));
           if (metaRefresh.url) {
             const url = this.resolveLocalLink(metaRefresh.url, this.baseUrl);
             this.captureRewriteAttr(elem, "content", metaRefresh.time + (url ? "; url=" + url : ""));

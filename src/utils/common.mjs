@@ -1976,7 +1976,7 @@ function splitXmlAttribute(attr) {
 
 
 /****************************************************************************
- * String handling - HTML Header parsing
+ * String handling - HTTP Header parsing
  ***************************************************************************/
 
 /**
@@ -2113,14 +2113,19 @@ const parseHeaderContentDisposition = (() => {
   };
 })();
 
+
+/****************************************************************************
+ * String handling - HTML parsing
+ ***************************************************************************/
+
 /**
- * Parse Refresh string from the HTTP Header
+ * Parse the `content` attribute value of meta[http-equiv="refresh"].
  *
  * ref: https://html.spec.whatwg.org/multipage/semantics.html#attr-meta-http-equiv-refresh
  *
  * @return {{time: (integer|undefined), url: (string|undefined)}}
  */
-const parseHeaderRefresh = (() => {
+const parseMetaRefresh = (() => {
   const regex = new RegExp([
     '^',
     String.raw`[${ASCII_WHITESPACE}]*`,
@@ -2133,7 +2138,7 @@ const parseHeaderRefresh = (() => {
       String.raw`(?:"([^"]*)(?="|$)|'([^']*)(?='|$)|(.*)$)`,  // capture 2, 3, 4
     ')?',
   ].join(''), 'i');
-  return function parseHeaderRefresh(string) {
+  return function parseMetaRefresh(string) {
     const result = {time: undefined, url: undefined};
 
     if (typeof string !== 'string') {
@@ -2791,7 +2796,7 @@ function getMetaRefreshTarget(doc, baseUrl = doc.URL, {
       continue;
     }
 
-    const metaRefresh = parseHeaderRefresh(elem.getAttribute("content"));
+    const metaRefresh = parseMetaRefresh(elem.getAttribute("content"));
     if (typeof metaRefresh.time === 'undefined') {
       continue;
     }
@@ -3431,7 +3436,7 @@ export {
   splitXmlAttribute,
   parseHeaderContentType,
   parseHeaderContentDisposition,
-  parseHeaderRefresh,
+  parseMetaRefresh,
   compressCode,
   compressJsFunc,
   readFileAsArrayBuffer,

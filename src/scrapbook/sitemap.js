@@ -191,7 +191,7 @@ const sitemap = {
     const loadLinks = (doc, items) => {
       // meta refresh doesn't work in a shadowroot
       for (const elem of doc.querySelectorAll('meta[http-equiv="refresh" i][content]')) {
-        const {time, url} = utils.parseHeaderRefresh(elem.getAttribute("content"));
+        const {time, url} = utils.parseMetaRefresh(elem.getAttribute("content"));
         if (!checkInterlinkingUrl(url)) { continue; }
         items.push({
           url: new URL(url, doc.URL).href,
