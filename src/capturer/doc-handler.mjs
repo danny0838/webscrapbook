@@ -1884,9 +1884,9 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
       if (META_REFERRER_POLICY.has(policy)) {
         this.docRefPolicy = policy;
       } else {
-        const policyLegacy = META_REFERRER_POLICY_LEGACY.get(policy);
-        if (policyLegacy !== undefined) {
-          this.docRefPolicy = policy;
+        const policyCanonical = META_REFERRER_POLICY_LEGACY.get(policy);
+        if (policyCanonical !== undefined) {
+          this.docRefPolicy = policyCanonical;
         }
       }
     }

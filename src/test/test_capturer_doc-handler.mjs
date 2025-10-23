@@ -1791,7 +1791,7 @@ describe('capturer/doc-handler.mjs', function () {
               }
             });
 
-            $it.xfail()('should update document referrer policy to a canonical value when the value is legacy', async function () {
+            it('should update document referrer policy to a canonical value when the value is legacy', async function () {
               for (const [value, newValue] of META_REFERRER_POLICY_LEGACY) {
                 var doc = createDocFixture({tagName, attrs: {name: 'referrer', content: value}});
 
