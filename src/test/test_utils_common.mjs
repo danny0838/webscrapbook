@@ -2979,7 +2979,7 @@ div { image-background: var(${/(--sb(\d+)-2)/}); }`;
         {name: 'meta', attrs: {"http-equiv": "refresh", "content": "2; page3.html"}},
         {name: 'meta', attrs: {"http-equiv": "refresh", "content": "2; page4.html"}},
       ]});
-      assert.strictEqual(utils.getMetaRefreshTarget(doc, 'https://example.org/', true), 'https://example.org/page2.html');
+      assert.strictEqual(utils.getMetaRefreshTarget(doc, 'https://example.org/', {includeDelayedRefresh: true}), 'https://example.org/page2.html');
     });
 
     it('should skip a meta refresh if in <noscript>', function () {
@@ -2993,7 +2993,7 @@ div { image-background: var(${/(--sb(\d+)-2)/}); }`;
       var doc = createDocFixture({name: 'noscript', children: [
         {name: 'meta', attrs: {"http-equiv": "refresh", "content": "0; page.html"}},
       ]});
-      assert.strictEqual(utils.getMetaRefreshTarget(doc, 'https://example.org/', undefined, true), 'https://example.org/page.html');
+      assert.strictEqual(utils.getMetaRefreshTarget(doc, 'https://example.org/', {includeNoscript: true}), 'https://example.org/page.html');
     });
   });
 
