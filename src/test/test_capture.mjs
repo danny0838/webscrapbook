@@ -2593,7 +2593,7 @@ p { background-image: url("about:blank"); }`);
 
         var metaElems = doc.querySelectorAll('meta');
         assert.strictEqual(metaElems[0].getAttribute('content'), r`text/javascript; KEY=VALUE`);
-        assert.strictEqual(metaElems[1].getAttribute('content'), r`text/plain; charset=UTF-8; data=foo123; data2="中文\"789\""`);
+        assert.strictEqual(metaElems[1].getAttribute('content'), r`text/html; charset=UTF-8`);
         assert.strictEqual(metaElems[2].getAttribute('content'), r`text/css; CHARSET="GBK"; data=中文123`);
       });
 

@@ -2119,6 +2119,53 @@ const parseHeaderContentDisposition = (() => {
  ***************************************************************************/
 
 /**
+ * Parse the `content` attribute value of meta[http-equiv="content-type"].
+ *
+ * ref: https://html.spec.whatwg.org/multipage/urls-and-fetching.html#extracting-character-encodings-from-meta-elements
+ *
+ * @return {{charset: string, start: integer, end: integer}}
+ */
+const parseMetaContentType = (() => {
+  const regex = new RegExp(`(charset[${ASCII_WHITESPACE}]*=[${ASCII_WHITESPACE}]*)(?:("[^"]*"?)|('[^']*'?)|([^${ASCII_WHITESPACE};]*))`, 'i');
+
+  return function parseMetaContentType(string) {
+    const result = {charset: undefined, start: undefined, end: undefined};
+
+    if (typeof string !== 'string') {
+      return result;
+    }
+
+    const match = regex.exec(string);
+    if (match) {
+      if (match[2]) {
+        if (match[2].endsWith('"')) {
+          Object.assign(result, {
+            charset: trim(match[2].slice(1, -1)),
+            start: match.index + match[1].length + 1,
+            end: match.index + match[1].length + match[2].length - 1,
+          });
+        }
+      } else if (match[3]) {
+        if (match[3].endsWith("'")) {
+          Object.assign(result, {
+            charset: trim(match[3].slice(1, -1)),
+            start: match.index + match[1].length + 1,
+            end: match.index + match[1].length + match[3].length - 1,
+          });
+        }
+      } else if (match[4]) {
+        Object.assign(result, {
+          charset: match[4],
+          start: match.index + match[1].length,
+          end: match.index + match[1].length + match[4].length,
+        });
+      }
+    }
+    return result;
+  };
+})();
+
+/**
  * Parse the `content` attribute value of meta[http-equiv="refresh"].
  *
  * ref: https://html.spec.whatwg.org/multipage/semantics.html#attr-meta-http-equiv-refresh
@@ -3436,6 +3483,7 @@ export {
   splitXmlAttribute,
   parseHeaderContentType,
   parseHeaderContentDisposition,
+  parseMetaContentType,
   parseMetaRefresh,
   compressCode,
   compressJsFunc,

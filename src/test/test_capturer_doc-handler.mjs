@@ -1523,15 +1523,26 @@ describe('capturer/doc-handler.mjs', function () {
             sinon.assert.calledWithExactly(spyRewrite, elems[1], 'content', 'text/html; charset=UTF-8');
           });
 
-          it('should rewrite when `content` has `charset` parameter in altered case', async function () {
-            var doc = createDocFixture({tagName, attrs: {'http-equiv': 'content-type', 'content': 'text/html; CHARSET=BIG5'}});
+          it('should rewrite only the charset in various cases', async function () {
+            // Check only for representative cases here.
+            // See `utils.parseMetaContentType` for more deductable cases.
+            for (const input of [
+              'charset=Big5',
+              'text/html charset=Big5',
+              'application/xhtml+xml; charset="Big5"',
+              "image/svg+xml; charset='Big5'",
+              'TEXT/HTML; CHARSET=BIG5',
+              'text/html; charset = Big5 ',
+              'text/html; charset = " Big5 " ',
+              'text/html; charset="Big5"; k1=v1; k2="v2"',
+            ]) {
+              var doc = createDocFixture({tagName, attrs: {'http-equiv': 'content-type', 'content': input}});
 
-            var {doc, metaCharsetNode} = await new TestCapturer().captureDocument({doc, docUrl});
-            var elem = doc.querySelector(tagName);
-            assert.strictEqual(elem.getAttribute('content'), 'text/html; charset=UTF-8');
-            assert.strictEqual(metaCharsetNode, elem);
-
-            sinon.assert.calledWithExactly(spyRewrite, elem, 'content', 'text/html; charset=UTF-8');
+              var {doc, metaCharsetNode} = await new TestCapturer().captureDocument({doc, docUrl});
+              var elem = doc.querySelector(tagName);
+              assert.strictEqual(elem.getAttribute('content'), 'text/html; charset=UTF-8', `when input is '${input}'`);
+              assert.strictEqual(metaCharsetNode, elem);
+            }
           });
 
           it('should skip when in a shadow DOM', async function () {

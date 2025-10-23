@@ -1805,18 +1805,17 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
     if (elem.matches('[http-equiv][content]')) {
       switch (elem.getAttribute("http-equiv").toLowerCase()) {
         case "content-type": {
-          const contentType = utils.parseHeaderContentType(elem.getAttribute("content"));
-          if (contentType.parameters.charset && !this.metaCharsetNode) {
+          if (this.metaCharsetNode) { break; }
+
+          const content = elem.getAttribute("content");
+          const {charset, start, end} = utils.parseMetaContentType(content);
+          if (charset) {
             // force UTF-8
             this.metaCharsetNode = elem;
-            const regexToken = /^[!#$%&'*+.0-9A-Z^_`a-z|~-]+$/;
-            let value = contentType.type;
-            for (const field in contentType.parameters) {
-              let v = contentType.parameters[field];
-              if (field === 'charset') { v = 'UTF-8'; }
-              value += '; ' + field + '=' + (regexToken.test(v) ? v : '"' + utils.escapeQuotes(v) + '"');
-            }
-            this.captureRewriteAttr(elem, "content", value);
+
+            // rewrite with the most canonical form to prevent a compatibility issue
+            // (e.g. Firefox 79 cannot recognize content="text/html; charset=&quot;UTF-8&quot;"
+            this.captureRewriteAttr(elem, "content", 'text/html; charset=UTF-8');
           }
           break;
         }
