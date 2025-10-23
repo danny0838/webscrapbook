@@ -5,6 +5,7 @@ import {
   GREEN_BMP_B64,
 } from "./unittest.mjs";
 import sinon from "./lib/sinon-esm.js";
+import {NS_HTML, NS_SVG, NS_MATHML} from "../utils/common.mjs";
 
 import * as utils from "../utils/common.mjs";
 
@@ -2966,6 +2967,15 @@ div { image-background: var(${/(--sb(\d+)-2)/}); }`;
       assert.strictEqual(utils.getMetaRefreshTarget(doc, 'https://example.org/'), 'https://example.org/page2.html');
     });
 
+    it('should skip a meta refresh if not in HTML namespace', function () {
+      var doc = createDocFixture({
+        type: 'svg',
+        name: 'meta', ns: NS_SVG,
+        attrs: {"http-equiv": "refresh", "content": "0; page1.html"},
+      });
+      assert.strictEqual(utils.getMetaRefreshTarget(doc, 'https://example.org/'), undefined);
+    });
+
     it('should return the URL resolved with altered base URL if there is a base[href]', function () {
       var doc = createDocFixture({name: 'head', children: [
         {name: 'base', attrs: {target: "_blank"}},
@@ -2981,6 +2991,19 @@ div { image-background: var(${/(--sb(\d+)-2)/}); }`;
         {name: 'base', attrs: {target: "_blank"}},
         {name: 'base', attrs: {href: "https://exa[mple.org/"}},
         {name: 'base', attrs: {href: "./baseUrl2/"}},
+        {name: 'meta', attrs: {"http-equiv": "refresh", "content": "0; page.html"}},
+      ]});
+      assert.strictEqual(utils.getMetaRefreshTarget(doc, 'https://example.org/'), 'https://example.org/page.html');
+    });
+
+    it('should ignore base[href] if not in HTML namespace', function () {
+      var doc = createDocFixture({name: 'body', children: [
+        {name: 'svg', ns: NS_SVG, children: [
+          {name: 'base', ns: NS_SVG, attrs: {href: "./baseUrl/"}},
+        ]},
+        {name: 'math', ns: NS_MATHML, children: [
+          {name: 'base', ns: NS_MATHML, attrs: {href: "./baseUrl2/"}},
+        ]},
         {name: 'meta', attrs: {"http-equiv": "refresh", "content": "0; page.html"}},
       ]});
       assert.strictEqual(utils.getMetaRefreshTarget(doc, 'https://example.org/'), 'https://example.org/page.html');
@@ -3013,6 +3036,20 @@ div { image-background: var(${/(--sb(\d+)-2)/}); }`;
     it('should skip a meta refresh if in <noscript>', function () {
       var doc = createDocFixture({name: 'noscript', children: [
         {name: 'meta', attrs: {"http-equiv": "refresh", "content": "0; page.html"}},
+      ]});
+      assert.strictEqual(utils.getMetaRefreshTarget(doc, 'https://example.org/'), undefined);
+
+      // ignore svg:noscript
+      var doc = createDocFixture({name: 'noscript', ns: NS_SVG, children: [
+        {name: 'meta', attrs: {"http-equiv": "refresh", "content": "0; page.html"}},
+      ]});
+      assert.strictEqual(utils.getMetaRefreshTarget(doc, 'https://example.org/'), 'https://example.org/page.html');
+
+      // don't ignore noscript svg:noscript
+      var doc = createDocFixture({name: 'noscript', children: [
+        {name: 'noscript', ns: NS_SVG, children: [
+          {name: 'meta', attrs: {"http-equiv": "refresh", "content": "0; page.html"}},
+        ]},
       ]});
       assert.strictEqual(utils.getMetaRefreshTarget(doc, 'https://example.org/'), undefined);
     });

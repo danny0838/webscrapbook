@@ -409,6 +409,15 @@ const NS_SVG = "http://www.w3.org/2000/svg";
 const NS_XLINK = "http://www.w3.org/1999/xlink";
 const NS_MATHML = "http://www.w3.org/1998/Math/MathML";
 
+const NS_RESOLVER_DICT = {
+  html: NS_HTML,
+  svg: NS_SVG,
+  math: NS_MATHML,
+  xlink: NS_XLINK,
+  xmlns: NS_XMLNS,
+};
+const NS_RESOLVER = p => (NS_RESOLVER_DICT[p]);
+
 const HTTP_STATUS_TEXT = {
   // 1××: Informational
   100: "Continue",
@@ -2771,8 +2780,10 @@ function getMetaRefreshTarget(doc, baseUrl = doc.URL, {
   let lastMetaRefreshUrl;
   let seenBaseElem = false;
   for (const elem of doc.querySelectorAll('base[href], meta[http-equiv="refresh"][content]')) {
+    if (elem.namespaceURI !== NS_HTML) { continue; }
+
     // update baseUrl when seeing the first base[href]
-    if (elem.matches('base') && !elem.closest('svg, math') && !seenBaseElem) {
+    if (elem.matches('base') && !seenBaseElem) {
       try {
         baseUrl = new URL(elem.getAttribute('href'), baseUrl).href;
       } catch {}
@@ -2787,7 +2798,7 @@ function getMetaRefreshTarget(doc, baseUrl = doc.URL, {
     if (!includeDelayedRefresh && metaRefresh.time !== 0) {
       continue;
     }
-    if (!includeNoscript && elem.closest('noscript')) {
+    if (!includeNoscript && doc.evaluate('ancestor::html:noscript', elem, NS_RESOLVER).iterateNext()) {
       continue;
     }
     if (metaRefresh.time > lastMetaRefreshTime) {
@@ -3353,6 +3364,7 @@ export {
   NS_SVG,
   NS_XLINK,
   NS_MATHML,
+  NS_RESOLVER,
   userAgent,
   loadOptions,
   loadOptionsAuto,
