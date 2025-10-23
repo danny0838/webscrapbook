@@ -1584,6 +1584,122 @@ describe('utils/common.mjs', function () {
     });
   });
 
+  describe('parseMetaContentType()', function () {
+    context('for double quoted charset', function () {
+      it('should return an object with trimmed quoted charset', function () {
+        assert.deepEqual(utils.parseMetaContentType('text/html; charset="utf-8"'), {charset: 'utf-8', start: 20, end: 25});
+        assert.deepEqual(utils.parseMetaContentType('text/html; charset="utf-8 big5"'), {charset: 'utf-8 big5', start: 20, end: 30});
+        assert.deepEqual(utils.parseMetaContentType('text/html; charset="  utf-8  "'), {charset: 'utf-8', start: 20, end: 29});
+        assert.deepEqual(utils.parseMetaContentType('text/html; charset="\nutf-8\n"'), {charset: 'utf-8', start: 20, end: 27});
+        assert.deepEqual(utils.parseMetaContentType('text/html; charset=" \t\r\n\f utf-8 \t\r\n\f "'), {charset: 'utf-8', start: 20, end: 37});
+      });
+
+      it('should return the first match', function () {
+        assert.deepEqual(utils.parseMetaContentType('text/html; charset="utf-8"; charset="big5"'), {charset: 'utf-8', start: 20, end: 25});
+      });
+
+      it('should work with altered case', function () {
+        assert.deepEqual(utils.parseMetaContentType('text/html; CHARSET="UTF-8"'), {charset: 'UTF-8', start: 20, end: 25});
+        assert.deepEqual(utils.parseMetaContentType('text/html; Charset="utf-8"'), {charset: 'utf-8', start: 20, end: 25});
+      });
+
+      it('should work with ASCII white spaces around "charset"', function () {
+        assert.deepEqual(utils.parseMetaContentType('text/html; charset \t\r\n\f = \t\r\n\f "utf-8"'), {charset: 'utf-8', start: 32, end: 37});
+      });
+
+      it('should work with various prefix', function () {
+        assert.deepEqual(utils.parseMetaContentType('charset="utf-8"'), {charset: 'utf-8', start: 9, end: 14});
+        assert.deepEqual(utils.parseMetaContentType('text/html charset="utf-8"'), {charset: 'utf-8', start: 19, end: 24});
+        assert.deepEqual(utils.parseMetaContentType('application/xhtml+xml;charset="utf-8"'), {charset: 'utf-8', start: 31, end: 36});
+        assert.deepEqual(utils.parseMetaContentType('image/svg+xml,charset="utf-8"'), {charset: 'utf-8', start: 23, end: 28});
+      });
+
+      it('should return default object for unmatched quote', function () {
+        assert.deepEqual(utils.parseMetaContentType('text/html; charset="utf-8'), {charset: undefined, start: undefined, end: undefined});
+      });
+    });
+
+    context('for single quoted charset', function () {
+      it('should return an object with trimmed quoted charset', function () {
+        assert.deepEqual(utils.parseMetaContentType("text/html; charset='utf-8'"), {charset: "utf-8", start: 20, end: 25});
+        assert.deepEqual(utils.parseMetaContentType("text/html; charset='utf-8 big5'"), {charset: "utf-8 big5", start: 20, end: 30});
+        assert.deepEqual(utils.parseMetaContentType("text/html; charset='  utf-8  '"), {charset: "utf-8", start: 20, end: 29});
+        assert.deepEqual(utils.parseMetaContentType("text/html; charset='\nutf-8\n'"), {charset: "utf-8", start: 20, end: 27});
+        assert.deepEqual(utils.parseMetaContentType("text/html; charset=' \t\r\n\f utf-8 \t\r\n\f '"), {charset: "utf-8", start: 20, end: 37});
+      });
+
+      it('should return the first match', function () {
+        assert.deepEqual(utils.parseMetaContentType("text/html; charset='utf-8'; charset='big5'"), {charset: 'utf-8', start: 20, end: 25});
+      });
+
+      it('should work with altered case', function () {
+        assert.deepEqual(utils.parseMetaContentType("text/html; CHARSET='UTF-8'"), {charset: 'UTF-8', start: 20, end: 25});
+        assert.deepEqual(utils.parseMetaContentType("text/html; Charset='utf-8'"), {charset: 'utf-8', start: 20, end: 25});
+      });
+
+      it('should work with ASCII white spaces around "charset"', function () {
+        assert.deepEqual(utils.parseMetaContentType("text/html; charset \t\r\n\f = \t\r\n\f 'utf-8'"), {charset: 'utf-8', start: 32, end: 37});
+      });
+
+      it('should work with various prefix', function () {
+        assert.deepEqual(utils.parseMetaContentType("charset='utf-8'"), {charset: 'utf-8', start: 9, end: 14});
+        assert.deepEqual(utils.parseMetaContentType("text/html charset='utf-8'"), {charset: 'utf-8', start: 19, end: 24});
+        assert.deepEqual(utils.parseMetaContentType("application/xhtml+xml;charset='utf-8'"), {charset: 'utf-8', start: 31, end: 36});
+        assert.deepEqual(utils.parseMetaContentType("image/svg+xml,charset='utf-8'"), {charset: 'utf-8', start: 23, end: 28});
+      });
+
+      it('should return default object for unmatched quote', function () {
+        assert.deepEqual(utils.parseMetaContentType("text/html; charset='utf-8"), {charset: undefined, start: undefined, end: undefined});
+      });
+    });
+
+    context('for unquoted charset', function () {
+      it('should return an object with the charset', function () {
+        assert.deepEqual(utils.parseMetaContentType('text/html; charset=utf-8'), {charset: 'utf-8', start: 19, end: 24});
+      });
+
+      it('should truncate at an ASCII white space', function () {
+        assert.deepEqual(utils.parseMetaContentType('text/html; charset=utf-8 foo'), {charset: 'utf-8', start: 19, end: 24});
+        assert.deepEqual(utils.parseMetaContentType('text/html; charset=utf-8\tfoo'), {charset: 'utf-8', start: 19, end: 24});
+        assert.deepEqual(utils.parseMetaContentType('text/html; charset=utf-8\nfoo'), {charset: 'utf-8', start: 19, end: 24});
+        assert.deepEqual(utils.parseMetaContentType('text/html; charset=utf-8\rfoo'), {charset: 'utf-8', start: 19, end: 24});
+        assert.deepEqual(utils.parseMetaContentType('text/html; charset=utf-8\ffoo'), {charset: 'utf-8', start: 19, end: 24});
+      });
+
+      it('should truncate at a semicolon', function () {
+        assert.deepEqual(utils.parseMetaContentType('text/html; charset=utf-8;foo'), {charset: 'utf-8', start: 19, end: 24});
+      });
+
+      it('should return default object for empty value', function () {
+        assert.deepEqual(utils.parseMetaContentType("text/html; charset="), {charset: undefined, start: undefined, end: undefined});
+      });
+
+      it('should work with altered case', function () {
+        assert.deepEqual(utils.parseMetaContentType('text/html; CHARSET=UTF-8'), {charset: 'UTF-8', start: 19, end: 24});
+        assert.deepEqual(utils.parseMetaContentType('text/html; Charset=utf-8'), {charset: 'utf-8', start: 19, end: 24});
+      });
+
+      it('should work with ASCII white spaces around "charset"', function () {
+        assert.deepEqual(utils.parseMetaContentType('text/html; charset \t\r\n\f = \t\r\n\f utf-8'), {charset: 'utf-8', start: 31, end: 36});
+      });
+
+      it('should work with various prefix', function () {
+        assert.deepEqual(utils.parseMetaContentType('charset=utf-8'), {charset: 'utf-8', start: 8, end: 13});
+        assert.deepEqual(utils.parseMetaContentType('text/html charset=utf-8'), {charset: 'utf-8', start: 18, end: 23});
+        assert.deepEqual(utils.parseMetaContentType("application/xhtml+xml;charset=utf-8"), {charset: 'utf-8', start: 30, end: 35});
+        assert.deepEqual(utils.parseMetaContentType("image/svg+xml,charset=utf-8"), {charset: 'utf-8', start: 22, end: 27});
+      });
+    });
+
+    context('for missing charset', function () {
+      it('should return default object', function () {
+        assert.deepEqual(utils.parseMetaContentType(''), {charset: undefined, start: undefined, end: undefined});
+        assert.deepEqual(utils.parseMetaContentType('text/html'), {charset: undefined, start: undefined, end: undefined});
+        assert.deepEqual(utils.parseMetaContentType('text/html charset'), {charset: undefined, start: undefined, end: undefined});
+      });
+    });
+  });
+
   describe('parseMetaRefresh()', function () {
     it('should return an object with time and url properties', function () {
       assert.deepEqual(utils.parseMetaRefresh(``), {time: undefined, url: undefined});
