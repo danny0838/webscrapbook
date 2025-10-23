@@ -2309,7 +2309,7 @@ p { background-image: url("about:blank"); }`);
 
     /**
      * capturer.captureUrl
-     * utils.parseHeaderRefresh
+     * utils.parseMetaRefresh
      */
     describe('should save refreshed target for zero-time meta refresh', function () {
       it('time = 0: should save the refreshed page', async function () {
