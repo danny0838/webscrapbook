@@ -2759,13 +2759,14 @@ function getAnchoredPosition(elem, {clientX, clientY}, viewport) {
  *
  * @param {Document} doc
  * @param {string} [baseUrl] - An arbitarary reference URL. Use document.URL if not set.
- * @param {boolean} [includeDelayedRefresh] - Also consider meta refresh with non-0 refresh time.
- * @param {boolean} [includeNoscript] - Also consider meta refresh in <noscript>.
+ * @param {Object} [options]
+ * @param {boolean} [options.includeDelayedRefresh] - Also consider meta refresh with non-0 refresh time.
+ * @param {boolean} [options.includeNoscript] - Also consider meta refresh in <noscript>.
  * @return {string|undefined} Absolute URL of the meta refresh target.
  */
-function getMetaRefreshTarget(doc, baseUrl = doc.URL,
+function getMetaRefreshTarget(doc, baseUrl = doc.URL, {
   includeDelayedRefresh = false, includeNoscript = false,
-) {
+} = {}) {
   let lastMetaRefreshTime = Infinity;
   let lastMetaRefreshUrl;
   let seenBaseElem = false;
