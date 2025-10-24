@@ -2,7 +2,7 @@
  * Content script for editor functionality.
  *****************************************************************************/
 
-import {ANNOTATION_CSS} from "../utils/common.mjs";
+import {ANNOTATION_CSS, NS_HTML, NS_SVG} from "../utils/common.mjs";
 import * as utils from "../utils/common.mjs";
 import {DocumentRewriter} from "../utils/doc-handler.mjs";
 import {StorageCache} from "../utils/cache.mjs";
@@ -104,7 +104,7 @@ editor.init = async function ({willActive = !editor.active, force = false} = {})
   }
 
   // do not load the toolbar if the document cannot be load as HTML
-  if (document.documentElement.nodeName.toLowerCase() !== "html") {
+  if (document.documentElement.namespaceURI !== NS_HTML) {
     return;
   }
 
@@ -1911,7 +1911,7 @@ editor.isDocumentScripted = function (doc) {
   for (const fdoc of utils.flattenFrames(doc)) {
     for (const elem of fdoc.querySelectorAll("*")) {
       // check <script> elements
-      if (elem.nodeName.toLowerCase() === 'script') {
+      if ([NS_HTML, NS_SVG].includes(elem.namespaceURI) && elem.localName === 'script') {
         if (SCRIPT_TYPES.has(elem.type.toLowerCase()) &&
             !ALLOWED_SCRAPBOOK_SCRIPTS.has(utils.getScrapbookObjectType(elem))) {
           if (elem.src) {
@@ -1924,7 +1924,7 @@ editor.isDocumentScripted = function (doc) {
 
       // check on* attributes
       for (const attr of elem.attributes) {
-        if (attr.name.toLowerCase().startsWith("on")) {
+        if (!attr.namespaceURI && attr.localName.startsWith("on")) {
           return true;
         }
       }
