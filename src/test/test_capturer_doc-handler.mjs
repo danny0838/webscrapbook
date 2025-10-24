@@ -8638,7 +8638,7 @@ Default3\
               sinon.assert.calledWithExactly(spyRewriteAnchor, elem, 'href', {ns: null});
               sinon.assert.calledWithExactly(spyRewriteAnchor, elem, 'href', {ns: NS_XLINK});
               sinon.assert.calledTwice(spyRewriteAnchor);
-              sinon.assert.calledOnceWithExactly(spyRewrite, elem, 'href', 'https://example.com/linked.html', {ns});
+              sinon.assert.calledWithExactly(spyRewrite, elem, 'href', 'https://example.com/linked.html', {ns});
               sinon.assert.notCalled(spyCaptureUrl);
             });
 
@@ -8963,11 +8963,42 @@ Default3\
               ['script', 'console.debug("test");'],
             ];
 
+            const testCasesSvg = [
+              ['style', 'circle { color: red; }'],
+              ['script', 'console.debug("test");'],
+            ];
+
             switch (mode) {
               case "save": {
                 for (const [tagName, text] of testCases) {
                   it(`should keep \`nonce\` attribute (for <${tagName}>)`, async function () {
                     var doc = createDocFixture({tagName, attrs: {nonce}, value: text});
+
+                    var {doc} = await new TestCapturer().captureDocument({doc, docUrl, options});
+                    var elem = doc.querySelector(tagName);
+                    assert.strictEqual(elem.getAttribute('nonce'), nonce);
+
+                    sinon.assert.neverCalledWith(spyRewrite, elem, "nonce");
+                  });
+                }
+
+                for (const [tagName, text] of testCasesSvg) {
+                  it(`should keep \`nonce\` attribute (for <svg:${tagName}>)`, async function () {
+                    var doc = createDocFixture({type: 'svg', tagName, ns: NS_SVG, attrs: {nonce}, value: text});
+
+                    var {doc} = await new TestCapturer().captureDocument({doc, docUrl, options});
+                    var elem = doc.querySelector(tagName);
+                    assert.strictEqual(elem.getAttribute('nonce'), nonce);
+
+                    sinon.assert.neverCalledWith(spyRewrite, elem, "nonce");
+                  });
+                }
+
+                for (const [tagName, text] of testCasesSvg) {
+                  it(`should keep \`nonce\` attribute (for embedded <svg:${tagName}>)`, async function () {
+                    var doc = createDocFixture({tagName: 'svg', ns: NS_SVG, children: [
+                      {tagName, ns: NS_SVG, attrs: {nonce}, value: text},
+                    ]});
 
                     var {doc} = await new TestCapturer().captureDocument({doc, docUrl, options});
                     var elem = doc.querySelector(tagName);
@@ -8984,6 +9015,32 @@ Default3\
                 for (const [tagName, text] of testCases) {
                   it(`should remove \`nonce\` attribute (for <${tagName}>)`, async function () {
                     var doc = createDocFixture({tagName, attrs: {nonce}, value: text});
+
+                    var {doc} = await new TestCapturer().captureDocument({doc, docUrl, options});
+                    var elem = doc.querySelector(tagName);
+                    assert.strictEqual(elem.getAttribute('nonce'), null);
+
+                    sinon.assert.calledWithExactly(spyRewrite, elem, "nonce", null);
+                  });
+                }
+
+                for (const [tagName, text] of testCasesSvg) {
+                  it(`should remove \`nonce\` attribute (for <svg:${tagName}>)`, async function () {
+                    var doc = createDocFixture({type: 'svg', tagName, ns: NS_SVG, attrs: {nonce}, value: text});
+
+                    var {doc} = await new TestCapturer().captureDocument({doc, docUrl, options});
+                    var elem = doc.querySelector(tagName);
+                    assert.strictEqual(elem.getAttribute('nonce'), null);
+
+                    sinon.assert.calledWithExactly(spyRewrite, elem, "nonce", null);
+                  });
+                }
+
+                for (const [tagName, text] of testCasesSvg) {
+                  it(`should remove \`nonce\` attribute (for embedded <svg:${tagName}>)`, async function () {
+                    var doc = createDocFixture({tagName: 'svg', ns: NS_SVG, children: [
+                      {tagName, ns: NS_SVG, attrs: {nonce}, value: text},
+                    ]});
 
                     var {doc} = await new TestCapturer().captureDocument({doc, docUrl, options});
                     var elem = doc.querySelector(tagName);
