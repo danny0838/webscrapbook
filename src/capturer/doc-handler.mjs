@@ -1612,6 +1612,17 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
 
     this[`_handle_{${elem.namespaceURI}}`]?.call(this, elem);
 
+    // handle nonce
+    switch (options["capture.contentSecurityPolicy"]) {
+      case "save":
+        // do nothing
+        break;
+      case "remove":
+      default:
+        this.captureRewriteAttr(elem, "nonce", null); // this is meaningless as CSP is removed
+        break;
+    }
+
     // styles: style attribute
     if (elem.hasAttribute("style")) {
       const baseUrlCurrent = this.baseUrl;
@@ -1725,17 +1736,6 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
         shadowRootList.push(shadowRoot);
         this.requireBasicLoader = true;
       }
-    }
-
-    // handle nonce
-    switch (options["capture.contentSecurityPolicy"]) {
-      case "save":
-        // do nothing
-        break;
-      case "remove":
-      default:
-        this.captureRewriteAttr(elem, "nonce", null); // this is meaningless as CSP is removed
-        break;
     }
 
     // record custom elements
