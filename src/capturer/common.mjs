@@ -3353,11 +3353,6 @@ class BaseCapturer {
       },
     });
 
-    // special handling for blob response
-    if (!('url' in response)) {
-      return response;
-    }
-
     return Object.assign({}, response, {
       url: this.getRedirectedUrl(response.url, docUrlHash),
       sourceUrl: envDocUrl,

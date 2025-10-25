@@ -6,7 +6,7 @@
  * https://opensource.org/licenses/MIT
  *****************************************************************************/
 
-import {userAgent, delay} from "../utils/common.mjs";
+import {userAgent, delay, filepathParts} from "../utils/common.mjs";
 import {deserializeObject} from "../utils/cache.mjs";
 import {Capturer} from "../capturer/capturer.mjs";
 
@@ -14,6 +14,63 @@ let config;
 let backend;
 let localhost;
 let localhost2;
+
+/**
+ * Mocked Capturer that saves files internally and adds to the `data` property
+ * of each result.
+ */
+class TestCapturerBase extends Capturer {
+  __savedData = new Map();
+
+  async run(taskInfo) {
+    const results = await super.run(taskInfo);
+    for (const result of results) {
+      const {timeId} = result;
+      const data = this.__savedData.get(timeId);
+      if (data !== undefined) {
+        result.data = data;
+      }
+    }
+    return results;
+  }
+
+  async getAvailableSaveFilename({filename}) {
+    return filepathParts(filename)[1];
+  }
+
+  async _saveMainDocumentBlob(blob, {timeId, filename, targetDir}) {
+    this.__savedData.set(timeId, blob);
+    return {filename, targetDir};
+  }
+
+  async _saveMainDocumentEntries(entries, {timeId, filename, targetDir}) {
+    const map = new Map();
+    this.__savedData.set(timeId, map);
+    for (const [filename, _sourceUrl, blob] of entries) {
+      map.set(filename, blob);
+    }
+    return {filename, targetDir};
+  }
+}
+
+class TestCapturerSimpleRaw extends TestCapturerBase {
+  async run(taskInfo) {
+    const [result] = await super.run(taskInfo);
+    return result;
+  }
+}
+
+class TestCapturerSimple extends TestCapturerBase {
+  async run(taskInfo) {
+    const [result] = await super.run(taskInfo);
+
+    if (result.error) {
+      throw new Error(result.error.message);
+    }
+
+    return result.data;
+  }
+}
 
 async function init() {
   const config1 = await (async () => {
@@ -178,10 +235,10 @@ async function openTestTab(createProperties, handler) {
  * @param {Object} [options]
  * @param {boolean} [options.headless]
  * @param {float} [options.delay]
- * @param {boolean} [options.rawResponse]
+ * @param {Object} [options.cls]
  */
 async function capture(params, options = {}) {
-  const {headless = false, delay: delayTime, rawResponse = false} = options;
+  const {headless = false, delay: delayTime, cls = TestCapturerSimple} = options;
   const pageTab = !headless && await openPageTab(params.url);
 
   if (typeof delayTime === 'number') {
@@ -197,20 +254,12 @@ async function capture(params, options = {}) {
     ],
   };
 
-  const capturer = new Capturer();
-  const [result] = await capturer.run(taskInfo);
+  const capturer = new cls();
+  const result = await capturer.run(taskInfo);
 
   !headless && await browser.tabs.remove(pageTab.id);
 
-  if (rawResponse) {
-    return result;
-  }
-
-  if (result.error) {
-    throw new Error(result.error.message);
-  }
-
-  return deserializeObject(result);
+  return result;
 }
 
 /**
@@ -304,6 +353,9 @@ async function backendRequest({
 }
 
 export {
+  TestCapturerBase,
+  TestCapturerSimpleRaw,
+  TestCapturerSimple,
   init,
   config,
   backend,

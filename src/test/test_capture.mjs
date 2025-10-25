@@ -4,10 +4,12 @@ import {
   getRulesFromCssText, getToken, regex, rawRegex, cssRegex,
 } from "./unittest.mjs";
 import {
+  TestCapturerSimpleRaw,
   checkBackendServer, checkTestServer, checkExtension,
   backend, localhost, localhost2,
   capture, captureHeadless, backendRequest,
 } from "./extension.mjs";
+import {Capturer} from "../capturer/capturer.mjs";
 import {
   userAgent, xhr, escapeRegExp,
   readFileAsText, readFileAsArrayBuffer, readFileAsDataURL, readFileAsDocument,
@@ -20,7 +22,7 @@ const $it = $(it);
 const r = String.raw;
 
 const baseOptions = {
-  "capture.saveTo": "memory",
+  "capture.saveTo": "folder",
   "capture.saveAs": "zip",
   "capture.saveAsciiFilename": false,
   "capture.saveOverwrite": false,
@@ -142,6 +144,46 @@ $describe.skipIf($.noExtensionBrowser)('Capture tests', function () {
      * capturer.downloadBlob
      */
     describe('HTML', function () {
+      it('capture.saveAs = folder', async function () {
+        var options = Object.assign({}, baseOptions, {
+          "capture.saveAs": "folder",
+        });
+
+        var data = await capture({
+          url: `${localhost}/capture_html/index.html`,
+          options,
+        });
+
+        var indexBlob = data.get('index.html');
+        var doc = await readFileAsDocument(indexBlob);
+        assert.exists(doc);
+        assert.strictEqual(doc.contentType, "text/html");
+        assert.strictEqual(doc.characterSet, "UTF-8");
+        assert.strictEqual(doc.doctype.name, "html");
+        assert.strictEqual(doc.doctype.publicId, "");
+        assert.strictEqual(doc.doctype.systemId, "");
+
+        assert.exists(doc.querySelector('meta[charset="UTF-8"]'));
+        assert.strictEqual(doc.title, 'ABC 中文 𠀀 にほんご');
+        assert.strictEqual(doc.querySelector('p').textContent, 'ABC 中文 𠀀 にほんご');
+
+        var imgElem = doc.querySelectorAll('img')[0];
+        assert.exists(imgElem);
+        assert.strictEqual(imgElem.getAttribute('src'), 'red.bmp');
+        var imgBlob = data.get('red.bmp');
+        assert.exists(imgBlob);
+        var imgData = await readFileAsText(imgBlob, false);
+        assert.strictEqual(btoa(imgData), RED_BMP_B64);
+
+        var imgElem = doc.querySelectorAll('img')[1];
+        assert.exists(imgElem);
+        assert.strictEqual(imgElem.getAttribute('src'), 'blue.bmp');
+        var imgBlob = data.get('blue.bmp');
+        assert.exists(imgBlob);
+        var imgData = await readFileAsText(imgBlob, false);
+        assert.strictEqual(btoa(imgData), BLUE_BMP_B64);
+      });
+
       it('capture.saveAs = htz', async function () {
         var options = Object.assign({}, baseOptions, {
           "capture.saveAs": "zip",
@@ -2286,7 +2328,7 @@ p { background-image: url("about:blank"); }`);
         var result = await captureHeadless({
           url: `${localhost}/capture_headless_metaRefresh/time-0-self.html`,
           options: baseOptions,
-        }, {rawResponse: true});
+        }, {cls: TestCapturerSimpleRaw});
         assert.exists(result.error);
       });
 
@@ -2386,11 +2428,11 @@ p { background-image: url("about:blank"); }`);
       });
 
       it('for tab: should fetch title and favicon', async function () {
-        var response = await capture({
+        var [response] = await capture({
           url: `${localhost}/capture_bookmark/basic.html`,
           mode: "bookmark",
           options,
-        }, {rawResponse: true});
+        }, {cls: Capturer});
         var {timeId: itemId} = response;
 
         var {data: [response]} = await backendRequest({
@@ -2417,11 +2459,11 @@ p { background-image: url("about:blank"); }`);
       });
 
       it('for URL: should fetch title and favicon', async function () {
-        var response = await captureHeadless({
+        var [response] = await captureHeadless({
           url: `${localhost}/capture_bookmark/basic.html`,
           mode: "bookmark",
           options,
-        }, {rawResponse: true});
+        }, {cls: Capturer});
         var {timeId: itemId} = response;
 
         var {data: [response]} = await backendRequest({
@@ -2448,11 +2490,11 @@ p { background-image: url("about:blank"); }`);
       });
 
       it('for URL (attachment): should ignore title and favicon', async function () {
-        var response = await captureHeadless({
+        var [response] = await captureHeadless({
           url: `${localhost}/capture_bookmark/basic.py`,
           mode: "bookmark",
           options,
-        }, {rawResponse: true});
+        }, {cls: Capturer});
         var {timeId: itemId} = response;
 
         var {data: [response]} = await backendRequest({
@@ -18636,10 +18678,10 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
           "capture.saveAs": "folder",
         });
 
-        var response = await capture({
+        var [response] = await capture({
           url: `${localhost}/capture_recapture/page1/index.html`,
           options,
-        }, {rawResponse: true});
+        }, {cls: Capturer});
         ({timeId: itemId} = response);
 
         // these overriding options should be safely ignored
@@ -18654,11 +18696,11 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
           ]),
         });
 
-        var response = await captureHeadless({
+        var [response] = await captureHeadless({
           url: `${localhost}/capture_recapture/page2/index.html`,
           options,
           recaptureInfo: {bookId: "", itemId},
-        }, {rawResponse: true});
+        }, {cls: Capturer});
         ({timeId: itemId2} = response);
       });
 
@@ -18724,10 +18766,10 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
           "capture.saveAs": "folder",
         });
 
-        var response = await capture({
+        var [response] = await capture({
           url: `${localhost}/capture_recapture_migrate/page1/index.html`,
           options,
-        }, {rawResponse: true});
+        }, {cls: Capturer});
         var {timeId: itemId} = response;
 
         var html = await backendRequest({
@@ -18750,11 +18792,11 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
           csrfToken: true,
         }).then(r => r.json());
 
-        var response = await captureHeadless({
+        var [response] = await captureHeadless({
           url: `${localhost}/capture_recapture_migrate/page1/index.html`,
           options,
           recaptureInfo: {bookId: "", itemId},
-        }, {rawResponse: true});
+        }, {cls: Capturer});
         var {timeId: itemId2} = response;
 
         var doc = (await xhr({
@@ -18765,11 +18807,11 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
         assert.exists(doc.querySelector('scrapbook-linemarker[data-scrapbook-id="20240928140505409"]'));
 
         /* recapture slightly modified document */
-        var response = await captureHeadless({
+        var [response] = await captureHeadless({
           url: `${localhost}/capture_recapture_migrate/page2/index.html`,
           options,
           recaptureInfo: {bookId: "", itemId},
-        }, {rawResponse: true});
+        }, {cls: Capturer});
         var {timeId: itemId3} = response;
 
         var doc = (await xhr({
@@ -18787,10 +18829,10 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
           "capture.saveAs": "folder",
         });
 
-        var response = await capture({
+        var [response] = await capture({
           url: `${localhost}/capture_recapture_migrate/page1/index.html`,
           options,
-        }, {rawResponse: true});
+        }, {cls: Capturer});
         var {timeId: itemId} = response;
 
         var html = await backendRequest({
@@ -18813,11 +18855,11 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
           csrfToken: true,
         }).then(r => r.json());
 
-        var response = await captureHeadless({
+        var [response] = await captureHeadless({
           url: `${localhost}/capture_recapture_migrate/page1/index.html`,
           options,
           recaptureInfo: {bookId: "", itemId},
-        }, {rawResponse: true});
+        }, {cls: Capturer});
         var {timeId: itemId2} = response;
 
         var doc = (await xhr({
@@ -18828,11 +18870,11 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
         assert.exists(doc.querySelector('scrapbook-sticky[data-scrapbook-id="20240928140509146"]'));
 
         /* recapture slightly modified document */
-        var response = await captureHeadless({
+        var [response] = await captureHeadless({
           url: `${localhost}/capture_recapture_migrate/page2/index.html`,
           options,
           recaptureInfo: {bookId: "", itemId},
-        }, {rawResponse: true});
+        }, {cls: Capturer});
         var {timeId: itemId3} = response;
 
         var doc = (await xhr({
@@ -18856,10 +18898,10 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
           "capture.downLink.doc.depth": 0,
         });
 
-        var response = await capture({
+        var [response] = await capture({
           url: `${localhost}/capture_mergeCapture/main.html`,
           options,
-        }, {rawResponse: true});
+        }, {cls: Capturer});
 
         ({timeId: itemId} = response);
         var mergeCaptureInfo = {bookId: "", itemId};
@@ -18878,29 +18920,29 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
           ]),
         });
 
-        var response = await capture({
+        var [response] = await capture({
           url: `${localhost}/capture_mergeCapture/linked1-1.html`,
           options,
           mergeCaptureInfo,
-        }, {rawResponse: true});
+        }, {cls: Capturer});
 
-        var response = await capture({
+        var [response] = await capture({
           url: `${localhost}/capture_mergeCapture/linked1-2.xhtml`,
           options,
           mergeCaptureInfo,
-        }, {rawResponse: true});
+        }, {cls: Capturer});
 
-        var response = await capture({
+        var [response] = await capture({
           url: `${localhost}/capture_mergeCapture/linked1-3.svg`,
           options,
           mergeCaptureInfo,
-        }, {rawResponse: true});
+        }, {cls: Capturer});
 
-        var response = await capture({
+        var [response] = await capture({
           url: `${localhost}/capture_mergeCapture/linked1-4.txt`,
           options,
           mergeCaptureInfo,
-        }, {rawResponse: true});
+        }, {cls: Capturer});
       });
 
       it('should add captured resources', async function () {
@@ -19053,10 +19095,10 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
           "capture.downLink.doc.depth": 0,
         });
 
-        var response = await capture({
+        var [response] = await capture({
           url: `${localhost}/capture_mergeCapture_again/main.html`,
           options,
-        }, {rawResponse: true});
+        }, {cls: Capturer});
         var {timeId: itemId} = response;
 
         var {data} = await backendRequest({
@@ -19082,11 +19124,11 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
           "capture.downLink.file.extFilter": "txt",
         });
 
-        var response = await captureHeadless({
+        var [response] = await captureHeadless({
           url: `${localhost}/capture_mergeCapture_again/main.html`,
           options,
           mergeCaptureInfo: {bookId: "", itemId},
-        }, {rawResponse: true});
+        }, {cls: Capturer});
 
         var {data: response} = await backendRequest({
           url: `${backend}/data/${itemId}`,
@@ -19117,20 +19159,20 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
           "capture.downLink.doc.depth": 1,
         });
 
-        var response = await capture({
+        var [response] = await capture({
           url: `${localhost}/capture_mergeCapture_redirect/main.html`,
           options,
-        }, {rawResponse: true});
+        }, {cls: Capturer});
 
         var bookId = "";
         var {timeId: itemId} = response;
 
         var options = baseOptions;
-        var response = await capture({
+        var [response] = await capture({
           url: `${localhost}/capture_mergeCapture_redirect/other.html`,
           options,
           mergeCaptureInfo: {bookId, itemId},
-        }, {rawResponse: true});
+        }, {cls: Capturer});
 
         var doc = (await xhr({
           url: `${backend}/data/${itemId}/index.html`,
@@ -19227,10 +19269,10 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
           "capture.downLink.doc.depth": 0,
         });
 
-        var response = await capture({
+        var [response] = await capture({
           url: `${localhost}/capture_mergeCapture_redirect/main.html`,
           options,
-        }, {rawResponse: true});
+        }, {cls: Capturer});
 
         var bookId = "";
         var {timeId: itemId} = response;
@@ -19260,17 +19302,17 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
           csrfToken: true,
         }).then(r => r.json());
 
-        var response = await capture({
+        var [response] = await capture({
           url: `${localhost}/capture_mergeCapture_redirect/redirected1-1.html`,
           options,
           mergeCaptureInfo: {bookId, itemId},
-        }, {rawResponse: true});
+        }, {cls: Capturer});
 
-        var response = await capture({
+        var [response] = await capture({
           url: `${localhost}/capture_mergeCapture_redirect/redirected1-2.xhtml`,
           options,
           mergeCaptureInfo: {bookId, itemId},
-        }, {rawResponse: true});
+        }, {cls: Capturer});
 
         var doc = (await xhr({
           url: `${backend}/data/${itemId}/index.html`,

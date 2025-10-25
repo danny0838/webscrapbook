@@ -1393,11 +1393,6 @@ class Capturer extends BaseCapturer {
       throw new Error(`Bad parameters.`);
     }
 
-    // special handling (for unit test)
-    if (options["capture.saveTo"] === "memory") {
-      return response;
-    }
-
     if (!captureOnly) {
       if (options["capture.saveTo"] === "server") {
         await this.addItemToServer({
@@ -1984,11 +1979,6 @@ Bookmark for <a href="${utils.escapeHtml(sourceUrl)}">${utils.escapeHtml(sourceU
       },
     });
 
-    // special handling for blob response
-    if (!('url' in response)) {
-      return response;
-    }
-
     return Object.assign({}, response, {
       url: this.getRedirectedUrl(response.url, sourceUrlHash),
     });
@@ -2090,11 +2080,6 @@ Redirecting to file <a href="${utils.escapeHtml(response.url)}">${utils.escapeHt
         blob,
       },
     });
-
-    // special handling for blob response
-    if (!('url' in response)) {
-      return response;
-    }
 
     return Object.assign({}, response, {
       charset: charset || undefined,
@@ -3428,146 +3413,6 @@ Redirecting to <a href="${utils.escapeHtml(target)}">${utils.escapeHtml(target, 
       });
     };
 
-    const saveBlob = async (blob) => {
-      switch (options["capture.saveTo"]) {
-        case 'memory': {
-          // special handling (for unit test)
-          return await this.saveBlobCache(blob, Infinity);
-        }
-        case 'file': {
-          const downloadItem = await this.saveBlobNaturally({
-            timeId,
-            blob,
-            filename,
-            sourceUrl,
-          });
-          this.log(`Saved to "${downloadItem.filename}"`);
-          filename = utils.filepathParts(downloadItem.filename)[1];
-          break;
-        }
-        case 'server': {
-          [targetDir, filename] = utils.filepathParts(filename);
-          filename = await this.saveBlobToServer({
-            timeId,
-            blob,
-            directory: targetDir,
-            filename,
-            settings,
-            options,
-          });
-          this.log(`Saved to "${(targetDir ? targetDir + '/' : '') + filename}"`);
-          break;
-        }
-        case 'folder':
-        default: {
-          [targetDir, filename] = utils.filepathParts(options["capture.saveFolder"] + "/" + filename);
-          const downloadItem = await this.saveBlob({
-            timeId,
-            blob,
-            directory: targetDir,
-            filename,
-            sourceUrl,
-            autoErase: false,
-            savePrompt: false,
-            conflictAction: options["capture.saveOverwrite"] ? "overwrite" : "uniquify",
-            settings,
-            options,
-          });
-          this.log(`Saved to "${downloadItem.filename}"`);
-          filename = utils.filepathParts(downloadItem.filename)[1];
-          break;
-        }
-      }
-    };
-
-    const saveEntries = async (entries) => {
-      switch (options["capture.saveTo"]) {
-        case 'server': {
-          targetDir = settings.indexFilename;
-
-          let workers = options["capture.serverUploadWorkers"];
-          if (!(workers >= 1)) { workers = Infinity; }
-          workers = Math.min(workers, entries.length);
-
-          let taskIdx = 0;
-          const runTask = async () => {
-            while (taskIdx < entries.length) {
-              const [path, sourceUrl, blob] = entries[taskIdx++];
-              try {
-                await this.saveBlobToServer({
-                  timeId,
-                  blob,
-                  directory: targetDir,
-                  filename: path,
-                  settings,
-                  options,
-                });
-              } catch (ex) {
-                // show message for individual saving error
-                console.error(ex);
-                this.error(utils.lang("ErrorFileSaveError", [sourceUrl, path, ex.message]));
-              }
-            }
-          };
-
-          await Promise.all(Array.from({length: workers}, () => runTask()));
-
-          this.log(`Saved to "${targetDir}"`);
-
-          break;
-        }
-        case 'folder':
-        case 'file': // not supported, fallback to folder
-        case 'memory': // not supported, fallback to folder
-        default: {
-          targetDir = options["capture.saveFolder"] + "/" + settings.indexFilename;
-
-          let workers = options["capture.downloadWorkers"];
-          if (!(workers >= 1)) { workers = Infinity; }
-          workers = Math.min(workers, entries.length);
-
-          const downloadItems = [];
-          let taskIdx = 0;
-          const saveEntry = async ([path, sourceUrl, blob]) => {
-            try {
-              return await this.saveBlob({
-                timeId,
-                blob,
-                directory: targetDir,
-                filename: path,
-                sourceUrl,
-                autoErase: path !== "index.html",
-                savePrompt: false,
-                conflictAction: "overwrite",
-                settings,
-                options,
-              });
-            } catch (ex) {
-              // show message for individual saving error
-              console.error(ex);
-              this.error(utils.lang("ErrorFileSaveError", [sourceUrl, path, ex.message]));
-              return {filename: targetDir + "/" + path, error: {message: ex.message}};
-            }
-          };
-          const runTask = async () => {
-            while (taskIdx < entries.length) {
-              const idx = taskIdx++;
-              downloadItems[idx] = await saveEntry(entries[idx]);
-            }
-          };
-          await Promise.all(Array.from({length: workers}, () => runTask()));
-
-          const downloadItem = downloadItems.pop();
-          if (downloadItem.error) {
-            throw new Error(`Unable to save index.html`);
-          }
-          this.log(`Saved to "${downloadItem.filename}"`);
-          filename = utils.filepathParts(downloadItem.filename)[1];
-          break;
-        }
-      }
-    };
-
     // throw for unexpected item type
     if (!itemType) {
       throw new Error(`unexpected item type: ${JSON.stringify(itemType)}`);
@@ -3611,9 +3456,7 @@ Redirecting to <a href="${utils.escapeHtml(target)}">${utils.escapeHtml(target, 
           filename = 'index_.html';
         }
 
-        const rv = await saveBlob(blob);
-        if (rv) { return rv; }
-
+        ({filename, targetDir} = await this._saveMainDocumentBlob(blob, {timeId, filename, targetDir, sourceUrl, settings, options}));
         break;
       }
 
@@ -3628,9 +3471,7 @@ Redirecting to <a href="${utils.escapeHtml(target)}">${utils.escapeHtml(target, 
         const blob = await zip.generateAsync({type: "blob", mimeType: "application/html+zip"});
         filename = settings.indexFilename + ".htz";
 
-        const rv = await saveBlob(blob);
-        if (rv) { return rv; }
-
+        ({filename, targetDir} = await this._saveMainDocumentBlob(blob, {timeId, filename, targetDir, sourceUrl, settings, options}));
         break;
       }
 
@@ -3667,9 +3508,7 @@ Redirecting to <a href="${utils.escapeHtml(target)}">${utils.escapeHtml(target, 
         const blob = await zip.generateAsync({type: "blob", mimeType: "application/x-maff"});
         filename = settings.indexFilename + ".maff";
 
-        const rv = await saveBlob(blob);
-        if (rv) { return rv; }
-
+        ({filename, targetDir} = await this._saveMainDocumentBlob(blob, {timeId, filename, targetDir, sourceUrl, settings, options}));
         break;
       }
 
@@ -3693,9 +3532,7 @@ Redirecting to <a href="${utils.escapeHtml(target)}">${utils.escapeHtml(target, 
         }
 
         const entries = await this.loadFileCache({timeId});
-        const rv = await saveEntries(entries);
-        if (rv) { return rv; }
-
+        ({filename, targetDir} = await this._saveMainDocumentEntries(entries, {timeId, filename, targetDir, settings, options}));
         break;
       }
     }
@@ -3710,6 +3547,143 @@ Redirecting to <a href="${utils.escapeHtml(target)}">${utils.escapeHtml(target, 
       url: utils.escapeFilename(documentFileName),
       favIconUrl: data.favIconUrl,
     };
+  }
+
+  async _saveMainDocumentBlob(blob, {timeId, filename, targetDir, sourceUrl, settings, options}) {
+    switch (options["capture.saveTo"]) {
+      case 'file': {
+        const downloadItem = await this.saveBlobNaturally({
+          timeId,
+          blob,
+          filename,
+          sourceUrl,
+        });
+        this.log(`Saved to "${downloadItem.filename}"`);
+        filename = utils.filepathParts(downloadItem.filename)[1];
+        break;
+      }
+      case 'server': {
+        [targetDir, filename] = utils.filepathParts(filename);
+        filename = await this.saveBlobToServer({
+          timeId,
+          blob,
+          directory: targetDir,
+          filename,
+          settings,
+          options,
+        });
+        this.log(`Saved to "${(targetDir ? targetDir + '/' : '') + filename}"`);
+        break;
+      }
+      case 'folder':
+      default: {
+        [targetDir, filename] = utils.filepathParts(options["capture.saveFolder"] + "/" + filename);
+        const downloadItem = await this.saveBlob({
+          timeId,
+          blob,
+          directory: targetDir,
+          filename,
+          sourceUrl,
+          autoErase: false,
+          savePrompt: false,
+          conflictAction: options["capture.saveOverwrite"] ? "overwrite" : "uniquify",
+          settings,
+          options,
+        });
+        this.log(`Saved to "${downloadItem.filename}"`);
+        filename = utils.filepathParts(downloadItem.filename)[1];
+        break;
+      }
+    }
+    return {targetDir, filename};
+  }
+
+  async _saveMainDocumentEntries(entries, {timeId, filename, targetDir, settings, options}) {
+    switch (options["capture.saveTo"]) {
+      case 'server': {
+        targetDir = settings.indexFilename;
+
+        let workers = options["capture.serverUploadWorkers"];
+        if (!(workers >= 1)) { workers = Infinity; }
+        workers = Math.min(workers, entries.length);
+
+        let taskIdx = 0;
+        const runTask = async () => {
+          while (taskIdx < entries.length) {
+            const [path, sourceUrl, blob] = entries[taskIdx++];
+            try {
+              await this.saveBlobToServer({
+                timeId,
+                blob,
+                directory: targetDir,
+                filename: path,
+                settings,
+                options,
+              });
+            } catch (ex) {
+              // show message for individual saving error
+              console.error(ex);
+              this.error(utils.lang("ErrorFileSaveError", [sourceUrl, path, ex.message]));
+            }
+          }
+        };
+
+        await Promise.all(Array.from({length: workers}, () => runTask()));
+
+        this.log(`Saved to "${targetDir}"`);
+
+        break;
+      }
+      case 'folder':
+      case 'file': // not supported, fallback to folder
+      default: {
+        targetDir = options["capture.saveFolder"] + "/" + settings.indexFilename;
+
+        let workers = options["capture.downloadWorkers"];
+        if (!(workers >= 1)) { workers = Infinity; }
+        workers = Math.min(workers, entries.length);
+
+        const downloadItems = [];
+        let taskIdx = 0;
+        const saveEntry = async ([path, sourceUrl, blob]) => {
+          try {
+            return await this.saveBlob({
+              timeId,
+              blob,
+              directory: targetDir,
+              filename: path,
+              sourceUrl,
+              autoErase: path !== "index.html",
+              savePrompt: false,
+              conflictAction: "overwrite",
+              settings,
+              options,
+            });
+          } catch (ex) {
+            // show message for individual saving error
+            console.error(ex);
+            this.error(utils.lang("ErrorFileSaveError", [sourceUrl, path, ex.message]));
+            return {filename: targetDir + "/" + path, error: {message: ex.message}};
+          }
+        };
+        const runTask = async () => {
+          while (taskIdx < entries.length) {
+            const idx = taskIdx++;
+            downloadItems[idx] = await saveEntry(entries[idx]);
+          }
+        };
+        await Promise.all(Array.from({length: workers}, () => runTask()));
+
+        const downloadItem = downloadItems.pop();
+        if (downloadItem.error) {
+          throw new Error(`Unable to save index.html`);
+        }
+        this.log(`Saved to "${downloadItem.filename}"`);
+        filename = utils.filepathParts(downloadItem.filename)[1];
+        break;
+      }
+    }
+    return {targetDir, filename};
   }
 
   /**
