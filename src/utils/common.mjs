@@ -41,7 +41,7 @@ const DEFAULT_OPTIONS = {
   "capture.downloadWorkers": 4,
   "capture.downloadRetryCount": 3,
   "capture.downloadRetryDelay": 1000,
-  "capture.saveTo": "folder", // "server", "folder", "file", "memory"
+  "capture.saveTo": "folder", // "server", "folder", "file"
   "capture.saveFolder": "WebScrapBook/data",
   "capture.saveAs": "folder", // "folder", "zip", "maff", "singleHtml"
   "capture.saveFilename": "%id%",
