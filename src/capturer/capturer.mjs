@@ -526,47 +526,6 @@ class Capturer extends BaseCapturer {
       ALLOWED_SCHEMES.delete('file');
     }
 
-    const getFetchToken = (url, role) => {
-      let token = `${utils.normalizeUrl(url)}\t${role}`;
-      token = sha1(token, "TEXT");
-      return token;
-    };
-
-    /**
-     * Set referrer for the request according to the specified referrer policy.
-     *
-     * @param {Object} params
-     * @param {Object} params.headers
-     * @param {string} params.targetUrl
-     * @param {string} [params.refUrl]
-     * @param {string} [params.refPolicy] - the referrer policy
-     * @param {Object} [params.options]
-     * @return {Object} The modified headers object.
-     */
-    const setReferrer = ({headers, targetUrl, refUrl, refPolicy, options = {}}) => {
-      const defaultPolicy = options["capture.referrerPolicy"];
-      const policy = defaultPolicy.startsWith('+') ?
-          (defaultPolicy.substring(1) || refPolicy) :
-          (refPolicy || defaultPolicy);
-      const spoof = options["capture.referrerSpoofSource"];
-      const referrer = new Referrer(refUrl, targetUrl, policy, spoof).toString();
-
-      if (referrer) {
-        // Browser does not allow assigning "Referer" header directly.
-        // Set a placeholder header, whose prefix will be removed by the
-        // listener of browser.webRequest.onBeforeSendHeaders later on.
-        headers["X-WebScrapBook-Referer"] = referrer;
-      }
-
-      return headers;
-    };
-
-    const setCache = async (id, token, data) => {
-      const key = {table: "fetchCache", id, token};
-      await IdbCache.set(key, data);
-      return await IdbCache.get(key);
-    };
-
     const fetch = this.fetch = async (params) => {
       isDebug && console.debug("call: fetch", params);
 
@@ -630,7 +589,7 @@ class Capturer extends BaseCapturer {
       // fail out if sourceUrl is invalid
       let fetchToken;
       try {
-        fetchToken = getFetchToken(sourceUrlMain, fetchRole);
+        fetchToken = this._fetchGetToken(sourceUrlMain, fetchRole);
       } catch (ex) {
         return Object.assign(response, {
           error: {
@@ -648,209 +607,22 @@ class Capturer extends BaseCapturer {
         }
       }
 
-      const fetchCurrent = (async () => {
-        let overrideUrl;
-
-        try {
-          // special handling for data URI
-          if (scheme === "data") {
-            const file = dataUriToFile(sourceUrlMain);
-            if (!file) { throw new Error("Malformed data URL."); }
-
-            // simulate headers from data URI parameters
-            headers.filename = file.name;
-            headers.contentLength = file.size;
-            const contentType = utils.parseHeaderContentType(file.type);
-            headers.contentType = contentType.type;
-            headers.charset = contentType.parameters.charset;
-
-            let blob = new Blob([file], {type: file.type});
-            if (this.captureInfo.get(timeId).useDiskCache) {
-              blob = await setCache(timeId, fetchToken, blob);
-            }
-
-            return Object.assign(response, {
-              status: 200,
-              blob,
-            });
-          }
-
-          // special handling for about:blank or about:srcdoc
-          if (scheme === "about") {
-            return Object.assign(response, {
-              status: 200,
-              blob: new Blob([], {type: 'text/html'}),
-            });
-          }
-
-          // special handling of overrideBlob
-          if (overrideBlob) {
-            overrideUrl = URL.createObjectURL(overrideBlob);
-          }
-
-          const xhr = await utils.xhr({
-            url: overrideUrl || sourceUrlMain,
-            responseType: 'blob',
-            allowAnyStatus: true,
-            requestHeaders: setReferrer({
-              headers: {},
-              refUrl,
-              targetUrl: overrideUrl || sourceUrlMain,
-              refPolicy,
-              options,
-            }),
-            onreadystatechange(xhr) {
-              if (xhr.readyState !== 2) { return; }
-
-              // check for previous fetch if redirected
-              // treat as if no redirect when overrideUrl is used
-              if (!overrideUrl) {
-                // xhr.responseURL must be valid; otherwise the onerror event of the XHR will be triggered
-                const [responseUrlMain, responseUrlHash] = utils.splitUrlByAnchor(xhr.responseURL);
-                if (responseUrlMain !== sourceUrlMain) {
-                  const responseFetchToken = getFetchToken(responseUrlMain, fetchRole);
-                  const responseFetchPrevious = fetchMap.get(responseFetchToken);
-
-                  // a fetch to the redirected URL exists, abort the request and return it
-                  if (responseFetchPrevious && responseFetchPrevious !== fetchCurrent) {
-                    response = responseFetchPrevious;
-                    xhr.abort();
-                    return;
-                  }
-
-                  // otherwise, map the redirected URL to the same fetch promise
-                  fetchMap.set(responseFetchToken, fetchCurrent);
-                  if (!headerOnly) {
-                    const responseFetchToken = getFetchToken(responseUrlMain, 'head');
-                    fetchMap.set(responseFetchToken, fetchCurrent);
-                  }
-                }
-              }
-
-              // get headers
-              if (sourceUrl.startsWith("http:") || sourceUrl.startsWith("https:") || sourceUrl.startsWith("blob:")) {
-                const headerContentType = xhr.getResponseHeader("Content-Type");
-                if (headerContentType) {
-                  const contentType = utils.parseHeaderContentType(headerContentType);
-                  headers.contentType = contentType.type;
-                  headers.charset = contentType.parameters.charset;
-                }
-                const headerContentDisposition = xhr.getResponseHeader("Content-Disposition");
-                if (headerContentDisposition) {
-                  const contentDisposition = utils.parseHeaderContentDisposition(headerContentDisposition);
-                  headers.isAttachment = (contentDisposition.type !== "inline");
-                  headers.filename = contentDisposition.parameters.filename;
-                }
-                const headerContentLength = xhr.getResponseHeader("Content-Length");
-                if (headerContentLength) {
-                  headers.contentLength = parseInt(headerContentLength, 10);
-                }
-              }
-
-              let earlyResponse;
-              if (headerOnly) {
-                // skip loading body for a headerOnly fetch
-                earlyResponse = Object.assign(response, {
-                  url: overrideUrl ? sourceUrlMain : xhr.responseURL,
-                  status: xhr.status,
-                });
-              } else if (!ignoreSizeLimit &&
-                  typeof options["capture.resourceSizeLimit"] === "number" &&
-                  typeof headers.contentLength === "number" &&
-                  headers.contentLength >= options["capture.resourceSizeLimit"] * 1024 * 1024) {
-                // apply size limit if header contentLength is known
-                earlyResponse = Object.assign(response, {
-                  url: overrideUrl ? sourceUrlMain : xhr.responseURL,
-                  status: xhr.status,
-                  error: {
-                    name: 'FilterSizeError',
-                    message: 'Resource size limit exceeded.',
-                  },
-                });
-              }
-
-              if (earlyResponse) {
-                // handle HTTP error
-                if (!(xhr.status >= 200 && xhr.status < 300)) {
-                  Object.assign(earlyResponse, {
-                    error: {
-                      name: 'HttpError',
-                      message: `${xhr.status} ${xhr.statusText}`,
-                    },
-                  });
-                }
-
-                xhr.abort();
-                return;
-              }
-            },
-          }).catch((ex) => {
-            Object.assign(response, {
-              error: {
-                name: 'RequestError',
-                message: ex.message,
-              },
-            });
-            return;
-          });
-
-          // xhr is resolved to undefined when aborted or on error.
-          if (!xhr) {
-            return response;
-          }
-
-          let blob = xhr.response;
-          if (this.captureInfo.get(timeId).useDiskCache) {
-            blob = await setCache(timeId, fetchToken, blob);
-          }
-
-          Object.assign(response, {
-            url: overrideUrl ? sourceUrlMain : xhr.responseURL,
-            status: xhr.status,
-            blob,
-          });
-
-          // apply size limit
-          if (!ignoreSizeLimit &&
-              typeof options["capture.resourceSizeLimit"] === "number" &&
-              blob.size >= options["capture.resourceSizeLimit"] * 1024 * 1024) {
-            Object.assign(response, {
-              blob: null,
-              error: {
-                name: 'FilterSizeError',
-                message: 'Resource size limit exceeded.',
-              },
-            });
-          }
-
-          // handle HTTP error
-          if (!(xhr.status >= 200 && xhr.status < 300 || xhr.status === 0)) {
-            Object.assign(response, {
-              error: {
-                name: 'HttpError',
-                message: `${xhr.status} ${xhr.statusText}`,
-              },
-            });
-          }
-
-          return response;
-        } catch (ex) {
-          return Object.assign(response, {
-            error: {
-              name: 'FetchError',
-              message: ex.message,
-            },
-          });
-        } finally {
-          if (overrideUrl) {
-            URL.revokeObjectURL(overrideUrl);
-          }
-        }
-      })();
+      const fetchCurrent = this._fetch({
+        refUrl, refPolicy,
+        overrideBlob,
+        headerOnly,
+        ignoreSizeLimit,
+        timeId,
+        options,
+        sourceUrl, sourceUrlMain, sourceUrlHash,
+        headers, response,
+        scheme,
+        fetchMap, fetchRole, fetchToken,
+      });
 
       fetchMap.set(fetchToken, fetchCurrent);
       if (!headerOnly) {
-        const fetchToken = getFetchToken(sourceUrlMain, 'head');
+        const fetchToken = this._fetchGetToken(sourceUrlMain, 'head');
         fetchMap.set(fetchToken, fetchCurrent);
       }
 
@@ -858,6 +630,261 @@ class Capturer extends BaseCapturer {
     };
 
     return await fetch(params);
+  }
+
+  _fetch({
+    refUrl, refPolicy,
+    overrideBlob,
+    headerOnly,
+    ignoreSizeLimit,
+    timeId,
+    options,
+    sourceUrl, sourceUrlMain, sourceUrlHash,
+    headers, response,
+    scheme,
+    fetchMap, fetchRole, fetchToken,
+  }) {
+    const fetchCurrent = (async () => {
+      let overrideUrl;
+
+      try {
+        // special handling for data URI
+        if (scheme === "data") {
+          const file = dataUriToFile(sourceUrlMain);
+          if (!file) { throw new Error("Malformed data URL."); }
+
+          // simulate headers from data URI parameters
+          headers.filename = file.name;
+          headers.contentLength = file.size;
+          const contentType = utils.parseHeaderContentType(file.type);
+          headers.contentType = contentType.type;
+          headers.charset = contentType.parameters.charset;
+
+          let blob = new Blob([file], {type: file.type});
+          if (this.captureInfo.get(timeId).useDiskCache) {
+            blob = await this._fetchSetCache(timeId, fetchToken, blob);
+          }
+
+          return Object.assign(response, {
+            status: 200,
+            blob,
+          });
+        }
+
+        // special handling for about:blank or about:srcdoc
+        if (scheme === "about") {
+          return Object.assign(response, {
+            status: 200,
+            blob: new Blob([], {type: 'text/html'}),
+          });
+        }
+
+        // special handling of overrideBlob
+        if (overrideBlob) {
+          overrideUrl = URL.createObjectURL(overrideBlob);
+        }
+
+        const xhr = await utils.xhr({
+          url: overrideUrl || sourceUrlMain,
+          responseType: 'blob',
+          allowAnyStatus: true,
+          requestHeaders: this._fetchSetReferrer({
+            headers: {},
+            refUrl,
+            targetUrl: overrideUrl || sourceUrlMain,
+            refPolicy,
+            options,
+          }),
+          onreadystatechange: (xhr) => {
+            if (xhr.readyState !== 2) { return; }
+
+            // check for previous fetch if redirected
+            // treat as if no redirect when overrideUrl is used
+            if (!overrideUrl) {
+              // xhr.responseURL must be valid; otherwise the onerror event of the XHR will be triggered
+              const [responseUrlMain, responseUrlHash] = utils.splitUrlByAnchor(xhr.responseURL);
+              if (responseUrlMain !== sourceUrlMain) {
+                const responseFetchToken = this._fetchGetToken(responseUrlMain, fetchRole);
+                const responseFetchPrevious = fetchMap.get(responseFetchToken);
+
+                // a fetch to the redirected URL exists, abort the request and return it
+                if (responseFetchPrevious && responseFetchPrevious !== fetchCurrent) {
+                  response = responseFetchPrevious;
+                  xhr.abort();
+                  return;
+                }
+
+                // otherwise, map the redirected URL to the same fetch promise
+                fetchMap.set(responseFetchToken, fetchCurrent);
+                if (!headerOnly) {
+                  const responseFetchToken = this._fetchGetToken(responseUrlMain, 'head');
+                  fetchMap.set(responseFetchToken, fetchCurrent);
+                }
+              }
+            }
+
+            // get headers
+            if (sourceUrl.startsWith("http:") || sourceUrl.startsWith("https:") || sourceUrl.startsWith("blob:")) {
+              const headerContentType = xhr.getResponseHeader("Content-Type");
+              if (headerContentType) {
+                const contentType = utils.parseHeaderContentType(headerContentType);
+                headers.contentType = contentType.type;
+                headers.charset = contentType.parameters.charset;
+              }
+              const headerContentDisposition = xhr.getResponseHeader("Content-Disposition");
+              if (headerContentDisposition) {
+                const contentDisposition = utils.parseHeaderContentDisposition(headerContentDisposition);
+                headers.isAttachment = (contentDisposition.type !== "inline");
+                headers.filename = contentDisposition.parameters.filename;
+              }
+              const headerContentLength = xhr.getResponseHeader("Content-Length");
+              if (headerContentLength) {
+                headers.contentLength = parseInt(headerContentLength, 10);
+              }
+            }
+
+            let earlyResponse;
+            if (headerOnly) {
+              // skip loading body for a headerOnly fetch
+              earlyResponse = Object.assign(response, {
+                url: overrideUrl ? sourceUrlMain : xhr.responseURL,
+                status: xhr.status,
+              });
+            } else if (!ignoreSizeLimit &&
+                typeof options["capture.resourceSizeLimit"] === "number" &&
+                typeof headers.contentLength === "number" &&
+                headers.contentLength >= options["capture.resourceSizeLimit"] * 1024 * 1024) {
+              // apply size limit if header contentLength is known
+              earlyResponse = Object.assign(response, {
+                url: overrideUrl ? sourceUrlMain : xhr.responseURL,
+                status: xhr.status,
+                error: {
+                  name: 'FilterSizeError',
+                  message: 'Resource size limit exceeded.',
+                },
+              });
+            }
+
+            if (earlyResponse) {
+              // handle HTTP error
+              if (!(xhr.status >= 200 && xhr.status < 300)) {
+                Object.assign(earlyResponse, {
+                  error: {
+                    name: 'HttpError',
+                    message: `${xhr.status} ${xhr.statusText}`,
+                  },
+                });
+              }
+
+              xhr.abort();
+              return;
+            }
+          },
+        }).catch((ex) => {
+          Object.assign(response, {
+            error: {
+              name: 'RequestError',
+              message: ex.message,
+            },
+          });
+          return;
+        });
+
+        // xhr is resolved to undefined when aborted or on error.
+        if (!xhr) {
+          return response;
+        }
+
+        let blob = xhr.response;
+        if (this.captureInfo.get(timeId).useDiskCache) {
+          blob = await this._fetchSetCache(timeId, fetchToken, blob);
+        }
+
+        Object.assign(response, {
+          url: overrideUrl ? sourceUrlMain : xhr.responseURL,
+          status: xhr.status,
+          blob,
+        });
+
+        // apply size limit
+        if (!ignoreSizeLimit &&
+            typeof options["capture.resourceSizeLimit"] === "number" &&
+            blob.size >= options["capture.resourceSizeLimit"] * 1024 * 1024) {
+          Object.assign(response, {
+            blob: null,
+            error: {
+              name: 'FilterSizeError',
+              message: 'Resource size limit exceeded.',
+            },
+          });
+        }
+
+        // handle HTTP error
+        if (!(xhr.status >= 200 && xhr.status < 300 || xhr.status === 0)) {
+          Object.assign(response, {
+            error: {
+              name: 'HttpError',
+              message: `${xhr.status} ${xhr.statusText}`,
+            },
+          });
+        }
+
+        return response;
+      } catch (ex) {
+        return Object.assign(response, {
+          error: {
+            name: 'FetchError',
+            message: ex.message,
+          },
+        });
+      } finally {
+        if (overrideUrl) {
+          URL.revokeObjectURL(overrideUrl);
+        }
+      }
+    })();
+    return fetchCurrent;
+  }
+
+  _fetchGetToken(url, role) {
+    let token = `${utils.normalizeUrl(url)}\t${role}`;
+    token = sha1(token, "TEXT");
+    return token;
+  }
+
+  /**
+   * Set referrer for the request according to the specified referrer policy.
+   *
+   * @param {Object} params
+   * @param {Object} params.headers
+   * @param {string} params.targetUrl
+   * @param {string} [params.refUrl]
+   * @param {string} [params.refPolicy] - the referrer policy
+   * @param {Object} [params.options]
+   * @return {Object} The modified headers object.
+   */
+  _fetchSetReferrer({headers, targetUrl, refUrl, refPolicy, options = {}}) {
+    const defaultPolicy = options["capture.referrerPolicy"];
+    const policy = defaultPolicy.startsWith('+') ?
+        (defaultPolicy.substring(1) || refPolicy) :
+        (refPolicy || defaultPolicy);
+    const spoof = options["capture.referrerSpoofSource"];
+    const referrer = new Referrer(refUrl, targetUrl, policy, spoof).toString();
+
+    if (referrer) {
+      // Browser does not allow assigning "Referer" header directly.
+      // Set a placeholder header, whose prefix will be removed by the
+      // listener of browser.webRequest.onBeforeSendHeaders later on.
+      headers["X-WebScrapBook-Referer"] = referrer;
+    }
+
+    return headers;
+  }
+
+  async _fetchSetCache(id, token, data) {
+    const key = {table: "fetchCache", id, token};
+    await IdbCache.set(key, data);
+    return await IdbCache.get(key);
   }
 
   /**
