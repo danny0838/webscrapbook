@@ -1269,6 +1269,8 @@ class Capturer extends BaseCapturer {
    * @param {captureOptions} params.options - options for the capture
    * @param {captureOptions} params.presets - preset options, which are never
    *   overwritten by capture helpers, for the capture
+   * @param {boolean} [params.useDiskCache] - whether to use disk cache
+   *   (auto-determined when undefined)
    * @param {string} [params.comment] - comment for the captured item
    * @param {?string} [params.bookId] - bookId ID for the captured items
    * @param {string} [params.parentId] - parent item ID for the captured items
@@ -1292,6 +1294,7 @@ class Capturer extends BaseCapturer {
     } = {},
     options,
     presets,
+    useDiskCache,
     comment,
     bookId = null, parentId, index,
     captureOnly = false,
@@ -1358,7 +1361,7 @@ class Capturer extends BaseCapturer {
     }
 
     // use disk cache for in-depth capture to prevent memory exhaustion
-    this.captureInfo.get(timeId).useDiskCache = parseInt(options["capture.downLink.doc.depth"], 10) > 0;
+    this.captureInfo.get(timeId).useDiskCache = useDiskCache ?? parseInt(options["capture.downLink.doc.depth"], 10) > 0;
 
     const settings = {
       missionId: this.missionId,
