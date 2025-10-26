@@ -774,63 +774,89 @@ class RebuildLinksDocumentRewriter extends BaseDocumentRewriter {
     Object.assign(this, {
       doc, capturer, filenameMap, redirects,
     });
-    this.processRootNode(doc.documentElement);
+    this.processRootNode(doc);
   }
 
   processRootNode(rootNode) {
-    // rewrite links
-    this[`_handle_{${rootNode.namespaceURI ?? NS_HTML}}`]?.call(this, rootNode);
+    for (const elem of rootNode.querySelectorAll([
+      // 'a[href]:not([download])',
+      // 'area[href]:not([download])',
+      'meta[http-equiv="refresh" i][content]',
+      'iframe[srcdoc]',
+      '[data-scrapbook-shadowdom]',
 
-    // recurse into shadow roots
-    this.rewriteScrapBookShadowDom(rootNode);
-  }
+      // SVG
+      'a[*|href]',
 
-  rewriteScrapBookShadowDom(rootNode) {
-    for (const elem of rootNode.querySelectorAll('[data-scrapbook-shadowdom]')) {
-      const shadowRoot = elem.attachShadow({mode: 'open'});
-      shadowRoot.innerHTML = elem.getAttribute('data-scrapbook-shadowdom');
-      this.processRootNode(shadowRoot);
-      elem.setAttribute("data-scrapbook-shadowdom", shadowRoot.innerHTML);
-    }
-  }
-
-  [`_handle_{${NS_HTML}}`](rootNode) {
-    for (const elem of rootNode.querySelectorAll('a[href], area[href]')) {
-      if (elem.namespaceURI !== NS_HTML) { continue; }
-      if (elem.hasAttribute('download')) { continue; }
-      this.rewriteHref(elem, 'href');
-    }
-    if (!rootNode.host) {
-      for (const elem of rootNode.querySelectorAll('meta[http-equiv="refresh" i][content]')) {
-        this.rewriteMetaRefresh(elem);
-      }
-    }
-    for (const elem of rootNode.querySelectorAll('iframe[srcdoc]')) {
-      const doc = (new DOMParser()).parseFromString(elem.srcdoc, 'text/html');
-      this.processRootNode(doc.documentElement);
-      elem.srcdoc = doc.documentElement.outerHTML;
-    }
-    for (const elem of rootNode.querySelectorAll('svg, math')) {
-      this.processRootNode(elem);
+      // MathML
+      '[href]',
+    ].join(', '))) {
+      this[`_handle_{${elem.namespaceURI}}`]?.call(this, elem);
     }
   }
 
-  [`_handle_{${NS_SVG}}`](rootNode) {
-    for (const elem of rootNode.querySelectorAll('a[*|href]')) {
-      for (const ns of [null, NS_XLINK]) {
-        if (!elem.hasAttributeNS(ns, 'href')) { continue; }
-        this.rewriteHref(elem, 'href', ns);
-      }
+  [`_handle_{${NS_HTML}}`](elem) {
+    this[`_handle_{${NS_HTML}}${elem.localName}`]?.call(this, elem);
+    this.rewriteScrapBookShadowDom(elem);
+  }
+
+  [`_handle_{${NS_HTML}}a`](elem) {
+    if (elem.hasAttribute('download')) { return; }
+    this.rewriteHref(elem, 'href');
+  }
+
+  [`_handle_{${NS_HTML}}area`](elem) {
+    if (elem.hasAttribute('download')) { return; }
+    this.rewriteHref(elem, 'href');
+  }
+
+  [`_handle_{${NS_HTML}}meta`](elem) {
+    if (elem.getRootNode().host) { return; }
+    const {time, url} = utils.parseMetaRefresh(elem.getAttribute("content"));
+    if (!url) { return; }
+    const newUrl = this.resolveUrl(url);
+    if (!newUrl) { return; }
+    elem.setAttribute("content", `${time}; url=${newUrl}`);
+  }
+
+  [`_handle_{${NS_HTML}}iframe`](elem) {
+    const doc = (new DOMParser()).parseFromString(elem.srcdoc, 'text/html');
+    this.processRootNode(doc.documentElement);
+    elem.srcdoc = utils.documentToString(doc);
+  }
+
+  [`_handle_{${NS_SVG}}`](elem) {
+    this[`_handle_{${NS_SVG}}${elem.localName}`]?.call(this, elem);
+  }
+
+  [`_handle_{${NS_SVG}}a`](elem) {
+    for (const ns of [null, NS_XLINK]) {
+      this.rewriteHref(elem, 'href', ns);
     }
   }
 
-  [`_handle_{${NS_MATHML}}`](rootNode) {
-    for (const elem of rootNode.querySelectorAll('[href]')) {
-      this.rewriteHref(elem, 'href');
-    }
+  [`_handle_{${NS_MATHML}}`](elem) {
+    this.rewriteHref(elem, 'href');
   }
 
-  rewriteUrl(url) {
+  rewriteScrapBookShadowDom(elem) {
+    const html = elem.getAttribute("data-scrapbook-shadowdom");
+    if (!html) { return; }
+
+    let shadowRoot;
+    try {
+      shadowRoot = elem.attachShadow({mode: 'open'});
+    } catch {
+      // skip an element that cannot attach a shadow root
+      return;
+    }
+
+    shadowRoot.innerHTML = html;
+    this.processRootNode(shadowRoot);
+    elem.setAttribute("data-scrapbook-shadowdom", shadowRoot.innerHTML);
+  }
+
+  resolveUrl(url) {
     // assume a non-absolute URL to be already mapped
     if (!utils.isUrlAbsolute(url)) {
       return null;
@@ -857,17 +883,9 @@ class RebuildLinksDocumentRewriter extends BaseDocumentRewriter {
 
   rewriteHref(elem, attr, ns = null) {
     const url = elem.getAttributeNS(ns, attr);
-    const newUrl = this.rewriteUrl(url);
+    const newUrl = this.resolveUrl(url);
     if (!newUrl) { return; }
     elem.setAttributeNS(ns, attr, newUrl);
-  }
-
-  rewriteMetaRefresh(elem) {
-    const {time, url} = utils.parseMetaRefresh(elem.getAttribute("content"));
-    if (!url) { return; }
-    const newUrl = this.rewriteUrl(url);
-    if (!newUrl) { return; }
-    elem.setAttribute("content", `${time}; url=${newUrl}`);
   }
 
   getRedirectedUrl(...args) {

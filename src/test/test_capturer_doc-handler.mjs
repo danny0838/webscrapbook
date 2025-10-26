@@ -456,6 +456,118 @@ describe('capturer/doc-handler.mjs', function () {
     const docUrl = 'https://example.com/';
 
     describe('#run()', function () {
+      function setElement(elem, attrs = [], text = "") {
+        if (Array.isArray(attrs)) {
+          for (const [key, value, ns = null] of attrs) {
+            elem.setAttributeNS(ns, key, value);
+          }
+        } else {
+          for (const [key, value] of Object.entries(attrs)) {
+            elem.setAttribute(key, value);
+          }
+        }
+        elem.textContent = text;
+      }
+
+      function testHtml({tagName, attrs, text, attr, expected}) {
+        var doc = createDocFixture({tagName, attrs, value: text});
+        rewriter.run(doc, {capturer, filenameMap, redirects});
+        assert.strictEqual(doc.querySelector(tagName).getAttribute(attr), expected);
+      }
+
+      function testIframeSrcdoc({tagName, attrs, text, attr, expected}) {
+        var elem = createNodeFixture({tagName, attrs, value: text});
+        var doc = createDocFixture({tagName: 'iframe', attrs: {srcdoc: elem.outerHTML}});
+        rewriter.run(doc, {capturer, filenameMap, redirects});
+
+        var html = doc.querySelector('iframe').getAttribute('srcdoc');
+        var frameDoc = createDocFixture({code: html});
+        assert.strictEqual(frameDoc.querySelector(tagName).getAttribute(attr), expected);
+      }
+
+      function testIframeSrcdocDeep({tagName, attrs, text, attr, expected}) {
+        var elem = createNodeFixture({tagName, attrs, value: text});
+        var elem = createNodeFixture({tagName: 'iframe', attrs: {srcdoc: elem.outerHTML}});
+        var doc = createDocFixture({tagName: 'iframe', attrs: {srcdoc: elem.outerHTML}});
+        rewriter.run(doc, {capturer, filenameMap, redirects});
+
+        var html = doc.querySelector('iframe').getAttribute('srcdoc');
+        var frameDoc = createDocFixture({code: html});
+        var html = frameDoc.querySelector('iframe').getAttribute('srcdoc');
+        var frameDoc = createDocFixture({code: html});
+        assert.strictEqual(frameDoc.querySelector(tagName).getAttribute(attr), expected);
+      }
+
+      async function testShadow({tagName, attrs, text, attr, expected}) {
+        var doc = createDocFixture({tagName: 'div', shadow: {
+          virtual: true,
+          children: [{tagName, attrs, value: text}],
+        }});
+        rewriter.run(doc, {capturer, filenameMap, redirects});
+
+        var html = doc.querySelector('div').getAttribute('data-scrapbook-shadowdom');
+        var shadow = createFragFixture(html);
+        assert.strictEqual(shadow.querySelector(tagName).getAttribute(attr), expected);
+      }
+
+      async function testShadowDeep({tagName, attrs, text, attr, expected}) {
+        var doc = createDocFixture({tagName: 'div', shadow: {
+          virtual: true,
+          children: [{tagName: 'div', shadow: {
+            virtual: true,
+            children: [{tagName, attrs, value: text}],
+          }}],
+        }});
+        rewriter.run(doc, {capturer, filenameMap, redirects});
+
+        var html = doc.querySelector('div').getAttribute('data-scrapbook-shadowdom');
+        var shadow = createFragFixture(html);
+        var html = shadow.querySelector('div').getAttribute('data-scrapbook-shadowdom');
+        var shadow = createFragFixture(html);
+        assert.strictEqual(shadow.querySelector(tagName).getAttribute(attr), expected);
+      }
+
+      function testHtmlInSvg({tagName, attrs, text, attr, expected}) {
+        var doc = createDocFixture({
+          type: 'svg',
+          tagName: 'foreignObject',
+          ns: NS_SVG,
+          children: [{tagName, ns: NS_HTML, attrs, value: text}],
+        });
+        rewriter.run(doc, {capturer, filenameMap, redirects});
+        assert.strictEqual(doc.querySelector(tagName).getAttribute(attr), expected);
+      }
+
+      function testHtmlInSvgPrefixed({tagName, attrs, text, attr, expected}) {
+        var doc = createDocFixture({
+          type: 'svg',
+          tagName: 'foreignObject',
+          ns: NS_SVG,
+          attrs: [['xmlns:h', NS_HTML, NS_XMLNS]],
+          children: [{tagName: `h:${tagName}`, ns: NS_HTML, attrs, value: text}],
+        });
+        rewriter.run(doc, {capturer, filenameMap, redirects});
+        assert.strictEqual(doc.querySelector(tagName).getAttribute(attr), expected);
+      }
+
+      function testSvg({tagName, prefix = 'xlink', attrs, text, ns = null, attr, expected}) {
+        var doc = createDocFixture({type: 'svg', nsmap: {[prefix]: NS_XLINK}, tagName, ns: NS_SVG, attrs, value: text});
+        rewriter.run(doc, {capturer, filenameMap, redirects});
+        assert.strictEqual(doc.querySelector(tagName).getAttributeNS(ns, attr), expected);
+      }
+
+      function testSvgPrefixed(params) {
+        testSvg({...params, prefix: 'x'});
+      }
+
+      function testSvgInHtml({tagName, attrs, text, ns = null, attr, expected}) {
+        var doc = createDocFixture({tagName: 'svg', ns: NS_SVG, children: [
+          {tagName, ns: NS_SVG, attrs, value: text},
+        ]});
+        rewriter.run(doc, {capturer, filenameMap, redirects});
+        assert.strictEqual(doc.querySelector(tagName).getAttributeNS(ns, attr), expected);
+      }
+
       const options = {
         "capture.frame": "link",
         "capture.downLink.doc.depth": 1,
@@ -476,180 +588,177 @@ describe('capturer/doc-handler.mjs', function () {
         redirects = new Map();
       });
 
-      context('for <a>', function () {
-        const tagName = 'a';
+      for (const tagName of ["a", "area"]) {
+        context(`for <${tagName}>`, function () {
+          for (const [ctx, testFunc] of [
+            ['when in HTML', testHtml],
+            ['when in iframe[srcdoc]', testIframeSrcdoc],
+            ['when in deep iframe[srcdoc]', testIframeSrcdocDeep],
+            ['when in shadow root', testShadow],
+            ['when in deep shadow root', testShadowDeep],
+            ['when in HTML namespace in SVG', testHtmlInSvg],
+            ['when in prefixed HTML namespace in SVG', testHtmlInSvgPrefixed],
+          ]) {
+            context(ctx, function () {
+              it('should rewrite `href` attribute', async function () {
+                await testFunc({
+                  tagName,
+                  attr: 'href',
+                  attrs: {
+                    href: `${docUrl}page.html`,
+                  },
+                  text: "text",
+                  expected: 'page.html',
+                });
+              });
 
-        it('should rewrite `href` attribute', async function () {
-          var doc = createDocFixture({tagName, attrs: {href: `${docUrl}page.html`}, value: 'text'});
-          rewriter.run(doc, {capturer, filenameMap, redirects});
-
-          assert.strictEqual(doc.querySelector(tagName).getAttribute('href'), 'page.html');
+              it('should not rewrite `href` attribute when having `download` attribute', async function () {
+                await testFunc({
+                  tagName,
+                  attr: 'href',
+                  attrs: {
+                    href: `${docUrl}page.html`,
+                    download: 'page',
+                  },
+                  text: "text",
+                  expected: `${docUrl}page.html`,
+                });
+              });
+            });
+          }
         });
+      }
 
-        it('should not rewrite `href` attribute when having `download` attribute', async function () {
-          var doc = createDocFixture({tagName, attrs: {href: `${docUrl}page.html`, download: 'page'}, value: 'text'});
-          rewriter.run(doc, {capturer, filenameMap, redirects});
+      for (const tagName of ["meta"]) {
+        context(`for <${tagName}>`, function () {
+          for (const [ctx, testFunc] of [
+            ['when in HTML', testHtml],
+            ['when in iframe[srcdoc]', testIframeSrcdoc],
+            ['when in deep iframe[srcdoc]', testIframeSrcdocDeep],
+            ['when in shadow root', testShadow],
+            ['when in deep shadow root', testShadowDeep],
+            ['when in HTML namespace in SVG', testHtmlInSvg],
+            ['when in prefixed HTML namespace in SVG', testHtmlInSvgPrefixed],
+          ]) {
+            context(ctx, function () {
+              if (![testShadow, testShadowDeep].includes(testFunc)) {
+                it('should rewrite `content` attribute for `[http-equiv="refresh"]`', async function () {
+                  await testFunc({
+                    tagName,
+                    attr: 'content',
+                    attrs: {
+                      "http-equiv": "refresh",
+                      "content": `0; url=${docUrl}page.html`,
+                    },
+                    expected: '0; url=page.html',
+                  });
+                });
 
-          assert.strictEqual(doc.querySelector(tagName).getAttribute('href'), 'https://example.com/page.html');
+                it('should work when `http-equiv` is in altered case', async function () {
+                  await testFunc({
+                    tagName,
+                    attr: 'content',
+                    attrs: {
+                      "http-equiv": "REFRESH",
+                      "content": `0; url=${docUrl}page.html`,
+                    },
+                    expected: '0; url=page.html',
+                  });
+                });
+              } else {
+                it('should not rewrite', async function () {
+                  await testFunc({
+                    tagName,
+                    attr: 'content',
+                    attrs: {
+                      "http-equiv": "refresh",
+                      "content": `0; url=${docUrl}page.html`,
+                    },
+                    expected: `0; url=${docUrl}page.html`,
+                  });
+                });
+              }
+            });
+          }
         });
-      });
+      }
 
-      context('for <area>', function () {
-        const tagName = 'area';
+      for (const tagName of ["a"]) {
+        context(`for <svg:${tagName}>`, function () {
+          for (const [ctx, testFunc] of [
+            ['when in SVG', testSvg],
+            ['when in SVG with altered prefix', testSvgPrefixed],
+            ['when in SVG in HTML', testSvgInHtml],
+          ]) {
+            context(ctx, function () {
+              it('should rewrite `href` attribute', async function () {
+                await testFunc({
+                  tagName,
+                  attr: 'href',
+                  attrs: [
+                    ['href', `${docUrl}page.html`],
+                  ],
+                  text: "text",
+                  expected: 'page.html',
+                });
+              });
 
-        it('should rewrite `href` attribute', async function () {
-          var doc = createDocFixture({tagName, attrs: {href: `${docUrl}page.html`}});
-          rewriter.run(doc, {capturer, filenameMap, redirects});
+              it('should rewrite `xlink:href` attribute', async function () {
+                await testFunc({
+                  tagName,
+                  ns: NS_XLINK,
+                  attr: 'href',
+                  attrs: [
+                    ['href', `${docUrl}page.html`, NS_XLINK],
+                  ],
+                  text: "text",
+                  expected: 'page.html',
+                });
+              });
 
-          assert.strictEqual(doc.querySelector(tagName).getAttribute('href'), 'page.html');
+              it('should rewrite `href` attribute regardless of `download` attribute', async function () {
+                await testFunc({
+                  tagName,
+                  attr: 'href',
+                  attrs: [
+                    ['href', `${docUrl}page.html`],
+                    ['download', 'page'],
+                  ],
+                  text: "text",
+                  expected: 'page.html',
+                });
+              });
+
+              it('should rewrite `xlink:href` attribute regardless of `download` attribute', async function () {
+                await testFunc({
+                  tagName,
+                  ns: NS_XLINK,
+                  attr: 'href',
+                  attrs: [
+                    ['href', `${docUrl}page.html`, NS_XLINK],
+                    ['download', 'page'],
+                  ],
+                  text: "text",
+                  expected: 'page.html',
+                });
+              });
+            });
+          }
         });
-
-        it('should not rewrite `href` attribute when having `download` attribute', async function () {
-          var doc = createDocFixture({tagName, attrs: {href: `${docUrl}page.html`, download: 'page'}});
-          rewriter.run(doc, {capturer, filenameMap, redirects});
-
-          assert.strictEqual(doc.querySelector(tagName).getAttribute('href'), 'https://example.com/page.html');
-        });
-
-        it('should not work when in SVG in HTML', async function () {
-          var doc = createDocFixture({tagName: 'svg', ns: NS_SVG, children: [
-            {tagName, ns: NS_SVG, attrs: {href: `${docUrl}page.html`}},
-          ]});
-          rewriter.run(doc, {capturer, filenameMap, redirects});
-
-          assert.strictEqual(doc.querySelector(tagName).getAttribute('href'), 'https://example.com/page.html');
-        });
-      });
-
-      context('for <meta>', function () {
-        const tagName = 'meta';
-
-        it('should rewrite `content` attribute for `[http-equiv="refresh"]`', async function () {
-          var doc = createDocFixture({tagName, attrs: {'http-equiv': "refresh", 'content': `0; url=${docUrl}page.html`}});
-          rewriter.run(doc, {capturer, filenameMap, redirects});
-
-          assert.strictEqual(doc.querySelector(tagName).getAttribute('content'), '0; url=page.html');
-        });
-
-        it('should work when `http-equiv` is in altered case', async function () {
-          var doc = createDocFixture({tagName, attrs: {'http-equiv': "REFRESH", 'content': `0; url=${docUrl}page.html`}});
-          rewriter.run(doc, {capturer, filenameMap, redirects});
-
-          assert.strictEqual(doc.querySelector(tagName).getAttribute('content'), '0; url=page.html');
-        });
-
-        it('should not work when in shadow DOM', async function () {
-          var doc = createDocFixture({tagName: 'div', shadow: {
-            virtual: true,
-            children: [
-              {tagName, attrs: {'http-equiv': "refresh", 'content': `0; url=${docUrl}page.html`}},
-            ],
-          }});
-          rewriter.run(doc, {capturer, filenameMap, redirects});
-
-          var html = doc.querySelector('div').getAttribute('data-scrapbook-shadowdom');
-          var shadow = createFragFixture(html);
-          assert.strictEqual(shadow.querySelector('meta').getAttribute('content'), '0; url=https://example.com/page.html');
-        });
-      });
-
-      context('for <iframe>', function () {
-        const tagName = 'iframe';
-
-        it('should rewrite `srcdoc` attribute content', async function () {
-          var doc = createDocFixture({tagName: 'body', children: [
-            {tagName: 'meta', attrs: {'http-equiv': "refresh", 'content': `0; url=${docUrl}page.html`}},
-            {tagName: 'a', attrs: {href: `${docUrl}page.html`}},
-          ]});
-          var doc = createDocFixture({
-            tagName,
-            attrs: {srcdoc: utils.documentToString(doc)},
-          });
-          rewriter.run(doc, {capturer, filenameMap, redirects});
-
-          var html = doc.querySelector(tagName).getAttribute('srcdoc');
-          var frameDoc = createDocFixture({code: html});
-          assert.strictEqual(frameDoc.querySelector('meta').getAttribute('content'), '0; url=page.html');
-          assert.strictEqual(frameDoc.querySelector('a').getAttribute('href'), 'page.html');
-        });
-      });
-
-      context('for <svg:a>', function () {
-        const tagName = 'a';
-
-        it('should rewrite `href` and `xlink:href` attributes', async function () {
-          var doc = createDocFixture({type: 'svg', tagName: '#document-fragment', children: [
-            {tagName: 'a', ns: NS_SVG, attrs: [['href', `${docUrl}page.html`]]},
-            {tagName: 'a', ns: NS_SVG, attrs: [['xlink:href', `${docUrl}page.html`, NS_XLINK]]},
-          ]});
-          rewriter.run(doc, {capturer, filenameMap, redirects});
-
-          var elems = doc.querySelectorAll(tagName);
-          assert.strictEqual(elems[0].getAttributeNS(null, 'href'), 'page.html');
-          assert.strictEqual(elems[1].getAttributeNS(NS_XLINK, 'href'), 'page.html');
-        });
-
-        it('should rewrite `xlink:href` in SVG document with altered prefix', async function () {
-          var doc = createDocFixture({type: 'svg', nsmap: {'x': NS_XLINK}, tagName: '#document-fragment', children: [
-            {tagName: 'a', ns: NS_SVG, attrs: [['x:href', `${docUrl}page.html`, NS_XLINK]]},
-          ]});
-          rewriter.run(doc, {capturer, filenameMap, redirects});
-
-          assert.strictEqual(doc.querySelector(tagName).getAttributeNS(NS_XLINK, 'href'), 'page.html');
-        });
-
-        it('should rewrite `href` and `xlink:href` attributes in SVG in HTML', async function () {
-          var doc = createDocFixture({tagName: 'svg', ns: NS_SVG, children: [
-            {tagName: 'a', ns: NS_SVG, attrs: [['href', `${docUrl}page.html`]]},
-            {tagName: 'a', ns: NS_SVG, attrs: [['xlink:href', `${docUrl}page.html`, NS_XLINK]]},
-          ]});
-          rewriter.run(doc, {capturer, filenameMap, redirects});
-
-          var elems = doc.querySelectorAll(tagName);
-          assert.strictEqual(elems[0].getAttributeNS(null, 'href'), 'page.html');
-          assert.strictEqual(elems[1].getAttributeNS(NS_XLINK, 'href'), 'page.html');
-        });
-
-        it('should ignore `download` attribute in SVG in HTML', async function () {
-          var doc = createDocFixture({tagName: 'svg', ns: NS_SVG, children: [
-            {tagName: 'a', ns: NS_SVG, attrs: [['href', `${docUrl}page.html`], ['download', 'page']]},
-            {tagName: 'a', ns: NS_SVG, attrs: [['xlink:href', `${docUrl}page.html`, NS_XLINK], ['download', 'page']]},
-          ]});
-          rewriter.run(doc, {capturer, filenameMap, redirects});
-
-          var elems = doc.querySelectorAll(tagName);
-          assert.strictEqual(elems[0].getAttributeNS(null, 'href'), 'page.html');
-          assert.strictEqual(elems[1].getAttributeNS(NS_XLINK, 'href'), 'page.html');
-        });
-      });
+      }
 
       context('for <math:*>', function () {
         it('should rewrite `href` attribute in MathML in HTML', async function () {
-          var doc = createDocFixture({tagName: 'math', ns: NS_MATHML, children: [
+          var doc = createDocFixture({tagName: 'math', ns: NS_MATHML, attrs: {href: `${docUrl}page.html`}, children: [
             {tagName: 'mrow', ns: NS_MATHML, attrs: {href: `${docUrl}page.html`}, children: [
               {tagName: 'mo', ns: NS_MATHML, attrs: {href: `${docUrl}page.html`}, value: '123'},
             ]},
           ]});
           rewriter.run(doc, {capturer, filenameMap, redirects});
 
+          assert.strictEqual(doc.querySelector('math').getAttribute('href'), 'page.html');
           assert.strictEqual(doc.querySelector('mrow').getAttribute('href'), 'page.html');
           assert.strictEqual(doc.querySelector('mo').getAttribute('href'), 'page.html');
-        });
-      });
-
-      context('shadow DOM handling', function () {
-        it('should rewrite shadow DOM content', async function () {
-          var doc = createDocFixture({tagName: 'div', shadow: {
-            virtual: true,
-            children: [
-              {tagName: 'a', attrs: {href: `${docUrl}page.html`}},
-            ],
-          }});
-          rewriter.run(doc, {capturer, filenameMap, redirects});
-
-          var html = doc.querySelector('div').getAttribute('data-scrapbook-shadowdom');
-          var shadow = createFragFixture(html);
-          assert.strictEqual(shadow.querySelector('a').getAttribute('href'), 'page.html');
         });
       });
     });
