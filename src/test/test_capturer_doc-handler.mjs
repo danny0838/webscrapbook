@@ -471,14 +471,14 @@ describe('capturer/doc-handler.mjs', function () {
 
       function testHtml({tagName, attrs, text, attr, expected}) {
         var doc = createDocFixture({tagName, attrs, value: text});
-        rewriter.run(doc, {capturer, filenameMap, redirects});
+        rewriter.run(doc, {capturer, filenameMap, redirects, timeId, options});
         assert.strictEqual(doc.querySelector(tagName).getAttribute(attr), expected);
       }
 
       function testIframeSrcdoc({tagName, attrs, text, attr, expected}) {
         var elem = createNodeFixture({tagName, attrs, value: text});
         var doc = createDocFixture({tagName: 'iframe', attrs: {srcdoc: elem.outerHTML}});
-        rewriter.run(doc, {capturer, filenameMap, redirects});
+        rewriter.run(doc, {capturer, filenameMap, redirects, timeId, options});
 
         var html = doc.querySelector('iframe').getAttribute('srcdoc');
         var frameDoc = createDocFixture({code: html});
@@ -489,7 +489,7 @@ describe('capturer/doc-handler.mjs', function () {
         var elem = createNodeFixture({tagName, attrs, value: text});
         var elem = createNodeFixture({tagName: 'iframe', attrs: {srcdoc: elem.outerHTML}});
         var doc = createDocFixture({tagName: 'iframe', attrs: {srcdoc: elem.outerHTML}});
-        rewriter.run(doc, {capturer, filenameMap, redirects});
+        rewriter.run(doc, {capturer, filenameMap, redirects, timeId, options});
 
         var html = doc.querySelector('iframe').getAttribute('srcdoc');
         var frameDoc = createDocFixture({code: html});
@@ -503,7 +503,7 @@ describe('capturer/doc-handler.mjs', function () {
           virtual: true,
           children: [{tagName, attrs, value: text}],
         }});
-        rewriter.run(doc, {capturer, filenameMap, redirects});
+        rewriter.run(doc, {capturer, filenameMap, redirects, timeId, options});
 
         var html = doc.querySelector('div').getAttribute('data-scrapbook-shadowdom');
         var shadow = createFragFixture(html);
@@ -518,7 +518,7 @@ describe('capturer/doc-handler.mjs', function () {
             children: [{tagName, attrs, value: text}],
           }}],
         }});
-        rewriter.run(doc, {capturer, filenameMap, redirects});
+        rewriter.run(doc, {capturer, filenameMap, redirects, timeId, options});
 
         var html = doc.querySelector('div').getAttribute('data-scrapbook-shadowdom');
         var shadow = createFragFixture(html);
@@ -534,7 +534,7 @@ describe('capturer/doc-handler.mjs', function () {
           ns: NS_SVG,
           children: [{tagName, ns: NS_HTML, attrs, value: text}],
         });
-        rewriter.run(doc, {capturer, filenameMap, redirects});
+        rewriter.run(doc, {capturer, filenameMap, redirects, timeId, options});
         assert.strictEqual(doc.querySelector(tagName).getAttribute(attr), expected);
       }
 
@@ -546,13 +546,13 @@ describe('capturer/doc-handler.mjs', function () {
           attrs: [['xmlns:h', NS_HTML, NS_XMLNS]],
           children: [{tagName: `h:${tagName}`, ns: NS_HTML, attrs, value: text}],
         });
-        rewriter.run(doc, {capturer, filenameMap, redirects});
+        rewriter.run(doc, {capturer, filenameMap, redirects, timeId, options});
         assert.strictEqual(doc.querySelector(tagName).getAttribute(attr), expected);
       }
 
       function testSvg({tagName, prefix = 'xlink', attrs, text, ns = null, attr, expected}) {
         var doc = createDocFixture({type: 'svg', nsmap: {[prefix]: NS_XLINK}, tagName, ns: NS_SVG, attrs, value: text});
-        rewriter.run(doc, {capturer, filenameMap, redirects});
+        rewriter.run(doc, {capturer, filenameMap, redirects, timeId, options});
         assert.strictEqual(doc.querySelector(tagName).getAttributeNS(ns, attr), expected);
       }
 
@@ -564,19 +564,21 @@ describe('capturer/doc-handler.mjs', function () {
         var doc = createDocFixture({tagName: 'svg', ns: NS_SVG, children: [
           {tagName, ns: NS_SVG, attrs, value: text},
         ]});
-        rewriter.run(doc, {capturer, filenameMap, redirects});
+        rewriter.run(doc, {capturer, filenameMap, redirects, timeId, options});
         assert.strictEqual(doc.querySelector(tagName).getAttributeNS(ns, attr), expected);
       }
 
       const options = {
         "capture.frame": "link",
         "capture.downLink.doc.depth": 1,
+        "capture.recordRewrites": false,
       };
 
       let rewriter;
       let capturer;
       let filenameMap;
       let redirects;
+      let timeId;
 
       beforeEach(function () {
         rewriter = new RebuildLinksDocumentRewriter();
@@ -586,6 +588,7 @@ describe('capturer/doc-handler.mjs', function () {
           [rewriter.getRegisterToken(`${docUrl}page.html`, 'document'), {url: "page.html"}],
         ]);
         redirects = new Map();
+        timeId = utils.dateToId();
       });
 
       for (const tagName of ["a", "area"]) {
@@ -754,11 +757,38 @@ describe('capturer/doc-handler.mjs', function () {
               {tagName: 'mo', ns: NS_MATHML, attrs: {href: `${docUrl}page.html`}, value: '123'},
             ]},
           ]});
-          rewriter.run(doc, {capturer, filenameMap, redirects});
+          rewriter.run(doc, {capturer, filenameMap, redirects, timeId, options});
 
           assert.strictEqual(doc.querySelector('math').getAttribute('href'), 'page.html');
           assert.strictEqual(doc.querySelector('mrow').getAttribute('href'), 'page.html');
           assert.strictEqual(doc.querySelector('mo').getAttribute('href'), 'page.html');
+        });
+      });
+
+      context('record handling', function () {
+        it('should record rewriting when options["capture.recordRewrites"] = true', async function () {
+          var resMap = {
+            [docUrl]: {
+              blob: new Blob([`<meta http-equiv="refresh" content="1; url=${docUrl}page.html"><a href="${docUrl}page.html">text</a>`], {type: 'text/html'}),
+            },
+            [`${docUrl}page.html`]: {
+              blob: new Blob(['foo'], {type: 'text/html'}),
+            },
+          };
+          var options = {
+            "capture.downLink.doc.depth": 1,
+            "capture.recordRewrites": true,
+          };
+          var {data} = await new TestCapturer(resMap).captureGeneral({url: docUrl, settings: {timeId}, options});
+          var doc = await utils.readFileAsDocument(data.get('index.html'));
+
+          var elem = doc.querySelector('meta[http-equiv="refresh"]');
+          assert.strictEqual(elem.getAttribute('content'), '1; url=page.html');
+          assert.strictEqual(elem.getAttribute(`data-scrapbook-orig-attr-content-${timeId}`), `1; url=${docUrl}page.html`);
+
+          var elem = doc.querySelector('a');
+          assert.strictEqual(elem.getAttribute('href'), 'page.html');
+          assert.strictEqual(elem.getAttribute(`data-scrapbook-orig-attr-href-${timeId}`), `${docUrl}page.html`);
         });
       });
     });

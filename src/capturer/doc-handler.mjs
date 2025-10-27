@@ -801,9 +801,9 @@ class CaptureDocumentRewriterBase extends DocumentRewriter {
 }
 
 class RebuildLinksDocumentRewriter extends CaptureDocumentRewriterBase {
-  run(doc, {capturer, filenameMap, redirects}) {
+  run(doc, {capturer, filenameMap, redirects, timeId, options}) {
     Object.assign(this, {
-      doc, capturer, filenameMap, redirects,
+      doc, capturer, filenameMap, redirects, timeId, options,
     });
     this.processRootNode(doc);
   }
@@ -847,7 +847,7 @@ class RebuildLinksDocumentRewriter extends CaptureDocumentRewriterBase {
     if (!url) { return; }
     const newUrl = this.resolveUrl(url);
     if (!newUrl) { return; }
-    elem.setAttribute("content", `${time}; url=${newUrl}`);
+    this.captureRewriteAttr(elem, "content", `${time}; url=${newUrl}`);
   }
 
   [`_handle_{${NS_HTML}}iframe`](elem) {
@@ -884,7 +884,7 @@ class RebuildLinksDocumentRewriter extends CaptureDocumentRewriterBase {
 
     shadowRoot.innerHTML = html;
     this.processRootNode(shadowRoot);
-    elem.setAttribute("data-scrapbook-shadowdom", shadowRoot.innerHTML);
+    this.captureRewriteAttr(elem, "data-scrapbook-shadowdom", shadowRoot.innerHTML, {record: false});
   }
 
   resolveUrl(url) {
@@ -916,7 +916,7 @@ class RebuildLinksDocumentRewriter extends CaptureDocumentRewriterBase {
     const url = elem.getAttributeNS(ns, attr);
     const newUrl = this.resolveUrl(url);
     if (!newUrl) { return; }
-    elem.setAttributeNS(ns, attr, newUrl);
+    this.captureRewriteAttr(elem, attr, newUrl, {ns});
   }
 
   getRedirectedUrl(...args) {
