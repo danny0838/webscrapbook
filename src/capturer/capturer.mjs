@@ -4191,6 +4191,8 @@ Redirecting to <a href="${utils.escapeHtml(target)}">${utils.escapeHtml(target, 
         capturer: this,
         filenameMap,
         redirects,
+        timeId,
+        options,
       });
 
       const content = utils.documentToString(doc, options["capture.prettyPrint"]);
