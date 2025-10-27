@@ -1970,6 +1970,24 @@ describe('capturer/doc-handler.mjs', function () {
                   }
                 }
 
+                it('should not update `favIconUrl` when in shadow DOM', async function () {
+                  var doc = createDocFixture({tagName: 'div', shadow: {
+                    children: [{tagName, rel, attrs: {href: "./green.ico"}}],
+                  }});
+
+                  var tester = function ([elem, rootName], {func, doneSignal}) {
+                    if (elem === this.doc.querySelector(tagName)) {
+                      this.favIconUrl = undefined;
+                    }
+                    return func.call(this, elem, rootName);
+                  };
+
+                  var {stub, rewriter} = await rewriteNodeControlledTest({doc, docUrl, tester, options});
+                  sinon.assert.called(stub);
+
+                  assert.strictEqual(rewriter.favIconUrl, undefined);
+                });
+
                 it('should not alter `favIconUrl` when defined', async function () {
                   var doc = createDocFixture({tagName, rel, attrs: {href: "./green.ico"}});
 

@@ -2029,18 +2029,19 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
         }
         break;
       case "blank":
+        if (typeof this.favIconUrl === 'undefined' && elem.getRootNode().nodeType !== 11) {
+          this.favIconUrl = "";
+        }
+
         // HTML 5.1 2nd Edition / W3C Recommendation:
         // If the href attribute is absent, then the element does not define a link.
         this.captureRewriteAttr(elem, "href", null);
-        if (typeof this.favIconUrl === 'undefined' && elem.getRootNode().nodeType !== 11) {
-          this.favIconUrl = "";
-        }
         break;
       case "remove":
-        this.captureRemoveNode(elem);
         if (typeof this.favIconUrl === 'undefined' && elem.getRootNode().nodeType !== 11) {
           this.favIconUrl = "";
         }
+        this.captureRemoveNode(elem);
         return;
       case "save":
       default: {
