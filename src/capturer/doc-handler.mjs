@@ -1326,22 +1326,22 @@ class CaptureDocumentRewriter extends MapperMixin(CaptureDocumentRewriterBase) {
       url += docUrlHash;
     }
 
-    rootNode.setAttribute("data-scrapbook-source", url);
+    this.captureRewriteAttr(rootNode, "data-scrapbook-source", url, {record: false});
 
     // record item metadata for index.html
     if (isIndexPage) {
-      rootNode.setAttribute("data-scrapbook-create", timeId);
+      this.captureRewriteAttr(rootNode, "data-scrapbook-create", timeId, {record: false});
 
       if (title) {
-        rootNode.setAttribute("data-scrapbook-title", title);
+        this.captureRewriteAttr(rootNode, "data-scrapbook-title", title, {record: false});
       }
 
       if (favIconUrl) {
-        rootNode.setAttribute("data-scrapbook-icon", favIconUrl);
+        this.captureRewriteAttr(rootNode, "data-scrapbook-icon", favIconUrl, {record: false});
       }
 
       if (type) {
-        rootNode.setAttribute("data-scrapbook-type", type);
+        this.captureRewriteAttr(rootNode, "data-scrapbook-type", type, {record: false});
       }
     }
   }
@@ -1476,7 +1476,7 @@ class CaptureDocumentRewriter extends MapperMixin(CaptureDocumentRewriterBase) {
             break;
           }
         }
-        rootNode.setAttribute(`data-scrapbook-adoptedstylesheet-${id}`, cssText);
+        this.captureRewriteAttr(rootNode, `data-scrapbook-adoptedstylesheet-${id}`, cssText, {record: false});
       });
     }
     this.requireBasicLoader = true;
@@ -1539,21 +1539,21 @@ class CaptureDocumentRewriter extends MapperMixin(CaptureDocumentRewriterBase) {
   } = {}) {
     for (const shadowRoot of shadowRootList) {
       const host = shadowRoot.host;
-      host.setAttribute("data-scrapbook-shadowdom", shadowRoot.innerHTML);
+      this.captureRewriteAttr(host, "data-scrapbook-shadowdom", shadowRoot.innerHTML, {record: false});
       if (shadowRoot.mode !== 'open') {
-        host.setAttribute("data-scrapbook-shadowdom-mode", shadowRoot.mode);
+        this.captureRewriteAttr(host, "data-scrapbook-shadowdom-mode", shadowRoot.mode, {record: false});
       }
       if (shadowRoot.clonable) {
-        host.setAttribute("data-scrapbook-shadowdom-clonable", "");
+        this.captureRewriteAttr(host, "data-scrapbook-shadowdom-clonable", true, {record: false});
       }
       if (shadowRoot.delegatesFocus) {
-        host.setAttribute("data-scrapbook-shadowdom-delegates-focus", "");
+        this.captureRewriteAttr(host, "data-scrapbook-shadowdom-delegates-focus", true, {record: false});
       }
       if (shadowRoot.serializable) {
-        host.setAttribute("data-scrapbook-shadowdom-serializable", "");
+        this.captureRewriteAttr(host, "data-scrapbook-shadowdom-serializable", true, {record: false});
       }
       if (shadowRoot.slotAssignment && shadowRoot.slotAssignment !== 'named') {
-        host.setAttribute("data-scrapbook-shadowdom-slot-assignment", shadowRoot.slotAssignment);
+        this.captureRewriteAttr(host, "data-scrapbook-shadowdom-slot-assignment", shadowRoot.slotAssignment, {record: false});
       }
     }
   }
@@ -1565,7 +1565,7 @@ class CaptureDocumentRewriter extends MapperMixin(CaptureDocumentRewriterBase) {
     if (!(resourceMap && Object.keys(resourceMap).length)) { return; }
 
     const elem = doc.createElement('style');
-    elem.setAttribute("data-scrapbook-elem", "css-resource-map");
+    this.captureRewriteAttr(elem, "data-scrapbook-elem", "css-resource-map", {record: false});
     elem.textContent = ':root {'
         + Object.entries(resourceMap).map(([k, v]) => `${v}:url("${k}");`).join('')
         + '}';
@@ -1589,7 +1589,7 @@ class CaptureDocumentRewriter extends MapperMixin(CaptureDocumentRewriterBase) {
     };
 
     const elem = doc.createElement('script');
-    elem.setAttribute("data-scrapbook-elem", "custom-elements-loader");
+    this.captureRewriteAttr(elem, "data-scrapbook-elem", "custom-elements-loader", {record: false});
     elem.textContent = CUSTOM_ELEMENT_NAME_LOADER_TEMPLATE.replace(/%([\w@]*)%/g, (_, key) => data[key] || '');
     doc.head.appendChild(elem);
   }
@@ -2024,7 +2024,7 @@ class CaptureDocumentRewriter extends MapperMixin(CaptureDocumentRewriterBase) {
       case "link": {
         if (disableCss) {
           this.captureRewriteAttr(elem, "href", null);
-          elem.setAttribute("data-scrapbook-css-disabled", "");
+          this.captureRewriteAttr(elem, "data-scrapbook-css-disabled", true, {record: false});
           break;
         }
         break;
@@ -2043,7 +2043,7 @@ class CaptureDocumentRewriter extends MapperMixin(CaptureDocumentRewriterBase) {
       default: {
         if (disableCss) {
           this.captureRewriteAttr(elem, "href", null);
-          elem.setAttribute("data-scrapbook-css-disabled", "");
+          this.captureRewriteAttr(elem, "data-scrapbook-css-disabled", true, {record: false});
           break;
         }
         tasks.push(async () => {
@@ -3400,7 +3400,7 @@ class CaptureDocumentRewriter extends MapperMixin(CaptureDocumentRewriterBase) {
         try {
           const data = elemOrig.toDataURL();
           if (data !== utils.getBlankCanvasData(elemOrig)) {
-            elem.setAttribute("data-scrapbook-canvas", data);
+            this.captureRewriteAttr(elem, "data-scrapbook-canvas", data, {record: false});
             this.requireBasicLoader = true;
           }
         } catch (ex) {
@@ -3485,7 +3485,7 @@ class CaptureDocumentRewriter extends MapperMixin(CaptureDocumentRewriterBase) {
             if (elemOrig) {
               const value = elemOrig.value;
               if (value !== elem.getAttribute('value')) {
-                elem.setAttribute("data-scrapbook-input-value", value);
+                this.captureRewriteAttr(elem, "data-scrapbook-input-value", value, {record: false});
                 this.requireBasicLoader = true;
               }
             }
@@ -3515,12 +3515,12 @@ class CaptureDocumentRewriter extends MapperMixin(CaptureDocumentRewriterBase) {
             if (elemOrig) {
               const checked = elemOrig.checked;
               if (checked !== elem.hasAttribute('checked')) {
-                elem.setAttribute("data-scrapbook-input-checked", checked);
+                this.captureRewriteAttr(elem, "data-scrapbook-input-checked", String(checked), {record: false});
                 this.requireBasicLoader = true;
               }
               const indeterminate = elemOrig.indeterminate;
               if (indeterminate && elem.type.toLowerCase() === 'checkbox') {
-                elem.setAttribute("data-scrapbook-input-indeterminate", "");
+                this.captureRewriteAttr(elem, "data-scrapbook-input-indeterminate", true, {record: false});
                 this.requireBasicLoader = true;
               }
             }
@@ -3530,7 +3530,7 @@ class CaptureDocumentRewriter extends MapperMixin(CaptureDocumentRewriterBase) {
             if (elemOrig) {
               const indeterminate = elemOrig.indeterminate;
               if (indeterminate && elem.type.toLowerCase() === 'checkbox') {
-                elem.setAttribute("data-scrapbook-input-indeterminate", "");
+                this.captureRewriteAttr(elem, "data-scrapbook-input-indeterminate", true, {record: false});
                 this.requireBasicLoader = true;
               }
             }
@@ -3564,7 +3564,7 @@ class CaptureDocumentRewriter extends MapperMixin(CaptureDocumentRewriterBase) {
             if (elemOrig) {
               const value = elemOrig.value;
               if (value !== elem.getAttribute('value')) {
-                elem.setAttribute("data-scrapbook-input-value", value);
+                this.captureRewriteAttr(elem, "data-scrapbook-input-value", value, {record: false});
                 this.requireBasicLoader = true;
               }
             }
@@ -3606,7 +3606,7 @@ class CaptureDocumentRewriter extends MapperMixin(CaptureDocumentRewriterBase) {
         if (elemOrig) {
           const selected = elemOrig.selected;
           if (selected !== elem.hasAttribute('selected')) {
-            elem.setAttribute("data-scrapbook-option-selected", selected);
+            this.captureRewriteAttr(elem, "data-scrapbook-option-selected", String(selected), {record: false});
             this.requireBasicLoader = true;
           }
         }
@@ -3636,7 +3636,7 @@ class CaptureDocumentRewriter extends MapperMixin(CaptureDocumentRewriterBase) {
         if (elemOrig) {
           const value = elemOrig.value;
           if (value !== elem.textContent) {
-            elem.setAttribute("data-scrapbook-textarea-value", value);
+            this.captureRewriteAttr(elem, "data-scrapbook-textarea-value", value, {record: false});
             this.requireBasicLoader = true;
           }
         }
@@ -3695,7 +3695,7 @@ class CaptureDocumentRewriter extends MapperMixin(CaptureDocumentRewriterBase) {
         slotMap.set(targetNode, id);
       }
       if (targetNode.nodeType === Node.ELEMENT_NODE) {
-        targetNode.setAttribute("data-scrapbook-slot-index", id);
+        this.captureRewriteAttr(targetNode, "data-scrapbook-slot-index", id, {record: false});
       } else {
         targetNode.before(this.doc.createComment(`scrapbook-slot-index=${id}`));
         targetNode.after(this.doc.createComment(`/scrapbook-slot-index`));
@@ -3703,7 +3703,7 @@ class CaptureDocumentRewriter extends MapperMixin(CaptureDocumentRewriterBase) {
       ids.push(id);
     }
     if (ids.length) {
-      elem.setAttribute("data-scrapbook-slot-assigned", ids.join(','));
+      this.captureRewriteAttr(elem, "data-scrapbook-slot-assigned", ids.join(','), {record: false});
     }
   }
 
@@ -3919,7 +3919,7 @@ class CaptureDocumentRewriter extends MapperMixin(CaptureDocumentRewriterBase) {
       default: {
         if (disableCss) {
           this.captureRewriteTextContent(elem, "");
-          elem.setAttribute("data-scrapbook-css-disabled", "");
+          this.captureRewriteAttr(elem, "data-scrapbook-css-disabled", true, {record: false});
           break;
         }
         tasks.push(async () => {
@@ -4151,7 +4151,7 @@ class CaptureDocumentRewriter extends MapperMixin(CaptureDocumentRewriterBase) {
     }
     if (infos.length) {
       const elem = root.host || root;
-      elem.setAttribute("data-scrapbook-adoptedstylesheets", infos.map(x => x.id).join(','));
+      this.captureRewriteAttr(elem, "data-scrapbook-adoptedstylesheets", infos.map(x => x.id).join(','), {record: false});
     }
   }
 
