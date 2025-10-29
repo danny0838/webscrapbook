@@ -12184,32 +12184,6 @@ document.querySelector("p").textContent = "srcdoc content modified";
     });
   });
 
-  describe('namespace handling', function () {
-    it('should save `style`/`script` elements in another namespace', async function () {
-      var blob = await capture({
-        url: `${localhost}/capture_namespace/namespace.html`,
-        options: baseOptions,
-      });
-
-      var zip = await Zip.loadAsync(blob);
-      var indexFile = zip.file('index.html');
-      var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
-      var doc = await readFileAsDocument(indexBlob);
-
-      var styleElems = doc.querySelectorAll('style');
-      assert.strictEqual(styleElems[0].innerHTML.trim(), `body > #html { background: green; }`);
-      assert.strictEqual(styleElems[1].innerHTML.trim(), `body > #non-html { background: green; }`);
-      assert.strictEqual(styleElems[2].innerHTML.trim(), `#svg &gt; circle { fill: green; }`);
-      assert.strictEqual(styleElems[3].innerHTML.trim(), `#non-svg &gt; circle { fill: green; }`);
-
-      var scriptElems = doc.querySelectorAll('script');
-      assert.strictEqual(scriptElems[0].innerHTML.trim(), `console.log("head > html script")`);
-      assert.strictEqual(scriptElems[1].innerHTML.trim(), `console.log("head > non-html script")`);
-      assert.strictEqual(scriptElems[2].innerHTML.trim(), `console.log("svg &gt; svg script")`);
-      assert.strictEqual(scriptElems[3].innerHTML.trim(), `console.log("svg &gt; html script")`);
-    });
-  });
-
   describe('invalid tags', function () {
     it('should escape bad tag content for security', async function () {
       var options = Object.assign({}, baseOptions, {

@@ -29,6 +29,7 @@ const CONTEXT_CROSS_ORIGIN = 'cross-origin handling';
 const CONTEXT_REFERRER_POLICY = 'referrer policy handling';
 const CONTEXT_FAVICON = 'favicon handling';
 const CONTEXT_DOWN_LINK = 'downLink handling';
+const CONTEXT_RAW_TEXT_ESCAPING = 'raw text escaping';
 
 const BASIC_LOADER_PATTERN = rawRegex`${'^'}(function${'\\s*'}()${'\\s*'}{${'.+'}})()${'$'}`;
 const ANNOTATION_LOADER_PATTERN = rawRegex`${'^'}(function${'\\s*'}()${'\\s*'}{${'.+'}})()${'$'}`;
@@ -2274,6 +2275,24 @@ describe('capturer/doc-handler.mjs', function () {
                   });
                 });
 
+                context(CONTEXT_RAW_TEXT_ESCAPING, function () {
+                  it('should escape tag-ending text in HTML document', async function () {
+                    var doc = createDocFixture({tagName, value: 'body { content: "</style>"; background-image: url("./green.bmp"); }'});
+
+                    var {doc} = await new TestCapturer().captureDocument({doc, docUrl, options});
+                    var elem = doc.querySelector(tagName);
+                    assert.strictEqual(elem.textContent, 'body { content: "<\\/style>"; background-image: url("green.bmp"); }');
+                  });
+
+                  $it.xfail()('should not escape tag-ending text in non-HTML document', async function () {
+                    var doc = createDocFixture({type: 'xhtml', tagName, value: 'body { content: "</style>"; background-image: url("./green.bmp"); }'});
+
+                    var {doc} = await new TestCapturer().captureDocument({doc, docUrl, options});
+                    var elem = doc.querySelector(tagName);
+                    assert.strictEqual(elem.textContent, 'body { content: "</style>"; background-image: url("green.bmp"); }');
+                  });
+                });
+
                 break;
               }
               case "blank": {
@@ -2338,7 +2357,7 @@ describe('capturer/doc-handler.mjs', function () {
                   var elem = doc.querySelector(tagName);
                   assert.strictEqual(elem.textContent, 'console.debug("test")');
 
-                  sinon.assert.notCalled(spyRewriteText);
+                  sinon.assert.calledWithExactly(spyRewriteText, elem, 'console.debug("test")');
                 });
 
                 context(CONTEXT_CROSS_ORIGIN, function () {
@@ -2373,7 +2392,7 @@ describe('capturer/doc-handler.mjs', function () {
                   var elem = doc.querySelector(tagName);
                   assert.strictEqual(elem.textContent, 'console.debug("test")');
 
-                  sinon.assert.notCalled(spyRewriteText);
+                  sinon.assert.calledWithExactly(spyRewriteText, elem, 'console.debug("test")');
                 });
 
                 break;
@@ -2396,7 +2415,7 @@ describe('capturer/doc-handler.mjs', function () {
                   var elem = doc.querySelector(tagName);
                   assert.strictEqual(elem.textContent, '');
 
-                  sinon.assert.calledOnceWithExactly(spyRewriteText, elem, "");
+                  sinon.assert.calledWithExactly(spyRewriteText, elem, "");
                 });
 
                 break;
@@ -2436,6 +2455,31 @@ describe('capturer/doc-handler.mjs', function () {
 
                 sinon.assert.calledOnceWithExactly(spyResolve, './script.js', 'https://example.com/baseUrl/');
               });
+            });
+
+            context(CONTEXT_RAW_TEXT_ESCAPING, function () {
+              switch (mode) {
+                case "save":
+                case "link": {
+                  it('should escape tag-ending text in HTML document', async function () {
+                    var doc = createDocFixture({tagName, value: 'console.debug("</script>")'});
+
+                    var {doc} = await new TestCapturer().captureDocument({doc, docUrl, options});
+                    var elem = doc.querySelector(tagName);
+                    assert.strictEqual(elem.textContent, 'console.debug("<\\/script>")');
+                  });
+
+                  $it.xfail()('should not escape tag-ending text in non-HTML document', async function () {
+                    var doc = createDocFixture({type: 'xhtml', tagName, value: 'console.debug("</script>")'});
+
+                    var {doc} = await new TestCapturer().captureDocument({doc, docUrl, options});
+                    var elem = doc.querySelector(tagName);
+                    assert.strictEqual(elem.textContent, 'console.debug("</script>")');
+                  });
+
+                  break;
+                }
+              }
             });
           });
         }
@@ -6918,9 +6962,43 @@ describe('capturer/doc-handler.mjs', function () {
         });
       });
 
+      context('for <xmp>', function () {
+        const tagName = 'xmp';
+
+        context(CONTEXT_RAW_TEXT_ESCAPING, function () {
+          it('should escape tag-ending text in HTML document', async function () {
+            var doc = createDocFixture({tagName, value: 'some text with </xmp>'});
+
+            var {doc} = await new TestCapturer().captureDocument({doc, docUrl});
+            var elem = doc.querySelector(tagName);
+            assert.strictEqual(elem.textContent, 'some text with <\\/xmp>');
+
+            sinon.assert.calledWithExactly(spyRewriteText, elem, 'some text with <\\/xmp>');
+          });
+
+          $it.xfail()('should not escape tag-ending text in non-HTML document', async function () {
+            var doc = createDocFixture({type: 'xhtml', tagName, value: 'some text with </xmp>'});
+
+            var {doc} = await new TestCapturer().captureDocument({doc, docUrl});
+            var elem = doc.querySelector(tagName);
+            assert.strictEqual(elem.textContent, 'some text with </xmp>');
+          });
+        });
+      });
+
       context('for <svg:style>', function () {
         function docFactory(value) {
           return createDocFixture({type: 'svg', tagName, ns: NS_SVG, value});
+        }
+
+        function docFactoryHtml(value) {
+          return createDocFixture({
+            tagName: 'svg',
+            ns: NS_SVG,
+            children: [
+              {tagName, ns: NS_SVG, value},
+            ],
+          });
         }
 
         const tagName = 'style';
@@ -6966,6 +7044,24 @@ describe('capturer/doc-handler.mjs', function () {
                   });
                 });
 
+                context(CONTEXT_RAW_TEXT_ESCAPING, function () {
+                  it('should not escape tag-ending text in non-HTML document', async function () {
+                    var doc = docFactory('body { content: "</style>"; background-image: url("./green.bmp"); }');
+
+                    var {doc} = await new TestCapturer().captureDocument({doc, docUrl, options});
+                    var elem = doc.querySelector(tagName);
+                    assert.strictEqual(elem.textContent, 'body { content: "</style>"; background-image: url("green.bmp"); }');
+                  });
+
+                  it('should not escape tag-ending text in HTML document', async function () {
+                    var doc = docFactoryHtml('body { content: "</style>"; background-image: url("./green.bmp"); }');
+
+                    var {doc} = await new TestCapturer().captureDocument({doc, docUrl, options});
+                    var elem = doc.querySelector(tagName);
+                    assert.strictEqual(elem.textContent, 'body { content: "</style>"; background-image: url("green.bmp"); }');
+                  });
+                });
+
                 break;
               }
               case "blank": {
@@ -7004,6 +7100,12 @@ describe('capturer/doc-handler.mjs', function () {
       context('for <svg:script>', function () {
         function docFactory({attrs, value = ''} = {}) {
           return createDocFixture({type: 'svg', tagName, ns: NS_SVG, attrs, value});
+        }
+
+        function docFactoryHtml({attrs, value = ''} = {}) {
+          return createDocFixture({tagName: 'svg', ns: NS_SVG, children: [
+            {tagName, ns: NS_SVG, attrs, value},
+          ]});
         }
 
         const tagName = 'script';
@@ -7152,6 +7254,31 @@ describe('capturer/doc-handler.mjs', function () {
                 sinon.assert.calledWithExactly(spyResolve, './script2.js', 'https://example.com/baseUrl/');
                 sinon.assert.calledTwice(spyResolve);
               });
+            });
+
+            context(CONTEXT_RAW_TEXT_ESCAPING, function () {
+              switch (mode) {
+                case "save":
+                case "link": {
+                  it('should not escape tag-ending text in non-HTML document', async function () {
+                    var doc = docFactory({value: 'console.debug("</script>")'});
+
+                    var {doc} = await new TestCapturer().captureDocument({doc, docUrl, options});
+                    var elem = doc.querySelector(tagName);
+                    assert.strictEqual(elem.textContent, 'console.debug("</script>")');
+                  });
+
+                  it('should not escape tag-ending text in HTML document', async function () {
+                    var doc = docFactoryHtml({value: 'console.debug("</script>")'});
+
+                    var {doc} = await new TestCapturer().captureDocument({doc, docUrl, options});
+                    var elem = doc.querySelector(tagName);
+                    assert.strictEqual(elem.textContent, 'console.debug("</script>")');
+                  });
+
+                  break;
+                }
+              }
             });
           });
         }

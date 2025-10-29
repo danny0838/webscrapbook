@@ -2214,19 +2214,6 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
             callback: (elem, response) => {
               // escape </style> as textContent can contain HTML
               this.captureRewriteTextContent(elem, response.cssText.replace(/<\/(style>)/gi, "<\\/$1"));
-
-              // For an HTML document the CSS content must not be HTML-escaped.
-              // However the innerHTML/outerHTML property of the <style> element
-              // is escaped if the element is in another namespace. Replace it
-              // with the default namespace to fix it.
-              if (elem.namespaceURI !== 'http://www.w3.org/1999/xhtml') {
-                const newElem = this.doc.createElement('style');
-                for (const attr of elem.attributes) {
-                  newElem.setAttribute(attr.name, attr.value);
-                }
-                newElem.textContent = elem.textContent;
-                elem.replaceWith(newElem);
-              }
             },
           });
         });
@@ -2286,20 +2273,7 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
     }
 
     // escape </script> as textContent can contain HTML
-    elem.textContent = elem.textContent.replace(/<\/(script>)/gi, "<\\/$1");
-
-    // For an HTML document the script content must not be HTML-escaped.
-    // However the innerHTML/outerHTML property of the <script> element
-    // is escaped if the element is in another namespace. Replace it
-    // with the default namespace to fix it.
-    if (elem.namespaceURI !== 'http://www.w3.org/1999/xhtml') {
-      const newElem = this.doc.createElement('script');
-      for (const attr of elem.attributes) {
-        newElem.setAttribute(attr.name, attr.value);
-      }
-      newElem.textContent = elem.textContent;
-      elem.replaceWith(newElem);
-    }
+    this.captureRewriteTextContent(elem, elem.textContent.replace(/<\/(script>)/gi, "<\\/$1"));
   }
 
   _handle_html_noscript(elem) {
@@ -3746,7 +3720,7 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
 
   _handle_html_xmp(elem) {
     // escape </xmp> as textContent can contain HTML
-    elem.textContent = elem.textContent.replace(/<\/(xmp>)/gi, "<\\/$1");
+    this.captureRewriteTextContent(elem, elem.textContent.replace(/<\/(xmp>)/gi, "<\\/$1"));
   }
 
   _handle_svg_a(elem) {
@@ -3836,8 +3810,7 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
             envCharset: charset,
             settings,
             callback: (elem, response) => {
-              // escape </style> as textContent can contain HTML
-              this.captureRewriteTextContent(elem, response.cssText.replace(/<\/(style>)/gi, "<\\/$1"));
+              this.captureRewriteTextContent(elem, response.cssText);
             },
           });
         });
