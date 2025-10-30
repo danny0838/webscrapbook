@@ -194,7 +194,14 @@ class CaptureHelperHandler {
     }
     if (typeof selector.xpath === 'string') {
       const doc = this.getOwnerDocument(rootNode);
-      const iter = doc.evaluate(selector.xpath, rootNode, null, 0, null);
+      const nsResolver = (() => {
+        const nsmap = selector.nsmap;
+        if (!nsmap) { return null; }
+        return (prefix) => {
+          return nsmap[prefix] || null;
+        };
+      })();
+      const iter = doc.evaluate(selector.xpath, rootNode, nsResolver, 0, null);
       let elems = [], elem;
       while (elem = iter.iterateNext()) {
         elems.push(elem);
@@ -257,8 +264,9 @@ class CaptureHelperHandler {
       };
     }
 
-    let {name, value = null, attrs, children} = nodeData;
+    let {name, ns, value = null, attrs, children} = nodeData;
     name = this.resolve(name, rootNode);
+    ns = this.resolve(ns, rootNode);
     value = this.resolve(value, rootNode);
 
     const tag = name || "#text";
@@ -270,13 +278,20 @@ class CaptureHelperHandler {
         return doc.createComment(utils.escapeHtmlComment(value || ""));
       }
       default: {
-        const newElem = doc.createElement(tag);
+        const newElem = (ns !== undefined) ? doc.createElementNS(ns, tag) : doc.createElement(tag);
 
         if (!attrs) {
           // do nothing
         } else if (Array.isArray(attrs)) {
-          for (const [key, value] of attrs) {
-            newElem.setAttribute(this.resolve(key, rootNode), this.resolve(value, rootNode));
+          for (let [key, value, ns] of attrs) {
+            key = this.resolve(key, rootNode);
+            value = this.resolve(value, rootNode);
+            ns = this.resolve(ns, rootNode);
+            if (ns !== undefined) {
+              newElem.setAttributeNS(ns, key, value);
+            } else {
+              newElem.setAttribute(key, value);
+            }
           }
         } else if (typeof attrs === 'object') {
           for (const key in attrs) {
@@ -479,9 +494,13 @@ class CaptureHelperHandler {
     return elems.length > 0;
   }
 
-  cmd_has_attr(rootNode, selector, attr) {
+  cmd_has_attr(rootNode, selector, attr, ns) {
     const elems = this.selectNodes(rootNode, this.resolve(selector, rootNode));
     try {
+      const _ns = this.resolve(ns, rootNode);
+      if (_ns !== undefined) {
+        return elems[0].hasAttributeNS(_ns, this.resolve(attr, rootNode));
+      }
       return elems[0].hasAttribute(this.resolve(attr, rootNode));
     } catch (ex) {
       return false;
@@ -511,9 +530,13 @@ class CaptureHelperHandler {
     }
   }
 
-  cmd_get_attr(rootNode, selector, attr) {
+  cmd_get_attr(rootNode, selector, attr, ns) {
     const elems = this.selectNodes(rootNode, this.resolve(selector, rootNode));
     try {
+      const _ns = this.resolve(ns, rootNode);
+      if (_ns !== undefined) {
+        return elems[0].getAttributeNS(_ns, this.resolve(attr, rootNode));
+      }
       return elems[0].getAttribute(this.resolve(attr, rootNode));
     } catch (ex) {
       return null;
@@ -599,7 +622,7 @@ class CaptureHelperHandler {
     }
   }
 
-  cmd_attr(rootNode, selector, attrs, attrValue) {
+  cmd_attr(rootNode, selector, attrs, attrValue, attrNs) {
     const elems = this.selectNodes(rootNode, this.resolve(selector, rootNode));
     for (const elem of elems) {
       if (!elem.setAttribute) { continue; }
@@ -607,27 +630,45 @@ class CaptureHelperHandler {
       const _attrs = this.resolve(attrs, elem);
       if (!_attrs) { continue; }
 
-      // key, value
+      // key, value, ns
       if (typeof _attrs === 'string') {
         const key = _attrs;
         const value = this.resolve(attrValue, elem);
+        const ns = this.resolve(attrNs, elem);
         if (value !== null) {
-          elem.setAttribute(key, value);
+          if (ns !== undefined) {
+            elem.setAttributeNS(ns, key, value);
+          } else {
+            elem.setAttribute(key, value);
+          }
         } else {
-          elem.removeAttribute(key);
+          if (ns !== undefined) {
+            elem.removeAttributeNS(ns, key);
+          } else {
+            elem.removeAttribute(key);
+          }
         }
         continue;
       }
 
-      // [[key1, value1], ...]
+      // [[key1, value1, ns1], ...]
       if (Array.isArray(_attrs)) {
-        for (let [key, value] of _attrs) {
+        for (let [key, value, ns] of _attrs) {
           key = this.resolve(key, elem);
           value = this.resolve(value, elem);
+          ns = this.resolve(ns, elem);
           if (value !== null) {
-            elem.setAttribute(key, value);
+            if (ns !== undefined) {
+              elem.setAttributeNS(ns, key, value);
+            } else {
+              elem.setAttribute(key, value);
+            }
           } else {
-            elem.removeAttribute(key);
+            if (ns !== undefined) {
+              elem.removeAttributeNS(ns, key);
+            } else {
+              elem.removeAttribute(key);
+            }
           }
         }
         continue;
