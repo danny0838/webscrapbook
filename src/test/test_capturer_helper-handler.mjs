@@ -1,5 +1,6 @@
 import {MochaQuery as $, assert, runControlledTest, createDocFixture} from "./unittest.mjs";
 import sinon from "./lib/sinon-esm.js";
+import {NS_HTML, NS_SVG, NS_XLINK} from "../utils/common.mjs";
 
 import {CaptureHelperHandler} from "../capturer/helper-handler.mjs";
 
@@ -228,6 +229,32 @@ describe('capturer/helper-handler.mjs', function () {
               doc.querySelector('#parent-next'),
             ]);
           });
+
+          it("should resolve namespaces with `.nsmap`", function () {
+            var doc = createDocFixture({
+              name: 'body',
+              children: [
+                {name: 'div', id: 'e1'},
+                {name: 'circle', ns: NS_SVG, id: 'e2'},
+              ],
+            });
+
+            var selector = {xpath: ".//div", nsmap: {}};
+            var result = CaptureHelperHandler.selectNodes(doc, selector);
+            assert.deepEqual(result, [doc.querySelector('#e1')]);
+
+            var selector = {xpath: ".//html:div", nsmap: {
+              html: NS_HTML,
+            }};
+            var result = CaptureHelperHandler.selectNodes(doc, selector);
+            assert.deepEqual(result, [doc.querySelector('#e1')]);
+
+            var selector = {xpath: ".//svg:circle", nsmap: {
+              svg: NS_SVG,
+            }};
+            var result = CaptureHelperHandler.selectNodes(doc, selector);
+            assert.deepEqual(result, [doc.querySelector('#e2')]);
+          });
         });
 
         context("should modify refNode when having `.base`", function () {
@@ -373,6 +400,17 @@ describe('capturer/helper-handler.mjs', function () {
         return createDocFixture({code: `\
 <div id="target">target</div>
 <div id="target2">target2</div>`});
+      }
+
+      function makeTestDocNs() {
+        return createDocFixture({
+          name: 'body',
+          children: [
+            {name: 'a', attrs: [['id', 'target'], ['href', 'https://example.org/', NS_XLINK]], value: 'target'},
+            '\n',
+            {name: 'a', attrs: [['id', 'target2'], ['xlink:href', 'https://example.org/']], value: 'target2'},
+          ],
+        });
       }
 
       it ('should call the corresponding handler with rootNode and arguments', function () {
@@ -1024,20 +1062,37 @@ describe('capturer/helper-handler.mjs', function () {
       context("cmd_has_attr", function () {
         it("should return whether the first selected node has the attribute", function () {
           var helper = new CaptureHelperHandler();
-          var doc = makeTestDoc();
+          var doc = makeTestDocNs();
 
-          var command = ["has_attr", {css: "#target"}, "id"];
+          var command = ["has_attr", {css: "#target"}, "href"];
           assert.strictEqual(helper.runCommand(command, doc), true);
 
-          var command = ["has_attr", {css: "#target"}, "class"];
+          var command = ["has_attr", {css: "#target"}, "xlink:href"];
+          assert.strictEqual(helper.runCommand(command, doc), false);
+
+          var command = ["has_attr", {css: "#target2"}, "xlink:href"];
+          assert.strictEqual(helper.runCommand(command, doc), true);
+        });
+
+        it("should return whether the first selected node has the namespaced attribute when argument 4 is provided", function () {
+          var helper = new CaptureHelperHandler();
+          var doc = makeTestDocNs();
+
+          var command = ["has_attr", {css: "#target"}, "href", null];
+          assert.strictEqual(helper.runCommand(command, doc), false);
+
+          var command = ["has_attr", {css: "#target"}, "href", NS_XLINK];
+          assert.strictEqual(helper.runCommand(command, doc), true);
+
+          var command = ["has_attr", {css: "#target2"}, "href", NS_XLINK];
           assert.strictEqual(helper.runCommand(command, doc), false);
         });
 
         it("should resolve parameter commands", function () {
           var helper = new CaptureHelperHandler();
-          var doc = makeTestDoc();
+          var doc = makeTestDocNs();
 
-          var command = ["has_attr", ["if", true, {css: "#target"}], ["concat", "id"]];
+          var command = ["has_attr", ["if", true, {css: "#target"}], ["concat", "href"], ["concat", NS_XLINK]];
           assert.strictEqual(helper.runCommand(command, doc), true);
         });
       });
@@ -1099,26 +1154,37 @@ describe('capturer/helper-handler.mjs', function () {
       });
 
       context("cmd_get_attr", function () {
-        function makeTestDoc() {
-          return createDocFixture({code: `\
-<img data-src="image1.jpg">
-<img data-src="image2.jpg">`});
-        }
-
         it("should return the attribute of the first selected node", function () {
           var helper = new CaptureHelperHandler();
-          var doc = makeTestDoc();
+          var doc = makeTestDocNs();
 
-          var command = ["get_attr", {css: "img"}, "data-src"];
-          assert.strictEqual(helper.runCommand(command, doc), "image1.jpg");
+          var command = ["get_attr", {css: "#target"}, "href"];
+          assert.strictEqual(helper.runCommand(command, doc), 'https://example.org/');
+
+          var command = ["get_attr", {css: "#target"}, "xlink:href"];
+          assert.strictEqual(helper.runCommand(command, doc), null);
+
+          var command = ["get_attr", {css: "#target2"}, "href"];
+          assert.strictEqual(helper.runCommand(command, doc), null);
+
+          var command = ["get_attr", {css: "#target2"}, "xlink:href"];
+          assert.strictEqual(helper.runCommand(command, doc), 'https://example.org/');
+        });
+
+        it("should return the namespaced attribute of the first selected node when argument 4 is provided", function () {
+          var helper = new CaptureHelperHandler();
+          var doc = makeTestDocNs();
+
+          var command = ["get_attr", {css: "#target"}, "href", NS_XLINK];
+          assert.strictEqual(helper.runCommand(command, doc), 'https://example.org/');
         });
 
         it("should resolve parameter commands", function () {
           var helper = new CaptureHelperHandler();
-          var doc = makeTestDoc();
+          var doc = makeTestDocNs();
 
-          var command = ["get_attr", ["if", true, {css: "img"}], ["concat", "data-src"]];
-          assert.strictEqual(helper.runCommand(command, doc), "image1.jpg");
+          var command = ["get_attr", ["if", true, {css: "#target"}], ["concat", "href"], ["concat", NS_XLINK]];
+          assert.strictEqual(helper.runCommand(command, doc), 'https://example.org/');
         });
       });
 
@@ -1369,11 +1435,11 @@ describe('capturer/helper-handler.mjs', function () {
 <img data-src="myimage.jpg">`);
 
             var doc = makeTestDoc();
-            var command = ["attr", {css: "img"}, "src", "myimage.jpg"];
+            var command = ["attr", {css: "img"}, "foo:bar:src", "myimage.jpg"];
             assert.strictEqual(helper.runCommand(command, doc), undefined);
             assert.strictEqual(doc.body.innerHTML.trim(), `\
-<img data-src="image1.jpg" src="myimage.jpg">
-<img data-src="image2.jpg" src="myimage.jpg">`);
+<img data-src="image1.jpg" foo:bar:src="myimage.jpg">
+<img data-src="image2.jpg" foo:bar:src="myimage.jpg">`);
           });
 
           it("should remove the named attribute when value is null", function () {
@@ -1387,15 +1453,39 @@ describe('capturer/helper-handler.mjs', function () {
 <img>`);
           });
 
+          it("should set the namespaced attribute with the value when value is a string and argument 4 is provided", function () {
+            var helper = new CaptureHelperHandler();
+
+            var doc = makeTestDocNs();
+            var command = ["attr", {css: "a"}, "src", "123", NS_XLINK];
+            assert.strictEqual(helper.runCommand(command, doc), undefined);
+            assert.strictEqual(doc.body.innerHTML.trim(), `\
+<a id="target" xlink:href="https://example.org/" xlink:src="123">target</a>
+<a id="target2" xlink:href="https://example.org/" xlink:src="123">target2</a>`);
+            assert.strictEqual(doc.querySelector('a').getAttributeNS(NS_XLINK, 'src'), '123');
+          });
+
+          it("should remove the namespaced attribute when value is null and argument 4 is provided", function () {
+            var helper = new CaptureHelperHandler();
+
+            var doc = makeTestDocNs();
+            var command = ["attr", {css: "#target"}, "href", null, NS_XLINK];
+            assert.strictEqual(helper.runCommand(command, doc), undefined);
+            assert.strictEqual(doc.body.innerHTML.trim(), `\
+<a id="target">target</a>
+<a id="target2" xlink:href="https://example.org/">target2</a>`);
+          });
+
           it("should resolve parameter commands", function () {
             var helper = new CaptureHelperHandler();
 
             var doc = makeTestDoc();
-            var command = ["attr", ["if", true, {css: "img"}], ["concat", "src"], ["get_attr", null, "data-src"]];
+            var command = ["attr", ["if", true, {css: "img"}], ["concat", "src"], ["get_attr", null, "data-src"], ["concat", NS_XLINK]];
             assert.strictEqual(helper.runCommand(command, doc), undefined);
             assert.strictEqual(doc.body.innerHTML.trim(), `\
-<img data-src="image1.jpg" src="image1.jpg">
-<img data-src="image2.jpg" src="image2.jpg">`);
+<img data-src="image1.jpg" xlink:src="image1.jpg">
+<img data-src="image2.jpg" xlink:src="image2.jpg">`);
+            assert.strictEqual(doc.querySelector('img').getAttributeNS(NS_XLINK, 'src'), 'image1.jpg');
           });
         });
 
@@ -1450,12 +1540,29 @@ describe('capturer/helper-handler.mjs', function () {
             var command = ["attr", {css: "img"}, [
               ["src", "myimage.jpg"],
               ["data-src", null],
-              ["data-extra", "extra-value"],
+              ["foo:bar:src", "extra-value"],
             ]];
             assert.strictEqual(helper.runCommand(command, doc), undefined);
             assert.strictEqual(doc.body.innerHTML.trim(), `\
-<img src="myimage.jpg" data-extra="extra-value">
-<img src="myimage.jpg" data-extra="extra-value">`);
+<img src="myimage.jpg" foo:bar:src="extra-value">
+<img src="myimage.jpg" foo:bar:src="extra-value">`);
+          });
+
+          it("should set the attributes with namespace if provided", function () {
+            var helper = new CaptureHelperHandler();
+
+            var doc = makeTestDocNs();
+            var command = ["attr", {css: "a"}, [
+              ["id", null, null],
+              ["href", null, NS_XLINK],
+              ["class", "cls", null],
+              ["src", 'http://example.com/', NS_XLINK],
+            ]];
+            assert.strictEqual(helper.runCommand(command, doc), undefined);
+            assert.strictEqual(doc.body.innerHTML.trim(), `\
+<a class="cls" xlink:src="http://example.com/">target</a>
+<a xlink:href="https://example.org/" class="cls" xlink:src="http://example.com/">target2</a>`);
+            assert.strictEqual(doc.querySelector('a').getAttributeNS(NS_XLINK, 'src'), 'http://example.com/');
           });
 
           it("should resolve parameter commands", function () {
@@ -1482,6 +1589,16 @@ describe('capturer/helper-handler.mjs', function () {
             assert.strictEqual(doc.body.innerHTML.trim(), `\
 <img src="image1.jpg" data-extra="extra-value">
 <img src="image2.jpg" data-extra="extra-value">`);
+
+            var doc = makeTestDocNs();
+            var command = ["attr", {css: "a"}, [
+              [["concat", "href"], ["if", true, null], ["concat", NS_XLINK]],
+              [["concat", "ns1:", "ns2:", "foo"], ["concat", "bar"]],
+            ]];
+            assert.strictEqual(helper.runCommand(command, doc), undefined);
+            assert.strictEqual(doc.body.innerHTML.trim(), `\
+<a id="target" ns1:ns2:foo="bar">target</a>
+<a id="target2" xlink:href="https://example.org/" ns1:ns2:foo="bar">target2</a>`);
           });
         });
       });
@@ -1779,6 +1896,32 @@ insertedText`);
 <div class="target"><div id="child-1"></div><div id="child-2"></div><div id="child-3"></div>\
 <b data-attr1="value1" data-attr2="value2">text<i data-a1="v1">elem-child</i><u data-a1="v1">elem-child</u><!--safe <-\u200B- comment -\u200B-> text-->text-child</b>\
 </div>`);
+          });
+
+          it("should insert the generated nodes with namespaced element and attributes", function () {
+            var helper = new CaptureHelperHandler();
+
+            var doc = makeTestDoc();
+            var command = ["insert", {"css": ".target"}, {
+              "name": "svg",
+              "ns": NS_SVG,
+              "children": [
+                {
+                  "name": "a",
+                  "ns": NS_SVG,
+                  "attrs": [
+                    ["href", "http://example.com/", NS_XLINK],
+                  ],
+                  "value": "dummy",
+                },
+              ],
+            }];
+            assert.strictEqual(helper.runCommand(command, doc), undefined);
+            assert.strictEqual(doc.body.innerHTML.trim(), `\
+<div class="target"><div id="child-1"></div><div id="child-2"></div><div id="child-3"></div><svg><a xlink:href="http://example.com/">dummy</a></svg></div>
+<div class="target"><div id="child-1"></div><div id="child-2"></div><div id="child-3"></div><svg><a xlink:href="http://example.com/">dummy</a></svg></div>`);
+            assert.strictEqual(doc.querySelector('svg').namespaceURI, NS_SVG);
+            assert.strictEqual(doc.querySelector('a').getAttributeNS(NS_XLINK, 'href'), 'http://example.com/');
           });
         });
 
