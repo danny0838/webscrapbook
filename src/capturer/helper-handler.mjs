@@ -277,6 +277,14 @@ class CaptureHelperHandler {
       case "#comment": {
         return doc.createComment(utils.escapeHtmlComment(value || ""));
       }
+      case "#cdata-section": {
+        try {
+          return doc.createCDATASection(value || "");
+        } catch {
+          // fallback to a normal text node if CDATA section contains invalid char sequence
+          return doc.createTextNode(value || "");
+        }
+      }
       default: {
         const newElem = (ns !== undefined) ? doc.createElementNS(ns, tag) : doc.createElement(tag);
 

@@ -1942,6 +1942,32 @@ insertedText`);
 </div>`);
           });
 
+          it("should insert CDATA section", function () {
+            var helper = new CaptureHelperHandler();
+
+            var doc = createDocFixture({type: 'xhtml'});
+            var command = ["insert", {"css": "body"}, {
+              "name": "#cdata-section",
+              "value": "data",
+            }];
+            assert.strictEqual(helper.runCommand(command, doc), undefined);
+            assert.strictEqual(doc.documentElement.outerHTML.trim(), `\
+<html xmlns="http://www.w3.org/1999/xhtml"><head></head><body><![CDATA[data]]></body></html>`);
+          });
+
+          it("should insert text node if CDATA contains invalid chars", function () {
+            var helper = new CaptureHelperHandler();
+
+            var doc = createDocFixture({type: 'xhtml'});
+            var command = ["insert", {"css": "body"}, {
+              "name": "#cdata-section",
+              "value": "no ]]> text",
+            }];
+            assert.strictEqual(helper.runCommand(command, doc), undefined);
+            assert.strictEqual(doc.documentElement.outerHTML.trim(), `\
+<html xmlns="http://www.w3.org/1999/xhtml"><head></head><body>no ]]&gt; text</body></html>`);
+          });
+
           it("should insert the generated nodes with namespaced element and attributes", function () {
             var helper = new CaptureHelperHandler();
 
