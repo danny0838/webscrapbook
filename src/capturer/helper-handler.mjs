@@ -622,6 +622,29 @@ class CaptureHelperHandler {
     }
   }
 
+  cmd_tag(rootNode, selector, name, ns) {
+    const doc = this.getOwnerDocument(rootNode);
+    const elems = this.selectNodes(rootNode, this.resolve(selector, rootNode));
+    const _name = this.resolve(name, rootNode);
+    const _ns = this.resolve(ns, rootNode);
+    for (const elem of elems) {
+      if (elem.nodeType !== 1) { continue; }
+      const newElem = (_ns !== undefined) ? doc.createElementNS(_ns, _name) : doc.createElement(_name);
+      for (const attr of elem.attributes) {
+        if (!attr.namespaceURI) {
+          newElem.setAttribute(attr.nodeName, attr.nodeValue);
+        } else {
+          newElem.setAttributeNS(attr.namespaceURI, attr.nodeName, attr.nodeValue);
+        }
+      }
+      let child;
+      while (child = elem.firstChild) {
+        newElem.appendChild(child);
+      }
+      elem.replaceWith(newElem);
+    }
+  }
+
   cmd_attr(rootNode, selector, attrs, attrValue, attrNs) {
     const elems = this.selectNodes(rootNode, this.resolve(selector, rootNode));
     for (const elem of elems) {
