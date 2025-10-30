@@ -1416,6 +1416,50 @@ describe('capturer/helper-handler.mjs', function () {
         });
       });
 
+      context("cmd_tag", function () {
+        it("should replace the element with a new one having the specified name", function () {
+          var helper = new CaptureHelperHandler();
+
+          var doc = createDocFixture({code: '<svg><a id="myid" xlink:href="foo" ns1:ns2:attr="val"><text>t1</text><text>t2</text></a></svg>'});
+          var command = ["tag", {css: "a"}, "section"];
+          assert.strictEqual(helper.runCommand(command, doc), undefined);
+          assert.strictEqual(doc.body.innerHTML.trim(), '<svg><section id="myid" xlink:href="foo" ns1:ns2:attr="val"><text>t1</text><text>t2</text></section></svg>');
+          assert.strictEqual(doc.querySelector('section').getAttributeNS(NS_XLINK, 'href'), 'foo');
+        });
+
+        it("should replace the element with a new one having the specified name and namespace", function () {
+          var helper = new CaptureHelperHandler();
+
+          var doc = createDocFixture({code: '<svg><a id="myid" xlink:href="foo" ns1:ns2:attr="val"><text>t1</text><text>t2</text></a></svg>'});
+          var command = ["tag", {css: "a"}, "use", NS_SVG];
+          assert.strictEqual(helper.runCommand(command, doc), undefined);
+          assert.strictEqual(doc.body.innerHTML.trim(), '<svg><use id="myid" xlink:href="foo" ns1:ns2:attr="val"><text>t1</text><text>t2</text></use></svg>');
+          assert.strictEqual(doc.querySelector('use').namespaceURI, NS_SVG);
+          assert.strictEqual(doc.querySelector('use').getAttributeNS(NS_XLINK, 'href'), 'foo');
+        });
+
+        it("should safely skip a non-element node", function () {
+          var helper = new CaptureHelperHandler();
+
+          var doc = createDocFixture({name: 'body', value: '123'});
+          var command = ["tag", {xpath: ".//text()"}, "section"];
+          assert.strictEqual(helper.runCommand(command, doc), undefined);
+          assert.strictEqual(doc.body.innerHTML, '123');
+        });
+
+        it("should resolve parameter commands", function () {
+          var helper = new CaptureHelperHandler();
+
+          var doc = makeTestDoc();
+          var command = ["tag", ["if", true, {css: "div"}], ["concat", "foreignObject"], ["concat", NS_SVG]];
+          assert.strictEqual(helper.runCommand(command, doc), undefined);
+          assert.strictEqual(doc.body.innerHTML.trim(), `\
+<foreignObject id="target">target</foreignObject>
+<foreignObject id="target2">target2</foreignObject>`);
+          assert.strictEqual(doc.querySelector('foreignObject').namespaceURI, NS_SVG);
+        });
+      });
+
       context("cmd_attr", function () {
         function makeTestDoc() {
           return createDocFixture({code: `\
