@@ -402,6 +402,13 @@ const CONTENT_SCRIPT_FILES = [
   "/content/index.js",
 ];
 
+const NS_XMLNS = "http://www.w3.org/2000/xmlns/";
+const NS_HTML = "http://www.w3.org/1999/xhtml";
+const NS_XHTML = "http://www.w3.org/1999/xhtml";
+const NS_SVG = "http://www.w3.org/2000/svg";
+const NS_XLINK = "http://www.w3.org/1999/xlink";
+const NS_MATHML = "http://www.w3.org/1998/Math/MathML";
+
 const HTTP_STATUS_TEXT = {
   // 1××: Informational
   100: "Continue",
@@ -3889,6 +3896,12 @@ export {
   BACKEND_MIN_VERSION,
   DEFAULT_OPTIONS,
   ANNOTATION_CSS,
+  NS_XMLNS,
+  NS_HTML,
+  NS_XHTML,
+  NS_SVG,
+  NS_XLINK,
+  NS_MATHML,
   userAgent,
   loadOptions,
   loadOptionsAuto,

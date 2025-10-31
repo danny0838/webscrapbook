@@ -7,7 +7,11 @@
  *****************************************************************************/
 
 import {assert, config as chaiConfig} from "./lib/chai.mjs";
-import {userAgent, escapeRegExp} from "../utils/common.mjs";
+import sinon from "./lib/sinon-esm.js";
+import {
+  NS_XMLNS, NS_HTML, NS_SVG, NS_XLINK,
+  userAgent, escapeRegExp, trim,
+} from "../utils/common.mjs";
 import {sha1} from "../utils/sha.mjs";
 
 Object.assign(chaiConfig, {
@@ -550,6 +554,360 @@ function cssRegex(strings, ...args) {
   return new RegExp(results.join(''));
 }
 
+function getAttributes(node) {
+  const attrs = {};
+  if (node.nodeType === Node.ELEMENT_NODE) {
+    for (const {namespaceURI: _ns, prefix: _prefix, localName: local, nodeValue: value} of node.attributes) {
+      const ns = _ns ? `{${_ns}}` : '';
+      const prefix = _prefix ? `${_prefix}:` : '';
+      attrs[`${ns}${prefix}${local}`] = value;
+    }
+  }
+  return attrs;
+}
+
+function createFragFixture(html) {
+  const template = document.createElement('template');
+  template.innerHTML = html.trim();
+  return template.content;
+}
+
+function createDomFixture(html) {
+  return createFragFixture(html).firstChild;
+}
+
+function createNodeFixture(nodeData) {
+  if (typeof nodeData === 'string') {
+    nodeData = {name: "#text", value: nodeData};
+  }
+
+  const {
+    doc = document,
+    tagName /* alias of name */,
+    name = tagName, ns, value, attrs, children, shadow,
+    id, class: classes, style: styles, rel: rels, textContent, innerHTML,
+  } = nodeData;
+
+  switch (name) {
+    case "#text": {
+      return doc.createTextNode(value || "");
+    }
+    case "#comment": {
+      return doc.createComment(value || "");
+    }
+    case "#cdata-section": {
+      return doc.createCDATASection(value || "");
+    }
+    case "#document-fragment": {
+      const elem = doc.createDocumentFragment();
+      if (children) {
+        for (const child of children) {
+          elem.appendChild(createNodeFixture(child));
+        }
+      }
+      return elem;
+    }
+    default: {
+      const elem = (ns === undefined) ? doc.createElement(name) : doc.createElementNS(ns, name);
+
+      if (Array.isArray(attrs)) {
+        for (const [key, value, ns] of attrs) {
+          (ns === undefined) ? elem.setAttribute(key, value) : elem.setAttributeNS(ns, key, value);
+        }
+      } else if (typeof attrs === 'object') {
+        for (const [key, value] of Object.entries(attrs)) {
+          elem.setAttribute(key, value);
+        }
+      }
+
+      if (id != null) {
+        elem.id = id;
+      }
+
+      if (classes != null) {
+        for (const cls of classes) {
+          elem.classList.add(cls);
+        }
+      }
+
+      if (rels != null) {
+        for (const rel of rels) {
+          elem.relList.add(rel);
+        }
+      }
+
+      if (styles != null) {
+        if (Array.isArray(styles)) {
+          for (const [key, value, priority] of styles) {
+            elem.style.setProperty(key, value, priority);
+          }
+        } else if (typeof styles === 'object') {
+          for (const [key, value] of Object.entries(styles)) {
+            elem.style[key] = value;
+          }
+        }
+      }
+
+      if (children) {
+        for (const child of children) {
+          elem.appendChild(createNodeFixture(child));
+        }
+      }
+
+      if (value != null) {
+        elem.textContent = value;
+      }
+
+      if (textContent != null) {
+        elem.textContent = textContent;
+      }
+
+      if (innerHTML != null) {
+        elem.innerHTML = innerHTML;
+      }
+
+      if (shadow != null) {
+        const {virtual = false, children, innerHTML, mode = 'open', ...options} = shadow;
+        if (virtual) {
+          const host = doc.createElement('div');
+          const shadowRoot = host.attachShadow({mode, ...options});
+          if (children) {
+            for (const child of children) {
+              shadowRoot.appendChild(createNodeFixture(child));
+            }
+          }
+          if (innerHTML) {
+            shadowRoot.innerHTML = innerHTML;
+          }
+
+          elem.setAttribute("data-scrapbook-shadowdom", shadowRoot.innerHTML);
+          if (shadowRoot.mode !== 'open') {
+            elem.setAttribute("data-scrapbook-shadowdom-mode", shadowRoot.mode);
+          }
+          if (shadowRoot.clonable) {
+            elem.setAttribute("data-scrapbook-shadowdom-clonable", "");
+          }
+          if (shadowRoot.delegatesFocus) {
+            elem.setAttribute("data-scrapbook-shadowdom-delegates-focus", "");
+          }
+          if (shadowRoot.serializable) {
+            elem.setAttribute("data-scrapbook-shadowdom-serializable", "");
+          }
+          if (shadowRoot.slotAssignment && shadowRoot.slotAssignment !== 'named') {
+            elem.setAttribute("data-scrapbook-shadowdom-slot-assignment", shadowRoot.slotAssignment);
+          }
+        } else {
+          const shadowRoot = elem.attachShadow({mode, ...options});
+          if (children) {
+            for (const child of children) {
+              shadowRoot.appendChild(createNodeFixture(child));
+            }
+          }
+          if (innerHTML) {
+            shadowRoot.innerHTML = innerHTML;
+          }
+        }
+      }
+
+      return elem;
+    }
+  }
+}
+
+function createDocFixture({
+  type = "html", code, nsmap,
+  ...nodeData
+} = {}) {
+  let doc;
+
+  switch (type) {
+    case "html": {
+      doc = new DOMParser().parseFromString(code ?? '<!DOCTYPE html><html><head></head><body></body></html>', "text/html");
+      break;
+    }
+    case "xhtml": {
+      doc = new DOMParser().parseFromString(code ?? `<!DOCTYPE html><html xmlns="${NS_HTML}"><head></head><body></body></html>`, "application/xhtml+xml");
+      break;
+    }
+    case "svg": {
+      doc = new DOMParser().parseFromString(code ?? `<svg xmlns="${NS_SVG}"></svg>`, "image/svg+xml");
+      break;
+    }
+    case "xml": {
+      doc = new DOMParser().parseFromString(code ?? `<root/>`, "text/xml");
+      break;
+    }
+    default: {
+      throw new Error(`Unsupported type: ${type}`);
+    }
+  }
+
+  if (Object.keys(nodeData).length) {
+    const node = createNodeFixture({doc, ...nodeData});
+    initDocWithNode({doc, node});
+  }
+
+  generateXmlnsForDoc(doc, nsmap);
+
+  return doc;
+}
+
+function initDocWithNode({doc, node}) {
+  switch (doc.contentType) {
+    case "text/html":
+    case "application/xhtml+xml": {
+      if (node.namespaceURI === NS_HTML) {
+        switch (node.localName) {
+          case "html": {
+            doc.documentElement.replaceWith(node);
+            return;
+          }
+          case "head": {
+            doc.head.replaceWith(node);
+            return;
+          }
+          case "body": {
+            doc.body.replaceWith(node);
+            return;
+          }
+          case "base":
+          case "link":
+          case "meta":
+          case "script":
+          case "style":
+          case "template":
+          case "title": {
+            doc.head.appendChild(node);
+            return;
+          }
+          case "noscript": {
+            if (Array.prototype.every.call(node.childNodes, (elem) => {
+              switch (elem.nodeType) {
+                case 1: {
+                  return elem.namespaceURI === NS_HTML &&
+                    ["base", "link", "meta", "script", "style", "template", "title"].includes(elem.localName);
+                }
+                case 3:
+                case 4: {
+                  return !trim(elem.nodeValue);
+                }
+                case 8: {
+                  return true;
+                }
+              }
+              return false;
+            })) {
+              doc.head.appendChild(node);
+              return;
+            }
+          }
+        }
+      }
+
+      doc.body.appendChild(node);
+      return;
+    }
+    case "image/svg+xml": {
+      if (node.namespaceURI === NS_SVG && node.localName === 'svg') {
+        doc.documentElement.replaceWith(node);
+        return;
+      }
+
+      doc.documentElement.appendChild(node);
+      return;
+    }
+    case "text/xml": {
+      doc.documentElement.replaceWith(node);
+      return;
+    }
+  }
+}
+
+function generateXmlnsForDoc(doc, nsmap) {
+  if (nsmap === undefined) {
+    switch (doc.contentType) {
+      case "image/svg+xml": {
+        nsmap = {
+          "xlink": NS_XLINK,
+        };
+        break;
+      }
+    }
+  }
+
+  if (nsmap) {
+    for (const [prefix, ns] of Object.entries(nsmap)) {
+      doc.documentElement.setAttributeNS(NS_XMLNS, `xmlns${prefix ? ':' + prefix : ''}`, ns);
+    }
+  }
+}
+
+async function createIframeFixture({
+  doc = document,
+  hidden = true, src, srcdoc, sandbox, onload,
+  docData,
+} = {}) {
+  return await new Promise((resolve) => {
+    const iframe = doc.createElement('iframe');
+    iframe.hidden = hidden;
+    iframe.style.setProperty('visibility', 'hidden');
+    iframe.style.setProperty('position', 'absolute');
+    iframe.style.setProperty('top', '0');
+
+    if (src) { iframe.src = src; }
+    if (srcdoc) { iframe.srcdoc = srcdoc; }
+    if (sandbox) { iframe.sandbox = sandbox; }
+
+    let _doc;
+    if (docData) {
+      _doc = createDocFixture(docData);
+      const blob = new Blob(['<html></html>'], {type: _doc.contentType});
+      iframe.src = URL.createObjectURL(blob);
+    }
+
+    iframe.onload = async function (event) {
+      if (docData) {
+        // revoke the generated blob URL
+        URL.revokeObjectURL(iframe.src);
+
+        const doc = iframe.contentDocument;
+        let child;
+        while (child = doc.firstChild) {
+          doc.removeChild(child);
+        }
+        while (child = _doc.firstChild) {
+          doc.appendChild(child);
+        }
+      }
+
+      if (typeof onload === 'function') {
+        await onload.call(this, event);
+      }
+
+      resolve(iframe);
+    };
+
+    (doc.body ?? doc.documentElement).appendChild(iframe);
+  });
+}
+
+async function runControlledTest(obj, method, fn, tester) {
+  const doneSignal = {};
+  const stub = sinon.stub(obj, method).callsFake(function (...args) {
+    return tester.call(this, args, {stub, func: stub.wrappedMethod, doneSignal});
+  });
+  try {
+    await fn.call(this);
+  } catch (ex) {
+    if (ex !== doneSignal) {
+      throw ex;
+    }
+  } finally {
+    stub.restore();
+  }
+  return stub;
+}
+
 export {
   RED_BMP_B64,
   GREEN_BMP_B64,
@@ -571,4 +929,11 @@ export {
   regex,
   rawRegex,
   cssRegex,
+  getAttributes,
+  createFragFixture,
+  createDomFixture,
+  createNodeFixture,
+  createDocFixture,
+  createIframeFixture,
+  runControlledTest,
 };
