@@ -1,4 +1,4 @@
-import {MochaQuery as $, assert} from "./unittest.mjs";
+import {MochaQuery as $, assert, createDocFixture} from "./unittest.mjs";
 
 import {CaptureHelperHandler} from "../capturer/helper-handler.mjs";
 
@@ -8,10 +8,6 @@ const r = String.raw;
 
 describe('capturer/helper-handler.mjs', function () {
   $describe.skipIf($.noBrowser)('CaptureHelperHandler', function () {
-    function makeHtmlDocument(html) {
-      return new DOMParser().parseFromString(html, 'text/html');
-    }
-
     describe(".getOverwritingOptions()", function () {
       it("should not include capture helper related options", function () {
         var options = CaptureHelperHandler.getOverwritingOptions(
@@ -173,7 +169,7 @@ describe('capturer/helper-handler.mjs', function () {
 
     describe(".selectNodes()", function () {
       function makeTestDoc() {
-        return makeHtmlDocument(`\
+        return createDocFixture({code: `\
 <body>
 <div id="parent-prev"></div>
 <div id="parent">
@@ -186,7 +182,7 @@ describe('capturer/helper-handler.mjs', function () {
   <div id="next"></div>
 </div>
 <div id="parent-next"></div>
-</body>`);
+</body>`});
       }
 
       context("when passing an object selector", function () {
@@ -368,9 +364,9 @@ describe('capturer/helper-handler.mjs', function () {
 
     describe("#runCommand()", function () {
       function makeTestDoc() {
-        return makeHtmlDocument(`\
+        return createDocFixture({code: `\
 <div id="target">target</div>
-<div id="target2">target2</div>`);
+<div id="target2">target2</div>`});
       }
 
       context("cmd_if", function () {
@@ -986,9 +982,9 @@ describe('capturer/helper-handler.mjs', function () {
 
       context("cmd_get_html", function () {
         function makeTestDoc() {
-          return makeHtmlDocument(`\
+          return createDocFixture({code: `\
 <div><b>elem1</b></div>
-<div><b>elem2</b></div>`);
+<div><b>elem2</b></div>`});
         }
 
         it("should return the innerHTML of the first selected node", function () {
@@ -1018,9 +1014,9 @@ describe('capturer/helper-handler.mjs', function () {
 
       context("cmd_get_text", function () {
         function makeTestDoc() {
-          return makeHtmlDocument(`\
+          return createDocFixture({code: `\
 <div><b>elem1-1</b><b>elem1-2</b></div>
-<div><b>elem2-1</b><b>elem2-2</b></div>`);
+<div><b>elem2-1</b><b>elem2-2</b></div>`});
         }
 
         it("should return the text content of the first selected node", function () {
@@ -1042,9 +1038,9 @@ describe('capturer/helper-handler.mjs', function () {
 
       context("cmd_get_attr", function () {
         function makeTestDoc() {
-          return makeHtmlDocument(`\
+          return createDocFixture({code: `\
 <img data-src="image1.jpg">
-<img data-src="image2.jpg">`);
+<img data-src="image2.jpg">`});
         }
 
         it("should return the attribute of the first selected node", function () {
@@ -1066,9 +1062,9 @@ describe('capturer/helper-handler.mjs', function () {
 
       context("cmd_get_css", function () {
         function makeTestDoc() {
-          return makeHtmlDocument(`\
+          return createDocFixture({code: `\
 <div style="color: green;"></div>
-<div style="color: yellow !important;"></div>`);
+<div style="color: yellow !important;"></div>`});
         }
 
         it("should return the CSS property of the first selected node", function () {
@@ -1101,9 +1097,9 @@ describe('capturer/helper-handler.mjs', function () {
 
       context("cmd_remove", function () {
         function makeTestDoc() {
-          return makeHtmlDocument(`\
+          return createDocFixture({code: `\
 <div><b>elem1</b></div>
-<div><b>elem2</b></div>`);
+<div><b>elem2</b></div>`});
         }
 
         it("should remove the selected nodes", function () {
@@ -1131,9 +1127,9 @@ describe('capturer/helper-handler.mjs', function () {
 
       context("cmd_unwrap", function () {
         function makeTestDoc() {
-          return makeHtmlDocument(`\
+          return createDocFixture({code: `\
 <div><b>elem1</b></div>
-<div><b>elem2</b></div>`);
+<div><b>elem2</b></div>`});
         }
 
         it("should remove the selected nodes while keeping their descendants", function () {
@@ -1161,7 +1157,7 @@ describe('capturer/helper-handler.mjs', function () {
 
       context("cmd_isolate", function () {
         function makeTestDoc() {
-          return makeHtmlDocument(`\
+          return createDocFixture({code: `\
 <html>
 <head>
 <meta charset="UTF-8">
@@ -1177,7 +1173,7 @@ describe('capturer/helper-handler.mjs', function () {
 </article>
 </section>
 </body>
-</html>`);
+</html>`});
         }
 
         it("should remove nodes other than the selected nodes and ancestors", function () {
@@ -1223,9 +1219,9 @@ describe('capturer/helper-handler.mjs', function () {
 
       context("cmd_html", function () {
         function makeTestDoc() {
-          return makeHtmlDocument(`\
+          return createDocFixture({code: `\
 <div><b>elem1</b></div>
-<div><b>elem2</b></div>`);
+<div><b>elem2</b></div>`});
         }
 
         it("should set innerHTML for the selected nodes", function () {
@@ -1264,9 +1260,9 @@ describe('capturer/helper-handler.mjs', function () {
 
       context("cmd_text", function () {
         function makeTestDoc() {
-          return makeHtmlDocument(`\
+          return createDocFixture({code: `\
 <div>text1</div>
-<div>text2</div>`);
+<div>text2</div>`});
         }
 
         it("should set text content for the selected nodes", function () {
@@ -1294,9 +1290,9 @@ describe('capturer/helper-handler.mjs', function () {
 
       context("cmd_attr", function () {
         function makeTestDoc() {
-          return makeHtmlDocument(`\
+          return createDocFixture({code: `\
 <img data-src="image1.jpg">
-<img data-src="image2.jpg">`);
+<img data-src="image2.jpg">`});
         }
 
         context('when passing (name, value)', function () {
@@ -1430,9 +1426,9 @@ describe('capturer/helper-handler.mjs', function () {
 
       context("cmd_css", function () {
         function makeTestDoc() {
-          return makeHtmlDocument(`\
+          return createDocFixture({code: `\
 <div style="color: green;"></div>
-<div style="color: yellow;"></div>`);
+<div style="color: yellow;"></div>`});
         }
 
         context('when passing (name, value, [priority])', function () {
@@ -1573,13 +1569,13 @@ describe('capturer/helper-handler.mjs', function () {
 
       context("cmd_insert", function () {
         function makeTestDoc() {
-          return makeHtmlDocument(`\
+          return createDocFixture({code: `\
 <div class="target"><div id="child-1"></div><div id="child-2"></div><div id="child-3"></div></div>
-<div class="target"><div id="child-1"></div><div id="child-2"></div><div id="child-3"></div></div>`);
+<div class="target"><div id="child-1"></div><div id="child-2"></div><div id="child-3"></div></div>`});
         }
 
         function makeTestDocSimple() {
-          return makeHtmlDocument(`<div></div>`);
+          return createDocFixture({code: `<div></div>`});
         }
 
         context('when argument 3 is a string', function () {
@@ -1811,10 +1807,10 @@ insertedText`);
 
     describe("#run()", function () {
       it("should skip helpers with truthy `disabled` property", function () {
-        var doc = makeHtmlDocument(`\
+        var doc = createDocFixture({code: `\
 <div class="exclude1"></div>
 <div class="exclude2"></div>
-<div class="exclude3"></div>`);
+<div class="exclude3"></div>`});
         var helpers = [
           {
             commands: [
@@ -1843,10 +1839,10 @@ insertedText`);
       });
 
       it("should skip helpers whose `pattern` does not match document URL", function () {
-        var doc = makeHtmlDocument(`\
+        var doc = createDocFixture({code: `\
 <div class="exclude1"></div>
 <div class="exclude2"></div>
-<div class="exclude3"></div>`);
+<div class="exclude3"></div>`});
         var helpers = [
           {
             commands: [

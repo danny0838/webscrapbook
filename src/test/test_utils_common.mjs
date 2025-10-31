@@ -1,6 +1,7 @@
 import {
   MochaQuery as $, assert,
   encodeText, cssRegex,
+  createDocFixture,
   GREEN_BMP_B64,
 } from "./unittest.mjs";
 import sinon from "./lib/sinon-esm.js";
@@ -2928,56 +2929,63 @@ div { image-background: var(${/(--sb(\d+)-2)/}); }`;
 
   $describe.skipIf($.noBrowser)('getMetaRefreshTarget()', function () {
     it('should return the URL resolved with `baseUrl`', function () {
-      var doc = new DOMParser().parseFromString('<meta http-equiv="refresh" content="0; page.html?id=123">', 'text/html');
+      var doc = createDocFixture({name: 'meta', attrs: {
+        "http-equiv": "refresh",
+        "content": "0; page.html?id=123",
+      }});
       assert.strictEqual(utils.getMetaRefreshTarget(doc, 'https://example.org/'), 'https://example.org/page.html?id=123');
     });
 
     it('should return undefined when there is no meta refresh', function () {
-      var doc = new DOMParser().parseFromString('', 'text/html');
+      var doc = createDocFixture();
       assert.strictEqual(utils.getMetaRefreshTarget(doc, 'https://example.org/'), undefined);
     });
 
     it('should return the last meta refresh URL when there are many', function () {
-      var doc = new DOMParser().parseFromString(`\
-<meta http-equiv="refresh" content="0; page1.html">\
-<meta http-equiv="refresh" content="0; page2.html">\
-<meta http-equiv="refresh" content="0; page3.html">\
-`, 'text/html');
+      var doc = createDocFixture({name: 'head', children: [
+        {name: 'meta', attrs: {"http-equiv": "refresh", "content": "0; page1.html"}},
+        {name: 'meta', attrs: {"http-equiv": "refresh", "content": "0; page2.html"}},
+        {name: 'meta', attrs: {"http-equiv": "refresh", "content": "0; page3.html"}},
+      ]});
       assert.strictEqual(utils.getMetaRefreshTarget(doc, 'https://example.org/'), 'https://example.org/page3.html');
     });
 
     it('should return the URL resolved with altered base URL if there is a base[href]', function () {
-      var doc = new DOMParser().parseFromString(`
-<base target="_blank">
-<base href="./baseUrl/">
-<base href="./baseUrl2/">
-<meta http-equiv="refresh" content="0; page.html">
-`, 'text/html');
+      var doc = createDocFixture({name: 'head', children: [
+        {name: 'base', attrs: {target: "_blank"}},
+        {name: 'base', attrs: {href: "./baseUrl/"}},
+        {name: 'base', attrs: {href: "./baseUrl2/"}},
+        {name: 'meta', attrs: {"http-equiv": "refresh", "content": "0; page.html"}},
+      ]});
       assert.strictEqual(utils.getMetaRefreshTarget(doc, 'https://example.org/'), 'https://example.org/baseUrl/page.html');
     });
 
     it('should skip a meta refresh if time is non-0', function () {
-      var doc = new DOMParser().parseFromString('<meta http-equiv="refresh" content="1; page1.html">', 'text/html');
+      var doc = createDocFixture({name: 'meta', attrs: {"http-equiv": "refresh", "content": "1; page1.html"}});
       assert.strictEqual(utils.getMetaRefreshTarget(doc, 'https://example.org/'), undefined);
     });
 
     it('should return the last meta refresh URL with least time when `includeDelayedRefresh` is truthy', function () {
-      var doc = new DOMParser().parseFromString(`\
-<meta http-equiv="refresh" content="1; page1.html">\
-<meta http-equiv="refresh" content="1; page2.html">\
-<meta http-equiv="refresh" content="2; page3.html">\
-<meta http-equiv="refresh" content="2; page4.html">\
-`, 'text/html');
+      var doc = createDocFixture({name: 'head', children: [
+        {name: 'meta', attrs: {"http-equiv": "refresh", "content": "1; page1.html"}},
+        {name: 'meta', attrs: {"http-equiv": "refresh", "content": "1; page2.html"}},
+        {name: 'meta', attrs: {"http-equiv": "refresh", "content": "2; page3.html"}},
+        {name: 'meta', attrs: {"http-equiv": "refresh", "content": "2; page4.html"}},
+      ]});
       assert.strictEqual(utils.getMetaRefreshTarget(doc, 'https://example.org/', true), 'https://example.org/page2.html');
     });
 
     it('should skip a meta refresh if in noscript', function () {
-      var doc = new DOMParser().parseFromString('<noscript><meta http-equiv="refresh" content="0; page.html"></noscript>', 'text/html');
+      var doc = createDocFixture({name: 'noscript', children: [
+        {name: 'meta', attrs: {"http-equiv": "refresh", "content": "0; page.html"}},
+      ]});
       assert.strictEqual(utils.getMetaRefreshTarget(doc, 'https://example.org/'), undefined);
     });
 
     it('should not skip a meta refresh in noscript when `includeNoscript` is truthy', function () {
-      var doc = new DOMParser().parseFromString('<noscript><meta http-equiv="refresh" content="0; page.html"></noscript>', 'text/html');
+      var doc = createDocFixture({name: 'noscript', children: [
+        {name: 'meta', attrs: {"http-equiv": "refresh", "content": "0; page.html"}},
+      ]});
       assert.strictEqual(utils.getMetaRefreshTarget(doc, 'https://example.org/', undefined, true), 'https://example.org/page.html');
     });
   });
