@@ -983,7 +983,7 @@
     "message": "NOSCRIPTs:"
   },
   "OptionCaptureNoscriptTooltip": {
-    "message": "This determines how NOSCRIPT elements are handled. A NOSCRIPT element is shown when the browser does not or has disabled scripts, and typically shows a warning that the browser does not support scripts, or redirects to another page without script requirement. Consider remove such contents when scripts are not captured.\n\n• Save: Keep NOSCRIPT elements.\n• Blank: Blank NOSCRIPT elements.\n• Remove: Remove NOSCRIPT elements."
+    "message": "This determines how NOSCRIPT elements are handled. A NOSCRIPT element is shown when the browser does not or has disabled scripts, and typically shows a warning that the browser does not support scripts, or redirects to another page without script requirement. Consider remove such contents when scripts are not captured.\n\n• Save: Keep NOSCRIPT elements.\n• Remove: Remove NOSCRIPT elements."
   },
   "OptionCaptureObjectLabel": {
     "message": "OBJECTs:"

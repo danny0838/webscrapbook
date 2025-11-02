@@ -8682,25 +8682,6 @@ body { color: red; }`);
         assert(noscripts[1].querySelector('img[src="red.bmp"]'));
       });
 
-      it('capture.noscript = blank', async function () {
-        var options = Object.assign({}, baseOptions, {
-          "capture.noscript": "blank",
-        });
-        var blob = await capture({
-          url: `${localhost}/capture_script/noscript.html`,
-          options,
-        });
-
-        var zip = await Zip.loadAsync(blob);
-
-        var indexFile = zip.file('index.html');
-        var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
-        var doc = await readFileAsDocument(indexBlob);
-        var noscripts = doc.querySelectorAll('noscript');
-        assert.strictEqual(noscripts[0].textContent, ``);
-        assert.strictEqual(noscripts[1].innerHTML, ``);
-      });
-
       it('capture.noscript = remove', async function () {
         var options = Object.assign({}, baseOptions, {
           "capture.noscript": "remove",
