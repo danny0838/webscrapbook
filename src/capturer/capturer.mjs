@@ -1422,6 +1422,8 @@ class Capturer extends BaseCapturer {
       // nothing to capture
       throw new Error(`Bad parameters.`);
     }
+    if (!response) { throw new Error(`Response not received.`); }
+    if (response.error) { throw new Error(response.error.message); }
 
     if (!captureOnly) {
       if (options["capture.saveTo"] === "server") {
@@ -1524,8 +1526,6 @@ class Capturer extends BaseCapturer {
     isDebug && console.debug("(main) send", source, message);
     const response = await this.invoke("captureDocumentOrFile", message, {tabId, frameId});
     isDebug && console.debug("(main) response", source, response);
-    if (!response) { throw new Error(`Response not received.`); }
-    if (response.error) { throw new Error(response.error.message); }
     return response;
   }
 
@@ -1576,8 +1576,6 @@ class Capturer extends BaseCapturer {
     this.log(`Capturing (${captureMode}) ${source} ...`);
     const response = await captureFunc.call(this, message);
     isDebug && console.debug("(main) response", source, response);
-    if (!response) { throw new Error(`Response not received.`); }
-    if (response.error) { throw new Error(response.error.message); }
     return response;
   }
 
