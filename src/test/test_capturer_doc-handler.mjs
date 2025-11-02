@@ -3830,24 +3830,7 @@ Default3\
 
                 break;
               }
-              case "blank": {
-                for (const [desc, factory] of [
-                  ['should clear the content for a headed document', docFactoryHeaded],
-                  ['should clear the content for a headless document', docFactoryHeadless],
-                ]) {
-                  it(desc, async function () {
-                    var doc = await factory();
-
-                    var {doc} = await new TestCapturer().captureDocument({doc, docUrl, options});
-                    var elem = doc.querySelector(tagName);
-                    assert.strictEqual(elem.innerHTML, '');
-
-                    sinon.assert.calledOnceWithExactly(spyRewriteText, elem, '');
-                  });
-                }
-
-                break;
-              }
+              case "blank":
               case "remove": {
                 for (const [desc, factory] of [
                   ['should remove the element for a headed document', docFactoryHeaded],

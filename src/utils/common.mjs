@@ -72,7 +72,7 @@ const DEFAULT_OPTIONS = {
   "capture.rewriteCss": "url", // "none", "url", "tidy", "match"
   "capture.mergeCssResources": true,
   "capture.script": "remove", // "save", "link", "blank", "remove"
-  "capture.noscript": "save", // "save", "blank", "remove"
+  "capture.noscript": "save", // "save", "remove"
   "capture.contentSecurityPolicy": "remove", // "save", "remove"
   "capture.ping": "blank", // "link", "blank"
   "capture.preload": "remove", // "blank", "remove"

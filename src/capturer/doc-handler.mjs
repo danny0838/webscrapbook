@@ -2326,8 +2326,6 @@ class CaptureDocumentRewriter extends MapperMixin(CaptureDocumentRewriterBase) {
 
     switch (options["capture.noscript"]) {
       case "blank":
-        this.captureRewriteTextContent(elem, "");
-        break;
       case "remove":
         this.captureRemoveNode(elem);
         throw new NodeDisconnect(elem);
