@@ -1,4 +1,0 @@
-﻿<!DOCTYPE>
-<style>img { width: 60px; }</style>
-<p>Frame page content.</p>
-<img src="./red.bmp">
