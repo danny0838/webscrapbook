@@ -1286,11 +1286,13 @@ class Capturer extends BaseCapturer {
 
   /**
    * @param {Object} params
+   * @param {Document} [params.doc] - document to capture
+   * @param {string} [params.docUrl] - an overriding document URL for doc
    * @param {integer} [params.tabId] - ID of the tab to capture
    * @param {integer} [params.frameId] - ID of the frame to capture
    * @param {string} [params.url] - source URL of the page to capture (ignored
    *   when tabId is set)
-   * @param {string} [params.refUrl] - the referrer policy
+   * @param {string} [params.refUrl] - the referrer URL
    * @param {string} [params.mode] - "tab", "source", "bookmark"
    * @param {captureSettings} [params.settings] - overriding settings
    * @param {captureOptions} params.options - options for the capture
@@ -1307,6 +1309,7 @@ class Capturer extends BaseCapturer {
    * @return {Promise<captureDocumentResponse|transferableBlob>}
    */
   async captureGeneral({
+    doc, docUrl,
     tabId, frameId,
     url, refUrl,
     mode,
@@ -1334,8 +1337,10 @@ class Capturer extends BaseCapturer {
           const helpers = utils.parseOption("capture.helpers", options["capture.helpers"]);
 
           // apply overriding options
-          const docUrl = await (async () => {
-            if (Number.isInteger(tabId)) {
+          const _docUrl = await (async () => {
+            if (doc) {
+              return docUrl || doc.URL;
+            } else if (Number.isInteger(tabId)) {
               return (await browser.webNavigation.getFrame({
                 tabId,
                 frameId: Number.isInteger(frameId) ? frameId : 0,
@@ -1364,7 +1369,7 @@ class Capturer extends BaseCapturer {
             }
           })();
 
-          const _options = CaptureHelperHandler.getOverwritingOptions(helpers, docUrl);
+          const _options = CaptureHelperHandler.getOverwritingOptions(helpers, _docUrl);
           Object.assign(options, _options);
         } catch (ex) {
           options["capture.helpersEnabled"] = false;
@@ -1406,7 +1411,12 @@ class Capturer extends BaseCapturer {
     };
 
     let response;
-    if (Number.isInteger(tabId)) {
+    if (doc) {
+      // capture document
+      response = await this.captureDocumentOrFile({
+        doc, docUrl, refUrl, settings, options,
+      });
+    } else if (Number.isInteger(tabId)) {
       // capture tab
       response = await this.captureTab({
         tabId, frameId,
