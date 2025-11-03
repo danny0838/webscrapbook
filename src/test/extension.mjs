@@ -6,9 +6,13 @@
  * https://opensource.org/licenses/MIT
  *****************************************************************************/
 
-import {userAgent, delay, filepathParts} from "../utils/common.mjs";
+import {
+  DEFAULT_OPTIONS,
+  userAgent, delay, filepathParts,
+} from "../utils/common.mjs";
 import {deserializeObject} from "../utils/cache.mjs";
 import {Capturer} from "../capturer/capturer.mjs";
+import {server as _server} from "../scrapbook/server.mjs";
 
 let config;
 let backend;
@@ -22,14 +26,19 @@ let localhost2;
 class TestCapturerBase extends Capturer {
   __savedData = new Map();
 
+  __bindSavedData(result) {
+    const {timeId} = result;
+    const data = this.__savedData.get(timeId);
+    if (data !== undefined) {
+      result.data = data;
+    }
+    return result;
+  }
+
   async run(taskInfo) {
     const results = await super.run(taskInfo);
     for (const result of results) {
-      const {timeId} = result;
-      const data = this.__savedData.get(timeId);
-      if (data !== undefined) {
-        result.data = data;
-      }
+      this.__bindSavedData(result);
     }
     return results;
   }
@@ -70,6 +79,128 @@ class TestCapturerSimple extends TestCapturerBase {
 
     return result.data;
   }
+}
+
+class TestCapturerGeneral extends TestCapturerBase {
+  async captureGeneral({options, useDiskCache = false, ...params}) {
+    options = {...DEFAULT_OPTIONS, ...options};
+    return this.__bindSavedData(await super.captureGeneral({options, useDiskCache, ...params}));
+  }
+}
+
+class TestCapturerOffline extends TestCapturerGeneral {
+  /**
+   * @callback TestCapturerOfflineMapper
+   * @param {string} url
+   * @return {Object|boolean} The response data object. Or true to return
+   *   normal fetch response. Or null or undefined to return a 404 error.
+   */
+
+  /**
+   * @param {Map|Object|TestCapturerOfflineMapper} [mapper]
+   */
+  constructor(mapper) {
+    super();
+    if (typeof mapper === 'function') {
+      this.__fetchMapper = mapper;
+    } else if (mapper instanceof Map) {
+      this.__fetchMapper = url => mapper.get(url);
+    } else if (typeof mapper === 'object') {
+      this.__fetchMapper = url => mapper[url];
+    }
+  }
+
+  async _fetch(params) {
+    const {sourceUrlMain, response} = params;
+
+    const mapper = this.__fetchMapper;
+    if (mapper) {
+      const res = mapper(sourceUrlMain) ?? {
+        status: 404,
+        error: {
+          name: 'HttpError',
+          message: '404 Not Found',
+        },
+      };
+      if (res === true) {
+        return super._fetch(params);
+      }
+      return Object.assign(response, {
+        status: 200,
+      }, res);
+    }
+
+    return Object.assign(response, {
+      status: 200,
+      blob: new Blob([], {type: 'application/octet-stream'}),
+    });
+  }
+}
+
+/**
+ * Stub out `XMLHttpRequest` for offline testing.
+ */
+function stubXhr(sandbox, responser = {}) {
+  const requestData = {headers: new Map()};
+  let aborted = false;
+  let stubReadyState;
+  sandbox.stub(XMLHttpRequest.prototype, 'setRequestHeader').callsFake(function (header, value) {
+    requestData.headers.set(header.toLowerCase(), value);
+  });
+  sandbox.stub(XMLHttpRequest.prototype, 'open').callsFake(function (method, url, _isAsync, user, password) {
+    Object.assign(requestData, {method, url, user, password});
+    aborted = false;
+    stubReadyState = sandbox.stub(XMLHttpRequest.prototype, 'readyState').value(1);
+    this.dispatchEvent(new Event('readystatechange'));
+  });
+  sandbox.stub(XMLHttpRequest.prototype, 'send').callsFake(async function (body) {
+    Object.assign(requestData, {body});
+
+    const responseData = (typeof responser === 'function') ?
+      await responser.call(this, requestData) :
+      responser;
+
+    const {url = requestData.url, status = 200, statusText = 'OK', headers: _headers = {}, response} = responseData;
+    const headers = new Map(Object.entries(_headers).map(([key, value]) => [key.toLowerCase(), value]));
+    sandbox.stub(XMLHttpRequest.prototype, 'responseURL').value(url);
+    sandbox.stub(XMLHttpRequest.prototype, 'status').value(status);
+    sandbox.stub(XMLHttpRequest.prototype, 'statusText').value(statusText);
+    sandbox.stub(XMLHttpRequest.prototype, 'getResponseHeader').value(name => headers.get(name.toLowerCase()));
+    sandbox.stub(XMLHttpRequest.prototype, 'getAllResponseHeaders').value([...headers.entries()].join('\r\n'));
+
+    await delay(0);
+    if (aborted) { return; }
+    stubReadyState.restore();
+    stubReadyState = sandbox.stub(XMLHttpRequest.prototype, 'readyState').value(2);
+    this.dispatchEvent(new Event('readystatechange'));
+
+    await delay(0);
+    if (aborted) { return; }
+    stubReadyState.restore();
+    stubReadyState = sandbox.stub(XMLHttpRequest.prototype, 'readyState').value(3);
+    this.dispatchEvent(new Event('readystatechange'));
+
+    await delay(0);
+    if (aborted) { return; }
+    stubReadyState.restore();
+    stubReadyState = sandbox.stub(XMLHttpRequest.prototype, 'readyState').value(4);
+    sandbox.stub(XMLHttpRequest.prototype, 'response').value(response);
+    this.dispatchEvent(new Event('readystatechange'));
+    this.dispatchEvent(new Event('load'));
+  });
+  sandbox.stub(XMLHttpRequest.prototype, 'abort').callsFake(function () {
+    aborted = true;
+    this.dispatchEvent(new Event('abort'));
+  });
+}
+
+/**
+ * Stub out `server` for offline testing.
+ */
+function stubServer(sandbox, {server = _server, bookId = '', books = {'': {config: {}}}} = {}) {
+  sandbox.stub(server, 'init');
+  sandbox.stub(server, 'bookId').value(bookId);
+  sandbox.stub(server, 'books').value(books);
 }
 
 async function init() {
@@ -356,6 +487,10 @@ export {
   TestCapturerBase,
   TestCapturerSimpleRaw,
   TestCapturerSimple,
+  TestCapturerGeneral,
+  TestCapturerOffline,
+  stubXhr,
+  stubServer,
   init,
   config,
   backend,
