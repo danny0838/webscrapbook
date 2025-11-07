@@ -719,7 +719,7 @@ class Book {
     for (const id in this.meta) {
       const value = this.meta[id];
       if (!value) { continue; }
-      meta[id] = Object.assign({}, value, {id: undefined}); // remove id
+      meta[id] = {...value, id: undefined}; // remove id
       size += 1;
 
       if (size >= sizeThreshold) {

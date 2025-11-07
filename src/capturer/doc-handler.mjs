@@ -1281,11 +1281,12 @@ class CaptureDocumentRewriter extends MapperMixin(CaptureDocumentRewriterBase) {
       (parseInt(options["capture.downLink.doc.depth"], 10) >= 0 && options['capture.saveAs'] !== 'singleHtml')
     )) { return; }
 
-    const downLinkSettings = Object.assign({}, settings, {
+    const downLinkSettings = {
+      ...settings,
       depth: 0,
       isMainPage: false,
       isMainFrame: true,
-    });
+    };
     const urls = utils.parseOption("capture.downLink.urlExtra", options["capture.downLink.urlExtra"]);
     for (const url of urls) {
       downLinkTasks.push(async () => {
@@ -1881,11 +1882,12 @@ class CaptureDocumentRewriter extends MapperMixin(CaptureDocumentRewriterBase) {
                   (parseInt(options["capture.downLink.doc.depth"], 10) > 0 && options['capture.saveAs'] !== 'singleHtml')) {
                 const refPolicy = this.docRefPolicy;
                 downLinkTasks.push(async () => {
-                  const downLinkSettings = Object.assign({}, settings, {
+                  const downLinkSettings = {
+                    ...settings,
                     depth: settings.depth + 1,
                     isMainPage: false,
                     isMainFrame: true,
-                  });
+                  };
                   const response = await this.captureUrl({
                     url,
                     refUrl,
@@ -2378,18 +2380,20 @@ class CaptureDocumentRewriter extends MapperMixin(CaptureDocumentRewriterBase) {
             // don't rewrite srcdoc if error
           };
 
-          const frameSettings = Object.assign({}, settings, {
+          const frameSettings = {
+            ...settings,
             recurseChain: [...settings.recurseChain],
             isMainFrame: false,
             fullPage: true,
             usedCssFontUrl: undefined,
             usedCssImageUrl: undefined,
-          });
+          };
 
           // save resources in srcdoc as data URL
-          const frameOptions = Object.assign({}, options, {
+          const frameOptions = {
+            ...options,
             "capture.saveAs": "singleHtml",
-          });
+          };
 
           sourceUrl = 'about:srcdoc';
 
@@ -2480,13 +2484,14 @@ class CaptureDocumentRewriter extends MapperMixin(CaptureDocumentRewriterBase) {
           return {url: this.getErrorUrl(sourceUrl, options), error: {message: ex.message}};
         };
 
-        const frameSettings = Object.assign({}, settings, {
+        const frameSettings = {
+          ...settings,
           recurseChain: [...settings.recurseChain],
           isMainFrame: false,
           fullPage: true,
           usedCssFontUrl: undefined,
           usedCssImageUrl: undefined,
-        });
+        };
 
         sourceUrl = frame.getAttribute("src");
 
@@ -2582,9 +2587,10 @@ class CaptureDocumentRewriter extends MapperMixin(CaptureDocumentRewriterBase) {
               options["capture.saveAs"] !== "singleHtml") {
             // Save frame document and inner URLs as data URL since data URL
             // is null origin and no relative URL is allowed in it.
-            frameOptions = Object.assign({}, options, {
+            frameOptions = {
+              ...options,
               "capture.saveAs": "singleHtml",
-            });
+            };
           }
 
           const [sourceUrlMain, sourceUrlHash] = utils.splitUrlByAnchor(sourceUrl);
@@ -3128,13 +3134,14 @@ class CaptureDocumentRewriter extends MapperMixin(CaptureDocumentRewriterBase) {
             const [sourceUrlMain, sourceUrlHash] = utils.splitUrlByAnchor(sourceUrl);
 
             // headlessly capture
-            const embedSettings = Object.assign({}, settings, {
+            const embedSettings = {
+              ...settings,
               recurseChain: [...settings.recurseChain, refUrl],
               isMainFrame: false,
               fullPage: true,
               usedCssFontUrl: undefined,
               usedCssImageUrl: undefined,
-            });
+            };
 
             let embedOptions = options;
 
@@ -3144,9 +3151,10 @@ class CaptureDocumentRewriter extends MapperMixin(CaptureDocumentRewriterBase) {
                 options["capture.saveAs"] !== "singleHtml") {
               // Save object document and inner URLs as data URL since data URL
               // is null origin and no relative URL is allowed in it.
-              embedOptions = Object.assign({}, options, {
+              embedOptions = {
+                ...options,
                 "capture.saveAs": "singleHtml",
-              });
+              };
             }
 
             // check circular reference if saving as data URL
@@ -3241,13 +3249,14 @@ class CaptureDocumentRewriter extends MapperMixin(CaptureDocumentRewriterBase) {
             const [sourceUrlMain, sourceUrlHash] = utils.splitUrlByAnchor(sourceUrl);
 
             // headlessly capture
-            const objectSettings = Object.assign({}, settings, {
+            const objectSettings = {
+              ...settings,
               recurseChain: [...settings.recurseChain, refUrl],
               isMainFrame: false,
               fullPage: true,
               usedCssFontUrl: undefined,
               usedCssImageUrl: undefined,
-            });
+            };
 
             let objectOptions = options;
 
@@ -3257,9 +3266,10 @@ class CaptureDocumentRewriter extends MapperMixin(CaptureDocumentRewriterBase) {
                 options["capture.saveAs"] !== "singleHtml") {
               // Save object document and inner URLs as data URL since data URL
               // is null origin and no relative URL is allowed in it.
-              objectOptions = Object.assign({}, options, {
+              objectOptions = {
+                ...options,
                 "capture.saveAs": "singleHtml",
-              });
+              };
             }
 
             // check circular reference if saving as data URL
@@ -4131,11 +4141,12 @@ class CaptureDocumentRewriter extends MapperMixin(CaptureDocumentRewriterBase) {
         }
         downLinkTasks.push(async () => {
           const isAttachment = (elem.namespaceURI === NS_HTML) ? elem.hasAttribute('download') : false;
-          const downLinkSettings = Object.assign({}, settings, {
+          const downLinkSettings = {
+            ...settings,
             depth: settings.depth + 1,
             isMainPage: false,
             isMainFrame: true,
-          });
+          };
           const response = await this.captureUrl({
             url,
             refUrl,
@@ -4266,9 +4277,10 @@ class CaptureDocumentRewriter extends MapperMixin(CaptureDocumentRewriterBase) {
 
     try {
       const response = await this.capturer.downloadFile(params);
-      return Object.assign({}, response, {
+      return {
+        ...response,
         url: this.capturer.getRedirectedUrl(response.url, utils.splitUrlByAnchor(url)[1]),
-      });
+      };
     } catch (ex) {
       console.error(ex);
       this.warn(utils.lang("ErrorFileDownloadError", [url, ex.message]));

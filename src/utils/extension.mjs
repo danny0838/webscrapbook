@@ -94,7 +94,7 @@ const getContentPagePattern = (() => {
  * @return {Promise<Array>}
  */
 async function getContentTabs(filter = {currentWindow: true}) {
-  filter = Object.assign({}, filter, {url: await getContentPagePattern()});
+  filter = {...filter, url: await getContentPagePattern()};
   const tabs = await browser.tabs.query(filter);
 
   // Note that tab.hidden is only supported in Firefox >= 61. For other
@@ -111,9 +111,9 @@ async function getHighlightedTabs(filter = {currentWindow: true}) {
   // (e.g. when at browser action page).
   // Query with {active: true} to get the real active tabs instead.
   if (userAgent.is('chromium') && userAgent.is('mobile')) {
-    filter = Object.assign({}, filter, {active: true});
+    filter = {...filter, active: true};
   } else {
-    filter = Object.assign({}, filter, {highlighted: true});
+    filter = {...filter, highlighted: true};
   }
 
   return await browser.tabs.query(Object.assign(filter, {
@@ -171,7 +171,7 @@ async function visitLink({
  * Wrapped browser.windows.create() with automatic compatibility handling.
  */
 async function createWindow(createData) {
-  createData = Object.assign({}, createData);
+  createData = {...createData};
   const updateDatas = [];
 
   if (userAgent.is('gecko')) {
@@ -417,7 +417,7 @@ async function invokeCaptureBatchLinks(taskInfo) {
   for (const subTaskList of await Promise.all(subTasks)) {
     tasks = tasks.concat(subTaskList);
   }
-  return await invokeCaptureBatch(Object.assign({}, taskInfo, {tasks}));
+  return await invokeCaptureBatch({...taskInfo, tasks});
 }
 
 /**

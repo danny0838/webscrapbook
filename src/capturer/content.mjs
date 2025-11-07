@@ -58,7 +58,7 @@ class ContentCapturer extends BaseCapturer {
           allowAnyStatus: true,
         });
         const overrideBlob = xhr.response;
-        params = Object.assign({}, params, {overrideBlob});
+        params = {...params, overrideBlob};
       } catch (ex) {
         // skip Error when the blob is not retrievable
       }
@@ -86,7 +86,7 @@ class ContentCapturer extends BaseCapturer {
           allowAnyStatus: true,
         });
         const overrideBlob = xhr.response;
-        params = Object.assign({}, params, {overrideBlob});
+        params = {...params, overrideBlob};
       } catch (ex) {
         // skip Error when the blob is not retrievable
       }
@@ -114,7 +114,7 @@ class ContentCapturer extends BaseCapturer {
           allowAnyStatus: true,
         });
         const overrideBlob = xhr.response;
-        params = Object.assign({}, params, {overrideBlob});
+        params = {...params, overrideBlob};
       } catch (ex) {
         // skip Error when the blob is not retrievable
       }

@@ -77,14 +77,14 @@ function MochaQuery(func, data = {}) {
 MochaQuery.handler = {
   get(data, func, prop) {
     if (prop in MochaQuery.methods) {
-      return MochaQuery(func, Object.assign({}, data, {method: prop}));
+      return MochaQuery(func, {...data, method: prop});
     }
     return Reflect.get(func, prop);
   },
   apply(data, func, thisArg, args) {
     const methods = MochaQuery.methods, method = methods[data.method];
     if (method) {
-      const d = Object.assign({}, data, {method: null});
+      const d = {...data, method: null};
       method.call(methods, d, ...args);
       return MochaQuery(func, d);
     }
