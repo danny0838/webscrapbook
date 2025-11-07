@@ -1043,9 +1043,7 @@ class Capturer extends BaseCapturer {
         }
 
         // update book
-        const newItem = book.addItem(
-          Object.assign({}, item, {icon}),
-        );
+        const newItem = book.addItem({...item, icon});
 
         await server.request({
           url: book.topUrl,
@@ -1224,7 +1222,7 @@ class Capturer extends BaseCapturer {
         recaptureInfo, mergeCaptureInfo,
       } = task;
 
-      const options = Object.assign({}, baseOptions, taskOptions);
+      const options = {...baseOptions, ...taskOptions};
 
       let result;
       try {
@@ -1373,7 +1371,7 @@ class Capturer extends BaseCapturer {
                   isMainPage: true,
                   isMainFrame: true,
                 },
-                options: Object.assign({}, options, _options),
+                options: {...options, ..._options},
               });
               return redirectInfo.url;
             } else {
@@ -1504,9 +1502,10 @@ class Capturer extends BaseCapturer {
       case "source":
       case "bookmark": {
         if (!Number.isInteger(frameId)) {
-          settings = Object.assign({}, settings, {
+          settings = {
+            ...settings,
             title: settings.title || title,
-          });
+          };
         }
         return await this.captureRemote({
           url,
@@ -1563,9 +1562,10 @@ class Capturer extends BaseCapturer {
     const source = `${url}`;
     const message = {
       url, refUrl, refPolicy,
-      settings: Object.assign({}, settings, {
+      settings: {
+        ...settings,
         fullPage: true,
-      }),
+      },
       options,
     };
 
@@ -1626,9 +1626,10 @@ class Capturer extends BaseCapturer {
       return await this.invoke("captureDocumentOrFile", [{
         refUrl,
         refPolicy,
-        settings: Object.assign({}, settings, {
+        settings: {
+          ...settings,
           fullPage: true,
-        }),
+        },
         options,
       }], {
         tabId: tab.id,
@@ -1788,9 +1789,10 @@ class Capturer extends BaseCapturer {
           settings,
           options,
         });
-        return Object.assign({}, response, {
+        return {
+          ...response,
           url: this.getRedirectedUrl(response.url, urlHash),
-        });
+        };
       }
 
       if (downLinkExtra) {
@@ -2019,9 +2021,10 @@ Bookmark for <a href="${utils.escapeHtml(sourceUrl)}">${utils.escapeHtml(sourceU
       },
     });
 
-    return Object.assign({}, response, {
+    return {
+      ...response,
       url: this.getRedirectedUrl(response.url, sourceUrlHash),
-    });
+    };
   }
 
   /**
@@ -2051,9 +2054,10 @@ Bookmark for <a href="${utils.escapeHtml(sourceUrl)}">${utils.escapeHtml(sourceU
     });
 
     if (!(isMainPage && isMainFrame)) {
-      return Object.assign({}, response, {
+      return {
+        ...response,
         url: this.getRedirectedUrl(response.url, sourceUrlHash),
-      });
+      };
     }
 
     // This should only happen during a merge capture.
@@ -2121,10 +2125,11 @@ Redirecting to file <a href="${utils.escapeHtml(response.url)}">${utils.escapeHt
       },
     });
 
-    return Object.assign({}, response, {
+    return {
+      ...response,
       charset: charset || undefined,
       url: this.getRedirectedUrl(response.url, sourceUrlHash),
-    });
+    };
   }
 
   /**
@@ -3016,9 +3021,10 @@ Redirecting to file <a href="${utils.escapeHtml(response.url)}">${utils.escapeHt
         // if a previous registry exists, return it
         const previousRegistry = filenameMap.get(token);
         if (previousRegistry) {
-          return Object.assign({}, previousRegistry, {
+          return {
+            ...previousRegistry,
             isDuplicate: true,
-          });
+          };
         }
 
         let documentFileName;
@@ -3192,9 +3198,10 @@ Redirecting to file <a href="${utils.escapeHtml(response.url)}">${utils.escapeHt
         // if a previous registry exists, return it
         const previousRegistry = filenameMap.get(token);
         if (previousRegistry) {
-          return Object.assign({}, previousRegistry, {
+          return {
+            ...previousRegistry,
             isDuplicate: true,
-          });
+          };
         }
 
         let filename = getFilename({
@@ -4118,11 +4125,12 @@ Redirecting to <a href="${utils.escapeHtml(target)}">${utils.escapeHtml(target, 
     const {timeId} = settings;
 
     const delay = options["capture.downLink.doc.delay"];
-    const subSettings = Object.assign({}, settings, {
+    const subSettings = {
+      ...settings,
       isMainPage: false,
       isMainFrame: true,
       fullPage: true,
-    });
+    };
 
     const {linkedPages, redirects} = this.captureInfo.get(timeId);
     for (const [sourceUrl, {url, refUrl, depth}] of linkedPages) {

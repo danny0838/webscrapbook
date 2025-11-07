@@ -221,7 +221,7 @@ async function init() {
     }
   })();
 
-  config = Object.assign({}, config1, config2);
+  config = {...config1, ...config2};
   backend = `http://localhost${config["backend_port"] === 80 ? "" : ":" + config["backend_port"]}`;
   localhost = `http://localhost${config["server_port"] === 80 ? "" : ":" + config["server_port"]}`;
   localhost2 = `http://localhost${config["server_port2"] === 80 ? "" : ":" + config["server_port2"]}`;
@@ -378,10 +378,11 @@ async function capture(params, options = {}) {
 
   const taskInfo = {
     tasks: [
-      headless ? params : Object.assign({
+      headless ? params : {
         tabId: pageTab.id,
         url: pageTab.url,
-      }, params),
+        ...params,
+      },
     ],
   };
 
@@ -398,8 +399,8 @@ async function capture(params, options = {}) {
  */
 async function captureHeadless(params, options = {}) {
   return await capture(
-    Object.assign({mode: "source"}, params),
-    Object.assign({}, options, {headless: true}),
+    {mode: "source", ...params},
+    {...options, headless: true},
   );
 }
 

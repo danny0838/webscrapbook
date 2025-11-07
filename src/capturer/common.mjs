@@ -78,9 +78,10 @@ class BaseCapturer {
         refUrl,
         refPolicy,
         charset: doc.characterSet,
-        settings: Object.assign({}, settings, {
+        settings: {
+          ...settings,
           title: settings.title || doc.title,
-        }),
+        },
         options,
       }]);
     }
@@ -126,10 +127,11 @@ class BaseCapturer {
 
     if (duplicate) {
       const {docUrlHash, envDocUrl} = duplicate;
-      return Object.assign({}, registry, {
+      return {
+        ...registry,
         url: this.getRedirectedUrl(registry.url, docUrlHash),
         sourceUrl: envDocUrl,
-      });
+      };
     }
 
     const {
@@ -166,10 +168,11 @@ class BaseCapturer {
       },
     });
 
-    return Object.assign({}, response, {
+    return {
+      ...response,
       url: this.getRedirectedUrl(response.url, docUrlHash),
       sourceUrl: envDocUrl,
-    });
+    };
   }
 
   async _captureDocument(params) {

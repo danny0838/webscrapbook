@@ -643,11 +643,11 @@ class DocumentCssHandler {
    * @param {captureOptions} [params.options]
    */
   async rewriteCssText({cssText, baseUrl, refUrl, refPolicy, envCharset, refCss = null, rootNode, isInline = false, settings, options}) {
-    settings = Object.assign({}, this.settings, settings);
+    settings = {...this.settings, ...settings};
     settings = Object.assign(settings, {
       recurseChain: [...settings.recurseChain, utils.splitUrlByAnchor(refUrl)[0]],
     });
-    options = options ? Object.assign({}, this.options, options) : this.options;
+    options = options ? {...this.options, ...options} : this.options;
 
     const {usedCssFontUrl, usedCssImageUrl} = settings;
 
@@ -1022,8 +1022,8 @@ class DocumentCssHandler {
    * @param {captureOptions} [params.options]
    */
   async rewriteCss({elem, url, refCss, baseUrl, refUrl, refPolicy, envCharset, rootNode, callback, settings, options}) {
-    settings = settings ? Object.assign({}, this.settings, settings) : this.settings;
-    options = options ? Object.assign({}, this.options, options) : this.options;
+    settings = settings ? {...this.settings, ...settings} : this.settings;
+    options = options ? {...this.options, ...options} : this.options;
 
     let sourceUrl;
     let cssType = !elem ? 'imported' : elem.localName === 'link' ? 'external' : 'internal';
@@ -1148,9 +1148,10 @@ class DocumentCssHandler {
           (!options["capture.saveDataUriAsFile"] || options["capture.saveAs"] === "singleHtml")) {
         // Save inner URLs as data URL since data URL is null origin
         // and no relative URLs are allowed in it.
-        options = Object.assign({}, options, {
+        options = {
+          ...options,
           "capture.saveAs": "singleHtml",
-        });
+        };
         break registerFilename;
       }
 
@@ -1168,17 +1169,19 @@ class DocumentCssHandler {
         const target = sourceUrl;
         const source = settings.recurseChain[settings.recurseChain.length - 1];
         this.warn(utils.lang("WarnCaptureCircular", [source, target]));
-        await callback(elem, Object.assign({}, registry, {
+        await callback(elem, {
+          ...registry,
           url: `urn:scrapbook:download:circular:url:${sourceUrl}`,
-        }));
+        });
         return;
       }
 
       // handle duplicated CSS
       if (registry.isDuplicate) {
-        await callback(elem, Object.assign({}, registry, {
+        await callback(elem, {
+          ...registry,
           url: registry.url + utils.splitUrlByAnchor(sourceUrl)[1],
-        }));
+        });
         return;
       }
 
@@ -1280,9 +1283,10 @@ class DocumentCssHandler {
         options,
       }]);
 
-      await callback(elem, Object.assign({}, response, {
+      await callback(elem, {
+        ...response,
         url: response.url + utils.splitUrlByAnchor(sourceUrl)[1],
-      }));
+      });
     }
   }
 }
