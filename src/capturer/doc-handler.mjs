@@ -274,7 +274,7 @@ const REBUILD_LINK_SVG_HREF_ATTRS = ['href', 'xlink:href'];
 class PresaveDocumentRewriter extends BaseDocumentRewriter {
   run(doc, {isMainDocument, deleteErased, requireBasicLoader, insertInfoBar}) {
     Object.assign(this, {doc, isMainDocument, deleteErased, requireBasicLoader, insertInfoBar});
-    this.processRootNode(doc.documentElement);
+    this.processRootNode(doc);
   }
 
   processRootNode(rootNode) {
@@ -307,24 +307,15 @@ class PresaveDocumentRewriter extends BaseDocumentRewriter {
   updateLoaders(rootNode) {
     this.removeLoaders(rootNode);
 
-    const bodyNode = rootNode.querySelector('body') || rootNode;
+    const bodyNode = (rootNode.nodeType === Node.DOCUMENT_NODE && rootNode.body) || rootNode.documentElement;
 
     if (this.requireBasicLoader) {
       this.insertBasicLoader(bodyNode);
     }
 
     if (this.insertInfoBar && this.isMainDocument) {
-      let data;
       try {
-        const itemSource = rootNode.getAttribute('data-scrapbook-source');
-        const itemCreate = rootNode.getAttribute('data-scrapbook-create');
-
-        const url = utils.normalizeUrl(itemSource);
-        const domain = new URL(url).origin;
-        const date = utils.idToDate(itemCreate).toString();
-        data = {url, domain, date};
-
-        this.insertInfoBarLoader(bodyNode, data);
+        this.insertInfoBarLoader(bodyNode);
       } catch (ex) {
         console.error(ex);
       }
@@ -350,7 +341,16 @@ class PresaveDocumentRewriter extends BaseDocumentRewriter {
     loader.textContent = ANNOTATION_LOADER_TEMPLATE.replace(/%(\w*)%/g, (_, key) => utils.lang(key) || '');
   }
 
-  insertInfoBarLoader(bodyNode, data) {
+  insertInfoBarLoader(bodyNode) {
+    const rootNode = this.doc.documentElement;
+    const itemSource = rootNode.getAttribute('data-scrapbook-source');
+    const itemCreate = rootNode.getAttribute('data-scrapbook-create');
+
+    const url = utils.normalizeUrl(itemSource);
+    const domain = new URL(url).origin;
+    const date = utils.idToDate(itemCreate).toString();
+    const data = {url, domain, date};
+
     const loader = bodyNode.appendChild(this.doc.createElement("script"));
     loader.setAttribute("data-scrapbook-elem", "infobar-loader");
     loader.textContent = INFOBAR_LOADER_TEMPLATE.replace(/%([\w@]*)%/g, (_, key) => data[key] || utils.lang(key) || '');
