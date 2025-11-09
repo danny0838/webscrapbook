@@ -3423,7 +3423,8 @@ class CaptureDocumentRewriter extends MapperMixin(CaptureDocumentRewriterBase) {
     const {baseUrlFinal, refUrl, tasks, settings, options} = this;
     const elemOrig = this.getOrigNode(elem);
 
-    switch (elem.type.toLowerCase()) {
+    const type = elem.type.toLowerCase();
+    switch (type) {
       case "image": {
         if (elem.hasAttribute("formaction")) {
           const newUrl = this.resolveRelativeUrl(elem.getAttribute("formaction"), baseUrlFinal, {checkJavascript: true});
@@ -3482,7 +3483,7 @@ class CaptureDocumentRewriter extends MapperMixin(CaptureDocumentRewriterBase) {
           case "save-all":
             if (elemOrig) {
               const value = elemOrig.value;
-              if (value !== elem.getAttribute('value')) {
+              if (value !== (elem.getAttribute('value') ?? '')) {
                 this.captureRewriteAttr(elem, "data-scrapbook-input-value", value, {record: false});
                 this.requireBasicLoader = true;
               }
@@ -3491,7 +3492,10 @@ class CaptureDocumentRewriter extends MapperMixin(CaptureDocumentRewriterBase) {
           case "keep-all":
           case "html-all":
             if (elemOrig) {
-              this.captureRewriteAttr(elem, "value", elemOrig.value);
+              const value = elemOrig.value;
+              if (value !== (elem.getAttribute('value') ?? '')) {
+                this.captureRewriteAttr(elem, "value", value);
+              }
             }
             break;
           case "save":
@@ -3517,7 +3521,7 @@ class CaptureDocumentRewriter extends MapperMixin(CaptureDocumentRewriterBase) {
                 this.requireBasicLoader = true;
               }
               const indeterminate = elemOrig.indeterminate;
-              if (indeterminate && elem.type.toLowerCase() === 'checkbox') {
+              if (indeterminate && type === 'checkbox') {
                 this.captureRewriteAttr(elem, "data-scrapbook-input-indeterminate", true, {record: false});
                 this.requireBasicLoader = true;
               }
@@ -3527,7 +3531,7 @@ class CaptureDocumentRewriter extends MapperMixin(CaptureDocumentRewriterBase) {
           case "keep":
             if (elemOrig) {
               const indeterminate = elemOrig.indeterminate;
-              if (indeterminate && elem.type.toLowerCase() === 'checkbox') {
+              if (indeterminate && type === 'checkbox') {
                 this.captureRewriteAttr(elem, "data-scrapbook-input-indeterminate", true, {record: false});
                 this.requireBasicLoader = true;
               }
@@ -3556,12 +3560,16 @@ class CaptureDocumentRewriter extends MapperMixin(CaptureDocumentRewriterBase) {
 
       // eslint-disable-next-line no-fallthrough
       default: {
+        const defaultValue =
+          (type === 'color') ? '#000000' :
+          (type === 'range') ? '50' :
+          '';
         switch (options["capture.formStatus"]) {
           case "save-all":
           case "save":
             if (elemOrig) {
               const value = elemOrig.value;
-              if (value !== elem.getAttribute('value')) {
+              if (value !== (elem.getAttribute('value') ?? defaultValue)) {
                 this.captureRewriteAttr(elem, "data-scrapbook-input-value", value, {record: false});
                 this.requireBasicLoader = true;
               }
@@ -3572,7 +3580,10 @@ class CaptureDocumentRewriter extends MapperMixin(CaptureDocumentRewriterBase) {
           case "html-all":
           case "html":
             if (elemOrig) {
-              this.captureRewriteAttr(elem, "value", elemOrig.value);
+              const value = elemOrig.value;
+              if (value !== (elem.getAttribute('value') ?? defaultValue)) {
+                this.captureRewriteAttr(elem, "value", value);
+              }
             }
             break;
           case "reset":

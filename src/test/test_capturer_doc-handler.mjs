@@ -5640,6 +5640,8 @@ describe('capturer/doc-handler.mjs', function () {
       context('for <input>', function () {
         const tagName = 'input';
 
+        // [type="submit"] and [type="hidden"] auto sync value attribute with property
+        // and do not need the current implemented tests
         for (const type of ["radio", "checkbox", "password", "text", "number", "color", "range", "file", "submit", "image", "<other>"]) {
           context(`for [type="${type}"]`, function () {
             function factory(present, consistent) {
@@ -6238,7 +6240,7 @@ describe('capturer/doc-handler.mjs', function () {
                           });
 
                           context('when the current value is consistent to attribute', function () {
-                            $it.xfail()('should not save the current value', async function () {
+                            it('should not save the current value', async function () {
                               var {doc, valueAttr, valueProp} = factory(false, true);
 
                               var {doc, requireBasicLoader} = await new TestCapturer().captureDocument({doc, docUrl, options});
@@ -6283,7 +6285,7 @@ describe('capturer/doc-handler.mjs', function () {
                               assert.strictEqual(elem.getAttribute('data-scrapbook-input-value'), null);
                               assert.isFalse(requireBasicLoader);
 
-                              sinon.assert.calledWithExactly(spyRewrite, elem, 'value', valueAttr);
+                              sinon.assert.neverCalledWith(spyRewrite, elem, 'value');
                             });
                           });
                         });
@@ -6304,7 +6306,7 @@ describe('capturer/doc-handler.mjs', function () {
                           });
 
                           context('when the current value is consistent to attribute', function () {
-                            $it.xfail()('should not rewrite `value` attribute', async function () {
+                            it('should not rewrite `value` attribute', async function () {
                               var {doc, valueAttr, valueProp} = factory(false, true);
 
                               var {doc, requireBasicLoader} = await new TestCapturer().captureDocument({doc, docUrl, options});
@@ -6406,7 +6408,7 @@ describe('capturer/doc-handler.mjs', function () {
                           });
 
                           context('when the current value is consistent to attribute', function () {
-                            $it.xfail()('should not save the current value', async function () {
+                            it('should not save the current value', async function () {
                               var {doc, valueAttr, valueProp} = factory(false, true);
 
                               var {doc, requireBasicLoader} = await new TestCapturer().captureDocument({doc, docUrl, options});
@@ -6449,7 +6451,7 @@ describe('capturer/doc-handler.mjs', function () {
                               assert.strictEqual(elem.getAttribute('data-scrapbook-input-value'), null);
                               assert.isFalse(requireBasicLoader);
 
-                              sinon.assert.calledWithExactly(spyRewrite, elem, 'value', valueAttr);
+                              sinon.assert.neverCalledWith(spyRewrite, elem, 'value');
                             });
                           });
                         });
@@ -6470,7 +6472,7 @@ describe('capturer/doc-handler.mjs', function () {
                           });
 
                           context('when the current value is consistent to attribute', function () {
-                            $it.xfail()('should not rewrite `value` attribute', async function () {
+                            it('should not rewrite `value` attribute', async function () {
                               var {doc, valueAttr, valueProp} = factory(false, true);
 
                               var {doc, requireBasicLoader} = await new TestCapturer().captureDocument({doc, docUrl, options});
