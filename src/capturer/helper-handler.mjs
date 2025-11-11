@@ -58,9 +58,9 @@ class CaptureHelperHandler {
             }
           }
         }
-      }
 
-      this.debugging = false;
+        this.debugging = false;
+      }
     } catch (ex) {
       const msg = `Error running capture helper`;
       console.error('WebScrapBook: %s: %o', msg, ex);

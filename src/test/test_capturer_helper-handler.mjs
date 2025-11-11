@@ -1947,7 +1947,7 @@ insertedText`);
         assert.isNull(spy.getCall(2));
       });
 
-      $it.xfail()("should call `runCommand` with `debugging` = true for helpers with truthy `debug` property", async function () {
+      it("should call `runCommand` with `debugging` = true for helpers with truthy `debug` property", async function () {
         sinon.stub(console, 'debug');
 
         var doc = makeTestDoc();
