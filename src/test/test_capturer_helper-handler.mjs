@@ -1,12 +1,18 @@
-import {MochaQuery as $, assert, createDocFixture} from "./unittest.mjs";
+import {MochaQuery as $, assert, runControlledTest, createDocFixture} from "./unittest.mjs";
+import sinon from "./lib/sinon-esm.js";
 
 import {CaptureHelperHandler} from "../capturer/helper-handler.mjs";
 
 const $describe = $(describe);
+const $it = $(it);
 
 const r = String.raw;
 
 describe('capturer/helper-handler.mjs', function () {
+  afterEach(function () {
+    sinon.restore();
+  });
+
   $describe.skipIf($.noBrowser)('CaptureHelperHandler', function () {
     describe(".getOverwritingOptions()", function () {
       it("should not include capture helper related options", function () {
@@ -368,6 +374,62 @@ describe('capturer/helper-handler.mjs', function () {
 <div id="target">target</div>
 <div id="target2">target2</div>`});
       }
+
+      it ('should call the corresponding handler with rootNode and arguments', function () {
+        var stub = sinon.stub(console, 'debug');
+        var spy = sinon.spy(CaptureHelperHandler.prototype, 'cmd_if');
+
+        var helper = new CaptureHelperHandler();
+        var doc = makeTestDoc();
+        var command = ["if", true, 1, 0];
+        helper.runCommand(command, doc);
+
+        sinon.assert.notCalled(stub);
+        sinon.assert.calledOnceWithExactly(spy, doc, true, 1, 0);
+      });
+
+      it ('should show debug info for commands prefixed with `*` when `debugging` is truthy', function () {
+        var stub = sinon.stub(console, 'debug');
+        var spy = sinon.spy(CaptureHelperHandler.prototype, 'cmd_if');
+
+        var helper = new CaptureHelperHandler();
+        helper.debugging = true;
+        var doc = makeTestDoc();
+        var command = ["*if", true, 1, 0];
+        helper.runCommand(command, doc);
+
+        sinon.assert.calledTwice(stub);
+        sinon.assert.calledOnceWithExactly(spy, doc, true, 1, 0);
+      });
+
+      it ('should not show debug info for commands prefixed with `*` when `debugging` is falsy', function () {
+        var stub = sinon.stub(console, 'debug');
+        var spy = sinon.spy(CaptureHelperHandler.prototype, 'cmd_if');
+
+        var helper = new CaptureHelperHandler();
+        var doc = makeTestDoc();
+        var command = ["*if", true, 1, 0];
+        helper.runCommand(command, doc);
+
+        sinon.assert.notCalled(stub);
+        sinon.assert.calledOnceWithExactly(spy, doc, true, 1, 0);
+      });
+
+      it ('should resolve the command name argument', function () {
+        var stub = sinon.stub(console, 'debug');
+        var spyResolve = sinon.spy(CaptureHelperHandler.prototype, 'resolve');
+        var spy = sinon.spy(CaptureHelperHandler.prototype, 'cmd_if');
+
+        var helper = new CaptureHelperHandler();
+        helper.debugging = true;
+        var doc = makeTestDoc();
+        var command = [["concat", "*", "i", "f"], true, 1, 0];
+        helper.runCommand(command, doc);
+
+        sinon.assert.calledWithExactly(spyResolve, ["concat", "*", "i", "f"], doc);
+        sinon.assert.calledTwice(stub);
+        sinon.assert.calledOnceWithExactly(spy, doc, true, 1, 0);
+      });
 
       context("cmd_if", function () {
         it("should return argument 3 when argument 2 is truthy", function () {
@@ -1806,11 +1868,18 @@ insertedText`);
     });
 
     describe("#run()", function () {
+      function makeTestDoc() {
+        return createDocFixture({name: 'body', children: [
+          {name: 'div', class: ['exclude1']},
+          {name: 'div', class: ['exclude2']},
+          {name: 'div', class: ['exclude3']},
+        ]});
+      }
+
       it("should skip helpers with truthy `disabled` property", function () {
-        var doc = createDocFixture({code: `\
-<div class="exclude1"></div>
-<div class="exclude2"></div>
-<div class="exclude3"></div>`});
+        var spy = sinon.spy(CaptureHelperHandler.prototype, 'runCommand');
+
+        var doc = makeTestDoc();
         var helpers = [
           {
             commands: [
@@ -1835,14 +1904,17 @@ insertedText`);
           docUrl: 'http://example.com/',
         });
         assert.deepEqual(helper.run(), {errors: []});
-        assert.strictEqual(doc.body.innerHTML.trim(), `<div class="exclude2"></div>`);
+        assert.strictEqual(doc.body.innerHTML, `<div class="exclude2"></div>`);
+
+        sinon.assert.calledWithExactly(spy.getCall(0), ['remove', '.exclude1'], doc);
+        sinon.assert.calledWithExactly(spy.getCall(1), ['remove', '.exclude3'], doc);
+        assert.isNull(spy.getCall(2));
       });
 
       it("should skip helpers whose `pattern` does not match document URL", function () {
-        var doc = createDocFixture({code: `\
-<div class="exclude1"></div>
-<div class="exclude2"></div>
-<div class="exclude3"></div>`});
+        var spy = sinon.spy(CaptureHelperHandler.prototype, 'runCommand');
+
+        var doc = makeTestDoc();
         var helpers = [
           {
             commands: [
@@ -1868,7 +1940,57 @@ insertedText`);
           docUrl: 'http://example.com/',
         });
         assert.deepEqual(helper.run(), {errors: []});
-        assert.strictEqual(doc.body.innerHTML.trim(), `<div class="exclude2"></div>`);
+        assert.strictEqual(doc.body.innerHTML, `<div class="exclude2"></div>`);
+
+        sinon.assert.calledWithExactly(spy.getCall(0), ['remove', '.exclude1'], doc);
+        sinon.assert.calledWithExactly(spy.getCall(1), ['remove', '.exclude3'], doc);
+        assert.isNull(spy.getCall(2));
+      });
+
+      $it.xfail()("should call `runCommand` with `debugging` = true for helpers with truthy `debug` property", async function () {
+        sinon.stub(console, 'debug');
+
+        var doc = makeTestDoc();
+        var helpers = [
+          {
+            commands: [
+              ["remove", ".exclude1"],
+            ],
+          },
+          {
+            debug: true,
+            commands: [
+              ["remove", ".exclude2-1"],
+              ["remove", ".exclude2-2"],
+            ],
+          },
+          {
+            commands: [
+              ["remove", ".exclude3"],
+            ],
+          },
+        ];
+
+        var fn = function () {
+          var helper = new CaptureHelperHandler({
+            helpers,
+            rootNode: doc,
+            docUrl: 'http://example.com/',
+          });
+          assert.deepEqual(helper.run(), {errors: []});
+        };
+
+        var tester = function ([command, rootNode], {func}) {
+          if (helpers[1].commands.includes(command)) {
+            assert.isTrue(this.debugging);
+          } else {
+            assert.isFalse(this.debugging);
+          }
+          return func.call(this, command, rootNode);
+        };
+
+        var stub = await runControlledTest(CaptureHelperHandler.prototype, 'runCommand', fn, tester);
+        sinon.assert.called(stub);
       });
     });
   });
