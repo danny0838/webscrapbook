@@ -39,13 +39,13 @@ class CaptureHelperHandler {
         if (Array.isArray(helper.commands)) {
           if (this.debugging) {
             const nameStr = helper.name ? ` (${helper.name})` : '';
-            console.debug(`WebScrapBook: Running capture helper[${i}]${nameStr} for ${this.docUrl}`);
+            console.debug('WebScrapBook: Running capture helper[%i]%s for %s', i, nameStr, this.docUrl);
           }
 
           for (const command of helper.commands) {
             if (!this.isCommand(command)) {
               const msg = `Skipped running invalid capture helper command: ${JSON.stringify(command)}`;
-              console.error(`WebScrapBook: ${msg}`);
+              console.error('WebScrapBook: %s', msg);
               errors.push(msg);
               continue;
             }
@@ -53,8 +53,7 @@ class CaptureHelperHandler {
               this.runCommand(command, rootNode);
             } catch (ex) {
               const msg = `Error running capture helper command: ${JSON.stringify(command)}`;
-              console.error(`WebScrapBook: ${msg}`);
-              console.error(ex);
+              console.error('WebScrapBook: %s: %o', msg, ex);
               errors.push(`${msg}: ${ex.message}`);
             }
           }
@@ -64,8 +63,7 @@ class CaptureHelperHandler {
       this.debugging = false;
     } catch (ex) {
       const msg = `Error running capture helper`;
-      console.error(`WebScrapBook: ${msg}`);
-      console.error(ex);
+      console.error('WebScrapBook: %s: %o', msg, ex);
       errors.push(`${msg}: ${ex.message}`);
     }
 
@@ -233,11 +231,11 @@ class CaptureHelperHandler {
     }
     const id = this.commandId++;
     if (debug) {
-      console.debug(`WebScrapBook: Running helper (${id}) ${JSON.stringify(command)} at`, this.origNodeMap.get(rootNode) || rootNode);
+      console.debug('WebScrapBook: Running helper (%s) %s at %o', id, JSON.stringify(command), this.origNodeMap?.get(rootNode) || rootNode);
     }
     const rv = this['cmd_' + cmd].apply(this, [rootNode, ...command.slice(1)]);
     if (debug) {
-      console.debug(`WebScrapBook: Running helper (${id}) returns`, rv);
+      console.debug('WebScrapBook: Running helper (%s) returns %o', id, rv);
     }
     return rv;
   }
