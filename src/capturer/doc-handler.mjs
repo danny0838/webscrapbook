@@ -1740,7 +1740,10 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
 
     // record custom elements
     if (CUSTOM_ELEMENT_NAME_PATTERN.test(localName) && !CUSTOM_ELEMENT_NAME_FORBIDDEN.has(localName)) {
-      customElementNames.add(localName);
+      const elemOrig = this.getOrigNode(elem);
+      if (elemOrig?.matches(':defined')) {
+        customElementNames.add(localName);
+      }
     }
   }
 

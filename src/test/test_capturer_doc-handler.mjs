@@ -8270,7 +8270,11 @@ describe('capturer/doc-handler.mjs', function () {
       context('for custom elements', function () {
         async function docFactory() {
           const {contentDocument: doc} = await createIframeFixture({
-            docData: {tagName: 'custom-elem'},
+            docData: {tagName: 'body', children: [
+              {tagName: 'custom-elem'},
+              {tagName: 'custom-elem2'},
+              {tagName: 'custom-elem-undefined'},
+            ]},
             onload: ({target: {contentWindow: window, contentDocument: document}}) => {
               window.customElements.define(
                 'custom-elem',
@@ -8285,6 +8289,10 @@ describe('capturer/doc-handler.mjs', function () {
                     var subElem = shadow.appendChild(document.createElement('custom-subelem'));
                   }
                 },
+              );
+              window.customElements.define(
+                'custom-elem2',
+                class CustomElem extends window.HTMLElement {},
               );
               window.customElements.define(
                 'custom-subelem',
@@ -8304,14 +8312,19 @@ describe('capturer/doc-handler.mjs', function () {
           return doc;
         }
 
-        it('should generate registry for valid custom elements', async function () {
+        it('should generate registry for defined custom elements', async function () {
           var doc = await docFactory();
           var rewriter = await new TestCapturer().captureDocument({doc, docUrl});
-          assert.deepEqual(rewriter.customElementNames, new Set(['custom-subelem', 'custom-elem']));
+          assert.deepEqual(rewriter.customElementNames, new Set(['custom-subelem', 'custom-elem', 'custom-elem2']));
         });
 
         it('should not generate registry for invalid custom elements', async function () {
           var doc = createDocFixture({tagName: 'body', children: [
+            {tagName: 'div'},
+            {tagName: 'audio'},
+            {tagName: 'video'},
+            {tagName: 'custom-elem', ns: NS_SVG},
+            {tagName: 'custom-elem', ns: NS_MATHML},
             {tagName: 'annotation-xml', value: 'something'},
             {tagName: 'color-profile', value: 'something'},
             {tagName: 'font-face', value: 'something'},
@@ -8327,35 +8340,31 @@ describe('capturer/doc-handler.mjs', function () {
         });
 
         it('should work for an XHTML element with altered prefix', async function () {
-          var doc = createDocFixture({
-            type: 'xhtml',
-            nsmap: {h: NS_HTML},
-            tagName: 'h:html',
-            ns: NS_HTML,
-            children: [
-              {tagName: 'h:head', ns: NS_HTML},
-              {tagName: 'h:body', ns: NS_HTML, children: [
-                {tagName: 'h:custom-elem', ns: NS_HTML},
-              ]},
-            ],
-          });
-
+          var doc = await (async () => {
+            const {contentDocument: doc} = await createIframeFixture({
+              docData: {
+                type: 'xhtml',
+                nsmap: {h: NS_HTML},
+                tagName: 'h:html',
+                ns: NS_HTML,
+                children: [
+                  {tagName: 'h:head', ns: NS_HTML},
+                  {tagName: 'h:body', ns: NS_HTML, children: [
+                    {tagName: 'h:custom-elem', ns: NS_HTML},
+                  ]},
+                ],
+              },
+              onload: ({target: {contentWindow: window, contentDocument: document}}) => {
+                window.customElements.define(
+                  'custom-elem',
+                  class CustomElem extends window.HTMLElement {},
+                );
+              },
+            });
+            return doc;
+          })();
           var rewriter = await new TestCapturer().captureDocument({doc, docUrl});
           assert.deepEqual(rewriter.customElementNames, new Set(["custom-elem"]));
-        });
-
-        it('should not generate registry for non-HTML elements (under <svg>)', async function () {
-          var doc = createDocFixture({tagName: 'svg', ns: NS_SVG, children: [
-            {tagName: 'custom-elem', ns: NS_SVG},
-          ]});
-          var rewriter = await new TestCapturer().captureDocument({doc});
-          assert.deepEqual(rewriter.customElementNames, new Set());
-        });
-
-        it('should not generate registry for non-HTML elements (other)', async function () {
-          var doc = createDocFixture({tagName: 'custom-elem', ns: NS_SVG});
-          var rewriter = await new TestCapturer().captureDocument({doc});
-          assert.deepEqual(rewriter.customElementNames, new Set());
         });
 
         for (const mode of ["save", "link", "blank", "remove", "<other>"]) {
@@ -8382,7 +8391,7 @@ describe('capturer/doc-handler.mjs', function () {
                   var doc = await docFactory();
                   var {doc} = await new TestCapturer().captureDocument({doc, docUrl, options});
                   var loader = doc.querySelector('[data-scrapbook-elem="custom-elements-loader"]');
-                  assert.match(loader.textContent, rawRegex`${'^'}(function${'\\s*'}(${'\\w+'})${'\\s*'}{${'.+'}})(["custom-subelem","custom-elem"])${'$'}`);
+                  assert.match(loader.textContent, rawRegex`${'^'}(function${'\\s*'}(${'\\w+'})${'\\s*'}{${'.+'}})(["custom-subelem","custom-elem","custom-elem2"])${'$'}`);
                 });
 
                 break;
