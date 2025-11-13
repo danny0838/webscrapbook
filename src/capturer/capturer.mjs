@@ -490,6 +490,15 @@ class Capturer extends BaseCapturer {
     await IdbCache.removeAll(filter);
   }
 
+  async injectContentScripts(tabId) {
+    (await utils.initContentScripts(tabId)).forEach(({tabId, frameId, url, error, injected}) => {
+      if (error) {
+        const source = `[${tabId}:${frameId}] ${url}`;
+        this.error(utils.lang("ErrorContentScriptExecute", [source, error.message]));
+      }
+    });
+  }
+
   /**
    * @typedef {Object} fetchError
    * @property {string} name
@@ -1526,12 +1535,7 @@ class Capturer extends BaseCapturer {
       throw new Error(utils.lang("ErrorTabDiscarded"));
     }
 
-    (await utils.initContentScripts(tabId)).forEach(({tabId, frameId, url, error, injected}) => {
-      if (error) {
-        const source = `[${tabId}:${frameId}] ${url}`;
-        this.error(utils.lang("ErrorContentScriptExecute", [source, error.message]));
-      }
-    });
+    await this.injectContentScripts(tabId);
 
     isDebug && console.debug("(main) send", source, message);
     const response = await this.invoke("captureDocumentOrFile", message, {tabId, frameId});
@@ -1613,12 +1617,7 @@ class Capturer extends BaseCapturer {
       await utils.delay(delay);
     }
 
-    (await utils.initContentScripts(tab.id)).forEach(({tabId, frameId, url, error, injected}) => {
-      if (error) {
-        const source = `[${tabId}:${frameId}] ${url}`;
-        this.error(utils.lang("ErrorContentScriptExecute", [source, error.message]));
-      }
-    });
+    await this.injectContentScripts(tab.id);
 
     try {
       return await this.invoke("captureDocumentOrFile", [{
@@ -2197,12 +2196,8 @@ Redirecting to file <a href="${utils.escapeHtml(response.url)}">${utils.escapeHt
           }
         }
 
-        (await utils.initContentScripts(tabId)).forEach(({tabId, frameId, url, error, injected}) => {
-          if (error) {
-            const source = `[${tabId}:${frameId}] ${url}`;
-            this.error(utils.lang("ErrorContentScriptExecute", [source, error.message]));
-          }
-        });
+
+        await this.injectContentScripts(tabId);
 
         const message = [{
           internalize,
