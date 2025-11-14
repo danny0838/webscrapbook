@@ -7057,6 +7057,57 @@ describe('capturer/capturer.mjs', function () {
             },
           };
         }],
+        ['should return with `{error}` for circular meta refresh with redirect', () => {
+          const settings = {
+            timeId,
+            isMainPage: true,
+            isMainFrame: true,
+          };
+          const fetchResponse = {
+            url: `${docUrl}redir2.html`,
+            status: 200,
+            headers: {},
+            blob: new Blob([`<meta http-equiv="refresh" content="0; url=${docUrl}redir1.html">`], {type: 'text/html'}),
+          };
+          const fetchFunc = ({url}) => {
+            if (url === docUrl) {
+              return {
+                url: docUrl,
+                status: 200,
+                headers: {},
+                blob: new Blob([`<meta http-equiv="refresh" content="0; url=${docUrl}redir1.html">`], {type: 'text/html'}),
+              };
+            }
+            return fetchResponse;
+          };
+          return {
+            input: {
+              url: `${docUrl}#frag`,
+              refUrl: `${docUrl}referrer/`,
+              refPolicy: 'unsafe-url',
+              settings,
+              options,
+            },
+            fetchResponse,
+            expectedFetchArgs: {
+              url: docUrl,
+              refUrl: `${docUrl}referrer/`,
+              refPolicy: 'unsafe-url',
+              overrideBlob: undefined,
+              ignoreSizeLimit: true,
+              settings,
+              options,
+            },
+            expectedResult: {
+              url: `${docUrl}#frag`,
+              refUrl: `${docUrl}referrer/`,
+              fetchResponse,
+              isAttachment: undefined,
+              doc: sinon.match.instanceOf(HTMLDocument),
+              error: {name: 'Error', message: 'Circular meta refresh.'},
+            },
+          };
+        }],
       ]) {
         it(desc, async function () {
           var {input, fetchResponse, fetchFunc, expectedFetchArgs, expectedResult} = factory();
