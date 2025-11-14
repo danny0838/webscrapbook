@@ -7270,7 +7270,7 @@ $describe.skipIf($.noBrowser)('capturer/capturer.mjs', function () {
             url: `${docUrl}refreshed1.html`,
             status: 200,
             headers: {},
-            blob: new Blob([`<meta http-equiv="refresh" content="0; url=${docUrl}">`], {type: 'text/html'}),
+            blob: new Blob([`<meta http-equiv="refresh" content="0; url=${docUrl}#frag2">`], {type: 'text/html'}),
           };
           const fetchFunc = ({url}) => {
             if (url === docUrl) {

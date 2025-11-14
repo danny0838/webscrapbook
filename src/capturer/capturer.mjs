@@ -975,7 +975,8 @@ class Capturer extends BaseCapturer {
           break;
         }
 
-        if (metaRefreshChain.includes(metaRefreshTarget)) {
+        const [metaRefreshTargetMain, metaRefreshTargetHash] = utils.splitUrlByAnchor(metaRefreshTarget);
+        if (metaRefreshChain.includes(metaRefreshTargetMain)) {
           throw new Error(`Circular meta refresh.`);
         }
 
@@ -984,7 +985,7 @@ class Capturer extends BaseCapturer {
         overrideBlob = null;
 
         // meta refresh will replace the original hash
-        [sourceUrlMain, sourceUrlHash] = utils.splitUrlByAnchor(metaRefreshTarget);
+        [sourceUrlMain, sourceUrlHash] = [metaRefreshTargetMain, metaRefreshTargetHash];
       }
       sourceUrl = this.getRedirectedUrl(fetchResponse.url, sourceUrlHash);
       refUrl = referrerUrl;
