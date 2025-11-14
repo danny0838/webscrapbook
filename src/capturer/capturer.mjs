@@ -927,7 +927,7 @@ class Capturer extends BaseCapturer {
     let {url: sourceUrl, refUrl, overrideBlob, isAttachment} = params;
 
     const ignoreSizeLimit = settings.isMainPage && settings.isMainFrame;
-    const metaRefreshChain = [];
+    const metaRefreshChain = new Set();
     let [sourceUrlMain, sourceUrlHash] = utils.splitUrlByAnchor(sourceUrl);
     let referrerUrl = refUrl;
     let fetchResponse;
@@ -969,18 +969,19 @@ class Capturer extends BaseCapturer {
           break;
         }
 
-        const metaRefreshTarget = utils.getMetaRefreshTarget(doc, fetchResponse.url);
+        metaRefreshChain.add(sourceUrlMain);
+        metaRefreshChain.add(fetchResponse.url);
 
+        const metaRefreshTarget = utils.getMetaRefreshTarget(doc, fetchResponse.url);
         if (!metaRefreshTarget) {
           break;
         }
 
         const [metaRefreshTargetMain, metaRefreshTargetHash] = utils.splitUrlByAnchor(metaRefreshTarget);
-        if (metaRefreshChain.includes(metaRefreshTargetMain)) {
+        if (metaRefreshChain.has(metaRefreshTargetMain)) {
           throw new Error(`Circular meta refresh.`);
         }
 
-        metaRefreshChain.push(fetchResponse.url);
         referrerUrl = fetchResponse.url;
         overrideBlob = null;
 
