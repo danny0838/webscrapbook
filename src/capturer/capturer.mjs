@@ -925,10 +925,11 @@ class Capturer extends BaseCapturer {
 
     const {refPolicy, checkMetaRefresh = true, settings, options} = params;
     let {url: sourceUrl, refUrl, overrideBlob, isAttachment} = params;
-    let [sourceUrlMain, sourceUrlHash] = utils.splitUrlByAnchor(sourceUrl);
 
     const ignoreSizeLimit = settings.isMainPage && settings.isMainFrame;
     const metaRefreshChain = [];
+    let [sourceUrlMain, sourceUrlHash] = utils.splitUrlByAnchor(sourceUrl);
+    let referrerUrl = refUrl;
     let fetchResponse;
     let doc;
     let error;
@@ -936,7 +937,7 @@ class Capturer extends BaseCapturer {
       while (true) {
         fetchResponse = await this.fetch({
           url: sourceUrlMain,
-          refUrl,
+          refUrl: referrerUrl,
           refPolicy,
           overrideBlob,
           ignoreSizeLimit,
@@ -979,14 +980,14 @@ class Capturer extends BaseCapturer {
         }
 
         metaRefreshChain.push(fetchResponse.url);
-        refUrl = fetchResponse.url;
+        referrerUrl = fetchResponse.url;
         overrideBlob = null;
 
         // meta refresh will replace the original hash
         [sourceUrlMain, sourceUrlHash] = utils.splitUrlByAnchor(metaRefreshTarget);
       }
       sourceUrl = this.getRedirectedUrl(fetchResponse.url, sourceUrlHash);
-      [sourceUrlMain, sourceUrlHash] = utils.splitUrlByAnchor(sourceUrl);
+      refUrl = referrerUrl;
     } catch (ex) {
       error = ex;
     }

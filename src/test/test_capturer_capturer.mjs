@@ -6705,7 +6705,7 @@ describe('capturer/capturer.mjs', function () {
             },
             expectedResult: {
               url: `${docUrl}#frag`,
-              refUrl: docUrl,
+              refUrl: `${docUrl}referrer/`,
               fetchResponse,
               isAttachment: undefined,
               doc: sinon.match.instanceOf(HTMLDocument),
