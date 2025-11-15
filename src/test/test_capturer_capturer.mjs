@@ -317,7 +317,7 @@ describe('capturer/capturer.mjs', function () {
             }
 
             assert.instanceOf(error, Error);
-            assert.strictEqual(error.message, 'Bad parameters.');
+            assert.strictEqual(error.message, 'Bad arguments.');
           });
         }
       });
