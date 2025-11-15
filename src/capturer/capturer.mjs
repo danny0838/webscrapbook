@@ -1439,7 +1439,7 @@ class Capturer extends BaseCapturer {
       });
     } else {
       // nothing to capture
-      throw new Error(`Bad parameters.`);
+      throw new Error(`Bad arguments.`);
     }
     if (!response) { throw new Error(`Response not received.`); }
     if (response.error) { throw new Error(response.error.message); }
