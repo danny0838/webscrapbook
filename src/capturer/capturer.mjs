@@ -1988,7 +1988,7 @@ Bookmark for <a href="${utils.escapeHtml(sourceUrl)}">${utils.escapeHtml(sourceU
     })();
     const blob = new Blob([html], {type: "text/html"});
 
-    settings.type = settings.type || 'bookmark';
+    settings.type ??= 'bookmark';
     settings.indexFilename = settings.indexFilename || await this.formatIndexFilename({
       title: title || utils.filenameParts(utils.urlToFilename(sourceUrl))[0] || "untitled",
       sourceUrl,
@@ -2091,7 +2091,7 @@ Redirecting to file <a href="${utils.escapeHtml(response.url)}">${utils.escapeHt
     })();
     const blob = new Blob([html], {type: "text/html;charset=UTF-8"});
 
-    settings.type = settings.type || 'file';
+    settings.type ??= 'file';
     settings.indexFilename = settings.indexFilename || await this.formatIndexFilename({
       title: title || utils.urlToFilename(sourceUrl) || "untitled",
       sourceUrl,
@@ -3450,7 +3450,7 @@ Redirecting to <a href="${utils.escapeHtml(target)}">${utils.escapeHtml(target, 
     };
 
     // throw for unexpected item type
-    if (!itemType) {
+    if (itemType == null) {
       throw new Error(`unexpected item type: ${JSON.stringify(itemType)}`);
     }
 
@@ -3576,7 +3576,7 @@ Redirecting to <a href="${utils.escapeHtml(target)}">${utils.escapeHtml(target, 
     return {
       timeId,
       title,
-      type: itemType === 'document' ? '' : itemType,
+      type: itemType,
       sourceUrl,
       targetDir,
       filename,

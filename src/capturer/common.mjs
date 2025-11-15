@@ -2770,11 +2770,9 @@ class BaseCapturer {
     let docRefPolicy = this.isAboutUrl(docUrl) ? (params.refPolicy || "") : "";
 
     if (isMainPage && isMainFrame) {
-      if (!settings.type) {
-        settings.type = (parseInt(options["capture.downLink.doc.depth"], 10) >= 0 && options['capture.saveAs'] !== 'singleHtml') ?
-          'site' :
-          'document';
-      }
+      settings.type ??= (parseInt(options["capture.downLink.doc.depth"], 10) >= 0 && options['capture.saveAs'] !== 'singleHtml') ?
+        'site' :
+        '';
       settings.indexFilename = settings.indexFilename || await this.invoke("formatIndexFilename", [{
         title: settings.title || doc.title || utils.filenameParts(utils.urlToFilename(envDocUrl))[0] || "untitled",
         sourceUrl: envDocUrl,
@@ -3148,7 +3146,7 @@ class BaseCapturer {
           rootNode.setAttribute("data-scrapbook-icon", settings.favIconUrl);
         }
 
-        if (settings.type !== 'document') {
+        if (settings.type) {
           rootNode.setAttribute("data-scrapbook-type", settings.type);
         }
       }
