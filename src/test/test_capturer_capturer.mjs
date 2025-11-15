@@ -2646,6 +2646,7 @@ describe('capturer/capturer.mjs', function () {
                     assert.deepEqual(getAttributes(doc.documentElement), {
                       [`{${NS_XMLNS}}xmlns`]: NS_HTML,
                       'data-scrapbook-source': 'https://example.com/page.xhtml',
+                      'data-scrapbook-create': timeId,
                     });
                     assert.exists(doc.querySelector('meta[charset="UTF-8"]'));
                     assert.strictEqual(doc.title, 'ABC 中文 𠀀 にほんご');
@@ -2853,6 +2854,7 @@ describe('capturer/capturer.mjs', function () {
                       [`{${NS_XMLNS}}xmlns`]: NS_SVG,
                       [`{${NS_XMLNS}}xmlns:xlink`]: NS_XLINK,
                       'data-scrapbook-source': 'https://example.com/image.svg',
+                      'data-scrapbook-create': timeId,
                     });
                     assert.strictEqual(doc.querySelector('image').getAttribute('href'), `data:image/bmp;filename=green.bmp;base64,${GREEN_BMP_B64}`);
                   });

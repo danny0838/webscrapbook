@@ -3124,18 +3124,19 @@ class BaseCapturer {
 
     // record metadata
     if (options["capture.recordDocumentMeta"]) {
+      const isIndexPage = isMainPage && isMainFrame && (mime === "text/html" || options["capture.saveAs"] === "singleHtml");
       let url = docUrl.startsWith("data:") ? "data:" : docUrl;
 
       // add hash only for index.html as subframes with different hash
       // must share the same file and record (e.g. foo.html and foo.html#bar)
-      if (isMainPage && isMainFrame && mime === "text/html") {
+      if (isIndexPage) {
         url += docUrlHash;
       }
 
       rootNode.setAttribute("data-scrapbook-source", url);
 
       // record item metadata for index.html
-      if (isMainPage && isMainFrame && mime === "text/html") {
+      if (isIndexPage) {
         rootNode.setAttribute("data-scrapbook-create", timeId);
 
         if (settings.title) {
