@@ -116,7 +116,7 @@ class BaseCapturer {
       }
 
       return await this.invoke("captureFile", [{
-        url: doc.URL,
+        url: docUrl || doc.URL,
         refUrl,
         refPolicy,
         charset: doc.characterSet,
