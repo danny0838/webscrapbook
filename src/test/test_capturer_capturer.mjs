@@ -2497,7 +2497,6 @@ $describe.skipIf($.noBrowser)('capturer/capturer.mjs', function () {
                     assert.deepEqual(getAttributes(doc.documentElement), {
                       'data-scrapbook-source': 'https://example.com/page.xhtml',
                       'data-scrapbook-create': timeId,
-                      'data-scrapbook-type': 'document',
                     });
                     assert.exists(doc.querySelector('meta[charset="UTF-8"]'));
                     assert.exists(doc.querySelector('meta[http-equiv="refresh"][content="0; url=index.xhtml"]'));
@@ -2546,7 +2545,6 @@ $describe.skipIf($.noBrowser)('capturer/capturer.mjs', function () {
                     assert.deepEqual(getAttributes(doc.documentElement), {
                       'data-scrapbook-source': 'https://example.com/page.xhtml',
                       'data-scrapbook-create': timeId,
-                      'data-scrapbook-type': 'document',
                     });
                     assert.exists(doc.querySelector('meta[charset="UTF-8"]'));
                     assert.exists(doc.querySelector('meta[http-equiv="refresh"][content="0; url=index.xhtml"]'));
@@ -2602,7 +2600,6 @@ $describe.skipIf($.noBrowser)('capturer/capturer.mjs', function () {
                     assert.deepEqual(getAttributes(doc.documentElement), {
                       'data-scrapbook-source': 'https://example.com/page.xhtml',
                       'data-scrapbook-create': timeId,
-                      'data-scrapbook-type': 'document',
                     });
                     assert.exists(doc.querySelector('meta[charset="UTF-8"]'));
                     assert.exists(doc.querySelector('meta[http-equiv="refresh"][content="0; url=index.xhtml"]'));
@@ -2705,7 +2702,6 @@ $describe.skipIf($.noBrowser)('capturer/capturer.mjs', function () {
                     assert.deepEqual(getAttributes(doc.documentElement), {
                       'data-scrapbook-source': 'https://example.com/image.svg',
                       'data-scrapbook-create': timeId,
-                      'data-scrapbook-type': 'document',
                     });
                     assert.exists(doc.querySelector('meta[charset="UTF-8"]'));
                     assert.exists(doc.querySelector('meta[http-equiv="refresh"][content="0; url=index.svg"]'));
@@ -2754,7 +2750,6 @@ $describe.skipIf($.noBrowser)('capturer/capturer.mjs', function () {
                     assert.deepEqual(getAttributes(doc.documentElement), {
                       'data-scrapbook-source': 'https://example.com/image.svg',
                       'data-scrapbook-create': timeId,
-                      'data-scrapbook-type': 'document',
                     });
                     assert.exists(doc.querySelector('meta[charset="UTF-8"]'));
                     assert.exists(doc.querySelector('meta[http-equiv="refresh"][content="0; url=index.svg"]'));
@@ -2810,7 +2805,6 @@ $describe.skipIf($.noBrowser)('capturer/capturer.mjs', function () {
                     assert.deepEqual(getAttributes(doc.documentElement), {
                       'data-scrapbook-source': 'https://example.com/image.svg',
                       'data-scrapbook-create': timeId,
-                      'data-scrapbook-type': 'document',
                     });
                     assert.exists(doc.querySelector('meta[charset="UTF-8"]'));
                     assert.exists(doc.querySelector('meta[http-equiv="refresh"][content="0; url=index.svg"]'));
