@@ -1560,7 +1560,7 @@ data:text/css;charset=UTF-8;filename=link.css,%23external%20%7B%20background:%20
       assert.strictEqual(srcdoc.querySelector('style').textContent.trim(), `\
 #internal { background: url("data:image/bmp;filename=green.bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAP8AAAAA"); }
 #internal::after { content: "內部"; }`);
-assert.strictEqual(srcdoc.querySelector('img').getAttribute('src'), `data:image/bmp;filename=red.bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAAD/AAAA`);
+      assert.strictEqual(srcdoc.querySelector('img').getAttribute('src'), `data:image/bmp;filename=red.bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAAD/AAAA`);
     });
 
     it('should use non-uniquified filename for generated data URLs', async function () {
