@@ -3762,7 +3762,7 @@ Redirecting to <a href="${utils.escapeHtml(target)}">${utils.escapeHtml(target, 
     }
 
     const registry = await this.registerFile({
-      url: sourceUrl,
+      url: sourceUrlMain,
       role: options["capture.saveAs"] === "singleHtml" ? undefined : 'resource',
       settings,
       options,
@@ -3781,7 +3781,7 @@ Redirecting to <a href="${utils.escapeHtml(target)}">${utils.escapeHtml(target, 
     return await this.downloadBlob({
       blob,
       filename: registry.filename,
-      sourceUrl,
+      sourceUrl: sourceUrlMain,
       settings,
       options,
     });
