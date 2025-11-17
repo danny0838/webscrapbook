@@ -7757,7 +7757,7 @@ $describe.skipIf($.noBrowser)('capturer/capturer.mjs', function () {
           options,
         });
         sinon.assert.calledOnceWithExactly(spyRegister, {
-          url: 'https://example.com/file.txt#foo',
+          url: 'https://example.com/file.txt',
           role: 'resource',
           settings,
           options,
@@ -7765,7 +7765,7 @@ $describe.skipIf($.noBrowser)('capturer/capturer.mjs', function () {
         sinon.assert.calledOnceWithExactly(spyDownloadBlob, {
           blob: sinon.match.instanceOf(Blob),
           filename: 'file.txt',
-          sourceUrl: 'https://example.com/file.txt#foo',
+          sourceUrl: 'https://example.com/file.txt',
           settings,
           options,
         });
@@ -7843,7 +7843,7 @@ $describe.skipIf($.noBrowser)('capturer/capturer.mjs', function () {
           options,
         });
         sinon.assert.calledOnceWithExactly(spyRegister, {
-          url: 'https://example.com/file.txt#foo',
+          url: 'https://example.com/file.txt',
           role: undefined,
           settings,
           options,
@@ -7851,7 +7851,7 @@ $describe.skipIf($.noBrowser)('capturer/capturer.mjs', function () {
         sinon.assert.calledOnceWithExactly(spyDownloadBlob, {
           blob: sinon.match.instanceOf(Blob),
           filename: 'file.txt',
-          sourceUrl: 'https://example.com/file.txt#foo',
+          sourceUrl: 'https://example.com/file.txt',
           settings,
           options,
         });
