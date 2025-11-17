@@ -7175,6 +7175,43 @@ describe('capturer/capturer.mjs', function () {
         assert.strictEqual(await utils.readFileAsText(spyDownloadBlob.lastCall.args[0].blob), 'foo');
       });
 
+      it('should take header filename and charset from fetch response if exists', async function () {
+        var stubFetch = sinon.stub(Capturer.prototype, 'fetch').callsFake(({url}) => ({
+          url,
+          status: 200,
+          headers: {
+            contentType: 'text/plain',
+            charset: 'UTF-8',
+            isAttachment: false,
+            filename: '中文.txt',
+            contentLength: 4,
+          },
+          blob: new Blob(['中文'], {type: 'text/plain'}),
+        }));
+        var spyDownloadBlob = sinon.spy(Capturer.prototype, 'downloadBlob');
+
+        var settings = {timeId};
+        var result = await new Capturer().downloadFile({
+          url: `${docUrl}file.txt`,
+          settings,
+          options,
+        });
+        sinon.assert.match(result, {
+          filename: '中文.txt',
+          url: '中文.txt',
+        });
+
+        sinon.assert.calledOnceWithExactly(spyDownloadBlob, {
+          blob: sinon.match.instanceOf(Blob),
+          filename: '中文.txt',
+          sourceUrl: `${docUrl}file.txt`,
+          settings,
+          options,
+        });
+        assert.strictEqual(spyDownloadBlob.lastCall.args[0].blob.type, 'text/plain;charset=utf-8');
+        assert.strictEqual(await utils.readFileAsText(spyDownloadBlob.lastCall.args[0].blob), '中文');
+      });
+
       it('should return as data URL when options["capture.saveAs"] = "singleHtml"', async function () {
         var stubFetch = sinon.stub(Capturer.prototype, 'fetch').callsFake(({url}) => ({
           url,

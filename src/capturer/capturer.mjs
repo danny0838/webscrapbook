@@ -3773,7 +3773,7 @@ Redirecting to <a href="${utils.escapeHtml(target)}">${utils.escapeHtml(target, 
     }
 
     let blob = fetchResponse.blob;
-    const {parameters: {charset}} = utils.parseHeaderContentType(fetchResponse.headers.contentType);
+    const {charset} = fetchResponse.headers;
     if (charset) {
       blob = new Blob([blob], {type: `${blob.type};charset=${charset}`});
     }
