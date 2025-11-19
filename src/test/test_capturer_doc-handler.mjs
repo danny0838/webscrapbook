@@ -4860,7 +4860,7 @@ Default3\
                 });
 
                 context(CONTEXT_CROSS_ORIGIN, function () {
-                  $it.xfail()('should remove `crossorigin` attribute for a headed document', testSaveCrossOriginHeaded);
+                  it('should remove `crossorigin` attribute for a headed document', testSaveCrossOriginHeaded);
 
                   it('should remove `crossorigin` attribute for a headless document', testSaveCrossOrigin);
                 });
@@ -5304,7 +5304,7 @@ Default3\
                 it('should save resources and rewrite `src` for complex audio for a headless document', testSaveComplex);
 
                 context(CONTEXT_CROSS_ORIGIN, function () {
-                  $it.xfail()('should remove `crossorigin` attribute for a headed document', testSaveCrossOriginHeaded);
+                  it('should remove `crossorigin` attribute for a headed document', testSaveCrossOriginHeaded);
 
                   it('should remove `crossorigin` attribute for a headless document', testSaveCrossOrigin);
                 });
@@ -5641,7 +5641,7 @@ Default3\
                 it('should save resources and rewrite `src` for complex video for a headless document', testSaveComplex);
 
                 context(CONTEXT_CROSS_ORIGIN, function () {
-                  $it.xfail()('should remove `crossorigin` attribute for a headed document', testSaveCrossOriginHeaded);
+                  it('should remove `crossorigin` attribute for a headed document', testSaveCrossOriginHeaded);
 
                   it('should remove `crossorigin` attribute for a headless document', testSaveCrossOrigin);
                 });

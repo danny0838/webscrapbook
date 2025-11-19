@@ -2129,7 +2129,7 @@ class CaptureDocumentRewriter extends MapperMixin(CaptureDocumentRewriterBase) {
           });
         });
 
-        // remove crossorigin as the origin has changed
+        // remove crossorigin as it prevents local loading with file:
         this.captureRewriteAttr(elem, "crossorigin", null);
         break;
       }
@@ -2185,7 +2185,7 @@ class CaptureDocumentRewriter extends MapperMixin(CaptureDocumentRewriterBase) {
           return response;
         });
 
-        // remove crossorigin as the origin has changed
+        // remove crossorigin as it prevents local loading with file:
         this.captureRewriteAttr(elem, "crossorigin", null);
         break;
       }
@@ -2221,7 +2221,7 @@ class CaptureDocumentRewriter extends MapperMixin(CaptureDocumentRewriterBase) {
           return response;
         });
 
-        // remove crossorigin as the origin has changed
+        // remove crossorigin as it prevents local loading with file:
         this.captureRewriteAttr(elem, "crossorigin", null);
         break;
       }
@@ -2312,7 +2312,7 @@ class CaptureDocumentRewriter extends MapperMixin(CaptureDocumentRewriterBase) {
           });
         }
 
-        // remove crossorigin as the origin has changed
+        // remove crossorigin as it prevents local loading with file:
         this.captureRewriteAttr(elem, "crossorigin", null);
         break;
       }
@@ -2752,6 +2752,9 @@ class CaptureDocumentRewriter extends MapperMixin(CaptureDocumentRewriterBase) {
               return response;
             });
           }
+
+          // remove crossorigin as it prevents local loading with file:
+          this.captureRewriteAttr(elem, "crossorigin", null);
           break;
         }
         // Headless capture doesn't support currentSrc, fallback to "save".
@@ -2788,7 +2791,7 @@ class CaptureDocumentRewriter extends MapperMixin(CaptureDocumentRewriterBase) {
           });
         }
 
-        // remove crossorigin as the origin has changed
+        // remove crossorigin as it prevents local loading with file:
         this.captureRewriteAttr(elem, "crossorigin", null);
         break;
     }
@@ -2936,6 +2939,8 @@ class CaptureDocumentRewriter extends MapperMixin(CaptureDocumentRewriterBase) {
             });
           }
 
+          // remove crossorigin as it prevents local loading with file:
+          this.captureRewriteAttr(elem, "crossorigin", null);
           break;
         }
         // Headless capture doesn't support currentSrc, fallback to "save".
@@ -2971,7 +2976,7 @@ class CaptureDocumentRewriter extends MapperMixin(CaptureDocumentRewriterBase) {
           });
         }
 
-        // remove crossorigin as the origin has changed
+        // remove crossorigin as it prevents local loading with file:
         this.captureRewriteAttr(elem, "crossorigin", null);
         break;
     }
@@ -3073,6 +3078,8 @@ class CaptureDocumentRewriter extends MapperMixin(CaptureDocumentRewriterBase) {
             });
           }
 
+          // remove crossorigin as it prevents local loading with file:
+          this.captureRewriteAttr(elem, "crossorigin", null);
           break;
         }
         // Headless capture doesn't support currentSrc, fallback to "save".
@@ -3122,7 +3129,7 @@ class CaptureDocumentRewriter extends MapperMixin(CaptureDocumentRewriterBase) {
           });
         }
 
-        // remove crossorigin as the origin has changed
+        // remove crossorigin as it prevents local loading with file:
         this.captureRewriteAttr(elem, "crossorigin", null);
         break;
     }
