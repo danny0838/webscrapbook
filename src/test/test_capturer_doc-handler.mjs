@@ -7473,6 +7473,18 @@ describe('capturer/doc-handler.mjs', function () {
                   sinon.assert.notCalled(spyRewriteText);
                 });
 
+                context(CONTEXT_CROSS_ORIGIN, function () {
+                  it('should remove `crossorigin` attribute', async function () {
+                    var doc = docFactory({attrs: [['href', './myicon.bmp'], ['crossorigin', '']]});
+
+                    var {doc} = await new TestCapturer().captureDocument({doc, docUrl, options});
+                    var elem = doc.querySelector(tagName);
+                    assert.strictEqual(elem.getAttribute('crossorigin'), null);
+
+                    sinon.assert.calledWithExactly(spyRewrite, elem, "crossorigin", null);
+                  });
+                });
+
                 break;
               }
               case "link": {
@@ -7634,6 +7646,18 @@ describe('capturer/doc-handler.mjs', function () {
 
                         sinon.assert.calledOnceWithExactly(spyResolve, './myicon.bmp', 'https://example.com/');
                         sinon.assert.calledWithExactly(spyRewrite, elem, 'href', 'myicon.bmp', {ns});
+                      });
+
+                      context(CONTEXT_CROSS_ORIGIN, function () {
+                        it('should remove `crossorigin` attribute', async function () {
+                          var doc = docFactory({attrs: [[`${prefix}href`, './myicon.bmp', ns], ['crossorigin', '']]});
+
+                          var {doc} = await new TestCapturer().captureDocument({doc, docUrl, options});
+                          var elem = doc.querySelector(tagName);
+                          assert.strictEqual(elem.getAttribute('crossorigin'), null);
+
+                          sinon.assert.calledWithExactly(spyRewrite, elem, 'crossorigin', null);
+                        });
                       });
 
                       break;
