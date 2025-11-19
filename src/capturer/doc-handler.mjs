@@ -3738,8 +3738,13 @@ class CaptureDocumentRewriter extends MapperMixin(CaptureDocumentRewriterBase) {
   }
 
   [`_handle_{${NS_SVG}}use`](elem) {
+    const {baseUrl} = this;
+
     for (const ns of [null, NS_XLINK]) {
-      this[`_handle_{${NS_SVG}}use#href`].call(this, elem, 'href', ns);
+      if (elem.hasAttributeNS(ns, "href")) {
+        const newUrl = this.resolveRelativeUrl(elem.getAttributeNS(ns, "href"), baseUrl);
+        this.captureRewriteAttr(elem, "href", newUrl, {ns});
+      }
     }
   }
 
@@ -3779,61 +3784,54 @@ class CaptureDocumentRewriter extends MapperMixin(CaptureDocumentRewriterBase) {
     this[`_handle_{${NS_SVG}}use`].call(this, elem);
   }
 
-  [`_handle_{${NS_SVG}}use#href`](elem, attr, ns) {
-    if (!elem.hasAttributeNS(ns, attr)) { return; }
-    const newUrl = this.resolveRelativeUrl(elem.getAttributeNS(ns, attr), this.baseUrl);
-    this.captureRewriteAttr(elem, attr, newUrl, {ns});
-  }
-
   [`_handle_{${NS_SVG}}image`](elem) {
+    const {baseUrl, refUrl, docRefPolicy: refPolicy, tasks, settings, options} = this;
+
     for (const ns of [null, NS_XLINK]) {
-      this[`_handle_{${NS_SVG}}image#href`].call(this, elem, 'href', ns);
+      if (elem.hasAttributeNS(ns, "href")) {
+        const newUrl = this.resolveRelativeUrl(elem.getAttributeNS(ns, "href"), baseUrl);
+        this.captureRewriteAttr(elem, "href", newUrl, {ns});
+      }
+    }
+
+    switch (options["capture.image"]) {
+      case "link": {
+        // do nothing
+        break;
+      }
+      case "blank":
+      case "remove": {
+        for (const ns of [null, NS_XLINK]) {
+          if (elem.hasAttributeNS(ns, "href")) {
+            this.captureRewriteAttr(elem, "href", null, {ns});
+          }
+        }
+        break;
+      }
+      case "save":
+      default: {
+        for (const ns of [null, NS_XLINK]) {
+          if (elem.hasAttributeNS(ns, "href")) {
+            tasks.push(async () => {
+              const response = await this.downloadFile({
+                url: elem.getAttributeNS(ns, "href"),
+                refUrl,
+                refPolicy,
+                settings,
+                options,
+              });
+              this.captureRewriteAttr(elem, "href", response.url, {ns});
+              return response;
+            });
+          }
+        }
+        break;
+      }
     }
   }
 
   [`_handle_{${NS_SVG}}feImage`](elem) {
     this[`_handle_{${NS_SVG}}image`].call(this, elem);
-  }
-
-  [`_handle_{${NS_SVG}}image#href`](elem, attr, ns) {
-    if (!elem.hasAttributeNS(ns, attr)) { return; }
-
-    const {baseUrl, refUrl, docRefPolicy: refPolicy, tasks, settings, options} = this;
-
-    // check local link and rewrite url
-    const url = this.resolveRelativeUrl(elem.getAttributeNS(ns, attr), baseUrl);
-    this.captureRewriteAttr(elem, attr, url, {ns});
-
-    switch (options["capture.image"]) {
-      case "link":
-        // do nothing
-        break;
-      case "blank":
-      case "remove":
-        this.captureRewriteAttr(elem, attr, null, {ns});
-        break;
-      case "save-current":
-      case "save":
-      default: {
-        // skip further processing for non-absolute links
-        if (!utils.isUrlAbsolute(url)) {
-          break;
-        }
-
-        tasks.push(async () => {
-          const response = await this.downloadFile({
-            url,
-            refUrl,
-            refPolicy,
-            settings,
-            options,
-          });
-          this.captureRewriteAttr(elem, attr, response.url, {ns});
-          return response;
-        });
-        break;
-      }
-    }
   }
 
   [`_handle_{${NS_SVG}}script`](elem) {
@@ -3846,19 +3844,22 @@ class CaptureDocumentRewriter extends MapperMixin(CaptureDocumentRewriterBase) {
     }
 
     switch (options["capture.script"]) {
-      case "link":
+      case "link": {
         // do nothing
         break;
-      case "blank":
+      }
+      case "blank": {
         for (const ns of [null, NS_XLINK]) {
           if (!elem.hasAttributeNS(ns, 'href')) { continue; }
           this.captureRewriteAttr(elem, 'href', null, {ns});
         }
         this.captureRewriteTextContent(elem, "");
         break;
-      case "remove":
+      }
+      case "remove": {
         this.captureRemoveNode(elem);
         throw new NodeDisconnect(elem);
+      }
       case "save":
       default: {
         for (const ns of [null, NS_XLINK]) {
