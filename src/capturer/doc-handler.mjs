@@ -3888,6 +3888,9 @@ class CaptureDocumentRewriter extends MapperMixin(CaptureDocumentRewriterBase) {
 
         // remove crossorigin as it prevents local loading with file:
         this.captureRewriteAttr(elem, "crossorigin", null);
+
+        // remove integrity in case it doesn't work due to rewriting
+        this.captureRewriteAttr(elem, "integrity", null);
         break;
       }
     }

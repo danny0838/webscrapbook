@@ -7534,6 +7534,18 @@ describe('capturer/doc-handler.mjs', function () {
                   });
                 });
 
+                context(CONTEXT_INTEGRITY, function () {
+                  it('should remove `integrity` attribute', async function () {
+                    var doc = docFactory({attrs: [['href', './myicon.bmp'], ['integrity', 'sha384-dummy']]});
+
+                    var {doc} = await new TestCapturer().captureDocument({doc, docUrl, options});
+                    var elem = doc.querySelector(tagName);
+                    assert.strictEqual(elem.getAttribute('integrity'), null);
+
+                    sinon.assert.calledWithExactly(spyRewrite, elem, "integrity", null);
+                  });
+                });
+
                 break;
               }
               case "link": {
