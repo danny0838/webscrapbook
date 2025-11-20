@@ -26,6 +26,7 @@ const $it = $(it);
 
 const CONTEXT_BASE_URL = 'base URL handling';
 const CONTEXT_CROSS_ORIGIN = 'cross-origin handling';
+const CONTEXT_INTEGRITY = 'integrity handling';
 const CONTEXT_REFERRER_POLICY = 'referrer policy handling';
 const CONTEXT_FAVICON = 'favicon handling';
 const CONTEXT_DOWN_LINK = 'downLink handling';
@@ -2036,6 +2037,18 @@ describe('capturer/doc-handler.mjs', function () {
                     });
                   });
 
+                  context(CONTEXT_INTEGRITY, function () {
+                    it('should remove `integrity` attribute', async function () {
+                      var doc = createDocFixture({tagName, rel, attrs: {href: "./style.css", integrity: "sha384-dummy"}});
+
+                      var {doc} = await new TestCapturer().captureDocument({doc, docUrl, options});
+                      var elem = doc.querySelector(tagName);
+                      assert.strictEqual(elem.getAttribute('integrity'), null);
+
+                      sinon.assert.calledWithExactly(spyRewrite, elem, 'integrity', null);
+                    });
+                  });
+
                   break;
                 }
                 case "link": {
@@ -2140,6 +2153,18 @@ describe('capturer/doc-handler.mjs', function () {
                       assert.strictEqual(elem.getAttribute('crossorigin'), null);
 
                       sinon.assert.calledWithExactly(spyRewrite, elem, 'crossorigin', null);
+                    });
+                  });
+
+                  context(CONTEXT_INTEGRITY, function () {
+                    it('should remove `integrity` attribute', async function () {
+                      var doc = createDocFixture({tagName, rel, attrs: {href: "./green.ico", integrity: "sha384-dummy"}});
+
+                      var {doc} = await new TestCapturer().captureDocument({doc, docUrl, options});
+                      var elem = doc.querySelector(tagName);
+                      assert.strictEqual(elem.getAttribute('integrity'), null);
+
+                      sinon.assert.calledWithExactly(spyRewrite, elem, 'integrity', null);
                     });
                   });
 
@@ -2332,6 +2357,18 @@ describe('capturer/doc-handler.mjs', function () {
                       assert.strictEqual(elem.getAttribute('crossorigin'), null);
 
                       sinon.assert.calledWithExactly(spyRewrite, elem, 'crossorigin', null);
+                    });
+                  });
+
+                  context(CONTEXT_INTEGRITY, function () {
+                    it('should remove `integrity` attribute', async function () {
+                      var doc = createDocFixture({tagName, rel, attrs: {href: "./green.png", integrity: "sha384-dummy"}});
+
+                      var {doc} = await new TestCapturer().captureDocument({doc, docUrl, options});
+                      var elem = doc.querySelector(tagName);
+                      assert.strictEqual(elem.getAttribute('integrity'), null);
+
+                      sinon.assert.calledWithExactly(spyRewrite, elem, 'integrity', null);
                     });
                   });
 
@@ -2648,6 +2685,18 @@ describe('capturer/doc-handler.mjs', function () {
                     assert.strictEqual(elem.getAttribute('crossorigin'), null);
 
                     sinon.assert.calledWithExactly(spyRewrite, elem, "crossorigin", null);
+                  });
+                });
+
+                context(CONTEXT_INTEGRITY, function () {
+                  it('should remove `integrity` attribute', async function () {
+                    var doc = createDocFixture({tagName, attrs: {href: "./style.css", integrity: "sha384-dummy"}});
+
+                    var {doc} = await new TestCapturer().captureDocument({doc, docUrl, options});
+                    var elem = doc.querySelector(tagName);
+                    assert.strictEqual(elem.getAttribute('integrity'), null);
+
+                    sinon.assert.calledWithExactly(spyRewrite, elem, 'integrity', null);
                   });
                 });
 
