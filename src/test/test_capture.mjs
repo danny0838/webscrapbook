@@ -12512,8 +12512,8 @@ document.querySelector("p").textContent = "srcdoc content modified";
       var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
       var doc = await readFileAsDocument(indexBlob);
 
-      assert(!doc.querySelector('link').hasAttribute('integrity'));
-      assert(!doc.querySelector('script').hasAttribute('integrity'));
+      assert.strictEqual(doc.querySelector('link').getAttribute('integrity'), 'sha256-OAn7e+hGplOaF+6v3ptEgb0XGqHU18uwCoC5Plnw+8g=');
+      assert.strictEqual(doc.querySelector('script').getAttribute('integrity'), 'sha256-FDJ1FZczv9rCdgEzfJCWGhlAqb9kOUFZoNu99URFDlg=');
     });
 
     it('blank', async function () {
@@ -12530,8 +12530,8 @@ document.querySelector("p").textContent = "srcdoc content modified";
       var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
       var doc = await readFileAsDocument(indexBlob);
 
-      assert(!doc.querySelector('link').hasAttribute('integrity'));
-      assert(!doc.querySelector('script').hasAttribute('integrity'));
+      assert.strictEqual(doc.querySelector('link').getAttribute('integrity'), 'sha256-OAn7e+hGplOaF+6v3ptEgb0XGqHU18uwCoC5Plnw+8g=');
+      assert.strictEqual(doc.querySelector('script').getAttribute('integrity'), 'sha256-FDJ1FZczv9rCdgEzfJCWGhlAqb9kOUFZoNu99URFDlg=');
     });
   });
 
@@ -17081,11 +17081,9 @@ ${localhost}/capture_downLink_indepth_urlExtra/1-3.txt`,
         assert.strictEqual(doc.querySelector('link[rel="preload"]').getAttribute(`data-scrapbook-orig-attr-href-${timeId}`), `./null.css`);
         assert.strictEqual(doc.querySelector('link[rel="preload"]').getAttribute(`data-scrapbook-orig-attr-nonce-${timeId}`), `2726c7f26c`);
         assert(!doc.querySelector('link[rel="preload"]').hasAttribute(`data-scrapbook-orig-attr-crossorigin-${timeId}`));
-        assert.strictEqual(doc.querySelector('link[rel="preload"]').getAttribute(`data-scrapbook-orig-attr-integrity-${timeId}`), `sha256-47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU=`);
         assert.strictEqual(doc.querySelector('link[rel="prefetch"]').getAttribute(`data-scrapbook-orig-attr-href-${timeId}`), `./null2.css`);
         assert.strictEqual(doc.querySelector('link[rel="prefetch"]').getAttribute(`data-scrapbook-orig-attr-nonce-${timeId}`), `2726c7f26c`);
         assert(!doc.querySelector('link[rel="prefetch"]').hasAttribute(`data-scrapbook-orig-attr-crossorigin-${timeId}`));
-        assert.strictEqual(doc.querySelector('link[rel="preload"]').getAttribute(`data-scrapbook-orig-attr-integrity-${timeId}`), `sha256-47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU=`);
         assert.strictEqual(doc.querySelector('link[rel~="icon"]').getAttribute(`data-scrapbook-orig-attr-href-${timeId}`), `./null.bmp`);
         assert.strictEqual(doc.querySelector('link[rel~="icon"]').getAttribute(`data-scrapbook-orig-attr-nonce-${timeId}`), `2726c7f26c`);
         assert.strictEqual(doc.querySelector('link[rel~="icon"]').getAttribute(`data-scrapbook-orig-attr-crossorigin-${timeId}`), `anonymous`);
