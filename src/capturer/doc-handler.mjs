@@ -2743,7 +2743,7 @@ class CaptureDocumentRewriter extends MapperMixin(CaptureDocumentRewriterBase) {
   [`_handle_{${NS_HTML}}picture`](elem) {
     const {isHeadless, refUrl, tasks, settings, options} = this;
 
-    for (const subElem of elem.querySelectorAll('source[srcset]')) {
+    for (const subElem of elem.querySelectorAll(':scope > source[srcset]')) {
       if (subElem.namespaceURI !== NS_HTML) { continue; }
       const rewriteSrcset = utils.rewriteSrcset(subElem.getAttribute("srcset"), (url) => {
         return this.resolveRelativeUrl(url, this.baseUrl);
@@ -2751,14 +2751,14 @@ class CaptureDocumentRewriter extends MapperMixin(CaptureDocumentRewriterBase) {
       this.captureRewriteAttr(subElem, "srcset", rewriteSrcset);
     }
 
-    const [imgElem] = Array.prototype.filter.call(elem.querySelectorAll('img'), x => x.namespaceURI === NS_HTML);
+    const [imgElem] = Array.prototype.filter.call(elem.querySelectorAll(':scope > img'), x => x.namespaceURI === NS_HTML);
     const refPolicy = imgElem?.referrerPolicy || this.docRefPolicy;
     switch (options["capture.image"]) {
       case "link":
         // do nothing
         break;
       case "blank":
-        for (const subElem of elem.querySelectorAll('source[srcset]')) {
+        for (const subElem of elem.querySelectorAll(':scope > source[srcset]')) {
           if (subElem.namespaceURI !== NS_HTML) { continue; }
           this.captureRewriteAttr(subElem, "srcset", null);
         }
@@ -2768,7 +2768,7 @@ class CaptureDocumentRewriter extends MapperMixin(CaptureDocumentRewriterBase) {
         throw new NodeDisconnect(elem);
       case "save-current":
         if (!isHeadless) {
-          for (const subElem of elem.querySelectorAll('img')) {
+          for (const subElem of elem.querySelectorAll(':scope > img')) {
             if (subElem.namespaceURI !== NS_HTML) { continue; }
             const subElemOrig = this.getOrigNode(subElem);
 
@@ -2779,7 +2779,7 @@ class CaptureDocumentRewriter extends MapperMixin(CaptureDocumentRewriterBase) {
             }
           }
 
-          for (const subElem of elem.querySelectorAll('source[srcset]')) {
+          for (const subElem of elem.querySelectorAll(':scope > source[srcset]')) {
             if (subElem.namespaceURI !== NS_HTML) { continue; }
             this.captureRemoveNode(subElem);
           }
@@ -2790,7 +2790,7 @@ class CaptureDocumentRewriter extends MapperMixin(CaptureDocumentRewriterBase) {
         // eslint-disable-next-line no-fallthrough
       case "save":
       default: {
-        for (const subElem of elem.querySelectorAll('source[srcset]')) {
+        for (const subElem of elem.querySelectorAll(':scope > source[srcset]')) {
           if (subElem.namespaceURI !== NS_HTML) { continue; }
           tasks.push(async () => {
             const response = await utils.rewriteSrcset(subElem.getAttribute("srcset"), async (url) => {
@@ -2820,7 +2820,7 @@ class CaptureDocumentRewriter extends MapperMixin(CaptureDocumentRewriterBase) {
       this.captureRewriteAttr(elem, "src", newUrl);
     }
 
-    for (const subElem of elem.querySelectorAll('source[src], track[src]')) {
+    for (const subElem of elem.querySelectorAll(':scope > source[src], :scope > track[src]')) {
       if (subElem.namespaceURI !== NS_HTML) { continue; }
       const newUrl = this.resolveRelativeUrl(subElem.getAttribute("src"), this.baseUrl);
       this.captureRewriteAttr(subElem, "src", newUrl);
@@ -2837,7 +2837,7 @@ class CaptureDocumentRewriter extends MapperMixin(CaptureDocumentRewriterBase) {
 
         // HTML 5.1 2nd Edition / W3C Recommendation:
         // The src attribute must be present and be a valid non-empty URL.
-        for (const subElem of elem.querySelectorAll('source[src], track[src]')) {
+        for (const subElem of elem.querySelectorAll(':scope > source[src], :scope > track[src]')) {
           if (subElem.namespaceURI !== NS_HTML) { continue; }
           this.captureRewriteAttr(subElem, "src", "about:blank");
         }
@@ -2851,7 +2851,7 @@ class CaptureDocumentRewriter extends MapperMixin(CaptureDocumentRewriterBase) {
           const elemOrig = this.getOrigNode(elem);
           if (elemOrig?.currentSrc) {
             const url = elemOrig.currentSrc;
-            for (const subElem of elem.querySelectorAll('source[src]')) {
+            for (const subElem of elem.querySelectorAll(':scope > source[src]')) {
               if (subElem.namespaceURI !== NS_HTML) { continue; }
               this.captureRemoveNode(subElem);
             }
@@ -2868,7 +2868,7 @@ class CaptureDocumentRewriter extends MapperMixin(CaptureDocumentRewriterBase) {
             });
           }
 
-          for (const subElem of elem.querySelectorAll('track[src]')) {
+          for (const subElem of elem.querySelectorAll(':scope > track[src]')) {
             if (subElem.namespaceURI !== NS_HTML) { continue; }
             tasks.push(async () => {
               const response = await this.downloadFile({
@@ -2905,7 +2905,7 @@ class CaptureDocumentRewriter extends MapperMixin(CaptureDocumentRewriterBase) {
           });
         }
 
-        for (const subElem of elem.querySelectorAll('source[src], track[src]')) {
+        for (const subElem of elem.querySelectorAll(':scope > source[src], :scope > track[src]')) {
           if (subElem.namespaceURI !== NS_HTML) { continue; }
           tasks.push(async () => {
             const response = await this.downloadFile({
@@ -2939,7 +2939,7 @@ class CaptureDocumentRewriter extends MapperMixin(CaptureDocumentRewriterBase) {
       this.captureRewriteAttr(elem, "src", newUrl);
     }
 
-    for (const subElem of elem.querySelectorAll('source[src], track[src]')) {
+    for (const subElem of elem.querySelectorAll(':scope > source[src], :scope > track[src]')) {
       if (subElem.namespaceURI !== NS_HTML) { continue; }
       const newUrl = this.resolveRelativeUrl(subElem.getAttribute("src"), this.baseUrl);
       this.captureRewriteAttr(subElem, "src", newUrl);
@@ -2962,7 +2962,7 @@ class CaptureDocumentRewriter extends MapperMixin(CaptureDocumentRewriterBase) {
 
         // HTML 5.1 2nd Edition / W3C Recommendation:
         // The src attribute must be present and be a valid non-empty URL.
-        for (const subElem of elem.querySelectorAll('source[src], track[src]')) {
+        for (const subElem of elem.querySelectorAll(':scope > source[src], :scope > track[src]')) {
           if (subElem.namespaceURI !== NS_HTML) { continue; }
           this.captureRewriteAttr(subElem, "src", "about:blank");
         }
@@ -2990,7 +2990,7 @@ class CaptureDocumentRewriter extends MapperMixin(CaptureDocumentRewriterBase) {
           const elemOrig = this.getOrigNode(elem);
           if (elemOrig?.currentSrc) {
             const url = elemOrig.currentSrc;
-            for (const subElem of elem.querySelectorAll('source[src]')) {
+            for (const subElem of elem.querySelectorAll(':scope > source[src]')) {
               if (subElem.namespaceURI !== NS_HTML) { continue; }
               this.captureRemoveNode(subElem);
             }
@@ -3007,7 +3007,7 @@ class CaptureDocumentRewriter extends MapperMixin(CaptureDocumentRewriterBase) {
             });
           }
 
-          for (const subElem of elem.querySelectorAll('track[src]')) {
+          for (const subElem of elem.querySelectorAll(':scope > track[src]')) {
             if (subElem.namespaceURI !== NS_HTML) { continue; }
             tasks.push(async () => {
               const response = await this.downloadFile({
@@ -3058,7 +3058,7 @@ class CaptureDocumentRewriter extends MapperMixin(CaptureDocumentRewriterBase) {
           });
         }
 
-        for (const subElem of elem.querySelectorAll('source[src], track[src]')) {
+        for (const subElem of elem.querySelectorAll(':scope > source[src], :scope > track[src]')) {
           if (subElem.namespaceURI !== NS_HTML) { continue; }
           tasks.push(async () => {
             const response = await this.downloadFile({
