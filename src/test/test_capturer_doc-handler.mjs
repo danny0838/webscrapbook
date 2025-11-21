@@ -834,6 +834,28 @@ describe('capturer/doc-handler.mjs', function () {
       };
     }
 
+    function referrerPolicyHandlingTesterFactory({tagName, selector}) {
+      return function referrerPolicyHandlingTest([elem], {func, doneSignal}) {
+        if (!selector) {
+          if (tagName) {
+            selector = CSS.escape(tagName);
+          } else {
+            throw new Error('Must specify either tagName or selector.');
+          }
+        }
+        if (elem.matches(selector)) {
+          const sandbox = sinon.createSandbox();
+          sandbox.replace(this, 'docRefPolicy', 'same-origin');
+          try {
+            return func.call(this, elem);
+          } finally {
+            sandbox.restore();
+          }
+        }
+        return func.call(this, elem);
+      };
+    }
+
     const docUrl = 'https://example.com/';
 
     describe('#run()', function () {
@@ -1787,6 +1809,32 @@ describe('capturer/doc-handler.mjs', function () {
                 },
               });
             });
+
+            context(CONTEXT_REFERRER_POLICY, function () {
+              it('should pass document referrer policy by default', async function () {
+                var doc = createDocFixture({tagName, attrs: {'http-equiv': 'refresh', 'content': '0; url=page.html'}});
+                var tester = referrerPolicyHandlingTesterFactory({tagName, docUrl});
+                var {stub} = await rewriteNodeControlledTest({doc, docUrl, options, tester});
+                sinon.assert.called(stub);
+                sinon.assert.calledWithMatch(spyCaptureUrl, {refPolicy: 'same-origin'});
+              });
+
+              it('should ignore `referrerpolicy` attribute', async function () {
+                var doc = createDocFixture({tagName, attrs: {'http-equiv': 'refresh', 'content': '0; url=page.html', 'referrerpolicy': 'unsafe-url'}});
+                var tester = referrerPolicyHandlingTesterFactory({tagName, docUrl});
+                var {stub} = await rewriteNodeControlledTest({doc, docUrl, options, tester});
+                sinon.assert.called(stub);
+                sinon.assert.calledWithMatch(spyCaptureUrl, {refPolicy: 'same-origin'});
+              });
+
+              it('should ignore `[rel~="no-referrer"]`', async function () {
+                var doc = createDocFixture({tagName, attrs: {'http-equiv': 'refresh', 'content': '0; url=page.html', 'rel': 'noreferrer', 'referrerpolicy': 'unsafe-url'}});
+                var tester = referrerPolicyHandlingTesterFactory({tagName, docUrl});
+                var {stub} = await rewriteNodeControlledTest({doc, docUrl, options, tester});
+                sinon.assert.called(stub);
+                sinon.assert.calledWithMatch(spyCaptureUrl, {refPolicy: 'same-origin'});
+              });
+            });
           });
         });
 
@@ -2049,6 +2097,32 @@ describe('capturer/doc-handler.mjs', function () {
                     });
                   });
 
+                  context(CONTEXT_REFERRER_POLICY, function () {
+                    it('should pass document referrer policy by default', async function () {
+                      var doc = createDocFixture({tagName, rel, attrs: {href: './style.css'}});
+                      var tester = referrerPolicyHandlingTesterFactory({tagName, docUrl});
+                      var {stub} = await rewriteNodeControlledTest({doc, docUrl, options, tester});
+                      sinon.assert.called(stub);
+                      sinon.assert.calledWithMatch(spyRewritCss, {refPolicy: 'same-origin'});
+                    });
+
+                    it('should pass `referrerpolicy` attribute when exists', async function () {
+                      var doc = createDocFixture({tagName, rel, attrs: {href: './style.css', referrerpolicy: 'unsafe-url'}});
+                      var tester = referrerPolicyHandlingTesterFactory({tagName, docUrl});
+                      var {stub} = await rewriteNodeControlledTest({doc, docUrl, options, tester});
+                      sinon.assert.called(stub);
+                      sinon.assert.calledWithMatch(spyRewritCss, {refPolicy: 'unsafe-url'});
+                    });
+
+                    it('should ignore `[rel~="no-referrer"]`', async function () {
+                      var doc = createDocFixture({tagName, rel: [...rel, 'noreferrer'], attrs: {href: './style.css', referrerpolicy: 'unsafe-url'}});
+                      var tester = referrerPolicyHandlingTesterFactory({tagName, docUrl});
+                      var {stub} = await rewriteNodeControlledTest({doc, docUrl, options, tester});
+                      sinon.assert.called(stub);
+                      sinon.assert.calledWithMatch(spyRewritCss, {refPolicy: 'unsafe-url'});
+                    });
+                  });
+
                   break;
                 }
                 case "link": {
@@ -2165,6 +2239,32 @@ describe('capturer/doc-handler.mjs', function () {
                       assert.strictEqual(elem.getAttribute('integrity'), null);
 
                       sinon.assert.calledWithExactly(spyRewrite, elem, 'integrity', null);
+                    });
+                  });
+
+                  context(CONTEXT_REFERRER_POLICY, function () {
+                    it('should pass document referrer policy by default', async function () {
+                      var doc = createDocFixture({tagName, rel, attrs: {href: './green.ico'}});
+                      var tester = referrerPolicyHandlingTesterFactory({tagName, docUrl});
+                      var {stub} = await rewriteNodeControlledTest({doc, docUrl, options, tester});
+                      sinon.assert.called(stub);
+                      sinon.assert.calledWithMatch(spyDownload, {refPolicy: 'same-origin'});
+                    });
+
+                    it('should pass `referrerpolicy` attribute when exists', async function () {
+                      var doc = createDocFixture({tagName, rel, attrs: {href: './green.ico', referrerpolicy: 'unsafe-url'}});
+                      var tester = referrerPolicyHandlingTesterFactory({tagName, docUrl});
+                      var {stub} = await rewriteNodeControlledTest({doc, docUrl, options, tester});
+                      sinon.assert.called(stub);
+                      sinon.assert.calledWithMatch(spyDownload, {refPolicy: 'unsafe-url'});
+                    });
+
+                    it('should ignore `[rel~="no-referrer"]`', async function () {
+                      var doc = createDocFixture({tagName, rel: [...rel, 'noreferrer'], attrs: {href: './green.ico', referrerpolicy: 'unsafe-url'}});
+                      var tester = referrerPolicyHandlingTesterFactory({tagName, docUrl});
+                      var {stub} = await rewriteNodeControlledTest({doc, docUrl, options, tester});
+                      sinon.assert.called(stub);
+                      sinon.assert.calledWithMatch(spyDownload, {refPolicy: 'unsafe-url'});
                     });
                   });
 
@@ -2369,6 +2469,32 @@ describe('capturer/doc-handler.mjs', function () {
                       assert.strictEqual(elem.getAttribute('integrity'), null);
 
                       sinon.assert.calledWithExactly(spyRewrite, elem, 'integrity', null);
+                    });
+                  });
+
+                  context(CONTEXT_REFERRER_POLICY, function () {
+                    it('should pass document referrer policy by default', async function () {
+                      var doc = createDocFixture({tagName, rel, attrs: {href: './green.png'}});
+                      var tester = referrerPolicyHandlingTesterFactory({tagName, docUrl});
+                      var {stub} = await rewriteNodeControlledTest({doc, docUrl, options, tester});
+                      sinon.assert.called(stub);
+                      sinon.assert.calledWithMatch(spyDownload, {refPolicy: 'same-origin'});
+                    });
+
+                    it('should pass `referrerpolicy` attribute when exists', async function () {
+                      var doc = createDocFixture({tagName, rel, attrs: {href: './green.png', referrerpolicy: 'unsafe-url'}});
+                      var tester = referrerPolicyHandlingTesterFactory({tagName, docUrl});
+                      var {stub} = await rewriteNodeControlledTest({doc, docUrl, options, tester});
+                      sinon.assert.called(stub);
+                      sinon.assert.calledWithMatch(spyDownload, {refPolicy: 'unsafe-url'});
+                    });
+
+                    it('should ignore `[rel~="no-referrer"]`', async function () {
+                      var doc = createDocFixture({tagName, rel: [...rel, 'noreferrer'], attrs: {href: './green.png', referrerpolicy: 'unsafe-url'}});
+                      var tester = referrerPolicyHandlingTesterFactory({tagName, docUrl});
+                      var {stub} = await rewriteNodeControlledTest({doc, docUrl, options, tester});
+                      sinon.assert.called(stub);
+                      sinon.assert.calledWithMatch(spyDownload, {refPolicy: 'unsafe-url'});
                     });
                   });
 
@@ -2697,6 +2823,32 @@ describe('capturer/doc-handler.mjs', function () {
                     assert.strictEqual(elem.getAttribute('integrity'), null);
 
                     sinon.assert.calledWithExactly(spyRewrite, elem, 'integrity', null);
+                  });
+                });
+
+                context(CONTEXT_REFERRER_POLICY, function () {
+                  it('should pass document referrer policy by default', async function () {
+                    var doc = createDocFixture({tagName, attrs: {src: './script.js'}});
+                    var tester = referrerPolicyHandlingTesterFactory({tagName, docUrl});
+                    var {stub} = await rewriteNodeControlledTest({doc, docUrl, options, tester});
+                    sinon.assert.called(stub);
+                    sinon.assert.calledWithMatch(spyDownload, {refPolicy: 'same-origin'});
+                  });
+
+                  it('should pass `referrerpolicy` attribute when exists', async function () {
+                    var doc = createDocFixture({tagName, attrs: {src: './script.js', referrerpolicy: 'unsafe-url'}});
+                    var tester = referrerPolicyHandlingTesterFactory({tagName, docUrl});
+                    var {stub} = await rewriteNodeControlledTest({doc, docUrl, options, tester});
+                    sinon.assert.called(stub);
+                    sinon.assert.calledWithMatch(spyDownload, {refPolicy: 'unsafe-url'});
+                  });
+
+                  it('should ignore `[rel~="no-referrer"]`', async function () {
+                    var doc = createDocFixture({tagName, attrs: {src: './script.js', rel: 'noreferrer', referrerpolicy: 'unsafe-url'}});
+                    var tester = referrerPolicyHandlingTesterFactory({tagName, docUrl});
+                    var {stub} = await rewriteNodeControlledTest({doc, docUrl, options, tester});
+                    sinon.assert.called(stub);
+                    sinon.assert.calledWithMatch(spyDownload, {refPolicy: 'unsafe-url'});
                   });
                 });
 
@@ -3229,6 +3381,50 @@ describe('capturer/doc-handler.mjs', function () {
                         });
                         sinon.assert.calledWithExactly(spyRewrite, elem, 'src', 'index_1.html');
                         sinon.assert.neverCalledWith(spyRewrite, elem, 'srcdoc');
+                      });
+                    }
+                  });
+
+                  context(CONTEXT_REFERRER_POLICY, function () {
+                    it('should pass document referrer policy by default', async function () {
+                      var doc = await docFactory({attrs: {src: './page.html'}});
+                      var tester = referrerPolicyHandlingTesterFactory({tagName, docUrl});
+                      var {stub} = await rewriteNodeControlledTest({doc, docUrl, options, tester});
+                      sinon.assert.called(stub);
+                      sinon.assert.calledWithMatch(spyCaptureDocumentOrFile, {refPolicy: 'same-origin'});
+                    });
+
+                    if (tagName === 'iframe') {
+                      it('should pass `referrerpolicy` attribute when exists', async function () {
+                        var doc = await docFactory({attrs: {src: './page.html', referrerpolicy: 'unsafe-url'}});
+                        var tester = referrerPolicyHandlingTesterFactory({tagName, docUrl});
+                        var {stub} = await rewriteNodeControlledTest({doc, docUrl, options, tester});
+                        sinon.assert.called(stub);
+                        sinon.assert.calledWithMatch(spyCaptureDocumentOrFile, {refPolicy: 'unsafe-url'});
+                      });
+
+                      it('should ignore `[rel~="no-referrer"]`', async function () {
+                        var doc = await docFactory({attrs: {src: './page.html', rel: 'noreferrer', referrerpolicy: 'unsafe-url'}});
+                        var tester = referrerPolicyHandlingTesterFactory({tagName, docUrl});
+                        var {stub} = await rewriteNodeControlledTest({doc, docUrl, options, tester});
+                        sinon.assert.called(stub);
+                        sinon.assert.calledWithMatch(spyCaptureDocumentOrFile, {refPolicy: 'unsafe-url'});
+                      });
+                    } else {
+                      it('should ignore `referrerpolicy` attribute', async function () {
+                        var doc = await docFactory({attrs: {src: './page.html', referrerpolicy: 'unsafe-url'}});
+                        var tester = referrerPolicyHandlingTesterFactory({tagName, docUrl});
+                        var {stub} = await rewriteNodeControlledTest({doc, docUrl, options, tester});
+                        sinon.assert.called(stub);
+                        sinon.assert.calledWithMatch(spyCaptureDocumentOrFile, {refPolicy: 'same-origin'});
+                      });
+
+                      it('should ignore `[rel~="no-referrer"]`', async function () {
+                        var doc = await docFactory({attrs: {src: './page.html', rel: 'noreferrer', referrerpolicy: 'unsafe-url'}});
+                        var tester = referrerPolicyHandlingTesterFactory({tagName, docUrl});
+                        var {stub} = await rewriteNodeControlledTest({doc, docUrl, options, tester});
+                        sinon.assert.called(stub);
+                        sinon.assert.calledWithMatch(spyCaptureDocumentOrFile, {refPolicy: 'same-origin'});
                       });
                     }
                   });
@@ -3791,6 +3987,32 @@ describe('capturer/doc-handler.mjs', function () {
               await new TestCapturer().captureDocument({doc, docUrl, settings: {timeId}, options});
               sinon.assert.notCalled(spyCaptureUrl);
             });
+
+            context(CONTEXT_REFERRER_POLICY, function () {
+              it('should pass document referrer policy by default', async function () {
+                var doc = docFactory("./page.html");
+                var tester = referrerPolicyHandlingTesterFactory({tagName, docUrl});
+                var {stub} = await rewriteNodeControlledTest({doc, docUrl, options, tester});
+                sinon.assert.called(stub);
+                sinon.assert.calledWithMatch(spyCaptureUrl, {refPolicy: 'same-origin'});
+              });
+
+              it('should pass `referrerpolicy` attribute when exists', async function () {
+                var doc = docFactory("./page.html", {referrerpolicy: 'unsafe-url'});
+                var tester = referrerPolicyHandlingTesterFactory({tagName, docUrl});
+                var {stub} = await rewriteNodeControlledTest({doc, docUrl, options, tester});
+                sinon.assert.called(stub);
+                sinon.assert.calledWithMatch(spyCaptureUrl, {refPolicy: 'unsafe-url'});
+              });
+
+              it('should honor `[rel~="no-referrer"]` when exists', async function () {
+                var doc = docFactory("./page.html", {rel: 'noreferrer', referrerpolicy: 'unsafe-url'});
+                var tester = referrerPolicyHandlingTesterFactory({tagName, docUrl});
+                var {stub} = await rewriteNodeControlledTest({doc, docUrl, options, tester});
+                sinon.assert.called(stub);
+                sinon.assert.calledWithMatch(spyCaptureUrl, {refPolicy: 'no-referrer'});
+              });
+            });
           });
         });
       }
@@ -3855,6 +4077,35 @@ describe('capturer/doc-handler.mjs', function () {
                   it('should remove `crossorigin` attribute', testSaveCrossOrigin);
                 });
 
+                context(CONTEXT_REFERRER_POLICY, function () {
+                  it('should pass document referrer policy by default', async function () {
+                    var doc = createDocFixture({tagName, attrs: {src: './green.bmp', srcset: './yellow.bmp 2x'}});
+                    var tester = referrerPolicyHandlingTesterFactory({tagName, docUrl});
+                    var {stub} = await rewriteNodeControlledTest({doc, docUrl, options, tester});
+                    sinon.assert.called(stub);
+                    sinon.assert.calledWithMatch(spyDownload.getCall(0), {url: `${docUrl}green.bmp`, refPolicy: 'same-origin'});
+                    sinon.assert.calledWithMatch(spyDownload.getCall(1), {url: `${docUrl}yellow.bmp`, refPolicy: 'same-origin'});
+                  });
+
+                  it('should pass `referrerpolicy` attribute when exists', async function () {
+                    var doc = createDocFixture({tagName, attrs: {src: './green.bmp', srcset: './yellow.bmp 2x', referrerpolicy: 'unsafe-url'}});
+                    var tester = referrerPolicyHandlingTesterFactory({tagName, docUrl});
+                    var {stub} = await rewriteNodeControlledTest({doc, docUrl, options, tester});
+                    sinon.assert.called(stub);
+                    sinon.assert.calledWithMatch(spyDownload.getCall(0), {url: `${docUrl}green.bmp`, refPolicy: 'unsafe-url'});
+                    sinon.assert.calledWithMatch(spyDownload.getCall(1), {url: `${docUrl}yellow.bmp`, refPolicy: 'unsafe-url'});
+                  });
+
+                  it('should ignore `[rel~="no-referrer"]`', async function () {
+                    var doc = createDocFixture({tagName, attrs: {src: './green.bmp', srcset: './yellow.bmp 2x', rel: 'noreferrer', referrerpolicy: 'unsafe-url'}});
+                    var tester = referrerPolicyHandlingTesterFactory({tagName, docUrl});
+                    var {stub} = await rewriteNodeControlledTest({doc, docUrl, options, tester});
+                    sinon.assert.called(stub);
+                    sinon.assert.calledWithMatch(spyDownload.getCall(0), {url: `${docUrl}green.bmp`, refPolicy: 'unsafe-url'});
+                    sinon.assert.calledWithMatch(spyDownload.getCall(1), {url: `${docUrl}yellow.bmp`, refPolicy: 'unsafe-url'});
+                  });
+                });
+
                 break;
               }
               case "save-current": {
@@ -3907,6 +4158,35 @@ describe('capturer/doc-handler.mjs', function () {
                   it('should remove `crossorigin` attribute for a headed document', testSaveCrossOriginHeaded);
 
                   it('should remove `crossorigin` attribute for a headless document', testSaveCrossOrigin);
+                });
+
+                context(CONTEXT_REFERRER_POLICY, function () {
+                  it('should pass document referrer policy by default for a headed document', async function () {
+                    var {contentDocument: doc} = await createIframeFixture({docData: {tagName, attrs: {src: './green.bmp'}}});
+                    sinon.stub(doc.querySelector('img'), 'currentSrc').value(`${docUrl}green.bmp`);
+                    var tester = referrerPolicyHandlingTesterFactory({tagName, docUrl});
+                    var {stub} = await rewriteNodeControlledTest({doc, docUrl, options, tester});
+                    sinon.assert.called(stub);
+                    sinon.assert.calledOnceWithMatch(spyDownload, {url: `${docUrl}green.bmp`, refPolicy: 'same-origin'});
+                  });
+
+                  it('should pass `referrerpolicy` attribute when exists for a headed document', async function () {
+                    var {contentDocument: doc} = await createIframeFixture({docData: {tagName, attrs: {src: './green.bmp', referrerpolicy: 'unsafe-url'}}});
+                    sinon.stub(doc.querySelector('img'), 'currentSrc').value(`${docUrl}green.bmp`);
+                    var tester = referrerPolicyHandlingTesterFactory({tagName, docUrl});
+                    var {stub} = await rewriteNodeControlledTest({doc, docUrl, options, tester});
+                    sinon.assert.called(stub);
+                    sinon.assert.calledOnceWithMatch(spyDownload, {url: `${docUrl}green.bmp`, refPolicy: 'unsafe-url'});
+                  });
+
+                  it('should ignore `[rel~="no-referrer"]` for a headed document', async function () {
+                    var {contentDocument: doc} = await createIframeFixture({docData: {tagName, attrs: {src: './green.bmp', rel: 'noreferrer', referrerpolicy: 'unsafe-url'}}});
+                    sinon.stub(doc.querySelector('img'), 'currentSrc').value(`${docUrl}green.bmp`);
+                    var tester = referrerPolicyHandlingTesterFactory({tagName, docUrl});
+                    var {stub} = await rewriteNodeControlledTest({doc, docUrl, options, tester});
+                    sinon.assert.called(stub);
+                    sinon.assert.calledOnceWithMatch(spyDownload, {url: `${docUrl}green.bmp`, refPolicy: 'unsafe-url'});
+                  });
                 });
 
                 break;
@@ -4038,6 +4318,46 @@ describe('capturer/doc-handler.mjs', function () {
               default: {
                 it('should save resources and rewrite `src` and `srcset`', testSave);
 
+                context(CONTEXT_REFERRER_POLICY, function () {
+                  function docFactory({attrs} = {}) {
+                    return createDocFixture({tagName, children: [
+                      {tagName: 'source', attrs: {media: 'min-width: 300px', srcset: './img1.bmp 2x'}},
+                      {tagName: 'source', attrs: {media: 'min-width: 600px', srcset: './img2.bmp'}},
+                      {tagName: 'img', attrs: {src: './img3.bmp', ...attrs}},
+                    ]});
+                  }
+
+                  it('should pass document referrer policy by default', async function () {
+                    var doc = docFactory();
+                    var tester = referrerPolicyHandlingTesterFactory({selector: 'picture, picture img', docUrl});
+                    var {stub} = await rewriteNodeControlledTest({doc, docUrl, options, tester});
+                    sinon.assert.called(stub);
+                    sinon.assert.calledWithMatch(spyDownload.getCall(0), {url: `${docUrl}img1.bmp`, refPolicy: 'same-origin'});
+                    sinon.assert.calledWithMatch(spyDownload.getCall(1), {url: `${docUrl}img2.bmp`, refPolicy: 'same-origin'});
+                    sinon.assert.calledWithMatch(spyDownload.getCall(2), {url: `${docUrl}img3.bmp`, refPolicy: 'same-origin'});
+                  });
+
+                  it('should pass `referrerpolicy` attribute when exists', async function () {
+                    var doc = docFactory({attrs: {referrerpolicy: 'unsafe-url'}});
+                    var tester = referrerPolicyHandlingTesterFactory({selector: 'picture, picture img', docUrl});
+                    var {stub} = await rewriteNodeControlledTest({doc, docUrl, options, tester});
+                    sinon.assert.called(stub);
+                    sinon.assert.calledWithMatch(spyDownload.getCall(0), {url: `${docUrl}img1.bmp`, refPolicy: 'unsafe-url'});
+                    sinon.assert.calledWithMatch(spyDownload.getCall(1), {url: `${docUrl}img2.bmp`, refPolicy: 'unsafe-url'});
+                    sinon.assert.calledWithMatch(spyDownload.getCall(2), {url: `${docUrl}img3.bmp`, refPolicy: 'unsafe-url'});
+                  });
+
+                  it('should ignore `[rel~="no-referrer"]`', async function () {
+                    var doc = docFactory({attrs: {rel: 'noreferrer', referrerpolicy: 'unsafe-url'}});
+                    var tester = referrerPolicyHandlingTesterFactory({selector: 'picture, picture img', docUrl});
+                    var {stub} = await rewriteNodeControlledTest({doc, docUrl, options, tester});
+                    sinon.assert.called(stub);
+                    sinon.assert.calledWithMatch(spyDownload.getCall(0), {url: `${docUrl}img1.bmp`, refPolicy: 'unsafe-url'});
+                    sinon.assert.calledWithMatch(spyDownload.getCall(1), {url: `${docUrl}img2.bmp`, refPolicy: 'unsafe-url'});
+                    sinon.assert.calledWithMatch(spyDownload.getCall(2), {url: `${docUrl}img3.bmp`, refPolicy: 'unsafe-url'});
+                  });
+                });
+
                 break;
               }
               case "save-current": {
@@ -4075,6 +4395,44 @@ describe('capturer/doc-handler.mjs', function () {
                 });
 
                 it('should save resources and rewrite `src` and `srcset` for a headless document', testSave);
+
+                context(CONTEXT_REFERRER_POLICY, function () {
+                  async function docFactory({attrs} = {}) {
+                    const {contentDocument: doc} = await createIframeFixture({docData: {tagName, children: [
+                      {tagName: 'source', attrs: {media: 'min-width: 300px', srcset: './img1.bmp 2x'}},
+                      {tagName: 'source', attrs: {media: 'min-width: 600px', srcset: './img2.bmp'}},
+                      {tagName: 'img', attrs: {src: './img3.bmp', ...attrs}},
+                    ]}});
+                    return doc;
+                  }
+
+                  it('should pass document referrer policy by default for a headed document', async function () {
+                    var doc = await docFactory();
+                    sinon.stub(doc.querySelector('img'), 'currentSrc').value('https://example.com/img1.bmp');
+                    var tester = referrerPolicyHandlingTesterFactory({selector: 'picture, picture img', docUrl});
+                    var {stub} = await rewriteNodeControlledTest({doc, docUrl, options, tester});
+                    sinon.assert.called(stub);
+                    sinon.assert.calledOnceWithMatch(spyDownload, {url: `${docUrl}img1.bmp`, refPolicy: 'same-origin'});
+                  });
+
+                  it('should pass `referrerpolicy` attribute when exists for a headed document', async function () {
+                    var doc = await docFactory({attrs: {referrerpolicy: 'unsafe-url'}});
+                    sinon.stub(doc.querySelector('img'), 'currentSrc').value('https://example.com/img1.bmp');
+                    var tester = referrerPolicyHandlingTesterFactory({selector: 'picture, picture img', docUrl});
+                    var {stub} = await rewriteNodeControlledTest({doc, docUrl, options, tester});
+                    sinon.assert.called(stub);
+                    sinon.assert.calledOnceWithMatch(spyDownload, {url: `${docUrl}img1.bmp`, refPolicy: 'unsafe-url'});
+                  });
+
+                  it('should ignore `[rel~="no-referrer"]` for a headed document', async function () {
+                    var doc = await docFactory({attrs: {rel: 'noreferrer', referrerpolicy: 'unsafe-url'}});
+                    sinon.stub(doc.querySelector('img'), 'currentSrc').value('https://example.com/img1.bmp');
+                    var tester = referrerPolicyHandlingTesterFactory({selector: 'picture, picture img', docUrl});
+                    var {stub} = await rewriteNodeControlledTest({doc, docUrl, options, tester});
+                    sinon.assert.called(stub);
+                    sinon.assert.calledOnceWithMatch(spyDownload, {url: `${docUrl}img1.bmp`, refPolicy: 'unsafe-url'});
+                  });
+                });
 
                 break;
               }
@@ -4306,6 +4664,44 @@ describe('capturer/doc-handler.mjs', function () {
                   it('should remove `crossorigin` attribute', testSaveCrossOrigin);
                 });
 
+                context(CONTEXT_REFERRER_POLICY, function () {
+                  it('should pass document referrer policy by default', async function () {
+                    var doc = docFactoryComplex({attrs: {src: './horse.wav'}});
+                    var tester = referrerPolicyHandlingTesterFactory({tagName, docUrl});
+                    var {stub} = await rewriteNodeControlledTest({doc, docUrl, options, tester});
+                    sinon.assert.called(stub);
+                    sinon.assert.calledWithMatch(spyDownload.getCall(0), {url: `${docUrl}horse.wav`, refPolicy: 'same-origin'});
+                    sinon.assert.calledWithMatch(spyDownload.getCall(1), {url: `${docUrl}horse.ogg`, refPolicy: 'same-origin'});
+                    sinon.assert.calledWithMatch(spyDownload.getCall(2), {url: `${docUrl}horse.mp3`, refPolicy: 'same-origin'});
+                    sinon.assert.calledWithMatch(spyDownload.getCall(3), {url: `${docUrl}horse_en.vtt`, refPolicy: 'same-origin'});
+                    sinon.assert.calledWithMatch(spyDownload.getCall(4), {url: `${docUrl}horse_zh.vtt`, refPolicy: 'same-origin'});
+                  });
+
+                  it('should ignore `referrerpolicy` attribute', async function () {
+                    var doc = docFactoryComplex({attrs: {src: './horse.wav', referrerpolicy: 'unsafe-url'}});
+                    var tester = referrerPolicyHandlingTesterFactory({tagName, docUrl});
+                    var {stub} = await rewriteNodeControlledTest({doc, docUrl, options, tester});
+                    sinon.assert.called(stub);
+                    sinon.assert.calledWithMatch(spyDownload.getCall(0), {url: `${docUrl}horse.wav`, refPolicy: 'same-origin'});
+                    sinon.assert.calledWithMatch(spyDownload.getCall(1), {url: `${docUrl}horse.ogg`, refPolicy: 'same-origin'});
+                    sinon.assert.calledWithMatch(spyDownload.getCall(2), {url: `${docUrl}horse.mp3`, refPolicy: 'same-origin'});
+                    sinon.assert.calledWithMatch(spyDownload.getCall(3), {url: `${docUrl}horse_en.vtt`, refPolicy: 'same-origin'});
+                    sinon.assert.calledWithMatch(spyDownload.getCall(4), {url: `${docUrl}horse_zh.vtt`, refPolicy: 'same-origin'});
+                  });
+
+                  it('should ignore `[rel~="no-referrer"]`', async function () {
+                    var doc = docFactoryComplex({attrs: {src: './horse.wav', rel: 'noreferrer', referrerpolicy: 'unsafe-url'}});
+                    var tester = referrerPolicyHandlingTesterFactory({tagName, docUrl});
+                    var {stub} = await rewriteNodeControlledTest({doc, docUrl, options, tester});
+                    sinon.assert.called(stub);
+                    sinon.assert.calledWithMatch(spyDownload.getCall(0), {url: `${docUrl}horse.wav`, refPolicy: 'same-origin'});
+                    sinon.assert.calledWithMatch(spyDownload.getCall(1), {url: `${docUrl}horse.ogg`, refPolicy: 'same-origin'});
+                    sinon.assert.calledWithMatch(spyDownload.getCall(2), {url: `${docUrl}horse.mp3`, refPolicy: 'same-origin'});
+                    sinon.assert.calledWithMatch(spyDownload.getCall(3), {url: `${docUrl}horse_en.vtt`, refPolicy: 'same-origin'});
+                    sinon.assert.calledWithMatch(spyDownload.getCall(4), {url: `${docUrl}horse_zh.vtt`, refPolicy: 'same-origin'});
+                  });
+                });
+
                 break;
               }
               case "save-current": {
@@ -4351,6 +4747,41 @@ describe('capturer/doc-handler.mjs', function () {
                   it('should remove `crossorigin` attribute for a headed document', testSaveCrossOriginHeaded);
 
                   it('should remove `crossorigin` attribute for a headless document', testSaveCrossOrigin);
+                });
+
+                context(CONTEXT_REFERRER_POLICY, function () {
+                  it('should pass document referrer policy by default for a headed document', async function () {
+                    var {contentDocument: doc} = await docFactoryComplexIframe({attrs: {src: './horse.wav'}});
+                    sinon.stub(doc.querySelector(tagName), 'currentSrc').value(`${docUrl}horse.ogg`);
+                    var tester = referrerPolicyHandlingTesterFactory({tagName, docUrl});
+                    var {stub} = await rewriteNodeControlledTest({doc, docUrl, options, tester});
+                    sinon.assert.called(stub);
+                    sinon.assert.calledWithMatch(spyDownload.getCall(0), {url: `${docUrl}horse.ogg`, refPolicy: 'same-origin'});
+                    sinon.assert.calledWithMatch(spyDownload.getCall(1), {url: `${docUrl}horse_en.vtt`, refPolicy: 'same-origin'});
+                    sinon.assert.calledWithMatch(spyDownload.getCall(2), {url: `${docUrl}horse_zh.vtt`, refPolicy: 'same-origin'});
+                  });
+
+                  it('should ignore `referrerpolicy` attribute for a headed document', async function () {
+                    var {contentDocument: doc} = await docFactoryComplexIframe({attrs: {src: './horse.wav', referrerpolicy: 'unsafe-url'}});
+                    sinon.stub(doc.querySelector(tagName), 'currentSrc').value(`${docUrl}horse.ogg`);
+                    var tester = referrerPolicyHandlingTesterFactory({tagName, docUrl});
+                    var {stub} = await rewriteNodeControlledTest({doc, docUrl, options, tester});
+                    sinon.assert.called(stub);
+                    sinon.assert.calledWithMatch(spyDownload.getCall(0), {url: `${docUrl}horse.ogg`, refPolicy: 'same-origin'});
+                    sinon.assert.calledWithMatch(spyDownload.getCall(1), {url: `${docUrl}horse_en.vtt`, refPolicy: 'same-origin'});
+                    sinon.assert.calledWithMatch(spyDownload.getCall(2), {url: `${docUrl}horse_zh.vtt`, refPolicy: 'same-origin'});
+                  });
+
+                  it('should ignore `[rel~="no-referrer"]` for a headed document', async function () {
+                    var {contentDocument: doc} = await docFactoryComplexIframe({attrs: {src: './horse.wav', rel: 'noreferrer', referrerpolicy: 'unsafe-url'}});
+                    sinon.stub(doc.querySelector(tagName), 'currentSrc').value(`${docUrl}horse.ogg`);
+                    var tester = referrerPolicyHandlingTesterFactory({tagName, docUrl});
+                    var {stub} = await rewriteNodeControlledTest({doc, docUrl, options, tester});
+                    sinon.assert.called(stub);
+                    sinon.assert.calledWithMatch(spyDownload.getCall(0), {url: `${docUrl}horse.ogg`, refPolicy: 'same-origin'});
+                    sinon.assert.calledWithMatch(spyDownload.getCall(1), {url: `${docUrl}horse_en.vtt`, refPolicy: 'same-origin'});
+                    sinon.assert.calledWithMatch(spyDownload.getCall(2), {url: `${docUrl}horse_zh.vtt`, refPolicy: 'same-origin'});
+                  });
                 });
 
                 break;
@@ -4642,6 +5073,47 @@ describe('capturer/doc-handler.mjs', function () {
                   it('should remove `crossorigin` attribute', testSaveCrossOrigin);
                 });
 
+                context(CONTEXT_REFERRER_POLICY, function () {
+                  it('should pass document referrer policy by default', async function () {
+                    var doc = docFactoryComplex({attrs: {src: './small.webm', poster: './poster.png'}});
+                    var tester = referrerPolicyHandlingTesterFactory({tagName, docUrl});
+                    var {stub} = await rewriteNodeControlledTest({doc, docUrl, options, tester});
+                    sinon.assert.called(stub);
+                    sinon.assert.calledWithMatch(spyDownload.getCall(0), {url: `${docUrl}poster.png`, refPolicy: 'same-origin'});
+                    sinon.assert.calledWithMatch(spyDownload.getCall(1), {url: `${docUrl}small.webm`, refPolicy: 'same-origin'});
+                    sinon.assert.calledWithMatch(spyDownload.getCall(2), {url: `${docUrl}small.ogg`, refPolicy: 'same-origin'});
+                    sinon.assert.calledWithMatch(spyDownload.getCall(3), {url: `${docUrl}small.mp4`, refPolicy: 'same-origin'});
+                    sinon.assert.calledWithMatch(spyDownload.getCall(4), {url: `${docUrl}small_en.vtt`, refPolicy: 'same-origin'});
+                    sinon.assert.calledWithMatch(spyDownload.getCall(5), {url: `${docUrl}small_zh.vtt`, refPolicy: 'same-origin'});
+                  });
+
+                  it('should ignore `referrerpolicy` attribute', async function () {
+                    var doc = docFactoryComplex({attrs: {src: './small.webm', poster: './poster.png', referrerpolicy: 'unsafe-url'}});
+                    var tester = referrerPolicyHandlingTesterFactory({tagName, docUrl});
+                    var {stub} = await rewriteNodeControlledTest({doc, docUrl, options, tester});
+                    sinon.assert.called(stub);
+                    sinon.assert.calledWithMatch(spyDownload.getCall(0), {url: `${docUrl}poster.png`, refPolicy: 'same-origin'});
+                    sinon.assert.calledWithMatch(spyDownload.getCall(1), {url: `${docUrl}small.webm`, refPolicy: 'same-origin'});
+                    sinon.assert.calledWithMatch(spyDownload.getCall(2), {url: `${docUrl}small.ogg`, refPolicy: 'same-origin'});
+                    sinon.assert.calledWithMatch(spyDownload.getCall(3), {url: `${docUrl}small.mp4`, refPolicy: 'same-origin'});
+                    sinon.assert.calledWithMatch(spyDownload.getCall(4), {url: `${docUrl}small_en.vtt`, refPolicy: 'same-origin'});
+                    sinon.assert.calledWithMatch(spyDownload.getCall(5), {url: `${docUrl}small_zh.vtt`, refPolicy: 'same-origin'});
+                  });
+
+                  it('should ignore `[rel~="no-referrer"]`', async function () {
+                    var doc = docFactoryComplex({attrs: {src: './small.webm', poster: './poster.png', rel: 'noreferrer', referrerpolicy: 'unsafe-url'}});
+                    var tester = referrerPolicyHandlingTesterFactory({tagName, docUrl});
+                    var {stub} = await rewriteNodeControlledTest({doc, docUrl, options, tester});
+                    sinon.assert.called(stub);
+                    sinon.assert.calledWithMatch(spyDownload.getCall(0), {url: `${docUrl}poster.png`, refPolicy: 'same-origin'});
+                    sinon.assert.calledWithMatch(spyDownload.getCall(1), {url: `${docUrl}small.webm`, refPolicy: 'same-origin'});
+                    sinon.assert.calledWithMatch(spyDownload.getCall(2), {url: `${docUrl}small.ogg`, refPolicy: 'same-origin'});
+                    sinon.assert.calledWithMatch(spyDownload.getCall(3), {url: `${docUrl}small.mp4`, refPolicy: 'same-origin'});
+                    sinon.assert.calledWithMatch(spyDownload.getCall(4), {url: `${docUrl}small_en.vtt`, refPolicy: 'same-origin'});
+                    sinon.assert.calledWithMatch(spyDownload.getCall(5), {url: `${docUrl}small_zh.vtt`, refPolicy: 'same-origin'});
+                  });
+                });
+
                 break;
               }
               case "save-current": {
@@ -4688,6 +5160,44 @@ describe('capturer/doc-handler.mjs', function () {
                   it('should remove `crossorigin` attribute for a headed document', testSaveCrossOriginHeaded);
 
                   it('should remove `crossorigin` attribute for a headless document', testSaveCrossOrigin);
+                });
+
+                context(CONTEXT_REFERRER_POLICY, function () {
+                  it('should pass document referrer policy by default for a headed document', async function () {
+                    var {contentDocument: doc} = await docFactoryComplexIframe({attrs: {src: './small.webm', poster: './poster.png'}});
+                    sinon.stub(doc.querySelector(tagName), 'currentSrc').value(`${docUrl}small.ogg`);
+                    var tester = referrerPolicyHandlingTesterFactory({tagName, docUrl});
+                    var {stub} = await rewriteNodeControlledTest({doc, docUrl, options, tester});
+                    sinon.assert.called(stub);
+                    sinon.assert.calledWithMatch(spyDownload.getCall(0), {url: `${docUrl}poster.png`, refPolicy: 'same-origin'});
+                    sinon.assert.calledWithMatch(spyDownload.getCall(1), {url: `${docUrl}small.ogg`, refPolicy: 'same-origin'});
+                    sinon.assert.calledWithMatch(spyDownload.getCall(2), {url: `${docUrl}small_en.vtt`, refPolicy: 'same-origin'});
+                    sinon.assert.calledWithMatch(spyDownload.getCall(3), {url: `${docUrl}small_zh.vtt`, refPolicy: 'same-origin'});
+                  });
+
+                  it('should ignore `referrerpolicy` attribute for a headed document', async function () {
+                    var {contentDocument: doc} = await docFactoryComplexIframe({attrs: {src: './small.webm', poster: './poster.png', referrerpolicy: 'unsafe-url'}});
+                    sinon.stub(doc.querySelector(tagName), 'currentSrc').value(`${docUrl}small.ogg`);
+                    var tester = referrerPolicyHandlingTesterFactory({tagName, docUrl});
+                    var {stub} = await rewriteNodeControlledTest({doc, docUrl, options, tester});
+                    sinon.assert.called(stub);
+                    sinon.assert.calledWithMatch(spyDownload.getCall(0), {url: `${docUrl}poster.png`, refPolicy: 'same-origin'});
+                    sinon.assert.calledWithMatch(spyDownload.getCall(1), {url: `${docUrl}small.ogg`, refPolicy: 'same-origin'});
+                    sinon.assert.calledWithMatch(spyDownload.getCall(2), {url: `${docUrl}small_en.vtt`, refPolicy: 'same-origin'});
+                    sinon.assert.calledWithMatch(spyDownload.getCall(3), {url: `${docUrl}small_zh.vtt`, refPolicy: 'same-origin'});
+                  });
+
+                  it('should ignore `[rel~="no-referrer"]` for a headed document', async function () {
+                    var {contentDocument: doc} = await docFactoryComplexIframe({attrs: {src: './small.webm', poster: './poster.png', rel: 'noreferrer', referrerpolicy: 'unsafe-url'}});
+                    sinon.stub(doc.querySelector(tagName), 'currentSrc').value(`${docUrl}small.ogg`);
+                    var tester = referrerPolicyHandlingTesterFactory({tagName, docUrl});
+                    var {stub} = await rewriteNodeControlledTest({doc, docUrl, options, tester});
+                    sinon.assert.called(stub);
+                    sinon.assert.calledWithMatch(spyDownload.getCall(0), {url: `${docUrl}poster.png`, refPolicy: 'same-origin'});
+                    sinon.assert.calledWithMatch(spyDownload.getCall(1), {url: `${docUrl}small.ogg`, refPolicy: 'same-origin'});
+                    sinon.assert.calledWithMatch(spyDownload.getCall(2), {url: `${docUrl}small_en.vtt`, refPolicy: 'same-origin'});
+                    sinon.assert.calledWithMatch(spyDownload.getCall(3), {url: `${docUrl}small_zh.vtt`, refPolicy: 'same-origin'});
+                  });
                 });
 
                 break;
@@ -7925,6 +8435,32 @@ describe('capturer/doc-handler.mjs', function () {
                     isMainFrame: true,
                     recurseChain: [],
                   },
+                });
+              });
+
+              context(CONTEXT_REFERRER_POLICY, function () {
+                it('should pass document referrer policy by default', async function () {
+                  var doc = docFactory({attrs: [[`${prefix}href`, './linked.html', ns]]});
+                  var tester = referrerPolicyHandlingTesterFactory({tagName, docUrl});
+                  var {stub} = await rewriteNodeControlledTest({doc, docUrl, options, tester});
+                  sinon.assert.called(stub);
+                  sinon.assert.calledWithMatch(spyCaptureUrl, {refPolicy: 'same-origin'});
+                });
+
+                $it.skipIf($.noSvgAnchorReferrerPolicy)('should pass `referrerpolicy` attribute when exists', async function () {
+                  var doc = docFactory({attrs: [[`${prefix}href`, './linked.html', ns], ['referrerpolicy', 'unsafe-url']]});
+                  var tester = referrerPolicyHandlingTesterFactory({tagName, docUrl});
+                  var {stub} = await rewriteNodeControlledTest({doc, docUrl, options, tester});
+                  sinon.assert.called(stub);
+                  sinon.assert.calledWithMatch(spyCaptureUrl, {refPolicy: 'unsafe-url'});
+                });
+
+                it('should honor `[rel~="no-referrer"]` when exists', async function () {
+                  var doc = docFactory({attrs: [[`${prefix}href`, './linked.html', ns], ['rel', 'noreferrer'], ['referrerpolicy', 'unsafe-url']]});
+                  var tester = referrerPolicyHandlingTesterFactory({tagName, docUrl});
+                  var {stub} = await rewriteNodeControlledTest({doc, docUrl, options, tester});
+                  sinon.assert.called(stub);
+                  sinon.assert.calledWithMatch(spyCaptureUrl, {refPolicy: 'no-referrer'});
                 });
               });
             });

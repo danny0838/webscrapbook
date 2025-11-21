@@ -12747,17 +12747,9 @@ document.querySelector("p").textContent = "srcdoc content modified";
         var text = (await readFileAsText(await file.async('blob'))).trim();
         assert.strictEqual(text, `${localhost}/`);
 
-        var file = zip.file('favicon_rel.py');
-        var text = (await readFileAsText(await file.async('blob'))).trim();
-        assert.strictEqual(text, ``);
-
         var file = zip.file('stylesheet.py');
         var text = (await readFileAsText(await file.async('blob'))).trim();
         assert.strictEqual(text, `${localhost}/`);
-
-        var file = zip.file('stylesheet_rel.py');
-        var text = (await readFileAsText(await file.async('blob'))).trim();
-        assert.strictEqual(text, ``);
 
         var file = zip.file('script.py');
         var text = (await readFileAsText(await file.async('blob'))).trim();
@@ -12808,15 +12800,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
         var text = (await readFileAsText(await file.async('blob'))).trim();
         assert.strictEqual(text, `${localhost}/capture_referrer_attr/index.html`);
 
-        var file = zip.file('favicon_rel.py');
-        var text = (await readFileAsText(await file.async('blob'))).trim();
-        assert.strictEqual(text, `${localhost}/capture_referrer_attr/index.html`);
-
         var file = zip.file('stylesheet.py');
-        var text = (await readFileAsText(await file.async('blob'))).trim();
-        assert.strictEqual(text, `${localhost}/capture_referrer_attr/index.html`);
-
-        var file = zip.file('stylesheet_rel.py');
         var text = (await readFileAsText(await file.async('blob'))).trim();
         assert.strictEqual(text, `${localhost}/capture_referrer_attr/index.html`);
 

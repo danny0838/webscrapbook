@@ -1879,6 +1879,7 @@ class CaptureDocumentRewriter extends MapperMixin(CaptureDocumentRewriterBase) {
             if (['http:', 'https:', 'file:'].some(p => url.startsWith(p))) {
               if (["header", "url"].includes(options["capture.downLink.file.mode"]) ||
                   (parseInt(options["capture.downLink.doc.depth"], 10) > 0 && options['capture.saveAs'] !== 'singleHtml')) {
+                const refPolicy = this.docRefPolicy;
                 downLinkTasks.push(async () => {
                   const downLinkSettings = Object.assign({}, settings, {
                     depth: settings.depth + 1,
@@ -1888,6 +1889,7 @@ class CaptureDocumentRewriter extends MapperMixin(CaptureDocumentRewriterBase) {
                   const response = await this.captureUrl({
                     url,
                     refUrl,
+                    refPolicy,
                     downLink: true,
                     settings: downLinkSettings,
                     options,
@@ -1973,7 +1975,7 @@ class CaptureDocumentRewriter extends MapperMixin(CaptureDocumentRewriterBase) {
   [`_handle_{${NS_HTML}}link#stylesheet`](elem) {
     const {baseUrl, refUrl, charset, cssHandler, cssResourcesHandler, cssTasks, tasks, settings, options} = this;
 
-    const refPolicy = elem.matches('[rel~="noreferrer"]') ? 'no-referrer' : elem.referrerPolicy || this.docRefPolicy;
+    const refPolicy = elem.referrerPolicy || this.docRefPolicy;
     const envCharset = elem.getAttribute("charset") || charset;
     let disableCss = false;
     const css = cssHandler.getElemCss(elem);
@@ -2099,7 +2101,7 @@ class CaptureDocumentRewriter extends MapperMixin(CaptureDocumentRewriterBase) {
           this.favIconUrl = elem.getAttribute("href");
           useFavIcon = true;
         }
-        const refPolicy = elem.matches('[rel~="noreferrer"]') ? 'no-referrer' : elem.referrerPolicy || this.docRefPolicy;
+        const refPolicy = elem.referrerPolicy || this.docRefPolicy;
         tasks.push(async () => {
           const response = await this.downloadFile({
             url: elem.getAttribute("href"),
@@ -2143,7 +2145,7 @@ class CaptureDocumentRewriter extends MapperMixin(CaptureDocumentRewriterBase) {
         throw new NodeDisconnect(elem);
       case "save":
       default: {
-        const refPolicy = elem.matches('[rel~="noreferrer"]') ? 'no-referrer' : elem.referrerPolicy || this.docRefPolicy;
+        const refPolicy = elem.referrerPolicy || this.docRefPolicy;
         tasks.push(async () => {
           const response = await this.downloadFile({
             url: elem.getAttribute("href"),
@@ -2735,6 +2737,9 @@ class CaptureDocumentRewriter extends MapperMixin(CaptureDocumentRewriterBase) {
     }
   }
 
+  // @FIXME: When there are multiple <img>s under a <picture> (which is against
+  // the spec), all <img>s' resources should be fetched using the first <img>'s
+  // `referrerPolicy`.
   [`_handle_{${NS_HTML}}picture`](elem) {
     const {isHeadless, refUrl, tasks, settings, options} = this;
 
@@ -2746,6 +2751,8 @@ class CaptureDocumentRewriter extends MapperMixin(CaptureDocumentRewriterBase) {
       this.captureRewriteAttr(subElem, "srcset", rewriteSrcset);
     }
 
+    const [imgElem] = Array.prototype.filter.call(elem.querySelectorAll('img'), x => x.namespaceURI === NS_HTML);
+    const refPolicy = imgElem?.referrerPolicy || this.docRefPolicy;
     switch (options["capture.image"]) {
       case "link":
         // do nothing
@@ -2783,7 +2790,6 @@ class CaptureDocumentRewriter extends MapperMixin(CaptureDocumentRewriterBase) {
         // eslint-disable-next-line no-fallthrough
       case "save":
       default: {
-        const refPolicy = this.docRefPolicy;
         for (const subElem of elem.querySelectorAll('source[srcset]')) {
           if (subElem.namespaceURI !== NS_HTML) { continue; }
           tasks.push(async () => {
@@ -4066,13 +4072,12 @@ class CaptureDocumentRewriter extends MapperMixin(CaptureDocumentRewriterBase) {
     if (['http:', 'https:', 'file:', 'blob:'].some(p => url.startsWith(p))) {
       if (["header", "url"].includes(options["capture.downLink.file.mode"]) ||
           (parseInt(options["capture.downLink.doc.depth"], 10) > 0 && options['capture.saveAs'] !== 'singleHtml')) {
-        const isHtml = elem.namespaceURI === NS_HTML;
         let refPolicy = docRefPolicy;
-        if (isHtml) {
+        if ([NS_HTML, NS_SVG].includes(elem.namespaceURI)) {
           refPolicy = (elem.matches('[rel~="noreferrer"]') ? 'no-referrer' : elem.referrerPolicy) || refPolicy;
         }
         downLinkTasks.push(async () => {
-          const isAttachment = isHtml ? elem.hasAttribute('download') : false;
+          const isAttachment = (elem.namespaceURI === NS_HTML) ? elem.hasAttribute('download') : false;
           const downLinkSettings = Object.assign({}, settings, {
             depth: settings.depth + 1,
             isMainPage: false,

@@ -284,6 +284,19 @@ Object.defineProperties(MochaQuery, Object.getOwnPropertyDescriptors({
     Object.defineProperty(this, 'noAdoptedStylesheet', {value});
     return value;
   },
+  get noSvgAnchorReferrerPolicy() {
+    const value = this.noBrowser.condition ? this.noBrowser : new MochaQuery.Query(
+      !(() => {
+        const elem = document.createElementNS(NS_SVG, 'a');
+        if (typeof elem.referrerPolicy === 'undefined') { return false; }
+        elem.referrerPolicy = 'unsafe-url';
+        return elem.referrerPolicy === 'unsafe-url';
+      })(),
+      'SVGAElement.referrerPolicy not supported',
+    );
+    Object.defineProperty(this, 'noSvgAnchorReferrerPolicy', {value});
+    return value;
+  },
   get noNestingCss() {
     // CSS nesting selector is not supported in Firefox < 117 and Chromium < 120.
     const value = this.noBrowser.condition ? this.noBrowser : new MochaQuery.Query(
