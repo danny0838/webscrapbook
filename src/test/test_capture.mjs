@@ -11622,20 +11622,28 @@ document.querySelector("p").textContent = "srcdoc content modified";
         });
 
         var zip = await Zip.loadAsync(blob);
-        assert.exists(zip.file('applet.class'));
-        assert.exists(zip.file('applet.jar'));
-        assert.exists(zip.file('applet2.class'));
-        assert.exists(zip.file('applet2.jar'));
+        assert.hasAllKeys(zip.files, ['index.html', 'applet.jar', 'applet2.jar']);
 
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
         var doc = await readFileAsDocument(indexBlob);
         var applets = doc.querySelectorAll('applet');
-        assert.strictEqual(applets[0].getAttribute('code'), `applet.class`);
-        assert.strictEqual(applets[0].getAttribute('archive'), `applet.jar`);
-        assert.strictEqual(applets[1].getAttribute('code'), `applet2.class`);
-        assert.strictEqual(applets[1].getAttribute('archive'), `applet2.jar`);
-        assert(!applets[1].hasAttribute('codebase'));
+
+        assert.strictEqual(applets[0].getAttribute('code'), 'appletComponentArch.DynamicTreeApplet');
+        assert.strictEqual(applets[0].getAttribute('archive'), 'applet.jar');
+        assert.strictEqual(applets[0].getAttribute('codebase'), null);
+
+        assert.strictEqual(applets[1].getAttribute('code'), 'appletComponentArch.DynamicTreeApplet');
+        assert.strictEqual(applets[1].getAttribute('archive'), null);
+        assert.strictEqual(applets[1].getAttribute('codebase'), `${localhost}/capture_applet/applet.html`);
+
+        assert.strictEqual(applets[2].getAttribute('code'), 'appletComponentArch.DynamicTreeApplet');
+        assert.strictEqual(applets[2].getAttribute('archive'), 'applet2.jar');
+        assert.strictEqual(applets[2].getAttribute('codebase'), null);
+
+        assert.strictEqual(applets[3].getAttribute('code'), 'appletComponentArch.DynamicTreeApplet');
+        assert.strictEqual(applets[3].getAttribute('archive'), null);
+        assert.strictEqual(applets[3].getAttribute('codebase'), `${localhost}/capture_applet/resources/applet2/`);
       });
 
       it('capture.applet = link', async function () {
@@ -11648,17 +11656,28 @@ document.querySelector("p").textContent = "srcdoc content modified";
         });
 
         var zip = await Zip.loadAsync(blob);
-        assert.lengthOf(Object.keys(zip.files), 1);
+        assert.hasAllKeys(zip.files, ['index.html']);
 
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
         var doc = await readFileAsDocument(indexBlob);
         var applets = doc.querySelectorAll('applet');
-        assert.strictEqual(applets[0].getAttribute('code'), `${localhost}/capture_applet/applet.class`);
-        assert.strictEqual(applets[0].getAttribute('archive'), `${localhost}/capture_applet/applet.jar`);
-        assert.strictEqual(applets[1].getAttribute('code'), `${localhost}/capture_applet/resources/applet2.class`);
-        assert.strictEqual(applets[1].getAttribute('archive'), `${localhost}/capture_applet/resources/applet2.jar`);
-        assert(!applets[1].hasAttribute('codebase'));
+
+        assert.strictEqual(applets[0].getAttribute('code'), 'appletComponentArch.DynamicTreeApplet');
+        assert.strictEqual(applets[0].getAttribute('archive'), './applet.jar');
+        assert.strictEqual(applets[0].getAttribute('codebase'), `${localhost}/capture_applet/applet.html`);
+
+        assert.strictEqual(applets[1].getAttribute('code'), 'appletComponentArch.DynamicTreeApplet');
+        assert.strictEqual(applets[1].getAttribute('archive'), null);
+        assert.strictEqual(applets[1].getAttribute('codebase'), `${localhost}/capture_applet/applet.html`);
+
+        assert.strictEqual(applets[2].getAttribute('code'), 'appletComponentArch.DynamicTreeApplet');
+        assert.strictEqual(applets[2].getAttribute('archive'), './applet2.jar');
+        assert.strictEqual(applets[2].getAttribute('codebase'), `${localhost}/capture_applet/resources/`);
+
+        assert.strictEqual(applets[3].getAttribute('code'), 'appletComponentArch.DynamicTreeApplet');
+        assert.strictEqual(applets[3].getAttribute('archive'), null);
+        assert.strictEqual(applets[3].getAttribute('codebase'), `${localhost}/capture_applet/resources/applet2/`);
       });
 
       it('capture.applet = blank', async function () {
@@ -11671,17 +11690,28 @@ document.querySelector("p").textContent = "srcdoc content modified";
         });
 
         var zip = await Zip.loadAsync(blob);
-        assert.lengthOf(Object.keys(zip.files), 1);
+        assert.hasAllKeys(zip.files, ['index.html']);
 
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
         var doc = await readFileAsDocument(indexBlob);
         var applets = doc.querySelectorAll('applet');
+
         assert(!applets[0].hasAttribute('code'));
         assert(!applets[0].hasAttribute('archive'));
+        assert(!applets[0].hasAttribute('codebase'));
+
         assert(!applets[1].hasAttribute('code'));
         assert(!applets[1].hasAttribute('archive'));
         assert(!applets[1].hasAttribute('codebase'));
+
+        assert(!applets[2].hasAttribute('code'));
+        assert(!applets[2].hasAttribute('archive'));
+        assert(!applets[2].hasAttribute('codebase'));
+
+        assert(!applets[3].hasAttribute('code'));
+        assert(!applets[3].hasAttribute('archive'));
+        assert(!applets[3].hasAttribute('codebase'));
       });
 
       it('capture.applet = remove', async function () {
@@ -11694,7 +11724,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
         });
 
         var zip = await Zip.loadAsync(blob);
-        assert.lengthOf(Object.keys(zip.files), 1);
+        assert.hasAllKeys(zip.files, ['index.html']);
 
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -12993,10 +13023,6 @@ document.querySelector("p").textContent = "srcdoc content modified";
         assert.strictEqual(text, `${localhost}/`);
 
         var file = zip.file('object_archive.py');
-        var text = (await readFileAsText(await file.async('blob'))).trim();
-        assert.strictEqual(text, `${localhost}/`);
-
-        var file = zip.file('applet.py');
         var text = (await readFileAsText(await file.async('blob'))).trim();
         assert.strictEqual(text, `${localhost}/`);
 
@@ -17141,7 +17167,6 @@ ${localhost}/capture_downLink_indepth_urlExtra/1-3.txt`,
         assert.strictEqual(doc.querySelector('iframe').getAttribute(`data-scrapbook-orig-attr-src-${timeId}`), `./null.html`);
         assert.strictEqual(doc.querySelector('embed').getAttribute(`data-scrapbook-orig-attr-src-${timeId}`), `./null.swf`);
         assert.strictEqual(doc.querySelector('object').getAttribute(`data-scrapbook-orig-attr-data-${timeId}`), `./null.swf`);
-        assert.strictEqual(doc.querySelector('applet').getAttribute(`data-scrapbook-orig-attr-code-${timeId}`), `./null.class`);
         assert.strictEqual(doc.querySelector('applet').getAttribute(`data-scrapbook-orig-attr-archive-${timeId}`), `./null.jar`);
         assert.strictEqual(doc.querySelector('a').getAttribute(`data-scrapbook-orig-attr-href-${timeId}`), `./null.txt`);
 
@@ -17238,7 +17263,7 @@ p { background-image: url("null.bmp"); }`);
         assert.strictEqual(doc.querySelector('iframe').getAttribute(`data-scrapbook-orig-attr-src-${timeId}`), `./null.html`);
         assert.strictEqual(doc.querySelector('embed').getAttribute(`data-scrapbook-orig-attr-src-${timeId}`), `./null.swf`);
         assert.strictEqual(doc.querySelector('object').getAttribute(`data-scrapbook-orig-attr-data-${timeId}`), `./null.swf`);
-        assert.strictEqual(doc.querySelector('applet').getAttribute(`data-scrapbook-orig-attr-code-${timeId}`), `./null.class`);
+        assert.strictEqual(doc.querySelector('applet').getAttribute(`data-scrapbook-orig-attr-code-${timeId}`), `MyApplet.class`);
         assert.strictEqual(doc.querySelector('applet').getAttribute(`data-scrapbook-orig-attr-archive-${timeId}`), `./null.jar`);
 
         // CSS

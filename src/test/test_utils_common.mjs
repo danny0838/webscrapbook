@@ -3051,6 +3051,32 @@ div { image-background: var(${/(--sb(\d+)-2)/}); }`;
     });
   });
 
+  describe('rewriteCommaSeparatedUrls()', function () {
+    it('should return synchronously for a synchronous rewriter', function () {
+      const rewriter = url => `<${url}>`;
+      assert.strictEqual(
+        utils.rewriteCommaSeparatedUrls('http://example.com,https://example.com', rewriter),
+        '<http://example.com>,<https://example.com>',
+      );
+      assert.strictEqual(
+        utils.rewriteCommaSeparatedUrls(' http://example.com , https://example.com ', rewriter),
+        '<http://example.com>,<https://example.com>',
+      );
+    });
+
+    it('should return asynchronously for an asynchronous rewriter', async function () {
+      const rewriter = async url => `<${url}>`;
+      assert.strictEqual(
+        await utils.rewriteCommaSeparatedUrls('http://example.com,https://example.com', rewriter),
+        '<http://example.com>,<https://example.com>',
+      );
+      assert.strictEqual(
+        await utils.rewriteCommaSeparatedUrls(' http://example.com , https://example.com ', rewriter),
+        '<http://example.com>,<https://example.com>',
+      );
+    });
+  });
+
   $describe.skipIf($.noBrowser)('getMetaRefreshTarget()', function () {
     it('should return the URL resolved with `baseUrl`', function () {
       var doc = createDocFixture({name: 'meta', attrs: {
