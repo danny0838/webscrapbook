@@ -5691,6 +5691,51 @@ describe('capturer/doc-handler.mjs', function () {
                     sinon.assert.calledWithExactly(spyRewrite, elem, 'data', 'page.html');
                   });
 
+                  it('should save `archive` and rewrite `codebase`, without honoring `codebase`', async function () {
+                    var doc = createDocFixture({tagName, attrs: {data: './page.html', archive: './archive.jar ./archive2.jar', codebase: './applet/'}});
+
+                    var {doc} = await new TestCapturer().captureDocument({doc, docUrl, settings: {timeId}, options});
+                    var elem = doc.querySelector(tagName);
+                    assert.strictEqual(elem.getAttribute('data'), 'page.html');
+                    assert.strictEqual(elem.getAttribute('archive'), 'archive.jar archive2.jar');
+                    assert.strictEqual(elem.getAttribute('codebase'), 'https://example.com/applet/');
+
+                    sinon.assert.calledWithExactly(spyResolve, './page.html', 'https://example.com/');
+                    sinon.assert.calledWithExactly(spyResolve, './archive.jar', 'https://example.com/');
+                    sinon.assert.calledWithExactly(spyResolve, './archive2.jar', 'https://example.com/');
+                    sinon.assert.calledWithMatch(spyCaptureUrl, {
+                      url: 'https://example.com/page.html',
+                      refUrl: 'https://example.com/',
+                      refPolicy: '',
+                      settings: {
+                        timeId,
+                        documentName: 'index',
+                        recurseChain: ['https://example.com/'],
+                        depth: 0,
+                        isMainPage: true,
+                        isMainFrame: false,
+                        type: '',
+                        indexFilename: timeId,
+                        fullPage: true,
+                        usedCssImageUrl: undefined,
+                        usedCssFontUrl: undefined,
+                      },
+                    });
+                    sinon.assert.calledWithMatch(spyDownload, {
+                      url: 'https://example.com/archive.jar',
+                      refUrl: 'https://example.com/',
+                      refPolicy: '',
+                    });
+                    sinon.assert.calledWithMatch(spyDownload, {
+                      url: 'https://example.com/archive2.jar',
+                      refUrl: 'https://example.com/',
+                      refPolicy: '',
+                    });
+                    sinon.assert.calledWithExactly(spyRewrite, elem, 'data', 'page.html');
+                    sinon.assert.calledWithExactly(spyRewrite, elem, 'archive', 'archive.jar archive2.jar');
+                    sinon.assert.calledWithExactly(spyRewrite, elem, 'codebase', 'https://example.com/applet/');
+                  });
+
                   it('should keep about: URLs as-is', async function () {
                     var doc = createDocFixture({tagName: 'body', children: [
                       {tagName, attrs: {data: 'about:blank#foo'}},
@@ -5761,6 +5806,145 @@ describe('capturer/doc-handler.mjs', function () {
                   });
                 });
 
+                context('for legacy object', function () {
+                  context('when `archive` is present', function () {
+                    it('should save the resource and rewrite `archive` if `codebase` is not present', async function () {
+                      var doc = createDocFixture({tagName, attrs: {classid: 'java:MyApplet.class', archive: './archive.jar ./archive2.jar'}});
+
+                      var {doc} = await new TestCapturer().captureDocument({doc, docUrl, options});
+                      var elem = doc.querySelector(tagName);
+                      assert.strictEqual(elem.getAttribute('classid'), 'java:MyApplet.class');
+                      assert.strictEqual(elem.getAttribute('archive'), 'archive.jar archive2.jar');
+                      assert.strictEqual(elem.getAttribute('codebase'), null);
+
+                      sinon.assert.calledWithExactly(spyResolve, './archive.jar', 'https://example.com/');
+                      sinon.assert.calledWithExactly(spyResolve, './archive2.jar', 'https://example.com/');
+                      sinon.assert.calledWithMatch(spyDownload, {
+                        url: 'https://example.com/archive.jar',
+                        refUrl: 'https://example.com/',
+                        refPolicy: '',
+                      });
+                      sinon.assert.calledWithMatch(spyDownload, {
+                        url: 'https://example.com/archive2.jar',
+                        refUrl: 'https://example.com/',
+                        refPolicy: '',
+                      });
+                      sinon.assert.calledWithExactly(spyRewrite, elem, 'archive', 'archive.jar archive2.jar');
+                      sinon.assert.calledWithExactly(spyRewrite, elem, 'codebase', null);
+                    });
+
+                    it('should save the resource and rewrite `archive` and `codebase` if `codebase` is present', async function () {
+                      var doc = createDocFixture({tagName, attrs: {classid: 'java:MyApplet.class', archive: './archive.jar ./archive2.jar', codebase: './applets/'}});
+
+                      var {doc} = await new TestCapturer().captureDocument({doc, docUrl, options});
+                      var elem = doc.querySelector(tagName);
+                      assert.strictEqual(elem.getAttribute('classid'), 'java:MyApplet.class');
+                      assert.strictEqual(elem.getAttribute('archive'), 'archive.jar archive2.jar');
+                      assert.strictEqual(elem.getAttribute('codebase'), null);
+
+                      sinon.assert.calledWithExactly(spyResolve.getCall(0), './applets/', 'https://example.com/', {skipLocal: false});
+                      sinon.assert.calledWithExactly(spyResolve.getCall(1), './archive.jar', 'https://example.com/applets/');
+                      sinon.assert.calledWithMatch(spyDownload, {
+                        url: 'https://example.com/applets/archive.jar',
+                        refUrl: 'https://example.com/',
+                        refPolicy: '',
+                      });
+                      sinon.assert.calledWithMatch(spyDownload, {
+                        url: 'https://example.com/applets/archive2.jar',
+                        refUrl: 'https://example.com/',
+                        refPolicy: '',
+                      });
+                      sinon.assert.calledWithExactly(spyRewrite, elem, 'archive', 'archive.jar archive2.jar');
+                      sinon.assert.calledWithExactly(spyRewrite, elem, 'codebase', null);
+                    });
+                  });
+
+                  context('when `data` is present', function () {
+                    it('should save the resource and rewrite `code` if `codebase` is not present', async function () {
+                      var doc = createDocFixture({tagName, attrs: {classid: 'clsid:663C8FEF-1EF9-11CF-A3DB-080036F12502', data: './clock.stm'}});
+
+                      var {doc} = await new TestCapturer().captureDocument({doc, docUrl, options});
+                      var elem = doc.querySelector(tagName);
+                      assert.strictEqual(elem.getAttribute('classid'), 'clsid:663C8FEF-1EF9-11CF-A3DB-080036F12502');
+                      assert.strictEqual(elem.getAttribute('data'), 'clock.stm');
+                      assert.strictEqual(elem.getAttribute('codebase'), null);
+
+                      sinon.assert.calledWithExactly(spyResolve, './clock.stm', 'https://example.com/');
+                      sinon.assert.calledWithMatch(spyDownload, {
+                        url: 'https://example.com/clock.stm',
+                        refUrl: 'https://example.com/',
+                        refPolicy: '',
+                      });
+                      sinon.assert.calledWithExactly(spyRewrite, elem, 'data', 'clock.stm');
+                      sinon.assert.calledWithExactly(spyRewrite, elem, 'codebase', null);
+                    });
+
+                    it('should save the resource and rewrite `code` if `codebase` is present', async function () {
+                      var doc = createDocFixture({tagName, attrs: {classid: 'clsid:663C8FEF-1EF9-11CF-A3DB-080036F12502', data: './clock.stm', codebase: './applets/'}});
+
+                      var {doc} = await new TestCapturer().captureDocument({doc, docUrl, options});
+                      var elem = doc.querySelector(tagName);
+                      assert.strictEqual(elem.getAttribute('classid'), 'clsid:663C8FEF-1EF9-11CF-A3DB-080036F12502');
+                      assert.strictEqual(elem.getAttribute('data'), 'clock.stm');
+                      assert.strictEqual(elem.getAttribute('codebase'), null);
+
+                      sinon.assert.calledWithExactly(spyResolve, './clock.stm', 'https://example.com/applets/');
+                      sinon.assert.calledWithMatch(spyDownload, {
+                        url: 'https://example.com/applets/clock.stm',
+                        refUrl: 'https://example.com/',
+                        refPolicy: '',
+                      });
+                      sinon.assert.calledWithExactly(spyRewrite, elem, 'data', 'clock.stm');
+                      sinon.assert.calledWithExactly(spyRewrite, elem, 'codebase', null);
+                    });
+                  });
+
+                  context('when `archive` and `data` are not present', function () {
+                    it('should rewrite `codebase` attribute to the resolved URL if not present', async function () {
+                      var doc = createDocFixture({tagName, attrs: {classid: 'java:MyApplet.class'}});
+
+                      var {doc} = await new TestCapturer().captureDocument({doc, docUrl, options});
+                      var elem = doc.querySelector(tagName);
+                      assert.strictEqual(elem.getAttribute('classid'), 'java:MyApplet.class');
+                      assert.strictEqual(elem.getAttribute('archive'), null);
+                      assert.strictEqual(elem.getAttribute('codebase'), 'https://example.com/');
+
+                      sinon.assert.calledWithExactly(spyResolve, '', 'https://example.com/', {skipLocal: false});
+                      sinon.assert.notCalled(spyDownload);
+                      sinon.assert.notCalled(spyCaptureUrl);
+                      sinon.assert.calledWithExactly(spyRewrite, elem, 'codebase', 'https://example.com/');
+                    });
+
+                    it('should rewrite `codebase` attribute to the resolved URL if present', async function () {
+                      var doc = createDocFixture({tagName, attrs: {classid: 'java:MyApplet.class', codebase: './applet/'}});
+
+                      var {doc} = await new TestCapturer().captureDocument({doc, docUrl, options});
+                      var elem = doc.querySelector(tagName);
+                      assert.strictEqual(elem.getAttribute('classid'), 'java:MyApplet.class');
+                      assert.strictEqual(elem.getAttribute('archive'), null);
+                      assert.strictEqual(elem.getAttribute('codebase'), 'https://example.com/applet/');
+
+                      sinon.assert.calledWithExactly(spyResolve, './applet/', 'https://example.com/', {skipLocal: false});
+                      sinon.assert.notCalled(spyDownload);
+                      sinon.assert.notCalled(spyCaptureUrl);
+                      sinon.assert.calledWithExactly(spyRewrite, elem, 'codebase', 'https://example.com/applet/');
+                    });
+                  });
+                });
+
+                context('for empty object', function () {
+                  it('should do nothing', async function () {
+                    var doc = createDocFixture({tagName});
+
+                    var {doc} = await new TestCapturer().captureDocument({doc, docUrl, options});
+                    var elem = doc.querySelector(tagName);
+                    assert.deepEqual(getAttributes(elem), {});
+
+                    sinon.assert.notCalled(spyCaptureUrl);
+                    sinon.assert.notCalled(spyDownload);
+                  });
+                });
+
                 break;
               }
               case "link": {
@@ -5776,6 +5960,71 @@ describe('capturer/doc-handler.mjs', function () {
                     sinon.assert.notCalled(spyCaptureUrl);
                     sinon.assert.notCalled(spyDownload);
                     sinon.assert.calledWithExactly(spyRewrite, elem, 'data', 'https://example.com/page.html');
+                  });
+
+                  it('should rewrite `archive` and `codebase`, without honoring `codebase`', async function () {
+                    var doc = createDocFixture({tagName, attrs: {data: './page.html', archive: './archive.jar ./archive2.jar', codebase: './applets/'}});
+
+                    var {doc} = await new TestCapturer().captureDocument({doc, docUrl, options});
+                    var elem = doc.querySelector(tagName);
+                    assert.strictEqual(elem.getAttribute('data'), 'https://example.com/page.html');
+                    assert.strictEqual(elem.getAttribute('archive'), 'https://example.com/archive.jar https://example.com/archive2.jar');
+                    assert.strictEqual(elem.getAttribute('codebase'), 'https://example.com/applets/');
+
+                    sinon.assert.calledWithExactly(spyResolve, './page.html', 'https://example.com/');
+                    sinon.assert.calledWithExactly(spyResolve, './archive.jar', 'https://example.com/');
+                    sinon.assert.calledWithExactly(spyResolve, './archive2.jar', 'https://example.com/');
+                    sinon.assert.calledWithExactly(spyResolve, './applets/', 'https://example.com/');
+                    sinon.assert.notCalled(spyCaptureUrl);
+                    sinon.assert.notCalled(spyDownload);
+                    sinon.assert.calledWithExactly(spyRewrite, elem, 'data', 'https://example.com/page.html');
+                    sinon.assert.calledWithExactly(spyRewrite, elem, 'archive', 'https://example.com/archive.jar https://example.com/archive2.jar');
+                    sinon.assert.calledWithExactly(spyRewrite, elem, 'codebase', 'https://example.com/applets/');
+                  });
+                });
+
+                context('for legacy object', function () {
+                  it('should rewrite `codebase` attribute to the resolved URL if not present', async function () {
+                    var doc = createDocFixture({tagName, attrs: {classid: 'java:MyApplet.class'}});
+
+                    var {doc} = await new TestCapturer().captureDocument({doc, docUrl, options});
+                    var elem = doc.querySelector(tagName);
+                    assert.strictEqual(elem.getAttribute('classid'), 'java:MyApplet.class');
+                    assert.strictEqual(elem.getAttribute('archive'), null);
+                    assert.strictEqual(elem.getAttribute('codebase'), 'https://example.com/');
+
+                    sinon.assert.calledWithExactly(spyResolve, '', 'https://example.com/', {skipLocal: false});
+                    sinon.assert.notCalled(spyCaptureUrl);
+                    sinon.assert.notCalled(spyDownload);
+                    sinon.assert.calledWithExactly(spyRewrite, elem, 'codebase', 'https://example.com/');
+                  });
+
+                  it('should rewrite `codebase` attribute to the resolved URL if present', async function () {
+                    var doc = createDocFixture({tagName, attrs: {classid: 'java:MyApplet.class', codebase: './applet/'}});
+
+                    var {doc} = await new TestCapturer().captureDocument({doc, docUrl, options});
+                    var elem = doc.querySelector(tagName);
+                    assert.strictEqual(elem.getAttribute('classid'), 'java:MyApplet.class');
+                    assert.strictEqual(elem.getAttribute('archive'), null);
+                    assert.strictEqual(elem.getAttribute('codebase'), 'https://example.com/applet/');
+
+                    sinon.assert.calledWithExactly(spyResolve, './applet/', 'https://example.com/', {skipLocal: false});
+                    sinon.assert.notCalled(spyCaptureUrl);
+                    sinon.assert.notCalled(spyDownload);
+                    sinon.assert.calledWithExactly(spyRewrite, elem, 'codebase', 'https://example.com/applet/');
+                  });
+                });
+
+                context('for empty object', function () {
+                  it('should do nothing', async function () {
+                    var doc = createDocFixture({tagName});
+
+                    var {doc} = await new TestCapturer().captureDocument({doc, docUrl, options});
+                    var elem = doc.querySelector(tagName);
+                    assert.deepEqual(getAttributes(elem), {});
+
+                    sinon.assert.notCalled(spyCaptureUrl);
+                    sinon.assert.notCalled(spyDownload);
                   });
                 });
 
@@ -5796,12 +6045,46 @@ describe('capturer/doc-handler.mjs', function () {
                   });
                 });
 
+                context('for legacy object', function () {
+                  it('should remove `classid`, `archive`, `data`, and `codebase` attribute', async function () {
+                    var doc = createDocFixture({tagName, attrs: {classid: 'java:MyApplet.class', data: './resource.bin', archive: './archive.jar', codebase: './applets/'}});
+
+                    var {doc} = await new TestCapturer().captureDocument({doc, docUrl, options});
+                    var elem = doc.querySelector(tagName);
+                    assert.strictEqual(elem.getAttribute('classid'), null);
+                    assert.strictEqual(elem.getAttribute('data'), null);
+                    assert.strictEqual(elem.getAttribute('archive'), null);
+                    assert.strictEqual(elem.getAttribute('codebase'), null);
+
+                    sinon.assert.notCalled(spyCaptureUrl);
+                    sinon.assert.notCalled(spyDownload);
+                    sinon.assert.calledWithExactly(spyRewrite, elem, 'classid', null);
+                    sinon.assert.calledWithExactly(spyRewrite, elem, 'data', null);
+                    sinon.assert.calledWithExactly(spyRewrite, elem, 'archive', null);
+                    sinon.assert.calledWithExactly(spyRewrite, elem, 'codebase', null);
+                  });
+                });
+
                 break;
               }
               case "remove": {
                 context('for modern object', function () {
                   it('should remove the element', async function () {
                     var doc = createDocFixture({tagName, attrs: {data: './page.html'}});
+                    var elemOrig = doc.querySelector(tagName);
+
+                    var rewriter = await new TestCapturer().captureDocument({doc, docUrl, options});
+                    assert.isNull(rewriter.doc.querySelector(tagName));
+
+                    sinon.assert.notCalled(spyCaptureUrl);
+                    sinon.assert.notCalled(spyDownload);
+                    sinon.assert.calledWithExactly(spyRemove, rewriter.getClonedNode(elemOrig));
+                  });
+                });
+
+                context('for legacy object', function () {
+                  it('should remove the element', async function () {
+                    var doc = createDocFixture({tagName, attrs: {classid: 'java:MyApplet.class', archive: './archive.jar', codebase: './applets/'}});
                     var elemOrig = doc.querySelector(tagName);
 
                     var rewriter = await new TestCapturer().captureDocument({doc, docUrl, options});
@@ -5836,9 +6119,11 @@ describe('capturer/doc-handler.mjs', function () {
                   var {stub} = await rewriteNodeControlledTest({doc, docUrl, options, tester});
                   sinon.assert.called(stub);
 
-                  sinon.assert.calledWithExactly(spyResolve, './applets/', 'https://example.com/baseUrl/');
-                  sinon.assert.calledWithExactly(spyResolve, './archive.jar', 'https://example.com/baseUrl/applets/');
-                  sinon.assert.calledWithExactly(spyResolve, './archive2.jar', 'https://example.com/baseUrl/applets/');
+                  sinon.assert.calledWithExactly(spyResolve, './applets/', 'https://example.com/baseUrl/', {skipLocal: false});
+                  if (mode !== "link") {
+                    sinon.assert.calledWithExactly(spyResolve, './archive.jar', 'https://example.com/baseUrl/applets/');
+                    sinon.assert.calledWithExactly(spyResolve, './archive2.jar', 'https://example.com/baseUrl/applets/');
+                  }
                 });
               });
             }

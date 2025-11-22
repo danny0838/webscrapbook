@@ -3178,62 +3178,53 @@ class CaptureDocumentRewriter extends MapperMixin(CaptureDocumentRewriterBase) {
     }
   }
 
+  // ref: https://www.w3.org/TR/html401/struct/objects.html#edef-OBJECT
   [`_handle_{${NS_HTML}}object`](elem) {
-    const {refUrl, tasks, settings, options} = this;
-
-    let objectBaseUrl = this.baseUrl;
-
-    // Some browsers ignore the codebase attribute (e.g. Chromium).
-    // We follow it anyway.
-    if (elem.hasAttribute("codebase")) {
-      objectBaseUrl = this.resolveRelativeUrl(elem.getAttribute("codebase"), objectBaseUrl);
-      this.captureRewriteAttr(elem, "codebase", null);
-    }
-
-    // According to doc, classid is resolved using codebase, although
-    // it's usually an absolute non-http URI.
-    // https://developer.mozilla.org/en-US/docs/Web/HTML/Element/object
-    if (elem.hasAttribute("classid")) {
-      const newUrl = this.resolveRelativeUrl(elem.getAttribute("classid"), objectBaseUrl);
-      this.captureRewriteAttr(elem, "classid", newUrl);
-    }
-
-    if (elem.hasAttribute("data")) {
-      const newUrl = this.resolveRelativeUrl(elem.getAttribute("data"), objectBaseUrl);
-      this.captureRewriteAttr(elem, "data", newUrl);
-    }
-
-    if (elem.hasAttribute("archive")) {
-      const newUrls = utils.rewriteUrls(elem.getAttribute("archive"), (url) => {
-        return this.resolveRelativeUrl(url, objectBaseUrl);
-      });
-      this.captureRewriteAttr(elem, "archive", newUrls);
-    }
+    const {baseUrl, refUrl, tasks, settings, options} = this;
 
     switch (options["capture.object"]) {
-      case "link":
-        // do nothing
-        break;
-      case "blank":
-        // HTML 5.1 2nd Edition / W3C Recommendation:
-        // The data attribute, if present, must be a valid non-empty URL.
-        if (elem.hasAttribute("data")) {
-          this.captureRewriteAttr(elem, "data", null);
-        }
+      case "link": {
+        if (elem.hasAttribute("data") && !elem.hasAttribute("classid")) {
+          // HTML5
+          const newUrl = this.resolveRelativeUrl(elem.getAttribute("data"), baseUrl);
+          this.captureRewriteAttr(elem, "data", newUrl);
 
-        if (elem.hasAttribute("archive")) {
-          this.captureRewriteAttr(elem, "archive", null);
+          if (elem.hasAttribute("archive")) {
+            const newUrls = utils.rewriteUrls(elem.getAttribute("archive"), (url) => {
+              return this.resolveRelativeUrl(url, baseUrl);
+            });
+            this.captureRewriteAttr(elem, "archive", newUrls);
+          }
+
+          if (elem.hasAttribute("codebase")) {
+            const newUrl = this.resolveRelativeUrl(elem.getAttribute("codebase"), baseUrl);
+            this.captureRewriteAttr(elem, "codebase", newUrl);
+          }
+        } else if (["classid", "data", "archive", "codebase"].some(x => elem.hasAttribute(x))) {
+          // legacy object
+          const objectBaseUrl = this.resolveRelativeUrl(elem.getAttribute("codebase") || "", baseUrl, {skipLocal: false});
+          this.captureRewriteAttr(elem, "codebase", objectBaseUrl);
         }
         break;
-      case "remove":
+      }
+      case "blank": {
+        this.captureRewriteAttr(elem, "data", null);
+        this.captureRewriteAttr(elem, "classid", null);
+        this.captureRewriteAttr(elem, "archive", null);
+        this.captureRewriteAttr(elem, "codebase", null);
+        break;
+      }
+      case "remove": {
         this.captureRemoveNode(elem);
         throw new NodeDisconnect(elem);
+      }
       case "save":
       default: {
         const refPolicy = this.docRefPolicy;
-        if (elem.hasAttribute("data")) {
+        if (elem.hasAttribute("data") && !elem.hasAttribute("classid")) {
+          // HTML5
           tasks.push(async () => {
-            const sourceUrl = elem.getAttribute("data");
+            const sourceUrl = this.resolveRelativeUrl(elem.getAttribute("data"), baseUrl);
 
             // skip further processing and keep current src
             // (point to self, or not resolvable)
@@ -3295,23 +3286,68 @@ class CaptureDocumentRewriter extends MapperMixin(CaptureDocumentRewriterBase) {
               return response;
             });
           });
-        }
 
-        // plugins referenced by legacy archive are static and do not require rewriting
-        if (elem.hasAttribute("archive")) {
-          tasks.push(async () => {
-            const response = await utils.rewriteUrls(elem.getAttribute("archive"), async (url) => {
-              return (await this.downloadFile({
-                url,
-                refUrl,
-                refPolicy,
-                settings,
-                options,
-              })).url;
+          if (elem.hasAttribute("archive")) {
+            tasks.push(async () => {
+              const response = await utils.rewriteUrls(elem.getAttribute("archive"), async (url) => {
+                return (await this.downloadFile({
+                  url: this.resolveRelativeUrl(url, baseUrl),
+                  refUrl,
+                  refPolicy,
+                  settings,
+                  options,
+                })).url;
+              });
+              this.captureRewriteAttr(elem, "archive", response);
+              return response;
             });
-            this.captureRewriteAttr(elem, "archive", response);
-            return response;
-          });
+          }
+
+          if (elem.hasAttribute("codebase")) {
+            const newUrl = this.resolveRelativeUrl(elem.getAttribute("codebase"), baseUrl);
+            this.captureRewriteAttr(elem, "codebase", newUrl);
+          }
+        } else if (["classid", "data", "archive", "codebase"].some(x => elem.hasAttribute(x))) {
+          // legacy object
+          const objectBaseUrl = this.resolveRelativeUrl(elem.getAttribute("codebase") || "", baseUrl, {skipLocal: false});
+
+          if (elem.hasAttribute("archive") || elem.hasAttribute("data")) {
+            if (elem.hasAttribute("archive")) {
+              tasks.push(async () => {
+                const response = await utils.rewriteUrls(elem.getAttribute("archive"), async (url) => {
+                  return (await this.downloadFile({
+                    url: this.resolveRelativeUrl(url, objectBaseUrl),
+                    refUrl,
+                    refPolicy,
+                    settings,
+                    options,
+                  })).url;
+                });
+                this.captureRewriteAttr(elem, "archive", response);
+              });
+            }
+
+            if (elem.hasAttribute("data")) {
+              const url = this.resolveRelativeUrl(elem.getAttribute("data"), objectBaseUrl);
+              tasks.push(async () => {
+                const response = await this.downloadFile({
+                  url,
+                  refUrl,
+                  refPolicy,
+                  settings,
+                  options,
+                });
+                this.captureRewriteAttr(elem, "data", response.url);
+              });
+            }
+
+            // Assume that all resources are listed in `archive` and `data` and downloaded.
+            this.captureRewriteAttr(elem, "codebase", null);
+          } else {
+            // We can hardly retrieve all referenced files by an applet.
+            // Link to the source instead.
+            this.captureRewriteAttr(elem, "codebase", objectBaseUrl);
+          }
         }
         break;
       }

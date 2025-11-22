@@ -11334,23 +11334,31 @@ document.querySelector("p").textContent = "srcdoc content modified";
         });
 
         var zip = await Zip.loadAsync(blob);
-        assert.exists(zip.file('demo.svg'));
-        assert.exists(zip.file('green.bmp'));
-        assert.exists(zip.file('demo2.svg'));
-        assert.exists(zip.file('green2.bmp'));
-        assert.exists(zip.file('demo-1.svg'));
+        assert.hasAllKeys(zip.files, ['index.html', 'demo.svg', 'green.bmp', 'applet.jar', 'applet2.jar']);
 
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
         var doc = await readFileAsDocument(indexBlob);
         var objects = doc.querySelectorAll('object');
+
         assert.strictEqual(objects[0].getAttribute('data'), `demo.svg`);
         assert.strictEqual(objects[1].getAttribute('data'), `green.bmp`);
-        assert.strictEqual(objects[2].getAttribute('data'), `demo2.svg`);
-        assert(!objects[2].hasAttribute('codebase'));
-        assert.strictEqual(objects[3].getAttribute('data'), `green2.bmp`);
-        assert(!objects[3].hasAttribute('codebase'));
-        assert.strictEqual(objects[4].getAttribute('archive'), `demo-1.svg green.bmp`);
+
+        assert.strictEqual(objects[2].getAttribute('classid'), 'java:appletComponentArch.DynamicTreeApplet');
+        assert.strictEqual(objects[2].getAttribute('archive'), 'applet.jar');
+        assert.strictEqual(objects[2].getAttribute('codebase'), null);
+
+        assert.strictEqual(objects[3].getAttribute('classid'), 'java:appletComponentArch.DynamicTreeApplet');
+        assert.strictEqual(objects[3].getAttribute('archive'), null);
+        assert.strictEqual(objects[3].getAttribute('codebase'), `${localhost}/capture_object/object.html`);
+
+        assert.strictEqual(objects[4].getAttribute('classid'), 'java:appletComponentArch.DynamicTreeApplet');
+        assert.strictEqual(objects[4].getAttribute('archive'), 'applet2.jar');
+        assert.strictEqual(objects[4].getAttribute('codebase'), null);
+
+        assert.strictEqual(objects[5].getAttribute('classid'), 'java:appletComponentArch.DynamicTreeApplet');
+        assert.strictEqual(objects[5].getAttribute('archive'), null);
+        assert.strictEqual(objects[5].getAttribute('codebase'), `${localhost}/capture_object/resources/applet2/`);
       });
 
       it('capture.object = link', async function () {
@@ -11361,19 +11369,31 @@ document.querySelector("p").textContent = "srcdoc content modified";
         });
 
         var zip = await Zip.loadAsync(blob);
-        assert.lengthOf(Object.keys(zip.files), 1);
+        assert.hasAllKeys(zip.files, ['index.html']);
 
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
         var doc = await readFileAsDocument(indexBlob);
         var objects = doc.querySelectorAll('object');
+
         assert.strictEqual(objects[0].getAttribute('data'), `${localhost}/capture_object/demo.svg`);
         assert.strictEqual(objects[1].getAttribute('data'), `${localhost}/capture_object/green.bmp`);
-        assert.strictEqual(objects[2].getAttribute('data'), `${localhost}/capture_object/resources/demo2.svg`);
-        assert(!objects[2].hasAttribute('codebase'));
-        assert.strictEqual(objects[3].getAttribute('data'), `${localhost}/capture_object/resources/green2.bmp`);
-        assert(!objects[3].hasAttribute('codebase'));
-        assert.strictEqual(objects[4].getAttribute('archive'), `${localhost}/capture_object/demo.svg ${localhost}/capture_object/green.bmp`);
+
+        assert.strictEqual(objects[2].getAttribute('classid'), 'java:appletComponentArch.DynamicTreeApplet');
+        assert.strictEqual(objects[2].getAttribute('archive'), './applet.jar');
+        assert.strictEqual(objects[2].getAttribute('codebase'), `${localhost}/capture_object/object.html`);
+
+        assert.strictEqual(objects[3].getAttribute('classid'), 'java:appletComponentArch.DynamicTreeApplet');
+        assert.strictEqual(objects[3].getAttribute('archive'), null);
+        assert.strictEqual(objects[3].getAttribute('codebase'), `${localhost}/capture_object/object.html`);
+
+        assert.strictEqual(objects[4].getAttribute('classid'), 'java:appletComponentArch.DynamicTreeApplet');
+        assert.strictEqual(objects[4].getAttribute('archive'), './applet2.jar');
+        assert.strictEqual(objects[4].getAttribute('codebase'), `${localhost}/capture_object/resources/`);
+
+        assert.strictEqual(objects[5].getAttribute('classid'), 'java:appletComponentArch.DynamicTreeApplet');
+        assert.strictEqual(objects[5].getAttribute('archive'), null);
+        assert.strictEqual(objects[5].getAttribute('codebase'), `${localhost}/capture_object/resources/applet2/`);
       });
 
       it('capture.object = blank', async function () {
@@ -11384,19 +11404,35 @@ document.querySelector("p").textContent = "srcdoc content modified";
         });
 
         var zip = await Zip.loadAsync(blob);
-        assert.lengthOf(Object.keys(zip.files), 1);
+        assert.hasAllKeys(zip.files, ['index.html']);
 
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
         var doc = await readFileAsDocument(indexBlob);
         var objects = doc.querySelectorAll('object');
+
         assert(!objects[0].hasAttribute('data'));
         assert(!objects[1].hasAttribute('data'));
+
         assert(!objects[2].hasAttribute('data'));
+        assert(!objects[2].hasAttribute('classid'));
+        assert(!objects[2].hasAttribute('archive'));
         assert(!objects[2].hasAttribute('codebase'));
+
         assert(!objects[3].hasAttribute('data'));
+        assert(!objects[3].hasAttribute('classid'));
+        assert(!objects[3].hasAttribute('archive'));
         assert(!objects[3].hasAttribute('codebase'));
+
+        assert(!objects[4].hasAttribute('data'));
+        assert(!objects[4].hasAttribute('classid'));
         assert(!objects[4].hasAttribute('archive'));
+        assert(!objects[4].hasAttribute('codebase'));
+
+        assert(!objects[5].hasAttribute('data'));
+        assert(!objects[5].hasAttribute('classid'));
+        assert(!objects[5].hasAttribute('archive'));
+        assert(!objects[5].hasAttribute('codebase'));
       });
 
       it('capture.object = remove', async function () {
@@ -11407,7 +11443,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
         });
 
         var zip = await Zip.loadAsync(blob);
-        assert.lengthOf(Object.keys(zip.files), 1);
+        assert.hasAllKeys(zip.files, ['index.html']);
 
         var indexFile = zip.file('index.html');
         var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
