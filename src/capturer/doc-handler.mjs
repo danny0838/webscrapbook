@@ -3354,78 +3354,49 @@ class CaptureDocumentRewriter extends MapperMixin(CaptureDocumentRewriterBase) {
     }
   }
 
+  // ref: https://www.w3.org/TR/html401/struct/objects.html#edef-APPLET
   [`_handle_{${NS_HTML}}applet`](elem) {
-    const {refUrl, tasks, settings, options} = this;
+    const {refUrl, docRefPolicy: refPolicy, tasks, settings, options} = this;
 
-    let appletBaseUrl = this.baseUrl;
-
-    if (elem.hasAttribute("codebase")) {
-      appletBaseUrl = this.resolveRelativeUrl(elem.getAttribute("codebase"), appletBaseUrl);
-      this.captureRewriteAttr(elem, "codebase", null);
-    }
-
-    // According to doc, classid is used by applet.
-    // http://help.dottoro.com/lhbvlpge.php
-    if (elem.hasAttribute("classid")) {
-      const newUrl = this.resolveRelativeUrl(elem.getAttribute("classid"), appletBaseUrl);
-      this.captureRewriteAttr(elem, "classid", newUrl);
-    }
-
-    if (elem.hasAttribute("code")) {
-      let newUrl = this.resolveRelativeUrl(elem.getAttribute("code"), appletBaseUrl);
-      this.captureRewriteAttr(elem, "code", newUrl);
-    }
-
-    if (elem.hasAttribute("archive")) {
-      let newUrl = this.resolveRelativeUrl(elem.getAttribute("archive"), appletBaseUrl);
-      this.captureRewriteAttr(elem, "archive", newUrl);
-    }
+    const appletBaseUrl = this.resolveRelativeUrl(elem.getAttribute("codebase") || "", this.baseUrl, {skipLocal: false});
 
     switch (options["capture.applet"]) {
-      case "link":
-        // do nothing
+      case "link": {
+        this.captureRewriteAttr(elem, "codebase", appletBaseUrl);
         break;
-      case "blank":
-        if (elem.hasAttribute("code")) {
-          this.captureRewriteAttr(elem, "code", null);
-        }
-
-        if (elem.hasAttribute("archive")) {
-          this.captureRewriteAttr(elem, "archive", null);
-        }
+      }
+      case "blank": {
+        this.captureRewriteAttr(elem, "codebase", null);
+        this.captureRewriteAttr(elem, "code", null);
+        this.captureRewriteAttr(elem, "archive", null);
         break;
-      case "remove":
+      }
+      case "remove": {
         this.captureRemoveNode(elem);
         throw new NodeDisconnect(elem);
+      }
       case "save":
       default: {
-        const refPolicy = this.docRefPolicy;
-        if (elem.hasAttribute("code")) {
-          tasks.push(async () => {
-            const response = await this.downloadFile({
-              url: elem.getAttribute("code"),
-              refUrl,
-              refPolicy,
-              settings,
-              options,
-            });
-            this.captureRewriteAttr(elem, "code", response.url);
-            return response;
-          });
-        }
-
         if (elem.hasAttribute("archive")) {
           tasks.push(async () => {
-            const response = await this.downloadFile({
-              url: elem.getAttribute("archive"),
-              refUrl,
-              refPolicy,
-              settings,
-              options,
+            const response = await utils.rewriteCommaSeparatedUrls(elem.getAttribute("archive"), async (url) => {
+              return (await this.downloadFile({
+                url: this.resolveRelativeUrl(url, appletBaseUrl),
+                refUrl,
+                refPolicy,
+                settings,
+                options,
+              })).url;
             });
-            this.captureRewriteAttr(elem, "archive", response.url);
-            return response;
+            this.captureRewriteAttr(elem, "archive", response);
           });
+
+          // Assume that all resources are listed in archive and downloaded.
+          this.captureRewriteAttr(elem, "codebase", null);
+        } else {
+          // We can hardly retrieve all referenced files without an working applet.
+          // Link to the source instead.
+          this.captureRewriteAttr(elem, "codebase", appletBaseUrl);
         }
         break;
       }

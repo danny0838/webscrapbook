@@ -2735,6 +2735,40 @@ const rewriteUrls = (() => {
   };
 })();
 
+const rewriteCommaSeparatedUrls = (() => {
+  const KEY_PREFIX = "urn:scrapbook:str:";
+  const REGEX_UUID = new RegExp(KEY_PREFIX + "([0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12})", 'g');
+
+  return function rewriteUrls(urls, rewriter) {
+    let mapUrlPromise;
+    const response = urls.split(',').map(x => trim(x)).filter(x => !!x).map(url => {
+      let replacement = rewriter(url);
+      if (isPromise(replacement)) {
+        if (!mapUrlPromise) { mapUrlPromise = new Map(); }
+        const key = getUuid();
+        mapUrlPromise.set(key, replacement.then(r => {
+          mapUrlPromise.set(key, r);
+        }));
+        replacement = KEY_PREFIX + key;
+      }
+      return replacement;
+    }).join(',');
+
+    if (!mapUrlPromise) {
+      return response;
+    }
+
+    return Promise.all(Array.from(mapUrlPromise.values())).then(() => {
+      return response.replace(REGEX_UUID, (match, key) => {
+        if (mapUrlPromise.has(key)) {
+          return mapUrlPromise.get(key);
+        }
+        return match;
+      });
+    });
+  };
+})();
+
 /**
  * Get all accessible descendant frames.
  */
@@ -3498,6 +3532,7 @@ export {
   rewriteCssText,
   rewriteSrcset,
   rewriteUrls,
+  rewriteCommaSeparatedUrls,
   flattenFrames,
   getViewport,
   getAnchoredPosition,
