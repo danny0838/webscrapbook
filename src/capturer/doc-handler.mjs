@@ -868,8 +868,7 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
     capturer, settings, options,
     isHeadless,
     docUrl, docUrlHash, envDocUrl,
-    baseUrl, baseUrlFinal, baseUrlFallback,
-    refUrl, docRefPolicy,
+    baseUrl, refPolicy,
     mime,
   }) {
     const includeShadowDom = options["capture.shadowDom"] === "save";
@@ -889,8 +888,7 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
       capturer, settings, options,
       isHeadless, isPartial: !!selection,
       docUrl, docUrlHash, envDocUrl,
-      baseUrl, baseUrlFinal, baseUrlFallback,
-      refUrl, docRefPolicy,
+      baseUrl, refPolicy,
       mime,
       origNodeMap, clonedNodeMap,
     });
@@ -989,8 +987,7 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
     capturer, settings, options,
     isHeadless, isPartial,
     docUrl, docUrlHash, envDocUrl,
-    baseUrl, baseUrlFinal, baseUrlFallback,
-    refUrl, docRefPolicy,
+    baseUrl, refPolicy,
     mime,
     origNodeMap, clonedNodeMap,
   }) {
@@ -1002,13 +999,42 @@ class CaptureDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
     const {missionId, timeId, isMainPage, isMainFrame} = settings;
     const {characterSet: charset, title} = this.origDoc;
 
+    // baseUrl: updates dynamically when the first base[href] is parsed.
+    // baseUrlFallback: the initial baseUrl, used for resolving base elements.
+    // baseUrlFinal: the final baseUrl, used for resolving links etc.
+    //
+    // URLs in the document are usually resolved using baseUrl, which can be
+    // dynamically changed when the first <base href="..."> element is parsed
+    // or when it's "href" attribute changes.
+    //
+    // Nevertheless, links and citations should be updated when the baseUrl
+    // changes, such as a[href], a[ping], q[cite]. As a result, they should
+    // be resolved using baseUrlFinal.
+    //
+    // Normally baseUrl should be equivalent to baseUrlFinal as base[href]
+    // should appear at first according to spec. Though we still implement
+    // dynamic baseUrl for a bad document with an URL before base[href].
+    //
+    // ref: https://html.spec.whatwg.org/#dynamic-changes-to-base-urls
+    const baseUrlFallback = baseUrl;
+    const baseUrlFinal = (() => {
+      let base = baseUrlFallback;
+      for (const elem of doc.querySelectorAll('base[href]')) {
+        if (elem.closest('svg, math')) { continue; }
+        base = new URL(elem.getAttribute('href'), baseUrlFallback).href;
+        base = utils.splitUrlByAnchor(base)[0];
+        break;
+      }
+      return base;
+    })();
+
     Object.assign(this, {
       missionId, timeId, settings, options,
       isHeadless,
       isPartial,
       docUrl, docUrlHash, envDocUrl,
       baseUrl, baseUrlFinal, baseUrlFallback,
-      refUrl, docRefPolicy,
+      refUrl: envDocUrl, docRefPolicy: refPolicy,
       mime, charset, title,
     });
 
