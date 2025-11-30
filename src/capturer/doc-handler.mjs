@@ -3746,6 +3746,52 @@ class CaptureDocumentRewriter extends MapperMixin(CaptureDocumentRewriterBase) {
     this.escapeRawTextTag(elem);
   }
 
+  [`_handle_{${NS_HTML}}noframes`](elem) {
+    const {options} = this;
+
+    switch (options["capture.noframes"]) {
+      case "remove":
+        this.captureRemoveNode(elem);
+        throw new NodeDisconnect(elem);
+      case "save":
+      default: {
+        // In a modern browser, the elem contains only text.
+        // See <noscript> for details.
+        const elemOrig = this.getOrigNode(elem);
+        if (elemOrig && elemOrig.innerHTML === elemOrig.textContent) {
+          const tempElem = this.doc.createElement('template');
+          tempElem.innerHTML = elem.textContent;
+          elem.textContent = '';
+          elem.appendChild(tempElem.content.cloneNode(true));
+        }
+        break;
+      }
+    }
+  }
+
+  [`_handle_{${NS_HTML}}noembed`](elem) {
+    const {options} = this;
+
+    switch (options["capture.noembed"]) {
+      case "remove":
+        this.captureRemoveNode(elem);
+        throw new NodeDisconnect(elem);
+      case "save":
+      default: {
+        // In a modern browser, the elem contains only text.
+        // See <noscript> for details.
+        const elemOrig = this.getOrigNode(elem);
+        if (elemOrig && elemOrig.innerHTML === elemOrig.textContent) {
+          const tempElem = this.doc.createElement('template');
+          tempElem.innerHTML = elem.textContent;
+          elem.textContent = '';
+          elem.appendChild(tempElem.content.cloneNode(true));
+        }
+        break;
+      }
+    }
+  }
+
   [`_handle_{${NS_SVG}}`](elem) {
     this[`_handle_{${NS_SVG}}${elem.localName}`]?.call(this, elem);
   }

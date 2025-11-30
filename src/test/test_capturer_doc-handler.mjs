@@ -3642,6 +3642,89 @@ describe('capturer/doc-handler.mjs', function () {
         });
       }
 
+      context('for <noframes>', function () {
+        function docFactoryData() {
+          return {tagName, children: [
+            'foo',
+            {tagName: '#comment', value: 'bar'},
+            {tagName: 'img', attrs: {src: './green.bmp'}},
+          ]};
+        }
+
+        async function docFactoryHeaded() {
+          const _doc = createDocFixture(docFactoryData());
+          const blob = new Blob([utils.documentToString(_doc)], {type: _doc.contentType});
+          const src = URL.createObjectURL(blob);
+          const {contentDocument: doc} = await createIframeFixture({src});
+          URL.revokeObjectURL(src);
+
+          // noframes content is loaded as text in a modern browser.
+          assert.lengthOf(doc.querySelector('noframes').childNodes, 1);
+
+          return doc;
+        }
+
+        function docFactoryHeadless() {
+          const doc = createDocFixture(docFactoryData());
+
+          // Verify that noframes content is normal DOM.
+          assert.lengthOf(doc.querySelector('noframes').childNodes, 3);
+
+          return doc;
+        }
+
+        const tagName = 'noframes';
+
+        for (const mode of ["save", "remove", "<other>"]) {
+          context(`when options["capture.noframes"] = "${mode}"`, function () {
+            const options = {
+              "capture.noframes": mode,
+              "capture.image": "save",
+            };
+
+            switch (mode) {
+              case "save":
+              default: {
+                for (const [desc, factory] of [
+                  ['should keep and rewrite content elements for a headed document', docFactoryHeaded],
+                  ['should keep and rewrite content elements for a headless document', docFactoryHeadless],
+                ]) {
+                  it(desc, async function () {
+                    var doc = await factory();
+
+                    var {doc} = await new TestCapturer().captureDocument({doc, docUrl, options});
+                    var elem = doc.querySelector(tagName);
+                    assert.strictEqual(elem.innerHTML, 'foo<!--bar--><img src="green.bmp">');
+
+                    sinon.assert.calledWith(spyRewrite, doc.querySelector('noframes img'), 'src');
+                  });
+                }
+
+                break;
+              }
+              case "remove": {
+                for (const [desc, factory] of [
+                  ['should remove the element for a headed document', docFactoryHeaded],
+                  ['should remove the element for a headless document', docFactoryHeadless],
+                ]) {
+                  it(desc, async function () {
+                    var doc = await factory();
+                    var elemOrig = doc.querySelector(tagName);
+
+                    var rewriter = await new TestCapturer().captureDocument({doc, docUrl, options});
+                    assert.isNull(rewriter.doc.querySelector(tagName));
+
+                    sinon.assert.calledOnceWithExactly(spyRemove, rewriter.getClonedNode(elemOrig));
+                  });
+                }
+
+                break;
+              }
+            }
+          });
+        }
+      });
+
       for (const tagName of ["a", "area"]) {
         context(`for <${tagName}>`, function () {
           function docFactory(href = './page.html', attrs, value = 'text') {
@@ -5603,6 +5686,89 @@ describe('capturer/doc-handler.mjs', function () {
                   sinon.assert.calledWithExactly(spyResolve.getCall(1), './plugins/', 'https://example.com/baseUrl/');
                 });
               });
+            }
+          });
+        }
+      });
+
+      context('for <noembed>', function () {
+        function docFactoryData() {
+          return {tagName, children: [
+            'foo',
+            {tagName: '#comment', value: 'bar'},
+            {tagName: 'img', attrs: {src: './green.bmp'}},
+          ]};
+        }
+
+        async function docFactoryHeaded() {
+          const _doc = createDocFixture(docFactoryData());
+          const blob = new Blob([utils.documentToString(_doc)], {type: _doc.contentType});
+          const src = URL.createObjectURL(blob);
+          const {contentDocument: doc} = await createIframeFixture({src});
+          URL.revokeObjectURL(src);
+
+          // noembed content is loaded as text in a modern browser.
+          assert.lengthOf(doc.querySelector('noembed').childNodes, 1);
+
+          return doc;
+        }
+
+        function docFactoryHeadless() {
+          const doc = createDocFixture(docFactoryData());
+
+          // Verify that noembed content is normal DOM.
+          assert.lengthOf(doc.querySelector('noembed').childNodes, 3);
+
+          return doc;
+        }
+
+        const tagName = 'noembed';
+
+        for (const mode of ["save", "remove", "<other>"]) {
+          context(`when options["capture.noembed"] = "${mode}"`, function () {
+            const options = {
+              "capture.noembed": mode,
+              "capture.image": "save",
+            };
+
+            switch (mode) {
+              case "save":
+              default: {
+                for (const [desc, factory] of [
+                  ['should keep and rewrite content elements for a headed document', docFactoryHeaded],
+                  ['should keep and rewrite content elements for a headless document', docFactoryHeadless],
+                ]) {
+                  it(desc, async function () {
+                    var doc = await factory();
+
+                    var {doc} = await new TestCapturer().captureDocument({doc, docUrl, options});
+                    var elem = doc.querySelector(tagName);
+                    assert.strictEqual(elem.innerHTML, 'foo<!--bar--><img src="green.bmp">');
+
+                    sinon.assert.calledWith(spyRewrite, doc.querySelector('noembed img'), 'src');
+                  });
+                }
+
+                break;
+              }
+              case "remove": {
+                for (const [desc, factory] of [
+                  ['should remove the element for a headed document', docFactoryHeaded],
+                  ['should remove the element for a headless document', docFactoryHeadless],
+                ]) {
+                  it(desc, async function () {
+                    var doc = await factory();
+                    var elemOrig = doc.querySelector(tagName);
+
+                    var rewriter = await new TestCapturer().captureDocument({doc, docUrl, options});
+                    assert.isNull(rewriter.doc.querySelector(tagName));
+
+                    sinon.assert.calledOnceWithExactly(spyRemove, rewriter.getClonedNode(elemOrig));
+                  });
+                }
+
+                break;
+              }
             }
           });
         }
