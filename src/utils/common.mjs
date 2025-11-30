@@ -73,6 +73,8 @@ const DEFAULT_OPTIONS = {
   "capture.mergeCssResources": true,
   "capture.script": "remove", // "save", "link", "blank", "remove"
   "capture.noscript": "save", // "save", "remove"
+  "capture.noframes": "save", // "save", "remove"
+  "capture.noembed": "save", // "save", "remove"
   "capture.contentSecurityPolicy": "remove", // "save", "remove"
   "capture.ping": "blank", // "link", "blank"
   "capture.preload": "remove", // "blank", "remove"
