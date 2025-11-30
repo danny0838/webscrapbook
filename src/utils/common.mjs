@@ -2783,10 +2783,10 @@ function getMetaRefreshTarget(doc, baseUrl = doc.URL,
     if (typeof metaRefresh.time === 'undefined') {
       continue;
     }
-    if (!(includeDelayedRefresh || metaRefresh.time === 0)) {
+    if (!includeDelayedRefresh && metaRefresh.time !== 0) {
       continue;
     }
-    if (!(includeNoscript || !elem.closest('noscript'))) {
+    if (!includeNoscript && elem.closest('noscript')) {
       continue;
     }
     if (metaRefresh.time > lastMetaRefreshTime) {
