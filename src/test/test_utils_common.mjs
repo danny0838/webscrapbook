@@ -3202,6 +3202,74 @@ div { image-background: var(${/(--sb(\d+)-2)/}); }`;
       ]});
       assert.strictEqual(utils.getMetaRefreshTarget(doc, 'https://example.org/', {includeNoscript: true}), 'https://example.org/page.html');
     });
+
+    it('should skip a meta refresh if in <noframes>', function () {
+      var doc = createDocFixture({
+        tagName: 'noframes',
+        children: [
+          {name: 'meta', attrs: {"http-equiv": "refresh", "content": "0; page.html"}},
+        ],
+      });
+      assert.strictEqual(utils.getMetaRefreshTarget(doc, 'https://example.org/'), undefined);
+
+      // ignore svg:noframes
+      var doc = createDocFixture({name: 'noframes', ns: NS_SVG, children: [
+        {name: 'meta', attrs: {"http-equiv": "refresh", "content": "0; page.html"}},
+      ]});
+      assert.strictEqual(utils.getMetaRefreshTarget(doc, 'https://example.org/'), 'https://example.org/page.html');
+
+      // don't ignore noframes svg:noframes
+      var doc = createDocFixture({name: 'noframes', children: [
+        {name: 'noframes', ns: NS_SVG, children: [
+          {name: 'meta', attrs: {"http-equiv": "refresh", "content": "0; page.html"}},
+        ]},
+      ]});
+      assert.strictEqual(utils.getMetaRefreshTarget(doc, 'https://example.org/'), undefined);
+    });
+
+    it('should not skip a meta refresh in <noframes> when `includeNoframes` is truthy', function () {
+      var doc = createDocFixture({
+        tagName: 'noframes',
+        children: [
+          {name: 'meta', attrs: {"http-equiv": "refresh", "content": "0; page.html"}},
+        ],
+      });
+      assert.strictEqual(utils.getMetaRefreshTarget(doc, 'https://example.org/', {includeNoframes: true}), 'https://example.org/page.html');
+    });
+
+    it('should skip a meta refresh if in <noembed>', function () {
+      var doc = createDocFixture({
+        tagName: 'noembed',
+        children: [
+          {name: 'meta', attrs: {"http-equiv": "refresh", "content": "0; page.html"}},
+        ],
+      });
+      assert.strictEqual(utils.getMetaRefreshTarget(doc, 'https://example.org/'), undefined);
+
+      // ignore svg:noembed
+      var doc = createDocFixture({name: 'noembed', ns: NS_SVG, children: [
+        {name: 'meta', attrs: {"http-equiv": "refresh", "content": "0; page.html"}},
+      ]});
+      assert.strictEqual(utils.getMetaRefreshTarget(doc, 'https://example.org/'), 'https://example.org/page.html');
+
+      // don't ignore noembed svg:noembed
+      var doc = createDocFixture({name: 'noembed', children: [
+        {name: 'noembed', ns: NS_SVG, children: [
+          {name: 'meta', attrs: {"http-equiv": "refresh", "content": "0; page.html"}},
+        ]},
+      ]});
+      assert.strictEqual(utils.getMetaRefreshTarget(doc, 'https://example.org/'), undefined);
+    });
+
+    it('should not skip a meta refresh in <noembed> when `includeNoembed` is truthy', function () {
+      var doc = createDocFixture({
+        tagName: 'noembed',
+        children: [
+          {name: 'meta', attrs: {"http-equiv": "refresh", "content": "0; page.html"}},
+        ],
+      });
+      assert.strictEqual(utils.getMetaRefreshTarget(doc, 'https://example.org/', {includeNoembed: true}), 'https://example.org/page.html');
+    });
   });
 
   $describe.skipIf($.noBrowser)('getOffsetInSource()', function () {

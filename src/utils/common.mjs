@@ -2859,10 +2859,12 @@ function getAnchoredPosition(elem, {clientX, clientY}, viewport) {
  * @param {Object} [options]
  * @param {boolean} [options.includeDelayedRefresh] - Also consider meta refresh with non-0 refresh time.
  * @param {boolean} [options.includeNoscript] - Also consider meta refresh in <noscript>.
+ * @param {boolean} [options.includeNoframes] - Also consider meta refresh in <noframes>.
+ * @param {boolean} [options.includeNoembed] - Also consider meta refresh in <noembed>.
  * @return {string|undefined} Absolute URL of the meta refresh target.
  */
 function getMetaRefreshTarget(doc, baseUrl = doc.URL, {
-  includeDelayedRefresh = false, includeNoscript = false,
+  includeDelayedRefresh = false, includeNoscript = false, includeNoframes = false, includeNoembed = false,
 } = {}) {
   let lastMetaRefreshTime = Infinity;
   let lastMetaRefreshUrl;
@@ -2887,6 +2889,12 @@ function getMetaRefreshTarget(doc, baseUrl = doc.URL, {
       continue;
     }
     if (!includeNoscript && doc.evaluate('ancestor::html:noscript', elem, NS_RESOLVER).iterateNext()) {
+      continue;
+    }
+    if (!includeNoframes && doc.evaluate('ancestor::html:noframes', elem, NS_RESOLVER).iterateNext()) {
+      continue;
+    }
+    if (!includeNoembed && doc.evaluate('ancestor::html:noembed', elem, NS_RESOLVER).iterateNext()) {
       continue;
     }
     if (metaRefresh.time > lastMetaRefreshTime) {
