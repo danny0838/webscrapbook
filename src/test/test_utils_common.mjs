@@ -2982,14 +2982,14 @@ div { image-background: var(${/(--sb(\d+)-2)/}); }`;
       assert.strictEqual(utils.getMetaRefreshTarget(doc, 'https://example.org/', true), 'https://example.org/page2.html');
     });
 
-    it('should skip a meta refresh if in noscript', function () {
+    it('should skip a meta refresh if in <noscript>', function () {
       var doc = createDocFixture({name: 'noscript', children: [
         {name: 'meta', attrs: {"http-equiv": "refresh", "content": "0; page.html"}},
       ]});
       assert.strictEqual(utils.getMetaRefreshTarget(doc, 'https://example.org/'), undefined);
     });
 
-    it('should not skip a meta refresh in noscript when `includeNoscript` is truthy', function () {
+    it('should not skip a meta refresh in <noscript> when `includeNoscript` is truthy', function () {
       var doc = createDocFixture({name: 'noscript', children: [
         {name: 'meta', attrs: {"http-equiv": "refresh", "content": "0; page.html"}},
       ]});
