@@ -879,7 +879,7 @@ describe('utils/doc-handler.mjs', function () {
     describe('#htmlify()', function () {
       context('shadow DOMs handling', function () {
         it('should record shadow DOMs recursively', function () {
-          var spy = sinon.spy(DocumentRewriter.prototype, "htmlify");
+          var spy = sinon.spy(DocumentRewriter.prototype, "_htmlify_tree");
 
           var doc = createDocFixture({name: 'div', shadow: {
             children: [
@@ -907,7 +907,7 @@ describe('utils/doc-handler.mjs', function () {
         });
 
         $it.skipIf($.noShadowRootClosed)('should work for closed shadow DOMs', function () {
-          var spy = sinon.spy(DocumentRewriter.prototype, "htmlify");
+          var spy = sinon.spy(DocumentRewriter.prototype, "_htmlify_tree");
 
           var doc = createDocFixture({name: 'div', shadow: {
             mode: 'closed',
@@ -926,7 +926,7 @@ describe('utils/doc-handler.mjs', function () {
         });
 
         $it.skipIf($.noShadowRootClonable)('should work for clonable shadow DOMs', function () {
-          var spy = sinon.spy(DocumentRewriter.prototype, "htmlify");
+          var spy = sinon.spy(DocumentRewriter.prototype, "_htmlify_tree");
 
           var doc = createDocFixture({name: 'div', shadow: {
             clonable: true,
@@ -945,7 +945,7 @@ describe('utils/doc-handler.mjs', function () {
         });
 
         $it.skipIf($.noShadowRootDelegatesFocus)('should handle `delegatesFocus` for shadow DOMs', function () {
-          var spy = sinon.spy(DocumentRewriter.prototype, "htmlify");
+          var spy = sinon.spy(DocumentRewriter.prototype, "_htmlify_tree");
 
           var doc = createDocFixture({name: 'div', shadow: {
             delegatesFocus: true,
@@ -964,7 +964,7 @@ describe('utils/doc-handler.mjs', function () {
         });
 
         $it.skipIf($.noShadowRootSerializable)('should handle `serializable` for shadow DOMs', function () {
-          var spy = sinon.spy(DocumentRewriter.prototype, "htmlify");
+          var spy = sinon.spy(DocumentRewriter.prototype, "_htmlify_tree");
 
           var doc = createDocFixture({name: 'div', shadow: {
             serializable: true,
@@ -983,7 +983,7 @@ describe('utils/doc-handler.mjs', function () {
         });
 
         $it.skipIf($.noShadowRootSlotAssignment)('should handle `slotAssignment` for shadow DOMs', function () {
-          var spy = sinon.spy(DocumentRewriter.prototype, "htmlify");
+          var spy = sinon.spy(DocumentRewriter.prototype, "_htmlify_tree");
 
           var doc = createDocFixture({name: 'div', shadow: {
             slotAssignment: 'manual',
@@ -1136,6 +1136,28 @@ describe('utils/doc-handler.mjs', function () {
           assert.strictEqual(host.getAttribute('data-scrapbook-shadowdom'), `\
 <slot data-scrapbook-slot-assigned="0,1">default missing</slot>\
 <slot name="person" data-scrapbook-slot-assigned="2,3">person missing</slot>`);
+        });
+
+        $it.skipIf($.noShadowRootSlotAssignment)('should safely ignore non-HTML <slot> elements', async function () {
+          var doc = createDocFixture({
+            name: 'div',
+            children: [
+              {name: 'span', value: 'Default'},
+            ],
+            shadow: {
+              slotAssignment: 'manual',
+              children: [
+                {ns: NS_SVG, name: 'slot', value: 'default missing'},
+              ],
+            },
+          });
+          var elem = doc.querySelector('div');
+
+          rewriter.htmlify(elem);
+
+          var host = elem;
+          assert.strictEqual(host.innerHTML, `<span>Default</span>`);
+          assert.strictEqual(host.getAttribute('data-scrapbook-shadowdom'), `<slot>default missing</slot>`);
         });
       });
 
@@ -1419,6 +1441,138 @@ describe('utils/doc-handler.mjs', function () {
           assert.strictEqual(constructed[1].cssRules[1].cssText, '#adopted2-2 { color: blue; }');
 
           // should remove special attributes
+          assert.deepEqual(getAttributes(host1), {});
+          assert.deepEqual(getAttributes(host2), {});
+        });
+
+        $it.skipIf($.noAdoptedStylesheet)('should allow cheap subclassing with central map', async function () {
+          var {contentDocument: doc} = await createIframeFixture({docData: {
+            name: 'html',
+            attrs: {
+              'data-scrapbook-adoptedstylesheet-0': ['#adopted1-1 { color: green; }', '#adopted1-2 { color: yellow; }'].join('\n\n'),
+              'data-scrapbook-adoptedstylesheet-1': ['#adopted2-1 { color: red; }', '#adopted2-2 { color: blue; }'].join('\n\n'),
+            },
+            children: [
+              {name: 'head'},
+              {name: 'body', children: [{
+                name: 'div',
+                attrs: {
+                  'data-scrapbook-adoptedstylesheets': '0',
+                },
+                shadow: {virtual: true, children: [{
+                  name: 'div',
+                  attrs: {
+                    'data-scrapbook-adoptedstylesheets': '0,1',
+                  },
+                  shadow: {virtual: true},
+                }]},
+              }]},
+            ],
+          }});
+
+          class Rewriter extends DocumentRewriter {
+            unhtmlify(doc, options = {}) {
+              const {adoptedStyleSheetMap = new Map()} = options;
+              if (adoptedStyleSheetMap !== options.adoptedStyleSheetMap) {
+                options = {...options, adoptedStyleSheetMap};
+              }
+              this._unhtmlify_sharedAdoptedStyleSheets(doc.documentElement, options);
+              this._unhtmlify_tree(doc, options);
+            }
+          }
+
+          const rewriter = new Rewriter();
+          rewriter.unhtmlify(doc);
+
+          var docElem = doc.documentElement;
+          var host1 = doc.querySelector('div'), shadow1 = host1.shadowRoot;
+          var host2 = shadow1.querySelector('div'), shadow2 = host2.shadowRoot;
+
+          // should recover constructed stylesheets
+          var constructed = shadow1.adoptedStyleSheets;
+          assert.strictEqual(constructed[0].cssRules[0].cssText, '#adopted1-1 { color: green; }');
+          assert.strictEqual(constructed[0].cssRules[1].cssText, '#adopted1-2 { color: yellow; }');
+          var constructed = shadow2.adoptedStyleSheets;
+          assert.strictEqual(constructed[0].cssRules[0].cssText, '#adopted1-1 { color: green; }');
+          assert.strictEqual(constructed[0].cssRules[1].cssText, '#adopted1-2 { color: yellow; }');
+          assert.strictEqual(constructed[1].cssRules[0].cssText, '#adopted2-1 { color: red; }');
+          assert.strictEqual(constructed[1].cssRules[1].cssText, '#adopted2-2 { color: blue; }');
+
+          // should remove special attributes
+          assert.deepEqual(getAttributes(docElem), {});
+          assert.deepEqual(getAttributes(host1), {});
+          assert.deepEqual(getAttributes(host2), {});
+        });
+
+        $it.skipIf($.noAdoptedStylesheet)('should allow cheap subclassing with hierarchical maps', async function () {
+          var {contentDocument: doc} = await createIframeFixture({docData: {
+            name: 'html',
+            attrs: {
+              'data-scrapbook-adoptedstylesheets': '2,4',
+              'data-scrapbook-adoptedstylesheet-2': '#adopted2-3 { color: blue; }',
+              'data-scrapbook-adoptedstylesheet-4': '#adopted4-3 { color: green; }',
+            },
+            children: [
+              {name: 'head'},
+              {name: 'body', children: [{
+                name: 'div',
+                attrs: {
+                  'data-scrapbook-adoptedstylesheets': '1,3',
+                    'data-scrapbook-adoptedstylesheet-1': '#adopted1-2 { color: yellow; }',
+                    'data-scrapbook-adoptedstylesheet-3': '#adopted3-2 { color: yellow; }',
+                },
+                shadow: {virtual: true, children: [{
+                  name: 'div',
+                  attrs: {
+                    'data-scrapbook-adoptedstylesheets': '0,1,2,3,4',
+                    'data-scrapbook-adoptedstylesheet-0': '#adopted0-1 { color: green; }',
+                    'data-scrapbook-adoptedstylesheet-3': '#adopted3-1 { color: green; }',
+                    'data-scrapbook-adoptedstylesheet-4': '#adopted4-1 { color: green; }',
+                  },
+                  shadow: {virtual: true},
+                }]},
+              }]},
+            ],
+          }});
+
+          class Rewriter extends DocumentRewriter {
+            _unhtmlify_tree(node, options = {}) {
+              if (node.host || node.nodeType === Node.DOCUMENT_NODE) {
+                const adoptedStyleSheetMap = new Map(options.adoptedStyleSheetMap);
+                options = {...options, adoptedStyleSheetMap};
+                const elem = node.host ?? node.documentElement;
+                this._unhtmlify_sharedAdoptedStyleSheets(elem, options);
+              }
+              super._unhtmlify_tree(node, options);
+            }
+          }
+
+          const rewriter = new Rewriter();
+          rewriter.unhtmlify(doc);
+
+          var docElem = doc.documentElement;
+          var host1 = doc.querySelector('div'), shadow1 = host1.shadowRoot;
+          var host2 = shadow1.querySelector('div'), shadow2 = host2.shadowRoot;
+
+          // should recover constructed stylesheets
+          var constructed = doc.adoptedStyleSheets;
+          assert.strictEqual(constructed[0].cssRules[0].cssText, '#adopted2-3 { color: blue; }');
+          assert.strictEqual(constructed[1].cssRules[0].cssText, '#adopted4-3 { color: green; }');
+          assert.notExists(constructed[3]);
+          var constructed = shadow1.adoptedStyleSheets;
+          assert.strictEqual(constructed[0].cssRules[0].cssText, '#adopted1-2 { color: yellow; }');
+          assert.strictEqual(constructed[1].cssRules[0].cssText, '#adopted3-2 { color: yellow; }');
+          assert.notExists(constructed[2]);
+          var constructed = shadow2.adoptedStyleSheets;
+          assert.strictEqual(constructed[0].cssRules[0].cssText, '#adopted0-1 { color: green; }');
+          assert.strictEqual(constructed[1].cssRules[0].cssText, '#adopted1-2 { color: yellow; }');
+          assert.strictEqual(constructed[2].cssRules[0].cssText, '#adopted2-3 { color: blue; }');
+          assert.strictEqual(constructed[3].cssRules[0].cssText, '#adopted3-1 { color: green; }');
+          assert.strictEqual(constructed[4].cssRules[0].cssText, '#adopted4-1 { color: green; }');
+          assert.notExists(constructed[5]);
+
+          // should remove special attributes
+          assert.deepEqual(getAttributes(docElem), {});
           assert.deepEqual(getAttributes(host1), {});
           assert.deepEqual(getAttributes(host2), {});
         });

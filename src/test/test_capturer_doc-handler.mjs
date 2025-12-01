@@ -935,6 +935,35 @@ describe('capturer/doc-handler.mjs', function () {
           assert.strictEqual(host.getAttribute('data-scrapbook-shadowdom'), '<slot data-scrapbook-slot-assigned="1">person missing</slot>');
         });
 
+        $it.skipIf($.noShadowRootSlotAssignment)('should safely ignore non-HTML <slot> elements', async function () {
+          var doc = createDocFixture({
+            name: 'div',
+            children: [
+              {name: 'span', value: 'Default'},
+            ],
+            shadow: {
+              slotAssignment: 'manual',
+              children: [
+                {ns: NS_SVG, name: 'slot', value: 'default missing'},
+              ],
+            },
+          });
+          sinon.stub(doc, 'URL').value(docUrl);
+
+          var capturer = new TestCapturer();
+          var response = await capturer.retrieveDocumentContent({
+            doc,
+            isMainPage: true,
+            item,
+            options,
+          });
+          var doc = await utils.readFileAsDocument(await capturer.loadBlobCache(response[docUrl].blob));
+
+          var host = doc.querySelector('div');
+          assert.strictEqual(host.innerHTML, `<span>Default</span>`);
+          assert.strictEqual(host.getAttribute('data-scrapbook-shadowdom'), `<slot>default missing</slot>`);
+        });
+
         $it.skipIf($.noShadowRootSlotAssignment)('should clear obsolete attributes for <slot>', async function () {
           var doc = createDocFixture({
             name: 'div',
@@ -1081,6 +1110,31 @@ Default3\
             requireBasicLoader: false,
           });
         });
+
+        it('should safely ignore non-HTML <canvas> elements', async function () {
+          var spy = sinon.spy(TestCapturer.prototype, "preSaveProcess");
+
+          var doc = createDocFixture({ns: NS_SVG, name: 'canvas', attrs: {
+            'data-scrapbook-canvas': 'data:image/png,aaa',
+          }});
+          sinon.stub(doc, 'URL').value(docUrl);
+
+          var capturer = new TestCapturer();
+          var response = await capturer.retrieveDocumentContent({
+            doc,
+            isMainPage: true,
+            item,
+            options,
+          });
+          var doc = await utils.readFileAsDocument(await capturer.loadBlobCache(response[docUrl].blob));
+
+          var attrs = getAttributes(doc.querySelector('canvas'));
+          assert.deepEqual(attrs, {'data-scrapbook-canvas': 'data:image/png,aaa'});
+
+          sinon.assert.calledWithMatch(spy, {
+            requireBasicLoader: false,
+          });
+        });
       });
 
       context('form status handling', function () {
@@ -1109,6 +1163,25 @@ Default3\
           });
         });
 
+        it('should remove obsolete special attributes for <input>', async function () {
+          var doc = createDocFixture({name: 'input', attrs: {
+            'data-scrapbook-input-value': 'foo',
+          }});
+          sinon.stub(doc, 'URL').value(docUrl);
+
+          var capturer = new TestCapturer();
+          var response = await capturer.retrieveDocumentContent({
+            doc,
+            isMainPage: true,
+            item,
+            options,
+          });
+          var doc = await utils.readFileAsDocument(await capturer.loadBlobCache(response[docUrl].blob));
+
+          var attrs = getAttributes(doc.querySelector('input'));
+          assert.deepEqual(attrs, {});
+        });
+
         it('should record properties for <input type="radio">', async function () {
           var spy = sinon.spy(TestCapturer.prototype, "preSaveProcess");
 
@@ -1131,6 +1204,30 @@ Default3\
 
           sinon.assert.calledWithMatch(spy, {
             requireBasicLoader: false,
+          });
+        });
+
+        it('should remove obsolete special attributes for <input type="radio">', async function () {
+          var doc = createDocFixture({name: 'input', attrs: {
+            'type': 'radio',
+            'data-scrapbook-input-checked': 'true',
+            'data-scrapbook-input-indeterminate': '',
+          }});
+          sinon.stub(doc, 'URL').value(docUrl);
+
+          var capturer = new TestCapturer();
+          var response = await capturer.retrieveDocumentContent({
+            doc,
+            isMainPage: true,
+            item,
+            options,
+          });
+          var doc = await utils.readFileAsDocument(await capturer.loadBlobCache(response[docUrl].blob));
+
+          var attrs = getAttributes(doc.querySelector('input'));
+          assert.deepEqual(attrs, {
+            'type': 'radio',
+            'data-scrapbook-input-indeterminate': '',
           });
         });
 
@@ -1164,6 +1261,27 @@ Default3\
           });
         });
 
+        it('should remove obsolete special attributes for <input type="checkbox">', async function () {
+          var doc = createDocFixture({name: 'input', attrs: {
+            'type': 'checkbox',
+            'data-scrapbook-input-checked': 'true',
+            'data-scrapbook-input-indeterminate': '',
+          }});
+          sinon.stub(doc, 'URL').value(docUrl);
+
+          var capturer = new TestCapturer();
+          var response = await capturer.retrieveDocumentContent({
+            doc,
+            isMainPage: true,
+            item,
+            options,
+          });
+          var doc = await utils.readFileAsDocument(await capturer.loadBlobCache(response[docUrl].blob));
+
+          var attrs = getAttributes(doc.querySelector('input'));
+          assert.deepEqual(attrs, {type: 'checkbox'});
+        });
+
         it('should not record properties for <input type="password">', async function () {
           var spy = sinon.spy(TestCapturer.prototype, "preSaveProcess");
 
@@ -1187,6 +1305,26 @@ Default3\
           sinon.assert.calledWithMatch(spy, {
             requireBasicLoader: false,
           });
+        });
+
+        it('should remove obsolete special attributes for <input type="password">', async function () {
+          var doc = createDocFixture({name: 'input', attrs: {
+            'type': 'password',
+            'data-scrapbook-input-value': 'foo',
+          }});
+          sinon.stub(doc, 'URL').value(docUrl);
+
+          var capturer = new TestCapturer();
+          var response = await capturer.retrieveDocumentContent({
+            doc,
+            isMainPage: true,
+            item,
+            options,
+          });
+          var doc = await utils.readFileAsDocument(await capturer.loadBlobCache(response[docUrl].blob));
+
+          var attrs = getAttributes(doc.querySelector('input'));
+          assert.deepEqual(attrs, {type: 'password'});
         });
 
         it('should record properties for <textarea>', async function () {
@@ -1215,6 +1353,25 @@ Default3\
           });
         });
 
+        it('should remove obsolete special attributes for <textarea>', async function () {
+          var doc = createDocFixture({name: 'textarea', attrs: {
+            'data-scrapbook-textarea-value': 'foo',
+          }});
+          sinon.stub(doc, 'URL').value(docUrl);
+
+          var capturer = new TestCapturer();
+          var response = await capturer.retrieveDocumentContent({
+            doc,
+            isMainPage: true,
+            item,
+            options,
+          });
+          var doc = await utils.readFileAsDocument(await capturer.loadBlobCache(response[docUrl].blob));
+
+          var attrs = getAttributes(doc.querySelector('textarea'));
+          assert.deepEqual(attrs, {});
+        });
+
         it('should record properties for <option>', async function () {
           var spy = sinon.spy(TestCapturer.prototype, "preSaveProcess");
 
@@ -1234,6 +1391,55 @@ Default3\
 
           var attrs = getAttributes(doc.querySelector('option'));
           assert.deepEqual(attrs, {selected: ''});
+
+          sinon.assert.calledWithMatch(spy, {
+            requireBasicLoader: false,
+          });
+        });
+
+        it('should remove obsolete special attributes for <option>', async function () {
+          var doc = createDocFixture({name: 'option', attrs: {
+            'data-scrapbook-option-selected': 'true',
+          }});
+          sinon.stub(doc, 'URL').value(docUrl);
+
+          var capturer = new TestCapturer();
+          var response = await capturer.retrieveDocumentContent({
+            doc,
+            isMainPage: true,
+            item,
+            options,
+          });
+          var doc = await utils.readFileAsDocument(await capturer.loadBlobCache(response[docUrl].blob));
+
+          var attrs = getAttributes(doc.querySelector('option'));
+          assert.deepEqual(attrs, {});
+        });
+
+        it('should safely ignore non-HTML form-related elements', async function () {
+          var spy = sinon.spy(TestCapturer.prototype, "preSaveProcess");
+
+          var doc = createDocFixture({name: 'body', children: [
+            {ns: NS_SVG, name: 'input'},
+            {ns: NS_SVG, name: 'input', attrs: {'type': 'radio'}},
+            {ns: NS_SVG, name: 'input', attrs: {'type': 'checkbox', 'data-scrapbook-input-indeterminate': ''}},
+            {ns: NS_SVG, name: 'input', attrs: {'type': 'password'}},
+            {ns: NS_SVG, name: 'textarea'},
+            {ns: NS_SVG, name: 'option'},
+          ]});
+          sinon.stub(doc, 'URL').value(docUrl);
+
+          var capturer = new TestCapturer();
+          var response = await capturer.retrieveDocumentContent({
+            doc,
+            isMainPage: true,
+            item,
+            options,
+          });
+          var doc = await utils.readFileAsDocument(await capturer.loadBlobCache(response[docUrl].blob));
+
+          var attrs = getAttributes(doc.querySelector('input[type="checkbox"]'));
+          assert.deepEqual(attrs, {'type': 'checkbox', 'data-scrapbook-input-indeterminate': ''});
 
           sinon.assert.calledWithMatch(spy, {
             requireBasicLoader: false,

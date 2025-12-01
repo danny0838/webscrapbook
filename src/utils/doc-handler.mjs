@@ -1,4 +1,5 @@
 import * as utils from "./common.mjs";
+import {NS_HTML} from "./common.mjs";
 import {DocumentCloner} from "./doc-cloner.mjs";
 
 /**
@@ -331,357 +332,486 @@ class DocumentRewriter extends BaseDocumentRewriter {
   }
 
   /**
+   * Remove scrapbook toolbar related elements and attributes.
+   */
+  removeToolbar(rootNode) {
+    this.captureRewriteAttr(rootNode, 'data-scrapbook-toolbar-active', null, {record: false});
+    for (const elem of rootNode.querySelectorAll('[data-scrapbook-elem|="toolbar"]')) {
+      elem.remove();
+    }
+  }
+
+  /**
    * Convert dynamic information into representable HTML attributes recursively.
+   *
+   * @param {Element|Document|ShadowRoot} node
+   * @param {Object} [options]
+   * @param {Map} [options.adoptedStyleSheetMap] - shared map for constructed
+   *   stylesheets.
+   *
+   * @TODO: use shared constructed stylesheets among shadow roots
    */
   htmlify(node, options = {}) {
+    this._htmlify_tree(node, options);
+  }
+
+  _htmlify_tree(node, options = {}) {
+    // handle adoptedStyleSheet if supported by the browser
+    if (node.adoptedStyleSheets && (node.host || node.nodeType === Node.DOCUMENT_NODE)) {
+      const {adoptedStyleSheetMap = new Map()} = options;
+      this._htmlify_adoptedStyleSheets(node, {adoptedStyleSheetMap});
+      if (!options.adoptedStyleSheetMap) {
+        const elem = node.host ?? node.documentElement;
+        this._htmlify_sharedAdoptedStyleSheets(elem, {adoptedStyleSheetMap});
+      }
+    }
+
+    // handle manual slots
+    if (node.host && node.slotAssignment === 'manual') {
+      this._htmlify_slots(node);
+    }
+
     this._htmlify(node, options);
     for (const elem of node.querySelectorAll('*')) {
       this._htmlify(elem, options);
     }
   }
 
-  /**
-   * Convert dynamic information into representable HTML attributes for an
-   * element.
-   */
   _htmlify(elem, options = {}) {
-    // handle adoptedStyleSheet if supported by the browser
-    // @TODO: merge shared constructed stylesheets among shadow roots
-    if (elem.host && elem.adoptedStyleSheets) {
-      const adoptedStyleSheetMap = new Map();
-
-      const host = elem.host;
-      host.removeAttribute("data-scrapbook-adoptedstylesheets");
-
-      const ids = [];
-      for (const css of utils.getAdoptedStyleSheets(elem)) {
-        let id = adoptedStyleSheetMap.get(css);
-        if (typeof id === 'undefined') {
-          id = adoptedStyleSheetMap.size;
-          adoptedStyleSheetMap.set(css, id);
-        }
-        ids.push(id);
-      }
-      if (ids.length) {
-        host.setAttribute("data-scrapbook-adoptedstylesheets", ids.join(','));
-      }
-
-      const regex = /^data-scrapbook-adoptedstylesheet-(\d+)$/;
-      for (const {nodeName: attr} of Array.from(host.attributes)) {
-        if (regex.test(attr)) {
-          host.removeAttribute(attr);
-        }
-      }
-      if (adoptedStyleSheetMap.size) {
-        for (const [css, id] of adoptedStyleSheetMap) {
-          const cssTexts = Array.prototype.map.call(
-            css.cssRules,
-            cssRule => cssRule.cssText,
-          );
-          host.setAttribute(`data-scrapbook-adoptedstylesheet-${id}`, cssTexts.join('\n\n'));
-        }
-      }
-    }
-
-    // handle manual slots if supported by the browser
-    if (elem.host && elem.slotAssignment === 'manual') {
-      const slotMap = new Map();
-      const root = elem;
-      for (const elem of root.querySelectorAll('slot')) {
-        const ids = [];
-        for (const targetNode of elem.assignedNodes()) {
-          let id = slotMap.get(targetNode);
-          if (typeof id === 'undefined') {
-            id = slotMap.size;
-            slotMap.set(targetNode, id);
-          }
-          if (targetNode.nodeType === Node.ELEMENT_NODE) {
-            targetNode.setAttribute("data-scrapbook-slot-index", id);
-          } else {
-            targetNode.before(document.createComment(`scrapbook-slot-index=${id}`));
-            targetNode.after(document.createComment(`/scrapbook-slot-index`));
-          }
-          ids.push(id);
-        }
-        if (ids.length) {
-          elem.setAttribute("data-scrapbook-slot-assigned", ids.join(','));
-        }
-      }
-    }
-
     if (elem.nodeType !== Node.ELEMENT_NODE) { return; }
 
-    switch (elem.localName) {
-      case "canvas": {
-        try {
-          const data = elem.toDataURL();
-          if (data !== utils.getBlankCanvasData(elem)) {
-            elem.setAttribute("data-scrapbook-canvas", data);
-          }
-        } catch (ex) {
-          console.error(ex);
-        }
-        break;
-      }
+    this[`_htmlify_{${elem.namespaceURI}}${elem.localName}`]?.(elem, options);
 
-      case "input": {
-        const type = elem.type;
-        if (typeof type === 'undefined') { break; }
-        switch (type.toLowerCase()) {
-          case "image":
-          case "password":
-          case "file": {
-            break;
-          }
-          case "checkbox": {
-            const indeterminate = elem.indeterminate;
-            if (indeterminate) {
-              elem.setAttribute('data-scrapbook-input-indeterminate', '');
-            }
-          }
-          // eslint-disable-next-line no-fallthrough
-          case "radio": {
-            const checked = elem.checked;
-            if (checked !== elem.hasAttribute('checked')) {
-              elem.setAttribute('data-scrapbook-input-checked', checked);
-            }
-            break;
-          }
-          default: {
-            const value = elem.value;
-            if (value !== elem.getAttribute('value')) {
-              elem.setAttribute('data-scrapbook-input-value', value);
-            }
-            break;
-          }
-        }
-        break;
-      }
+    this._htmlify_shadowHost(elem, (shadowRoot) => {
+      this._htmlify_tree(shadowRoot, options);
+    });
+  }
 
-      case "textarea": {
-        const value = elem.value;
-        if (value !== elem.textContent) {
-          elem.setAttribute('data-scrapbook-textarea-value', value);
-        }
-        break;
-      }
-
-      case "option": {
-        const selected = elem.selected;
-        if (selected !== elem.hasAttribute('selected')) {
-          elem.setAttribute('data-scrapbook-option-selected', selected);
-        }
-        break;
-      }
-    }
+  /**
+   * Record serialized shadow DOM information.
+   *
+   * @param {Element} elem - The shadow host element.
+   * @param {Function} [callback] - The callback to rewrite the shadow root.
+   */
+  _htmlify_shadowHost(elem, callback) {
+    this._unhtmlify_shadowHost_attrs(elem);
 
     const shadowRoot = utils.getShadowRoot(elem);
-    if (shadowRoot) {
-      this.htmlify(shadowRoot, options);
-      elem.setAttribute("data-scrapbook-shadowdom", shadowRoot.innerHTML);
-      if (shadowRoot.mode !== 'open') {
-        elem.setAttribute("data-scrapbook-shadowdom-mode", shadowRoot.mode);
+    if (!shadowRoot) { return false; }
+
+    callback?.call(this, shadowRoot);
+
+    this.captureRewriteAttr(elem, "data-scrapbook-shadowdom", shadowRoot.innerHTML, {record: false});
+    if (shadowRoot.mode !== 'open') {
+      this.captureRewriteAttr(elem, "data-scrapbook-shadowdom-mode", shadowRoot.mode, {record: false});
+    }
+    if (shadowRoot.clonable) {
+      this.captureRewriteAttr(elem, "data-scrapbook-shadowdom-clonable", true, {record: false});
+    }
+    if (shadowRoot.delegatesFocus) {
+      this.captureRewriteAttr(elem, "data-scrapbook-shadowdom-delegates-focus", true, {record: false});
+    }
+    if (shadowRoot.serializable) {
+      this.captureRewriteAttr(elem, "data-scrapbook-shadowdom-serializable", true, {record: false});
+    }
+    if (shadowRoot.slotAssignment && shadowRoot.slotAssignment !== 'named') {
+      this.captureRewriteAttr(elem, "data-scrapbook-shadowdom-slot-assignment", shadowRoot.slotAssignment, {record: false});
+    }
+
+    return true;
+  }
+
+  /**
+   * Collect and record used constructed stylesheets.
+   *
+   * @param {Document|ShadowRoot} rootNode
+   * @param {Object} options
+   * @param {Map} options.adoptedStyleSheetMap
+   * @param {Function} [options.cssRewriter]
+   */
+  _htmlify_adoptedStyleSheets(rootNode, {adoptedStyleSheetMap, cssRewriter}) {
+    this._unhtmlify_adoptedStyleSheets(rootNode, {apply: false});
+
+    const rootNodeOrig = this.getOrigNode ? this.getOrigNode(rootNode) : rootNode;
+    if (!rootNodeOrig) { return; }
+
+    const infos = [];
+    for (const css of utils.getAdoptedStyleSheets(rootNodeOrig)) {
+      let info = adoptedStyleSheetMap.get(css);
+      if (info) {
+        info.roots.push(rootNode);
+      } else {
+        info = {
+          id: adoptedStyleSheetMap.size,
+          roots: [rootNode],
+        };
+        adoptedStyleSheetMap.set(css, info);
       }
-      if (shadowRoot.clonable) {
-        elem.setAttribute("data-scrapbook-shadowdom-clonable", "");
-      }
-      if (shadowRoot.delegatesFocus) {
-        elem.setAttribute("data-scrapbook-shadowdom-delegates-focus", "");
-      }
-      if (shadowRoot.serializable) {
-        elem.setAttribute("data-scrapbook-shadowdom-serializable", "");
-      }
-      if (shadowRoot.slotAssignment && shadowRoot.slotAssignment !== 'named') {
-        elem.setAttribute("data-scrapbook-shadowdom-slot-assignment", shadowRoot.slotAssignment);
-      }
+      infos.push(info);
+      cssRewriter?.call(this, css, rootNode);
+    }
+    if (infos.length) {
+      const elem = rootNode.host ?? rootNode.documentElement;
+      this.captureRewriteAttr(elem, "data-scrapbook-adoptedstylesheets", infos.map(x => x.id).join(','), {record: false});
     }
   }
 
   /**
+   * Record collected constructed stylesheets.
+   *
+   * @param {Element} elem - The documentElement or shadow host to record.
+   * @param {Object} options
+   * @param {Map} options.adoptedStyleSheetMap
+   * @param {Function} [options.rewriter]
+   */
+  _htmlify_sharedAdoptedStyleSheets(elem, {
+    adoptedStyleSheetMap,
+    rewriter = (elem, id, css, roots) => {
+      const cssText = Array.prototype.map.call(css.cssRules, r => r.cssText).join('\n\n');
+      this.captureRewriteAttr(elem, `data-scrapbook-adoptedstylesheet-${id}`, cssText, {record: false});
+    },
+  }) {
+    this._unhtmlify_sharedAdoptedStyleSheets(elem, {apply: false});
+
+    if (!adoptedStyleSheetMap.size) { return false; }
+    for (const [css, {id, roots}] of adoptedStyleSheetMap) {
+      rewriter?.call(this, elem, id, css, roots);
+    }
+    return true;
+  }
+
+  /**
+   * Update records for all slots and slottables of a shadow root.
+   *
+   * @param {ShadowRoot} rootNode
+   * @param {Object} [options]
+   * @param {Map} [options.slotMap]
+   */
+  _htmlify_slots(rootNode, {slotMap = new Map()} = {}) {
+    this._unhtmlify_slots(rootNode, {apply: false});
+
+    for (const elem of rootNode.querySelectorAll("slot")) {
+      if (elem.namespaceURI !== NS_HTML) { continue; }
+
+      const elemOrig = this.getOrigNode ? this.getOrigNode(elem) : elem;
+      if (!elemOrig) { continue; }
+
+      const ids = [];
+      for (const targetNodeOrig of elemOrig.assignedNodes()) {
+        const targetNode = this.getClonedNode ? this.getClonedNode(targetNodeOrig) : targetNodeOrig;
+        let id = slotMap.get(targetNode);
+        if (typeof id === 'undefined') {
+          id = slotMap.size;
+          slotMap.set(targetNode, id);
+        }
+        if (targetNode.nodeType === Node.ELEMENT_NODE) {
+          this.captureRewriteAttr(targetNode, "data-scrapbook-slot-index", id, {record: false});
+        } else {
+          const doc = targetNode.ownerDocument;
+          targetNode.before(doc.createComment(`scrapbook-slot-index=${id}`));
+          targetNode.after(doc.createComment(`/scrapbook-slot-index`));
+        }
+        ids.push(id);
+      }
+      if (ids.length) {
+        this.captureRewriteAttr(elem, "data-scrapbook-slot-assigned", ids.join(','), {record: false});
+      }
+    }
+  }
+
+  [`_htmlify_{${NS_HTML}}canvas`](elem) {
+    this[`_unhtmlify_{${NS_HTML}}canvas`](elem, {apply: false});
+
+    const elemOrig = this.getOrigNode ? this.getOrigNode(elem) : elem;
+    if (!elemOrig) { return; }
+
+    let data;
+    try {
+      data = elemOrig.toDataURL();
+    } catch (ex) {
+      console.error(ex);
+    }
+
+    if (data && data !== utils.getBlankCanvasData(elemOrig)) {
+      this.captureRewriteAttr(elem, "data-scrapbook-canvas", data, {record: false});
+      return true;
+    }
+
+    return false;
+  }
+
+  [`_htmlify_{${NS_HTML}}input`](elem, {mode = "save"} = {}) {
+    switch (elem.type?.toLowerCase()) {
+      case undefined:
+      case "image":
+      case "file": {
+        return false;
+      }
+      case "radio":
+      case "checkbox": {
+        return this[`_htmlify_{${NS_HTML}}input#radio`](elem, {mode});
+      }
+      case "password": {
+        return this[`_htmlify_{${NS_HTML}}input#password`](elem, {mode});
+      }
+      default: {
+        return this[`_htmlify_{${NS_HTML}}input#text`](elem, {mode});
+      }
+    }
+  }
+
+  [`_htmlify_{${NS_HTML}}input#radio`](elem, {mode = "save"} = {}) {
+    this[`_unhtmlify_{${NS_HTML}}input#radio`](elem, {apply: false});
+
+    let result = false;
+    const elemOrig = this.getOrigNode ? this.getOrigNode(elem) : elem;
+    if (!elemOrig) { return result; }
+
+    const isCheckbox = elem.type?.toLowerCase() === 'checkbox';
+    switch (mode) {
+      case "save-all":
+      case "save": {
+        const checked = elemOrig.checked;
+        if (checked !== elem.hasAttribute('checked')) {
+          this.captureRewriteAttr(elem, "data-scrapbook-input-checked", String(checked), {record: false});
+          result = true;
+        }
+        if (isCheckbox && elemOrig.indeterminate) {
+          this.captureRewriteAttr(elem, "data-scrapbook-input-indeterminate", true, {record: false});
+          result = true;
+        }
+        break;
+      }
+      case "keep-all":
+      case "keep": {
+        if (isCheckbox && elemOrig.indeterminate) {
+          this.captureRewriteAttr(elem, "data-scrapbook-input-indeterminate", true, {record: false});
+          result = true;
+        }
+      }
+      // eslint-disable-next-line no-fallthrough
+      case "html-all":
+      case "html": {
+        this.captureRewriteAttr(elem, "checked", elemOrig.checked);
+        break;
+      }
+      case "reset":
+      default: {
+        // do nothing
+        break;
+      }
+    }
+
+    return result;
+  }
+
+  [`_htmlify_{${NS_HTML}}input#password`](elem, {mode = "save"} = {}) {
+    this[`_unhtmlify_{${NS_HTML}}input#text`](elem, {apply: false});
+
+    let result = false;
+    const elemOrig = this.getOrigNode ? this.getOrigNode(elem) : elem;
+    if (!elemOrig) { return result; }
+
+    switch (mode) {
+      case "save-all": {
+        const value = elemOrig.value;
+        if (value !== (elem.getAttribute('value') ?? '')) {
+          this.captureRewriteAttr(elem, "data-scrapbook-input-value", value, {record: false});
+          result = true;
+        }
+        break;
+      }
+      case "keep-all":
+      case "html-all": {
+        const value = elemOrig.value;
+        if (value !== (elem.getAttribute('value') ?? '')) {
+          this.captureRewriteAttr(elem, "value", value);
+        }
+        break;
+      }
+      case "save":
+      case "keep":
+      case "html":
+      case "reset":
+      default: {
+        // do nothing
+        break;
+      }
+    }
+
+    return result;
+  }
+
+  [`_htmlify_{${NS_HTML}}input#text_defaultValues`] = {
+    'color': '#000000',
+    'range': '50',
+  };
+
+  [`_htmlify_{${NS_HTML}}input#text`](elem, {mode = "save"} = {}) {
+    this[`_unhtmlify_{${NS_HTML}}input#text`](elem, {apply: false});
+
+    let result = false;
+    const elemOrig = this.getOrigNode ? this.getOrigNode(elem) : elem;
+    if (!elemOrig) { return result; }
+
+    const defaultValue = this[`_htmlify_{${NS_HTML}}input#text_defaultValues`][elem.type?.toLowerCase()] ?? '';
+
+    switch (mode) {
+      case "save-all":
+      case "save": {
+        const value = elemOrig.value;
+        if (value !== (elem.getAttribute('value') ?? defaultValue)) {
+          this.captureRewriteAttr(elem, "data-scrapbook-input-value", value, {record: false});
+          result = true;
+        }
+        break;
+      }
+      case "keep-all":
+      case "keep":
+      case "html-all":
+      case "html": {
+        const value = elemOrig.value;
+        if (value !== (elem.getAttribute('value') ?? defaultValue)) {
+          this.captureRewriteAttr(elem, "value", value);
+        }
+        break;
+      }
+      case "reset":
+      default: {
+        // do nothing
+        break;
+      }
+    }
+
+    return result;
+  }
+
+  [`_htmlify_{${NS_HTML}}textarea`](elem, {mode = "save"} = {}) {
+    this[`_unhtmlify_{${NS_HTML}}textarea`](elem, {apply: false});
+
+    let result = false;
+    const elemOrig = this.getOrigNode ? this.getOrigNode(elem) : elem;
+    if (!elemOrig) { return result; }
+
+    switch (mode) {
+      case "save-all":
+      case "save": {
+        const value = elemOrig.value;
+        if (value !== elem.textContent) {
+          this.captureRewriteAttr(elem, "data-scrapbook-textarea-value", value, {record: false});
+          result = true;
+        }
+        break;
+      }
+      case "keep-all":
+      case "keep":
+      case "html-all":
+      case "html": {
+        this.captureRewriteTextContent(elem, elemOrig.value);
+        break;
+      }
+      case "reset":
+      default: {
+        // do nothing
+        break;
+      }
+    }
+
+    return result;
+  }
+
+  [`_htmlify_{${NS_HTML}}option`](elem, {mode = "save"} = {}) {
+    this[`_unhtmlify_{${NS_HTML}}option`](elem, {apply: false});
+
+    let result = false;
+    const elemOrig = this.getOrigNode ? this.getOrigNode(elem) : elem;
+    if (!elemOrig) { return result; }
+
+    switch (mode) {
+      case "save-all":
+      case "save": {
+        const selected = elemOrig.selected;
+        if (selected !== elem.hasAttribute('selected')) {
+          this.captureRewriteAttr(elem, "data-scrapbook-option-selected", String(selected), {record: false});
+          result = true;
+        }
+        break;
+      }
+      case "keep-all":
+      case "keep":
+      case "html-all":
+      case "html": {
+        this.captureRewriteAttr(elem, "selected", elemOrig.selected);
+        break;
+      }
+      case "reset":
+      default: {
+        // do nothing
+        break;
+      }
+    }
+
+    return result;
+  }
+
+  /**
    * Reverse htmlify recursively.
+   *
+   * @param {Element|Document|ShadowRoot} node
+   * @param {Object} [options]
+   * @param {boolean} [options.apply] - true to apply the recorded value to
+   *   the element; otherwise remove the record only.
+   * @param {boolean} [options.canvas] - true to handle canvas.
+   * @param {boolean} [options.form] - true to handle form elements.
+   * @param {boolean} [options.shadowDom] - true to handle shadowDom.
+   * @param {Map} [options.adoptedStyleSheetMap] - shared map for constructed
+   *   stylesheets.
+   *
+   * @TODO: use shared constructed stylesheets among shadow roots
    */
   unhtmlify(node, options = {}) {
+    this._unhtmlify_tree(node, options);
+  }
+
+  _unhtmlify_tree(node, options = {}) {
+    const {apply = true, shadowDom = true} = options;
+
+    if (shadowDom && (node.host || node.nodeType === Node.DOCUMENT_NODE)) {
+      const {adoptedStyleSheetMap = new Map()} = options;
+      if (!options.adoptedStyleSheetMap) {
+        const elem = node.host ?? node.documentElement;
+        this._unhtmlify_sharedAdoptedStyleSheets(elem, {apply, adoptedStyleSheetMap});
+      }
+      this._unhtmlify_adoptedStyleSheets(node, {apply, adoptedStyleSheetMap});
+    }
+
+    if (shadowDom && node.host && node.slotAssignment === 'manual') {
+      this._unhtmlify_slots(node, {apply});
+    }
+
     this._unhtmlify(node, options);
     for (const elem of node.querySelectorAll('*')) {
       this._unhtmlify(elem, options);
     }
   }
 
-  /**
-   * Reverse htmlify for an element.
-   *
-   * @param {boolean} [options.apply] - true to apply the recorded value to
-   *   the element; otherwise remove the record only.
-   * @param {boolean} [options.canvas] - true to handle canvas.
-   * @param {boolean} [options.form] - true to handle form elements.
-   * @param {boolean} [options.shadowDom] - true to handle shadowDom.
-   */
   _unhtmlify(elem, options = {}) {
-    const {
-      apply = true,
-      canvas = true,
-      form = true,
-      shadowDom = true,
-    } = options;
-
-    // handle adoptedStyleSheet
-    if (shadowDom && elem.host) {
-      const regex = /^data-scrapbook-adoptedstylesheet-(\d+)$/;
-      const host = elem.host;
-
-      const cssIndexes = host.getAttribute('data-scrapbook-adoptedstylesheets');
-      if (cssIndexes !== null && apply && elem.adoptedStyleSheets) {
-        const win = elem.ownerDocument.defaultView;
-        const newCss = [];
-        for (const idx of cssIndexes.split(',')) {
-          const attr = `data-scrapbook-adoptedstylesheet-${parseInt(idx, 10)}`;
-          const sel = `[${attr}]`;
-          const refElem = host.getRootNode().querySelector(sel);
-          if (!refElem) { continue; }
-          const cssText = refElem.getAttribute(attr);
-          if (cssText === null) { continue; }
-          const css = new win.CSSStyleSheet();
-          const cssTexts = cssText.split('\n\n');
-          for (let i = cssTexts.length - 1; i >= 0; i--) {
-            try {
-              cssTexts[i] && css.insertRule(cssTexts[i]);
-            } catch (ex) {
-              console.error(ex);
-            }
-          }
-          newCss.push(css);
-        }
-        // Chromium < 99: adoptedStyleSheets is immutable
-        elem.adoptedStyleSheets = elem.adoptedStyleSheets.concat(newCss);
-      }
-      host.removeAttribute('data-scrapbook-adoptedstylesheets');
-      for (const {nodeName: attr} of Array.from(host.attributes)) {
-        if (regex.test(attr)) {
-          host.removeAttribute(attr);
-        }
-      }
-    }
-
-    // handle manual slots
-    if (shadowDom && elem.host && elem.slotAssignment === 'manual') {
-      const regex = /^scrapbook-slot-index=(\d+)$/;
-      const host = elem.host;
-
-      const slotSources = [];
-      const children = host.childNodes;
-      for (let i = children.length - 1; i >= 0; i--) {
-        const node = children[i];
-        switch (node.nodeType) {
-          case Node.ELEMENT_NODE: {
-            const slotIdx = node.getAttribute("data-scrapbook-slot-index");
-            if (slotIdx !== null) {
-              slotSources[parseInt(slotIdx, 10)] = node;
-              node.removeAttribute("data-scrapbook-slot-index");
-            }
-            break;
-          }
-          case Node.COMMENT_NODE: {
-            const value = node.nodeValue;
-            const m = value.match(regex);
-            if (m) {
-              const next = node.nextSibling;
-              if (next.nodeType === Node.TEXT_NODE) {
-                slotSources[parseInt(m[1], 10)] = next;
-              }
-              node.remove();
-              break;
-            } else if (value === '/scrapbook-slot-index') {
-              node.remove();
-              break;
-            }
-            break;
-          }
-        }
-      }
-
-      const rootNode = elem;
-      for (const elem of rootNode.querySelectorAll("slot")) {
-        const slotIdxes = elem.getAttribute("data-scrapbook-slot-assigned");
-        if (slotIdxes !== null && apply) {
-          const srcs = slotIdxes.split(',').map(i => slotSources[parseInt(i, 10)]);
-          try {
-            elem.assign.apply(elem, srcs);
-          } catch (ex) {
-            if (ex.message.includes('must have a callable @@iterator')) {
-              elem.assign(srcs);
-            } else {
-              console.error(ex);
-            }
-          }
-        }
-        elem.removeAttribute("data-scrapbook-slot-assigned");
-      }
-    }
-
     if (elem.nodeType !== Node.ELEMENT_NODE) { return; }
 
-    if (canvas && elem.matches('canvas')) {
-      const canvasData = elem.getAttribute('data-scrapbook-canvas');
-      if (canvasData) {
-        if (apply) {
-          const img = new Image();
-          img.onload = () => { elem.getContext('2d').drawImage(img, 0, 0); };
-          img.src = elem.getAttribute('data-scrapbook-canvas');
-        }
-        elem.removeAttribute('data-scrapbook-canvas');
-      }
-    }
+    this[`_unhtmlify_{${elem.namespaceURI}}${elem.localName}`]?.(elem, options);
 
-    if (form && elem.matches('input[type="radio"], input[type="checkbox"]')) {
-      const checked = elem.getAttribute('data-scrapbook-input-checked');
-      if (checked !== null) {
-        if (apply) {
-          elem.checked = checked === 'true';
-        }
-        elem.removeAttribute('data-scrapbook-input-checked');
-      }
-    }
+    this._unhtmlify_shadowHost(elem, (shadowRoot) => {
+      this._unhtmlify_tree(shadowRoot, options);
+    }, options);
+  }
 
-    if (form && elem.matches('input[type="checkbox"]')) {
-      const indeterminate = elem.getAttribute('data-scrapbook-input-indeterminate');
-      if (indeterminate !== null) {
-        if (apply) {
-          elem.indeterminate = true;
-        }
-        elem.removeAttribute('data-scrapbook-input-indeterminate');
-      }
-    }
-
-    if (form && elem.matches('input')) {
-      const value = elem.getAttribute('data-scrapbook-input-value');
-      if (value !== null) {
-        if (apply) {
-          elem.value = value;
-        }
-        elem.removeAttribute('data-scrapbook-input-value');
-      }
-    }
-
-    if (form && elem.matches('textarea')) {
-      const value = elem.getAttribute('data-scrapbook-textarea-value');
-      if (value !== null) {
-        if (apply) {
-          elem.value = value;
-        }
-        elem.removeAttribute('data-scrapbook-textarea-value');
-      }
-    }
-
-    if (form && elem.matches('option')) {
-      const selected = elem.getAttribute('data-scrapbook-option-selected');
-      if (selected !== null) {
-        if (apply) {
-          elem.selected = selected === 'true';
-        }
-        elem.removeAttribute('data-scrapbook-option-selected');
-      }
-    }
-
+  /**
+   * Recover serialized shadow DOMs and recurse into deeper shadow roots.
+   *
+   * @param {Element} elem - The shadow host element.
+   * @param {Function} [callback] - The callback to rewrite deeper shadow roots.
+   */
+  _unhtmlify_shadowHost(elem, callback, {apply = true, shadowDom = true} = {}) {
     let shadowRoot = utils.getShadowRoot(elem);
     if (shadowDom) {
       const html = elem.getAttribute('data-scrapbook-shadowdom');
@@ -693,22 +823,227 @@ class DocumentRewriter extends BaseDocumentRewriter {
             clonable: elem.hasAttribute('data-scrapbook-shadowdom-clonable'),
             delegatesFocus: elem.hasAttribute('data-scrapbook-shadowdom-delegates-focus'),
             serializable: elem.hasAttribute('data-scrapbook-shadowdom-serializable'),
-            slotAssignment: (m = elem.getAttribute('data-scrapbook-shadowdom-slot-assignment')) !== null ? m : undefined,
+            ...((m = elem.getAttribute('data-scrapbook-shadowdom-slot-assignment')) !== null && {slotAssignment: m}),
           });
           shadowRoot.innerHTML = html;
         } catch (ex) {
           console.error(ex);
         }
       }
-      elem.removeAttribute('data-scrapbook-shadowdom');
-      elem.removeAttribute('data-scrapbook-shadowdom-mode');
-      elem.removeAttribute('data-scrapbook-shadowdom-clonable');
-      elem.removeAttribute('data-scrapbook-shadowdom-delegates-focus');
-      elem.removeAttribute('data-scrapbook-shadowdom-serializable');
-      elem.removeAttribute('data-scrapbook-shadowdom-slot-assignment');
+      this._unhtmlify_shadowHost_attrs(elem);
     }
     if (shadowRoot) {
-      this.unhtmlify(shadowRoot, options);
+      callback?.call(this, shadowRoot);
+    }
+  }
+
+  _unhtmlify_shadowHost_attrs(elem) {
+    this.captureRewriteAttr(elem, 'data-scrapbook-shadowdom', null, {record: false});
+    this.captureRewriteAttr(elem, 'data-scrapbook-shadowdom-mode', null, {record: false});
+    this.captureRewriteAttr(elem, 'data-scrapbook-shadowdom-clonable', null, {record: false});
+    this.captureRewriteAttr(elem, 'data-scrapbook-shadowdom-delegates-focus', null, {record: false});
+    this.captureRewriteAttr(elem, 'data-scrapbook-shadowdom-serializable', null, {record: false});
+    this.captureRewriteAttr(elem, 'data-scrapbook-shadowdom-slot-assignment', null, {record: false});
+  }
+
+  /**
+   * Recover constructed stylesheets.
+   *
+   * @param {Document|ShadowRoot} rootNode
+   * @param {Object} [options]
+   * @param {Map} [options.adoptedStyleSheetMap]
+   */
+  _unhtmlify_adoptedStyleSheets(rootNode, {apply = true, adoptedStyleSheetMap} = {}) {
+    const elem = rootNode.host ?? rootNode.documentElement;
+    const cssIndexes = elem.getAttribute('data-scrapbook-adoptedstylesheets');
+    if (cssIndexes !== null) {
+      if (apply && rootNode.adoptedStyleSheets) {
+        const newCss = [];
+        for (const idx of cssIndexes.split(',')) {
+          const css = adoptedStyleSheetMap?.get(parseInt(idx, 10));
+          if (!css) {
+            console.error(new Error(`Missing constructed stylesheet idx: ${idx}`));
+            continue;
+          }
+          newCss.push(css);
+        }
+        // Chromium < 99: adoptedStyleSheets is immutable
+        rootNode.adoptedStyleSheets = newCss;
+      }
+      this.captureRewriteAttr(elem, 'data-scrapbook-adoptedstylesheets', null, {record: false});
+    }
+  }
+
+  /**
+   * Collect shared constructed stylesheets and recover special attributes.
+   *
+   * @param {Element} elem - The documentElement or shadow host to collect.
+   * @param {Object} [options]
+   * @param {Map} [options.adoptedStyleSheetMap]
+   */
+  _unhtmlify_sharedAdoptedStyleSheets(elem, {apply = true, adoptedStyleSheetMap} = {}) {
+    const regex = /^data-scrapbook-adoptedstylesheet-(\d+)$/;
+    const win = elem.ownerDocument.defaultView;
+    let m;
+    for (const {nodeName: attr, nodeValue: value} of Array.from(elem.attributes)) {
+      if (m = regex.exec(attr)) {
+        if (apply && win && adoptedStyleSheetMap) {
+          const css = new win.CSSStyleSheet();
+          const cssTexts = value.split('\n\n');
+          for (let i = cssTexts.length - 1; i >= 0; i--) {
+            try {
+              cssTexts[i] && css.insertRule(cssTexts[i]);
+            } catch (ex) {
+              console.error(ex);
+            }
+          }
+          adoptedStyleSheetMap.set(parseInt(m[1], 10), css);
+        }
+        this.captureRewriteAttr(elem, attr, null, {record: false});
+      }
+    }
+  }
+
+  /**
+   * Recover manual assigned slots for a shadow root.
+   *
+   * @param {ShadowRoot} rootNode
+   */
+  _unhtmlify_slots(rootNode, {apply = true} = {}) {
+    const COMMENT_START = /^scrapbook-slot-index=(\d+)$/;
+    const COMMENT_END = '/scrapbook-slot-index';
+
+    const host = rootNode.host;
+    const slotSources = [];
+    const children = host.childNodes;
+    for (let i = children.length - 1; i >= 0; i--) {
+      const node = children[i];
+      switch (node.nodeType) {
+        case Node.ELEMENT_NODE: {
+          const slotIdx = node.getAttribute("data-scrapbook-slot-index");
+          if (slotIdx !== null) {
+            slotSources[parseInt(slotIdx, 10)] = node;
+            this.captureRewriteAttr(node, "data-scrapbook-slot-index", null, {record: false});
+          }
+          break;
+        }
+        case Node.COMMENT_NODE: {
+          const value = node.nodeValue;
+          const m = value.match(COMMENT_START);
+          if (m) {
+            const next = node.nextSibling;
+            if (next.nodeType === Node.TEXT_NODE) {
+              slotSources[parseInt(m[1], 10)] = next;
+            }
+            node.remove();
+            break;
+          } else if (value === COMMENT_END) {
+            node.remove();
+            break;
+          }
+          break;
+        }
+      }
+    }
+
+    for (const elem of rootNode.querySelectorAll("slot")) {
+      if (elem.namespaceURI !== NS_HTML) { continue; }
+      const slotIdxes = elem.getAttribute("data-scrapbook-slot-assigned");
+      if (slotIdxes === null) { continue; }
+      if (apply) {
+        const srcs = slotIdxes.split(',').map(i => slotSources[parseInt(i, 10)]);
+        try {
+          elem.assign.apply(elem, srcs);
+        } catch (ex) {
+          if (ex.message.includes('must have a callable @@iterator')) {
+            elem.assign(srcs);
+          } else {
+            console.error(ex);
+          }
+        }
+      }
+      this.captureRewriteAttr(elem, "data-scrapbook-slot-assigned", null, {record: false});
+    }
+  }
+
+  [`_unhtmlify_{${NS_HTML}}canvas`](elem, {apply = true, canvas = true} = {}) {
+    if (!canvas) { return; }
+    const canvasData = elem.getAttribute('data-scrapbook-canvas');
+    if (canvasData !== null) {
+      if (apply) {
+        const img = new Image();
+        img.onload = () => { elem.getContext('2d').drawImage(img, 0, 0); };
+        img.src = canvasData;
+      }
+      this.captureRewriteAttr(elem, 'data-scrapbook-canvas', null, {record: false});
+    }
+  }
+
+  [`_unhtmlify_{${NS_HTML}}input`](elem, {apply = true, form = true} = {}) {
+    if (!form) { return; }
+
+    switch (elem.type?.toLowerCase()) {
+      case undefined:
+      case "image":
+      case "file": {
+        return;
+      }
+      case "radio":
+      case "checkbox": {
+        return this[`_unhtmlify_{${NS_HTML}}input#radio`](elem, {apply});
+      }
+      default: {
+        return this[`_unhtmlify_{${NS_HTML}}input#text`](elem, {apply});
+      }
+    }
+  }
+
+  [`_unhtmlify_{${NS_HTML}}input#radio`](elem, {apply = true} = {}) {
+    const checked = elem.getAttribute('data-scrapbook-input-checked');
+    if (checked !== null) {
+      if (apply) {
+        elem.checked = checked === 'true';
+      }
+      this.captureRewriteAttr(elem, 'data-scrapbook-input-checked', null, {record: false});
+    }
+    if (elem.type.toLowerCase() === 'checkbox') {
+      const indeterminate = elem.getAttribute('data-scrapbook-input-indeterminate');
+      if (indeterminate !== null) {
+        if (apply) {
+          elem.indeterminate = true;
+        }
+        this.captureRewriteAttr(elem, 'data-scrapbook-input-indeterminate', null, {record: false});
+      }
+    }
+  }
+
+  [`_unhtmlify_{${NS_HTML}}input#text`](elem, {apply = true} = {}) {
+    const value = elem.getAttribute('data-scrapbook-input-value');
+    if (value !== null) {
+      if (apply) {
+        elem.value = value;
+      }
+      this.captureRewriteAttr(elem, 'data-scrapbook-input-value', null, {record: false});
+    }
+  }
+
+  [`_unhtmlify_{${NS_HTML}}textarea`](elem, {apply = true} = {}) {
+    const value = elem.getAttribute('data-scrapbook-textarea-value');
+    if (value !== null) {
+      if (apply) {
+        elem.value = value;
+      }
+      this.captureRewriteAttr(elem, 'data-scrapbook-textarea-value', null, {record: false});
+    }
+  }
+
+  [`_unhtmlify_{${NS_HTML}}option`](elem, {apply = true} = {}) {
+    const selected = elem.getAttribute('data-scrapbook-option-selected');
+    if (selected !== null) {
+      if (apply) {
+        elem.selected = selected === 'true';
+      }
+      this.captureRewriteAttr(elem, 'data-scrapbook-option-selected', null, {record: false});
     }
   }
 }

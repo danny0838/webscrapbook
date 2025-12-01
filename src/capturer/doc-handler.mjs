@@ -469,33 +469,17 @@ class RetrieveDocumentRewriter extends MapperMixin(DocumentRewriter) {
   }
 
   processMain() {
-    const rootNode = this.doc.documentElement;
+    const {doc} = this;
+    const {documentElement: docElem} = doc;
 
-    // remove webscrapbook toolbar related
-    rootNode.removeAttribute('data-scrapbook-toolbar-active');
-    for (const elem of rootNode.querySelectorAll(`[data-scrapbook-elem|="toolbar"]`)) {
-      elem.remove();
-    }
+    this.removeToolbar(docElem);
 
-    this.processRootNode(rootNode);
+    this.processRootNode(doc);
 
     // handle adoptedStyleSheet
     // don't refresh related attributes if not supported by the browser
-    if ('adoptedStyleSheets' in document) {
-      const regex = /^data-scrapbook-adoptedstylesheet-(\d+)$/;
-      for (const {nodeName: attr} of Array.from(rootNode.attributes)) {
-        if (regex.test(attr)) {
-          rootNode.removeAttribute(attr);
-        }
-      }
-      if (this.adoptedStyleSheetMap.size) {
-        for (const [css, id] of this.adoptedStyleSheetMap) {
-          const cssTexts = Array.prototype.map.call(
-            css.cssRules,
-            cssRule => cssRule.cssText,
-          );
-          rootNode.setAttribute(`data-scrapbook-adoptedstylesheet-${id}`, cssTexts.join('\n\n'));
-        }
+    if (doc.adoptedStyleSheets) {
+      if (this._htmlify_sharedAdoptedStyleSheets(docElem)) {
         this.requireBasicLoader = true;
       }
     }
@@ -504,24 +488,8 @@ class RetrieveDocumentRewriter extends MapperMixin(DocumentRewriter) {
   processRootNode(rootNode) {
     // handle adoptedStyleSheet
     // don't refresh related attributes if not supported by the browser
-    if ('adoptedStyleSheets' in document) {
-      const docOrShadowRoot = this.origNodeMap.get(rootNode).getRootNode();
-
-      const elem = rootNode.host || rootNode;
-      elem.removeAttribute("data-scrapbook-adoptedstylesheets");
-
-      const ids = [];
-      for (const css of utils.getAdoptedStyleSheets(docOrShadowRoot)) {
-        let id = this.adoptedStyleSheetMap.get(css);
-        if (typeof id === 'undefined') {
-          id = this.adoptedStyleSheetMap.size;
-          this.adoptedStyleSheetMap.set(css, id);
-        }
-        ids.push(id);
-      }
-      if (ids.length) {
-        elem.setAttribute("data-scrapbook-adoptedstylesheets", ids.join(','));
-      }
+    if (rootNode.adoptedStyleSheets) {
+      this._htmlify_adoptedStyleSheets(rootNode);
     }
 
     // fix noscript
@@ -588,55 +556,10 @@ class RetrieveDocumentRewriter extends MapperMixin(DocumentRewriter) {
     }
 
     // record form element status
-    for (const elem of rootNode.querySelectorAll("input")) {
-      const elemOrig = this.origNodeMap.get(elem);
-      if (!elemOrig) { continue; }
-      switch (elem.type.toLowerCase()) {
-        case "checkbox": {
-          // indeterminate
-          if (elemOrig.indeterminate) {
-            elem.setAttribute("data-scrapbook-input-indeterminate", "");
-            this.requireBasicLoader = true;
-          } else {
-            elem.removeAttribute("data-scrapbook-input-indeterminate");
-          }
-        }
-        // eslint-disable-next-line no-fallthrough
-        case "radio":
-          if (elemOrig.checked) {
-            elem.setAttribute("checked", "");
-          } else {
-            elem.removeAttribute("checked");
-          }
-          break;
-        case "password":
-        case "file":
-          // skip for security
-          // eslint-disable-next-line no-fallthrough
-        case "image":
-          // skip image
-          break;
-        case "text":
-        default:
-          elem.setAttribute("value", elemOrig.value);
-          break;
+    for (const elem of rootNode.querySelectorAll("input, option, textarea")) {
+      if (this[`_htmlify_{${elem.namespaceURI}}${elem.localName}`]?.(elem, {mode: 'keep'})) {
+        this.requireBasicLoader = true;
       }
-    }
-
-    for (const elem of rootNode.querySelectorAll("option")) {
-      const elemOrig = this.origNodeMap.get(elem);
-      if (!elemOrig) { continue; }
-      if (elemOrig.selected) {
-        elem.setAttribute("selected", "");
-      } else {
-        elem.removeAttribute("selected");
-      }
-    }
-
-    for (const elem of rootNode.querySelectorAll("textarea")) {
-      const elemOrig = this.origNodeMap.get(elem);
-      if (!elemOrig) { continue; }
-      elem.textContent = elemOrig.value;
     }
 
     // handle special scrapbook elements
@@ -667,96 +590,22 @@ class RetrieveDocumentRewriter extends MapperMixin(DocumentRewriter) {
 
     // update canvas data
     for (const elem of rootNode.querySelectorAll("canvas")) {
-      elem.removeAttribute("data-scrapbook-canvas");
-      const elemOrig = this.origNodeMap.get(elem);
-      if (!elemOrig) { continue; }
-      try {
-        const data = elemOrig.toDataURL();
-        if (data !== utils.getBlankCanvasData(elemOrig)) {
-          elem.setAttribute("data-scrapbook-canvas", data);
-          this.requireBasicLoader = true;
-        }
-      } catch (ex) {
-        console.error(ex);
+      if (this[`_htmlify_{${elem.namespaceURI}}${elem.localName}`]?.(elem)) {
+        this.requireBasicLoader = true;
       }
     }
 
     // update slot data
     // don't refresh related attributes if not supported by the browser
-    if (rootNode instanceof ShadowRoot && rootNode.slotAssignment === 'manual') {
-      // clear attributes for all slottables
-      const regexes = [/^scrapbook-slot-index=(\d+)$/, /^\/scrapbook-slot-index$/];
-      const children = rootNode.host.childNodes;
-      for (let i = children.length - 1; i >= 0; i--) {
-        const node = children[i];
-        switch (node.nodeType) {
-          case Node.ELEMENT_NODE: {
-            node.removeAttribute("data-scrapbook-slot-index");
-            break;
-          }
-          case Node.COMMENT_NODE: {
-            if (regexes.some(r => r.test(node.nodeValue))) {
-              node.remove();
-            }
-            break;
-          }
-        }
-      }
-
-      for (const elem of rootNode.querySelectorAll("slot")) {
-        elem.removeAttribute("data-scrapbook-slot-assigned");
-        const elemOrig = this.origNodeMap.get(elem);
-        if (!elemOrig) { continue; }
-        const ids = [];
-        for (const targetNodeOrig of elemOrig.assignedNodes()) {
-          const targetNode = this.clonedNodeMap.get(targetNodeOrig);
-          let id = this.slotMap.get(targetNode);
-          if (typeof id === 'undefined') {
-            id = this.slotMap.size;
-            this.slotMap.set(targetNode, id);
-          }
-          if (targetNode.nodeType === Node.ELEMENT_NODE) {
-            targetNode.setAttribute("data-scrapbook-slot-index", id);
-          } else {
-            targetNode.before(document.createComment(`scrapbook-slot-index=${id}`));
-            targetNode.after(document.createComment(`/scrapbook-slot-index`));
-          }
-          ids.push(id);
-        }
-        if (ids.length) {
-          elem.setAttribute("data-scrapbook-slot-assigned", ids.join(','));
-        }
-      }
+    if (rootNode.host && rootNode.slotAssignment === 'manual') {
+      this._htmlify_slots(rootNode);
     }
 
     // update shadow root data
     for (const elem of rootNode.querySelectorAll("*")) {
-      elem.removeAttribute("data-scrapbook-shadowdom");
-      elem.removeAttribute("data-scrapbook-shadowdom-mode");
-      elem.removeAttribute("data-scrapbook-shadowdom-clonable");
-      elem.removeAttribute("data-scrapbook-shadowdom-delegates-focus");
-      elem.removeAttribute("data-scrapbook-shadowdom-serializable");
-      elem.removeAttribute("data-scrapbook-shadowdom-slot-assignment");
-      const shadowRoot = utils.getShadowRoot(elem);
-      if (!shadowRoot) { continue; }
-      this.processRootNode(shadowRoot);
-      elem.setAttribute("data-scrapbook-shadowdom", shadowRoot.innerHTML);
-      if (shadowRoot.mode !== 'open') {
-        elem.setAttribute("data-scrapbook-shadowdom-mode", shadowRoot.mode);
+      if (this._htmlify_shadowHost(elem)) {
+        this.requireBasicLoader = true;
       }
-      if (shadowRoot.clonable) {
-        elem.setAttribute("data-scrapbook-shadowdom-clonable", "");
-      }
-      if (shadowRoot.delegatesFocus) {
-        elem.setAttribute("data-scrapbook-shadowdom-delegates-focus", "");
-      }
-      if (shadowRoot.serializable) {
-        elem.setAttribute("data-scrapbook-shadowdom-serializable", "");
-      }
-      if (shadowRoot.slotAssignment && shadowRoot.slotAssignment !== 'named') {
-        elem.setAttribute("data-scrapbook-shadowdom-slot-assignment", shadowRoot.slotAssignment);
-      }
-      this.requireBasicLoader = true;
     }
   }
 
@@ -765,6 +614,22 @@ class RetrieveDocumentRewriter extends MapperMixin(DocumentRewriter) {
     const key = "urn:scrapbook:url:" + uuid;
     this.resources[uuid] = url;
     return key;
+  }
+
+  _htmlify_shadowHost(elem, callback = this.processRootNode) {
+    return super._htmlify_shadowHost(elem, callback);
+  }
+
+  _htmlify_adoptedStyleSheets(rootNode, {adoptedStyleSheetMap = this.adoptedStyleSheetMap} = {}) {
+    return super._htmlify_adoptedStyleSheets(rootNode, {adoptedStyleSheetMap});
+  }
+
+  _htmlify_sharedAdoptedStyleSheets(rootNode, {adoptedStyleSheetMap = this.adoptedStyleSheetMap} = {}) {
+    return super._htmlify_sharedAdoptedStyleSheets(rootNode, {adoptedStyleSheetMap});
+  }
+
+  _htmlify_slots(rootNode, {slotMap = this.slotMap} = {}) {
+    return super._htmlify_slots(rootNode, {slotMap});
   }
 }
 
@@ -1104,12 +969,12 @@ class CaptureDocumentRewriter extends MapperMixin(CaptureDocumentRewriterBase) {
     this.initHeadNode();
 
     this.handlePrettyPrint();
-    this.removeToolbar();
+    this.removeToolbar(rootNode);
     this.processCaptureHelpers();
 
     // inspect all nodes (and register async tasks)
     this.handleDownLinkExtras();
-    this.addAdoptedStyleSheets(this.origDoc, rootNode);
+    this.addAdoptedStyleSheets(this.doc);
     this.rewriteRecursively(rootNode, this.rewriteNode);
 
     // register additional tasks that require data from inspected nodes
@@ -1209,18 +1074,6 @@ class CaptureDocumentRewriter extends MapperMixin(CaptureDocumentRewriterBase) {
       if (!bodyNodeAfter) {
         bodyNode.after("\n");
       }
-    }
-  }
-
-  /**
-   * Remove scrapbook toolbar related elements and attributes.
-   */
-  removeToolbar({
-    rootNode = this.doc.documentElement,
-  } = {}) {
-    rootNode.removeAttribute('data-scrapbook-toolbar-active');
-    for (const elem of rootNode.querySelectorAll(`[data-scrapbook-elem|="toolbar"]`)) {
-      elem.remove();
     }
   }
 
@@ -1442,36 +1295,39 @@ class CaptureDocumentRewriter extends MapperMixin(CaptureDocumentRewriterBase) {
     if (["blank", "remove"].includes(options["capture.style"])) { return; }
 
     const option = options["capture.rewriteCss"];
-    for (const [css, {id, roots}] of adoptedStyleSheetMap) {
-      tasks.push(async () => {
-        let cssText;
-        switch (option) {
-          case "url":
-          case "tidy":
-          case "match": {
-            cssText = await cssHandler.rewriteCssRules({
-              cssRules: css.cssRules,
-              baseUrl,
-              refUrl,
-              refPolicy,
-              envCharset: charset,
-              refCss: css,
-              rootNode: option === 'match' ? roots : null,
-              sep: '\n\n',
-              settings,
-              options,
-            });
-            break;
+    this._htmlify_sharedAdoptedStyleSheets(rootNode, {
+      adoptedStyleSheetMap,
+      rewriter: (elem, id, css, roots) => {
+        tasks.push(async () => {
+          let cssText;
+          switch (option) {
+            case "url":
+            case "tidy":
+            case "match": {
+              cssText = await cssHandler.rewriteCssRules({
+                cssRules: css.cssRules,
+                baseUrl,
+                refUrl,
+                refPolicy,
+                envCharset: charset,
+                refCss: css,
+                rootNode: option === 'match' ? roots : null,
+                sep: '\n\n',
+                settings,
+                options,
+              });
+              break;
+            }
+            case "none":
+            default: {
+              cssText = Array.prototype.map.call(css.cssRules, x => x.cssText).join('\n\n');
+              break;
+            }
           }
-          case "none":
-          default: {
-            cssText = Array.prototype.map.call(css.cssRules, x => x.cssText).join('\n\n');
-            break;
-          }
-        }
-        this.captureRewriteAttr(rootNode, `data-scrapbook-adoptedstylesheet-${id}`, cssText, {record: false});
-      });
-    }
+          this.captureRewriteAttr(elem, `data-scrapbook-adoptedstylesheet-${id}`, cssText, {record: false});
+        });
+      },
+    });
     this.requireBasicLoader = true;
   }
 
@@ -1531,23 +1387,7 @@ class CaptureDocumentRewriter extends MapperMixin(CaptureDocumentRewriterBase) {
     shadowRootList = this.shadowRootList,
   } = {}) {
     for (const shadowRoot of shadowRootList) {
-      const host = shadowRoot.host;
-      this.captureRewriteAttr(host, "data-scrapbook-shadowdom", shadowRoot.innerHTML, {record: false});
-      if (shadowRoot.mode !== 'open') {
-        this.captureRewriteAttr(host, "data-scrapbook-shadowdom-mode", shadowRoot.mode, {record: false});
-      }
-      if (shadowRoot.clonable) {
-        this.captureRewriteAttr(host, "data-scrapbook-shadowdom-clonable", true, {record: false});
-      }
-      if (shadowRoot.delegatesFocus) {
-        this.captureRewriteAttr(host, "data-scrapbook-shadowdom-delegates-focus", true, {record: false});
-      }
-      if (shadowRoot.serializable) {
-        this.captureRewriteAttr(host, "data-scrapbook-shadowdom-serializable", true, {record: false});
-      }
-      if (shadowRoot.slotAssignment && shadowRoot.slotAssignment !== 'named') {
-        this.captureRewriteAttr(host, "data-scrapbook-shadowdom-slot-assignment", shadowRoot.slotAssignment, {record: false});
-      }
+      this._htmlify_shadowHost(shadowRoot.host);
     }
   }
 
@@ -1828,6 +1668,10 @@ class CaptureDocumentRewriter extends MapperMixin(CaptureDocumentRewriterBase) {
     }
   }
 
+  _handle_slots(rootNode, {slotMap = this.slotMap} = {}) {
+    this._htmlify_slots(rootNode, {slotMap});
+  }
+
   [`_handle_{${NS_HTML}}`](elem) {
     const localName = elem.localName;
 
@@ -1841,7 +1685,10 @@ class CaptureDocumentRewriter extends MapperMixin(CaptureDocumentRewriterBase) {
       if (shadowRoot) {
         const shadowRootOrig = this.getOrigNode(shadowRoot);
         cssTasks.push(() => { cssResourcesHandler.scopePush(shadowRootOrig); });
-        this.addAdoptedStyleSheets(shadowRootOrig, shadowRoot);
+        if (shadowRootOrig.slotAssignment === 'manual') {
+          this._handle_slots(shadowRoot);
+        }
+        this.addAdoptedStyleSheets(shadowRoot);
         this.rewriteRecursively(shadowRoot, this.rewriteNode);
         cssTasks.push(() => { cssResourcesHandler.scopePop(); });
         shadowRootList.push(shadowRoot);
@@ -3478,28 +3325,21 @@ class CaptureDocumentRewriter extends MapperMixin(CaptureDocumentRewriterBase) {
     const {isHeadless, options} = this;
 
     switch (options["capture.canvas"]) {
-      case "blank":
+      case "blank": {
         // do nothing
         break;
-      case "remove":
+      }
+      case "remove": {
         this.captureRemoveNode(elem);
         throw new NodeDisconnect(elem);
+      }
       case "save":
       default: {
         // we get only blank canvas in headless capture
         if (isHeadless) { break; }
 
-        const elemOrig = this.getOrigNode(elem);
-        if (!elemOrig) { break; }
-
-        try {
-          const data = elemOrig.toDataURL();
-          if (data !== utils.getBlankCanvasData(elemOrig)) {
-            this.captureRewriteAttr(elem, "data-scrapbook-canvas", data, {record: false});
-            this.requireBasicLoader = true;
-          }
-        } catch (ex) {
-          console.error(ex);
+        if (this[`_htmlify_{${NS_HTML}}canvas`](elem)) {
+          this.requireBasicLoader = true;
         }
 
         break;
@@ -3516,139 +3356,34 @@ class CaptureDocumentRewriter extends MapperMixin(CaptureDocumentRewriterBase) {
     }
   }
 
-  [`_handle_{${NS_HTML}}input`](elem) {
-    const {baseUrlFinal, refUrl, tasks, settings, options} = this;
-    const elemOrig = this.getOrigNode(elem);
-
-    const type = elem.type.toLowerCase();
-    switch (type) {
-      case "image": {
-        if (elem.hasAttribute("formaction")) {
-          const newUrl = this.resolveRelativeUrl(elem.getAttribute("formaction"), baseUrlFinal, {checkJavascript: true});
-          this.captureRewriteAttr(elem, "formaction", newUrl);
-        }
-
-        if (elem.hasAttribute("src")) {
-          const newUrl = this.resolveRelativeUrl(elem.getAttribute("src"), this.baseUrl);
-          this.captureRewriteAttr(elem, "src", newUrl);
-        }
-        switch (options["capture.image"]) {
-          case "link":
-            // do nothing
-            break;
-          case "blank":
-            // HTML 5.1 2nd Edition / W3C Recommendation:
-            // The src attribute must be present, and must contain a valid non-empty URL.
-            if (elem.hasAttribute("src")) {
-              this.captureRewriteAttr(elem, "src", "about:blank");
-            }
-            break;
-          case "remove":
-            this.captureRemoveNode(elem);
-            throw new NodeDisconnect(elem);
-          case "save-current":
-            // srcset and currentSrc are not supported, do the same as save
-            // eslint-disable-next-line no-fallthrough
-          case "save":
-          default: {
-            if (elem.hasAttribute("src")) {
-              const refPolicy = this.docRefPolicy;
-              tasks.push(async () => {
-                const response = await this.downloadFile({
-                  url: elem.getAttribute("src"),
-                  refUrl,
-                  refPolicy,
-                  settings,
-                  options,
-                });
-                this.captureRewriteAttr(elem, "src", response.url);
-                return response;
-              });
-            }
-            break;
-          }
-        }
-        break;
-      }
-
+  [`_handle_{${NS_HTML}}input`](elem, {mode = this.options["capture.formStatus"]} = {}) {
+    switch (elem.type?.toLowerCase()) {
+      case undefined:
       case "file": {
         break;
       }
 
+      case "image": {
+        return this[`_handle_{${NS_HTML}}input#image`](elem);
+      }
+
       case "password": {
-        switch (options["capture.formStatus"]) {
-          case "save-all":
-            if (elemOrig) {
-              const value = elemOrig.value;
-              if (value !== (elem.getAttribute('value') ?? '')) {
-                this.captureRewriteAttr(elem, "data-scrapbook-input-value", value, {record: false});
-                this.requireBasicLoader = true;
-              }
-            }
-            break;
-          case "keep-all":
-          case "html-all":
-            if (elemOrig) {
-              const value = elemOrig.value;
-              if (value !== (elem.getAttribute('value') ?? '')) {
-                this.captureRewriteAttr(elem, "value", value);
-              }
-            }
-            break;
-          case "save":
-          case "keep":
-          case "html":
-          case "reset":
-          default:
-            // do nothing
-            break;
+        if (this[`_htmlify_{${NS_HTML}}input#password`](elem, {mode})) {
+          this.requireBasicLoader = true;
         }
         break;
       }
 
       case "radio":
       case "checkbox": {
-        switch (options["capture.formStatus"]) {
-          case "save-all":
-          case "save":
-            if (elemOrig) {
-              const checked = elemOrig.checked;
-              if (checked !== elem.hasAttribute('checked')) {
-                this.captureRewriteAttr(elem, "data-scrapbook-input-checked", String(checked), {record: false});
-                this.requireBasicLoader = true;
-              }
-              const indeterminate = elemOrig.indeterminate;
-              if (indeterminate && type === 'checkbox') {
-                this.captureRewriteAttr(elem, "data-scrapbook-input-indeterminate", true, {record: false});
-                this.requireBasicLoader = true;
-              }
-            }
-            break;
-          case "keep-all":
-          case "keep":
-            if (elemOrig) {
-              const indeterminate = elemOrig.indeterminate;
-              if (indeterminate && type === 'checkbox') {
-                this.captureRewriteAttr(elem, "data-scrapbook-input-indeterminate", true, {record: false});
-                this.requireBasicLoader = true;
-              }
-            }
-            // eslint-disable-next-line no-fallthrough
-          case "html-all":
-          case "html":
-            if (elemOrig) {
-              this.captureRewriteAttr(elem, "checked", elemOrig.checked);
-            }
-            break;
-          case "reset":
-          default:
-            // do nothing
-            break;
+        if (this[`_htmlify_{${NS_HTML}}input#radio`](elem, {mode})) {
+          this.requireBasicLoader = true;
         }
         break;
       }
 
       case "submit": {
+        const {baseUrlFinal} = this;
         if (elem.hasAttribute("formaction")) {
           const newUrl = this.resolveRelativeUrl(elem.getAttribute("formaction"), baseUrlFinal, {checkJavascript: true});
           this.captureRewriteAttr(elem, "formaction", newUrl);
@@ -3657,36 +3392,63 @@ class CaptureDocumentRewriter extends MapperMixin(CaptureDocumentRewriterBase) {
 
       // eslint-disable-next-line no-fallthrough
       default: {
-        const defaultValue =
-          (type === 'color') ? '#000000' :
-          (type === 'range') ? '50' :
-          '';
-        switch (options["capture.formStatus"]) {
-          case "save-all":
-          case "save":
-            if (elemOrig) {
-              const value = elemOrig.value;
-              if (value !== (elem.getAttribute('value') ?? defaultValue)) {
-                this.captureRewriteAttr(elem, "data-scrapbook-input-value", value, {record: false});
-                this.requireBasicLoader = true;
-              }
-            }
-            break;
-          case "keep-all":
-          case "keep":
-          case "html-all":
-          case "html":
-            if (elemOrig) {
-              const value = elemOrig.value;
-              if (value !== (elem.getAttribute('value') ?? defaultValue)) {
-                this.captureRewriteAttr(elem, "value", value);
-              }
-            }
-            break;
-          case "reset":
-          default:
-            // do nothing
-            break;
+        if (this[`_htmlify_{${NS_HTML}}input#text`](elem, {mode})) {
+          this.requireBasicLoader = true;
+        }
+        break;
+      }
+    }
+  }
+
+  [`_handle_{${NS_HTML}}input#image`](elem) {
+    const {baseUrlFinal, refUrl, tasks, settings, options} = this;
+
+    if (elem.hasAttribute("formaction")) {
+      const newUrl = this.resolveRelativeUrl(elem.getAttribute("formaction"), baseUrlFinal, {checkJavascript: true});
+      this.captureRewriteAttr(elem, "formaction", newUrl);
+    }
+
+    if (elem.hasAttribute("src")) {
+      const newUrl = this.resolveRelativeUrl(elem.getAttribute("src"), this.baseUrl);
+      this.captureRewriteAttr(elem, "src", newUrl);
+    }
+
+    switch (options["capture.image"]) {
+      case "link": {
+        // do nothing
+        break;
+      }
+      case "blank": {
+        // HTML 5.1 2nd Edition / W3C Recommendation:
+        // The src attribute must be present, and must contain a valid non-empty URL.
+        if (elem.hasAttribute("src")) {
+          this.captureRewriteAttr(elem, "src", "about:blank");
+        }
+        break;
+      }
+      case "remove": {
+        this.captureRemoveNode(elem);
+        throw new NodeDisconnect(elem);
+      }
+      case "save-current": {
+        // srcset and currentSrc are not supported, do the same as save
+      }
+      // eslint-disable-next-line no-fallthrough
+      case "save":
+      default: {
+        if (elem.hasAttribute("src")) {
+          const refPolicy = this.docRefPolicy;
+          tasks.push(async () => {
+            const response = await this.downloadFile({
+              url: elem.getAttribute("src"),
+              refUrl,
+              refPolicy,
+              settings,
+              options,
+            });
+            this.captureRewriteAttr(elem, "src", response.url);
+            return response;
+          });
         }
         break;
       }
@@ -3702,63 +3464,15 @@ class CaptureDocumentRewriter extends MapperMixin(CaptureDocumentRewriterBase) {
     }
   }
 
-  [`_handle_{${NS_HTML}}option`](elem) {
-    const {options} = this;
-    const elemOrig = this.getOrigNode(elem);
-
-    switch (options["capture.formStatus"]) {
-      case "save-all":
-      case "save":
-        if (elemOrig) {
-          const selected = elemOrig.selected;
-          if (selected !== elem.hasAttribute('selected')) {
-            this.captureRewriteAttr(elem, "data-scrapbook-option-selected", String(selected), {record: false});
-            this.requireBasicLoader = true;
-          }
-        }
-        break;
-      case "keep-all":
-      case "keep":
-      case "html-all":
-      case "html":
-        if (elemOrig) {
-          this.captureRewriteAttr(elem, "selected", elemOrig.selected);
-        }
-        break;
-      case "reset":
-      default:
-        // do nothing
-        break;
+  [`_handle_{${NS_HTML}}option`](elem, {mode = this.options["capture.formStatus"]} = {}) {
+    if (this[`_htmlify_{${NS_HTML}}option`](elem, {mode})) {
+      this.requireBasicLoader = true;
     }
   }
 
-  [`_handle_{${NS_HTML}}textarea`](elem) {
-    const {options} = this;
-    const elemOrig = this.getOrigNode(elem);
-
-    switch (options["capture.formStatus"]) {
-      case "save-all":
-      case "save":
-        if (elemOrig) {
-          const value = elemOrig.value;
-          if (value !== elem.textContent) {
-            this.captureRewriteAttr(elem, "data-scrapbook-textarea-value", value, {record: false});
-            this.requireBasicLoader = true;
-          }
-        }
-        break;
-      case "keep-all":
-      case "keep":
-      case "html-all":
-      case "html":
-        if (elemOrig) {
-          this.captureRewriteTextContent(elem, elemOrig.value);
-        }
-        break;
-      case "reset":
-      default:
-        // do nothing
-        break;
+  [`_handle_{${NS_HTML}}textarea`](elem, {mode = this.options["capture.formStatus"]} = {}) {
+    if (this[`_htmlify_{${NS_HTML}}textarea`](elem, {mode})) {
+      this.requireBasicLoader = true;
     }
   }
 
@@ -3781,36 +3495,6 @@ class CaptureDocumentRewriter extends MapperMixin(CaptureDocumentRewriterBase) {
 
   [`_handle_{${NS_HTML}}del`](elem) {
     return this[`_handle_{${NS_HTML}}blockquote`](elem);
-  }
-
-  [`_handle_{${NS_HTML}}slot`](elem) {
-    const {slotMap} = this;
-
-    const root = elem.getRootNode();
-    if (!(root instanceof ShadowRoot && root.slotAssignment === 'manual')) {
-      return;
-    }
-
-    const elemOrig = this.getOrigNode(elem);
-    const ids = [];
-    for (const targetNodeOrig of elemOrig.assignedNodes()) {
-      const targetNode = this.getClonedNode(targetNodeOrig);
-      let id = slotMap.get(targetNode);
-      if (typeof id === 'undefined') {
-        id = slotMap.size;
-        slotMap.set(targetNode, id);
-      }
-      if (targetNode.nodeType === Node.ELEMENT_NODE) {
-        this.captureRewriteAttr(targetNode, "data-scrapbook-slot-index", id, {record: false});
-      } else {
-        targetNode.before(this.doc.createComment(`scrapbook-slot-index=${id}`));
-        targetNode.after(this.doc.createComment(`/scrapbook-slot-index`));
-      }
-      ids.push(id);
-    }
-    if (ids.length) {
-      this.captureRewriteAttr(elem, "data-scrapbook-slot-assigned", ids.join(','), {record: false});
-    }
   }
 
   [`_handle_{${NS_HTML}}xmp`](elem) {
@@ -4204,7 +3888,7 @@ class CaptureDocumentRewriter extends MapperMixin(CaptureDocumentRewriterBase) {
     }
   }
 
-  addAdoptedStyleSheets(docOrShadowRoot, rootNode) {
+  addAdoptedStyleSheets(rootNode) {
     const {
       baseUrl, refUrl, docRefPolicy: refPolicy,
       charset,
@@ -4218,35 +3902,21 @@ class CaptureDocumentRewriter extends MapperMixin(CaptureDocumentRewriterBase) {
       return;
     }
 
-    const root = rootNode.getRootNode();
-    const infos = [];
-    for (const css of utils.getAdoptedStyleSheets(docOrShadowRoot)) {
-      let info = adoptedStyleSheetMap.get(css);
-      if (info) {
-        info.roots.push(root);
-      } else {
-        info = {
-          id: adoptedStyleSheetMap.size,
-          roots: [root],
-        };
-        adoptedStyleSheetMap.set(css, info);
-      }
-      infos.push(info);
-      cssTasks.push(async () => {
-        await cssResourcesHandler.inspectCss({
-          css,
-          baseUrl,
-          refUrl,
-          refPolicy,
-          envCharset: charset,
-          root,
+    this._htmlify_adoptedStyleSheets(rootNode, {
+      adoptedStyleSheetMap,
+      cssRewriter: (css, root) => {
+        cssTasks.push(async () => {
+          await cssResourcesHandler.inspectCss({
+            css,
+            baseUrl,
+            refUrl,
+            refPolicy,
+            envCharset: charset,
+            root,
+          });
         });
-      });
-    }
-    if (infos.length) {
-      const elem = rootNode.host || rootNode;
-      this.captureRewriteAttr(elem, "data-scrapbook-adoptedstylesheets", infos.map(x => x.id).join(','), {record: false});
-    }
+      },
+    });
   }
 
   async warn(...msg) {
