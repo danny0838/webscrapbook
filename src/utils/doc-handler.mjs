@@ -1,4 +1,5 @@
 import * as utils from "./common.mjs";
+import {NS_HTML} from "./common.mjs";
 import {DocumentCloner} from "./doc-cloner.mjs";
 
 /**
@@ -324,6 +325,16 @@ class DocumentRewriter extends BaseDocumentRewriter {
   }
 
   /**
+   * Remove scrapbook toolbar related elements and attributes.
+   */
+  removeToolbar(rootNode) {
+    rootNode.removeAttribute('data-scrapbook-toolbar-active');
+    for (const elem of rootNode.querySelectorAll(`[data-scrapbook-elem|="toolbar"]`)) {
+      elem.remove();
+    }
+  }
+
+  /**
    * Convert dynamic information into representable HTML attributes recursively.
    */
   htmlify(node, options = {}) {
@@ -471,22 +482,7 @@ class DocumentRewriter extends BaseDocumentRewriter {
     const shadowRoot = utils.getShadowRoot(elem);
     if (shadowRoot) {
       this.htmlify(shadowRoot, options);
-      elem.setAttribute("data-scrapbook-shadowdom", shadowRoot.innerHTML);
-      if (shadowRoot.mode !== 'open') {
-        elem.setAttribute("data-scrapbook-shadowdom-mode", shadowRoot.mode);
-      }
-      if (shadowRoot.clonable) {
-        elem.setAttribute("data-scrapbook-shadowdom-clonable", "");
-      }
-      if (shadowRoot.delegatesFocus) {
-        elem.setAttribute("data-scrapbook-shadowdom-delegates-focus", "");
-      }
-      if (shadowRoot.serializable) {
-        elem.setAttribute("data-scrapbook-shadowdom-serializable", "");
-      }
-      if (shadowRoot.slotAssignment && shadowRoot.slotAssignment !== 'named') {
-        elem.setAttribute("data-scrapbook-shadowdom-slot-assignment", shadowRoot.slotAssignment);
-      }
+      this._htmlify_shadowRoot(shadowRoot);
     }
   }
 
@@ -695,6 +691,275 @@ class DocumentRewriter extends BaseDocumentRewriter {
     if (shadowRoot) {
       this.unhtmlify(shadowRoot, options);
     }
+  }
+
+  _htmlify_shadowRoot(shadowRoot) {
+    const host = shadowRoot.host;
+    this.captureRewriteAttr(host, "data-scrapbook-shadowdom", shadowRoot.innerHTML, {record: false});
+    if (shadowRoot.mode !== 'open') {
+      this.captureRewriteAttr(host, "data-scrapbook-shadowdom-mode", shadowRoot.mode, {record: false});
+    }
+    if (shadowRoot.clonable) {
+      this.captureRewriteAttr(host, "data-scrapbook-shadowdom-clonable", true, {record: false});
+    }
+    if (shadowRoot.delegatesFocus) {
+      this.captureRewriteAttr(host, "data-scrapbook-shadowdom-delegates-focus", true, {record: false});
+    }
+    if (shadowRoot.serializable) {
+      this.captureRewriteAttr(host, "data-scrapbook-shadowdom-serializable", true, {record: false});
+    }
+    if (shadowRoot.slotAssignment && shadowRoot.slotAssignment !== 'named') {
+      this.captureRewriteAttr(host, "data-scrapbook-shadowdom-slot-assignment", shadowRoot.slotAssignment, {record: false});
+    }
+  }
+
+  [`_htmlify_{${NS_HTML}}slot`](elem, {slotMap} = {}) {
+    const elemOrig = this.getOrigNode ? this.getOrigNode(elem) : elem;
+    if (!elemOrig) { return; }
+
+    const ids = [];
+    for (const targetNodeOrig of elemOrig.assignedNodes()) {
+      const targetNode = this.getClonedNode(targetNodeOrig);
+      let id = slotMap.get(targetNode);
+      if (typeof id === 'undefined') {
+        id = slotMap.size;
+        slotMap.set(targetNode, id);
+      }
+      if (targetNode.nodeType === Node.ELEMENT_NODE) {
+        this.captureRewriteAttr(targetNode, "data-scrapbook-slot-index", id, {record: false});
+      } else {
+        targetNode.before(this.doc.createComment(`scrapbook-slot-index=${id}`));
+        targetNode.after(this.doc.createComment(`/scrapbook-slot-index`));
+      }
+      ids.push(id);
+    }
+    if (ids.length) {
+      this.captureRewriteAttr(elem, "data-scrapbook-slot-assigned", ids.join(','), {record: false});
+    }
+  }
+
+  [`_htmlify_{${NS_HTML}}canvas`](elem) {
+    const elemOrig = this.getOrigNode ? this.getOrigNode(elem) : elem;
+    if (!elemOrig) { return; }
+
+    let data;
+    try {
+      data = elemOrig.toDataURL();
+    } catch (ex) {
+      console.error(ex);
+    }
+
+    if (data && data !== utils.getBlankCanvasData(elemOrig)) {
+      this.captureRewriteAttr(elem, "data-scrapbook-canvas", data, {record: false});
+      return true;
+    }
+
+    return false;
+  }
+
+  [`_htmlify_{${NS_HTML}}input`](elem, {mode = "save"} = {}) {
+    switch (elem.type?.toLowerCase()) {
+      case undefined:
+      case "image":
+      case "file": {
+        return false;
+      }
+      case "radio":
+      case "checkbox": {
+        return this[`_htmlify_{${NS_HTML}}input#radio`](elem, {mode});
+      }
+      case "password": {
+        return this[`_htmlify_{${NS_HTML}}input#password`](elem, {mode});
+      }
+      default: {
+        return this[`_htmlify_{${NS_HTML}}input#text`](elem, {mode});
+      }
+    }
+  }
+
+  [`_htmlify_{${NS_HTML}}input#radio`](elem, {mode = "save"} = {}) {
+    let result = false;
+    const elemOrig = this.getOrigNode ? this.getOrigNode(elem) : elem;
+    if (!elemOrig) { return result; }
+
+    const type = elem.type?.toLowerCase();
+    switch (mode) {
+      case "save-all":
+      case "save": {
+        const checked = elemOrig.checked;
+        if (checked !== elem.hasAttribute('checked')) {
+          this.captureRewriteAttr(elem, "data-scrapbook-input-checked", String(checked), {record: false});
+          result = true;
+        }
+        const indeterminate = elemOrig.indeterminate;
+        if (indeterminate && type === 'checkbox') {
+          this.captureRewriteAttr(elem, "data-scrapbook-input-indeterminate", true, {record: false});
+          result = true;
+        }
+        break;
+      }
+      case "keep-all":
+      case "keep": {
+        const indeterminate = elemOrig.indeterminate;
+        if (indeterminate && type === 'checkbox') {
+          this.captureRewriteAttr(elem, "data-scrapbook-input-indeterminate", true, {record: false});
+          result = true;
+        }
+      }
+      // eslint-disable-next-line no-fallthrough
+      case "html-all":
+      case "html": {
+        this.captureRewriteAttr(elem, "checked", elemOrig.checked);
+        break;
+      }
+      case "reset":
+      default: {
+        // do nothing
+        break;
+      }
+    }
+
+    return result;
+  }
+
+  [`_htmlify_{${NS_HTML}}input#password`](elem, {mode = "save"} = {}) {
+    let result = false;
+    const elemOrig = this.getOrigNode ? this.getOrigNode(elem) : elem;
+    if (!elemOrig) { return result; }
+
+    switch (mode) {
+      case "save-all": {
+        const value = elemOrig.value;
+        if (value !== (elem.getAttribute('value') ?? '')) {
+          this.captureRewriteAttr(elem, "data-scrapbook-input-value", value, {record: false});
+          result = true;
+        }
+        break;
+      }
+      case "keep-all":
+      case "html-all": {
+        const value = elemOrig.value;
+        if (value !== (elem.getAttribute('value') ?? '')) {
+          this.captureRewriteAttr(elem, "value", value);
+        }
+        break;
+      }
+      case "save":
+      case "keep":
+      case "html":
+      case "reset":
+      default: {
+        // do nothing
+        break;
+      }
+    }
+
+    return result;
+  }
+
+  [`_htmlify_{${NS_HTML}}input#text`](elem, {mode = "save"} = {}) {
+    let result = false;
+    const elemOrig = this.getOrigNode ? this.getOrigNode(elem) : elem;
+    if (!elemOrig) { return result; }
+
+    const type = elem.type?.toLowerCase();
+    const defaultValue =
+      (type === 'color') ? '#000000' :
+      (type === 'range') ? '50' :
+      '';
+
+    switch (mode) {
+      case "save-all":
+      case "save": {
+        const value = elemOrig.value;
+        if (value !== (elem.getAttribute('value') ?? defaultValue)) {
+          this.captureRewriteAttr(elem, "data-scrapbook-input-value", value, {record: false});
+          result = true;
+        }
+        break;
+      }
+      case "keep-all":
+      case "keep":
+      case "html-all":
+      case "html": {
+        const value = elemOrig.value;
+        if (value !== (elem.getAttribute('value') ?? defaultValue)) {
+          this.captureRewriteAttr(elem, "value", value);
+        }
+        break;
+      }
+      case "reset":
+      default: {
+        // do nothing
+        break;
+      }
+    }
+
+    return result;
+  }
+
+  [`_htmlify_{${NS_HTML}}textarea`](elem, {mode = "save"} = {}) {
+    let result = false;
+    const elemOrig = this.getOrigNode ? this.getOrigNode(elem) : elem;
+    if (!elemOrig) { return result; }
+
+    switch (mode) {
+      case "save-all":
+      case "save": {
+        const value = elemOrig.value;
+        if (value !== elem.textContent) {
+          this.captureRewriteAttr(elem, "data-scrapbook-textarea-value", value, {record: false});
+          result = true;
+        }
+        break;
+      }
+      case "keep-all":
+      case "keep":
+      case "html-all":
+      case "html": {
+        this.captureRewriteTextContent(elem, elemOrig.value);
+        break;
+      }
+      case "reset":
+      default: {
+        // do nothing
+        break;
+      }
+    }
+
+    return result;
+  }
+
+  [`_htmlify_{${NS_HTML}}option`](elem, {mode = "save"} = {}) {
+    let result = false;
+    const elemOrig = this.getOrigNode ? this.getOrigNode(elem) : elem;
+    if (!elemOrig) { return result; }
+
+    switch (mode) {
+      case "save-all":
+      case "save": {
+        const selected = elemOrig.selected;
+        if (selected !== elem.hasAttribute('selected')) {
+          this.captureRewriteAttr(elem, "data-scrapbook-option-selected", String(selected), {record: false});
+          result = true;
+        }
+        break;
+      }
+      case "keep-all":
+      case "keep":
+      case "html-all":
+      case "html": {
+        this.captureRewriteAttr(elem, "selected", elemOrig.selected);
+        break;
+      }
+      case "reset":
+      default: {
+        // do nothing
+        break;
+      }
+    }
+
+    return result;
   }
 }
 
