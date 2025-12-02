@@ -593,7 +593,7 @@ describe('utils/doc-handler.mjs', function () {
           });
         });
 
-        $it.skipIf($.noAdoptedStylesheet).xfail()('should record shared constructed stylesheets as separated entries', async function () {
+        $it.skipIf($.noAdoptedStylesheet)('should record shared constructed stylesheets as separated entries', async function () {
           var {contentDocument: doc} = await createIframeFixture({
             docData: {name: 'div', shadow: {children: [
               {name: 'div', shadow: {}},
@@ -633,7 +633,7 @@ describe('utils/doc-handler.mjs', function () {
           });
         });
 
-        $it.skipIf($.noAdoptedStylesheet).xfail()('should remove obsolete special attributes', async function () {
+        $it.skipIf($.noAdoptedStylesheet)('should remove obsolete special attributes', async function () {
           var {contentDocument: doc} = await createIframeFixture({
             docData: {
               name: 'div',
@@ -917,7 +917,7 @@ describe('utils/doc-handler.mjs', function () {
       });
 
       context('constructed stylesheets handling', function () {
-        $it.skipIf($.noAdoptedStylesheet).xfail()('should recover constructed stylesheets', async function () {
+        $it.skipIf($.noAdoptedStylesheet)('should recover constructed stylesheets', async function () {
           var {contentDocument: doc} = await createIframeFixture({docData: {
             name: 'div',
             attrs: {
@@ -942,7 +942,7 @@ describe('utils/doc-handler.mjs', function () {
           assert.deepEqual(getAttributes(elem), {});
         });
 
-        $it.skipIf($.noAdoptedStylesheet).xfail()('should use separated maps for different shadow roots', async function () {
+        $it.skipIf($.noAdoptedStylesheet)('should use separated maps for different shadow roots', async function () {
           var {contentDocument: doc} = await createIframeFixture({docData: {
             name: 'div',
             attrs: {
