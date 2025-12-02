@@ -251,6 +251,58 @@ describe('utils/doc-handler.mjs', function () {
           'data-scrapbook-shadowdom-mode': 'closed',
         });
       });
+
+      it('should record adoptedStyleSheets', async function () {
+        var {contentDocument: doc} = await createIframeFixture({
+          docData: {
+            name: 'div',
+            shadow: {},
+          },
+          onload: function ({target: {contentWindow: win, contentDocument: doc}}) {
+            var shadow = doc.querySelector('div').shadowRoot;
+
+            var css = new win.CSSStyleSheet();
+            css.insertRule('#s1 { color: red; }', css.cssRules.length);
+            css.insertRule('#s2 { color: green; }', css.cssRules.length);
+            shadow.adoptedStyleSheets = [...shadow.adoptedStyleSheets, css];
+
+            var css = new win.CSSStyleSheet();
+            css.insertRule('#s1 { background-color: green; }', css.cssRules.length);
+            css.insertRule('#s2 { background-color: blue; }', css.cssRules.length);
+            shadow.adoptedStyleSheets = [...shadow.adoptedStyleSheets, css];
+          },
+        });
+        var elem = doc.querySelector('div');
+
+        rewriter.htmlify(elem);
+        assert.deepEqual(getAttributes(elem), {
+          'data-scrapbook-adoptedstylesheets': '0,1',
+          'data-scrapbook-adoptedstylesheet-0': ['#s1 { color: red; }', '#s2 { color: green; }'].join('\n\n'),
+          'data-scrapbook-adoptedstylesheet-1': ['#s1 { background-color: green; }', '#s2 { background-color: blue; }'].join('\n\n'),
+          'data-scrapbook-shadowdom': '',
+        });
+      });
+
+      it('should remove previously recorded adoptedStyleSheets', async function () {
+        var {contentDocument: doc} = await createIframeFixture({
+          docData: {
+            name: 'div',
+            attrs: {
+              'data-scrapbook-adoptedstylesheets': '0,1,2',
+              'data-scrapbook-adoptedstylesheet-0': '#s1 { color: red; }',
+              'data-scrapbook-adoptedstylesheet-1': '#s2 { color: green; }',
+              'data-scrapbook-adoptedstylesheet-2': '#s3 { color: blue; }',
+            },
+            shadow: {},
+          },
+        });
+        var elem = doc.querySelector('div');
+
+        rewriter.htmlify(elem);
+        assert.deepEqual(getAttributes(elem), {
+          'data-scrapbook-shadowdom': '',
+        });
+      });
     });
 
     describe('#unhtmlify()', function () {
@@ -263,6 +315,26 @@ describe('utils/doc-handler.mjs', function () {
         rewriter.unhtmlify(elem);
         assert.strictEqual(elem.shadowRoot.innerHTML, '<div></div>');
         assert.strictEqual(elem.shadowRoot.querySelector('div').shadowRoot.innerHTML, '<span title="span title">text</span>');
+      });
+
+      it('should recover adoptedStyleSheets', async function () {
+        var {contentDocument: doc} = await createIframeFixture({docData: {
+          name: 'div',
+          attrs: {
+            'data-scrapbook-adoptedstylesheets': '0,1',
+            'data-scrapbook-adoptedstylesheet-0': ['#s1 { color: red; }', '#s2 { color: green; }'].join('\n\n'),
+            'data-scrapbook-adoptedstylesheet-1': ['#s1 { background-color: green; }', '#s2 { background-color: blue; }'].join('\n\n'),
+            'data-scrapbook-shadowdom': '',
+          },
+        }});
+        var elem = doc.querySelector('div');
+
+        rewriter.unhtmlify(elem);
+        var constructed = elem.shadowRoot.adoptedStyleSheets;
+        assert.strictEqual(constructed[0].cssRules[0].cssText, '#s1 { color: red; }');
+        assert.strictEqual(constructed[0].cssRules[1].cssText, '#s2 { color: green; }');
+        assert.strictEqual(constructed[1].cssRules[0].cssText, '#s1 { background-color: green; }');
+        assert.strictEqual(constructed[1].cssRules[1].cssText, '#s2 { background-color: blue; }');
       });
     });
   });

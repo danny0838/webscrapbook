@@ -198,7 +198,7 @@ class DocumentRewriter extends BaseDocumentRewriter {
   _htmlify(elem, options = {}) {
     // handle adoptedStyleSheet if supported by the browser
     // @TODO: merge shared constructed stylesheets among shadow roots
-    if ('adoptedStyleSheets' in document && elem instanceof ShadowRoot) {
+    if (elem.host && elem.adoptedStyleSheets) {
       const adoptedStyleSheetMap = new Map();
 
       const host = elem.host;
@@ -218,7 +218,7 @@ class DocumentRewriter extends BaseDocumentRewriter {
       }
 
       const regex = /^data-scrapbook-adoptedstylesheet-(\d+)$/;
-      for (const {nodeName: attr} of host.attributes) {
+      for (const {nodeName: attr} of Array.from(host.attributes)) {
         if (regex.test(attr)) {
           host.removeAttribute(attr);
         }
@@ -235,7 +235,7 @@ class DocumentRewriter extends BaseDocumentRewriter {
     }
 
     // handle manual slots if supported by the browser
-    if (elem instanceof ShadowRoot && elem.slotAssignment === 'manual') {
+    if (elem.host && elem.slotAssignment === 'manual') {
       const slotMap = new Map();
       const root = elem;
       for (const elem of root.querySelectorAll('slot')) {
@@ -376,12 +376,12 @@ class DocumentRewriter extends BaseDocumentRewriter {
     } = options;
 
     // handle adoptedStyleSheet
-    if (shadowDom && elem instanceof ShadowRoot) {
+    if (shadowDom && elem.host) {
       const regex = /^data-scrapbook-adoptedstylesheet-(\d+)$/;
       const host = elem.host;
 
       const cssIndexes = host.getAttribute('data-scrapbook-adoptedstylesheets');
-      if (cssIndexes !== null && apply && 'adoptedStyleSheets' in document) {
+      if (cssIndexes !== null && apply && elem.adoptedStyleSheets) {
         for (const idx of cssIndexes.split(',')) {
           const attr = `data-scrapbook-adoptedstylesheet-${parseInt(idx, 10)}`;
           const sel = `[${attr}]`;
@@ -389,7 +389,7 @@ class DocumentRewriter extends BaseDocumentRewriter {
           if (!refElem) { continue; }
           const cssText = refElem.getAttribute(attr);
           if (cssText === null) { continue; }
-          const css = new CSSStyleSheet();
+          const css = new elem.ownerDocument.defaultView.CSSStyleSheet();
           const cssTexts = cssText.split('\n\n');
           for (let i = cssTexts.length - 1; i >= 0; i--) {
             try {
@@ -402,7 +402,7 @@ class DocumentRewriter extends BaseDocumentRewriter {
         }
       }
       host.removeAttribute('data-scrapbook-adoptedstylesheets');
-      for (const attr of Array.prototype.map.call(host.attributes, n => n.nodeName)) {
+      for (const {nodeName: attr} of Array.from(host.attributes)) {
         if (regex.test(attr)) {
           host.removeAttribute(attr);
         }
@@ -410,7 +410,7 @@ class DocumentRewriter extends BaseDocumentRewriter {
     }
 
     // handle manual slots
-    if (shadowDom && elem instanceof ShadowRoot && elem.slotAssignment === 'manual') {
+    if (shadowDom && elem.host && elem.slotAssignment === 'manual') {
       const regex = /^scrapbook-slot-index=(\d+)$/;
       const host = elem.host;
 
