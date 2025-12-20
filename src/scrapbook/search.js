@@ -244,6 +244,10 @@ const search = {
     wrapper.id = "result";
     document.getElementById("result").replaceWith(wrapper);
 
+    const bookIds = Array.prototype.map.call(
+      document.getElementById("books").querySelectorAll("option"),
+      (elem) => elem.value,
+    );
     try {
       // set queryStrFromFrom
       let queryStrFromFrom = "";
@@ -306,7 +310,9 @@ const search = {
         });
         if (error) { return; }
         if (rv.size) {
-          for (const [bookId, results] of rv) {
+          for (const bookId of bookIds) {
+            const results = rv.get(bookId);
+            if (!results) { continue; }
             const book = server.books[bookId];
             await this.loadBook(book);
             await this.showResults(results, {book, wrapper});
@@ -322,9 +328,10 @@ const search = {
           csrfToken: true,
         }).then(r => r.json());
         let found = false;
-        for (const bookId in response.data) {
-          found = true;
+        for (const bookId of bookIds) {
           const results = response.data[bookId];
+          if (!results) { continue; }
+          found = true;
           const book = server.books[bookId];
           await this.loadBook(book);
           await this.showResults(results, {book, wrapper});
