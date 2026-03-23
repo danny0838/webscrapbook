@@ -659,7 +659,7 @@ capturer.fetch = async function (params) {
                 const responseFetchPrevious = fetchMap.get(responseFetchToken);
 
                 // a fetch to the redirected URL exists, abort the request and return it
-                if (responseFetchPrevious) {
+                if (responseFetchPrevious && responseFetchPrevious !== fetchCurrent) {
                   response = responseFetchPrevious;
                   xhr.abort();
                   return;
