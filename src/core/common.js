@@ -188,7 +188,7 @@ const DEFAULT_OPTIONS = {
   "capture.removeHidden": "none", // "none", "undisplayed"
   "capture.linkUnsavedUri": false,
   "capture.downLink.file.mode": "none", // "none", "url", "header"
-  "capture.downLink.file.extFilter": "###image\n#bmp, gif, ico, jpg, jpeg, jpe, jp2, png, tif, tiff, svg\n###audio\n#aac, ape, flac, mid, midi, mp3, ogg, oga, ra, ram, rm, rmx, wav, wma\n###video\n#avc, avi, flv, mkv, mov, mpg, mpeg, mp4, wmv\n###archive\n#zip, rar, jar, bz2, gz, tar, rpm, 7z, 7zip, xz, jar, xpi, lzh, lha, lzma\n#/z[0-9]{2}|r[0-9]{2}/\n###document\n#pdf, doc, docx, xls, xlsx, ppt, pptx, odt, ods, odp, odg, odf, rtf, txt, csv\n###executable\n#exe, msi, dmg, bin, xpi, iso\n###any non-web-page\n#/(?!$|html?|xht(ml)?|php|py|pl|aspx?|cgi|jsp)(.*)/i",
+  "capture.downLink.file.extFilter": "###image\n#bmp, gif, ico, jpg, jpeg, jpe, jp2, jxl, png, tif, tiff, webp, avif, heic, heif; svg\n###audio\n#aac, ape, flac, alac, mka, mid, midi, mp3, m4a, ogg, oga, opus, ra, ram, rm, rmx, wav, wma\n###video\n#avc, avi, flv, mkv, mov, mpg, mpeg, mp4, m4p, m4v, wmv, webm, gifv\n###document\n#pdf, xps, doc, docx, xls, xlsx, ppt, pptx, odt, fodt, ods, fods, odp, fodp, odg, fodg, odb, odf, rtf, txt, csv, tsv, md, rst\n###archive / disk-image\n#zip, rar, bz2, gz, tar, 7z, 7zip, xz, lzh, lha, lzma, zst; cbz, cbt, cbr, cb7\n#/z[0-9]{2}|r[0-9]{2}/\n#iso, dmg, img\n###executable / script / installable / ambiguous\n#exe, appimage\n#cmd, bat, vbs, ps1, sh, bash, py, pl, php, rb, js; java\n#msi, msix, pkg, rpm, deb, apk, aab; jar, xpi\n#bin, dat\n###any non-web-page\n#/(?!$|html?|xht(ml)?|php|py|pl|aspx?|cgi|jsp)(.*)/i",
   "capture.downLink.doc.depth": null,
   "capture.downLink.doc.delay": null,
   "capture.downLink.doc.mode": "source", // "tab", "source"
