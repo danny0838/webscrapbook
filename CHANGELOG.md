@@ -3,6 +3,11 @@
 * Versions before 1.0 are in initial development. APIs are not stable for these versions, even a `y` version can involve a breaking change, and only partial notable changes are summarized in this document. See full commit history in the source repository for details.
 * Backend server requirement in this document refers to the version of [`webscrapbook` Python package](https://github.com/danny0838/pywebscrapbook) (or PyWebScrapBook).
 
+## [2.25.0] - 2026-03-24
+* Fixed a script error when capturing a non-standard URL.
+* Improved the default list to include more common formats for downloading linked files.
+* Improved the search page to show the result scrapbooks in order.
+
 ## [2.24.3] - 2025-10-13
 * Fixed incorrect log URL when capturing a frame.
 * Fixed several missing warning messages during a capture.
