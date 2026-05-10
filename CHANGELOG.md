@@ -3,6 +3,9 @@
 * Versions before 1.0 are in initial development. APIs are not stable for these versions, even a `y` version can involve a breaking change, and only partial notable changes are summarized in this document. See full commit history in the source repository for details.
 * Backend server requirement in this document refers to the version of [`webscrapbook` Python package](https://github.com/danny0838/pywebscrapbook) (or PyWebScrapBook).
 
+## [2.25.1] - 2026-05-10
+* Fixed missing item selector button for the manage dialog.
+
 ## [2.25.0] - 2026-03-24
 * Fixed a script error when capturing a non-standard URL.
 * Improved the default list to include more common formats for downloading linked files.
