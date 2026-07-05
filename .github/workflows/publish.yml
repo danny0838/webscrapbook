@@ -37,7 +37,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Configure and verify
         id: config
@@ -94,9 +94,9 @@ jobs:
           done
 
       - name: Set up Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
-          node-version: '22'
+          node-version: '24'
 
       - name: Install dependencies
         run: npm install
@@ -119,19 +119,19 @@ jobs:
           git push origin ${{ steps.config.outputs.tag_name }}
 
       - name: Upload artifact (ZIP)
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: ${{ steps.config.outputs.artifact_zip }}
           path: ${{ steps.config.outputs.ext_path_zip }}
 
       - name: Upload artifact (ZIP2)
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: ${{ steps.config.outputs.artifact_zip2 }}
           path: ${{ steps.config.outputs.ext_path_zip2 }}
 
       - name: Upload artifact (XPI)
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: ${{ steps.config.outputs.artifact_xpi }}
           path: ${{ steps.config.outputs.ext_path_xpi }}
@@ -144,13 +144,13 @@ jobs:
     environment: ${{ github.event.inputs.environment }}
     steps:
       - name: Download artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: ${{ needs.main.outputs.artifact_zip }}
           path: ${{ needs.main.outputs.artifact_dir }}
 
       - name: Upload to Chrome Web Store
-        uses: mnao305/chrome-extension-upload@v5.0.0
+        uses: mnao305/chrome-extension-upload@v6.0.0
         with:
           file-path: ${{ needs.main.outputs.ext_path_zip }}
           extension-id: ${{ vars.CHROME_EXTENSION_ID }}
@@ -168,7 +168,7 @@ jobs:
     environment: ${{ github.event.inputs.environment }}
     steps:
       - name: Download artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: ${{ needs.main.outputs.artifact_zip2 }}
           path: ${{ needs.main.outputs.artifact_dir }}
@@ -189,13 +189,13 @@ jobs:
     environment: ${{ github.event.inputs.environment }}
     steps:
       - name: Download artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: ${{ needs.main.outputs.artifact_xpi }}
           path: ${{ needs.main.outputs.artifact_dir }}
 
       - name: Upload to Firefox Add-ons
-        uses: kewisch/action-web-ext@v1
+        uses: kewisch/action-web-ext@v2
         with:
           cmd: sign
 
