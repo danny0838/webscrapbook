@@ -4,6 +4,7 @@
   "type": "module",
   "scripts": {
     "lint": "eslint",
+    "test": "mocha src/test/test_*.mjs",
     "dev": "npm run dev:chromium",
     "dev:chromium": "node tools/build.js -t chromium -m dev",
     "dev:chromium2": "node tools/build.js -t chromium-mv2 -m dev",
@@ -26,6 +27,7 @@
     "eslint-plugin-import": "^2.32.0",
     "glob": "^11.0.2",
     "globals": "^16.0.0",
+    "mocha": "^11.7.6",
     "rollup": "^4.46.2",
     "web-ext": "^10.4.0"
   }

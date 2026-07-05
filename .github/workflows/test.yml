@@ -28,3 +28,6 @@ jobs:
 
       - name: Verify no code issue
         run: npm run lint
+
+      - name: Quick tests
+        run: npm run test
