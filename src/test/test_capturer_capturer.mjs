@@ -4826,6 +4826,36 @@ $describe.skipIf($.noBrowser)('capturer/capturer.mjs', function () {
                 ].join('\n\n'),
               });
             });
+
+            it('should work for rules selecting documentElement', async function () {
+              async function docFactory() {
+                var {contentDocument: doc} = await createIframeFixture({
+                  onload: function ({target: {contentWindow: win, contentDocument: doc}}) {
+                    var css = new win.CSSStyleSheet();
+                    css.insertRule('html { background-image: url(./image.bmp); }', css.cssRules.length);
+                    doc.adoptedStyleSheets = [css];
+                  },
+                });
+                return doc;
+              }
+              const resMap = {
+                [docUrl]: {
+                  blob: new Blob([''], {type: 'text/html'}),
+                },
+                [`${docUrl}image.bmp`]: {
+                  blob: new Blob([utils.byteStringToArrayBuffer(GREEN_BMP_BYTES)], {type: 'image/bmp'}),
+                },
+              };
+              var options = Object.assign({}, baseOptions, {
+                "capture.rewriteCss": "match",
+              });
+              var {data, doc, attrs} = await capture({docUrl, resMap, doc: await docFactory(), options});
+              assert.hasAllKeys(data, ['index.html', 'image.bmp']);
+              assert.deepEqual(attrs, {
+                'data-scrapbook-adoptedstylesheets': '0',
+                'data-scrapbook-adoptedstylesheet-0': 'html { background-image: url("image.bmp"); }',
+              });
+            });
           });
 
           context('when options["capture.rewriteCss"] = "tidy"', function () {

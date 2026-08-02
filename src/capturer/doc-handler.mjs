@@ -4204,7 +4204,7 @@ class CaptureDocumentRewriter extends MapperMixin(CaptureDocumentRewriterBase) {
     }
   }
 
-  addAdoptedStyleSheets(docOrShadowRoot, root) {
+  addAdoptedStyleSheets(docOrShadowRoot, rootNode) {
     const {
       baseUrl, refUrl, docRefPolicy: refPolicy,
       charset,
@@ -4218,6 +4218,7 @@ class CaptureDocumentRewriter extends MapperMixin(CaptureDocumentRewriterBase) {
       return;
     }
 
+    const root = rootNode.getRootNode();
     const infos = [];
     for (const css of utils.getAdoptedStyleSheets(docOrShadowRoot)) {
       let info = adoptedStyleSheetMap.get(css);
@@ -4243,7 +4244,7 @@ class CaptureDocumentRewriter extends MapperMixin(CaptureDocumentRewriterBase) {
       });
     }
     if (infos.length) {
-      const elem = root.host || root;
+      const elem = rootNode.host || rootNode;
       this.captureRewriteAttr(elem, "data-scrapbook-adoptedstylesheets", infos.map(x => x.id).join(','), {record: false});
     }
   }
