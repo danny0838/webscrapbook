@@ -155,7 +155,7 @@ class DocumentRewriter extends BaseDocumentRewriter {
     if (!parent) { return false; }
 
     // if the associated source nodes exist, use them
-    let wrapper = mapCommentToWrapper.get(node);
+    const wrapper = mapCommentToWrapper?.get(node);
     if (wrapper) {
       const frag = node.ownerDocument.createDocumentFragment();
       let child;

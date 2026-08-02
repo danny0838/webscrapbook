@@ -359,7 +359,7 @@ describe('utils/doc-handler.mjs', function () {
         var span2 = elem.querySelectorAll('span')[1];
 
         rewriter.eraseNode(elem, {timeId});
-        rewriter.uneraseNode(doc.body.firstChild, {mapCommentToWrapper: new Map()});
+        rewriter.uneraseNode(doc.body.firstChild);
         assert.strictEqual(doc.body.innerHTML, '<div id="myid"><span>text1</span><span>text2</span></div>');
 
         assert.notStrictEqual(doc.querySelector('div'), elem);
@@ -400,7 +400,7 @@ describe('utils/doc-handler.mjs', function () {
           innerHTML: `foo <!--scrapbook-erased-${timeId}=bar <span id="myid">mytext</span> baz--> qux`,
         });
         var comment = Array.prototype.find.call(doc.body.childNodes, x => x.nodeType === Node.COMMENT_NODE);
-        rewriter.uneraseNode(comment, {mapCommentToWrapper: new Map()});
+        rewriter.uneraseNode(comment);
         assert.strictEqual(doc.body.innerHTML, 'foo bar <span id="myid">mytext</span> baz qux');
         assert.lengthOf(doc.body.childNodes, 3);
       });
@@ -411,7 +411,7 @@ describe('utils/doc-handler.mjs', function () {
           innerHTML: `foo <!--scrapbook-erased-${timeId}=bar <span id="myid">mytext</span> baz--> qux`,
         });
         var comment = Array.prototype.find.call(doc.body.childNodes, x => x.nodeType === Node.COMMENT_NODE);
-        rewriter.uneraseNode(comment, {mapCommentToWrapper: new Map(), normalize: true});
+        rewriter.uneraseNode(comment, {normalize: true});
         assert.strictEqual(doc.body.innerHTML, 'foo bar <span id="myid">mytext</span> baz qux');
         assert.lengthOf(doc.body.childNodes, 3);
       });
@@ -422,14 +422,14 @@ describe('utils/doc-handler.mjs', function () {
           innerHTML: `foo <!--scrapbook-erased-${timeId}=bar <span id="myid">mytext</span> baz--> qux`,
         });
         var comment = Array.prototype.find.call(doc.body.childNodes, x => x.nodeType === Node.COMMENT_NODE);
-        rewriter.uneraseNode(comment, {mapCommentToWrapper: new Map(), normalize: false});
+        rewriter.uneraseNode(comment, {normalize: false});
         assert.strictEqual(doc.body.innerHTML, 'foo bar <span id="myid">mytext</span> baz qux');
         assert.lengthOf(doc.body.childNodes, 5);
       });
 
       it('should unescape special chars in the comment', function () {
         var doc = createDocFixture({name: 'body', innerHTML: '<!--scrapbook-erased-${timeId}=<!-\u200B-test-\u200B->-->'});
-        rewriter.uneraseNode(doc.body.firstChild, {mapCommentToWrapper: new Map()});
+        rewriter.uneraseNode(doc.body.firstChild);
         assert.strictEqual(doc.body.innerHTML, `<!--test-->`);
       });
     });
