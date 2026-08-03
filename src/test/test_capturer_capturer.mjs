@@ -4550,272 +4550,476 @@ $describe.skipIf($.noBrowser)('capturer/capturer.mjs', function () {
       });
 
       $context.skipIf($.noAdoptedStylesheet)('constructed stylesheets handling', function () {
-        context('should save constructed stylesheets according to capture.{adoptedStyleSheet, style}', function () {
-          async function docFactory() {
-            var {contentDocument: doc} = await createIframeFixture({
-              docData: {
-                name: 'body',
-                children: [
-                  {name: 'blockquote', id: 'adopted1-1'},
-                  {name: 'blockquote', id: 'adopted1-2'},
-                  {name: 'blockquote', id: 'adopted2-1'},
-                  {name: 'blockquote', id: 'adopted2-2'},
-                ],
-              },
-              onload: function ({target: {contentWindow: win, contentDocument: doc}}) {
-                var css = new win.CSSStyleSheet();
-                css.insertRule('#adopted1-1 { background-color: #0F0; }', 0);
-                css.insertRule('#adopted1-2 { background-image: url(./green.bmp); }', 1);
-                css.insertRule('#nonexist { background-image: url(./nonexist.bmp); }', 2);
-                var css2 = new win.CSSStyleSheet();
-                css2.insertRule('#adopted2-1 { background-color: #0F0; }', 0);
-                css2.insertRule('#adopted2-2 { background-image: url(./green.bmp); }', 1);
-                css2.insertRule('#nonexist { background-image: url(./nonexist.bmp); }', 2);
-                doc.adoptedStyleSheets = [...doc.adoptedStyleSheets, css, css2];
-              },
-            });
-            return doc;
-          }
-
-          const resMap = {
-            [docUrl]: {
-              blob: new Blob([''], {type: 'text/html'}),
+        async function docFactory() {
+          var {contentDocument: doc} = await createIframeFixture({
+            onload: function ({target: {contentWindow: win, contentDocument: doc}}) {
+              var css = new win.CSSStyleSheet();
+              css.insertRule('#adopted1-1 { background-color: green; }', 0);
+              css.insertRule('#adopted1-2 { background-image: url(./green.bmp); }', 1);
+              var css2 = new win.CSSStyleSheet();
+              css2.insertRule('#adopted2-1 { background-color: yellow; }', 0);
+              css2.insertRule('#adopted2-2 { background-image: url(./yellow.bmp); }', 1);
+              doc.adoptedStyleSheets = [...doc.adoptedStyleSheets, css, css2];
             },
-            [`${docUrl}green.bmp`]: {
-              blob: new Blob([utils.byteStringToArrayBuffer(GREEN_BMP_BYTES)], {type: 'image/bmp'}),
-            },
-            [`${docUrl}nonexist.bmp`]: {
-              blob: new Blob([utils.byteStringToArrayBuffer(RED_BMP_BYTES)], {type: 'image/bmp'}),
-            },
-          };
+          });
+          return doc;
+        }
 
-          const baseOptions = {
-            "capture.style": "save",
-            "capture.adoptedStyleSheet": "save",
-            "capture.recordRewrites": true,
-            "capture.imageBackground": "save",
-            "capture.font": "save",
-          };
+        async function capture({docUrl, resMap, doc, options}) {
+          var {data} = await new TestCapturer(resMap).captureGeneral({doc, docUrl, options});
+          var doc = await utils.readFileAsDocument(data.get('index.html'));
+          var docElem = doc.documentElement;
+          var {'data-scrapbook-source': _, 'data-scrapbook-create': _, ...attrs} = getAttributes(docElem);
+          return {data, doc, attrs};
+        }
 
-          for (const mode of ['save', 'link']) {
-            it(`capture.adoptedStyleSheet = save, capture.style = ${mode}`, async function () {
-              var options = Object.assign({}, baseOptions, {
-                "capture.style": mode,
-                "capture.adoptedStyleSheet": "save",
-              });
+        const resMap = {
+          [docUrl]: {
+            blob: new Blob([''], {type: 'text/html'}),
+          },
+          [`${docUrl}green.bmp`]: {
+            blob: new Blob([utils.byteStringToArrayBuffer(GREEN_BMP_BYTES)], {type: 'image/bmp'}),
+          },
+          [`${docUrl}yellow.bmp`]: {
+            blob: new Blob([utils.byteStringToArrayBuffer(YELLOW_BMP_BYTES)], {type: 'image/bmp'}),
+          },
+        };
 
-              var doc = await docFactory();
+        const baseOptions = {
+          "capture.style": "save",
+          "capture.adoptedStyleSheet": "save",
+          "capture.imageBackground": "save",
+          "capture.font": "save",
+        };
 
-              var {data} = await new TestCapturer(resMap).captureGeneral({doc, docUrl, options});
-              assert.hasAllKeys(data, ['index.html', 'green.bmp', 'nonexist.bmp']);
-
-              var doc = await utils.readFileAsDocument(data.get('index.html'));
-              assert.exists(doc.querySelector('script[data-scrapbook-elem="basic-loader"]'));
-
-              var docElem = doc.documentElement;
-              var {'data-scrapbook-source': _, 'data-scrapbook-create': _, ...attrs} = getAttributes(docElem);
-              assert.deepEqual(attrs, {
-                'data-scrapbook-adoptedstylesheets': '0,1',
-                'data-scrapbook-adoptedstylesheet-0': [
-                  `#adopted1-1 { background-color: rgb(0, 255, 0); }`,
-                  `#adopted1-2 { background-image: /*scrapbook-orig-url="./green.bmp"*/url("green.bmp"); }`,
-                  `#nonexist { background-image: /*scrapbook-orig-url="./nonexist.bmp"*/url("nonexist.bmp"); }`,
-                ].join('\n\n'),
-                'data-scrapbook-adoptedstylesheet-1': [
-                  `#adopted2-1 { background-color: rgb(0, 255, 0); }`,
-                  `#adopted2-2 { background-image: /*scrapbook-orig-url="./green.bmp"*/url("green.bmp"); }`,
-                  `#nonexist { background-image: /*scrapbook-orig-url="./nonexist.bmp"*/url("nonexist.bmp"); }`,
-                ].join('\n\n'),
+        context('capture options', function () {
+          context('when options["capture.style"] = "save"', function () {
+            context('when options["capture.adoptedStyleSheet"] = "save"', function () {
+              it('should save constructed stylesheets', async function () {
+                var options = Object.assign({}, baseOptions, {
+                  "capture.style": "save",
+                  "capture.adoptedStyleSheet": "save",
+                });
+                var {data, doc, attrs} = await capture({docUrl, resMap, doc: await docFactory(), options});
+                assert.hasAllKeys(data, ['index.html', 'green.bmp', 'yellow.bmp']);
+                assert.exists(doc.querySelector('script[data-scrapbook-elem="basic-loader"]'));
+                assert.deepEqual(attrs, {
+                  'data-scrapbook-adoptedstylesheets': '0,1',
+                  'data-scrapbook-adoptedstylesheet-0': [
+                    `#adopted1-1 { background-color: green; }`,
+                    `#adopted1-2 { background-image: url("green.bmp"); }`,
+                  ].join('\n\n'),
+                  'data-scrapbook-adoptedstylesheet-1': [
+                    `#adopted2-1 { background-color: yellow; }`,
+                    `#adopted2-2 { background-image: url("yellow.bmp"); }`,
+                  ].join('\n\n'),
+                });
               });
             });
-          }
 
-          for (const mode of ['blank', 'remove']) {
-            it(`capture.adoptedStyleSheet = save, capture.style = ${mode}`, async function () {
-              var options = Object.assign({}, baseOptions, {
-                "capture.style": mode,
-                "capture.adoptedStyleSheet": "save",
+            context('when options["capture.adoptedStyleSheet"] = "remove"', function () {
+              it('should discard constructed stylesheets', async function () {
+                var options = Object.assign({}, baseOptions, {
+                  "capture.style": "save",
+                  "capture.adoptedStyleSheet": "remove",
+                });
+                var {data, doc, attrs} = await capture({docUrl, resMap, doc: await docFactory(), options});
+                assert.hasAllKeys(data, ['index.html']);
+                assert.notExists(doc.querySelector('script[data-scrapbook-elem="basic-loader"]'));
+                assert.deepEqual(attrs, {});
               });
-              var doc = await docFactory();
-              var {data} = await new TestCapturer(resMap).captureGeneral({doc, docUrl, options});
+            });
+          });
+
+          context('when options["capture.style"] = "link"', function () {
+            context('when options["capture.adoptedStyleSheet"] = "save"', function () {
+              it('should save constructed stylesheets', async function () {
+                var options = Object.assign({}, baseOptions, {
+                  "capture.style": "link",
+                  "capture.adoptedStyleSheet": "save",
+                });
+                var {data, doc, attrs} = await capture({docUrl, resMap, doc: await docFactory(), options});
+                assert.hasAllKeys(data, ['index.html', 'green.bmp', 'yellow.bmp']);
+                assert.exists(doc.querySelector('script[data-scrapbook-elem="basic-loader"]'));
+                assert.deepEqual(attrs, {
+                  'data-scrapbook-adoptedstylesheets': '0,1',
+                  'data-scrapbook-adoptedstylesheet-0': [
+                    `#adopted1-1 { background-color: green; }`,
+                    `#adopted1-2 { background-image: url("green.bmp"); }`,
+                  ].join('\n\n'),
+                  'data-scrapbook-adoptedstylesheet-1': [
+                    `#adopted2-1 { background-color: yellow; }`,
+                    `#adopted2-2 { background-image: url("yellow.bmp"); }`,
+                  ].join('\n\n'),
+                });
+              });
+            });
+
+            context('when options["capture.adoptedStyleSheet"] = "remove"', function () {
+              it('should discard constructed stylesheets', async function () {
+                var options = Object.assign({}, baseOptions, {
+                  "capture.style": "link",
+                  "capture.adoptedStyleSheet": "remove",
+                });
+                var {data, doc, attrs} = await capture({docUrl, resMap, doc: await docFactory(), options});
+                assert.hasAllKeys(data, ['index.html']);
+                assert.notExists(doc.querySelector('script[data-scrapbook-elem="basic-loader"]'));
+                assert.deepEqual(attrs, {});
+              });
+            });
+          });
+
+          context('when options["capture.style"] = "blank"', function () {
+            it('should discard constructed stylesheets', async function () {
+              var options = Object.assign({}, baseOptions, {
+                "capture.style": "blank",
+              });
+              var {data, doc, attrs} = await capture({docUrl, resMap, doc: await docFactory(), options});
               assert.hasAllKeys(data, ['index.html']);
-
-              var doc = await utils.readFileAsDocument(data.get('index.html'));
               assert.notExists(doc.querySelector('script[data-scrapbook-elem="basic-loader"]'));
-
-              var docElem = doc.documentElement;
-              var {'data-scrapbook-source': _, 'data-scrapbook-create': _, ...attrs} = getAttributes(docElem);
               assert.deepEqual(attrs, {});
             });
-          }
+          });
 
-          it('capture.adoptedStyleSheet = remove', async function () {
-            var options = Object.assign({}, baseOptions, {
-              "capture.adoptedStyleSheet": "remove",
+          context('when options["capture.style"] = "remove"', function () {
+            it('should discard constructed stylesheets', async function () {
+              var options = Object.assign({}, baseOptions, {
+                "capture.style": "remove",
+              });
+              var {data, doc, attrs} = await capture({docUrl, resMap, doc: await docFactory(), options});
+              assert.hasAllKeys(data, ['index.html']);
+              assert.notExists(doc.querySelector('script[data-scrapbook-elem="basic-loader"]'));
+              assert.deepEqual(attrs, {});
             });
-            var doc = await docFactory();
-            var {data} = await new TestCapturer(resMap).captureGeneral({doc, docUrl, options});
-            assert.hasAllKeys(data, ['index.html']);
-
-            var doc = await utils.readFileAsDocument(data.get('index.html'));
-            assert.notExists(doc.querySelector('script[data-scrapbook-elem="basic-loader"]'));
-
-            var docElem = doc.documentElement;
-            var {'data-scrapbook-source': _, 'data-scrapbook-create': _, ...attrs} = getAttributes(docElem);
-            assert.deepEqual(attrs, {});
           });
         });
 
-        context('should save shared constructed stylesheets as same entry', function () {
+        context('CSS rewrite options', function () {
           async function docFactory() {
             var {contentDocument: doc} = await createIframeFixture({
               docData: {
                 name: 'body',
                 children: [
-                  {name: 'blockquote', id: 'image1-1'},
-                  {name: 'blockquote', id: 'image1-2'},
-                  {name: 'blockquote', id: 'font1-1'},
-                  {name: 'blockquote', id: 'font1-2'},
+                  {name: 'blockquote', id: 'image1'},
+                  {name: 'blockquote', id: 'image2'},
                   {name: 'div', id: 'shadow1', shadow: {children: [
-                    {name: 'blockquote', id: 'image1-1'},
-                    {name: 'blockquote', id: 'image1-3'},
-                    {name: 'blockquote', id: 'font1-1'},
-                    {name: 'blockquote', id: 'font1-3'},
-                    {name: 'blockquote', id: 'image2-1'},
-                    {name: 'blockquote', id: 'image2-2'},
-                    {name: 'div', id: 'shadow2', shadow: {children: [
-                      {name: 'blockquote', id: 'image2-1'},
-                      {name: 'blockquote', id: 'image2-3'},
-                    ]}},
+                    {name: 'blockquote', id: 'image1'},
+                    {name: 'blockquote', id: 'image3'},
                   ]}},
                 ],
               },
               onload: function ({target: {contentWindow: win, contentDocument: doc}}) {
                 var css = new win.CSSStyleSheet();
-                css.insertRule('#image1-1 { background-image: url(./image1-1.bmp); }', css.cssRules.length);
-                css.insertRule('#image1-2 { background-image: url(./image1-2.bmp); }', css.cssRules.length);
-                css.insertRule('#image1-3 { background-image: url(./image1-3.bmp); }', css.cssRules.length);
-                css.insertRule('#image1-4 { background-image: url(./image1-4.bmp); }', css.cssRules.length);
+                css.insertRule('#image1 { background-image: url(./image1.bmp); }', css.cssRules.length);
+                css.insertRule('#image2 { background-image: url(./image2.bmp); }', css.cssRules.length);
+                css.insertRule('#image3 { background-image: url(./image3.bmp); }', css.cssRules.length);
+                css.insertRule('#image4 { background-image: url(./image4.bmp); }', css.cssRules.length);
 
-                var css2 = new win.CSSStyleSheet();
-                css2.insertRule('@font-face { font-family: font1-1; src: url(./font1-1.woff); }', css2.cssRules.length);
-                css2.insertRule('#font1-1 { font-family: font1-1; }', css2.cssRules.length);
-                css2.insertRule('@font-face { font-family: font1-2; src: url(./font1-2.woff); }', css2.cssRules.length);
-                css2.insertRule('#font1-2 { font-family: font1-2; }', css2.cssRules.length);
-                css2.insertRule('@font-face { font-family: font1-3; src: url(./font1-3.woff); }', css2.cssRules.length);
-                css2.insertRule('#font1-3 { font-family: font1-3; }', css2.cssRules.length);
-                css2.insertRule('@font-face { font-family: font1-4; src: url(./font1-4.woff); }', css2.cssRules.length);
-                css2.insertRule('#font1-4 { font-family: font1-4; }', css2.cssRules.length);
+                doc.adoptedStyleSheets = [css];
 
-                var css3 = new win.CSSStyleSheet();
-                css3.insertRule('#image2-1 { background-image: url(./image2-1.bmp); }', css3.cssRules.length);
-                css3.insertRule('#image2-2 { background-image: url(./image2-2.bmp); }', css3.cssRules.length);
-                css3.insertRule('#image2-3 { background-image: url(./image2-3.bmp); }', css3.cssRules.length);
-                css3.insertRule('#image2-4 { background-image: url(./image2-4.bmp); }', css3.cssRules.length);
-
-                doc.adoptedStyleSheets = [css, css2];
-
-                var s = doc.querySelector('#shadow1').shadowRoot;
-                s.adoptedStyleSheets = [css, css2, css3];
-
-                var s = s.querySelector('#shadow2').shadowRoot;
-                s.adoptedStyleSheets = [css3];
+                var shadow = doc.querySelector('#shadow1').shadowRoot;
+                shadow.adoptedStyleSheets = [css];
               },
             });
             return doc;
           }
 
+          var resMap = {
+            [docUrl]: {
+              blob: new Blob([''], {type: 'text/html'}),
+            },
+            [`${docUrl}image1.bmp`]: {
+              blob: new Blob([utils.byteStringToArrayBuffer(GREEN_BMP_BYTES)], {type: 'image/bmp'}),
+            },
+            [`${docUrl}image2.bmp`]: {
+              blob: new Blob([utils.byteStringToArrayBuffer(GREEN_BMP_BYTES)], {type: 'image/bmp'}),
+            },
+            [`${docUrl}image3.bmp`]: {
+              blob: new Blob([utils.byteStringToArrayBuffer(GREEN_BMP_BYTES)], {type: 'image/bmp'}),
+            },
+            [`${docUrl}image4.bmp`]: {
+              blob: new Blob([utils.byteStringToArrayBuffer(GREEN_BMP_BYTES)], {type: 'image/bmp'}),
+            },
+          };
+
+          context('when options["capture.rewriteCss"] = "match"', function () {
+            it('should remove unused CSS rules', async function () {
+              var options = Object.assign({}, baseOptions, {
+                "capture.rewriteCss": "match",
+              });
+              var {data, doc, attrs} = await capture({docUrl, resMap, doc: await docFactory(), options});
+              assert.hasAllKeys(data, ['index.html', 'image1.bmp', 'image2.bmp', 'image3.bmp']);
+              assert.deepEqual(attrs, {
+                'data-scrapbook-adoptedstylesheets': '0',
+                'data-scrapbook-adoptedstylesheet-0': [
+                  '#image1 { background-image: url("image1.bmp"); }',
+                  '#image2 { background-image: url("image2.bmp"); }',
+                  '#image3 { background-image: url("image3.bmp"); }',
+                ].join('\n\n'),
+              });
+            });
+          });
+
+          context('when options["capture.rewriteCss"] = "tidy"', function () {
+            it('should tidy CSS', async function () {
+              var options = Object.assign({}, baseOptions, {
+                "capture.rewriteCss": "tidy",
+              });
+              var {data, doc, attrs} = await capture({docUrl, resMap, doc: await docFactory(), options});
+              assert.hasAllKeys(data, ['index.html', 'image1.bmp', 'image2.bmp', 'image3.bmp', 'image4.bmp']);
+              assert.deepEqual(attrs, {
+                'data-scrapbook-adoptedstylesheets': '0',
+                'data-scrapbook-adoptedstylesheet-0': [
+                  '#image1 { background-image: url("image1.bmp"); }',
+                  '#image2 { background-image: url("image2.bmp"); }',
+                  '#image3 { background-image: url("image3.bmp"); }',
+                  '#image4 { background-image: url("image4.bmp"); }',
+                ].join('\n\n'),
+              });
+            });
+          });
+
+          context('when options["capture.rewriteCss"] = "url"', function () {
+            it('should rewrite URL in CSS', async function () {
+              var options = Object.assign({}, baseOptions, {
+                "capture.rewriteCss": "url",
+              });
+              var {data, doc, attrs} = await capture({docUrl, resMap, doc: await docFactory(), options});
+              assert.hasAllKeys(data, ['index.html', 'image1.bmp', 'image2.bmp', 'image3.bmp', 'image4.bmp']);
+              assert.deepEqual(attrs, {
+                'data-scrapbook-adoptedstylesheets': '0',
+                'data-scrapbook-adoptedstylesheet-0': [
+                  '#image1 { background-image: url("image1.bmp"); }',
+                  '#image2 { background-image: url("image2.bmp"); }',
+                  '#image3 { background-image: url("image3.bmp"); }',
+                  '#image4 { background-image: url("image4.bmp"); }',
+                ].join('\n\n'),
+              });
+            });
+          });
+
+          context('when options["capture.rewriteCss"] = "none"', function () {
+            it('should not rewrite CSS', async function () {
+              var options = Object.assign({}, baseOptions, {
+                "capture.rewriteCss": "none",
+              });
+              var {data, doc, attrs} = await capture({docUrl, resMap, doc: await docFactory(), options});
+              assert.hasAllKeys(data, ['index.html']);
+              assert.deepEqual(attrs, {
+                'data-scrapbook-adoptedstylesheets': '0',
+                'data-scrapbook-adoptedstylesheet-0': [
+                  '#image1 { background-image: url("./image1.bmp"); }',
+                  '#image2 { background-image: url("./image2.bmp"); }',
+                  '#image3 { background-image: url("./image3.bmp"); }',
+                  '#image4 { background-image: url("./image4.bmp"); }',
+                ].join('\n\n'),
+              });
+            });
+          });
+        });
+
+        context('rewrite recording', function () {
+          context('when options["capture.recordRewrites"] is truthy', function () {
+            it('should record original URLs', async function () {
+              var options = Object.assign({}, baseOptions, {
+                "capture.recordRewrites": true,
+              });
+              var {data, doc, attrs} = await capture({docUrl, resMap, doc: await docFactory(), options});
+              assert.hasAllKeys(data, ['index.html', 'green.bmp', 'yellow.bmp']);
+              assert.exists(doc.querySelector('script[data-scrapbook-elem="basic-loader"]'));
+              assert.deepEqual(attrs, {
+                'data-scrapbook-adoptedstylesheets': '0,1',
+                'data-scrapbook-adoptedstylesheet-0': [
+                  `#adopted1-1 { background-color: green; }`,
+                  `#adopted1-2 { background-image: /*scrapbook-orig-url="./green.bmp"*/url("green.bmp"); }`,
+                ].join('\n\n'),
+                'data-scrapbook-adoptedstylesheet-1': [
+                  `#adopted2-1 { background-color: yellow; }`,
+                  `#adopted2-2 { background-image: /*scrapbook-orig-url="./yellow.bmp"*/url("yellow.bmp"); }`,
+                ].join('\n\n'),
+              });
+            });
+          });
+        });
+
+        context('resources filtering', function () {
+          context('when options["capture.imageBackground"] or options["capture.font"] = "save-used"', function () {
+            it('should save only used images and fonts', async function () {
+              async function docFactory() {
+                var {contentDocument: doc} = await createIframeFixture({
+                  docData: {
+                    name: 'body',
+                    children: [
+                      {name: 'blockquote', id: 'image1'},
+                      {name: 'blockquote', id: 'image2'},
+                      {name: 'blockquote', id: 'font1'},
+                      {name: 'blockquote', id: 'font2'},
+                      {name: 'div', id: 'shadow1', shadow: {children: [
+                        {name: 'blockquote', id: 'image1'},
+                        {name: 'blockquote', id: 'image3'},
+                        {name: 'blockquote', id: 'font1'},
+                        {name: 'blockquote', id: 'font3'},
+                      ]}},
+                    ],
+                  },
+                  onload: function ({target: {contentWindow: win, contentDocument: doc}}) {
+                    var css = new win.CSSStyleSheet();
+                    css.insertRule('#image1 { background-image: url(./image1.bmp); }', css.cssRules.length);
+                    css.insertRule('#image2 { background-image: url(./image2.bmp); }', css.cssRules.length);
+                    css.insertRule('#image3 { background-image: url(./image3.bmp); }', css.cssRules.length);
+                    css.insertRule('#image4 { background-image: url(./image4.bmp); }', css.cssRules.length);
+                    var css1 = css;
+
+                    var css = new win.CSSStyleSheet();
+                    css.insertRule('@font-face { font-family: font1; src: url(./font1.woff); }', css.cssRules.length);
+                    css.insertRule('#font1 { font-family: font1; }', css.cssRules.length);
+                    css.insertRule('@font-face { font-family: font2; src: url(./font2.woff); }', css.cssRules.length);
+                    css.insertRule('#font2 { font-family: font2; }', css.cssRules.length);
+                    css.insertRule('@font-face { font-family: font3; src: url(./font3.woff); }', css.cssRules.length);
+                    css.insertRule('#font3 { font-family: font3; }', css.cssRules.length);
+                    css.insertRule('@font-face { font-family: font4; src: url(./font4.woff); }', css.cssRules.length);
+                    css.insertRule('#font4 { font-family: font4; }', css.cssRules.length);
+                    var css2 = css;
+
+                    doc.adoptedStyleSheets = [css1, css2];
+
+                    var shadow = doc.querySelector('#shadow1').shadowRoot;
+                    shadow.adoptedStyleSheets = [css1, css2];
+                  },
+                });
+                return doc;
+              }
+              var options = Object.assign({}, baseOptions, {
+                "capture.imageBackground": "save-used",
+                "capture.font": "save-used",
+              });
+              var resMap = {
+                [docUrl]: {
+                  blob: new Blob([''], {type: 'text/html'}),
+                },
+                [`${docUrl}image1.bmp`]: {
+                  blob: new Blob([utils.byteStringToArrayBuffer(GREEN_BMP_BYTES)], {type: 'image/bmp'}),
+                },
+                [`${docUrl}image2.bmp`]: {
+                  blob: new Blob([utils.byteStringToArrayBuffer(GREEN_BMP_BYTES)], {type: 'image/bmp'}),
+                },
+                [`${docUrl}image3.bmp`]: {
+                  blob: new Blob([utils.byteStringToArrayBuffer(GREEN_BMP_BYTES)], {type: 'image/bmp'}),
+                },
+                [`${docUrl}image4.bmp`]: {
+                  blob: new Blob([utils.byteStringToArrayBuffer(GREEN_BMP_BYTES)], {type: 'image/bmp'}),
+                },
+                [`${docUrl}font1.woff`]: {
+                  blob: new Blob([], {type: 'font/woff'}),
+                },
+                [`${docUrl}font2.woff`]: {
+                  blob: new Blob([], {type: 'font/woff'}),
+                },
+                [`${docUrl}font3.woff`]: {
+                  blob: new Blob([], {type: 'font/woff'}),
+                },
+                [`${docUrl}font4.woff`]: {
+                  blob: new Blob([], {type: 'font/woff'}),
+                },
+              };
+              var {data, doc, attrs} = await capture({docUrl, resMap, doc: await docFactory(), options});
+              assert.hasAllKeys(data, [
+                'index.html',
+                'image1.bmp', 'image2.bmp', 'image3.bmp',
+                'font1.woff', 'font2.woff', 'font3.woff',
+              ]);
+              assert.deepEqual(attrs, {
+                'data-scrapbook-adoptedstylesheets': '0,1',
+                'data-scrapbook-adoptedstylesheet-0': [
+                  '#image1 { background-image: url("image1.bmp"); }',
+                  '#image2 { background-image: url("image2.bmp"); }',
+                  '#image3 { background-image: url("image3.bmp"); }',
+                  '#image4 { background-image: url(""); }',
+                ].join('\n\n'),
+                'data-scrapbook-adoptedstylesheet-1': [
+                  '@font-face { font-family: font1; src: url("font1.woff"); }',
+                  '#font1 { font-family: font1; }',
+                  '@font-face { font-family: font2; src: url("font2.woff"); }',
+                  '#font2 { font-family: font2; }',
+                  '@font-face { font-family: font3; src: url("font3.woff"); }',
+                  '#font3 { font-family: font3; }',
+                  '@font-face { font-family: font4; src: url(""); }',
+                  '#font4 { font-family: font4; }',
+                ].join('\n\n'),
+              });
+            });
+          });
+        });
+
+        context('constructed stylesheet sharing', function () {
           const resMap = {
             [docUrl]: {
               blob: new Blob([''], {type: 'text/html'}),
             },
-            [`${docUrl}image1-1.bmp`]: {
-              blob: new Blob([utils.byteStringToArrayBuffer(GREEN_BMP_BYTES)], {type: 'image/bmp'}),
-            },
-            [`${docUrl}image1-2.bmp`]: {
-              blob: new Blob([utils.byteStringToArrayBuffer(GREEN_BMP_BYTES)], {type: 'image/bmp'}),
-            },
-            [`${docUrl}image1-3.bmp`]: {
-              blob: new Blob([utils.byteStringToArrayBuffer(GREEN_BMP_BYTES)], {type: 'image/bmp'}),
-            },
-            [`${docUrl}image1-4.bmp`]: {
-              blob: new Blob([utils.byteStringToArrayBuffer(GREEN_BMP_BYTES)], {type: 'image/bmp'}),
-            },
-            [`${docUrl}image2-1.bmp`]: {
-              blob: new Blob([utils.byteStringToArrayBuffer(GREEN_BMP_BYTES)], {type: 'image/bmp'}),
-            },
-            [`${docUrl}image2-2.bmp`]: {
-              blob: new Blob([utils.byteStringToArrayBuffer(GREEN_BMP_BYTES)], {type: 'image/bmp'}),
-            },
-            [`${docUrl}image2-3.bmp`]: {
-              blob: new Blob([utils.byteStringToArrayBuffer(GREEN_BMP_BYTES)], {type: 'image/bmp'}),
-            },
-            [`${docUrl}image2-4.bmp`]: {
-              blob: new Blob([utils.byteStringToArrayBuffer(GREEN_BMP_BYTES)], {type: 'image/bmp'}),
-            },
-            [`${docUrl}nonexist.bmp`]: {
-              blob: new Blob([utils.byteStringToArrayBuffer(RED_BMP_BYTES)], {type: 'image/bmp'}),
-            },
-            [`${docUrl}font1-1.woff`]: {
-              blob: new Blob([''], {type: 'font/woff'}),
-            },
-            [`${docUrl}font1-2.woff`]: {
-              blob: new Blob([''], {type: 'font/woff'}),
-            },
-            [`${docUrl}font1-3.woff`]: {
-              blob: new Blob([''], {type: 'font/woff'}),
-            },
-            [`${docUrl}font1-4.woff`]: {
-              blob: new Blob([''], {type: 'font/woff'}),
-            },
           };
 
-          const baseOptions = {
+          const options = {
             "capture.style": "save",
             "capture.adoptedStyleSheet": "save",
-            "capture.recordRewrites": false,
-            "capture.imageBackground": "save-used",
-            "capture.font": "save-used",
           };
 
-          it('capture.adoptedStyleSheet = save, capture.rewriteCss = match', async function () {
-            var options = Object.assign({}, baseOptions, {
-              "capture.adoptedStyleSheet": "save",
-              "capture.rewriteCss": "match",
-            });
+          it('should save shared constructed stylesheets as same entry', async function () {
+            async function docFactory() {
+              var {contentDocument: doc} = await createIframeFixture({
+                docData: {
+                  name: 'body',
+                  children: [
+                    {name: 'div', id: 'shadow1', shadow: {children: [
+                      {name: 'div', id: 'shadow2', shadow: {}},
+                    ]}},
+                  ],
+                },
+                onload: function ({target: {contentWindow: win, contentDocument: doc}}) {
+                  var css = new win.CSSStyleSheet();
+                  css.insertRule('#adopted1-1 { color: green; }', css.cssRules.length);
+                  css.insertRule('#adopted1-2 { color: yellow; }', css.cssRules.length);
+                  var css1 = css;
+
+                  var css = new win.CSSStyleSheet();
+                  css.insertRule('#adopted2-1 { color: red; }', css.cssRules.length);
+                  css.insertRule('#adopted2-2 { color: blue; }', css.cssRules.length);
+                  var css2 = css;
+
+                  var css = new win.CSSStyleSheet();
+                  css.insertRule('#adopted3-1 { color: black; }', css.cssRules.length);
+                  css.insertRule('#adopted3-2 { color: gray; }', css.cssRules.length);
+                  var css3 = css;
+
+                  doc.adoptedStyleSheets = [css1, css2];
+
+                  var shadow = doc.querySelector('#shadow1').shadowRoot;
+                  shadow.adoptedStyleSheets = [css1, css2, css3];
+
+                  var shadow = shadow.querySelector('#shadow2').shadowRoot;
+                  shadow.adoptedStyleSheets = [css3];
+                },
+              });
+              return doc;
+            }
+
             var doc = await docFactory();
             var {data} = await new TestCapturer(resMap).captureGeneral({doc, docUrl, options});
-            assert.hasAllKeys(data, [
-              'index.html',
-              'image1-1.bmp', 'image1-2.bmp', 'image1-3.bmp', 'image2-1.bmp', 'image2-2.bmp', 'image2-3.bmp',
-              'font1-1.woff', 'font1-2.woff', 'font1-3.woff',
-            ]);
-
             var doc = await utils.readFileAsDocument(data.get('index.html'));
-            assert.exists(doc.querySelector('script[data-scrapbook-elem="basic-loader"]'));
-
             var docElem = doc.documentElement;
             var {'data-scrapbook-source': _, 'data-scrapbook-create': _, ...attrs} = getAttributes(docElem);
             assert.deepEqual(attrs, {
               'data-scrapbook-adoptedstylesheets': '0,1',
               'data-scrapbook-adoptedstylesheet-0': [
-                `#image1-1 { background-image: url("image1-1.bmp"); }`,
-                `#image1-2 { background-image: url("image1-2.bmp"); }`,
-                `#image1-3 { background-image: url("image1-3.bmp"); }`,
+                `#adopted1-1 { color: green; }`,
+                `#adopted1-2 { color: yellow; }`,
               ].join('\n\n'),
               'data-scrapbook-adoptedstylesheet-1': [
-                `@font-face { font-family: font1-1; src: url("font1-1.woff"); }`,
-                `#font1-1 { font-family: font1-1; }`,
-                `@font-face { font-family: font1-2; src: url("font1-2.woff"); }`,
-                `#font1-2 { font-family: font1-2; }`,
-                `@font-face { font-family: font1-3; src: url("font1-3.woff"); }`,
-                `#font1-3 { font-family: font1-3; }`,
-                `@font-face { font-family: font1-4; src: url(""); }`,
+                `#adopted2-1 { color: red; }`,
+                `#adopted2-2 { color: blue; }`,
               ].join('\n\n'),
               'data-scrapbook-adoptedstylesheet-2': [
-                `#image2-1 { background-image: url("image2-1.bmp"); }`,
-                `#image2-2 { background-image: url("image2-2.bmp"); }`,
-                `#image2-3 { background-image: url("image2-3.bmp"); }`,
+                `#adopted3-1 { color: black; }`,
+                `#adopted3-2 { color: gray; }`,
               ].join('\n\n'),
             });
 
@@ -4833,200 +5037,105 @@ $describe.skipIf($.noBrowser)('capturer/capturer.mjs', function () {
             });
           });
 
-          it('capture.adoptedStyleSheet = save, capture.rewriteCss = tidy', async function () {
-            var options = Object.assign({}, baseOptions, {
-              "capture.adoptedStyleSheet": "save",
-              "capture.rewriteCss": "tidy",
-            });
+          it('should save different constructed stylesheets as separate entries', async function () {
+            async function docFactory() {
+              var {contentDocument: doc} = await createIframeFixture({
+                docData: {
+                  name: 'body',
+                  children: [
+                    {name: 'div', id: 'shadow1', shadow: {children: [
+                      {name: 'div', id: 'shadow2', shadow: {}},
+                    ]}},
+                  ],
+                },
+                onload: function ({target: {contentWindow: win, contentDocument: doc}}) {
+                  var css = new win.CSSStyleSheet();
+                  css.insertRule('#adopted1-1 { color: green; }', css.cssRules.length);
+                  css.insertRule('#adopted1-2 { color: yellow; }', css.cssRules.length);
+                  var css1 = css;
+
+                  var css = new win.CSSStyleSheet();
+                  css.insertRule('#adopted2-1 { color: red; }', css.cssRules.length);
+                  css.insertRule('#adopted2-2 { color: blue; }', css.cssRules.length);
+                  var css2 = css;
+
+                  doc.adoptedStyleSheets = [css1, css2];
+
+                  var css = new win.CSSStyleSheet();
+                  css.insertRule('#adopted1-1 { color: green; }', css.cssRules.length);
+                  css.insertRule('#adopted1-2 { color: yellow; }', css.cssRules.length);
+                  var css1 = css;
+
+                  var css = new win.CSSStyleSheet();
+                  css.insertRule('#adopted2-1 { color: red; }', css.cssRules.length);
+                  css.insertRule('#adopted2-2 { color: blue; }', css.cssRules.length);
+                  var css2 = css;
+
+                  var css = new win.CSSStyleSheet();
+                  css.insertRule('#adopted3-1 { color: black; }', css.cssRules.length);
+                  css.insertRule('#adopted3-2 { color: gray; }', css.cssRules.length);
+                  var css3 = css;
+
+                  var shadow = doc.querySelector('#shadow1').shadowRoot;
+                  shadow.adoptedStyleSheets = [css1, css2, css3];
+
+                  var css = new win.CSSStyleSheet();
+                  css.insertRule('#adopted3-1 { color: black; }', css.cssRules.length);
+                  css.insertRule('#adopted3-2 { color: gray; }', css.cssRules.length);
+                  var css3 = css;
+
+                  var shadow = shadow.querySelector('#shadow2').shadowRoot;
+                  shadow.adoptedStyleSheets = [css3];
+                },
+              });
+              return doc;
+            }
+
             var doc = await docFactory();
             var {data} = await new TestCapturer(resMap).captureGeneral({doc, docUrl, options});
-            assert.hasAllKeys(data, [
-              'index.html',
-              'image1-1.bmp', 'image1-2.bmp', 'image1-3.bmp', 'image2-1.bmp', 'image2-2.bmp', 'image2-3.bmp',
-              'font1-1.woff', 'font1-2.woff', 'font1-3.woff',
-            ]);
-
             var doc = await utils.readFileAsDocument(data.get('index.html'));
-            assert.exists(doc.querySelector('script[data-scrapbook-elem="basic-loader"]'));
-
             var docElem = doc.documentElement;
             var {'data-scrapbook-source': _, 'data-scrapbook-create': _, ...attrs} = getAttributes(docElem);
             assert.deepEqual(attrs, {
               'data-scrapbook-adoptedstylesheets': '0,1',
               'data-scrapbook-adoptedstylesheet-0': [
-                `#image1-1 { background-image: url("image1-1.bmp"); }`,
-                `#image1-2 { background-image: url("image1-2.bmp"); }`,
-                `#image1-3 { background-image: url("image1-3.bmp"); }`,
-                `#image1-4 { background-image: url(""); }`,
+                `#adopted1-1 { color: green; }`,
+                `#adopted1-2 { color: yellow; }`,
               ].join('\n\n'),
               'data-scrapbook-adoptedstylesheet-1': [
-                `@font-face { font-family: font1-1; src: url("font1-1.woff"); }`,
-                `#font1-1 { font-family: font1-1; }`,
-                `@font-face { font-family: font1-2; src: url("font1-2.woff"); }`,
-                `#font1-2 { font-family: font1-2; }`,
-                `@font-face { font-family: font1-3; src: url("font1-3.woff"); }`,
-                `#font1-3 { font-family: font1-3; }`,
-                `@font-face { font-family: font1-4; src: url(""); }`,
-                `#font1-4 { font-family: font1-4; }`,
+                `#adopted2-1 { color: red; }`,
+                `#adopted2-2 { color: blue; }`,
               ].join('\n\n'),
               'data-scrapbook-adoptedstylesheet-2': [
-                `#image2-1 { background-image: url("image2-1.bmp"); }`,
-                `#image2-2 { background-image: url("image2-2.bmp"); }`,
-                `#image2-3 { background-image: url("image2-3.bmp"); }`,
-                `#image2-4 { background-image: url(""); }`,
+                `#adopted1-1 { color: green; }`,
+                `#adopted1-2 { color: yellow; }`,
+              ].join('\n\n'),
+              'data-scrapbook-adoptedstylesheet-3': [
+                `#adopted2-1 { color: red; }`,
+                `#adopted2-2 { color: blue; }`,
+              ].join('\n\n'),
+              'data-scrapbook-adoptedstylesheet-4': [
+                `#adopted3-1 { color: black; }`,
+                `#adopted3-2 { color: gray; }`,
+              ].join('\n\n'),
+              'data-scrapbook-adoptedstylesheet-5': [
+                `#adopted3-1 { color: black; }`,
+                `#adopted3-2 { color: gray; }`,
               ].join('\n\n'),
             });
 
             var host1 = doc.querySelector('#shadow1');
             var {'id': _, 'data-scrapbook-shadowdom': html, ...attrs} = getAttributes(host1);
             assert.deepEqual(attrs, {
-              'data-scrapbook-adoptedstylesheets': '0,1,2',
+              'data-scrapbook-adoptedstylesheets': '2,3,4',
             });
 
             var shadow1 = createFragFixture(html);
             var host2 = shadow1.querySelector('#shadow2');
             var {'id': _, 'data-scrapbook-shadowdom': html, ...attrs} = getAttributes(host2);
             assert.deepEqual(attrs, {
-              'data-scrapbook-adoptedstylesheets': '2',
+              'data-scrapbook-adoptedstylesheets': '5',
             });
-          });
-
-          it('capture.adoptedStyleSheet = save, capture.rewriteCss = url', async function () {
-            var options = Object.assign({}, baseOptions, {
-              "capture.adoptedStyleSheet": "save",
-              "capture.rewriteCss": "url",
-            });
-            var doc = await docFactory();
-            var {data} = await new TestCapturer(resMap).captureGeneral({doc, docUrl, options});
-            assert.hasAllKeys(data, [
-              'index.html',
-              'image1-1.bmp', 'image1-2.bmp', 'image1-3.bmp', 'image2-1.bmp', 'image2-2.bmp', 'image2-3.bmp',
-              'font1-1.woff', 'font1-2.woff', 'font1-3.woff',
-            ]);
-
-            var doc = await utils.readFileAsDocument(data.get('index.html'));
-            assert.exists(doc.querySelector('script[data-scrapbook-elem="basic-loader"]'));
-
-            var docElem = doc.documentElement;
-            var {'data-scrapbook-source': _, 'data-scrapbook-create': _, ...attrs} = getAttributes(docElem);
-            assert.deepEqual(attrs, {
-              'data-scrapbook-adoptedstylesheets': '0,1',
-              'data-scrapbook-adoptedstylesheet-0': [
-                `#image1-1 { background-image: url("image1-1.bmp"); }`,
-                `#image1-2 { background-image: url("image1-2.bmp"); }`,
-                `#image1-3 { background-image: url("image1-3.bmp"); }`,
-                `#image1-4 { background-image: url(""); }`,
-              ].join('\n\n'),
-              'data-scrapbook-adoptedstylesheet-1': [
-                `@font-face { font-family: font1-1; src: url("font1-1.woff"); }`,
-                `#font1-1 { font-family: font1-1; }`,
-                `@font-face { font-family: font1-2; src: url("font1-2.woff"); }`,
-                `#font1-2 { font-family: font1-2; }`,
-                `@font-face { font-family: font1-3; src: url("font1-3.woff"); }`,
-                `#font1-3 { font-family: font1-3; }`,
-                `@font-face { font-family: font1-4; src: url(""); }`,
-                `#font1-4 { font-family: font1-4; }`,
-              ].join('\n\n'),
-              'data-scrapbook-adoptedstylesheet-2': [
-                `#image2-1 { background-image: url("image2-1.bmp"); }`,
-                `#image2-2 { background-image: url("image2-2.bmp"); }`,
-                `#image2-3 { background-image: url("image2-3.bmp"); }`,
-                `#image2-4 { background-image: url(""); }`,
-              ].join('\n\n'),
-            });
-
-            var host1 = doc.querySelector('#shadow1');
-            var {'id': _, 'data-scrapbook-shadowdom': html, ...attrs} = getAttributes(host1);
-            assert.deepEqual(attrs, {
-              'data-scrapbook-adoptedstylesheets': '0,1,2',
-            });
-
-            var shadow1 = createFragFixture(html);
-            var host2 = shadow1.querySelector('#shadow2');
-            var {'id': _, 'data-scrapbook-shadowdom': html, ...attrs} = getAttributes(host2);
-            assert.deepEqual(attrs, {
-              'data-scrapbook-adoptedstylesheets': '2',
-            });
-          });
-
-          it('capture.adoptedStyleSheet = save, capture.rewriteCss = none', async function () {
-            var options = Object.assign({}, baseOptions, {
-              "capture.adoptedStyleSheet": "save",
-              "capture.rewriteCss": "none",
-            });
-            var doc = await docFactory();
-            var {data} = await new TestCapturer(resMap).captureGeneral({doc, docUrl, options});
-            assert.hasAllKeys(data, ['index.html']);
-
-            var doc = await utils.readFileAsDocument(data.get('index.html'));
-            assert.exists(doc.querySelector('script[data-scrapbook-elem="basic-loader"]'));
-
-            var docElem = doc.documentElement;
-            var {'data-scrapbook-source': _, 'data-scrapbook-create': _, ...attrs} = getAttributes(docElem);
-            assert.deepEqual(attrs, {
-              'data-scrapbook-adoptedstylesheets': '0,1',
-              'data-scrapbook-adoptedstylesheet-0': [
-                `#image1-1 { background-image: url("./image1-1.bmp"); }`,
-                `#image1-2 { background-image: url("./image1-2.bmp"); }`,
-                `#image1-3 { background-image: url("./image1-3.bmp"); }`,
-                `#image1-4 { background-image: url("./image1-4.bmp"); }`,
-              ].join('\n\n'),
-              'data-scrapbook-adoptedstylesheet-1': [
-                `@font-face { font-family: font1-1; src: url("./font1-1.woff"); }`,
-                `#font1-1 { font-family: font1-1; }`,
-                `@font-face { font-family: font1-2; src: url("./font1-2.woff"); }`,
-                `#font1-2 { font-family: font1-2; }`,
-                `@font-face { font-family: font1-3; src: url("./font1-3.woff"); }`,
-                `#font1-3 { font-family: font1-3; }`,
-                `@font-face { font-family: font1-4; src: url("./font1-4.woff"); }`,
-                `#font1-4 { font-family: font1-4; }`,
-              ].join('\n\n'),
-              'data-scrapbook-adoptedstylesheet-2': [
-                `#image2-1 { background-image: url("./image2-1.bmp"); }`,
-                `#image2-2 { background-image: url("./image2-2.bmp"); }`,
-                `#image2-3 { background-image: url("./image2-3.bmp"); }`,
-                `#image2-4 { background-image: url("./image2-4.bmp"); }`,
-              ].join('\n\n'),
-            });
-
-            var host1 = doc.querySelector('#shadow1');
-            var {'id': _, 'data-scrapbook-shadowdom': html, ...attrs} = getAttributes(host1);
-            assert.deepEqual(attrs, {
-              'data-scrapbook-adoptedstylesheets': '0,1,2',
-            });
-
-            var shadow1 = createFragFixture(html);
-            var host2 = shadow1.querySelector('#shadow2');
-            var {'id': _, 'data-scrapbook-shadowdom': html, ...attrs} = getAttributes(host2);
-            assert.deepEqual(attrs, {
-              'data-scrapbook-adoptedstylesheets': '2',
-            });
-          });
-
-          it('capture.adoptedStyleSheet = remove', async function () {
-            var options = Object.assign({}, baseOptions, {
-              "capture.adoptedStyleSheet": "remove",
-              "capture.rewriteCss": "url",
-            });
-            var doc = await docFactory();
-            var {data} = await new TestCapturer(resMap).captureGeneral({doc, docUrl, options});
-            assert.hasAllKeys(data, ['index.html']);
-
-            var doc = await utils.readFileAsDocument(data.get('index.html'));
-            assert.exists(doc.querySelector('script[data-scrapbook-elem="basic-loader"]'));
-
-            var docElem = doc.documentElement;
-            var {'data-scrapbook-source': _, 'data-scrapbook-create': _, ...attrs} = getAttributes(docElem);
-            assert.deepEqual(attrs, {});
-
-            var host1 = doc.querySelector('#shadow1');
-            var {'id': _, 'data-scrapbook-shadowdom': html, ...attrs} = getAttributes(host1);
-            assert.deepEqual(attrs, {});
-
-            var shadow1 = createFragFixture(html);
-            var host2 = shadow1.querySelector('#shadow2');
-            var {'id': _, 'data-scrapbook-shadowdom': html, ...attrs} = getAttributes(host2);
-            assert.deepEqual(attrs, {});
           });
         });
       });
