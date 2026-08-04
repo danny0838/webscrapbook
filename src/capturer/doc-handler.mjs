@@ -413,8 +413,7 @@ class RetrieveDocumentRewriter extends MapperMixin(BaseDocumentRewriter) {
     // don't refresh related attributes if not supported by the browser
     if ('adoptedStyleSheets' in document) {
       const regex = /^data-scrapbook-adoptedstylesheet-(\d+)$/;
-      for (const attrNode of rootNode.attributes) {
-        const attr = attrNode.nodeName;
+      for (const {nodeName: attr} of Array.from(rootNode.attributes)) {
         if (regex.test(attr)) {
           rootNode.removeAttribute(attr);
         }

@@ -693,7 +693,7 @@ describe('capturer/doc-handler.mjs', function () {
           });
         });
 
-        $it.skipIf($.noAdoptedStylesheet).xfail()('should remove obsolete special attributes', async function () {
+        $it.skipIf($.noAdoptedStylesheet)('should remove obsolete special attributes', async function () {
           var spy = sinon.spy(TestCapturer.prototype, "preSaveProcess");
 
           var doc = createDocFixture({name: 'html', attrs: {
