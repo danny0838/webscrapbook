@@ -122,7 +122,7 @@ async function locateItem(params) {
  */
 async function captureCurrentTab(params, {tab: {id: tabId}}) {
   const task = Object.assign({tabId}, params);
-  return await utils.invokeCapture([task]);
+  return await utils.invokeCaptureEx({taskInfo: {tasks: [task]}});
 }
 
 async function createSubPage({url, title}) {
@@ -181,18 +181,20 @@ async function registerActiveEditorTab({willEnable = true}, {tab: {id: tabId}}) 
  * @param {Object} params
  * @param {MessageSender} sender
  */
-async function invokeEditorCommand({cmd, args, frameId = -1, frameIdExcept = -1}, {tab: {id: tabId}}) {
+async function invokeEditorCommand({
+  cmd, args, frameId = -1, frameIdExcept = -1, autofocus = true,
+}, {tab: {id: tabId}}) {
   if (frameId !== -1) {
     const response = await utils.invokeContentScript({
       tabId, frameId, cmd, args,
     });
-    await browser.scripting.executeScript({
-      target: {tabId, frameIds: [frameId]},
-      injectImmediately: true,
-      func: () => {
-        window.focus();
-      },
-    });
+    if (autofocus) {
+      await browser.scripting.executeScript({
+        target: {tabId, frameIds: [frameId]},
+        injectImmediately: true,
+        func: () => { window.focus(); },
+      });
+    }
     return response;
   } else {
     const frames = (await utils.initContentScripts(tabId)).filter(({frameId, error}) => {

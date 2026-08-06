@@ -1662,8 +1662,11 @@ editor.undo = async function () {
 };
 
 editor.save = async function (params = {}) {
-  mutationHandler.addSavePoint();
+  const revisions = await editor.invokeEditorCommand({
+    cmd: "editor.unloadBlocker.startSave",
+  });
 
+  let result;
   if (editor.inScrapBook) {
     // prompt a confirm if this page is scripted
     if (editor.isScripted) {
@@ -1675,7 +1678,7 @@ editor.save = async function (params = {}) {
     await editor.invokeEditorCommand({
       cmd: "editor.annotator.saveAll",
     });
-    return await utils.invokeExtensionScript({
+    result = await utils.invokeExtensionScript({
       cmd: "background.captureCurrentTab",
       args: [{mode: params.internalize ? "internalize" : "resave"}],
       senderProp: "1",
@@ -1684,12 +1687,25 @@ editor.save = async function (params = {}) {
     await editor.invokeEditorCommand({
       cmd: "editor.annotator.saveAll",
     });
-    return await utils.invokeExtensionScript({
+    result = await utils.invokeExtensionScript({
       cmd: "background.captureCurrentTab",
       args: [{}],
       senderProp: "1",
     });
   }
+
+  if (!result?.results?.[0]?.error) {
+    await Promise.all(revisions.map(
+      ([frameId, revision]) => editor.invokeEditorCommand({
+        frameId,
+        cmd: "editor.unloadBlocker.finishSave",
+        args: [revision],
+        autofocus: false,
+      }),
+    ));
+  }
+
+  return result;
 };
 
 editor.deleteErased = async function () {
@@ -2045,12 +2061,13 @@ editor.addHistory = () => {
  * @param {commandMessage} params
  * @param {integer} [params.frameId]
  * @param {integer} [params.frameIdExcept]
+ * @param {boolean} [params.autofocus]
  * @return {Promise<*>}
  */
-editor.invokeEditorCommand = async function ({cmd, args, frameId, frameIdExcept}) {
+editor.invokeEditorCommand = async function ({cmd, args, frameId, frameIdExcept, autofocus}) {
   return await utils.invokeExtensionScript({
     cmd: "background.invokeEditorCommand",
-    args: [{cmd, args, frameId, frameIdExcept}],
+    args: [{cmd, args, frameId, frameIdExcept, autofocus}],
     senderProp: "1",
   });
 };
@@ -3520,6 +3537,8 @@ const mutationHandler = editor.mutationHandler = (function () {
     },
 
     addRestorePoint() {
+      unloadBlocker.markModified();
+
       if (!this.active) { return; }
 
       this.flushPendingMutations();
@@ -3537,6 +3556,8 @@ const mutationHandler = editor.mutationHandler = (function () {
     },
 
     applyRestorePoint() {
+      unloadBlocker.markModified();
+
       if (!this.active) { return; }
       if (!this.history.length) { return; }
 
@@ -3615,6 +3636,35 @@ const mutationHandler = editor.mutationHandler = (function () {
 
   return mutationHandler;
 })();
+
+
+const unloadBlocker = editor.unloadBlocker = {
+  revision: 0,
+
+  handleEvent(event) {
+    event.preventDefault();
+
+    // for Chromium < 119
+    event.returnValue = true;
+  },
+
+  markModified() {
+    this.revision++;
+    if (editor.inScrapBook) {
+      window.addEventListener('beforeunload', this);
+    }
+  },
+
+  startSave() {
+    return ++this.revision;
+  },
+
+  finishSave(revision) {
+    if (revision === this.revision) {
+      window.removeEventListener('beforeunload', this);
+    }
+  },
+};
 
 
 window.addEventListener("focus", (event) => {
