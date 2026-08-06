@@ -747,7 +747,7 @@ function createNodeFixture(nodeData) {
           if (shadowRoot.serializable) {
             elem.setAttribute("data-scrapbook-shadowdom-serializable", "");
           }
-          if (shadowRoot.slotAssignment && shadowRoot.slotAssignment !== 'named') {
+          if (shadowRoot.slotAssignment && !['named', 'auto'].includes(shadowRoot.slotAssignment)) {
             elem.setAttribute("data-scrapbook-shadowdom-slot-assignment", shadowRoot.slotAssignment);
           }
         }

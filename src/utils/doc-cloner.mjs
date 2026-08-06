@@ -127,7 +127,7 @@ class DocumentCloner {
         clonable: shadowRoot.clonable,
         delegatesFocus: shadowRoot.delegatesFocus,
         serializable: shadowRoot.serializable,
-        slotAssignment: shadowRoot.slotAssignment,
+        ...(shadowRoot.slotAssignment && !['named', 'auto'].includes(shadowRoot.slotAssignment) && {slotAssignment: shadowRoot.slotAssignment}),
       });
       origNodeMap?.set(newShadowRoot, shadowRoot);
       clonedNodeMap?.set(shadowRoot, newShadowRoot);

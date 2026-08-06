@@ -414,7 +414,7 @@ class DocumentRewriter extends BaseDocumentRewriter {
     if (shadowRoot.serializable) {
       this.captureRewriteAttr(elem, "data-scrapbook-shadowdom-serializable", true, {record: false});
     }
-    if (shadowRoot.slotAssignment && shadowRoot.slotAssignment !== 'named') {
+    if (shadowRoot.slotAssignment && !['named', 'auto'].includes(shadowRoot.slotAssignment)) {
       this.captureRewriteAttr(elem, "data-scrapbook-shadowdom-slot-assignment", shadowRoot.slotAssignment, {record: false});
     }
 
