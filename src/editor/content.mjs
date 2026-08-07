@@ -881,7 +881,7 @@ editor.closeInternal = function () {
 };
 
 editor.getFocusedFrameIdInternal = function () {
-  return {frameId: core.frameId, time: editor.lastWindowBlurTime};
+  return editor.lastWindowBlurTime;
 };
 
 editor.lineMarkerInternal = function ({tagName = 'span', attrs = {}} = {}) {
@@ -1965,10 +1965,10 @@ editor.getFocusedFrameId = async function () {
     return 0;
   }
 
-  const arr = await editor.invokeEditorCommand({
+  const arr = (await editor.invokeEditorCommand({
     cmd: "editor.getFocusedFrameIdInternal",
     frameIdExcept: 0,
-  });
+  })).map(([frameId, time]) => ({frameId, time}));
 
   const lastFrame = arr.reduce((acc, cur) => {
     if (cur?.time > acc.time) {

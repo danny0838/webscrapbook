@@ -194,27 +194,20 @@ async function invokeEditorCommand({cmd, args, frameId = -1, frameIdExcept = -1}
       },
     });
     return response;
-  } else if (frameIdExcept !== -1) {
-    const tasks = Array.prototype.map.call(
-      await utils.initContentScripts(tabId),
-      async ({tabId, frameId, error, injected}) => {
-        if (error) { return undefined; }
-        if (frameId === frameIdExcept) { return undefined; }
-        return await utils.invokeContentScript({
-          tabId, frameId, cmd, args,
-        });
-      });
-    return Promise.all(tasks);
   } else {
-    const tasks = Array.prototype.map.call(
-      await utils.initContentScripts(tabId),
-      async ({tabId, frameId, error, injected}) => {
-        if (error) { return undefined; }
+    const frames = (await utils.initContentScripts(tabId)).filter(({frameId, error}) => {
+      if (error) { return false; }
+      if (frameIdExcept !== -1 && frameId === frameIdExcept) { return false; }
+      return true;
+    });
+    const results = await Promise.all(frames.map(
+      async ({tabId, frameId}) => {
         return await utils.invokeContentScript({
           tabId, frameId, cmd, args,
         });
-      });
-    return Promise.all(tasks);
+      },
+    ));
+    return frames.map(({frameId}, i) => [frameId, results[i]]);
   }
 }
 
