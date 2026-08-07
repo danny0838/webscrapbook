@@ -123,6 +123,53 @@ class BaseCapturer {
   async captureDocument(params) {
     isDebug && console.debug("call: captureDocument", params);
 
+    const {doc = document, ...restParams} = params;
+
+    const unloadBlocker = {
+      window: doc.defaultView,
+
+      handleEvent(event) {
+        switch (event.type) {
+          case 'beforeunload': {
+            event.preventDefault();
+
+            // for Chromium < 119
+            event.returnValue = true;
+            break;
+          }
+          case 'pageshow': {
+            // Page restored from bfcache.
+            // Assume the associated capture has failed and disable the blocker.
+            if (event.persisted) {
+              this.disable();
+            }
+            break;
+          }
+        }
+      },
+
+      enable() {
+        if (!this.window) { return; }
+        this.window.addEventListener('beforeunload', this);
+        this.window.addEventListener('pageshow', this);
+      },
+
+      disable() {
+        if (!this.window) { return; }
+        this.window.removeEventListener('beforeunload', this);
+        this.window.removeEventListener('pageshow', this);
+      },
+    };
+
+    unloadBlocker.enable();
+    try {
+      return await this.captureDocumentInternal({doc, ...restParams});
+    } finally {
+      unloadBlocker.disable();
+    }
+  }
+
+  async captureDocumentInternal(params) {
     const {duplicate, rewriter, registry} = await this._captureDocument(params);
 
     if (duplicate) {
@@ -176,7 +223,7 @@ class BaseCapturer {
   }
 
   async _captureDocument(params) {
-    const {doc = document, settings, options} = params;
+    const {doc, settings, options} = params;
     const {isMainPage, isMainFrame} = settings;
     const isHeadless = !doc.defaultView;
 
