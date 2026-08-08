@@ -56,6 +56,7 @@ import {escapeRegExp} from "../utils/common.mjs";
   await import('./test_capturer_css-handler.mjs');
   await import('./test_capturer_helper-handler.mjs');
   await import('./test_capturer_capturer.mjs');
+  await import('./test_scrapbook_sitemap.mjs');
   await import('./test_capture.mjs');
   await import('./test_external.mjs');
   await import('./test_manual.mjs');
