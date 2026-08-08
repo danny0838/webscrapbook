@@ -344,6 +344,10 @@ class NodeDisconnect extends NodeSkipIteration {
 class PresaveDocumentRewriter extends DocumentRewriter {
   run(doc, {isMainDocument, deleteErased, requireBasicLoader, insertInfoBar}) {
     Object.assign(this, {doc, isMainDocument, deleteErased, requireBasicLoader, insertInfoBar});
+
+    // @TODO: special handling to support non-HTML document such as SVG
+    if (doc.documentElement?.namespaceURI !== NS_HTML) { return; }
+
     this.processRootNode(doc);
   }
 
