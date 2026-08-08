@@ -3147,7 +3147,7 @@ function unwrapNode(node, normalize = true) {
  * Get data URL of a blank canvas.
  */
 function getBlankCanvasData(canvas) {
-  const blank = document.createElement('canvas');
+  const blank = document.createElementNS(NS_HTML, 'canvas');
   blank.width = canvas.width;
   blank.height = canvas.height;
   return blank.toDataURL();
