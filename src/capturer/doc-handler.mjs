@@ -492,9 +492,16 @@ class RetrieveDocumentRewriter extends MapperMixin(DocumentRewriter) {
       this._htmlify_adoptedStyleSheets(rootNode);
     }
 
+    // handle manually assigned slots
+    // don't refresh related attributes if not supported by the browser
+    if (rootNode.host && rootNode.slotAssignment === 'manual') {
+      this._htmlify_slots(rootNode);
+    }
+
     // fix noscript
     // noscript cannot be nested
     for (const elem of rootNode.querySelectorAll('noscript')) {
+      if (elem.namespaceURI !== NS_HTML) { continue; }
       const elemOrig = this.origNodeMap.get(elem);
       if (elemOrig.innerHTML === elemOrig.textContent) {
         const tempElem = this.doc.createElement('scrapbook-noscript');
@@ -504,61 +511,6 @@ class RetrieveDocumentRewriter extends MapperMixin(DocumentRewriter) {
         while (child = tempElem.firstChild) {
           elem.appendChild(child);
         }
-      }
-    }
-
-    // handle internalization
-    if (this.internalize) {
-      for (const elem of rootNode.querySelectorAll('img')) {
-        if (elem.hasAttribute('src')) {
-          elem.setAttribute('src', this.addResource(elem.getAttribute('src')));
-        }
-        if (elem.hasAttribute("srcset")) {
-          elem.setAttribute("srcset", utils.rewriteSrcset(elem.getAttribute("srcset"), url => this.addResource(url)));
-        }
-      }
-
-      for (const elem of rootNode.querySelectorAll('input[type="image"]')) {
-        if (elem.hasAttribute('src')) {
-          elem.setAttribute('src', this.addResource(elem.getAttribute('src')));
-        }
-      }
-
-      for (const elem of rootNode.querySelectorAll('audio')) {
-        if (elem.hasAttribute('src')) {
-          elem.setAttribute('src', this.addResource(elem.getAttribute('src')));
-        }
-      }
-
-      for (const elem of rootNode.querySelectorAll('video')) {
-        if (elem.hasAttribute('src')) {
-          elem.setAttribute('src', this.addResource(elem.getAttribute('src')));
-        }
-        if (elem.hasAttribute('poster')) {
-          elem.setAttribute('poster', this.addResource(elem.getAttribute('poster')));
-        }
-      }
-
-      for (const elem of rootNode.querySelectorAll('audio source, video source, picture source')) {
-        if (elem.hasAttribute('src')) {
-          elem.setAttribute('src', this.addResource(elem.getAttribute('src')));
-        }
-        if (elem.hasAttribute("srcset")) {
-          elem.setAttribute("srcset", utils.rewriteSrcset(elem.getAttribute("srcset"), url => this.addResource(url)));
-        }
-      }
-
-      for (const elem of rootNode.querySelectorAll('audio track, video track')) {
-        if (elem.hasAttribute('src')) {
-          elem.setAttribute('src', this.addResource(elem.getAttribute('src')));
-        }
-      }
-    }
-
-    // record form element status
-    for (const elem of rootNode.querySelectorAll("input, option, textarea")) {
-      if (this[`_htmlify_{${elem.namespaceURI}}${elem.localName}`]?.(elem, {mode: 'keep'})) {
-        this.requireBasicLoader = true;
       }
     }
 
@@ -588,24 +540,9 @@ class RetrieveDocumentRewriter extends MapperMixin(DocumentRewriter) {
       }
     }
 
-    // update canvas data
-    for (const elem of rootNode.querySelectorAll("canvas")) {
-      if (this[`_htmlify_{${elem.namespaceURI}}${elem.localName}`]?.(elem)) {
-        this.requireBasicLoader = true;
-      }
-    }
-
-    // update slot data
-    // don't refresh related attributes if not supported by the browser
-    if (rootNode.host && rootNode.slotAssignment === 'manual') {
-      this._htmlify_slots(rootNode);
-    }
-
-    // update shadow root data
+    // other general handling
     for (const elem of rootNode.querySelectorAll("*")) {
-      if (this._htmlify_shadowHost(elem)) {
-        this.requireBasicLoader = true;
-      }
+      this[`_handle_{${elem.namespaceURI}}`]?.(elem);
     }
   }
 
@@ -614,6 +551,88 @@ class RetrieveDocumentRewriter extends MapperMixin(DocumentRewriter) {
     const key = "urn:scrapbook:url:" + uuid;
     this.resources[uuid] = url;
     return key;
+  }
+
+  _handle_htmlify(elem, options = {}) {
+    if (this[`_htmlify_{${elem.namespaceURI}}${elem.localName}`]?.(elem, options)) {
+      this.requireBasicLoader = true;
+    }
+  }
+
+  [`_handle_{${NS_HTML}}`](elem) {
+    this[`_handle_{${NS_HTML}}${elem.localName}`]?.(elem);
+    if (this._htmlify_shadowHost(elem)) {
+      this.requireBasicLoader = true;
+    }
+  }
+
+  [`_handle_{${NS_HTML}}input`](elem) {
+    if (elem.type?.toLowerCase() === 'image') {
+      return this[`_handle_{${NS_HTML}}input#image`](elem);
+    }
+    this._handle_htmlify(elem, {mode: 'keep'});
+  }
+
+  [`_handle_{${NS_HTML}}textarea`](elem) {
+    this._handle_htmlify(elem, {mode: 'keep'});
+  }
+
+  [`_handle_{${NS_HTML}}option`](elem) {
+    this._handle_htmlify(elem, {mode: 'keep'});
+  }
+
+  [`_handle_{${NS_HTML}}canvas`](elem) {
+    this._handle_htmlify(elem);
+  }
+
+  [`_handle_{${NS_HTML}}img`](elem) {
+    if (!this.internalize) { return; }
+    if (elem.hasAttribute('src')) {
+      elem.setAttribute('src', this.addResource(elem.getAttribute('src')));
+    }
+    if (elem.hasAttribute("srcset")) {
+      elem.setAttribute("srcset", utils.rewriteSrcset(elem.getAttribute("srcset"), url => this.addResource(url)));
+    }
+  }
+
+  [`_handle_{${NS_HTML}}picture`](elem) {
+    if (!this.internalize) { return; }
+    for (const subElem of elem.querySelectorAll(':scope > source[srcset]')) {
+      if (subElem.namespaceURI !== NS_HTML) { continue; }
+      subElem.setAttribute("srcset", utils.rewriteSrcset(subElem.getAttribute("srcset"), url => this.addResource(url)));
+    }
+  }
+
+  [`_handle_{${NS_HTML}}audio`](elem) {
+    if (!this.internalize) { return; }
+    if (elem.hasAttribute('src')) {
+      elem.setAttribute('src', this.addResource(elem.getAttribute('src')));
+    }
+    for (const subElem of elem.querySelectorAll(':scope > source[src], :scope > track[src]')) {
+      if (subElem.namespaceURI !== NS_HTML) { continue; }
+      subElem.setAttribute('src', this.addResource(subElem.getAttribute('src')));
+    }
+  }
+
+  [`_handle_{${NS_HTML}}video`](elem) {
+    if (!this.internalize) { return; }
+    if (elem.hasAttribute('src')) {
+      elem.setAttribute('src', this.addResource(elem.getAttribute('src')));
+    }
+    if (elem.hasAttribute('poster')) {
+      elem.setAttribute('poster', this.addResource(elem.getAttribute('poster')));
+    }
+    for (const subElem of elem.querySelectorAll(':scope > source[src], :scope > track[src]')) {
+      if (subElem.namespaceURI !== NS_HTML) { continue; }
+      subElem.setAttribute('src', this.addResource(subElem.getAttribute('src')));
+    }
+  }
+
+  [`_handle_{${NS_HTML}}input#image`](elem) {
+    if (!this.internalize) { return; }
+    if (elem.hasAttribute('src')) {
+      elem.setAttribute('src', this.addResource(elem.getAttribute('src')));
+    }
   }
 
   _htmlify_shadowHost(elem, callback = this.processRootNode) {

@@ -1624,6 +1624,121 @@ Default3\
           var m = shadow.querySelector('img[src]').getAttribute('src').match(REGEX_UUID);
           assert.strictEqual(resources[m[1]], 'https://example.com/img.png');
         });
+
+        it('should not rewrite deep elements under <picture>, <audio>, <video>', async function () {
+          var doc = createDocFixture({name: 'body', children: [
+            {name: 'picture', children: [
+              {name: 'div', children: [
+                {name: 'source', attrs: {srcset: 'https://example.com/picture-2x.png 2x, https://example.com/picture-3x.png 3x'}},
+              ]},
+            ]},
+            {name: 'audio', children: [
+              {name: 'div', children: [
+                {name: 'source', attrs: {src: 'https://example.com/audio-source.oga'}},
+                {name: 'track', attrs: {src: 'https://example.com/audio.vtt'}},
+              ]},
+            ]},
+            {name: 'video', children: [
+              {name: 'div', children: [
+                {name: 'source', attrs: {src: 'https://example.com/video-source.ogv'}},
+                {name: 'track', attrs: {src: 'https://example.com/video.vtt'}},
+              ]},
+            ]},
+          ]});
+          sinon.stub(doc, 'URL').value(docUrl);
+
+          var capturer = new TestCapturer();
+          var response = await capturer.retrieveDocumentContent({
+            doc,
+            isMainPage: true,
+            item,
+            options,
+            internalize: true,
+          });
+
+          var {[docUrl]: {blob, resources}} = response;
+          var doc = await utils.readFileAsDocument(await capturer.loadBlobCache(blob));
+
+          assert.strictEqual(
+            doc.querySelector('picture source').getAttribute('srcset'),
+            'https://example.com/picture-2x.png 2x, https://example.com/picture-3x.png 3x',
+          );
+          assert.strictEqual(
+            doc.querySelector('audio source').getAttribute('src'),
+            'https://example.com/audio-source.oga',
+          );
+          assert.strictEqual(
+            doc.querySelector('audio track').getAttribute('src'),
+            'https://example.com/audio.vtt',
+          );
+          assert.strictEqual(
+            doc.querySelector('video source').getAttribute('src'),
+            'https://example.com/video-source.ogv',
+          );
+          assert.strictEqual(
+            doc.querySelector('video track').getAttribute('src'),
+            'https://example.com/video.vtt',
+          );
+        });
+
+        it('should not rewrite picture > source[src]', async function () {
+          var doc = createDocFixture({name: 'body', children: [
+            {name: 'picture', children: [
+              {name: 'source', attrs: {src: 'https://example.com/picture.png'}},
+            ]},
+          ]});
+          sinon.stub(doc, 'URL').value(docUrl);
+
+          var capturer = new TestCapturer();
+          var response = await capturer.retrieveDocumentContent({
+            doc,
+            isMainPage: true,
+            item,
+            options,
+            internalize: true,
+          });
+
+          var {[docUrl]: {blob, resources}} = response;
+          var doc = await utils.readFileAsDocument(await capturer.loadBlobCache(blob));
+
+          assert.strictEqual(
+            doc.querySelector('picture source').getAttribute('src'),
+            'https://example.com/picture.png',
+          );
+        });
+
+        it('should not rewrite :is(audio, video) > source[srcset]', async function () {
+          var doc = createDocFixture({name: 'body', children: [
+            {name: 'audio', children: [
+              {name: 'source', attrs: {srcset: 'https://example.com/audio.oga'}},
+            ]},
+            {name: 'video', children: [
+              {name: 'source', attrs: {srcset: 'https://example.com/video.ogv'}},
+            ]},
+          ]});
+          sinon.stub(doc, 'URL').value(docUrl);
+
+          var capturer = new TestCapturer();
+          var response = await capturer.retrieveDocumentContent({
+            doc,
+            isMainPage: true,
+            item,
+            options,
+            internalize: true,
+          });
+
+          var {[docUrl]: {blob, resources}} = response;
+          var doc = await utils.readFileAsDocument(await capturer.loadBlobCache(blob));
+
+          assert.strictEqual(
+            doc.querySelector('audio source').getAttribute('srcset'),
+            'https://example.com/audio.oga',
+          );
+          assert.strictEqual(
+            doc.querySelector('video source').getAttribute('srcset'),
+            'https://example.com/video.ogv',
+          );
+        });
       });
 
       context('<noscript> handling', function () {
