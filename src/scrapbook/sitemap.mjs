@@ -210,17 +210,17 @@ class SitemapBuilder {
         await this.loadPageMap(anchor);
       }
     }
+
+    for (const elem of wrapper.querySelectorAll('ul')) {
+      if (!elem.firstChild) {
+        elem.remove();
+      }
+    }
   }
 
   async loadPageMap(elem) {
     const url = elem.href;
-    const doc = await utils.xhr({
-      url,
-      responseType: 'document',
-    }).then(xhr => xhr.response).catch(ex => {
-      console.error(`Unable to load page ${url}`);
-      return null;
-    });
+    const doc = await this.loadPage(url);
 
     // remove the element if not (X)HTML document
     if (!(doc && SITEMAP_DOCTYPE.has(doc.contentType))) {
@@ -234,23 +234,34 @@ class SitemapBuilder {
 
     elem.parentNode.hidden = false;
 
-    const subqueue = [];
-    const ul = elem.insertAdjacentElement('afterend', document.createElement('ul'));
-
     const items = DocumentLinksReader.read(doc);
-    for (const {url, type, label, title} of items) {
-      const anchor = this.addPage(url, {
-        type,
-        label,
-        title,
-        parent: ul,
-      });
-      if (anchor) {
-        subqueue.push(anchor);
+    if (items.length) {
+      const subqueue = [];
+      const ul = elem.insertAdjacentElement('afterend', document.createElement('ul'));
+      for (const {url, type, label, title} of items) {
+        const anchor = this.addPage(url, {
+          type,
+          label,
+          title,
+          parent: ul,
+        });
+        if (anchor) {
+          subqueue.push(anchor);
+        }
+      }
+      while (subqueue.length) {
+        this.queue.push(subqueue.pop());
       }
     }
-    while (subqueue.length) {
-      this.queue.push(subqueue.pop());
+  }
+
+  async loadPage(url) {
+    try {
+      const xhr = await utils.xhr({url, responseType: 'document'});
+      return xhr.response;
+    } catch (ex) {
+      console.error(`Unable to load page: ${url}`);
+      return null;
     }
   }
 
