@@ -324,6 +324,10 @@ describe('utils/zip.mjs', function () {
       assert.isTrue(isCompressible('application/x-javascript'));
       assert.isTrue(isCompressible('application/json'));
       assert.isTrue(isCompressible('application/xml'));
+      assert.isTrue(isCompressible('application/yaml'));
+      assert.isTrue(isCompressible('application/rtf'));
+      assert.isTrue(isCompressible('image/x-icon'));
+      assert.isTrue(isCompressible('font/ttf'));
     });
 
     it('should return false for falsy value', async function () {

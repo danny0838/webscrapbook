@@ -13,21 +13,36 @@ if (!globalThis.JSZip) {
 }
 
 const COMPRESSIBLE_TYPES = new Set([
-  'application/xml',
-
-  // historical non-text/* javascript types
-  // ref: https://mimesniff.spec.whatwg.org/
-  'application/javascript',
-  'application/ecmascript',
-  'application/x-ecmascript',
-  'application/x-javascript',
-
   'application/json',
+  'application/postscript',
+  'application/rtf',
+  'application/sql',
+  'application/tar',
+  'application/wasm',
+  'application/xml',
+  'application/xml-dtd',
+  'application/xml-external-parsed-entity',
+  'application/yaml',
+  'font/otf',
+  'font/ttf',
+  'image/vnd.microsoft.icon',
+  'image/x-icon',
+
+  // legacy
+  'application/ecmascript',
+  'application/font-sfnt',
+  'application/javascript',
+  'application/x-ecmascript',
+  'application/x-font-ttf',
+  'application/x-javascript',
+  'application/x-yaml',
 ]);
 
 const COMPRESSIBLE_SUFFIXES = new Set([
-  '+xml',
+  '+csv',
   '+json',
+  '+xml',
+  '+yaml',
 ]);
 
 function isCompressible(mimetype) {
