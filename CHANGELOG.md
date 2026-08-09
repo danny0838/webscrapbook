@@ -3,6 +3,41 @@
 * Versions before 1.0 are in initial development. APIs are not stable for these versions, even a `y` version can involve a breaking change, and only partial notable changes are summarized in this document. See full commit history in the source repository for details.
 * Backend server requirement in this document refers to the version of [`webscrapbook` Python package](https://github.com/danny0838/pywebscrapbook) (or PyWebScrapBook).
 
+## [2.26.0] - 2026-08-09
+* Rewrote extensioin scripts as ES6 module.
+* Reworked external message response to return an object with `result` or `error` property.
+* Reworked SVG elements rewriting during a capture.
+* Added exit confirmation when a tab is being captured or has unsaved edits.
+* Added support for compressing additional file types (e.g., .rtf, .ico, .ttf).
+* Added support for namespaced tag/attribute manipulation for capture helpers.
+* Added "tag" command for capture helpers.
+* Removed `blank` mode from the `capture.noscript` option. It now works as an alias of `remove`.
+* Removed automatic bad foreign tags repairing to prevent unexpected issues in certain complex cases.
+* Fixed improper document metadata recording for non-HTML document in certain cases.
+* Fixed incorrect ordering of captured elements when the selection occurred outside the document body.
+* Fixed potential script errors caused by invalid base or meta refresh URLs.
+* Fixed improper meta charset rewriting in cases like `[content="charset=big5"]`.
+* Fixed improper raw text escaping for tags like `<style>` or `<script>` in certain cases.
+* Fixed improper resources capturing for legacy `<object>` and `<applet>`.
+* Fixed content handling for legacy `<noframes>` and `<noembed>` tags, and handling of meta refresh elements in these tags.
+* Fixed unnecessary rewriting for a textual `<input>` in certain cases (e.g., no `value` attribute).
+* Fixed `nonce` attribute handling for non-HTML elements.
+* Fixed `crossorigin` attribute handling in certain cases (e.g., for `save-current` mode and for SVG elements).
+* Fixed `integrity` attribute handling in certain cases (e.g., for non-`save` mode and for SVG elements).
+* Fixed referrer policy handling in certain cases (e.g., for `link[rel~="noreferrer"]`, for `<source>`s under `<picture>`, and for SVG elements).
+* Fixed unexpected registry script generation for undefined and invalid custom elements.
+* Fixed URL resolution for SVG images.
+* Fixed `xlink:href` attribute rewriting in certain cases (e.g., when a non-`xlink` prefix is used).
+* Fixed improper page URL rebuilding for an in-depth capture in certain cases.
+* Fixed missing rewriting records during URL rebuilding for an in-depth capture in certain cases (e.g., when the original URL is absolute).
+* Fixed improper debug status handling for capture helpers.
+* Fixed a script freezing caused by circular meta-refresh on URLs with hash fragments during a headless capture.
+* Fixed a script freezing caused by circular meta-refresh with redirects during a headless capture.
+* Fixed improper special attributes updating for removed constructed stylesheets during a page resave.
+* Fixed script error when unerasing constructed stylesheets in Chromium < 99.
+* Fixed script error when unerasing manually assigned slots in Chromium < 92.
+* Miscellaneous improvements and bug fixes to the internal code, documentation, test suite, and development tools.
+
 ## [2.25.1] - 2026-05-10
 * Fixed missing item selector button for the manage dialog.
 
