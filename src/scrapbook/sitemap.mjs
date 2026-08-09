@@ -275,7 +275,6 @@ class SitemapBuilder {
     anchor.className = type;
     anchor.textContent = label;
     if (title) { anchor.title = title; }
-    anchor.target = 'sitemapitem';
     return anchor;
   }
 }
