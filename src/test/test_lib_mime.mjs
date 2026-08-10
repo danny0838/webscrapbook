@@ -57,6 +57,18 @@ describe('lib/mime.js', function () {
         assert.strictEqual(Mime.types['myext4'], 'my/mime');
       });
 
+      it('should prevent duplicated extensions', function () {
+        Mime.extend('my/mime', {extensions: ['myext1', 'myext2']});
+        Mime.extend('my/mime', {extensions: ['myext2', 'myext3']});
+        assert.deepEqual(Mime.db['my/mime'], {extensions: ['myext1', 'myext2', 'myext3']});
+      });
+
+      it('should prevent duplicated extensions when `important` is truthy', function () {
+        Mime.extend('my/mime', {extensions: ['myext1', 'myext2']});
+        Mime.extend('my/mime', {extensions: ['myext2', 'myext3']}, {important: true});
+        assert.deepEqual(Mime.db['my/mime'], {extensions: ['myext2', 'myext3', 'myext1']});
+      });
+
       it('should not add to reverse map if `minor` is truthy', function () {
         Mime.extend('my/mime', {extensions: ['myext1', 'myext2']}, {minor: true});
         assert.deepEqual(Mime.db['my/mime'], {extensions: ['myext1', 'myext2']});

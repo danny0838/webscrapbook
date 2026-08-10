@@ -57,10 +57,20 @@ function extend(mime, {extensions = [], ...kwargs} = {}, {important, minor} = {}
     target.extensions = [];
   }
 
-  // handle extensions
-  const method = important ? Array.prototype.unshift : Array.prototype.push;
-  method.apply(target.extensions, extensions);
+  // update extensions
+  const newExtensions = new Set((function* () {
+    if (important) {
+      yield* extensions;
+      yield* target.extensions;
+    } else {
+      yield* target.extensions;
+      yield* extensions;
+    }
+  })());
+  target.extensions.length = 0;
+  target.extensions.push(...newExtensions);
 
+  // update types
   if (!minor) {
     for (const ext of extensions) {
       types[ext] = mime;
