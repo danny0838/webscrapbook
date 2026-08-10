@@ -106,6 +106,7 @@ const DEFAULT_OPTIONS = {
   "capture.deleteErasedOnSave": false,
   "capture.backupForRecapture": true,
   "capture.zipCompressLevel": null,
+  "capture.unmatchedContainer": "error", // "error", "warn", "none"
   "autocapture.enabled": false,
   "autocapture.rules": "",
   "editor.autoInit": true,

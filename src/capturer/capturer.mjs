@@ -1524,12 +1524,27 @@ class Capturer extends BaseCapturer {
 
     this.log(`Capturing (document) ${source} ...`);
 
-    // Do not capture a tab in a container different from the capturer
-    // to prevent an inconsistent result.
+    // Handle a tab in a container different from the capturer.
     if (cookieStoreId) {
       const tab = await browser.tabs.getCurrent();
       if (cookieStoreId !== tab.cookieStoreId) {
-        throw new Error(`Disallowed to capture a tab in container "${cookieStoreId}" from container "${tab.cookieStoreId}"`);
+        switch (options["capture.unmatchedContainer"]) {
+          case "none": {
+            break;
+          }
+          case "warn": {
+            this.warn(`The tab being captured is in container \
+"${cookieStoreId}", which differs from the current container \
+"${tab.cookieStoreId}". This capture may fail to download authorized \
+resources or leak sensitive information.`);
+            break;
+          }
+          case "error":
+          default: {
+            throw new Error(`Disallowed to capture a tab in container \
+"${cookieStoreId}" from container "${tab.cookieStoreId}"`);
+          }
+        }
       }
     }
 
