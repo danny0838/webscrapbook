@@ -14,8 +14,11 @@ if (!globalThis.Mime) {
 const {db} = globalThis.Mime;
 delete globalThis.Mime;
 
+const LOOKUP_REPLACE_REGEX = /.*[./\\]/;
+const EXTENSION_MATCH_REGEX = /^\s*([^;\s]*)(?:;|\s|$)/;
+
 /**
- * Reverse map from extension to mimetype
+ * Reverse map from extension to MIME type
  */
 const types = (() => {
   const table = {};
@@ -81,18 +84,18 @@ function extend(mime, {extensions = [], ...kwargs} = {}, {important, minor} = {}
 }
 
 /**
- * Lookup a mime type based on extension
+ * Lookup a MIME type based on extension
  */
 function lookup(path, fallback) {
-  const ext = path.replace(/.*[./\\]/, '').toLowerCase();
+  const ext = path.replace(LOOKUP_REPLACE_REGEX, '').toLowerCase();
   return types[ext] || fallback || "application/octet-stream";
 }
 
 /**
- * Return the first file extension associated with a mime type
+ * Return the first file extension associated with a MIME type
  */
-function extension(mimeType) {
-  const type = mimeType.match(/^\s*([^;\s]*)(?:;|\s|$)/)[1].toLowerCase();
+function extension(mime) {
+  const type = mime.match(EXTENSION_MATCH_REGEX)[1].toLowerCase();
   if (db[type] && db[type].extensions) {
     return db[type].extensions[0];
   }
@@ -100,10 +103,10 @@ function extension(mimeType) {
 }
 
 /**
- * Return the file extensions associated with a mime type
+ * Return the file extensions associated with a MIME type
  */
-function allExtensions(mimeType) {
-  const type = mimeType.match(/^\s*([^;\s]*)(?:;|\s|$)/)[1].toLowerCase();
+function allExtensions(mime) {
+  const type = mime.match(EXTENSION_MATCH_REGEX)[1].toLowerCase();
   if (db[type] && db[type].extensions) {
     return db[type].extensions.slice(0);
   }
