@@ -456,25 +456,25 @@ class Capturer extends BaseCapturer {
   }
 
   async loadFileCacheAsZip({timeId, options}) {
-    let zipOptions;
     const compressLevel = options["capture.zipCompressLevel"];
-    if (Number.isInteger(compressLevel)) {
-      if (compressLevel > 0) {
-        zipOptions = {
-          compression: "DEFLATE",
-          compressionOptions: {level: compressLevel},
-        };
-      } else {
-        zipOptions = {
-          compression: "STORE",
-        };
-      }
-    }
+    const defaultZipOptions = Number.isInteger(compressLevel) ? (
+      compressLevel > 0 ?
+      {compression: "DEFLATE", compressionOptions: {level: compressLevel}} :
+      {compression: "STORE"}
+    ) : null;
 
     const zip = new Zip();
     const {files} = this.captureInfo.get(timeId);
     for (const [filename, {path, url, blob}] of files) {
       if (!blob) { continue; }
+
+      // Auto-determine compression method if no defaultZipOptions
+      const zipOptions = defaultZipOptions ?? (
+        Mime.isCompressible(blob.type) ?
+        {compression: "DEFLATE", compressionOptions: {level: 9}} :
+        {compression: "STORE"}
+      );
+
       zip.file(path, blob, zipOptions);
     }
     return zip;

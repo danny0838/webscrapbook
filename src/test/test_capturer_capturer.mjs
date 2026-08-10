@@ -5239,6 +5239,146 @@ $describe.skipIf($.noBrowser)('capturer/capturer.mjs', function () {
       });
     });
 
+    describe('#saveMainDocument', function () {
+      context('ZIP compression handling', function () {
+        function docFactory() {
+          return createDocFixture({code: `<!DOCTYPE html><img src="./image.png">`});
+        }
+
+        const resMap = {
+          [`${docUrl}image.png`]: {
+            blob: new Blob(['dummy'], {type: 'image/png'}),
+          },
+        };
+
+        context('when options["capture.saveAs"] = "zip"', function () {
+          const options = {
+            "capture.saveAs": "zip",
+          };
+
+          it('should auto-determine compression type when options["capture.zipCompressLevel"] is not set', async function () {
+            var spy = sinon.spy(Zip.prototype, 'file');
+            var result = await new TestCapturer(resMap).captureGeneral({
+              doc: docFactory(),
+              docUrl: `${docUrl}page.html`,
+              settings: {timeId},
+              options,
+            });
+
+            sinon.assert.calledWith(spy, 'index.html',
+              sinon.match.instanceOf(Blob),
+              {compression: 'DEFLATE', compressionOptions: {level: 9}},
+            );
+            sinon.assert.calledWith(spy, 'image.png',
+              sinon.match.instanceOf(Blob),
+              {compression: 'STORE'},
+            );
+          });
+
+          it('should compress with specified level when `options["capture.zipCompressLevel"]` > 0', async function () {
+            var spy = sinon.spy(Zip.prototype, 'file');
+            var result = await new TestCapturer(resMap).captureGeneral({
+              doc: docFactory(),
+              docUrl: `${docUrl}page.html`,
+              settings: {timeId},
+              options: {...options, "capture.zipCompressLevel": 9},
+            });
+
+            sinon.assert.calledWith(spy, 'index.html',
+              sinon.match.instanceOf(Blob),
+              {compression: 'DEFLATE', compressionOptions: {level: 9}},
+            );
+            sinon.assert.calledWith(spy, 'image.png',
+              sinon.match.instanceOf(Blob),
+              {compression: 'DEFLATE', compressionOptions: {level: 9}},
+            );
+          });
+
+          it('should not compress when `options["capture.zipCompressLevel"]` = 0', async function () {
+            var spy = sinon.spy(Zip.prototype, 'file');
+            var result = await new TestCapturer(resMap).captureGeneral({
+              doc: docFactory(),
+              docUrl: `${docUrl}page.html`,
+              settings: {timeId},
+              options: {...options, "capture.zipCompressLevel": 0},
+            });
+
+            sinon.assert.calledWith(spy, 'index.html',
+              sinon.match.instanceOf(Blob),
+              {compression: 'STORE'},
+            );
+            sinon.assert.calledWith(spy, 'image.png',
+              sinon.match.instanceOf(Blob),
+              {compression: 'STORE'},
+            );
+          });
+        });
+
+        context('when options["capture.saveAs"] = "maff"', function () {
+          const options = {
+            "capture.saveAs": "maff",
+          };
+
+          it('should auto-determine compression type when options["capture.zipCompressLevel"] is not set', async function () {
+            var spy = sinon.spy(Zip.prototype, 'file');
+            var result = await new TestCapturer(resMap).captureGeneral({
+              doc: docFactory(),
+              docUrl: `${docUrl}page.html`,
+              settings: {timeId},
+              options,
+            });
+
+            sinon.assert.calledWith(spy, `${timeId}/index.html`,
+              sinon.match.instanceOf(Blob),
+              {compression: 'DEFLATE', compressionOptions: {level: 9}},
+            );
+            sinon.assert.calledWith(spy, `${timeId}/image.png`,
+              sinon.match.instanceOf(Blob),
+              {compression: 'STORE'},
+            );
+          });
+
+          it('should compress with specified level when `options["capture.zipCompressLevel"]` > 0', async function () {
+            var spy = sinon.spy(Zip.prototype, 'file');
+            var result = await new TestCapturer(resMap).captureGeneral({
+              doc: docFactory(),
+              docUrl: `${docUrl}page.html`,
+              settings: {timeId},
+              options: {...options, "capture.zipCompressLevel": 9},
+            });
+
+            sinon.assert.calledWith(spy, `${timeId}/index.html`,
+              sinon.match.instanceOf(Blob),
+              {compression: 'DEFLATE', compressionOptions: {level: 9}},
+            );
+            sinon.assert.calledWith(spy, `${timeId}/image.png`,
+              sinon.match.instanceOf(Blob),
+              {compression: 'DEFLATE', compressionOptions: {level: 9}},
+            );
+          });
+
+          it('should not compress when `options["capture.zipCompressLevel"]` = 0', async function () {
+            var spy = sinon.spy(Zip.prototype, 'file');
+            var result = await new TestCapturer(resMap).captureGeneral({
+              doc: docFactory(),
+              docUrl: `${docUrl}page.html`,
+              settings: {timeId},
+              options: {...options, "capture.zipCompressLevel": 0},
+            });
+
+            sinon.assert.calledWith(spy, `${timeId}/index.html`,
+              sinon.match.instanceOf(Blob),
+              {compression: 'STORE'},
+            );
+            sinon.assert.calledWith(spy, `${timeId}/image.png`,
+              sinon.match.instanceOf(Blob),
+              {compression: 'STORE'},
+            );
+          });
+        });
+      });
+    });
+
     describe('#fetch', function () {
       const options = {
         "capture.resourceSizeLimit": null,

@@ -17,6 +17,15 @@ delete globalThis.Mime;
 const LOOKUP_REPLACE_REGEX = /.*[./\\]/;
 const EXTENSION_MATCH_REGEX = /^\s*([^;\s]*)(?:;|\s|$)/;
 
+// see also: https://github.com/jshttp/mime-db/blob/master/src/custom-suffix.json
+const COMPRESSIBLE_SUFFIXES = new Set([
+  '+csv',
+  '+json',
+  '+json-seq',
+  '+xml',
+  '+yaml',
+]);
+
 /**
  * Reverse map from extension to MIME type
  */
@@ -41,6 +50,13 @@ extend("application/x-maff", {extensions: ["maff"]}, {important: true});
 
 // RFC 3534 defined .ogg, which may be expected by some implementations.
 extend("application/ogg", {extensions: ["ogg"]}, {minor: true});
+
+// patch for outdated mime-db data and legacy types
+extend("application/octet-stream", {compressible: undefined}, {minor: true});
+extend("application/yaml", {compressible: true}, {minor: true});
+extend("application/x-ecmascript", {compressible: true}, {minor: true});
+extend("application/font-sfnt", {compressible: true}, {minor: true});
+extend("application/x-font-ttf", {compressible: true}, {minor: true});
 
 /**
  * Extend the database.
@@ -113,6 +129,29 @@ function allExtensions(mime) {
   return [];
 }
 
+function isCompressible(mime) {
+  if (!mime) {
+    return false;
+  }
+
+  const value = db[mime]?.compressible;
+  if (value != null) {
+    return value;
+  }
+
+  if (mime.startsWith('text/')) {
+    return true;
+  }
+
+  for (const suffix of COMPRESSIBLE_SUFFIXES) {
+    if (mime.endsWith(suffix)) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
 export {
   db,
   types,
@@ -120,4 +159,5 @@ export {
   lookup,
   extension,
   allExtensions,
+  isCompressible,
 };

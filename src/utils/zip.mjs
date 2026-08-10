@@ -15,62 +15,6 @@ if (!globalThis.JSZip) {
 const JSZip = globalThis.JSZip;
 delete globalThis.JSZip;
 
-const COMPRESSIBLE_TYPES = new Set([
-  'application/json',
-  'application/postscript',
-  'application/rtf',
-  'application/sql',
-  'application/tar',
-  'application/wasm',
-  'application/xml',
-  'application/xml-dtd',
-  'application/xml-external-parsed-entity',
-  'application/yaml',
-  'font/otf',
-  'font/ttf',
-  'image/vnd.microsoft.icon',
-  'image/x-icon',
-
-  // legacy
-  'application/ecmascript',
-  'application/font-sfnt',
-  'application/javascript',
-  'application/x-ecmascript',
-  'application/x-font-ttf',
-  'application/x-javascript',
-  'application/x-yaml',
-]);
-
-const COMPRESSIBLE_SUFFIXES = new Set([
-  '+csv',
-  '+json',
-  '+json-seq',
-  '+xml',
-  '+yaml',
-]);
-
-function isCompressible(mimetype) {
-  if (!mimetype) {
-    return false;
-  }
-
-  if (mimetype.startsWith('text/')) {
-    return true;
-  }
-
-  if (COMPRESSIBLE_TYPES.has(mimetype)) {
-    return true;
-  }
-
-  for (const suffix of COMPRESSIBLE_SUFFIXES) {
-    if (mimetype.endsWith(suffix)) {
-      return true;
-    }
-  }
-
-  return false;
-}
-
 const _generateAsyncHandlerZip = {
   get(target, prop, receiver) {
     if (prop === "files") {
@@ -97,31 +41,6 @@ const _generateAsyncHandlerZipObject = {
 };
 
 class Zip extends JSZip {
-  file(...args) {
-    if (args.length < 2) {
-      return super.file(...args);
-    }
-
-    const [filename, data, options] = args;
-
-    // Auto-determine compression method if not defined
-    // when data is a Blob (with type available).
-    if (typeof options?.compression === 'undefined' && data instanceof Blob) {
-      const newOptions = {...options};
-      if (isCompressible(data.type)) {
-        newOptions.compression = "DEFLATE";
-        if (typeof newOptions.compressionOptions?.level === 'undefined') {
-          newOptions.compressionOptions = {...newOptions.compressionOptions, level: 9};
-        }
-      } else {
-        newOptions.compression = "STORE";
-      }
-      return super.file(filename, data, newOptions);
-    }
-
-    return super.file(...args);
-  }
-
   async generateAsync({fixModifiedTime = true, ...options} = {}, onUpdate) {
     // The timestamp field of zip usually use local time, while JSZip writes
     // UTC time for compatibility purpose since it does not support extended
@@ -241,12 +160,8 @@ class Maff {
 }
 
 export {
-  JSZip,
-  COMPRESSIBLE_TYPES,
-  COMPRESSIBLE_SUFFIXES,
   RDF as NS_RDF,
   MAF as NS_MAF,
-  isCompressible,
   Zip,
   Maff,
 };

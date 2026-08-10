@@ -220,5 +220,60 @@ describe('lib/mime.js', function () {
         assert.includeMembers(exts, ['maff']);
       });
     });
+
+    describe('.isCompressible()', function () {
+      it('should return true for text types', async function () {
+        assert.isTrue(Mime.isCompressible('text/plain'));
+        assert.isTrue(Mime.isCompressible('text/html'));
+        assert.isTrue(Mime.isCompressible('text/css'));
+        assert.isTrue(Mime.isCompressible('text/javascript'));
+        assert.isTrue(Mime.isCompressible('text/markdown'));
+      });
+
+      it('should return true for text suffixes', async function () {
+        assert.isTrue(Mime.isCompressible('application/xhtml+xml'));
+        assert.isTrue(Mime.isCompressible('image/svg+xml'));
+        assert.isTrue(Mime.isCompressible('application/ld+json'));
+      });
+
+      it('should return true for special types', async function () {
+        assert.isTrue(Mime.isCompressible('application/javascript'));
+        assert.isTrue(Mime.isCompressible('application/ecmascript'));
+        assert.isTrue(Mime.isCompressible('application/x-ecmascript'));
+        assert.isTrue(Mime.isCompressible('application/x-javascript'));
+        assert.isTrue(Mime.isCompressible('application/json'));
+        assert.isTrue(Mime.isCompressible('application/xml'));
+        assert.isTrue(Mime.isCompressible('application/yaml'));
+        assert.isTrue(Mime.isCompressible('application/rtf'));
+        assert.isTrue(Mime.isCompressible('image/bmp'));
+        assert.isTrue(Mime.isCompressible('image/x-icon'));
+        assert.isTrue(Mime.isCompressible('font/ttf'));
+      });
+
+      it('should return false for falsy value', async function () {
+        assert.isFalse(Mime.isCompressible());
+        assert.isFalse(Mime.isCompressible(null));
+        assert.isFalse(Mime.isCompressible(false));
+        assert.isFalse(Mime.isCompressible(''));
+      });
+
+      it('should return false for binary types', async function () {
+        assert.isFalse(Mime.isCompressible('image/jpeg'));
+        assert.isFalse(Mime.isCompressible('image/png'));
+        assert.isFalse(Mime.isCompressible('application/octet-stream'));
+        assert.isFalse(Mime.isCompressible('application/ogg'));
+        assert.isFalse(Mime.isCompressible('application/pdf'));
+        assert.isFalse(Mime.isCompressible('application/zip'));
+        assert.isFalse(Mime.isCompressible('application/x-rar-compressed'));
+        assert.isFalse(Mime.isCompressible('application/x-gzip'));
+        assert.isFalse(Mime.isCompressible('application/html+zip'));
+        assert.isFalse(Mime.isCompressible('application/x-maff'));
+      });
+
+      it('should return false for binary suffixes', async function () {
+        assert.isFalse(Mime.isCompressible('application/epub+zip'));
+      });
+    });
+
   });
 });
