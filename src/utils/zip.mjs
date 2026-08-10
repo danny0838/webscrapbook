@@ -44,6 +44,7 @@ const COMPRESSIBLE_TYPES = new Set([
 const COMPRESSIBLE_SUFFIXES = new Set([
   '+csv',
   '+json',
+  '+json-seq',
   '+xml',
   '+yaml',
 ]);
