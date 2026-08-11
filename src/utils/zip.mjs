@@ -76,7 +76,7 @@ class Zip {
       return this.files[name];
     }
 
-    const [name, data, {createFolders = true, ...options} = {}] = args;
+    const [name, data, {createFolders = false, ...options} = {}] = args;
     if (createFolders) {
       let missing = [];
       let parent = this._getParentFolder(name);

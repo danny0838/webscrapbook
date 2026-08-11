@@ -108,16 +108,14 @@ describe('utils/zip.mjs', function () {
         assert.strictEqual(entry.comment, '中文𠀀');
       });
 
-      it('should generate parent folders when `createFolders` is omitted', async function () {
+      it('should not generate parent folders when `createFolders` is omitted', async function () {
         var date = new Date('2025-01-01T00:00:00+08:00');
         var zip = new Zip();
         zip.file('a/b/c.txt', 'foo', {date});
         var zipfile = await zip.generateAsync({type: 'blob'});
 
         var zip = await Zip.loadAsync(zipfile);
-        assert.hasAllKeys(zip.files, ['a/', 'a/b/', 'a/b/c.txt']);
-        assert.approximately(zip.files['a/'].date.valueOf(), Date.now(), 2000);
-        assert.approximately(zip.files['a/b/'].date.valueOf(), Date.now(), 2000);
+        assert.hasAllKeys(zip.files, ['a/b/c.txt']);
         assert.strictEqual(zip.files['a/b/c.txt'].date.valueOf(), date.valueOf());
       });
 

@@ -1789,7 +1789,6 @@ $describe.skipIf($.noBrowser)('capturer/capturer.mjs', function () {
               });
               var zip = await Zip.loadAsync(result.data);
               assert.hasAllKeys(zip.files, [
-                `${timeId}/`,
                 `${timeId}/index.rdf`,
                 `${timeId}/index.html`,
                 `${timeId}/green.bmp`,
@@ -1896,7 +1895,6 @@ $describe.skipIf($.noBrowser)('capturer/capturer.mjs', function () {
         });
         var zip = await Zip.loadAsync(result.data);
         assert.hasAllKeys(zip.files, [
-          `${timeId}/`,
           `${timeId}/index.rdf`,
           `${timeId}/index.html`,
           `${timeId}/big5.txt`,
@@ -1955,7 +1953,6 @@ $describe.skipIf($.noBrowser)('capturer/capturer.mjs', function () {
         });
         var zip = await Zip.loadAsync(result.data);
         assert.hasAllKeys(zip.files, [
-          `${timeId}/`,
           `${timeId}/index.rdf`,
           `${timeId}/index.html`,
           `${timeId}/file.txt`,
@@ -2393,7 +2390,6 @@ $describe.skipIf($.noBrowser)('capturer/capturer.mjs', function () {
                     });
                     var zip = await Zip.loadAsync(result.data);
                     assert.hasAllKeys(zip.files, [
-                      `${timeId}/`,
                       `${timeId}/index.rdf`,
                       `${timeId}/index.html`,
                       `${timeId}/green.bmp`,
@@ -2589,7 +2585,6 @@ $describe.skipIf($.noBrowser)('capturer/capturer.mjs', function () {
                     });
                     var zip = await Zip.loadAsync(result.data);
                     assert.hasAllKeys(zip.files, [
-                      `${timeId}/`,
                       `${timeId}/index.rdf`,
                       `${timeId}/index.html`,
                       `${timeId}/index.xhtml`,
@@ -2795,7 +2790,6 @@ $describe.skipIf($.noBrowser)('capturer/capturer.mjs', function () {
                     });
                     var zip = await Zip.loadAsync(result.data);
                     assert.hasAllKeys(zip.files, [
-                      `${timeId}/`,
                       `${timeId}/index.rdf`,
                       `${timeId}/index.html`,
                       `${timeId}/index.svg`,
