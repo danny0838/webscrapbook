@@ -221,6 +221,55 @@ describe('lib/mime.js', function () {
       });
     });
 
+    describe('.isText()', function () {
+      it('should return true for a text MIME type', function () {
+        // text/*
+        assert.isTrue(Mime.isText('text/plain'));
+        assert.isTrue(Mime.isText('text/html'));
+        assert.isTrue(Mime.isText('text/css'));
+        assert.isTrue(Mime.isText('text/javascript'));
+
+        // +xml
+        assert.isTrue(Mime.isText('application/xhtml+xml'));
+        assert.isTrue(Mime.isText('text/svg+xml'));
+        assert.isTrue(Mime.isText('application/rdf+xml'));
+        assert.isTrue(Mime.isText('application/xslt+xml'));
+
+        // +json
+        assert.isTrue(Mime.isText('application/ld+json'));
+
+        // special text
+        assert.isTrue(Mime.isText('application/javascript'));
+        assert.isTrue(Mime.isText('application/ecmascript'));
+        assert.isTrue(Mime.isText('application/json'));
+        assert.isTrue(Mime.isText('application/yaml'));
+        assert.isTrue(Mime.isText('application/xml'));
+        assert.isTrue(Mime.isText('application/sql'));
+        assert.isTrue(Mime.isText('application/rtf'));
+      });
+
+      it('should return false for a non-text MIME type', function () {
+        // +zip are not text
+        assert.isFalse(Mime.isText('application/epub+zip'));
+
+        // others are not text
+        assert.isFalse(Mime.isText('image/bmp'));
+        assert.isFalse(Mime.isText('image/jpeg'));
+        assert.isFalse(Mime.isText('image/gif'));
+        assert.isFalse(Mime.isText('image/png'));
+        assert.isFalse(Mime.isText('image/webp'));
+        assert.isFalse(Mime.isText('image/vnd.microsoft.icon'));
+        assert.isFalse(Mime.isText('image/x-icon'));
+        assert.isFalse(Mime.isText('audio/mpeg'));
+        assert.isFalse(Mime.isText('video/mp4'));
+        assert.isFalse(Mime.isText('font/ttf'));
+        assert.isFalse(Mime.isText('font/woff'));
+        assert.isFalse(Mime.isText('application/zip'));
+        assert.isFalse(Mime.isText('application/pdf'));
+        assert.isFalse(Mime.isText('application/octet-stream'));
+      });
+    });
+
     describe('.isCompressible()', function () {
       it('should return true for text types', async function () {
         assert.isTrue(Mime.isCompressible('text/plain'));

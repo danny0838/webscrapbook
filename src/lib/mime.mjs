@@ -17,13 +17,35 @@ delete globalThis.Mime;
 const LOOKUP_REPLACE_REGEX = /.*[./\\]/;
 const EXTENSION_MATCH_REGEX = /^\s*([^;\s]*)(?:;|\s|$)/;
 
-// see also: https://github.com/jshttp/mime-db/blob/master/src/custom-suffix.json
-const COMPRESSIBLE_SUFFIXES = new Set([
+const TEXT_TYPES = new Set([
+  'application/json',
+  'application/postscript',
+  'application/rtf',
+  'application/sql',
+  'application/xml',
+  'application/xml-dtd',
+  'application/xml-external-parsed-entity',
+  'application/yaml',
+
+  // legacy
+  'application/ecmascript',
+  'application/javascript',
+  'application/x-ecmascript',
+  'application/x-javascript',
+  'application/x-yaml',
+]);
+
+const TEXT_SUFFIXES = new Set([
   '+csv',
   '+json',
   '+json-seq',
   '+xml',
   '+yaml',
+]);
+
+// see also: https://github.com/jshttp/mime-db/blob/master/src/custom-suffix.json
+const COMPRESSIBLE_SUFFIXES = new Set([
+  ...TEXT_SUFFIXES,
 ]);
 
 /**
@@ -129,6 +151,28 @@ function allExtensions(mime) {
   return [];
 }
 
+function isText(mime) {
+  if (!mime) {
+    return false;
+  }
+
+  if (TEXT_TYPES.has(mime)) {
+    return true;
+  }
+
+  if (mime.startsWith('text/')) {
+    return true;
+  }
+
+  for (const suffix of TEXT_SUFFIXES) {
+    if (mime.endsWith(suffix)) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
 function isCompressible(mime) {
   if (!mime) {
     return false;
@@ -159,5 +203,6 @@ export {
   lookup,
   extension,
   allExtensions,
+  isText,
   isCompressible,
 };

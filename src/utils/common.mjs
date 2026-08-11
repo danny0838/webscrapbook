@@ -2286,27 +2286,6 @@ async function readFileAsDocument(blob) {
   return response;
 }
 
-/**
- * Assume non-text for undefined types.
- */
-const mimeIsText = (() => {
-  const map = new Set([
-    "application/ecmascript",
-    "application/javascript",
-    "application/json",
-    "application/xml",
-    "application/sql",
-  ]);
-  return function mimeIsText(mime) {
-    if (mime.startsWith("text/") || mime.endsWith("+xml") || mime.endsWith("+json")) {
-      return true;
-    } else if (mime.endsWith("+zip")) {
-      return false;
-    }
-    return map.has(mime);
-  };
-})();
-
 
 /****************************************************************************
  * HTML DOM related utilities
@@ -3538,7 +3517,6 @@ export {
   readFileAsDataURL,
   readFileAsText,
   readFileAsDocument,
-  mimeIsText,
   documentToString,
   parseCssFile,
   rewriteCssFile,

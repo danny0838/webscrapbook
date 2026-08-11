@@ -1816,53 +1816,6 @@ describe('utils/common.mjs', function () {
     });
   });
 
-  describe('mimeIsText()', function () {
-    it('should return true for a text MIME type', function () {
-      // text/*
-      assert.strictEqual(utils.mimeIsText('text/plain'), true);
-      assert.strictEqual(utils.mimeIsText('text/html'), true);
-      assert.strictEqual(utils.mimeIsText('text/css'), true);
-      assert.strictEqual(utils.mimeIsText('text/javascript'), true);
-
-      // +xml
-      assert.strictEqual(utils.mimeIsText('application/xhtml+xml'), true);
-      assert.strictEqual(utils.mimeIsText('text/svg+xml'), true);
-      assert.strictEqual(utils.mimeIsText('application/rdf+xml'), true);
-      assert.strictEqual(utils.mimeIsText('application/xslt+xml'), true);
-
-      // +json
-      assert.strictEqual(utils.mimeIsText('application/ld+json'), true);
-
-      // special text
-      assert.strictEqual(utils.mimeIsText('application/javascript'), true);
-      assert.strictEqual(utils.mimeIsText('application/ecmascript'), true);
-      assert.strictEqual(utils.mimeIsText('application/json'), true);
-      assert.strictEqual(utils.mimeIsText('application/xml'), true);
-      assert.strictEqual(utils.mimeIsText('application/sql'), true);
-    });
-
-    it('should return false for a non-text MIME type', function () {
-      // +zip are not text
-      assert.strictEqual(utils.mimeIsText('application/epub+zip'), false);
-
-      // others are not text
-      assert.strictEqual(utils.mimeIsText('image/bmp'), false);
-      assert.strictEqual(utils.mimeIsText('image/jpeg'), false);
-      assert.strictEqual(utils.mimeIsText('image/gif'), false);
-      assert.strictEqual(utils.mimeIsText('image/png'), false);
-      assert.strictEqual(utils.mimeIsText('image/webp'), false);
-      assert.strictEqual(utils.mimeIsText('image/vnd.microsoft.icon'), false);
-      assert.strictEqual(utils.mimeIsText('image/x-icon'), false);
-      assert.strictEqual(utils.mimeIsText('audio/mpeg'), false);
-      assert.strictEqual(utils.mimeIsText('video/mp4'), false);
-      assert.strictEqual(utils.mimeIsText('font/ttf'), false);
-      assert.strictEqual(utils.mimeIsText('font/woff'), false);
-      assert.strictEqual(utils.mimeIsText('application/zip'), false);
-      assert.strictEqual(utils.mimeIsText('application/pdf'), false);
-      assert.strictEqual(utils.mimeIsText('application/octet-stream'), false);
-    });
-  });
-
   $describe.skipIf($.noBrowser)('parseCssFile()', function () {
     it('should take BOM as 1st priority', async function () {
       // UTF-8

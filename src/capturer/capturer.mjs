@@ -3857,7 +3857,7 @@ Redirecting to <a href="${utils.escapeHtml(target)}">${utils.escapeHtml(target, 
       const {type: mime, parameters: {charset}} = utils.parseHeaderContentType(blob.type);
 
       let dataUri;
-      if (charset || utils.mimeIsText(mime)) {
+      if (charset || Mime.isText(mime)) {
         if (charset && /utf-?8/i.test(charset)) {
           const str = await utils.readFileAsText(blob, "UTF-8");
           dataUri = utils.unicodeToDataUri(str, mime);
