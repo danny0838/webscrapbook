@@ -11,6 +11,9 @@ if (!globalThis.jsSHA) {
   throw new Error('Failed to load global jsSHA');
 }
 
+const jsSHA = globalThis.jsSHA;
+delete globalThis.jsSHA;
+
 /**
  * @param {*} data
  * @param {string} type - HEX, TEXT, B64, BYTES, or ARRAYBUFFER
@@ -22,5 +25,6 @@ function sha1(data, type) {
 }
 
 export {
+  jsSHA,
   sha1,
 };

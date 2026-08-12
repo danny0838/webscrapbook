@@ -1,7 +1,7 @@
 import {assert} from "./unittest.mjs";
 import sinon from "./lib/sinon-esm.js";
 
-import {Zip, isCompressible} from "../utils/zip.mjs";
+import {JSZip, Zip, isCompressible} from "../utils/zip.mjs";
 
 describe('utils/zip.mjs', function () {
   afterEach(function () {
@@ -65,7 +65,7 @@ describe('utils/zip.mjs', function () {
         });
 
         it('should generate a new `options` if not provided', function () {
-          var spy = sinon.spy(globalThis.JSZip.prototype, 'file');
+          var spy = sinon.spy(JSZip.prototype, 'file');
 
           var zip = new Zip();
           var file = 'file1';
@@ -75,7 +75,7 @@ describe('utils/zip.mjs', function () {
         });
 
         it('should generate a new `options` with merged keys if provided', function () {
-          var spy = sinon.spy(globalThis.JSZip.prototype, 'file');
+          var spy = sinon.spy(JSZip.prototype, 'file');
 
           var zip = new Zip();
           var file = 'file1';
@@ -87,7 +87,7 @@ describe('utils/zip.mjs', function () {
         });
 
         it('should generate a new `options.compressionOptions` with merged keys if provided', function () {
-          var spy = sinon.spy(globalThis.JSZip.prototype, 'file');
+          var spy = sinon.spy(JSZip.prototype, 'file');
 
           var zip = new Zip();
           var file = 'file1';
@@ -100,7 +100,7 @@ describe('utils/zip.mjs', function () {
         });
 
         it('should pass input `options.compressionOptions` if level defined', function () {
-          var spy = sinon.spy(globalThis.JSZip.prototype, 'file');
+          var spy = sinon.spy(JSZip.prototype, 'file');
 
           var zip = new Zip();
           var file = 'file1';
@@ -113,7 +113,7 @@ describe('utils/zip.mjs', function () {
         });
 
         it('should do nothing if `options.compreession` is defined', function () {
-          var spy = sinon.spy(globalThis.JSZip.prototype, 'file');
+          var spy = sinon.spy(JSZip.prototype, 'file');
 
           var zip = new Zip();
           var file = 'file1';
@@ -143,7 +143,7 @@ describe('utils/zip.mjs', function () {
 
       context('when input data is not a Blob', function () {
         it('should call `JSZip.file` with same input', function () {
-          var spy = sinon.spy(globalThis.JSZip.prototype, 'file');
+          var spy = sinon.spy(JSZip.prototype, 'file');
 
           var zip = new Zip();
 
@@ -168,7 +168,7 @@ describe('utils/zip.mjs', function () {
 
       context('when no input data', function () {
         it('should call `JSZip.file` with same input', function () {
-          var spy = sinon.spy(globalThis.JSZip.prototype, 'file');
+          var spy = sinon.spy(JSZip.prototype, 'file');
 
           var zip = new Zip();
           zip.file('file', 'foo');

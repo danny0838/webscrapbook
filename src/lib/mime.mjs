@@ -11,7 +11,8 @@ if (!globalThis.Mime) {
   throw new Error('Failed to load global Mime');
 }
 
-const {db} = Mime;
+const {db} = globalThis.Mime;
+delete globalThis.Mime;
 
 /**
  * Reverse map from extension to mimetype

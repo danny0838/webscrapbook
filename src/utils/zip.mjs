@@ -12,6 +12,9 @@ if (!globalThis.JSZip) {
   throw new Error('Failed to load global JSZip');
 }
 
+const JSZip = globalThis.JSZip;
+delete globalThis.JSZip;
+
 const COMPRESSIBLE_TYPES = new Set([
   'application/json',
   'application/postscript',
@@ -237,6 +240,7 @@ class Maff {
 }
 
 export {
+  JSZip,
   COMPRESSIBLE_TYPES,
   COMPRESSIBLE_SUFFIXES,
   RDF as NS_RDF,
