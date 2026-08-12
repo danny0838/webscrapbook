@@ -2,77 +2,182 @@
  * ZIP related utilities.
  *****************************************************************************/
 
-/* global JSZip */
-
 import {readFileAsDocument} from "./common.mjs";
-import "../lib/jszip.js";
+import * as Mime from "../lib/mime.mjs";
 
-// ensure module loaded (may be external when bundled)
-if (!globalThis.JSZip) {
-  throw new Error('Failed to load global JSZip');
-}
+import "../lib/web-streams-polyfill-prefix.js";
+import "../lib/web-streams-polyfill.js";
+import "../lib/web-streams-polyfill-postfix.js";
 
-const JSZip = globalThis.JSZip;
-delete globalThis.JSZip;
+// Never import zip.js to otherwhere directly to prevent missing polyfill.
+import * as zjs from "../lib/zip.js";
+import {
+  configure, ZipReader, ZipWriter,
+  BlobReader, Uint8ArrayReader, TextReader,
+  BlobWriter, Uint8ArrayWriter, Data64URIWriter,
+} from "../lib/zip.js";
 
-const _generateAsyncHandlerZip = {
-  get(target, prop, receiver) {
-    if (prop === "files") {
-      return new Proxy(Reflect.get(target, prop, receiver), _generateAsyncHandlerZipFiles);
-    }
-    return Reflect.get(target, prop, receiver);
-  },
-};
+/******************************************************************************
+ * The JSZip style ZIP file handlers.
+ * https://stuk.github.io/jszip/
+ *****************************************************************************/
 
-const _generateAsyncHandlerZipFiles = {
-  get(target, prop, receiver) {
-    return new Proxy(Reflect.get(target, prop, receiver), _generateAsyncHandlerZipObject);
-  },
-};
+class ZipObject {}
 
-const _generateAsyncHandlerZipObject = {
-  get(target, prop, receiver) {
-    if (prop === "date") {
-      const d = Reflect.get(target, prop, receiver);
-      return new Date(d.valueOf() - d.getTimezoneOffset() * 60 * 1000);
-    }
-    return Reflect.get(target, prop, receiver);
-  },
-};
-
-class Zip extends JSZip {
-  async generateAsync({fixModifiedTime = true, ...options} = {}, onUpdate) {
-    // The timestamp field of zip usually use local time, while JSZip writes
-    // UTC time for compatibility purpose since it does not support extended
-    // UTC fields. For example, a file modified at 08:00 (UTC+8) is stored with
-    // timestamp 00:00. We fix this by ourselves.
-    // https://github.com/Stuk/jszip/issues/369
-    let proxy = this;
-    if (fixModifiedTime) {
-      proxy = new Proxy(proxy, _generateAsyncHandlerZip);
-    }
-    return await super.generateAsync.call(proxy, options, onUpdate);
+class ZipObjectReader extends ZipObject {
+  constructor({name, data, options, entry}) {
+    super();
+    Object.assign(this, {
+      name: entry.filename,
+      date: entry.lastModDate,
+      comment: entry.comment,
+      _entry: entry,
+    });
   }
 
-  async loadAsync(data, {fixModifiedTime = true, ...options} = {}) {
-    const rv = await super.loadAsync(data, options);
-    // JSZip assumes timestamp of every file be UTC time and returns adjusted
-    // local time. For example, retrieving date for an entry with timestamp
-    // 00:00 gets 08:00 if the timezone is UTC+8. We fix this by ourselves.
-    // https://github.com/Stuk/jszip/issues/369
-    if (rv && fixModifiedTime) {
-      for (const subpath in rv.files) {
-        const d = rv.files[subpath].date;
-        d.setTime(d.valueOf() + d.getTimezoneOffset() * 60 * 1000);
+  async "async"(type) {
+    switch (type) {
+      case 'blob': {
+        return await this._entry.getData(new BlobWriter(Mime.lookup(this.name)));
+      }
+      case 'base64': {
+        const datauri = await this._entry.getData(new Data64URIWriter(Mime.lookup(this.name)));
+        return datauri.replace(/^data:[^,]+;base64,/, '');
+      }
+      default: {
+        throw new Error(`Unknown type: ${type}`);
       }
     }
-    return rv;
+  }
+}
+
+class ZipObjectWriter extends ZipObject {
+  constructor({name, data, options}) {
+    super();
+    const {date, comment, compression, compressionOptions} = options ?? {};
+    Object.assign(this, {
+      name,
+      date,
+      comment,
+      options: {compression, compressionOptions},
+      _data: data,
+    });
+  }
+}
+
+class Zip {
+  constructor() {
+    this.files = {};
+  }
+
+  file(...args) {
+    if (args.length < 2) {
+      const [name] = args;
+      return this.files[name];
+    }
+
+    const [name, data, {createFolders = true, ...options} = {}] = args;
+    if (createFolders) {
+      let missing = [];
+      let parent = this._getParentFolder(name);
+      while (parent) {
+        if (!this.files[parent]) {
+          missing.push(parent);
+        }
+        parent = this._getParentFolder(parent);
+      }
+      while (missing.length) {
+        const parent = missing.pop();
+        this.files[parent] = new ZipObjectWriter({name: parent});
+      }
+    }
+    this.files[name] = new ZipObjectWriter({name, data, options});
+    return this;
+  }
+
+  async generateAsync({
+    type,
+    mimeType = 'application/zip',
+    compression: _compreession = 'STORE',
+    compressionOptions: _compressionOptions = null,
+  } = {}) {
+    const writer = new ZipWriter(this._getWriter(type, mimeType));
+    await Promise.all(Object.entries(this.files).map(([name, entry]) => {
+      const {
+        date,
+        comment,
+        options: {
+          compression = _compreession,
+          compressionOptions = _compressionOptions,
+        },
+        _data,
+      } = entry;
+      const options = {
+        lastModDate: date,
+        comment,
+        compressionMethod: {STORE: 0, DEFLATE: 8}[compression?.toUpperCase()],
+        level: compressionOptions?.level ?? undefined,
+      };
+      return writer.add(name, this._getReader(_data), options);
+    }));
+    return await writer.close();
+  }
+
+  async loadAsync(data) {
+    const reader = new ZipReader(this._getReader(data));
+    this.comment = reader.comment;
+    const entries = await reader.getEntries();
+    for (const entry of entries) {
+      this.files[entry.filename] = new ZipObjectReader({entry});
+    }
+    return this;
+  }
+
+  _getParentFolder(path) {
+    if (path.slice(-1) === "/") {
+        path = path.substring(0, path.length - 1);
+    }
+    const lastSlash = path.lastIndexOf("/");
+    return (lastSlash >= 0) ? path.substring(0, lastSlash + 1) : "";
+  }
+
+  _getReader(data) {
+    if (data == null) {
+      return undefined;
+    } else if (data instanceof Blob) {
+      return new BlobReader(data);
+    } else if (data instanceof Uint8Array) {
+      return new Uint8ArrayReader(data);
+    } else if (typeof data === 'string') {
+      return new TextReader(data);
+    } else {
+      throw new Error(`Unknown data type: ${data}`);
+    }
+  }
+
+  _getWriter(type, mimeType) {
+    switch (type) {
+      case 'blob': {
+        return new BlobWriter(mimeType);
+      }
+      case 'uint8array': {
+        return new Uint8ArrayWriter();
+      }
+      default: {
+        throw new Error(`Unknown type: ${type}`);
+      }
+    }
   }
 
   static async loadAsync(...args) {
     return new this().loadAsync(...args);
   }
 }
+
+
+/******************************************************************************
+ * Helpers
+ *****************************************************************************/
 
 const RDF = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
 const MAF = "http://maf.mozdev.org/metadata/rdf#";
@@ -160,6 +265,7 @@ class Maff {
 }
 
 export {
+  zjs,
   RDF as NS_RDF,
   MAF as NS_MAF,
   Zip,

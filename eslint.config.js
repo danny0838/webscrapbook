@@ -22,7 +22,8 @@ export default [
   {
     ignores: [
       "src/lib/browser-polyfill.js",
-      "src/lib/jszip.js",
+      "src/lib/web-streams-polyfill.js",
+      "src/lib/zip.js",
       "src/lib/mime.js",
       "src/lib/sha.js",
       "src/content/index.js",

@@ -1,7 +1,7 @@
 import {assert} from "./unittest.mjs";
 import sinon from "./lib/sinon-esm.js";
 
-import {Zip} from "../utils/zip.mjs";
+import {Zip, zjs} from "../utils/zip.mjs";
 
 describe('utils/zip.mjs', function () {
   afterEach(function () {
@@ -10,22 +10,12 @@ describe('utils/zip.mjs', function () {
 
   describe('Zip', function () {
     describe('#generateAsync()', function () {
-      function toLittleEndian(num, byteLength) {
-        const bytes = [];
-        for (let i = 0; i < byteLength; i++) {
-          const shift = 8 * i;
-          const byte = (num >> shift) & 0xff;
-          bytes.push(byte);
-        }
-        return bytes;
-      }
-
       function getDateTimeBytes(date) {
         let dosTime = date.getHours();
         dosTime = dosTime << 6;
         dosTime = dosTime | date.getMinutes();
         dosTime = dosTime << 5;
-        dosTime = dosTime | date.getSeconds() / 2;
+        dosTime = dosTime | Math.ceil(date.getSeconds() / 2);
 
         let dosDate = date.getFullYear() - 1980;
         dosDate = dosDate << 4;
@@ -33,53 +23,89 @@ describe('utils/zip.mjs', function () {
         dosDate = dosDate << 5;
         dosDate = dosDate | date.getDate();
 
-        return [...toLittleEndian(dosTime, 2), ...toLittleEndian(dosDate, 2)];
+        const u8ar = new Uint8Array(4);
+        const view = new DataView(u8ar.buffer);
+        view.setUint16(0, dosTime, true);
+        view.setUint16(2, dosDate, true);
+        return u8ar;
       }
 
-      function getDateTimeBytes2(date) {
-        let dosTime = date.getUTCHours();
-        dosTime = dosTime << 6;
-        dosTime = dosTime | date.getUTCMinutes();
-        dosTime = dosTime << 5;
-        dosTime = dosTime | date.getUTCSeconds() / 2;
-
-        let dosDate = date.getUTCFullYear() - 1980;
-        dosDate = dosDate << 4;
-        dosDate = dosDate | (date.getUTCMonth() + 1);
-        dosDate = dosDate << 5;
-        dosDate = dosDate | date.getUTCDate();
-
-        return [...toLittleEndian(dosTime, 2), ...toLittleEndian(dosDate, 2)];
-      }
-
-      it('should store local time for the generated ZIP file', async function () {
-        var date = new Date('2025-01-01T00:00:00-06:00');
-
+      it('should store local DOS datetime for entries', async function () {
+        // even seconds is saved as-is
+        var date = new Date('2025-01-01T00:00:00.123-06:00');
         var zip = new Zip();
         zip.file('file.txt', 'foo', {date});
-        assert.strictEqual(zip.files['file.txt'].date.toISOString(), '2025-01-01T06:00:00.000Z');
+        var zipfile = await zip.generateAsync({type: 'blob'});
 
-        var u8ar = await zip.generateAsync({type: 'uint8array'});
-        assert.deepEqual(u8ar.slice(10, 14), new Uint8Array(getDateTimeBytes(date)));
+        var zip = new zjs.ZipReader(new zjs.BlobReader(zipfile));
+        var entry = (await zip.getEntries())[0];
+        assert.strictEqual(entry.lastModDate.toISOString(), '2025-01-01T06:00:00.000Z');
 
-        // should get same result in multiple runs
-        var u8ar2 = await zip.generateAsync({type: 'uint8array'});
-        assert.deepEqual(u8ar2, u8ar);
+        var u8ar = new Uint8Array(4);
+        var view = new DataView(u8ar.buffer);
+        view.setInt32(0, entry.rawLastModDate, true);
+        assert.deepEqual(u8ar, getDateTimeBytes(date));
+
+        // odd seconds is rounded up
+        var date = new Date('2025-01-01T00:00:01.123-06:00');
+        var zip = new Zip();
+        zip.file('file.txt', 'foo', {date});
+        var zipfile = await zip.generateAsync({type: 'blob'});
+
+        var zip = new zjs.ZipReader(new zjs.BlobReader(zipfile));
+        var entry = (await zip.getEntries())[0];
+        assert.strictEqual(entry.lastModDate.toISOString(), '2025-01-01T06:00:01.000Z');
+
+        var u8ar = new Uint8Array(4);
+        var view = new DataView(u8ar.buffer);
+        view.setInt32(0, entry.rawLastModDate, true);
+        assert.deepEqual(u8ar, getDateTimeBytes(date));
       });
 
-      it('should store UTC time for the generated ZIP file when `fixModifiedTime` not set', async function () {
-        var date = new Date('2025-01-01T00:00:00-06:00');
-
+      it('should store precise datetime with extended timestamp for entries', async function () {
+        var date = new Date('2025-01-01T00:00:01.123-06:00');
         var zip = new Zip();
         zip.file('file.txt', 'foo', {date});
-        assert.strictEqual(zip.files['file.txt'].date.toISOString(), '2025-01-01T06:00:00.000Z');
+        var zipfile = await zip.generateAsync({type: 'blob'});
 
-        var u8ar = await zip.generateAsync({type: 'uint8array', fixModifiedTime: false});
-        assert.deepEqual(u8ar.slice(10, 14), new Uint8Array(getDateTimeBytes2(date)));
+        var zip = new zjs.ZipReader(new zjs.BlobReader(zipfile));
+        var entry = (await zip.getEntries())[0];
+        assert.strictEqual(entry.lastModDate.toISOString(), '2025-01-01T06:00:01.000Z');
+        assert.exists(entry.extraFieldExtendedTimestamp);
+        assert.notExists(entry.extraFieldNTFS);
+      });
 
-        // should get same result in multiple runs
-        var u8ar2 = await zip.generateAsync({type: 'uint8array', fixModifiedTime: false});
-        assert.deepEqual(u8ar2, u8ar);
+      it('should store precise datetime with NTFS extra field for entries after 2038', async function () {
+        var date = new Date('2040-01-01T00:00:01.123-06:00');
+        var zip = new Zip();
+        zip.file('file.txt', 'foo', {date});
+        var zipfile = await zip.generateAsync({type: 'blob'});
+
+        var zip = new zjs.ZipReader(new zjs.BlobReader(zipfile));
+        var entry = (await zip.getEntries())[0];
+        assert.strictEqual(entry.lastModDate.toISOString(), '2040-01-01T06:00:01.123Z');
+        assert.notExists(entry.extraFieldExtendedTimestamp);
+        assert.exists(entry.extraFieldNTFS);
+      });
+
+      it('should store filename as UTF-8 for entries', async function () {
+        var zip = new Zip();
+        zip.file('中文𠀀.txt', 'foo');
+        var zipfile = await zip.generateAsync({type: 'blob'});
+
+        var zip = new zjs.ZipReader(new zjs.BlobReader(zipfile));
+        var entry = (await zip.getEntries())[0];
+        assert.strictEqual(entry.filename, '中文𠀀.txt');
+      });
+
+      it('should store comment as UTF-8 for entries', async function () {
+        var zip = new Zip();
+        zip.file('file.txt', 'foo', {comment: '中文𠀀'});
+        var zipfile = await zip.generateAsync({type: 'blob'});
+
+        var zip = new zjs.ZipReader(new zjs.BlobReader(zipfile));
+        var entry = (await zip.getEntries())[0];
+        assert.strictEqual(entry.comment, '中文𠀀');
       });
 
       it('should generate parent folders when `createFolders` is omitted', async function () {
@@ -118,54 +144,51 @@ describe('utils/zip.mjs', function () {
         assert.hasAllKeys(zip.files, ['a/b/c.txt']);
         assert.strictEqual(zip.files['a/b/c.txt'].date.valueOf(), date.valueOf());
       });
+
+      it('should not compress content when `compression` is `STORE`', async function () {
+        var zip = new Zip();
+        zip.file('file.txt', 'foo', {compression: 'STORE'});
+        var zipfile = await zip.generateAsync({type: 'blob'});
+
+        var zip = await Zip.loadAsync(zipfile);
+        assert.strictEqual(zip.files['file.txt']._entry.compressionMethod, 0);
+        assert.strictEqual(zip.files['file.txt']._entry.compressedSize, zip.files['file.txt']._entry.uncompressedSize);
+      });
+
+      it('should compress content when `compression` is `DEFLATE`', async function () {
+        var zip = new Zip();
+        zip.file('file.txt', 'foo', {compression: 'DEFLATE'});
+        var zipfile = await zip.generateAsync({type: 'blob'});
+
+        var zip = await Zip.loadAsync(zipfile);
+        assert.strictEqual(zip.files['file.txt']._entry.compressionMethod, 8);
+        assert.notStrictEqual(zip.files['file.txt']._entry.compressedSize, zip.files['file.txt']._entry.uncompressedSize);
+      });
     });
 
     describe('#loadAsync()', function () {
-      function fixDateTime(date) {
-        return new Date(date.valueOf() + date.getTimezoneOffset() * 60 * 1000);
-      }
-
-      it('should load as local time from a ZIP file', async function () {
+      it('should load DOS datetime as local timezone for entries', async function () {
         var date = new Date('2025-01-01T00:00:00-06:00');
+        var zip = new zjs.ZipWriter(new zjs.BlobWriter());
+        await zip.add('file.txt', new zjs.TextReader('foo'), {lastModDate: date, extendedTimestamp: false});
+        var zipfile = await zip.close();
 
-        var zip = new Zip();
-        zip.file('file.txt', 'foo', {date});
-        var u8ar = await zip.generateAsync({type: 'uint8array'});
-
-        var zip2 = await new Zip().loadAsync(u8ar);
-        assert.instanceOf(zip2, Zip);
-        assert.strictEqual(zip2.files['file.txt'].date.toISOString(), '2025-01-01T06:00:00.000Z');
-      });
-
-      it('should load as UTC time from a ZIP file when `fixModifiedTime` not set', async function () {
-        var date = new Date('2025-01-01T00:00:00-06:00');
-
-        var zip = new Zip();
-        zip.file('file.txt', 'foo', {date});
-        var u8ar = await zip.generateAsync({type: 'uint8array'});
-
-        var zip2 = await new Zip().loadAsync(u8ar, {fixModifiedTime: false});
-        assert.instanceOf(zip2, Zip);
-        assert.strictEqual(fixDateTime(zip2.files['file.txt'].date).toISOString(), '2025-01-01T06:00:00.000Z');
+        var zip = await new Zip().loadAsync(zipfile);
+        assert.instanceOf(zip, Zip);
+        assert.strictEqual(zip.files['file.txt'].date.toISOString(), '2025-01-01T06:00:00.000Z');
       });
     });
 
     describe('.loadAsync()', function () {
-      it('should create an instance of the same class', async function () {
-        var _zip = new Zip();
-        _zip.file('file.txt', 'foo');
-        var zipfile = await _zip.generateAsync({type: 'uint8array'});
+      it('should create an instance of the same class and call with same arguments', async function () {
+        var zip = new zjs.ZipWriter(new zjs.BlobWriter());
+        await zip.add('file.txt', new zjs.TextReader('foo'));
+        var zipfile = await zip.close();
 
+        var spy = sinon.spy(Zip.prototype, 'loadAsync');
         var zip = await Zip.loadAsync(zipfile);
         assert.instanceOf(zip, Zip);
-      });
-
-      it('should call with same arguments', async function () {
-        var stub = sinon.stub(Zip.prototype, 'loadAsync');
-
-        var dummyZipFile = {};
-        await Zip.loadAsync(dummyZipFile);
-        sinon.assert.calledOnceWithExactly(stub, dummyZipFile);
+        sinon.assert.calledOnceWithExactly(spy, zipfile);
       });
     });
   });
