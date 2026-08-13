@@ -6,7 +6,6 @@ import {isDebug} from "../utils/debug.mjs";
 import * as utils from "../utils/extension.mjs";
 import {StorageCache, IdbCache} from "../utils/cache.mjs";
 import {dataUriToFile} from "../utils/datauri.mjs";
-import {Zip} from "../utils/zip.mjs";
 import {sha1} from "../utils/sha.mjs";
 import * as Mime from "../lib/mime.mjs";
 import {MapWithDefault} from "../lib/map-with-default.mjs";
@@ -456,6 +455,9 @@ class Capturer extends BaseCapturer {
   }
 
   async loadFileCacheAsZip({timeId, options}) {
+    // import lazily for performance
+    const {Zip} = await import("../utils/zip.mjs");
+
     const compressLevel = options["capture.zipCompressLevel"];
     const defaultZipOptions = Number.isInteger(compressLevel) ? (
       compressLevel > 0 ?
