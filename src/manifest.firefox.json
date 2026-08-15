@@ -28,7 +28,9 @@
     "unlimitedStorage",
     "webNavigation",
     "webRequest",
-    "webRequestBlocking"
+    "webRequestBlocking",
+    "contextualIdentities",
+    "cookies"
   ],
   "optional_permissions": [
     "geolocation"

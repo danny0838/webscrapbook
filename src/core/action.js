@@ -57,6 +57,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         url: tab.url,
         title: tab.title,
       })),
+      container: tabs[0]?.cookieStoreId,
       mode,
     };
     switch (params.cmd) {

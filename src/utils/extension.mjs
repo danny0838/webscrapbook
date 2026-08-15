@@ -233,10 +233,11 @@ async function createWindow(createData) {
  * Simplified API to invoke a capture with an array of tasks.
  *
  * @param {Array} tasks
+ * @param {Object} [options]
  * @return {Promise<(Window|Tab)>}
  */
-async function invokeCapture(tasks) {
-  return await invokeCaptureEx({taskInfo: {tasks}, waitForResponse: false});
+async function invokeCapture(tasks, options) {
+  return await invokeCaptureEx({taskInfo: {tasks, ...options}, waitForResponse: false});
 }
 
 /**
@@ -314,6 +315,31 @@ async function invokeCaptureEx({
   const key = {table: "captureMissionCache", id: missionId};
   await Cache.set(key, taskInfo);
   const url = browser.runtime.getURL("capturer/capturer.html") + `?mid=${missionId}`;
+  const cookieStoreId = await (async () => {
+    let cookieStoreId = taskInfo.container;
+
+    // When specified, take the specified value when valid, or fallback to
+    // the default container.
+    if (cookieStoreId != null) {
+      try {
+        await browser.contextualIdentities.get(cookieStoreId);
+      } catch (ex) {
+        // Specified cookieStoreId doesn't exist, or Firefox preference
+        // `privacy.userContext.enabled` is false.
+        return null;
+      }
+      return cookieStoreId;
+    }
+
+    // When not specified, infer from the tabId of the first task, or fallback
+    // to the default container.
+    try {
+      ({cookieStoreId} = await browser.tabs.get(taskInfo.tasks[0].tabId));
+    } catch (ex) {
+      return null;
+    }
+    return cookieStoreId;
+  })();
 
   // launch capturer
   let tab;
@@ -325,6 +351,7 @@ async function invokeCaptureEx({
       width: 400,
       height: 400,
       incognito: win.incognito,
+      ...(cookieStoreId && {cookieStoreId}),
     }, windowCreateData)));
 
     if (!waitForResponse) {
@@ -333,6 +360,7 @@ async function invokeCaptureEx({
   } else {
     tab = await browser.tabs.create(Object.assign({
       url,
+      ...(cookieStoreId && {cookieStoreId}),
     }, tabCreateData));
 
     if (!waitForResponse) {

@@ -28,6 +28,8 @@
     "webNavigation",
     "webRequest",
     "webRequestBlocking",
+    "contextualIdentities",
+    "cookies",
     "http://*/*",
     "https://*/*"
   ],

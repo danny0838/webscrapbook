@@ -51,6 +51,7 @@ const commands = {
         url: tab.url,
         title: tab.title,
       })),
+      {container: tabs[0]?.cookieStoreId},
     );
   },
 
@@ -63,6 +64,7 @@ const commands = {
         title: tab.title,
         mode: "source",
       })),
+      {container: tabs[0]?.cookieStoreId},
     );
   },
 
@@ -75,6 +77,7 @@ const commands = {
         title: tab.title,
         mode: "bookmark",
       })),
+      {container: tabs[0]?.cookieStoreId},
     );
   },
 
@@ -86,6 +89,7 @@ const commands = {
         url: tab.url,
         title: tab.title,
       })),
+      container: tabs[0]?.cookieStoreId,
     });
   },
 
@@ -97,6 +101,7 @@ const commands = {
         url: tab.url,
         title: tab.title,
       })),
+      container: tabs[0]?.cookieStoreId,
     });
   },
 
@@ -108,6 +113,7 @@ const commands = {
         url: tab.url,
         title: tab.title,
       })),
+      container: tabs[0]?.cookieStoreId,
     });
   },
 
@@ -490,21 +496,21 @@ function initMenusListener() {
       return utils.invokeCapture([{
         tabId: tab.id,
         fullPage: true,
-      }]);
+      }], {container: tab.cookieStoreId});
     },
 
     capturePageSource(info, tab) {
       return utils.invokeCapture([{
         tabId: tab.id,
         mode: "source",
-      }]);
+      }], {container: tab.cookieStoreId});
     },
 
     capturePageBookmark(info, tab) {
       return utils.invokeCapture([{
         tabId: tab.id,
         mode: "bookmark",
-      }]);
+      }], {container: tab.cookieStoreId});
     },
 
     capturePageAs(info, tab) {
@@ -515,6 +521,7 @@ function initMenusListener() {
           url: tab.url,
           title: tab.title,
         }],
+        container: tab.cookieStoreId,
       });
     },
 
@@ -527,21 +534,21 @@ function initMenusListener() {
         tabId: tab.id,
         frameId: info.frameId,
         fullPage: true,
-      }]);
+      }], {container: tab.cookieStoreId});
     },
 
     captureFrameSource(info, tab) {
       return utils.invokeCapture([{
         url: info.frameUrl,
         mode: "source",
-      }]);
+      }], {container: tab.cookieStoreId});
     },
 
     captureFrameBookmark(info, tab) {
       return utils.invokeCapture([{
         url: info.frameUrl,
         mode: "bookmark",
-      }]);
+      }], {container: tab.cookieStoreId});
     },
 
     captureFrameAs(info, tab) {
@@ -553,6 +560,7 @@ function initMenusListener() {
           url: info.frameUrl,
           title: tab.title,
         }],
+        container: tab.cookieStoreId,
       }, {ignoreTitle: true});
     },
 
@@ -561,7 +569,7 @@ function initMenusListener() {
         tabId: tab.id,
         frameId: info.frameId,
         fullPage: false,
-      }]);
+      }], {container: tab.cookieStoreId});
     },
 
     captureSelectionAs(info, tab) {
@@ -572,6 +580,7 @@ function initMenusListener() {
           url: info.frameUrl || tab.url,
           title: tab.title,
         }],
+        container: tab.cookieStoreId,
       }, {ignoreTitle: true});
     },
 
@@ -581,6 +590,7 @@ function initMenusListener() {
           tabId: tab.id,
           frameId: info.frameId,
         }],
+        container: tab.cookieStoreId,
       });
     },
 
@@ -588,21 +598,21 @@ function initMenusListener() {
       return utils.invokeCapture([{
         url: info.linkUrl,
         mode: "tab",
-      }]);
+      }], {container: tab.cookieStoreId});
     },
 
     captureLinkSource(info, tab) {
       return utils.invokeCapture([{
         url: info.linkUrl,
         mode: "source",
-      }]);
+      }], {container: tab.cookieStoreId});
     },
 
     captureLinkBookmark(info, tab) {
       return utils.invokeCapture([{
         url: info.linkUrl,
         mode: "bookmark",
-      }]);
+      }], {container: tab.cookieStoreId});
     },
 
     captureLinkAs(info, tab) {
@@ -611,6 +621,7 @@ function initMenusListener() {
           url: info.linkUrl,
           title: info.linkText,
         }],
+        container: tab.cookieStoreId,
       }, {ignoreTitle: true});
     },
 
@@ -619,7 +630,7 @@ function initMenusListener() {
         url: info.srcUrl,
         refUrl: info.pageUrl,
         mode: "source",
-      }]);
+      }], {container: tab.cookieStoreId});
     },
 
     captureMediaAs(info, tab) {
@@ -628,6 +639,7 @@ function initMenusListener() {
           url: info.srcUrl,
           refUrl: info.pageUrl,
         }],
+        container: tab.cookieStoreId,
       });
     },
   };

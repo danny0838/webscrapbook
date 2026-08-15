@@ -1628,7 +1628,13 @@ resources or leak sensitive information.`);
   }) {
     this.log(`Launching remote tab ...`);
 
-    const tab = await browser.tabs.create({url, active: false});
+    // Inherit the current container.
+    const {cookieStoreId} = await browser.tabs.getCurrent();
+    const tab = await browser.tabs.create({
+      url,
+      active: false,
+      ...(cookieStoreId && {cookieStoreId}),
+    });
     await utils.waitTabLoading(tab);
 
     const delay = options["capture.remoteTabDelay"];

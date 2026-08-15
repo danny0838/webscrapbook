@@ -895,6 +895,7 @@ const sidebar = {
           url: tab.url,
           title: tab.title,
         })),
+        container: tabs[0]?.cookieStoreId,
         bookId: this.bookId,
         parentId: targetId,
         index: targetIndex,
