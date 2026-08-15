@@ -3,6 +3,13 @@
 * Versions before 1.0 are in initial development. APIs are not stable for these versions, even a `y` version can involve a breaking change, and only partial notable changes are summarized in this document. See full commit history in the source repository for details.
 * Backend server requirement in this document refers to the version of [`webscrapbook` Python package](https://github.com/danny0838/pywebscrapbook) (or PyWebScrapBook).
 
+## [2.27.0] - 2026-08-15
+* Added support for auto-switching container for a capture in Firefox.
+* Added option `capture.unmatchedContainer` to relax the restriction of a cross-container capture.
+* Added support for more precise timestamps for files in a captured HTZ/MAFF archive.
+* Added support for more text or auto-compression file formats.
+* Miscellaneous improvements and bug fixes to the internal code and test suite.
+
 ## [2.26.0] - 2026-08-09
 * Rewrote extensioin scripts as ES6 module.
 * Reworked external message response to return an object with `result` or `error` property.
