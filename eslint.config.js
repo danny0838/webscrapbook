@@ -116,9 +116,21 @@ export default [
   {
     files: [
       "tools/**/*.js",
+      "test/*.js",
     ],
     languageOptions: {
       globals: globals.node,
+    },
+  },
+  {
+    files: [
+      "test/test_*.mjs",
+    ],
+    languageOptions: {
+      globals: {
+        ...globals.node,
+        ...globals.mocha,
+      },
     },
   },
 ];

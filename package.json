@@ -29,6 +29,7 @@
     "globals": "^16.0.0",
     "mocha": "^11.7.6",
     "rollup": "^4.46.2",
+    "selenium-webdriver": "^4.47.0",
     "web-ext": "^10.4.0"
   },
   "mocha": {
