@@ -8,6 +8,9 @@ import {escapeRegExp} from "../utils/common.mjs";
 
 // Top-level await is available only in Chromium >=89 and Firefox >= 89
 (async () => {
+  globalThis.__TEST_SUITE__ = null;
+  globalThis.__TEST_QUEUE__ = [];
+
   await suite.init();
 
   // initialize mocha and expose global methods such as describe(), it()
@@ -61,5 +64,71 @@ import {escapeRegExp} from "../utils/common.mjs";
   await import('./test_external.mjs');
   await import('./test_manual.mjs');
 
-  mocha.run();
+  // run tests and expose global information
+  {
+    function buildSuiteTree(suite) {
+      const extractHooks = (hooksArray, type) => {
+        return hooksArray.map((hook, index) => ({
+          id: hook.id,
+          type: type,
+          title: hook.title.replace(/^.*? hook(?:: |$)/, ''),
+        }));
+      };
+
+      return {
+        title: suite.title,
+        hooks: [
+          ...extractHooks(suite._beforeAll, 'before'),
+          ...extractHooks(suite._beforeEach, 'beforeEach'),
+          ...extractHooks(suite._afterEach, 'afterEach'),
+          ...extractHooks(suite._afterAll, 'after'),
+        ],
+        tests: suite.tests.map((test) => {
+          return {
+            id: test.id,
+            title: test.title,
+          };
+        }),
+        suites: suite.suites.map(buildSuiteTree),
+      };
+    }
+
+    globalThis.__TEST_SUITE__ = buildSuiteTree(mocha.suite);
+
+    const runner = mocha.run();
+    const {EVENT_TEST_END, EVENT_TEST_FAIL, EVENT_HOOK_END, EVENT_RUN_END} = runner.constructor.constants;
+    runner.on(EVENT_TEST_END, (test) => {
+      globalThis.__TEST_QUEUE__.push({
+        id: test.id,
+        state: test.state,
+        ...(test.state === 'failed' && {error: {
+          message: test.err.message,
+          stack: test.err.stack,
+        }}),
+      });
+    });
+    runner.on(EVENT_TEST_FAIL, (test) => {
+      if (test.type === "hook") {
+        globalThis.__TEST_QUEUE__.push({
+          id: test.id,
+          state: test.state,
+          ...(test.state === 'failed' && {error: {
+            message: test.err.message,
+            stack: test.err.stack,
+          }}),
+        });
+      }
+    });
+    runner.on(EVENT_HOOK_END, (hook) => {
+      globalThis.__TEST_QUEUE__.push({
+        id: hook.id,
+        state: hook.state,
+      });
+    });
+    runner.on(EVENT_RUN_END, () => {
+      globalThis.__TEST_QUEUE__.push({
+        done: true,
+      });
+    });
+  }
 })();
