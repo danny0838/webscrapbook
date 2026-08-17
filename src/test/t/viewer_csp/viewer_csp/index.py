@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """An alternative entry to test the index.html with dynamic port
 """
 import json

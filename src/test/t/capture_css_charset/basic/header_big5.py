@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 import sys
 
 sys.stdout.buffer.write("""Content-Type: text/css;charset=Big5
