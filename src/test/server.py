@@ -2,9 +2,8 @@
 import http.server
 import json
 import os
-import shutil
-import time
 import tempfile
+import time
 from threading import Thread
 
 
@@ -71,8 +70,7 @@ class HTTPRequestHandler(http.server.CGIHTTPRequestHandler):
 
 def backend(port):
     try:
-        from webscrapbook import WSB_DIR, WSB_CONFIG
-        import webscrapbook.server
+        from webscrapbook import WSB_CONFIG, WSB_DIR, server
     except ImportError:
         print('WARNING: unable to import PyWebScrapBook')
         return
@@ -89,7 +87,7 @@ backup_dir = .wsb/backup
 
 [book ""]
 name = scrapbook
-top_dir = 
+top_dir =
 data_dir = data
 tree_dir = tree
 index = tree/map.html
@@ -97,7 +95,7 @@ no_tree = false
 new_at_top = false
 inclusive_frames = true
 static_index = false
-rss_root = 
+rss_root =
 rss_item_count = 50
 
 [server]
@@ -110,7 +108,7 @@ browse = false
         with open(config_file, 'w', encoding='UTF-8') as fh:
             fh.write(config)
 
-        webscrapbook.server.serve(root)
+        server.serve(root)
 
 
 def main():
