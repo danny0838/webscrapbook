@@ -28,7 +28,6 @@ def zip_folder(root_dir, formatter=None, filter=None):
                         zh.writestr(arcname, fh.read().format(**formatter))
                 else:
                     zh.write(file, arcname)
-        zh.close()
     return blob
 
 
