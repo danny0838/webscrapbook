@@ -11,6 +11,7 @@
 *.map text eol=lf
 *.txt text eol=lf
 *.md text eol=lf
+*.toml text eol=lf
 *.vtt text eol=lf
 *.py text eol=lf
 *.pyr text eol=lf
