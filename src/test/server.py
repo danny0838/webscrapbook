@@ -33,7 +33,6 @@ class TestApp:
         self.root = root
         self.config = config
         self.env = {
-            'PYTHONPATH': root,
             'PYTHONUTF8': '1',
             'wsb.config': json.dumps(config, ensure_ascii=False),
         }
@@ -155,13 +154,17 @@ class TestApp:
 
     def run_script(self, localpath, environ):
         import subprocess
-        cmdline = [sys.executable, '-u', localpath]
+
+        package_root = os.path.dirname(self.root)
+        rel_path = os.path.relpath(localpath, package_root)
+        module_name = os.path.splitext(rel_path)[0].replace(os.sep, '.')
+        cmdline = [sys.executable, '-u', '-m', module_name]
 
         env = {k: v for k, v in environ.items() if isinstance(v, str)}
         env.update(self.env)
 
         try:
-            p = subprocess.run(cmdline, env=env, capture_output=True, check=True)
+            p = subprocess.run(cmdline, cwd=package_root, env=env, capture_output=True, check=True)
         except subprocess.CalledProcessError as exc:
             logger = environ.get('wsgi.errors')
             if logger:

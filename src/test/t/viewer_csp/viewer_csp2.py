@@ -2,7 +2,7 @@ import json
 import os
 import re
 
-import utils
+from .. import utils
 
 port = json.loads(os.environ['wsb.config'])['server_port2']
 port = '' if port == 80 else f':{port}'
