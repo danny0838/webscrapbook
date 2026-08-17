@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """Common utils for CGI scripts."""
 import io
 import os

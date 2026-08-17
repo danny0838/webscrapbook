@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """A quick test for a CSS loaded via HTTP Link header.
 
 - Supported in Firefox (76.*) but not accessible via CSSOM.
