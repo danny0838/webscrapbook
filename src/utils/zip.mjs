@@ -29,6 +29,7 @@ class ZipObjectReader extends ZipObject {
     super();
     Object.assign(this, {
       name: entry.filename,
+      dir: entry.filename.slice(-1) === "/",
       date: entry.lastModDate,
       comment: entry.comment,
       _entry: entry,
@@ -57,6 +58,7 @@ class ZipObjectWriter extends ZipObject {
     const {date, comment, compression, compressionOptions} = options ?? {};
     Object.assign(this, {
       name,
+      dir: name.slice(-1) === "/",
       date,
       comment,
       options: {compression, compressionOptions},
@@ -67,19 +69,30 @@ class ZipObjectWriter extends ZipObject {
 
 class Zip {
   constructor() {
+    this.root = '';
     this.files = {};
   }
 
   file(...args) {
     if (args.length < 2) {
       const [name] = args;
-      return this.files[name];
+
+      if (this._isRegExp(name)) {
+        const regexp = name;
+        return this.filter((relativePath, file) => {
+          return !file.dir && regexp.test(relativePath);
+        });
+      }
+
+      return this.files[this.root + name];
     }
 
     const [name, data, {createFolders = false, ...options} = {}] = args;
+    const relativePath = this.root + name;
+
     if (createFolders) {
       let missing = [];
-      let parent = this._getParentFolder(name);
+      let parent = this._getParentFolder(relativePath);
       while (parent) {
         if (!this.files[parent]) {
           missing.push(parent);
@@ -91,8 +104,53 @@ class Zip {
         this.files[parent] = new ZipObjectWriter({name: parent});
       }
     }
-    this.files[name] = new ZipObjectWriter({name, data, options});
+
+    this.files[relativePath] = new ZipObjectWriter({name: relativePath, data, options});
     return this;
+  }
+
+  folder(arg) {
+    if (!arg) {
+      return this;
+    }
+
+    if (this._isRegExp(arg)) {
+      const regexp = arg;
+      return this.filter((relativePath, file) => {
+        return file.dir && regexp.test(relativePath);
+      });
+    }
+
+    const name = this.root + this._forceTrailingSlash(arg);
+    const ret = this.clone();
+    ret.root = name;
+    return ret;
+  }
+
+  forEach(callback) {
+    let filename, relativePath, file;
+    for (filename in this.files) {
+      file = this.files[filename];
+      relativePath = filename.slice(this.root.length);
+      if (relativePath && filename.slice(0, this.root.length) === this.root) {
+        callback(relativePath, file);
+      }
+    }
+  }
+
+  filter(search) {
+    const result = [];
+    this.forEach((relativePath, entry) => {
+      if (search(relativePath, entry)) {
+        result.push(entry);
+      }
+    });
+    return result;
+  }
+
+  clone() {
+    const newObj = new this.constructor();
+    return Object.assign(newObj, this);
   }
 
   async generateAsync({
@@ -131,6 +189,17 @@ class Zip {
       this.files[entry.filename] = new ZipObjectReader({entry});
     }
     return this;
+  }
+
+  _isRegExp(object) {
+    return Object.prototype.toString.call(object) === "[object RegExp]";
+  }
+
+  _forceTrailingSlash(path) {
+    if (path.slice(-1) !== "/") {
+        path += "/";
+    }
+    return path;
   }
 
   _getParentFolder(path) {
@@ -225,8 +294,8 @@ class Maff {
         if (zipRdfFile) {
           let doc;
           try {
-            const ab = await zipRdfFile.async('arraybuffer');
-            const file = new File([ab], 'index.rdf', {type: "application/rdf+xml"});
+            const blob = await zipRdfFile.async('blob');
+            const file = new File([blob], 'index.rdf', {type: "application/rdf+xml"});
             doc = await readFileAsDocument(file);
           } catch (ex) {
             throw new Error(`Unable to load 'index.rdf'.`);

@@ -9,6 +9,237 @@ describe('utils/zip.mjs', function () {
   });
 
   describe('Zip', function () {
+    async function zipFactory() {
+      var zip = new Zip();
+      zip.file('a/b/c.txt', 'foo');
+      zip.file('a/e/f.txt', 'bar');
+      return await zip.generateAsync({type: 'blob'});
+    }
+
+    async function zipFactoryPhysical() {
+      var zip = new Zip();
+      zip.file('a/b/c.txt', 'foo', {createFolders: true});
+      zip.file('a/e/f.txt', 'bar', {createFolders: true});
+      return await zip.generateAsync({type: 'blob'});
+    }
+
+    describe('#file()', function () {
+      context('passing (string)', function () {
+        it('should return a ZipObjectReader when file exists', async function () {
+          var zipfile = await zipFactory();
+          var zip = await Zip.loadAsync(zipfile);
+          var file = zip.file('a/b/c.txt');
+          assert.strictEqual(file.name, 'a/b/c.txt');
+          assert.strictEqual(file.dir, false);
+          assert.strictEqual(await (await file.async('blob')).text(), 'foo');
+        });
+
+        it('should return undefined when file not exists', async function () {
+          var zipfile = await zipFactory();
+          var zip = await Zip.loadAsync(zipfile);
+          assert.isUndefined(zip.file('nonexist'));
+        });
+
+        it('should match subpath from root', async function () {
+          var zipfile = await zipFactory();
+          var zip = await Zip.loadAsync(zipfile);
+          var zip1 = zip.folder('a/');
+          var file = zip1.file('b/c.txt');
+          assert.strictEqual(file.name, 'a/b/c.txt');
+          assert.strictEqual(file.dir, false);
+          assert.strictEqual(await (await file.async('blob')).text(), 'foo');
+        });
+      });
+
+      context('passing (regex)', function () {
+        it('should return ZipObjectReader[]', async function () {
+          var zipfile = await zipFactory();
+          var zip = await Zip.loadAsync(zipfile);
+          var [file1, file2] = zip.file(/^a/);
+
+          assert.strictEqual(file1.name, 'a/b/c.txt');
+          assert.strictEqual(file1.dir, false);
+          assert.strictEqual(await (await file1.async('blob')).text(), 'foo');
+
+          assert.strictEqual(file2.name, 'a/e/f.txt');
+          assert.strictEqual(file2.dir, false);
+          assert.strictEqual(await (await file2.async('blob')).text(), 'bar');
+        });
+
+        it('should return [] when no matching', async function () {
+          var zipfile = await zipFactory();
+          var zip = await Zip.loadAsync(zipfile);
+          assert.deepEqual(zip.file(/^nonexist/), []);
+        });
+
+        it('should match subpath from root', async function () {
+          var zipfile = await zipFactory();
+          var zip = await Zip.loadAsync(zipfile);
+          var zip1 = zip.folder('a/');
+          var [file1] = zip1.file(/^b/);
+
+          assert.strictEqual(file1.name, 'a/b/c.txt');
+          assert.strictEqual(file1.dir, false);
+          assert.strictEqual(await (await file1.async('blob')).text(), 'foo');
+        });
+      });
+
+      context('passing (string, data)', function () {
+        it('should create a new file and return self', async function () {
+          var zip = new Zip();
+          var zip1 = zip.file('a/b/c.txt', 'foo');
+          assert.strictEqual(zip1, zip);
+          assert.deepEqual(Object.keys(zip1.files), ['a/b/c.txt']);
+        });
+
+        it('should create at subpath from root', async function () {
+          var zip = new Zip();
+          var zip1 = zip.folder('a/');
+          var zip2 = zip1.file('b/c.txt', 'foo');
+          assert.strictEqual(zip2, zip1);
+          assert.deepEqual(Object.keys(zip2.files), ['a/b/c.txt']);
+        });
+
+        it('should accept string as data', async function () {
+          var zip = new Zip();
+          zip.file('file.txt', 'foo');
+          var zipfile = await zip.generateAsync({type: 'blob'});
+
+          var zip = await Zip.loadAsync(zipfile);
+          var file = zip.file('file.txt');
+          assert.strictEqual(await (await file.async('blob')).text(), 'foo');
+        });
+
+        it('should accept Blob as data', async function () {
+          var zip = new Zip();
+          zip.file('file.txt', new Blob(['foo']));
+          var zipfile = await zip.generateAsync({type: 'blob'});
+
+          var zip = await Zip.loadAsync(zipfile);
+          var file = zip.file('file.txt');
+          assert.strictEqual(await (await file.async('blob')).text(), 'foo');
+        });
+
+        it('should accept Uint8Array as data', async function () {
+          var zip = new Zip();
+          zip.file('file.txt', new Uint8Array([0x66, 0x6F, 0x6F]));
+          var zipfile = await zip.generateAsync({type: 'blob'});
+
+          var zip = await Zip.loadAsync(zipfile);
+          var file = zip.file('file.txt');
+          assert.strictEqual(await (await file.async('blob')).text(), 'foo');
+        });
+
+        it('should accept null as empty data', async function () {
+          var zip = new Zip();
+          zip.file('file.txt', null);
+          var zipfile = await zip.generateAsync({type: 'blob'});
+
+          var zip = await Zip.loadAsync(zipfile);
+          var file = zip.file('file.txt');
+          assert.strictEqual(await (await file.async('blob')).text(), '');
+        });
+
+        it('should accept undefined as empty data', async function () {
+          var zip = new Zip();
+          zip.file('file.txt', undefined);
+          var zipfile = await zip.generateAsync({type: 'blob'});
+
+          var zip = await Zip.loadAsync(zipfile);
+          var file = zip.file('file.txt');
+          assert.strictEqual(await (await file.async('blob')).text(), '');
+        });
+      });
+    });
+
+    describe('#folder()', function () {
+      context('passing (string)', function () {
+        it('should return a new Zip with the subpath as root', async function () {
+          var zipfile = await zipFactory();
+          var zip = await Zip.loadAsync(zipfile);
+          var zip1 = zip.folder('a/');
+          assert.instanceOf(zip1, Zip);
+          assert.strictEqual(zip1.root, 'a/');
+
+          var zip1 = zip.folder('a/b/');
+          assert.instanceOf(zip1, Zip);
+          assert.strictEqual(zip1.root, 'a/b/');
+
+          var zip1 = zip.folder('nonexist/');
+          assert.instanceOf(zip1, Zip);
+          assert.strictEqual(zip1.root, 'nonexist/');
+        });
+
+        it('should treat `subpath` as `subpath/`', async function () {
+          var zipfile = await zipFactory();
+          var zip = await Zip.loadAsync(zipfile);
+          var zip1 = zip.folder('a');
+          assert.instanceOf(zip1, Zip);
+          assert.strictEqual(zip1.root, 'a/');
+
+          var zip1 = zip.folder('a/b');
+          assert.instanceOf(zip1, Zip);
+          assert.strictEqual(zip1.root, 'a/b/');
+
+          var zip1 = zip.folder('nonexist');
+          assert.instanceOf(zip1, Zip);
+          assert.strictEqual(zip1.root, 'nonexist/');
+        });
+
+        it('should match subpath from root', async function () {
+          var zipfile = await zipFactory();
+          var zip = await Zip.loadAsync(zipfile);
+          var zip1 = zip.folder('a/');
+          assert.instanceOf(zip1, Zip);
+          assert.strictEqual(zip1.root, 'a/');
+
+          var zip2 = zip1.folder('b/');
+          assert.instanceOf(zip2, Zip);
+          assert.strictEqual(zip2.root, 'a/b/');
+
+          var zip3 = zip2.folder('c/');
+          assert.instanceOf(zip3, Zip);
+          assert.strictEqual(zip3.root, 'a/b/c/');
+
+          var zip4 = zip3.folder('d/');
+          assert.instanceOf(zip4, Zip);
+          assert.strictEqual(zip4.root, 'a/b/c/d/');
+        });
+      });
+
+      context('passing (regex)', function () {
+        it('should return ZipObjectReader[] for matching physical folders', async function () {
+          var zipfile = await zipFactoryPhysical();
+          var zip = await Zip.loadAsync(zipfile);
+          var [folder1, folder2, folder3] = zip.folder(/^a\//);
+
+          assert.strictEqual(folder1.name, 'a/');
+          assert.strictEqual(folder1.dir, true);
+
+          assert.strictEqual(folder2.name, 'a/b/');
+          assert.strictEqual(folder2.dir, true);
+
+          assert.strictEqual(folder3.name, 'a/e/');
+          assert.strictEqual(folder3.dir, true);
+        });
+
+        it('should return [] if no matching physical folders', async function () {
+          var zipfile = await zipFactory();
+          var zip = await Zip.loadAsync(zipfile);
+          assert.deepEqual(zip.folder(/^a\//), []);
+        });
+
+        it('should match subpath from root', async function () {
+          var zipfile = await zipFactoryPhysical();
+          var zip = await Zip.loadAsync(zipfile);
+          var zip1 = zip.folder('a/');
+          var [folder1] = zip1.folder(/^b\//);
+          assert.strictEqual(folder1.name, 'a/b/');
+          assert.strictEqual(folder1.dir, true);
+        });
+      });
+    });
+
     describe('#generateAsync()', function () {
       function getDateTimeBytes(date) {
         let dosTime = date.getHours();
@@ -149,8 +380,9 @@ describe('utils/zip.mjs', function () {
         var zipfile = await zip.generateAsync({type: 'blob'});
 
         var zip = await Zip.loadAsync(zipfile);
-        assert.strictEqual(zip.files['file.txt']._entry.compressionMethod, 0);
-        assert.strictEqual(zip.files['file.txt']._entry.compressedSize, zip.files['file.txt']._entry.uncompressedSize);
+        var file = zip.files['file.txt'];
+        assert.strictEqual(file._entry.compressionMethod, 0);
+        assert.strictEqual(file._entry.compressedSize, file._entry.uncompressedSize);
       });
 
       it('should compress content when `compression` is `DEFLATE`', async function () {
@@ -159,8 +391,21 @@ describe('utils/zip.mjs', function () {
         var zipfile = await zip.generateAsync({type: 'blob'});
 
         var zip = await Zip.loadAsync(zipfile);
-        assert.strictEqual(zip.files['file.txt']._entry.compressionMethod, 8);
-        assert.notStrictEqual(zip.files['file.txt']._entry.compressedSize, zip.files['file.txt']._entry.uncompressedSize);
+        var file = zip.files['file.txt'];
+        assert.strictEqual(file._entry.compressionMethod, 8);
+        assert.notStrictEqual(file._entry.compressedSize, file._entry.uncompressedSize);
+      });
+
+      it('should not include content for a folder', async function () {
+        var zip = new Zip();
+        zip.file('folder/', null);
+        var zipfile = await zip.generateAsync({type: 'blob'});
+
+        var zip = await Zip.loadAsync(zipfile);
+        var folder = zip.files['folder/'];
+        assert.strictEqual(folder._entry.compressionMethod, 0);
+        assert.strictEqual(folder._entry.compressedSize, 0);
+        assert.strictEqual(folder._entry.uncompressedSize, 0);
       });
     });
 
