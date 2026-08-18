@@ -3,6 +3,10 @@
 * Versions before 1.0 are in initial development. APIs are not stable for these versions, even a `y` version can involve a breaking change, and only partial notable changes are summarized in this document. See full commit history in the source repository for details.
 * Backend server requirement in this document refers to the version of [`webscrapbook` Python package](https://github.com/danny0838/pywebscrapbook) (or PyWebScrapBook).
 
+## [2.27.1] - 2026-08-19
+* Fixed error when viewing a MAFF archive.
+* Fixed missing executable permission for test scripts.
+
 ## [2.27.0] - 2026-08-15
 * Added support for auto-switching container for a capture in Firefox.
 * Added option `capture.unmatchedContainer` to relax the restriction of a cross-container capture.
