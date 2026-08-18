@@ -7,7 +7,7 @@ on:
 concurrency:
   # https://docs.github.com/en/actions/writing-workflows/workflow-syntax-for-github-actions#concurrency
   # https://docs.github.com/en/actions/reference/workflows-and-actions/contexts
-  group: ${{ github.workflow }}-${{ github.sha }}
+  group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -16,10 +16,10 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Set up Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v7
         with:
           node-version: '24'
 
