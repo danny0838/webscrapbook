@@ -1,11 +1,8 @@
-import json
-import os
-import sys
-
-port = json.loads(os.environ['wsb.config'])['server_port2']
-port = '' if port == 80 else f':{port}'
-sys.stdout.buffer.write(f"""Content-Type: text/html
-
+def application(environ, start_response, exc_info=None):
+    start_response('200 OK', [('Content-Type', 'text/html')])
+    port = environ['wsb.config']['server_port2']
+    port = '' if port == 80 else f':{port}'
+    body = f"""\
 <!DOCTYPE html>
 <html>
 <head>
@@ -24,4 +21,5 @@ sys.stdout.buffer.write(f"""Content-Type: text/html
 <blockquote id="css-style-bg"></blockquote>
 <blockquote id="css-link-bg"></blockquote>
 </body>
-</html>""".encode('UTF-8'))
+</html>"""
+    return (body.encode('UTF-8'),)

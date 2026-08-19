@@ -3,11 +3,10 @@ import html
 import json
 import mimetypes
 import os
-import sys
 import tempfile
 import time
 from socketserver import ThreadingMixIn
-from threading import Thread
+from threading import RLock, Thread
 from urllib.parse import quote
 from urllib.request import url2pathname
 from wsgiref.simple_server import WSGIServer, make_server
@@ -33,9 +32,11 @@ class TestApp:
         self.root = root
         self.config = config
         self.env = {
-            'PYTHONUTF8': '1',
-            'wsb.config': json.dumps(config, ensure_ascii=False),
+            'wsgi.multithread': True,
+            'wsb.config': config,
         }
+        self._modules = {}
+        self._lock = RLock()
 
     def __call__(self, environ, start_response, exc_info=None):
         path = environ.get('PATH_INFO', '/').encode('ISO-8859-1').decode('UTF-8')
@@ -58,18 +59,16 @@ class TestApp:
         if os.path.isfile(localpath):
             _, ext = os.path.splitext(localpath)
             if ext.lower() == '.py':
-                status = '200 OK'
-                headers = []
+                subapp = self.load_subapp(localpath)
 
-                body, _headers = self.run_script(localpath, environ)
-                for key, value in _headers:
-                    if key.lower() == 'status':
-                        status = value
-                    else:
-                        headers.append((key, value))
+                def sub_start_response(status, headers, exc_info=None):
+                    if not any(name.lower() == 'content-type' for name, value in headers):
+                        headers.append(('Content-Type', 'application/octet-stream'))
+                    if not any(name.lower() == 'cache-control' for name, value in headers):
+                        headers.append(('Cache-Control', 'no-store'))
+                    return start_response(status, headers, exc_info)
 
-                start_response(status, headers)
-                return body
+                return subapp({**environ, **self.env}, sub_start_response)
 
             elif ext.lower() == '.pyr':
                 port = self.config['server_port2']
@@ -152,54 +151,36 @@ class TestApp:
 </html>
 """
 
-    def run_script(self, localpath, environ):
-        import subprocess
+    def load_subapp(self, localpath):
+        import importlib
 
         package_root = os.path.dirname(self.root)
         rel_path = os.path.relpath(localpath, package_root)
         module_name = os.path.splitext(rel_path)[0].replace(os.sep, '.')
-        cmdline = [sys.executable, '-u', '-m', module_name]
 
-        env = {k: v for k, v in environ.items() if isinstance(v, str)}
-        env.update(self.env)
+        # Load the module. Reload when the script file changes.
+        # (Restarting the server is still required when an imported file is changed.)
+        with self._lock:
+            mtime = os.stat(localpath).st_mtime_ns
+            cached = self._modules.get(module_name)
+            if cached is None:
+                module = importlib.import_module(module_name)
+                self._modules[module_name] = (mtime, module)
+            else:
+                cached_mtime, module = cached
+                if cached_mtime != mtime:
+                    module = importlib.reload(module)
+                    self._modules[module_name] = (mtime, module)
 
-        try:
-            p = subprocess.run(cmdline, cwd=package_root, env=env, capture_output=True, check=True)
-        except subprocess.CalledProcessError as exc:
-            logger = environ.get('wsgi.errors')
-            if logger:
-                try:
-                    err = exc.stderr.decode('utf-8')
-                except UnicodeDecodeError:
-                    err = str(exc.stderr) + '\n'
-                logger.write(f'Command {exc.cmd!r} exit code {exc.returncode}:\n{err}')
-                logger.flush()
+        app = getattr(module, 'application', None)
 
-            return (
-                (b'A server error occurred.',),
-                [('Status:', '500 Internal Server Error')],
-            )
+        if app is None:
+            raise TypeError(f"{module_name} does not define 'application'")
 
-        head, sep, body = p.stdout.partition(b'\n\n')
+        if not callable(app):
+            raise TypeError(f'{module_name}.application is not callable')
 
-        headers = []
-        if not sep:
-            # script didn't output headers
-            body = head
-        else:
-            for line in head.splitlines():
-                if not line.strip():
-                    continue
-
-                key, sep, value = line.partition(b':')
-                if not sep:
-                    continue
-
-                key = key.strip().decode('ascii')
-                value = value.strip().decode('ascii')
-                headers.append((key, value))
-
-        return (body,), headers
+        return app
 
 
 def test_server(host, port, root, config):

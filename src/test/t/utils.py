@@ -1,9 +1,7 @@
 """Common utils for CGI scripts."""
 import io
 import os
-import sys
 import zipfile
-from textwrap import dedent
 
 
 def zip_folder(root_dir, formatter=None, filter=None):
@@ -36,7 +34,7 @@ ARCHIVE_TYPES_MAP = {
 }
 
 
-def send_archive(base_file, type='htz', dispos='inline', **kwargs):
+def send_archive(environ, start_response, base_file, type='htz', dispos='inline', **kwargs):
     """Send a directory as an archive on the fly.
 
     Args:
@@ -49,14 +47,8 @@ def send_archive(base_file, type='htz', dispos='inline', **kwargs):
     basename, _ = os.path.splitext(file)
     blob = zip_folder(os.path.join(dir, basename), **kwargs)
     mime = ARCHIVE_TYPES_MAP[type]
-
-    sys.stdout.buffer.write(
-        dedent(
-            f"""\
-            Content-Type: {mime}
-            Content-Disposition: {dispos}; filename="{basename}.{type}"
-
-            """
-        ).encode('ASCII')
-    )
-    sys.stdout.buffer.write(blob.getvalue())
+    start_response('200 OK', [
+        ('Content-Type', mime),
+        ('Content-Disposition', f'{dispos}; filename="{basename}.{type}"'),
+    ])
+    yield blob.getvalue()

@@ -1,8 +1,9 @@
-import sys
-
-sys.stdout.buffer.write("""Content-Type: text/html
-Link: <header/header.css>; rel=stylesheet
-
+def application(environ, start_response, exc_info=None):
+    start_response('200 OK', [
+        ('Content-Type', 'text/html'),
+        ('Link', '<header/header.css>; rel=stylesheet'),
+    ])
+    body = """\
 <!DOCTYPE html>
 <html>
 <head>
@@ -17,4 +18,5 @@ Link: <header/header.css>; rel=stylesheet
 <blockquote id="link">link</blockquote>
 <blockquote id="import">import</blockquote>
 </body>
-</html>""".encode('UTF-8'))
+</html>"""
+    return (body.encode('UTF-8'),)
