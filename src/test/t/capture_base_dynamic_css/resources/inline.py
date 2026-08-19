@@ -1,7 +1,4 @@
-import os
-import sys
-
-sys.stdout.buffer.write(f"""Content-Type: text/plain;charset=UTF-8
-Cache-Control: no-store
-
-{os.environ['HTTP_REFERER']}""".encode('UTF-8'))
+def application(environ, start_response, exc_info=None):
+    start_response('200 OK', [('Content-Type', 'text/plain; charset=UTF-8')])
+    body = environ.get('HTTP_REFERER', '')
+    return (body.encode('UTF-8'),)

@@ -1,11 +1,11 @@
 import os
-import sys
 
-os.chdir(os.path.dirname(__file__))
-sys.stdout.buffer.write("""Content-Type: font/woff
-Content-Disposition: inline; filename="neverused.woff"
-Access-Control-Allow-Origin: *
 
-""".encode('ASCII'))
-with open('font.woff', 'rb') as fh:
-    sys.stdout.buffer.write(fh.read())
+def application(environ, start_response, exc_info=None):
+    start_response('200 OK', [
+        ('Content-Type', 'font/woff'),
+        ('Content-Disposition', 'inline; filename="neverused.woff"'),
+        ('Access-Control-Allow-Origin', '*'),
+    ])
+    file = os.path.join(__file__, '..', 'font.woff')
+    return environ['wsgi.file_wrapper'](open(file, 'rb'))
