@@ -1,4 +1,4 @@
-# -*- coding: Big5 -*-
-print('Content-Type: text/plain;charset=Big5')
-print('')
-print('Big5 ¤¤¤å¤º®e')
+def application(environ, start_response, exc_info=None):
+    start_response('200 OK', [('Content-Type', 'text/plain; charset=Big5')])
+    body = """Big5 ä¸­æ–‡å…§å®¹"""
+    return (body.encode('Big5'),)

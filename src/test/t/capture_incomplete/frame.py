@@ -1,8 +1,9 @@
-import sys
 import time
 
-sys.stdout.buffer.write("""Content-Type: text/html
 
+def application(environ, start_response, exc_info=None):
+    start_response('200 OK', [('Content-Type', 'text/html')])
+    yield """\
 <!DOCTYPE html>
 <html>
 <head>
@@ -10,15 +11,14 @@ sys.stdout.buffer.write("""Content-Type: text/html
 <style>
 img { width: 60px; }
 </style>
-</head>
-""".encode('UTF-8'))
-sys.stdout.flush()
+</head>""".encode('UTF-8')
 
-time.sleep(10)
+    time.sleep(10)
 
-sys.stdout.buffer.write("""<body>
+    yield """\
+<body>
 <p>Frame content.</p>
 <img src="red.py">
 </body>
 </html>
-""".encode('UTF-8'))
+""".encode('UTF-8')

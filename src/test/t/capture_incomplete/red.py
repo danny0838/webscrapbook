@@ -1,15 +1,11 @@
 import os
-import sys
 import time
 
-file = os.path.join(os.path.dirname(__file__), 'red.bmp')
-with open(file, 'rb') as fh:
-    blob = fh.read()
 
-time.sleep(10)
+def application(environ, start_response, exc_info=None):
+    file = os.path.join(os.path.dirname(__file__), 'red.bmp')
 
-sys.stdout.buffer.write("""Content-Type: image/bmp
-Content-Disposition: inline; filename="red.bmp"
+    time.sleep(10)
 
-""".encode('ASCII'))
-sys.stdout.buffer.write(blob)
+    start_response('200 OK', [('Content-Type', 'text/html')])
+    return environ['wsgi.file_wrapper'](open(file, 'rb'))
