@@ -4,7 +4,10 @@
 
 * `web-streams-polyfill.js`: from [web-streams-polyfill](https://app.unpkg.com/web-streams-polyfill@4.3.0/files/dist/polyfill.js)
 
-* `zip.js`: from a custom build of [zip.js](https://gildas-lormeau.github.io/zip.js/builder/) (Options: API=both, Workers=true, Comp=wasm, FS=false)
+* `zip.js`: from a custom build of [zip.js](https://gildas-lormeau.github.io/zip.js/builder/)
+  * Options: API=both, Workers=true, Comp=js, FS=false
+  * Firefox extension blocks worker.
+  * Firefox MV3 extension blocks wasm.
 
 * `sha.js`: from [jsSHA](https://github.com/Caligatio/jsSHA/blob/v3.3.1/dist/sha.js)
 
