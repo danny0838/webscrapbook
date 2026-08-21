@@ -7178,7 +7178,7 @@ document.querySelector("p").textContent = "srcdoc content modified";
           "capture.recordDocumentMeta": true,
         });
         var blob = await captureHeadless({
-          url: `${localhost}/capture_record/meta.pyr#abc`,
+          url: `${localhost}/capture_record/meta.py#abc`,
           options,
         });
         var zip = await Zip.loadAsync(blob);
@@ -9083,11 +9083,11 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
           ],
           "redirects": [
             [
-              `${localhost}/capture_mergeCapture_redirect/linked1-1.pyr`,
+              `${localhost}/capture_mergeCapture_redirect/linked1-1.py`,
               `${localhost}/capture_mergeCapture_redirect/redirected1-1.html`,
             ],
             [
-              `${localhost}/capture_mergeCapture_redirect/linked1-2.pyr`,
+              `${localhost}/capture_mergeCapture_redirect/linked1-2.py`,
               `${localhost}/capture_mergeCapture_redirect/redirected1-2.xhtml`,
             ],
           ],
@@ -9165,11 +9165,11 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
 
         sitemap.redirects = [
           [
-            `${localhost}/capture_mergeCapture_redirect/linked1-1.pyr`,
+            `${localhost}/capture_mergeCapture_redirect/linked1-1.py`,
             `${localhost}/capture_mergeCapture_redirect/redirected1-1.html`,
           ],
           [
-            `${localhost}/capture_mergeCapture_redirect/linked1-2.pyr`,
+            `${localhost}/capture_mergeCapture_redirect/linked1-2.py`,
             `${localhost}/capture_mergeCapture_redirect/redirected1-2.xhtml`,
           ],
         ];
@@ -9217,11 +9217,11 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
           ],
           "redirects": [
             [
-              `${localhost}/capture_mergeCapture_redirect/linked1-1.pyr`,
+              `${localhost}/capture_mergeCapture_redirect/linked1-1.py`,
               `${localhost}/capture_mergeCapture_redirect/redirected1-1.html`,
             ],
             [
-              `${localhost}/capture_mergeCapture_redirect/linked1-2.pyr`,
+              `${localhost}/capture_mergeCapture_redirect/linked1-2.py`,
               `${localhost}/capture_mergeCapture_redirect/redirected1-2.xhtml`,
             ],
           ],

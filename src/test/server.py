@@ -70,16 +70,6 @@ class TestApp:
 
                 return subapp({**environ, **self.env}, sub_start_response)
 
-            elif ext.lower() == '.pyr':
-                port = self.config['server_port2']
-                port = '' if port == 80 else ':' + str(port)
-                with open(localpath) as fh:
-                    new_url = fh.read().format(port=port)
-                start_response('302 Found', [
-                    ('Location', new_url),
-                ])
-                return ()
-
             else:
                 mimetype, encoding = mimetypes.guess_type(localpath)
                 mimetype = mimetype or 'application/octet-stream'
