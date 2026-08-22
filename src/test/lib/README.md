@@ -1,8 +1,8 @@
 ## Dependencies
 
-* `mocha.js`: built from [mocha](https://github.com/mochajs/mocha/tree/v11.7.2) with:
+* `mocha.js`: built from [mocha](https://github.com/mochajs/mocha/tree/v11.8.0) with:
   ```
-  npm run install
+  npm ci
   npx rollup -c
   ```
 
