@@ -15,6 +15,7 @@ __export(utils_exports, {
   checkError: () => check_error_exports,
   compareByInspect: () => compareByInspect,
   eql: () => deep_eql_default,
+  events: () => events,
   expectTypes: () => expectTypes,
   flag: () => flag,
   getActual: () => getActual,
@@ -694,8 +695,8 @@ __name(inspectHTML, "inspectHTML");
 
 // node_modules/loupe/lib/index.js
 var symbolsSupported = typeof Symbol === "function" && typeof Symbol.for === "function";
-var chaiInspect = symbolsSupported ? Symbol.for("chai/inspect") : "@@chai/inspect";
-var nodeInspect = Symbol.for("nodejs.util.inspect.custom");
+var chaiInspect = symbolsSupported ? /* @__PURE__ */ Symbol.for("chai/inspect") : "@@chai/inspect";
+var nodeInspect = /* @__PURE__ */ Symbol.for("nodejs.util.inspect.custom");
 var constructorMap = /* @__PURE__ */ new WeakMap();
 var stringTagMap = {};
 var baseTypesMap = {
@@ -1537,6 +1538,18 @@ var _Assertion = class _Assertion {
 __name(_Assertion, "Assertion");
 var Assertion = _Assertion;
 
+// lib/chai/utils/events.js
+var events = new EventTarget();
+var _PluginEvent = class _PluginEvent extends Event {
+  constructor(type3, name, fn) {
+    super(type3);
+    this.name = String(name);
+    this.fn = fn;
+  }
+};
+__name(_PluginEvent, "PluginEvent");
+var PluginEvent = _PluginEvent;
+
 // lib/chai/utils/isProxyEnabled.js
 function isProxyEnabled() {
   return config.useProxy && typeof Proxy !== "undefined" && typeof Reflect !== "undefined";
@@ -1560,6 +1573,7 @@ function addProperty(ctx, name, getter) {
     }, "propertyGetter"),
     configurable: true
   });
+  events.dispatchEvent(new PluginEvent("addProperty", name, getter));
 }
 __name(addProperty, "addProperty");
 
@@ -1689,6 +1703,7 @@ function addMethod(ctx, name, method) {
   }, "methodWrapper");
   addLengthGuard(methodWrapper, name, false);
   ctx[name] = proxify(methodWrapper, name);
+  events.dispatchEvent(new PluginEvent("addMethod", name, method));
 }
 __name(addMethod, "addMethod");
 
@@ -1755,6 +1770,14 @@ var excludeNames = Object.getOwnPropertyNames(testFn).filter(function(name) {
 });
 var call = Function.prototype.call;
 var apply = Function.prototype.apply;
+var _PluginAddChainableMethodEvent = class _PluginAddChainableMethodEvent extends PluginEvent {
+  constructor(type3, name, fn, chainingBehavior) {
+    super(type3, name, fn);
+    this.chainingBehavior = chainingBehavior;
+  }
+};
+__name(_PluginAddChainableMethodEvent, "PluginAddChainableMethodEvent");
+var PluginAddChainableMethodEvent = _PluginAddChainableMethodEvent;
 function addChainableMethod(ctx, name, method, chainingBehavior) {
   if (typeof chainingBehavior !== "function") {
     chainingBehavior = /* @__PURE__ */ __name(function() {
@@ -1804,6 +1827,14 @@ function addChainableMethod(ctx, name, method, chainingBehavior) {
     }, "chainableMethodGetter"),
     configurable: true
   });
+  events.dispatchEvent(
+    new PluginAddChainableMethodEvent(
+      "addChainableMethod",
+      name,
+      method,
+      chainingBehavior
+    )
+  );
 }
 __name(addChainableMethod, "addChainableMethod");
 
@@ -2925,7 +2956,7 @@ function closeTo(expected, delta, msg) {
     );
   }
   new Assertion(expected, flagMsg, ssfi, true).is.numeric;
-  const abs = /* @__PURE__ */ __name((x) => x < 0n ? -x : x, "abs");
+  const abs = /* @__PURE__ */ __name((x) => x < 0 ? -x : x, "abs");
   const strip = /* @__PURE__ */ __name((number) => parseFloat(parseFloat(number).toPrecision(12)), "strip");
   this.assert(
     strip(abs(obj - expected)) <= delta,
@@ -4171,6 +4202,11 @@ export {
  * chai
  * http://chaijs.com
  * Copyright(c) 2011-2014 Jake Luer <jake@alogicalparadox.com>
+ * MIT Licensed
+ */
+/*!
+ * Chai - events utility
+ * Copyright(c) 2011-2016 Jake Luer <jake@alogicalparadox.com>
  * MIT Licensed
  */
 /*!
