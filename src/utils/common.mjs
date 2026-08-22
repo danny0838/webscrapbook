@@ -2280,10 +2280,12 @@ async function readFileAsText(blob, charset = "UTF-8") {
  * @return {Promise<Document>}
  */
 async function readFileAsDocument(blob) {
+  const url = URL.createObjectURL(blob);
   const {response} = await xhr({
-    url: URL.createObjectURL(blob),
+    url,
     responseType: "document",
   });
+  URL.revokeObjectURL(url);
   return response;
 }
 
