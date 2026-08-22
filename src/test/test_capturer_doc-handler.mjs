@@ -8086,7 +8086,7 @@ Default3\
                   assert.isFalse(requireBasicLoader);
                 });
 
-                it('should work for a webgl canvas with `preserveDrawingBuffer` = true', async function () {
+                $it.skipIf($.noCanvasWebgl)('should work for a webgl canvas with `preserveDrawingBuffer` = true', async function () {
                   var doc = await docFactoryWebgl();
 
                   var {doc, requireBasicLoader} = await new TestCapturer().captureDocument({doc, docUrl, options});
