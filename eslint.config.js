@@ -111,7 +111,6 @@ export default [
   },
   {
     files: [
-      "src/test/unittest-encoding.js",
       "src/test/t/**/*.js",
     ],
     languageOptions: {

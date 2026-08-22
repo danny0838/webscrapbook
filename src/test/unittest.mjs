@@ -12,6 +12,7 @@ import {
   ASCII_WHITESPACE,
   NS_XMLNS, NS_HTML, NS_SVG, NS_XLINK,
   userAgent, escapeRegExp, trim, getShadowRoot,
+  byteStringToArrayBuffer,
 } from "../utils/common.mjs";
 import {sha1} from "../utils/sha.mjs";
 
@@ -437,17 +438,11 @@ function getToken(url, role) {
  * @return {Promise<Uint8Array>} The encoded bytes.
  */
 var encodeText = (() => {
-  function escapeHtml(str) {
-    const rv = [];
-    for (let i = 0, I = str.length; i < I; i++) {
-      const code = str.codePointAt(i);
-      if (code > 0xFFFF) { i++; }
-      rv.push(`&#${code};`);
-    }
-    return rv.join('');
+  function quote(str) {
+    return str.replace(/[&#%]/g, m => encodeURIComponent("&#x" + m.charCodeAt(0).toString(16) + ";"));
   }
 
-  function unescapeHtml(str, replacement) {
+  function unquote(str, replacement) {
     return unescape(str).replace(/&#(?:(\d+)|x([\dA-Fa-f]+));/g, (_, dec, hex) => {
       if (hex) {
         return String.fromCharCode(parseInt(hex, 16));
@@ -457,12 +452,6 @@ var encodeText = (() => {
       }
       throw parseInt(dec, 10);
     });
-  }
-
-  function byteStringToU8Array(bstr) {
-    let n = bstr.length, u8ar = new Uint8Array(n);
-    while (n--) { u8ar[n] = bstr.charCodeAt(n); }
-    return u8ar;
   }
 
   async function encodeText(str, charset = "UTF-8", replacement = null) {
@@ -491,41 +480,37 @@ var encodeText = (() => {
       return u8ar;
     }
 
-    const frame = document.createElement("iframe");
-    frame.style.setProperty('display', 'none', 'important');
-    {
-      const js = browser.runtime.getURL('test/unittest-encoding.js');
-      const _str = escapeHtml(str);
+    let result = await (async () => {
+      const blob = new Blob([], {type: `text/html;charset=${charset}`});
+      const url = URL.createObjectURL(blob);
+      const frame = document.createElement("iframe");
+      frame.style.setProperty('display', 'none', 'important');
+      frame.src = url;
+      await new Promise((resolve, reject) => {
+        frame.onload = resolve;
+        setTimeout(() => reject(new Error('Iframe load timeout.')), 5000);
+        document.body.append(frame);
+      });
+      const doc = frame.contentDocument;
+      const anchor = doc.createElement('a');
+      anchor.href = "https://example.com/?" + quote(str);
 
-      // run script in a document with specific charset to get the encoded text
-      // handle different CSP rule for Chromium and Gecko
-      if (userAgent.is('chromium')) {
-        frame.src = `data:text/html;charset=${encodeURIComponent(charset)},<script src="${js}" data-text="${encodeURIComponent(_str)}"></script>`;
-      } else {
-        const markup = `<script src="${js}" data-text="${_str}"></script>`;
-        const blob = new Blob([markup], {type: `text/html;charset=${charset}`});
-        frame.src = URL.createObjectURL(blob);
-      }
-    }
-    document.body.append(frame);
-    const aborter = new AbortController();
-    let result = await new Promise((resolve) => {
-      addEventListener("message", ({source, data}) => {
-        if (source === frame.contentWindow) {
-          aborter.abort();
-          resolve(data);
-        }
-      }, {signal: aborter.signal});
-    });
-    frame.remove();
+      // Non-ASCII chars are automatically percent-encoded using doc charset.
+      // Non-supported chars are replaced with HTML entity like `&#NNNN;`.
+      const result = anchor.search.slice(1);
+
+      frame.remove();
+      URL.revokeObjectURL(url);
+      return result;
+    })();
     try {
-      result = unescapeHtml(result, replacement);
+      result = unquote(result, replacement);
     } catch (code) {
       const _code = code.toString(16).toUpperCase();
       const idx = str.indexOf(String.fromCodePoint(code));
       throw new RangeError(`Unable to encode char U+${_code} at position ${idx}`);
     }
-    return byteStringToU8Array(result);
+    return new Uint8Array(byteStringToArrayBuffer(result));
   }
 
   return encodeText;
