@@ -225,6 +225,17 @@ Object.defineProperties(MochaQuery, Object.getOwnPropertyDescriptors({
     Object.defineProperty(this, 'noMultipleSelection', {value});
     return value;
   },
+  get noCanvasWebgl() {
+    // may be unsupported in a workflow runner image
+    const value = this.noBrowser.condition ? this.noBrowser : new MochaQuery.Query(
+      (() => {
+        return !document.createElement('canvas').getContext('webgl');
+      })(),
+      'WebGLRenderingContext not supported',
+    );
+    Object.defineProperty(this, 'noCanvasWebgl', {value});
+    return value;
+  },
   get noShadowRootClosed() {
     // retrieving closed shadow DOM is not supported in Chromium < 88
     const value = this.noBrowser.condition ? this.noBrowser : new MochaQuery.Query(
