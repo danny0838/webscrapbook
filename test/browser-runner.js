@@ -6,7 +6,7 @@ import {parseArgs} from "util";
 import {execFileSync} from "child_process";
 
 import Mocha from 'mocha';
-import {Builder} from "selenium-webdriver";
+import {Builder, By, until} from "selenium-webdriver";
 import chrome from "selenium-webdriver/chrome.js";
 import firefox from "selenium-webdriver/firefox.js";
 import {getBinaryPaths} from "selenium-webdriver/common/driverFinder.js";
@@ -131,6 +131,9 @@ async function loadExtensions({driver, browserName, manifest, options}) {
   }
 
   if (browserName === "firefox") {
+    const capabilities = await driver.getCapabilities();
+    const version = Number(capabilities.get("browserVersion").match(/^\d+/)[0]);
+
     const extensionId = await driver.installAddon(srcDir, true);
     await driver.installAddon(srcDirExternal, true);
 
@@ -141,10 +144,40 @@ async function loadExtensions({driver, browserName, manifest, options}) {
     }, extensionId);
     await driver.setContext("content");
 
+    // grant host permission for MV3 extension in older Firefox
+    if (manifest.manifest_version === 3 && version < 127) {
+      await driver.get("about:addons");
+      const tab = await driver.wait(
+        until.elementLocated(By.css('button[role="tab"][name="extension"]')),
+        5000,
+      );
+      tab.click();
+      const cardAnchor = await driver.wait(
+        until.elementLocated(By.css(`[addon-id="${extensionId}"] h3 a`)),
+        5000,
+      );
+      await driver.executeScript(e => e.click(), cardAnchor);
+      const permBtn = await driver.wait(
+        until.elementLocated(By.css(`[addon-id="${extensionId}"] button[name="permissions"]`)),
+        5000,
+      );
+      permBtn.click();
+      const permInput = await driver.wait(
+        until.elementLocated(By.css(`[addon-id="${extensionId}"] input[type="checkbox"][permission-all-sites]`)),
+        5000,
+      );
+      await driver.executeScript(e => e.click(), permInput);
+    }
+
     return {driver, extensionId, extensionUrl};
   }
 
   throw new Error(`Unsupported browser: ${browserName}`);
+}
+
+async function modifyOptions({driver, extensionUrl, options}) {
+  await driver.get(`${extensionUrl}test/utils.html`);
+  await driver.executeScript((opts) => globalThis.utils.setOptions(opts), options);
 }
 
 async function runTestSuite({browserName, exePath, headless, grep, dryRun, reporter, keepOpen}) {
@@ -163,6 +196,32 @@ async function runTestSuite({browserName, exePath, headless, grep, dryRun, repor
     const {driver: updatedDriver, extensionId, extensionUrl} = await loadExtensions({driver, browserName, manifest, options});
     driver = updatedDriver;
 
+    // load config
+    const config = (() => {
+      try {
+        return JSON.parse(fs.readFileSync(path.join(srcDir, "test", "config.json"), "utf8"));
+      } catch {
+        throw new Error("Unable to load test config.");
+      }
+    })();
+    const config2 = (() => {
+      try {
+        return JSON.parse(fs.readFileSync(path.join(srcDir, "test", "config.local.json"), "utf8"));
+      } catch {
+        // pass
+      }
+    })();
+    Object.assign(config, config2);
+
+    // set options
+    const port = config.backend_port;
+    const portStr = (port === 80) ? '' : `:${port}`;
+    const serverUrl = `http://localhost${portStr}/`;
+    await modifyOptions({driver, extensionUrl, options: {
+      "server.url": serverUrl,
+    }});
+
+    // run tests
     context = {driver, extensionUrl, grep, reporter};
     const mocha = new Mocha({
       grep,
@@ -234,7 +293,7 @@ async function main() {
       },
       "grep": {
         type: "string",
-        default: "^(?!Capture tests|Manual tests)",
+        default: "^(?!Manual tests)",
         short: "g",
       },
       "dry-run": {
@@ -287,4 +346,5 @@ if (isMain()) {
 export {
   POLL_INTERVAL,
   context,
+  modifyOptions,
 };
