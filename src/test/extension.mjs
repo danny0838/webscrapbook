@@ -8,8 +8,8 @@
 
 import {
   DEFAULT_OPTIONS,
-  userAgent, delay, filepathParts,
-} from "../utils/common.mjs";
+  userAgent, delay, filepathParts, waitTabLoading,
+} from "../utils/extension.mjs";
 import {deserializeObject} from "../utils/cache.mjs";
 import {Capturer} from "../capturer/capturer.mjs";
 import {server as _server} from "../scrapbook/server.mjs";
@@ -263,26 +263,6 @@ async function checkExtension() {
   } catch (ex) {
     console.error(ex);
     throw new Error(`Unable to connect to the test extension with ID "${id}". Make sure the extension is installed and its ID is correctly configured.`);
-  }
-}
-
-async function waitTabLoading(tab) {
-  const {promise, resolve, reject} = Promise.withResolvers();
-  const listener = (tabId, changeInfo, t) => {
-    if (!(tabId === tab.id && changeInfo.status === 'complete')) { return; }
-    resolve(t);
-  };
-  const listener2 = (tabId, removeInfo) => {
-    if (!(tabId === tab.id)) { return; }
-    reject(new Error('Tab removed before loading complete.'));
-  };
-  try {
-    browser.tabs.onUpdated.addListener(listener);
-    browser.tabs.onRemoved.addListener(listener2);
-    return await promise;
-  } finally {
-    browser.tabs.onUpdated.removeListener(listener);
-    browser.tabs.onRemoved.removeListener(listener2);
   }
 }
 

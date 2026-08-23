@@ -54,7 +54,7 @@ async function waitTabLoading(tab) {
   try {
     browser.tabs.onUpdated.addListener(listener);
     browser.tabs.onRemoved.addListener(listener2);
-    await promise;
+    return await promise;
   } finally {
     browser.tabs.onUpdated.removeListener(listener);
     browser.tabs.onRemoved.removeListener(listener2);
