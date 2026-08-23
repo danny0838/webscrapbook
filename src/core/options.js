@@ -499,4 +499,7 @@ window.addEventListener("DOMContentLoaded", async (event) => {
 
   // refresh form
   refreshForm();
+
+  // activate form
+  document.querySelector('#options > fieldset').disabled = false;
 });
