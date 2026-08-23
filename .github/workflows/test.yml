@@ -238,6 +238,14 @@ jobs:
             echo "SE_SKIP_DRIVER_IN_PATH=true" >> $env:GITHUB_ENV
           }
 
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: '3.14'
+
+      - name: Install backend
+        run: pip install webscrapbook
+
       - name: Run tests
         shell: pwsh
         run: |
@@ -271,5 +279,14 @@ jobs:
             $argsList += $env:EXE_PATH
           }
 
+          $process = Start-Process "python" `
+              -ArgumentList (Join-Path $env:GITHUB_WORKSPACE "test" "server.py") `
+              -RedirectStandardOutput (Join-Path $env:TEMP "server-stdout.log") `
+              -RedirectStandardError (Join-Path $env:TEMP "server-stderr.log") `
+              -PassThru
+          echo "Started servers with PID: $($process.Id)"
+
           npm run "dev:$build"
           node test/browser-runner.js $argsList
+
+          Stop-Process -Id $process.Id
