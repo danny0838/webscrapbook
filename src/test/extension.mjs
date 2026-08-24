@@ -352,26 +352,26 @@ async function capture(params, options = {}) {
   const {headless = false, delay: delayTime, cls = TestCapturerSimple} = options;
   const pageTab = !headless && await openPageTab(params.url);
 
-  if (typeof delayTime === 'number') {
-    await delay(delayTime);
+  try {
+    if (typeof delayTime === 'number') {
+      await delay(delayTime);
+    }
+
+    const taskInfo = {
+      tasks: [
+        headless ? params : {
+          tabId: pageTab.id,
+          url: pageTab.url,
+          ...params,
+        },
+      ],
+    };
+
+    const capturer = new cls();
+    return await capturer.run(taskInfo);
+  } finally {
+    pageTab && browser.tabs.remove(pageTab.id);
   }
-
-  const taskInfo = {
-    tasks: [
-      headless ? params : {
-        tabId: pageTab.id,
-        url: pageTab.url,
-        ...params,
-      },
-    ],
-  };
-
-  const capturer = new cls();
-  const result = await capturer.run(taskInfo);
-
-  !headless && await browser.tabs.remove(pageTab.id);
-
-  return result;
 }
 
 /**
