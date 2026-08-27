@@ -20,6 +20,7 @@
   "use strict";
 
   if (!(globalThis.chrome && globalThis.chrome.runtime && globalThis.chrome.runtime.id)) {
+    module.exports = undefined;
     return;
   }
   if (!(globalThis.browser && globalThis.browser.runtime && globalThis.browser.runtime.id)) {
