@@ -179,6 +179,13 @@ async function loadExtensions({driver, browserName, manifest, version, options})
   throw new Error(`Unsupported browser: ${browserName}`);
 }
 
+async function modifyOptions({driver, extensionUrl, options}) {
+  const optionsPath = "core/options.html";
+  await driver.get(`${extensionUrl}${optionsPath}`);
+  await driver.wait(until.elementLocated(By.css('#options > fieldset:enabled')), 5000);
+  await driver.executeScript((opts) => globalThis.utils.setOptions(opts), options);
+}
+
 async function runTestSuite({browserName, exePath, headless, grep, reporter, keepOpen}) {
   const manifest = JSON.parse(fs.readFileSync(path.join(srcDir, "manifest.json"), "utf8"));
 
@@ -213,23 +220,12 @@ async function runTestSuite({browserName, exePath, headless, grep, reporter, kee
     Object.assign(config, config2);
 
     // set options
-    const optionsPath = "core/options.html";
     const port = config.backend_port;
     const portStr = (port === 80) ? '' : `:${port}`;
     const serverUrl = `http://localhost${portStr}/`;
-    await driver.switchTo().newWindow("tab");
-    await driver.get(`${extensionUrl}${optionsPath}`);
-    await driver.wait(
-      until.elementLocated(By.css('#options > fieldset:enabled')),
-      5000,
-    );
-    await driver.executeAsyncScript(async (serverUrl, done) => {
-      document.getElementById("opt_server.url").value = serverUrl;
-      document.querySelector('form input[type="submit"]').click();
-      done();
-    }, serverUrl);
-    const handles = await driver.getAllWindowHandles();
-    await driver.switchTo().window(handles[0]);
+    await modifyOptions({driver, extensionUrl, options: {
+      "server.url": serverUrl,
+    }});
 
     // run tests
     context = {driver, extensionUrl, grep, reporter};
@@ -350,4 +346,5 @@ if (isMain()) {
 export {
   POLL_INTERVAL,
   context,
+  modifyOptions,
 };

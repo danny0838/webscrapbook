@@ -503,3 +503,5 @@ window.addEventListener("DOMContentLoaded", async (event) => {
   // activate form
   document.querySelector('#options > fieldset').disabled = false;
 });
+
+globalThis.utils = utils;
