@@ -55,7 +55,10 @@ $describe.skipIf($.noExtensionBrowser)('External messaging tests', function () {
         }],
       };
       const response = await browser.runtime.sendMessage(extension_id, message);
-      assert.strictEqual(response.error.message, 'Nothing to capture.');
+
+      // Chromiun >= 147: response has prepended "Uncaught Error: ".
+      // ref: https://crbug.com/553141297
+      assert.include(response.error.message, 'Nothing to capture.');
     });
   });
 
