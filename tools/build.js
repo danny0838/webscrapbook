@@ -84,7 +84,7 @@ async function build(target) {
 }
 
 async function buildTest(target) {
-  const testExternalDir = path.join(testDir, 'external');
+  const testExternalDir = path.join(ROOT, 'test', 'external');
   switch (target) {
     case 'firefox-mv3': {
       console.log('Building test files for Firefox (MV3)...');
