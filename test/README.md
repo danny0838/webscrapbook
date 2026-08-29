@@ -18,11 +18,11 @@
 
 1. Install PyWebScrapBook and configure related extension options.
 
-2. Copy `config.json` to `config.local.json` and make sure `server_port`, `server_port2`, and `backend_port` are available (not used by other applications).
+2. Copy `src/test/config.json` to `src/test/config.local.json` and make sure `server_port`, `server_port2`, and `backend_port` are available (not used by other applications).
 
 3. Tweak WebScrapBook option `Backend server > Address` to match `http://localhost:<backend_port>/`
 
-4. Run `server.py` to start the local hosting server.
+4. Run `test/server.py` to start the local hosting server.
 
 5. Run capture tests.
 
@@ -30,9 +30,9 @@
 
 ### External messaging tests
 
-1. Install the external test extension from `src/test/external` (as a temporary extension).
+1. Install the external test extension from `test/external/` (as a temporary extension).
 
-2. Copy `config.json` to `config.local.json` and make sure `extension_id` matches the installed external test extension.
+2. Copy `src/test/config.json` to `src/test/config.local.json` and make sure `extension_id` matches the installed external test extension.
 
 3. Run external messaging tests.
 
