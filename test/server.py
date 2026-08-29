@@ -225,15 +225,15 @@ browse = false
 
 
 def main():
-    root = os.path.abspath(os.path.dirname(__file__))
+    root = os.path.normpath(os.path.join(__file__, '..', '..'))
 
     # load config.json
-    config_file = os.path.join(root, 'config.json')
+    config_file = os.path.join(root, 'src', 'test', 'config.json')
     with open(config_file, encoding='UTF-8') as fh:
         config = json.load(fh)
 
     # load config.local.json if exist
-    config_file = os.path.join(root, 'config.local.json')
+    config_file = os.path.join(root, 'src', 'test', 'config.local.json')
     try:
         fh = open(config_file, encoding='UTF-8')
     except FileNotFoundError:
@@ -246,7 +246,7 @@ def main():
     patch_mimetypes()
 
     # start server
-    site_root = os.path.join(root, 't')
+    site_root = os.path.join(root, 'test', 't')
     os.chdir(site_root)
 
     thread = Thread(target=test_server, kwargs={
