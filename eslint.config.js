@@ -103,7 +103,7 @@ export default [
   },
   {
     files: [
-      "src/test/t/**/*.js",
+      "test/t/**/*.js",
     ],
     languageOptions: {
       sourceType: "script",

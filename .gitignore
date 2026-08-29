@@ -11,5 +11,5 @@
 /src/manifest.json
 /src/content/index.js
 /src/content/index.js.map
-/src/test/external/manifest.json
+/test/external/manifest.json
 /dist/
