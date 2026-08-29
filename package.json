@@ -4,7 +4,7 @@
   "type": "module",
   "scripts": {
     "lint": "eslint",
-    "test": "mocha src/test/test_*.mjs",
+    "test": "mocha",
     "dev": "npm run dev:chromium",
     "dev:chromium": "node tools/build.js -t chromium -m dev",
     "dev:chromium2": "node tools/build.js -t chromium-mv2 -m dev",
@@ -30,5 +30,8 @@
     "mocha": "^11.7.6",
     "rollup": "^4.46.2",
     "web-ext": "^10.4.0"
+  },
+  "mocha": {
+    "spec": "src/test/test_*.mjs"
   }
 }
