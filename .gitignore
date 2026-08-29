@@ -3,7 +3,6 @@
 
 # IDE - Node.js
 /node_modules/
-/package-lock.json
 
 # IDE - Python
 *.pyc
