@@ -254,18 +254,6 @@ async function checkTestServer() {
   }
 }
 
-async function checkExtension() {
-  const id = config["extension_id"];
-  try {
-    if (!await browser.runtime.sendMessage(id, {cmd: "ping"})) {
-      throw new Error('ping failure');
-    }
-  } catch (ex) {
-    console.error(ex);
-    throw new Error(`Unable to connect to the test extension with ID "${id}". Make sure the extension is installed and its ID is correctly configured.`);
-  }
-}
-
 async function openTab(createProperties) {
   const tab = await browser.tabs.create(createProperties);
   return await waitTabLoading(tab);
@@ -479,7 +467,6 @@ export {
   localhost2,
   checkBackendServer,
   checkTestServer,
-  checkExtension,
   capture,
   captureHeadless,
   openTestTab,

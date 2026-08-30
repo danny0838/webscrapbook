@@ -117,6 +117,7 @@ async function buildTest(target) {
   const data = JSON.parse(fs.readFileSync(src, 'utf8'));
   data.name += " (dev)";
   data.author = "test";
+  data.permissions.push("management");
   data.content_scripts = [{
     "matches": [
       "http://localhost/capturex_*",
