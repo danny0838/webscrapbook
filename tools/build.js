@@ -14,23 +14,6 @@ const srcDir = path.join(ROOT, 'src');
 const testDir = path.join(srcDir, 'test');
 const artifactsDir = path.join(ROOT, 'dist');
 
-/**
- * Generate hardlink as needed.
- */
-function hardlink(src, dst) {
-  fs.mkdirSync(path.dirname(dst), {recursive: true});
-  if (fs.existsSync(dst)) {
-    const srcSt = fs.statSync(src);
-    const dstSt = fs.statSync(dst);
-    if (srcSt.ino === dstSt.ino && srcSt.dev === dstSt.dev) {
-      return;
-    } else {
-      fs.unlinkSync(dst);
-    }
-  }
-  fs.linkSync(src, dst);
-}
-
 async function build(target) {
   switch (target) {
     case 'firefox-mv3': {
@@ -105,24 +88,24 @@ async function buildTest(target) {
   switch (target) {
     case 'firefox-mv3': {
       console.log('Building test files for Firefox (MV3)...');
-      hardlink(path.join(testExternalDir, 'manifest.firefox.json'), path.join(testExternalDir, 'manifest.json'));
+      fs.copyFileSync(path.join(testExternalDir, 'manifest.firefox.json'), path.join(testExternalDir, 'manifest.json'));
       break;
     }
     case 'chromium':
     case 'chromium-mv3': {
       console.log('Building test files for Chromium (MV3)...');
-      hardlink(path.join(testExternalDir, 'manifest.chromium.json'), path.join(testExternalDir, 'manifest.json'));
+      fs.copyFileSync(path.join(testExternalDir, 'manifest.chromium.json'), path.join(testExternalDir, 'manifest.json'));
       break;
     }
     case 'firefox':
     case 'firefox-mv2': {
       console.log('Building test files for Firefox (MV2)...');
-      hardlink(path.join(testExternalDir, 'manifest.firefox-mv2.json'), path.join(testExternalDir, 'manifest.json'));
+      fs.copyFileSync(path.join(testExternalDir, 'manifest.firefox-mv2.json'), path.join(testExternalDir, 'manifest.json'));
       break;
     }
     case 'chromium-mv2': {
       console.log('Building test files for Chromium (MV2)...');
-      hardlink(path.join(testExternalDir, 'manifest.chromium-mv2.json'), path.join(testExternalDir, 'manifest.json'));
+      fs.copyFileSync(path.join(testExternalDir, 'manifest.chromium-mv2.json'), path.join(testExternalDir, 'manifest.json'));
       break;
     }
     default: {
