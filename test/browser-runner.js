@@ -14,6 +14,7 @@ import {getBinaryPaths} from "selenium-webdriver/common/driverFinder.js";
 const currentFile = fileURLToPath(import.meta.url);
 const rootDir = path.dirname(currentFile);
 const srcDir = path.resolve(rootDir, path.join("..", "src"));
+const srcDirExternal = path.resolve(rootDir, "external");
 
 const POLL_INTERVAL = 300;
 
@@ -25,7 +26,7 @@ async function launchDriver({profileDirectory, browserName, exePath, headless, m
     if (headless) { options.addArguments("--headless=new"); }
     if (exePath) { options.setBinaryPath(exePath); }
     options.addArguments(`--user-data-dir=${profileDirectory}`);
-    options.addArguments(`--load-extension=${srcDir}`);
+    options.addArguments(`--load-extension=${srcDir},${srcDirExternal}`);
     options.addArguments("--log-level=3");
     options.addArguments("--no-first-run");
     options.addArguments("--disable-backgrounding-occluded-windows");
@@ -94,16 +95,22 @@ async function loadExtensions({driver, browserName, manifest, options}) {
       const startTime = Date.now();
       while (Date.now() - startTime < timeout) {
         const result = await driver.sendAndGetDevToolsCommand("Target.getTargets", {});
-        const target = result.targetInfos.find(t => (
+        const targets = result.targetInfos.filter(t => (
           ["service_worker", "background_page"].includes(t.type) &&
           t.url.startsWith("chrome-extension://")
         ));
-        if (target) {
-          const u = new URL(target.url);
-          return {
-            extensionId: u.host,
-            extensionUrl: `${u.protocol}//${u.host}/`,
-          };
+        if (targets.length) {
+          let extensionId, extensionUrl, extensionIdExt;
+          for (const target of targets) {
+            const u = new URL(target.url);
+            if (target.title === "WebScrapBook External Test" || u.pathname === '/background.js') {
+              extensionIdExt = u.host;
+            } else {
+              extensionId = u.host;
+              extensionUrl = `${u.protocol}//${u.host}/`;
+            }
+          }
+          return {extensionId, extensionUrl, extensionIdExt};
         }
         await new Promise(resolve => setTimeout(resolve, POLL_INTERVAL));
       }
@@ -125,6 +132,7 @@ async function loadExtensions({driver, browserName, manifest, options}) {
 
   if (browserName === "firefox") {
     const extensionId = await driver.installAddon(srcDir, true);
+    await driver.installAddon(srcDirExternal, true);
 
     await driver.setContext("chrome");
     const extensionUrl = await driver.executeScript((extId) => {
@@ -226,7 +234,7 @@ async function main() {
       },
       "grep": {
         type: "string",
-        default: "^(?!Capture tests|External messaging tests|Manual tests)",
+        default: "^(?!Capture tests|Manual tests)",
         short: "g",
       },
       "dry-run": {
