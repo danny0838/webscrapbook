@@ -1,15 +1,21 @@
 import {MochaQuery as $, assert} from "./unittest.mjs";
-import {config, checkExtension} from "./extension.mjs";
 import * as utils from "../utils/common.mjs";
 
 const $describe = $(describe);
 
 $describe.skipIf($.noExtensionBrowser)('External messaging tests', function () {
-  let extension_id;
+  let extensionId;
 
   before(async function init() {
-    await checkExtension();
-    extension_id = config["extension_id"];
+    const extension = (await browser.management.getAll()).find(x => (
+      x.type === "extension" &&
+      x.name === "WebScrapBook External Test" &&
+      x.enabled
+    ));
+    if (!extension) {
+      throw new Error("External extension not installed and enabled.");
+    }
+    extensionId = extension.id;
   });
 
   describe('ping', function () {
@@ -20,7 +26,7 @@ $describe.skipIf($.noExtensionBrowser)('External messaging tests', function () {
           cmd: 'ping',
         }],
       };
-      const {result} = await browser.runtime.sendMessage(extension_id, message);
+      const {result} = await browser.runtime.sendMessage(extensionId, message);
       assert.isTrue(result);
     });
   });
@@ -34,7 +40,7 @@ $describe.skipIf($.noExtensionBrowser)('External messaging tests', function () {
           args: [[]],
         }],
       };
-      const {result} = await browser.runtime.sendMessage(extension_id, message);
+      const {result} = await browser.runtime.sendMessage(extensionId, message);
       assert.isNumber(result.id);
       await browser.tabs.remove(result.id);
     });
@@ -54,7 +60,7 @@ $describe.skipIf($.noExtensionBrowser)('External messaging tests', function () {
           }],
         }],
       };
-      const response = await browser.runtime.sendMessage(extension_id, message);
+      const response = await browser.runtime.sendMessage(extensionId, message);
 
       // Chromiun >= 147: response has prepended "Uncaught Error: ".
       // ref: https://crbug.com/553141297
@@ -70,7 +76,7 @@ $describe.skipIf($.noExtensionBrowser)('External messaging tests', function () {
           cmd: 'nonexist',
         }],
       };
-      const response = await browser.runtime.sendMessage(extension_id, message);
+      const response = await browser.runtime.sendMessage(extensionId, message);
       assert.strictEqual(response.error.message, "Unable to invoke unknown command 'nonexist'.");
     });
   });
