@@ -5,7 +5,7 @@ import {
 } from "./unittest.mjs";
 import {
   TestCapturerSimpleRaw,
-  checkBackendServer, checkTestServer, checkExtension,
+  checkBackendServer, checkTestServer,
   backend, localhost, localhost2,
   capture, captureHeadless, backendRequest,
 } from "./extension.mjs";

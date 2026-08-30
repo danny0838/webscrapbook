@@ -32,9 +32,7 @@
 
 1. Install the external test extension from `test/external/` (as a temporary extension).
 
-2. Copy `src/test/config.json` to `src/test/config.local.json` and make sure `extension_id` matches the installed external test extension.
-
-3. Run external messaging tests.
+2. Run external messaging tests.
 
 ## Notes
 
