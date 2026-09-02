@@ -3,6 +3,10 @@
 * Versions before 1.0 are in initial development. APIs are not stable for these versions, even a `y` version can involve a breaking change, and only partial notable changes are summarized in this document. See full commit history in the source repository for details.
 * Backend server requirement in this document refers to the version of [`webscrapbook` Python package](https://github.com/danny0838/pywebscrapbook) (or PyWebScrapBook).
 
+## [2.27.2] - 2026-09-02
+* Fixed the minimum compatible Chromium version for Manifest V3 (corrected from 102 to 105). Older Chromium engines suffer from service worker hanging issues that can cause commands to become unresponsive until the extension is manually reloaded.
+* Miscellaneous improvements and bug fixes to the internal code and test suite.
+
 ## [2.27.1] - 2026-08-19
 * Fixed error when viewing a MAFF archive.
 * Fixed missing executable permission for test scripts.
