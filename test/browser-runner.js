@@ -272,7 +272,7 @@ async function runTestSuite({browserName, exePath, headless, incognito, grep, re
     }});
 
     // run tests
-    context = {driver, extensionUrl, grep, reporter};
+    context = {driver, extensionUrl, config, grep, reporter};
     const mocha = new Mocha({
       grep,
       reporter,
@@ -280,6 +280,7 @@ async function runTestSuite({browserName, exePath, headless, incognito, grep, re
       slow: 10000,
     });
     mocha.addFile(path.resolve(rootDir, "./test_browser.mjs"));
+    mocha.addFile(path.resolve(rootDir, "./test_viewer.mjs"));
 
     await mocha.loadFilesAsync();
     const failures = await new Promise((resolve) => mocha.run(resolve));
@@ -345,7 +346,7 @@ async function main() {
       },
       "grep": {
         type: "string",
-        default: "^(?!Manual tests)",
+        default: "",
         short: "g",
       },
       "verbose": {

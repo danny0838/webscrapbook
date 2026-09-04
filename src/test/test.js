@@ -62,7 +62,6 @@ import {escapeRegExp} from "../utils/common.mjs";
   await import('./test_scrapbook_sitemap.mjs');
   await import('./test_capture.mjs');
   await import('./test_external.mjs');
-  await import('./test_manual.mjs');
 
   // run tests and expose global information
   {

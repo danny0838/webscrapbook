@@ -284,49 +284,6 @@ async function openPageTab(url) {
 }
 
 /**
- * @callback openTestTabHandlerResolver
- * @param {boolean} pass - whether the test passes
- */
-
-/**
- * @callback openTestTabHandler
- * @param {Object} message
- * @param {Port} port
- * @param {openTestTabHandlerResolver} resolve
- */
-
-/**
- * Open a tab with connection for test.
- *
- * @param {openTestTabHandler} [handler]
- */
-async function openTestTab(createProperties, handler) {
-  if (typeof handler === 'undefined') {
-    handler = (message, port, resolve) => {
-      const {cmd, args} = message;
-      if (cmd === 'result') {
-        resolve(args[0]);
-      }
-    };
-  }
-
-  const tab = await openTab(createProperties);
-  const port = browser.tabs.connect(tab.id, {name: 'test'});
-  const result = await new Promise((resolve, reject) => {
-    port.onMessage.addListener((message, port) => {
-      handler(message, port, resolve);
-    });
-    port.onDisconnect.addListener((port) => {
-      reject(new Error('Page disconnected'));
-    });
-  });
-  await browser.tabs.remove(tab.id);
-  if (!result) {
-    throw new Error('Manual test failed');
-  }
-}
-
-/**
  * @param {Object} params
  * @param {string} params.url
  * @param {string} [params.mode]
@@ -469,6 +426,5 @@ export {
   checkTestServer,
   capture,
   captureHeadless,
-  openTestTab,
   backendRequest,
 };
