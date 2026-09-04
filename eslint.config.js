@@ -79,14 +79,6 @@ export default [
   },
   {
     files: [
-      "tools/**/*.js",
-    ],
-    languageOptions: {
-      globals: globals.node,
-    },
-  },
-  {
-    files: [
       "src/**/*.js",
       "src/**/*.mjs",
     ],
@@ -119,6 +111,14 @@ export default [
     },
     rules: {
       "@stylistic/eol-last": "off", // for some one-liner test files
+    },
+  },
+  {
+    files: [
+      "tools/**/*.js",
+    ],
+    languageOptions: {
+      globals: globals.node,
     },
   },
 ];
