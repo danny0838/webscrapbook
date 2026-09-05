@@ -118,16 +118,6 @@ async function buildTest(target) {
   data.name += " (dev)";
   data.author = "test";
   data.permissions.push("management");
-  data.content_scripts = [{
-    "matches": [
-      "http://localhost/capturex_*",
-      "http://localhost/viewer_*",
-    ],
-    "js": [
-      "test/content.js",
-    ],
-    "run_at": "document_start",
-  }];
   if (data.web_accessible_resources?.[0]?.use_dynamic_url) {
     data.web_accessible_resources[0].use_dynamic_url = false;
   }

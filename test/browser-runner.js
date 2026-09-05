@@ -266,7 +266,7 @@ async function runTestSuite({browserName, exePath, headless, incognito, grep, dr
     }});
 
     // run tests
-    context = {driver, extensionUrl, grep, reporter};
+    context = {driver, extensionUrl, config, grep, reporter};
     const mocha = new Mocha({
       grep,
       reporter,
@@ -275,6 +275,7 @@ async function runTestSuite({browserName, exePath, headless, incognito, grep, dr
       slow: 10000,
     });
     mocha.addFile(path.resolve(rootDir, "./test_browser.mjs"));
+    mocha.addFile(path.resolve(rootDir, "./test_manual.mjs"));
 
     await mocha.loadFilesAsync();
     const failures = await new Promise((resolve) => mocha.run(resolve));
