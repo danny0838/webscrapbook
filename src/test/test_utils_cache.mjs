@@ -137,7 +137,9 @@ async function dbDelete(dbName) {
     req.onsuccess = (event) => resolve(event.target.result);
     req.onerror = (event) => reject(event.target.error);
   }).catch((ex) => {
-    throw new Error(`Failed to delete database "${dbName}": ${ex.message}`);
+    if (ex.name !== "InvalidStateError") {
+      throw new Error(`Failed to delete database "${dbName}": ${ex.message}`);
+    }
   });
 }
 
