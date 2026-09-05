@@ -35,7 +35,7 @@ jobs:
         run: npm run test
 
   test:
-    name: Test ${{ matrix.browser }} ${{ matrix.version }}${{ format(matrix.build && ' ({0})' || '', matrix.build) }} on ${{ matrix.os }}
+    name: Test ${{ matrix.browser }} ${{ matrix.version }}${{ format(matrix.build && ' ({0})' || '', matrix.build) }}${{ matrix.incognito && ' (incognito)' || '' }} on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     needs: lint
     continue-on-error: ${{ matrix.allow_failure || false }}
@@ -48,6 +48,10 @@ jobs:
           - os: windows-latest
             browser: chromium
             version: 'latest'
+          - os: windows-latest
+            browser: chromium
+            version: 'latest'
+            incognito: true
 
           # -- min major version of Chrome for Testing
           - os: windows-latest
@@ -89,6 +93,10 @@ jobs:
             version: 'latest'
           - os: windows-latest
             browser: firefox
+            version: 'latest'
+            incognito: true
+          - os: windows-latest
+            browser: firefox
             version: '109.0.1'
           - os: windows-latest
             browser: firefox
@@ -102,6 +110,11 @@ jobs:
             browser: firefox
             version: 'latest'
             build: firefox3
+          - os: windows-latest
+            browser: firefox
+            version: 'latest'
+            build: firefox3
+            incognito: true
           - os: windows-latest
             browser: firefox
             version: '109.0'
@@ -268,6 +281,9 @@ jobs:
           }
           echo "build: $build"
 
+          $incognito = "${{ matrix.incognito }}"
+          echo "incognito: $incognito"
+
           $argsList = @()
           $argsList += "--verbose"
 
@@ -277,6 +293,10 @@ jobs:
           if ($env:EXE_PATH) {
             $argsList += "--exe-path"
             $argsList += $env:EXE_PATH
+          }
+
+          if ($incognito) {
+            $argsList += "--incognito"
           }
 
           $process = Start-Process "python" `
