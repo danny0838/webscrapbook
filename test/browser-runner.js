@@ -20,10 +20,11 @@ const POLL_INTERVAL = 300;
 
 let context = null;
 
-async function launchDriver({profileDirectory, browserName, exePath, headless, manifest}) {
+async function launchDriver({profileDirectory, browserName, exePath, headless, incognito, manifest}) {
   if (browserName === "chromium") {
     const options = new chrome.Options();
     if (headless) { options.addArguments("--headless=new"); }
+    if (incognito) { options.addArguments('--incognito'); }
     if (exePath) { options.setBinaryPath(exePath); }
     options.addArguments(`--user-data-dir=${profileDirectory}`);
     options.addArguments(`--load-extension=${srcDir},${srcDirExternal}`);
@@ -51,6 +52,7 @@ async function launchDriver({profileDirectory, browserName, exePath, headless, m
   if (browserName === "firefox") {
     const options = new firefox.Options();
     if (headless) { options.addArguments("-headless"); }
+    if (incognito) { options.addArguments('-private-window'); }
     if (exePath) { options.setBinary(exePath); }
     options.addArguments("-profile", profileDirectory);
 
@@ -88,9 +90,9 @@ async function launchDriver({profileDirectory, browserName, exePath, headless, m
   throw new Error(`Unsupported browser: ${browserName}`);
 }
 
-async function loadExtensions({driver, browserName, manifest, options}) {
+async function loadExtensions({driver, browserName, incognito, manifest, options}) {
   if (browserName === "chromium") {
-    const {extensionId, extensionUrl} = await (async () => {
+    const {extensionId, extensionUrl, extensionIdExt} = await (async () => {
       const timeout = 8000;
       const startTime = Date.now();
       while (Date.now() - startTime < timeout) {
@@ -114,7 +116,7 @@ async function loadExtensions({driver, browserName, manifest, options}) {
         }
         await new Promise(resolve => setTimeout(resolve, POLL_INTERVAL));
       }
-      throw new Error("Unable to find the installed extension.");
+      throw new Error("Unable to find the installed extensions.");
     })();
 
     // add CLI argument to allow webRequestBlocking permission in MV3
@@ -127,6 +129,23 @@ async function loadExtensions({driver, browserName, manifest, options}) {
         .build();
     }
 
+    // grant permission for incognito
+    if (incognito) {
+      const toggleIncognito = async (extensionId) => {
+        await driver.get(`chrome://extensions/?id=${extensionId}`);
+        await driver.executeScript(() => {
+          const manager = document.querySelector('extensions-manager');
+          const detailView = manager.shadowRoot.querySelector('extensions-detail-view');
+          const incognitoItem = detailView.shadowRoot.querySelector('extensions-toggle-row#allow-incognito');
+          const toggle = incognitoItem.shadowRoot.querySelector('cr-toggle[aria-pressed="false"]');
+          toggle.click();
+        });
+      };
+      await toggleIncognito(extensionId);
+      await toggleIncognito(extensionIdExt);
+      await driver.sleep(1000);
+    }
+
     return {driver, extensionId, extensionUrl};
   }
 
@@ -135,7 +154,7 @@ async function loadExtensions({driver, browserName, manifest, options}) {
     const version = Number(capabilities.get("browserVersion").match(/^\d+/)[0]);
 
     const extensionId = await driver.installAddon(srcDir, true);
-    await driver.installAddon(srcDirExternal, true);
+    const extensionIdExt = await driver.installAddon(srcDirExternal, true);
 
     await driver.setContext("chrome");
     const extensionUrl = await driver.executeScript((extId) => {
@@ -143,6 +162,31 @@ async function loadExtensions({driver, browserName, manifest, options}) {
       return WebExtensionPolicy.getByID(extId).getURL("");
     }, extensionId);
     await driver.setContext("content");
+
+    // grant permission for incognito
+    if (incognito) {
+      await driver.get("about:addons");
+      const tab = await driver.wait(
+        until.elementLocated(By.css('button[role="tab"][name="extension"], moz-page-nav-button[view="extension"]')),
+        5000,
+      );
+      const toggleIncognito = async (extensionId) => {
+        tab.click();
+        const cardAnchor = await driver.wait(
+          until.elementLocated(By.css(`[addon-id="${extensionId}"] h3 a`)),
+          5000,
+        );
+        await driver.executeScript(e => e.click(), cardAnchor);
+        const incRadio = await driver.wait(
+          until.elementLocated(By.css(`[addon-id="${extensionId}"] input[name="private-browsing"][value="1"]`)),
+          5000,
+        );
+        incRadio.click();
+      };
+      await toggleIncognito(extensionId);
+      await toggleIncognito(extensionIdExt);
+      await driver.sleep(1000);
+    }
 
     // grant host permission for MV3 extension in older Firefox
     if (manifest.manifest_version === 3 && version < 127) {
@@ -180,7 +224,7 @@ async function modifyOptions({driver, extensionUrl, options}) {
   await driver.executeScript((opts) => globalThis.utils.setOptions(opts), options);
 }
 
-async function runTestSuite({browserName, exePath, headless, grep, dryRun, reporter, keepOpen}) {
+async function runTestSuite({browserName, exePath, headless, incognito, grep, dryRun, reporter, keepOpen}) {
   const manifest = JSON.parse(fs.readFileSync(path.join(srcDir, "manifest.json"), "utf8"));
 
   const profileDirectory = await fs.mkdtempSync(path.join(tmpdir(), "webscrapbook-tests-"));
@@ -190,10 +234,10 @@ async function runTestSuite({browserName, exePath, headless, grep, dryRun, repor
 
   try {
     console.log("Launching browser with profile: %s", profileDirectory);
-    const {driver: newDriver, options} = await launchDriver({profileDirectory, browserName, exePath, headless, manifest});
+    const {driver: newDriver, options} = await launchDriver({profileDirectory, browserName, exePath, headless, incognito, manifest});
     driver = newDriver;
 
-    const {driver: updatedDriver, extensionId, extensionUrl} = await loadExtensions({driver, browserName, manifest, options});
+    const {driver: updatedDriver, extensionId, extensionUrl} = await loadExtensions({driver, browserName, incognito, manifest, options});
     driver = updatedDriver;
 
     // load config
@@ -288,6 +332,9 @@ async function main() {
       "headless": {
         type: "boolean",
       },
+      "incognito": {
+        type: "boolean",
+      },
       "keep": {
         type: "boolean",
       },
@@ -315,6 +362,7 @@ Options:
   -b, --browser BROWSER  The browser to test. {chromium,firefox}
   -e, --exe-path PATH    The browser executable path.
   --headless             Launch the browser headlessly.
+  --incognito            Launch the browser in incognito (private) mode.
   --keep                 Keep the browser open after tests done.
   -g, --grep PATTERN     The matching regex pattern for tests to run.
   --dry-run              Report tests without executing them
@@ -328,6 +376,7 @@ Options:
     browserName: args.values["browser"],
     exePath: args.values["exe-path"],
     headless: args.values["headless"],
+    incognito: args.values["incognito"],
     keepOpen: args.values["keep"] && !args.values["headless"],
     grep: args.values["grep"],
     dryRun: args.values["dry-run"],
