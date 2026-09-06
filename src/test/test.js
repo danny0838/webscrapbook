@@ -21,8 +21,6 @@ import {escapeRegExp} from "../utils/common.mjs";
   mocha.setup({
     ui: 'bdd',
     checkLeaks: true,
-    timeout: 0,
-    slow: 10000,
     grep: (() => {
       if (dryRun) {
         return '(?:)';

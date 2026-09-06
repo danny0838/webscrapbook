@@ -4,6 +4,9 @@ import * as utils from "../utils/common.mjs";
 const $describe = $(describe);
 
 $describe.skipIf($.noExtensionBrowser)('External messaging tests', function () {
+  this.timeout(10000);
+  this.slow(2000);
+
   let extensionId;
 
   before(async function init() {

@@ -8,6 +8,9 @@ import {
 const $describe = $(describe);
 
 $describe.skipIf($.noExtensionBrowser)('Manual tests', function () {
+  this.timeout(600000);
+  this.slow(60000);
+
   before(async function checkEnvironment() {
     await checkTestServer();
   });
