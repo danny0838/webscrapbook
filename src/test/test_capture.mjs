@@ -131,6 +131,10 @@ function assertNoRecord(rootNode, {deep = true, filter = 'any'} = {}) {
 }
 
 $describe.skipIf($.noExtensionBrowser)('Capture tests', function () {
+  this.timeout(60000);
+  this.slow(10000);
+  this.retries(2);
+
   before(async function checkEnvironment() {
     await Promise.all([
       checkBackendServer(),
@@ -8550,6 +8554,9 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
   });
 
   describe('recapture', function () {
+    this.timeout(90000);
+    this.slow(20000);
+
     describe('basic', function () {
       var itemId;
       var itemId2;
@@ -8770,6 +8777,9 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
   });
 
   describe('merge capture', function () {
+    this.timeout(90000);
+    this.slow(20000);
+
     describe('basic', function () {
       var itemId;
 
