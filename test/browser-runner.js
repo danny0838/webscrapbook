@@ -275,6 +275,7 @@ async function runTestSuite({browserName, exePath, headless, incognito, grep, re
       slow: 10000,
     });
     mocha.addFile(path.resolve(rootDir, "./test_browser.mjs"));
+    mocha.addFile(path.resolve(rootDir, "./test_viewer.mjs"));
     mocha.addFile(path.resolve(rootDir, "./test_manual.mjs"));
 
     await mocha.loadFilesAsync();
