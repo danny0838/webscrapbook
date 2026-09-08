@@ -775,6 +775,8 @@ async function init() {
       for (const elem of frameDoc.querySelectorAll('frame, iframe')) {
         frameRegisterLinkLoader(elem);
       }
+
+      frame.setAttribute('data-loaded', 'true');
     };
 
     frame.addEventListener("load", (e) => {

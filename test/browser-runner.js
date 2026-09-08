@@ -33,6 +33,11 @@ async function launchDriver({profileDirectory, browserName, exePath, headless, i
     options.addArguments("--disable-background-timer-throttling");
     options.addArguments("--disable-background-networking");
     options.addArguments("--disable-default-apps");
+    options.setUserPreferences({
+      "download.default_directory": path.join(profileDirectory, "downloads"),
+      "download.prompt_for_download": false,
+      "download.directory_upgrade": true,
+    });
 
     // CLI argument to allow MV2 extension (for Chromium < 150)
     if (manifest.manifest_version === 2) {
@@ -62,6 +67,10 @@ async function launchDriver({profileDirectory, browserName, exePath, headless, i
     options.setPreference("app.update.mode", 0);
     options.setPreference("app.update.service.enabled", false);
     options.setPreference("app.update.background.interval", 0);
+    options.setPreference("browser.download.dir", path.join(profileDirectory, "downloads"));
+    options.setPreference("browser.download.folderList", 2);
+    options.setPreference("browser.download.useDownloadDir", true);
+    options.setPreference("browser.helperApps.neverAsk.saveToDisk", "text/plain, application/x-maff");
 
     const version = (() => {
       const {browserPath} = getBinaryPaths(options);
@@ -284,6 +293,7 @@ async function runTestSuite({browserName, exePath, headless, incognito, grep, re
       slow: 10000,
     });
     mocha.addFile(path.resolve(rootDir, "./test_browser.mjs"));
+    mocha.addFile(path.resolve(rootDir, "./test_viewer.mjs"));
     mocha.addFile(path.resolve(rootDir, "./test_manual.mjs"));
 
     await mocha.loadFilesAsync();

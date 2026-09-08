@@ -187,41 +187,6 @@ $describe.skipIf(
   });
 
   describe('Test viewer', function () {
-    it('should view HTZ/MAFF that conforms to the spec', async function () {
-      return await runManualTestTab({
-        url: `${localhost}/viewer_validate_good/index.html`,
-        timeout: this.timeout(),
-      });
-    });
-
-    it('should error out when HTZ/MAFF does not conform to the spec', async function () {
-      return await runManualTestTab({
-        url: `${localhost}/viewer_validate_bad/index.html`,
-        timeout: this.timeout(),
-      });
-    });
-
-    it('should handle document charset correctly', async function () {
-      return await runManualTestTab({
-        url: `${localhost}/viewer_encoding/index.html`,
-        timeout: this.timeout(),
-      });
-    });
-
-    it('should view attachment HTZ/MAFF only when `opt_viewer.viewAttachments`', async function () {
-      return await runManualTestTab({
-        url: `${localhost}/viewer_attachment/index.html`,
-        timeout: this.timeout(),
-      });
-    });
-
-    it('should ensure links and back/forward button work', async function () {
-      return await runManualTestTab({
-        url: `${localhost}/viewer_interlink/index.html`,
-        timeout: this.timeout(),
-      });
-    });
-
     it('should target the correct frame for links', async function () {
       return await runManualTestTab({
         url: `${localhost}/viewer_interlink_frame/index.html`,
