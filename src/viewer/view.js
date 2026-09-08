@@ -784,7 +784,13 @@ async function init() {
     frameOnLoad(frame);
   };
 
+  const onViewerFrameLoad = (e) => {
+    iframe.setAttribute("data-loaded", "true");
+    iframe.removeEventListener("load", onViewerFrameLoad);
+  };
+
   frameRegisterLinkLoader(iframe);
+  iframe.addEventListener("load", onViewerFrameLoad);
 
   try {
     const id = viewerData.id;
