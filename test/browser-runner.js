@@ -224,7 +224,7 @@ async function modifyOptions({driver, extensionUrl, options}) {
   await driver.executeScript((opts) => globalThis.utils.setOptions(opts), options);
 }
 
-async function runTestSuite({browserName, exePath, headless, incognito, grep, dryRun, reporter, keepOpen}) {
+async function runTestSuite({browserName, exePath, headless, incognito, grep, resources, dryRun, reporter, keepOpen}) {
   const manifest = JSON.parse(fs.readFileSync(path.join(srcDir, "manifest.json"), "utf8"));
 
   const profileDirectory = await fs.mkdtempSync(path.join(tmpdir(), "webscrapbook-tests-"));
@@ -266,7 +266,7 @@ async function runTestSuite({browserName, exePath, headless, incognito, grep, dr
     }});
 
     // run tests
-    context = {driver, extensionUrl, config, grep, reporter};
+    context = {driver, extensionUrl, config, grep, resources, reporter};
     const mocha = new Mocha({
       grep,
       reporter,
@@ -341,8 +341,13 @@ async function main() {
       },
       "grep": {
         type: "string",
-        default: "^(?!Manual tests)",
+        default: "",
         short: "g",
+      },
+      "use": {
+        type: "string",
+        default: "",
+        short: "u",
       },
       "dry-run": {
         type: "boolean",
@@ -366,6 +371,7 @@ Options:
   --incognito            Launch the browser in incognito (private) mode.
   --keep                 Keep the browser open after tests done.
   -g, --grep PATTERN     The matching regex pattern for tests to run.
+  -u, --use              Special resources available for tests. {manual}
   --dry-run              Report tests without executing them
   -v, --verbose          Show verbose output.
 `;
@@ -380,6 +386,7 @@ Options:
     incognito: args.values["incognito"],
     keepOpen: args.values["keep"] && !args.values["headless"],
     grep: args.values["grep"],
+    resources: args.values["use"].split(/[,\s]+/),
     dryRun: args.values["dry-run"],
     reporter: args.values["verbose"] ? "spec" : "dot",
   });
