@@ -1,13 +1,15 @@
 import {By, until} from "selenium-webdriver";
 import assert from "assert/strict";
 
+import {MochaQuery as $} from "../src/test/lib/mocha-query.mjs";
 import {POLL_INTERVAL, context as testContext, modifyOptions} from "./browser-runner.js";
 
 if (!testContext) {
   throw new Error("test context not initialized");
 }
 
-const {driver, extensionUrl, config, grep, reporter} = testContext;
+const {driver, extensionUrl, config, grep, resources, reporter} = testContext;
+const $describe = $(describe);
 
 async function runManualTestTab({url, timeout}) {
   if (!Number.isFinite(timeout)) {
@@ -160,7 +162,10 @@ async function runManualTestTab({url, timeout}) {
   }
 }
 
-describe('Manual tests', function () {
+$describe.skipIf(
+  !resources.includes('manual'),
+  'requires "manual" resource',
+)('Manual tests', function () {
   this.timeout(600000);
   this.slow(60000);
 
