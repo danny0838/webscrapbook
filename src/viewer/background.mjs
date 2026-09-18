@@ -47,8 +47,8 @@ function redirectUrl(tabId, type, url, filename, mime) {
 <meta charset="UTF-8">
 <style>
 a {
-background: ${utils.lang('@@bidi_start_edge')}/1em url("${utils.escapeHtml(browser.runtime.getURL("core/scrapbook_128.png"))}") no-repeat;
-padding-inline-start: 1em;
+  background: ${utils.lang('@@bidi_start_edge')}/1em url("${utils.escapeHtml(browser.runtime.getURL("core/scrapbook_128.png"))}") no-repeat;
+  padding-inline-start: 1em;
 }
 </style>
 </head>
