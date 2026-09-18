@@ -143,8 +143,20 @@ const viewer = {
     try {
       /* process URL params */
       const files = [];
-      const zipSourceUrl = viewer.mainUrl.searchParams.get("src");
+      const params = viewer.mainUrl.searchParams;
+      const zipSourceUrl = params.get("src");
       if (zipSourceUrl) {
+        checkToken: {
+          const token = params.get("t");
+          if (!await utils.invokeExtensionScript({
+            cmd: "background.validateLoaderToken",
+            args: [token],
+          })) {
+            this.error(`Invalid token: ${token}`);
+            return;
+          }
+        }
+
         this.autoLoading = true;
         const zipSourceUrlObj = new URL(zipSourceUrl);
         viewer.urlSearch = zipSourceUrlObj.search;

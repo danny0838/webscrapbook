@@ -12,7 +12,17 @@ const VIEWER_BEFORE_REQUEST_EXTRA = ["blocking"];
 const VIEWER_HEADERS_RECEIVED_FILTER = {urls: ["http://*/*", "https://*/*"], types: ["main_frame", "sub_frame"]};
 const VIEWER_HEADERS_RECEIVED_EXTRA = ["blocking", "responseHeaders"];
 
+const loaderTokens = new Set();
+
 let allowFileAccess;
+
+function validateLoaderToken(token) {
+  const result = loaderTokens.has(token);
+  if (result) {
+    loaderTokens.delete(token);
+  }
+  return result;
+}
 
 function redirectUrl(tabId, type, url, filename, mime) {
   if (mime === "application/html+zip" && utils.getOption("viewer.viewHtz")) {
@@ -32,10 +42,13 @@ function redirectUrl(tabId, type, url, filename, mime) {
     return; // no redirect
   }
 
+  const token = utils.getUuid();
+  loaderTokens.add(token);
+
   let newUrl = new URL(browser.runtime.getURL("viewer/load.html"));
   newUrl.hash = url.hash;
   url.hash = "";
-  newUrl.search = "?src=" + encodeURIComponent(url.href);
+  newUrl.search = `?src=${encodeURIComponent(url.href)}&t=${token}`;
   newUrl = newUrl.href;
 
   if (type === "sub_frame") {
@@ -145,5 +158,6 @@ async function init() {
 init();
 
 export {
+  validateLoaderToken,
   toggleViewerListeners,
 };

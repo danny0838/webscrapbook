@@ -6,6 +6,7 @@ import * as utils from "../utils/extension.mjs";
 import {server} from "../scrapbook/server.mjs";
 import * as capturer from "../capturer/background.mjs";
 import * as editor from "../editor/background.mjs";
+import * as viewer from "../viewer/background.mjs";
 
 /**
  * @type {Map<integer~windowId, integer~timestamp>}
@@ -340,6 +341,10 @@ async function getGeoLocation(options) {
   return utils.getGeoLocation(options);
 }
 
+async function validateLoaderToken(token) {
+  return viewer.validateLoaderToken(token);
+}
+
 export {
   focusedWindows,
   getLastFocusedWindow,
@@ -354,4 +359,5 @@ export {
   onServerTreeChange,
   onCaptureEnd,
   getGeoLocation,
+  validateLoaderToken,
 };
