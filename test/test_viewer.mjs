@@ -118,30 +118,6 @@ describe('Automated viewer tests', function () {
           errorMsgPatterns: [/No available page found/],
         });
       });
-
-      it('should view documents with UTF-8 encoding for an HTZ archive', async function () {
-        await driver.get(`${localhost}/viewer_basic/htz_encoding.py`);
-        await driver.wait(async () => isViewPage(await driver.getCurrentUrl()), 5000);
-        const iframe = await driver.wait(until.elementLocated(By.css('iframe[data-loaded="true"]')), 5000);
-
-        await driver.switchTo().frame(iframe);
-        const charset = await driver.executeScript(() => document.characterSet);
-        const title = await driver.executeScript(() => document.title);
-        const content = await driver.executeScript(() => document.querySelector('p').textContent);
-        assert.strictEqual(charset, 'UTF-8');
-        assert.strictEqual(title, '中文文件');
-        assert.strictEqual(content, '繁體中文文件');
-
-        await driver.executeScript(() => document.querySelector('a').click());
-        await driver.switchTo().defaultContent();
-        await driver.sleep(1500);
-
-        await driver.switchTo().frame(await driver.findElement(By.css('iframe')));
-        const charset2 = await driver.executeScript(() => document.characterSet);
-        const content2 = await driver.executeScript(() => document.body.textContent.trim());
-        assert.strictEqual(charset2, 'UTF-8');
-        assert.strictEqual(content2, '简体中文文件');
-      });
     });
 
     context('MAFF', function () {
@@ -313,29 +289,58 @@ describe('Automated viewer tests', function () {
           );
         }
       });
+    });
 
-      it('should view documents with UTF-8 encoding for a MAFF archive', async function () {
-        await driver.get(`${localhost}/viewer_basic/maff_encoding.py`);
+    context('resources handling', function () {
+      it('should show title and favicon in the tab', async function () {
+        await driver.get(`${localhost}/viewer_basic/resources.py`);
+        await driver.wait(async () => isViewPage(await driver.getCurrentUrl()), 5000);
+        const iframe = await driver.wait(until.elementLocated(By.css('iframe[data-loaded="true"]')), 5000);
+
+        const title = await driver.executeScript(() => document.title);
+        const imgHash = await driver.executeScript(async (fnStr) => {
+          const fetchDigestHex = new Function(`return ${fnStr}`)();
+          const url = document.querySelector('link[rel~="icon"]').href;
+          return await fetchDigestHex(url);
+        }, fetchDigestHex);
+        assert.strictEqual(title, '中文標題𠀀');
+        assert.deepEqual(imgHash, await fetchDigestHex(`${localhost}/viewer_basic/resources/favicon.bmp`));
+
+        await driver.switchTo().frame(iframe);
+        const frameCharset = await driver.executeScript(() => document.characterSet);
+        const frameTitle = await driver.executeScript(() => document.title);
+        const frameContent = await driver.executeScript(() => document.querySelector('p').textContent);
+        assert.strictEqual(frameCharset, 'UTF-8');
+        assert.strictEqual(frameTitle, '中文標題𠀀');
+        assert.strictEqual(frameContent, '中文文本𠀀');
+      });
+
+      it('should show title and favicon in the tab for a linked page', async function () {
+        await driver.get(`${localhost}/viewer_basic/resources_link.py`);
         await driver.wait(async () => isViewPage(await driver.getCurrentUrl()), 5000);
         const iframe = await driver.wait(until.elementLocated(By.css('iframe[data-loaded="true"]')), 5000);
 
         await driver.switchTo().frame(iframe);
-        const charset = await driver.executeScript(() => document.characterSet);
-        const title = await driver.executeScript(() => document.title);
-        const content = await driver.executeScript(() => document.querySelector('p').textContent);
-        assert.strictEqual(charset, 'UTF-8');
-        assert.strictEqual(title, '中文文件');
-        assert.strictEqual(content, '繁體中文文件');
-
         await driver.executeScript(() => document.querySelector('a').click());
         await driver.switchTo().defaultContent();
         await driver.sleep(1500);
 
+        const title = await driver.executeScript(() => document.title);
+        const imgHash = await driver.executeScript(async (fnStr) => {
+          const fetchDigestHex = new Function(`return ${fnStr}`)();
+          const url = document.querySelector('link[rel~="icon"]').href;
+          return await fetchDigestHex(url);
+        }, fetchDigestHex);
+        assert.strictEqual(title, '中文标题𠀀');
+        assert.deepEqual(imgHash, await fetchDigestHex(`${localhost}/viewer_basic/resources_link/icon.bmp`));
+
         await driver.switchTo().frame(await driver.findElement(By.css('iframe')));
-        const charset2 = await driver.executeScript(() => document.characterSet);
-        const content2 = await driver.executeScript(() => document.body.textContent.trim());
-        assert.strictEqual(charset2, 'UTF-8');
-        assert.strictEqual(content2, '简体中文文件');
+        const frameCharset = await driver.executeScript(() => document.characterSet);
+        const frameTitle = await driver.executeScript(() => document.title);
+        const frameContent = await driver.executeScript(() => document.querySelector('p').textContent);
+        assert.strictEqual(frameCharset, 'UTF-8');
+        assert.strictEqual(frameTitle, '中文标题𠀀');
+        assert.strictEqual(frameContent, '简体中文文本𠀀');
       });
     });
 
