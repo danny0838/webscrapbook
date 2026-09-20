@@ -635,7 +635,7 @@ async function init() {
 
   const defaultTitle = document.querySelector('title').textContent;
   const iframe = document.getElementById('viewer');
-  const faviconElem = document.getElementById('favicon');
+  const faviconElem = document.querySelector('link[rel~="icon"]');
 
   const urlSearch = "";
   const urlHash = location.hash;
