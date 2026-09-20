@@ -106,21 +106,21 @@ describe('Automated viewer tests', function () {
     context('HTZ', function () {
       it('should view a conforming HTZ archive', async function () {
         await assertConformingArchive({
-          archiveUrl: `${localhost}/viewer_validate_good/htz_good.py`,
-          resourceImageUrl: `${localhost}/viewer_validate_good/htz_good/red.bmp`,
+          archiveUrl: `${localhost}/viewer_validate/htz_good.py`,
+          resourceImageUrl: `${localhost}/viewer_validate/htz_good/red.bmp`,
           expectedParams: {"p": "index.html"},
         });
       });
 
       it('should not view a non-conforming HTZ archive', async function () {
         await assertNonConformingArchive({
-          archiveUrl: `${localhost}/viewer_validate_bad/htz_bad.py`,
+          archiveUrl: `${localhost}/viewer_validate/htz_bad_1_no_index.py`,
           errorMsgPatterns: [/No available page found/],
         });
       });
 
       it('should view documents with UTF-8 encoding for an HTZ archive', async function () {
-        await driver.get(`${localhost}/viewer_encoding/encoding_htz.py`);
+        await driver.get(`${localhost}/viewer_basic/htz_encoding.py`);
         await driver.wait(async () => isViewPage(await driver.getCurrentUrl()), 5000);
         const iframe = await driver.wait(until.elementLocated(By.css('iframe[data-loaded="true"]')), 5000);
 
@@ -147,8 +147,8 @@ describe('Automated viewer tests', function () {
     context('MAFF', function () {
       it('should view a conforming MAFF archive (elementary HTML)', async function () {
         await assertConformingArchive({
-          archiveUrl: `${localhost}/viewer_validate_good/test_elementary_type_html.py`,
-          resourceImageUrl: `${localhost}/viewer_validate_good/test_elementary_type_html/1269184827724_474/index_files/test-image.png`,
+          archiveUrl: `${localhost}/viewer_validate/maff_elementary_html.py`,
+          resourceImageUrl: `${localhost}/viewer_validate/maff_elementary_html/1269184827724_474/index_files/test-image.png`,
           expectedParams: {
             "p": "1269184827724_474/index.html",
             "d": "1269184827724_474",
@@ -158,8 +158,8 @@ describe('Automated viewer tests', function () {
 
       it('should view a conforming MAFF archive (elementary XHTML)', async function () {
         await assertConformingArchive({
-          archiveUrl: `${localhost}/viewer_validate_good/test_elementary_type_xhtml.py`,
-          resourceImageUrl: `${localhost}/viewer_validate_good/test_elementary_type_xhtml/1269184839791_914/index_files/test-image.png`,
+          archiveUrl: `${localhost}/viewer_validate/maff_elementary_xhtml.py`,
+          resourceImageUrl: `${localhost}/viewer_validate/maff_elementary_xhtml/1269184839791_914/index_files/test-image.png`,
           expectedParams: {
             "p": "1269184839791_914/index.xhtml",
             "d": "1269184839791_914",
@@ -169,8 +169,8 @@ describe('Automated viewer tests', function () {
 
       it('should view a conforming MAFF archive (elementary PNG)', async function () {
         await assertConformingArchive({
-          archiveUrl: `${localhost}/viewer_validate_good/test_elementary_type_png.py`,
-          resourceImageUrl: `${localhost}/viewer_validate_good/test_elementary_type_png/1269184832034_375/index.png`,
+          archiveUrl: `${localhost}/viewer_validate/maff_elementary_png.py`,
+          resourceImageUrl: `${localhost}/viewer_validate/maff_elementary_png/1269184832034_375/index.png`,
           expectedParams: {
             "p": "1269184832034_375/index.png",
             "d": "1269184832034_375",
@@ -180,8 +180,8 @@ describe('Automated viewer tests', function () {
 
       it('should view a conforming MAFF archive (elementary SVG)', async function () {
         await assertConformingArchive({
-          archiveUrl: `${localhost}/viewer_validate_good/test_elementary_type_svg.py`,
-          resourceImageUrl: `${localhost}/viewer_validate_good/test_elementary_type_svg/1269184836529_277/index_files/test-image.png`,
+          archiveUrl: `${localhost}/viewer_validate/maff_elementary_svg.py`,
+          resourceImageUrl: `${localhost}/viewer_validate/maff_elementary_svg/1269184836529_277/index_files/test-image.png`,
           expectedParams: {
             "p": "1269184836529_277/index.svg",
             "d": "1269184836529_277",
@@ -191,8 +191,8 @@ describe('Automated viewer tests', function () {
 
       it('should view a conforming MAFF archive (basic HTML)', async function () {
         await assertConformingArchive({
-          archiveUrl: `${localhost}/viewer_validate_good/test_basic_type_html.py`,
-          resourceImageUrl: `${localhost}/viewer_validate_good/test_basic_type_html/1269184802698_598/index_files/test-image.png`,
+          archiveUrl: `${localhost}/viewer_validate/maff_basic_html.py`,
+          resourceImageUrl: `${localhost}/viewer_validate/maff_basic_html/1269184802698_598/index_files/test-image.png`,
           expectedParams: {
             "p": "1269184802698_598/index.html",
             "d": "1269184802698_598",
@@ -202,8 +202,8 @@ describe('Automated viewer tests', function () {
 
       it('should view a conforming MAFF archive (basic XHTML)', async function () {
         await assertConformingArchive({
-          archiveUrl: `${localhost}/viewer_validate_good/test_basic_type_xhtml.py`,
-          resourceImageUrl: `${localhost}/viewer_validate_good/test_basic_type_xhtml/1269184815484_901/index_files/test-image.png`,
+          archiveUrl: `${localhost}/viewer_validate/maff_basic_xhtml.py`,
+          resourceImageUrl: `${localhost}/viewer_validate/maff_basic_xhtml/1269184815484_901/index_files/test-image.png`,
           expectedParams: {
             "p": "1269184815484_901/index.xhtml",
             "d": "1269184815484_901",
@@ -213,8 +213,8 @@ describe('Automated viewer tests', function () {
 
       it('should view a conforming MAFF archive (basic PNG)', async function () {
         await assertConformingArchive({
-          archiveUrl: `${localhost}/viewer_validate_good/test_basic_type_png.py`,
-          resourceImageUrl: `${localhost}/viewer_validate_good/test_basic_type_png/1269184807448_171/index.png`,
+          archiveUrl: `${localhost}/viewer_validate/maff_basic_png.py`,
+          resourceImageUrl: `${localhost}/viewer_validate/maff_basic_png/1269184807448_171/index.png`,
           expectedParams: {
             "p": "1269184807448_171/index.png",
             "d": "1269184807448_171",
@@ -224,8 +224,8 @@ describe('Automated viewer tests', function () {
 
       it('should view a conforming MAFF archive (basic SVG)', async function () {
         await assertConformingArchive({
-          archiveUrl: `${localhost}/viewer_validate_good/test_basic_type_svg.py`,
-          resourceImageUrl: `${localhost}/viewer_validate_good/test_basic_type_svg/1269184811769_549/index_files/test-image.png`,
+          archiveUrl: `${localhost}/viewer_validate/maff_basic_svg.py`,
+          resourceImageUrl: `${localhost}/viewer_validate/maff_basic_svg/1269184811769_549/index_files/test-image.png`,
           expectedParams: {
             "p": "1269184811769_549/index.svg",
             "d": "1269184811769_549",
@@ -235,55 +235,55 @@ describe('Automated viewer tests', function () {
 
       it('should not view a non-conforming MAFF archive (empty)', async function () {
         await assertNonConformingArchive({
-          archiveUrl: `${localhost}/viewer_validate_bad/maff_bad_1_empty.maff`,
+          archiveUrl: `${localhost}/viewer_validate/maff_bad_1_empty.maff`,
           errorMsgPatterns: [/No available page found/],
         });
       });
 
       it('should not view a non-conforming MAFF archive (no directory)', async function () {
         await assertNonConformingArchive({
-          archiveUrl: `${localhost}/viewer_validate_bad/maff_bad_2_no_dir.py`,
+          archiveUrl: `${localhost}/viewer_validate/maff_bad_2_no_dir.py`,
           errorMsgPatterns: [/No available page found/],
         });
       });
 
       it('should not view a non-conforming MAFF archive (RDF malformed)', async function () {
         await assertNonConformingArchive({
-          archiveUrl: `${localhost}/viewer_validate_bad/maff_bad_3_dir_rdf_malformed.py`,
+          archiveUrl: `${localhost}/viewer_validate/maff_bad_3_dir_rdf_malformed.py`,
           errorMsgPatterns: [/Unable to get index file in directory: '20170627151254191\/'/, /No available page found/],
         });
       });
 
       it('should not view a non-conforming MAFF archive (RDF has no index element)', async function () {
         await assertNonConformingArchive({
-          archiveUrl: `${localhost}/viewer_validate_bad/maff_bad_4_dir_rdf_no_index.py`,
+          archiveUrl: `${localhost}/viewer_validate/maff_bad_4_dir_rdf_no_index.py`,
           errorMsgPatterns: [/Unable to get index file in directory: '20171225171812833\/'/, /No available page found/],
         });
       });
 
       it('should not view a non-conforming MAFF archive (RDF defines nonexist index file)', async function () {
         await assertNonConformingArchive({
-          archiveUrl: `${localhost}/viewer_validate_bad/maff_bad_5_dir_rdf_to_nonexist_index.py`,
+          archiveUrl: `${localhost}/viewer_validate/maff_bad_5_dir_rdf_to_nonexist_index.py`,
           errorMsgPatterns: [/Unable to get index file in directory: '20171225171812833\/'/, /No available page found/],
         });
       });
 
       it('should not view a non-conforming MAFF archive (RDF defines invalid index file)', async function () {
         await assertNonConformingArchive({
-          archiveUrl: `${localhost}/viewer_validate_bad/maff_bad_6_dir_rdf_to_invalid_index.py`,
+          archiveUrl: `${localhost}/viewer_validate/maff_bad_6_dir_rdf_to_invalid_index.py`,
           errorMsgPatterns: [/Unable to get index file in directory: '20171225171812833\/'/, /No available page found/],
         });
       });
 
       it('should not view a non-conforming MAFF archive (no index file)', async function () {
         await assertNonConformingArchive({
-          archiveUrl: `${localhost}/viewer_validate_bad/maff_bad_7_dir_no_index.py`,
+          archiveUrl: `${localhost}/viewer_validate/maff_bad_7_dir_no_index.py`,
           errorMsgPatterns: [/Unable to get index file in directory: '20171225171812833\/'/, /No available page found/],
         });
       });
 
       it('should view a multi-page MAFF archive in tabs', async function () {
-        await driver.get(`${localhost}/viewer_validate_good/maff_multiple.py`);
+        await driver.get(`${localhost}/viewer_basic/maff_multi.py`);
         await driver.wait(async () => isViewPage(await driver.getCurrentUrl()), 5000);
 
         const tabs = await driver.executeScript(async () => {
@@ -315,7 +315,7 @@ describe('Automated viewer tests', function () {
       });
 
       it('should view documents with UTF-8 encoding for a MAFF archive', async function () {
-        await driver.get(`${localhost}/viewer_encoding/encoding_maff.py`);
+        await driver.get(`${localhost}/viewer_basic/maff_encoding.py`);
         await driver.wait(async () => isViewPage(await driver.getCurrentUrl()), 5000);
         const iframe = await driver.wait(until.elementLocated(By.css('iframe[data-loaded="true"]')), 5000);
 
