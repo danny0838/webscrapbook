@@ -475,7 +475,7 @@ describe('Automated viewer tests', function () {
           const anchors = await driver.findElements(By.css('a'));
           await anchors[4].click();
           await driver.switchTo().defaultContent();
-          await driver.wait(until.urlIs('https://example.com/?id=id=123#456'), 5000);
+          await driver.wait(until.urlIs('https://example.com/?id=123#456'), 5000);
         }
       });
     });
