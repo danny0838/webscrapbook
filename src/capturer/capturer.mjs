@@ -352,7 +352,7 @@ class Capturer extends BaseCapturer {
         break;
       }
       default: {
-        return utils.filepathParts(filename)[1];
+        isFilenameTaken = () => false;
       }
     }
 
