@@ -305,12 +305,8 @@ class Capturer extends BaseCapturer {
               return true;
             }
 
-            const [, newBasename] = utils.filepathParts(item.filename);
-            const [, oldBasename] = utils.filepathParts(filename);
-            if (newBasename === oldBasename) {
-              await browser.downloads.erase({id: item.id});
-              return false;
-            }
+            const expectedPath = filename.split(/[/\\]/).reverse();
+            const actualPath = item.filename.split(/[/\\]/).reverse();
 
             removeDummyFile: {
               // A random temporarily OS or API issue may cause the file
@@ -333,6 +329,12 @@ class Capturer extends BaseCapturer {
             }
             await browser.downloads.erase({id: item.id});
 
+            // @FIXME: handle false negative if <default_download_folder>/sub/path
+            //         is manually saved to <otherwhere>/sub/path
+            if (expectedPath.every((p, i) => p === actualPath[i])) {
+              return false;
+            }
+
             // This may happen when:
             // 1. The downloaded filename is cropped due to length restriction.
             //    e.g. xxxxxxxxxx => xxxxxx (1)
@@ -340,7 +342,7 @@ class Capturer extends BaseCapturer {
             // 2. The browser API cannot return the correct downloaded path
             //    (e.g. on Kiwi Browser), in which case the test will never pass.
             // Fail early for either case.
-            if (!newBasename.startsWith(utils.filenameParts(oldBasename)[0])) {
+            if (!actualPath[0].startsWith(utils.filenameParts(expectedPath[0])[0])) {
               throw new Error(`Unable to download to the folder.`);
             }
 
